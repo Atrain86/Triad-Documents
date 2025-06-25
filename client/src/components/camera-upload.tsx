@@ -26,8 +26,13 @@ export default function CameraUpload({ onFileSelect, accept = "image/*", title =
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const files = Array.from(e.target.files);
+      console.log('Files selected:', files);
       onFileSelect(files);
       setShowOptions(false);
+      // Reset file input
+      if (e.target) {
+        e.target.value = '';
+      }
     }
   };
 

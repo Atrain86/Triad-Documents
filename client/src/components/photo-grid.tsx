@@ -22,10 +22,14 @@ export default function PhotoGrid({ projectId }: PhotoGridProps) {
 
   const uploadMutation = useMutation({
     mutationFn: async (data: { files: File[]; description: string }) => {
-      const uploadPromises = data.files.map(file => 
-        uploadPhoto(projectId, file, data.description)
-      );
-      return Promise.all(uploadPromises);
+      console.log('Starting upload for files:', data.files);
+      const uploadPromises = data.files.map(async (file) => {
+        console.log('Uploading file:', file.name, file.size);
+        return uploadPhoto(projectId, file, data.description);
+      });
+      const results = await Promise.all(uploadPromises);
+      console.log('Upload results:', results);
+      return results;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'photos'] });

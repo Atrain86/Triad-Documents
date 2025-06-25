@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Receipt as ReceiptIcon, FileText, DollarSign, Calendar } from "lucide-react";
 import type { Receipt } from "@shared/schema";
-import ReceiptScanner from "./receipt-scanner";
+import ReceiptUpload from "./receipt-upload";
 
 interface ReceiptListProps {
   projectId: number;
@@ -19,8 +19,8 @@ export default function ReceiptList({ projectId }: ReceiptListProps) {
 
   return (
     <div className="space-y-6">
-      {/* Receipt Scanner */}
-      <ReceiptScanner projectId={projectId} />
+      {/* Receipt Upload */}
+      <ReceiptUpload projectId={projectId} />
       
       {/* Receipt List */}
       {receipts.length > 0 && (

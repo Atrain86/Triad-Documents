@@ -11,6 +11,7 @@ import type { Project } from "@shared/schema";
 import PhotoGrid from "@/components/photo-grid";
 import ReceiptList from "@/components/receipt-list";
 import HoursTracker from "@/components/hours-tracker";
+import DailyHoursTracker from "@/components/daily-hours-tracker";
 import EstimateCalculator from "@/components/estimate-calculator";
 import ProjectNotes from "@/components/project-notes";
 import ProjectStatus from "@/components/project-status";
@@ -162,6 +163,13 @@ export default function ProjectDetail() {
                   className="border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary px-6 py-3 text-sm font-medium rounded-none"
                 >
                   <Clock className="w-4 h-4 mr-2" />
+                  Daily Hours
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="hours"
+                  className="border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary px-6 py-3 text-sm font-medium rounded-none"
+                >
+                  <Clock className="w-4 h-4 mr-2" />
                   Hours
                 </TabsTrigger>
                 <TabsTrigger 
@@ -198,7 +206,7 @@ export default function ProjectDetail() {
             </TabsContent>
 
             <TabsContent value="hours" className="p-6">
-              <HoursTracker projectId={projectId} />
+              <DailyHoursTracker projectId={projectId} />
             </TabsContent>
 
             <TabsContent value="estimate" className="p-6">
