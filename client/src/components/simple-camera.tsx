@@ -15,6 +15,7 @@ export default function SimpleCamera({ onFileSelect }: SimpleCameraProps) {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const files = Array.from(e.target.files);
+      console.log('Files selected:', files.map(f => ({ name: f.name, size: f.size, type: f.type })));
       
       // Create preview URLs
       const urls = files.map(file => URL.createObjectURL(file));
@@ -25,6 +26,42 @@ export default function SimpleCamera({ onFileSelect }: SimpleCameraProps) {
       onFileSelect(files);
       
       e.target.value = '';
+    }
+  };
+
+  const handleCameraClick = async () => {
+    console.log('Camera button clicked');
+    
+    // Check if camera input exists
+    if (!cameraInputRef.current) {
+      console.error('Camera input ref not found');
+      return;
+    }
+
+    // Check for camera API support
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      console.log('Camera API supported');
+      try {
+        // Test camera permission
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        console.log('Camera permission granted');
+        stream.getTracks().forEach(track => track.stop()); // Stop the test stream
+      } catch (error) {
+        console.error('Camera permission denied or unavailable:', error);
+      }
+    } else {
+      console.warn('Camera API not supported in this browser');
+    }
+
+    console.log('Triggering camera input click');
+    cameraInputRef.current.click();
+  };
+
+  const handleLibraryClick = () => {
+    console.log('Library button clicked');
+    if (fileInputRef.current) {
+      console.log('Triggering file input');
+      fileInputRef.current.click();
     }
   };
 
@@ -44,7 +81,7 @@ export default function SimpleCamera({ onFileSelect }: SimpleCameraProps) {
     <div className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Button
-          onClick={() => cameraInputRef.current?.click()}
+          onClick={handleCameraClick}
           className="h-16 bg-blue-600 hover:bg-blue-700 text-white"
         >
           <Camera className="w-6 h-6 mr-2" />
@@ -53,7 +90,7 @@ export default function SimpleCamera({ onFileSelect }: SimpleCameraProps) {
         
         <Button
           variant="outline"
-          onClick={() => fileInputRef.current?.click()}
+          onClick={handleLibraryClick}
           className="h-16 border-gray-300 dark:border-gray-600"
         >
           <Upload className="w-6 h-6 mr-2" />
@@ -61,15 +98,16 @@ export default function SimpleCamera({ onFileSelect }: SimpleCameraProps) {
         </Button>
       </div>
 
-      {/* Camera input */}
+      {/* Camera input - rear camera */}
       <input
         ref={cameraInputRef}
         type="file"
-        accept="image/*,image/jpeg,image/png,image/gif"
+        accept="image/*"
         capture="environment"
         onChange={handleFileChange}
         className="hidden"
         style={{ display: 'none' }}
+        onClick={() => console.log('Camera input clicked')}
       />
       
       {/* File input */}
