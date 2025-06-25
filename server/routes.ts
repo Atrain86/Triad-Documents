@@ -2,7 +2,6 @@ import type { Express } from "express";
 import express from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { addPhoto, getPhotos, addProject, getProjects } from "./simple-db";
 import { insertProjectSchema, insertPhotoSchema, insertReceiptSchema, insertDailyHoursSchema } from "@shared/schema";
 import multer from "multer";
 import path from "path";
@@ -87,7 +86,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/projects/:id/photos', async (req, res) => {
     try {
       const projectId = parseInt(req.params.id);
-      const photos = getPhotos(projectId);
+      const photos = await storage.getProjectPhotos(projectId);
       res.json(photos);
     } catch (error) {
       res.status(500).json({ error: 'Failed to fetch photos' });
@@ -115,11 +114,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertPhotoSchema.parse(photoData);
       console.log('Validated photo data:', validatedData);
       
-      const photo = addPhoto({
-        ...validatedData,
-        uploadedAt: new Date().toISOString()
-      });
-      console.log('Photo saved to simple database:', photo);
+      const photo = await storage.createPhoto(validatedData);
+      console.log('Photo saved to database:', photo);
       
       res.status(201).json(photo);
     } catch (error) {

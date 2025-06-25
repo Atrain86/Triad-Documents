@@ -1,0 +1,37 @@
+{
+  "projects": [],
+  "photos": [
+    {
+      "projectId": 1,
+      "filename": "734d3c708b6a06ff5a8ced86779eb674",
+      "originalName": "IMG_1515.jpeg",
+      "description": null,
+      "uploadedAt": "2025-06-25T21:40:29.752Z",
+      "id": 1
+    },
+    {
+      "projectId": 1,
+      "filename": "7d1c331e3a3912599a47337e09ca231c",
+      "originalName": "IMG_1490.jpeg",
+      "description": null,
+      "uploadedAt": "2025-06-25T21:41:14.078Z",
+      "id": 2
+    },
+    {
+      "projectId": 1,
+      "filename": "2859dccf1adb0bd193d89891b7952beb",
+      "originalName": "IMG_1513.png",
+      "description": null,
+      "uploadedAt": "2025-06-25T21:41:53.876Z",
+      "id": 3
+    }
+  ],
+  "receipts": [],
+  "dailyHours": [],
+  "counters": {
+    "projectId": 1,
+    "photoId": 4,
+    "receiptId": 1,
+    "hoursId": 1
+  }
+}
