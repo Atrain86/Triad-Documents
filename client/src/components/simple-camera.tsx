@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Camera, Upload, X } from "lucide-react";
+import { Camera, Upload, X, AlertCircle } from "lucide-react";
 
 interface SimpleCameraProps {
   onFileSelect: (files: File[]) => void;
@@ -11,6 +11,7 @@ export default function SimpleCamera({ onFileSelect }: SimpleCameraProps) {
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [cameraError, setCameraError] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -31,26 +32,28 @@ export default function SimpleCamera({ onFileSelect }: SimpleCameraProps) {
 
   const handleCameraClick = async () => {
     console.log('Camera button clicked');
+    setCameraError(null);
     
-    // Check if camera input exists
     if (!cameraInputRef.current) {
       console.error('Camera input ref not found');
       return;
     }
 
-    // Check for camera API support
+    // Check for camera API support and permissions
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       console.log('Camera API supported');
       try {
-        // Test camera permission
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
         console.log('Camera permission granted');
-        stream.getTracks().forEach(track => track.stop()); // Stop the test stream
+        stream.getTracks().forEach(track => track.stop());
+        setCameraError(null);
       } catch (error) {
         console.error('Camera permission denied or unavailable:', error);
+        setCameraError('Camera access denied. Please enable camera permissions in your browser settings, or use "Upload from Library" instead.');
       }
     } else {
       console.warn('Camera API not supported in this browser');
+      setCameraError('Camera not supported in this browser. Please use "Upload from Library" instead.');
     }
 
     console.log('Triggering camera input click');
@@ -79,6 +82,22 @@ export default function SimpleCamera({ onFileSelect }: SimpleCameraProps) {
 
   return (
     <div className="space-y-4">
+      {/* Camera Error Message */}
+      {cameraError && (
+        <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4">
+          <div className="flex items-start">
+            <AlertCircle className="w-5 h-5 text-orange-600 dark:text-orange-400 mt-0.5 mr-3 flex-shrink-0" />
+            <div>
+              <h4 className="text-sm font-medium text-orange-800 dark:text-orange-200">Camera Access Issue</h4>
+              <p className="text-sm text-orange-700 dark:text-orange-300 mt-1">{cameraError}</p>
+              <p className="text-xs text-orange-600 dark:text-orange-400 mt-2">
+                💡 Tip: Use "Upload from Library" to add photos from your device's camera roll instead.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Button
           onClick={handleCameraClick}
