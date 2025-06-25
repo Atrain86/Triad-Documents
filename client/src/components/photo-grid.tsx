@@ -32,7 +32,7 @@ export default function PhotoGrid({ projectId }: PhotoGridProps) {
 
   const photoList = photos || [];
   
-  console.log('Photo grid data:', { photos, projectId, isLoading });
+  console.log('Photo grid data:', { photos, projectId, isLoading, photoListLength: photoList.length });
 
   const uploadMutation = useMutation({
     mutationFn: async (data: { files: File[]; description: string }) => {
@@ -74,57 +74,51 @@ export default function PhotoGrid({ projectId }: PhotoGridProps) {
     }
   };
 
-  // Force render based on photo count
-  const hasPhotos = photoList && photoList.length > 0;
-  
-  console.log('PhotoGrid render check:', { 
-    hasPhotos, 
-    photoCount: photoList?.length || 0, 
-    isLoading,
-    photos: photoList 
-  });
-
   if (isLoading) {
     return <div className="text-center text-gray-500 dark:text-gray-400 py-8">Loading photos...</div>;
   }
 
+  // Direct rendering approach - always show upload, then photos if they exist
   return (
     <div className="space-y-6">
-      {/* Always show current state for debugging */}
-      <div className="text-xs text-gray-500 dark:text-gray-400">
-        Photos loaded: {photoList?.length || 0} | Loading: {isLoading ? 'Yes' : 'No'}
+      {/* Upload section */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 text-center">
+          {photoList.length > 0 ? 'Add More Photos' : 'Add Project Photos'}
+        </h3>
+        <SimpleCamera onFileSelect={handleFileSelect} />
       </div>
       
-      {/* Photo Display Section */}
-      {hasPhotos ? (
+      {/* Photos section - only show if photos exist */}
+      {photoList.length > 0 && (
         <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Project Photos ({photoList.length})
-            </h3>
-            <SimpleCamera onFileSelect={handleFileSelect} />
-          </div>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Project Photos ({photoList.length})
+          </h3>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {photoList.map((photo: Photo) => (
               <div key={photo.id} className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg border border-gray-200 dark:border-gray-700">
-                <div className="aspect-square bg-gray-100 dark:bg-gray-700">
+                <div className="aspect-square bg-gray-100 dark:bg-gray-700 relative">
                   <img
                     src={`/uploads/${photo.filename}`}
                     alt={photo.description || photo.originalName}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover absolute inset-0"
                     loading="eager"
                     onError={(e) => {
                       console.error('Image failed to load:', `/uploads/${photo.filename}`, photo);
                       const target = e.currentTarget;
                       target.style.display = 'none';
-                      const errorDiv = document.createElement('div');
-                      errorDiv.className = 'w-full h-full bg-red-100 dark:bg-red-900 flex items-center justify-center text-red-600 dark:text-red-400 text-sm';
-                      errorDiv.textContent = 'Failed to load';
-                      target.parentNode?.appendChild(errorDiv);
+                      if (target.parentElement) {
+                        target.parentElement.innerHTML = `
+                          <div class="w-full h-full bg-red-100 dark:bg-red-900 flex items-center justify-center text-red-600 dark:text-red-400 text-sm absolute inset-0">
+                            Failed to load: ${photo.originalName}
+                          </div>
+                        `;
+                      }
                     }}
                     onLoad={() => {
-                      console.log('✓ Image loaded successfully:', `/uploads/${photo.filename}`);
+                      console.log('✓ Image displayed successfully:', photo.originalName);
                     }}
                   />
                 </div>
@@ -145,13 +139,6 @@ export default function PhotoGrid({ projectId }: PhotoGridProps) {
               </div>
             ))}
           </div>
-        </div>
-      ) : (
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-8 border border-gray-200 dark:border-gray-700 text-center">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Add Your First Project Photo
-          </h3>
-          <SimpleCamera onFileSelect={handleFileSelect} />
         </div>
       )}
     </div>

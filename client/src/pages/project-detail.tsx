@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Camera, Receipt, Clock, Calculator, StickyNote, Edit, DollarSign, Calendar } from "lucide-react";
 import { Link } from "wouter";
 import type { Project } from "@shared/schema";
-import PhotoGrid from "@/components/photo-grid";
+import CleanPhotoGrid from "@/components/clean-photo-grid";
 import ReceiptList from "@/components/receipt-list";
 import HoursTracker from "@/components/hours-tracker";
 import DailyHoursTracker from "@/components/daily-hours-tracker";
@@ -166,13 +166,6 @@ export default function ProjectDetail() {
                   Daily Hours
                 </TabsTrigger>
                 <TabsTrigger 
-                  value="hours"
-                  className="border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary px-6 py-3 text-sm font-medium rounded-none"
-                >
-                  <Clock className="w-4 h-4 mr-2" />
-                  Hours
-                </TabsTrigger>
-                <TabsTrigger 
                   value="estimate"
                   className="border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary px-6 py-3 text-sm font-medium rounded-none"
                 >
@@ -198,7 +191,7 @@ export default function ProjectDetail() {
             </TabsContent>
 
             <TabsContent value="photos" className="p-6">
-              <PhotoGrid projectId={projectId} />
+              <CleanPhotoGrid projectId={projectId} />
             </TabsContent>
 
             <TabsContent value="receipts" className="p-6">
