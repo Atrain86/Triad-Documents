@@ -91,9 +91,8 @@ export default function CameraUpload({ onFileSelect, accept = "image/*", title =
       <input
         ref={cameraInputRef}
         type="file"
-        accept={accept}
-        capture="environment"
-        multiple
+        accept="image/*"
+        capture="user"
         onChange={handleFileChange}
         className="hidden"
       />
@@ -101,7 +100,7 @@ export default function CameraUpload({ onFileSelect, accept = "image/*", title =
       <input
         ref={fileInputRef}
         type="file"
-        accept={accept}
+        accept="image/*"
         multiple
         onChange={handleFileChange}
         className="hidden"
