@@ -159,7 +159,7 @@ export default function ProjectSummary({ project }: ProjectSummaryProps) {
           <div className="space-y-4">
             <div className="flex justify-between text-sm">
               <span className="text-gray-600 dark:text-gray-300">Status</span>
-              <span className="font-medium text-gray-900 dark:text-white">{project.status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+              <span className="font-medium text-gray-900 dark:text-white">{(project.status || 'estimating').replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
             </div>
             {project.statusDetails && (
               <div className="flex justify-between text-sm">
