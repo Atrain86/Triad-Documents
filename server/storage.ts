@@ -12,6 +12,8 @@ import {
   type InsertReceipt, 
   type InsertDailyHours 
 } from "@shared/schema";
+import fs from 'fs';
+import path from 'path';
 
 export interface IStorage {
   // Projects
@@ -48,16 +50,87 @@ export class MemStorage implements IStorage {
   private currentPhotoId: number;
   private currentReceiptId: number;
   private currentHoursId: number;
+  private dataFile: string;
 
   constructor() {
-    this.projects = new Map();
-    this.photos = new Map();
-    this.receipts = new Map();
-    this.dailyHours = new Map();
-    this.currentProjectId = 1;
-    this.currentPhotoId = 1;
-    this.currentReceiptId = 1;
-    this.currentHoursId = 1;
+    this.dataFile = path.join(process.cwd(), 'storage.json');
+    
+    // Load existing data or initialize
+    const data = this.loadData();
+    this.projects = new Map(data.projects);
+    this.photos = new Map(data.photos);
+    this.receipts = new Map(data.receipts);
+    this.dailyHours = new Map(data.dailyHours);
+    this.currentProjectId = data.currentProjectId;
+    this.currentPhotoId = data.currentPhotoId;
+    this.currentReceiptId = data.currentReceiptId;
+    this.currentHoursId = data.currentHoursId;
+  }
+
+  private loadData() {
+    try {
+      if (fs.existsSync(this.dataFile)) {
+        const rawData = fs.readFileSync(this.dataFile, 'utf8');
+        const parsed = JSON.parse(rawData);
+        // Convert date strings back to Date objects
+        if (parsed.projects) {
+          parsed.projects = parsed.projects.map(([id, project]: [number, any]) => [
+            id, 
+            { ...project, createdAt: new Date(project.createdAt) }
+          ]);
+        }
+        if (parsed.photos) {
+          parsed.photos = parsed.photos.map(([id, photo]: [number, any]) => [
+            id, 
+            { ...photo, uploadedAt: new Date(photo.uploadedAt) }
+          ]);
+        }
+        if (parsed.receipts) {
+          parsed.receipts = parsed.receipts.map(([id, receipt]: [number, any]) => [
+            id, 
+            { ...receipt, date: new Date(receipt.date), uploadedAt: new Date(receipt.uploadedAt) }
+          ]);
+        }
+        if (parsed.dailyHours) {
+          parsed.dailyHours = parsed.dailyHours.map(([id, hours]: [number, any]) => [
+            id, 
+            { ...hours, date: new Date(hours.date), createdAt: new Date(hours.createdAt) }
+          ]);
+        }
+        return parsed;
+      }
+    } catch (error) {
+      console.error('Error loading storage data:', error);
+    }
+    
+    return {
+      projects: [],
+      photos: [],
+      receipts: [],
+      dailyHours: [],
+      currentProjectId: 1,
+      currentPhotoId: 1,
+      currentReceiptId: 1,
+      currentHoursId: 1
+    };
+  }
+
+  private saveData() {
+    try {
+      const data = {
+        projects: Array.from(this.projects.entries()),
+        photos: Array.from(this.photos.entries()),
+        receipts: Array.from(this.receipts.entries()),
+        dailyHours: Array.from(this.dailyHours.entries()),
+        currentProjectId: this.currentProjectId,
+        currentPhotoId: this.currentPhotoId,
+        currentReceiptId: this.currentReceiptId,
+        currentHoursId: this.currentHoursId
+      };
+      fs.writeFileSync(this.dataFile, JSON.stringify(data, null, 2));
+    } catch (error) {
+      console.error('Error saving storage data:', error);
+    }
   }
 
   // Projects
@@ -118,6 +191,7 @@ export class MemStorage implements IStorage {
       uploadedAt: new Date()
     };
     this.photos.set(id, photo);
+    this.saveData();
     return photo;
   }
 

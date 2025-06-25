@@ -1,0 +1,22 @@
+{
+  "projects": [],
+  "photos": [
+    [
+      1,
+      {
+        "projectId": 1,
+        "filename": "3fe969853ca7eaefe63c8ad0166ca8ec",
+        "originalName": "4c633a329df1036c287f89f0af6b6b36",
+        "description": "Test new storage",
+        "id": 1,
+        "uploadedAt": "2025-06-25T21:28:00.555Z"
+      }
+    ]
+  ],
+  "receipts": [],
+  "dailyHours": [],
+  "currentProjectId": 1,
+  "currentPhotoId": 2,
+  "currentReceiptId": 1,
+  "currentHoursId": 1
+}
