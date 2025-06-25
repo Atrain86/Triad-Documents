@@ -74,6 +74,7 @@ export class MemStorage implements IStorage {
     const project: Project = { 
       ...insertProject,
       id, 
+      projectType: insertProject.projectType ?? "interior",
       status: insertProject.status || "estimating",
       estimate: insertProject.estimate || null,
       notes: insertProject.notes || null,

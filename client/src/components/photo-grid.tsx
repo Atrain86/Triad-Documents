@@ -71,7 +71,14 @@ export default function PhotoGrid({ projectId }: PhotoGridProps) {
               <img
                 src={`/uploads/${photo.filename}`}
                 alt={photo.description || photo.originalName}
-                className="w-full h-48 object-cover rounded-lg shadow-md"
+                className="w-full h-48 object-cover rounded-lg shadow-md bg-gray-100 dark:bg-gray-700"
+                onError={(e) => {
+                  console.log('Image failed to load:', `/uploads/${photo.filename}`);
+                  e.currentTarget.style.display = 'none';
+                }}
+                onLoad={() => {
+                  console.log('Image loaded successfully:', `/uploads/${photo.filename}`);
+                }}
               />
               <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-opacity duration-200 rounded-lg flex items-center justify-center">
                 <a

@@ -23,6 +23,7 @@ export default function ProjectForm({ onSuccess }: ProjectFormProps) {
     defaultValues: {
       clientName: "",
       address: "",
+      projectType: "interior",
       roomCount: 1,
       difficulty: "easy",
       status: "estimating",
@@ -83,6 +84,28 @@ export default function ProjectForm({ onSuccess }: ProjectFormProps) {
               <FormControl>
                 <Input placeholder="Enter project address" className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400" {...field} />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="projectType"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Project Type</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white">
+                    <SelectValue placeholder="Select project type" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="interior">Interior Painting</SelectItem>
+                  <SelectItem value="exterior">Exterior Painting</SelectItem>
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
