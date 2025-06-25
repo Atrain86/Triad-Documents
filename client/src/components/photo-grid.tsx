@@ -68,10 +68,10 @@ export default function PhotoGrid({ projectId }: PhotoGridProps) {
       {/* Upload Area */}
       <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
         <DialogTrigger asChild>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 cursor-pointer">
-            <CloudUpload className="mx-auto text-3xl text-gray-400 mb-4" />
-            <p className="text-sm font-medium text-gray-900">Upload Photos</p>
-            <p className="text-xs text-gray-500">PNG, JPG up to 10MB</p>
+          <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-gray-400 dark:hover:border-gray-500 cursor-pointer bg-white dark:bg-gray-800">
+            <CloudUpload className="mx-auto text-3xl text-gray-400 dark:text-gray-500 mb-4" />
+            <p className="text-sm font-medium text-gray-900 dark:text-white">Upload Photos</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">PNG, JPG up to 10MB</p>
           </div>
         </DialogTrigger>
         <DialogContent>
@@ -143,13 +143,13 @@ export default function PhotoGrid({ projectId }: PhotoGridProps) {
             </div>
           </div>
           {photo.description && (
-            <p className="text-xs text-gray-500 mt-2">{photo.description}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">{photo.description}</p>
           )}
         </div>
       ))}
 
       {photos.length === 0 && (
-        <div className="col-span-full text-center text-gray-500 py-8">
+        <div className="col-span-full text-center text-gray-500 dark:text-gray-400 py-8">
           <p>No photos uploaded yet. Click the upload area to add photos.</p>
         </div>
       )}

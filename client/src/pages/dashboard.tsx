@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { PaintRollerIcon, Plus, Briefcase, DollarSign, Clock, Home } from "lucide-react";
 import type { Project } from "@shared/schema";
 import ProjectForm from "@/components/project-form";
+import AFrameLogo from "@/components/a-frame-logo";
 
 export default function Dashboard() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -49,12 +50,28 @@ export default function Dashboard() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               <div className="flex items-center">
-                <PaintRollerIcon className="text-primary text-2xl mr-3" />
-                <h1 className="text-xl font-bold text-gray-900">PaintPro</h1>
+                <AFrameLogo className="w-8 h-8 mr-3" />
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white">A-Frame Painting</h1>
+              </div>
+              <div className="flex items-center space-x-4">
+                <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="bg-primary text-white hover:bg-blue-700">
+                      <Plus className="w-4 h-4 mr-2" />
+                      New Project
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle>Create New Project</DialogTitle>
+                    </DialogHeader>
+                    <ProjectForm onSuccess={() => setIsCreateDialogOpen(false)} />
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
           </div>
@@ -67,31 +84,16 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+      <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <PaintRollerIcon className="text-primary text-2xl mr-3" />
               <h1 className="text-xl font-bold text-gray-900">PaintPro</h1>
             </div>
-            <div className="flex items-center space-x-4">
-              <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button className="bg-primary text-white hover:bg-blue-700">
-                    <Plus className="w-4 h-4 mr-2" />
-                    New Project
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl">
-                  <DialogHeader>
-                    <DialogTitle>Create New Project</DialogTitle>
-                  </DialogHeader>
-                  <ProjectForm onSuccess={() => setIsCreateDialogOpen(false)} />
-                </DialogContent>
-              </Dialog>
-            </div>
+
           </div>
         </div>
       </header>
@@ -99,29 +101,29 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Project Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card>
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardContent className="p-6">
               <div className="flex items-center">
-                <div className="p-3 bg-blue-100 rounded-lg">
+                <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg">
                   <Briefcase className="text-primary text-xl" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Active Projects</p>
-                  <p className="text-2xl font-bold text-gray-900">{activeProjects}</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Active Projects</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{activeProjects}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardContent className="p-6">
               <div className="flex items-center">
-                <div className="p-3 bg-green-100 rounded-lg">
+                <div className="p-3 bg-green-100 dark:bg-green-900 rounded-lg">
                   <DollarSign className="text-secondary text-xl" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Revenue</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
                     ${totalRevenue.toLocaleString()}
                   </p>
                 </div>
@@ -129,15 +131,15 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardContent className="p-6">
               <div className="flex items-center">
-                <div className="p-3 bg-yellow-100 rounded-lg">
-                  <Clock className="text-yellow-600 text-xl" />
+                <div className="p-3 bg-yellow-100 dark:bg-yellow-900 rounded-lg">
+                  <Clock className="text-yellow-600 dark:text-yellow-400 text-xl" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total Projects</p>
-                  <p className="text-2xl font-bold text-gray-900">{projects.length}</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Projects</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{projects.length}</p>
                 </div>
               </div>
             </CardContent>
@@ -145,11 +147,11 @@ export default function Dashboard() {
         </div>
 
         {/* Projects List */}
-        <Card>
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">Recent Projects</h2>
+        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Projects</h2>
           </div>
-          <div className="divide-y divide-gray-200">
+          <div className="divide-y divide-gray-200 dark:divide-gray-700">
             {projects.length === 0 ? (
               <div className="px-6 py-12 text-center">
                 <div className="text-gray-500">
@@ -161,27 +163,27 @@ export default function Dashboard() {
             ) : (
               projects.map((project) => (
                 <Link key={project.id} to={`/project/${project.id}`}>
-                  <div className="px-6 py-4 hover:bg-gray-50 cursor-pointer">
+                  <div className="px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
                         <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mr-4">
                           <Home className="text-primary" />
                         </div>
                         <div>
-                          <h3 className="text-sm font-medium text-gray-900">{project.clientName}</h3>
-                          <p className="text-sm text-gray-500">{project.address}</p>
+                          <h3 className="text-sm font-medium text-gray-900 dark:text-white">{project.clientName}</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">{project.address}</p>
                           <div className="flex items-center mt-1">
                             <Badge className={getStatusColor(project.status)}>
                               {getStatusLabel(project.status)}
                             </Badge>
-                            <span className="text-xs text-gray-500 ml-2">
+                            <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
                               {project.roomCount} rooms
                             </span>
                           </div>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-medium text-gray-900">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
                           {project.estimate ? `$${project.estimate.toLocaleString()}` : 'No estimate'}
                         </p>
                       </div>

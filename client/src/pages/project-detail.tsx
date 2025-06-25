@@ -70,11 +70,11 @@ export default function ProjectDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Project Header */}
-        <Card className="mb-6">
-          <div className="px-6 py-4 border-b border-gray-200">
+        <Card className="mb-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <Link to="/">
@@ -83,8 +83,8 @@ export default function ProjectDetail() {
                   </Button>
                 </Link>
                 <div>
-                  <h1 className="text-xl font-bold text-gray-900">{project.clientName}</h1>
-                  <p className="text-sm text-gray-500">{project.address}</p>
+                  <h1 className="text-xl font-bold text-gray-900 dark:text-white">{project.clientName}</h1>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{project.address}</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
@@ -102,30 +102,30 @@ export default function ProjectDetail() {
           {/* Project Stats Row */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6">
             <div className="text-center">
-              <p className="text-2xl font-bold text-gray-900">{project.roomCount}</p>
-              <p className="text-sm text-gray-500">Rooms</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{project.roomCount}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Rooms</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-gray-900">0</p>
-              <p className="text-sm text-gray-500">Hours Logged</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">0</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Hours Logged</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-gray-900">$0</p>
-              <p className="text-sm text-gray-500">Materials Cost</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">$0</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Materials Cost</p>
             </div>
             <div className="text-center">
               <p className="text-2xl font-bold text-secondary">
                 {project.estimate ? `$${project.estimate.toLocaleString()}` : '$0'}
               </p>
-              <p className="text-sm text-gray-500">Estimate</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Estimate</p>
             </div>
           </div>
         </Card>
 
         {/* Project Tabs */}
-        <Card>
+        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <Tabs defaultValue="photos" className="w-full">
-            <div className="border-b border-gray-200">
+            <div className="border-b border-gray-200 dark:border-gray-700">
               <TabsList className="h-auto bg-transparent p-0">
                 <TabsTrigger 
                   value="photos" 

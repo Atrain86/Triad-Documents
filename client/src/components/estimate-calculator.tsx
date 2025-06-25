@@ -16,8 +16,8 @@ interface EstimateCalculatorProps {
 
 export default function EstimateCalculator({ project }: EstimateCalculatorProps) {
   const [formData, setFormData] = useState({
-    roomCount: project.roomCount.toString(),
-    difficulty: project.difficulty,
+    roomCount: project?.roomCount?.toString() || "1",
+    difficulty: project?.difficulty || "easy",
     roomType: "standard",
     baseRate: "800",
   });
@@ -141,7 +141,7 @@ export default function EstimateCalculator({ project }: EstimateCalculatorProps)
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
       {/* Estimate Calculator */}
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-6">Project Estimate</h3>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-6">Project Estimate</h3>
         
         <div className="space-y-6">
           <div>
@@ -210,26 +210,26 @@ export default function EstimateCalculator({ project }: EstimateCalculatorProps)
 
       {/* Estimate Breakdown */}
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-6">Estimate Breakdown</h3>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-6">Estimate Breakdown</h3>
         
-        <Card className="bg-gray-50">
+        <Card className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <CardContent className="p-6">
             <div className="space-y-4">
               <div className="flex justify-between">
-                <span className="text-gray-600">
+                <span className="text-gray-600 dark:text-gray-300">
                   Base Cost ({formData.roomCount} rooms × ${formData.baseRate})
                 </span>
-                <span className="font-medium">
+                <span className="font-medium text-gray-900 dark:text-white">
                   ${((parseInt(formData.roomCount) || 0) * (parseFloat(formData.baseRate) || 0)).toLocaleString()}
                 </span>
               </div>
               
               {getDifficultyAdjustment() > 0 && (
                 <div className="flex justify-between">
-                  <span className="text-gray-600">
+                  <span className="text-gray-600 dark:text-gray-300">
                     Difficulty Adjustment ({getDifficultyLabel(formData.difficulty)})
                   </span>
-                  <span className="font-medium">
+                  <span className="font-medium text-gray-900 dark:text-white">
                     +${getDifficultyAdjustment().toLocaleString()}
                   </span>
                 </div>
@@ -238,7 +238,7 @@ export default function EstimateCalculator({ project }: EstimateCalculatorProps)
               <Separator />
               
               <div className="flex justify-between text-lg">
-                <span className="font-bold text-gray-900">Total Estimate</span>
+                <span className="font-bold text-gray-900 dark:text-white">Total Estimate</span>
                 <span className="font-bold text-primary">
                   {estimate ? `$${estimate.toLocaleString()}` : '$0'}
                 </span>
@@ -257,20 +257,20 @@ export default function EstimateCalculator({ project }: EstimateCalculatorProps)
               </div>
             )}
 
-            <div className="mt-6 pt-6 border-t border-gray-300">
-              <h4 className="font-medium text-gray-900 mb-3">Project Timeline</h4>
+            <div className="mt-6 pt-6 border-t border-gray-300 dark:border-gray-600">
+              <h4 className="font-medium text-gray-900 dark:text-white mb-3">Project Timeline</h4>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Estimated Days</span>
-                  <span>{Math.ceil((parseInt(formData.roomCount) || 1) * 0.75)}-{Math.ceil((parseInt(formData.roomCount) || 1) * 1)} days</span>
+                  <span className="text-gray-600 dark:text-gray-300">Estimated Days</span>
+                  <span className="text-gray-900 dark:text-white">{Math.ceil((parseInt(formData.roomCount) || 1) * 0.75)}-{Math.ceil((parseInt(formData.roomCount) || 1) * 1)} days</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Hours per Day</span>
-                  <span>8 hours</span>
+                  <span className="text-gray-600 dark:text-gray-300">Hours per Day</span>
+                  <span className="text-gray-900 dark:text-white">8 hours</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Total Hours</span>
-                  <span>{Math.ceil((parseInt(formData.roomCount) || 1) * 0.75) * 8}-{Math.ceil((parseInt(formData.roomCount) || 1) * 1) * 8} hours</span>
+                  <span className="text-gray-600 dark:text-gray-300">Total Hours</span>
+                  <span className="text-gray-900 dark:text-white">{Math.ceil((parseInt(formData.roomCount) || 1) * 0.75) * 8}-{Math.ceil((parseInt(formData.roomCount) || 1) * 1) * 8} hours</span>
                 </div>
               </div>
             </div>

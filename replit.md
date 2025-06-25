@@ -100,7 +100,11 @@ This is a full-stack web application designed for managing painting projects. Th
 
 ## Changelog
 - June 25, 2025. Initial setup
+- June 25, 2025. Rebranded to "A-Frame Painting" with custom logo and dark mode implementation
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+Brand name: A-Frame Painting
+Theme preference: Dark mode by default
+Logo: Custom A-frame house structure with paint brush accent

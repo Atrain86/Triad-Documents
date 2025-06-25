@@ -51,7 +51,7 @@ export default function ProjectNotes({ project }: ProjectNotesProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Project Notes</h3>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Project Notes</h3>
         <Textarea
           rows={6}
           placeholder="Add notes about the project, special requirements, client preferences, etc..."
@@ -62,30 +62,30 @@ export default function ProjectNotes({ project }: ProjectNotesProps) {
       </div>
 
       <div>
-        <h4 className="font-medium text-gray-900 mb-3">Client Preferences</h4>
-        <Card className="bg-gray-50">
+        <h4 className="font-medium text-gray-900 dark:text-white mb-3">Client Preferences</h4>
+        <Card className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <CardContent className="p-4">
             <Textarea
               rows={4}
               placeholder="Enter client preferences such as preferred paint brands, work hours, special considerations, etc."
               value={clientPreferences}
               onChange={(e) => setClientPreferences(e.target.value)}
-              className="resize-none border-0 bg-transparent"
+              className="resize-none border-0 bg-transparent text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
             />
           </CardContent>
         </Card>
       </div>
 
       <div>
-        <h4 className="font-medium text-gray-900 mb-3">Special Requirements</h4>
-        <Card className="bg-yellow-50 border-yellow-200">
+        <h4 className="font-medium text-gray-900 dark:text-white mb-3">Special Requirements</h4>
+        <Card className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
           <CardContent className="p-4">
             <Textarea
               rows={4}
               placeholder="Enter any special requirements or important notes that need attention..."
               value={specialRequirements}
               onChange={(e) => setSpecialRequirements(e.target.value)}
-              className="resize-none border-0 bg-transparent"
+              className="resize-none border-0 bg-transparent text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
             />
           </CardContent>
         </Card>

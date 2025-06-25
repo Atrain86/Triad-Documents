@@ -78,17 +78,17 @@ export default function HoursTracker({ projectId }: HoursTrackerProps) {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h3 className="text-lg font-medium text-gray-900">Time Tracking</h3>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white">Time Tracking</h3>
         <div className="text-right">
-          <p className="text-sm text-gray-500">Total Hours</p>
-          <p className="text-xl font-bold text-gray-900">{totalHours.toFixed(1)}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Total Hours</p>
+          <p className="text-xl font-bold text-gray-900 dark:text-white">{totalHours.toFixed(1)}</p>
         </div>
       </div>
 
       {/* Hours Entry Form */}
-      <Card className="bg-gray-50 mb-6">
+      <Card className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 mb-6">
         <CardContent className="p-4">
-          <h4 className="font-medium text-gray-900 mb-4">Log Daily Hours</h4>
+          <h4 className="font-medium text-gray-900 dark:text-white mb-4">Log Daily Hours</h4>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <Label htmlFor="date">Date</Label>
@@ -138,26 +138,26 @@ export default function HoursTracker({ projectId }: HoursTrackerProps) {
       {/* Hours History */}
       <div className="space-y-3">
         {hoursEntries.length === 0 ? (
-          <div className="text-center text-gray-500 py-8">
+          <div className="text-center text-gray-500 dark:text-gray-400 py-8">
             <p>No hours logged yet. Use the form above to log your first day.</p>
           </div>
         ) : (
           hoursEntries
             .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
             .map((entry) => (
-              <Card key={entry.id}>
+              <Card key={entry.id} className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-gray-900">
+                      <p className="font-medium text-gray-900 dark:text-white">
                         {new Date(entry.date).toLocaleDateString()}
                       </p>
                       {entry.description && (
-                        <p className="text-sm text-gray-500">{entry.description}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">{entry.description}</p>
                       )}
                     </div>
                     <div className="text-right">
-                      <p className="text-lg font-bold text-gray-900">{entry.hours} hrs</p>
+                      <p className="text-lg font-bold text-gray-900 dark:text-white">{entry.hours} hrs</p>
                     </div>
                   </div>
                 </CardContent>

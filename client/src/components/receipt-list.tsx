@@ -87,11 +87,11 @@ export default function ReceiptList({ projectId }: ReceiptListProps) {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h3 className="text-lg font-medium text-gray-900">Material Receipts</h3>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white">Material Receipts</h3>
         <div className="flex items-center space-x-4">
           <div className="text-right">
-            <p className="text-sm text-gray-500">Total Cost</p>
-            <p className="text-xl font-bold text-gray-900">${totalCost.toFixed(2)}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Total Cost</p>
+            <p className="text-xl font-bold text-gray-900 dark:text-white">${totalCost.toFixed(2)}</p>
           </div>
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
@@ -180,31 +180,31 @@ export default function ReceiptList({ projectId }: ReceiptListProps) {
 
       <div className="space-y-4">
         {receipts.length === 0 ? (
-          <div className="text-center text-gray-500 py-8">
-            <ReceiptIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+          <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+            <ReceiptIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
             <p>No receipts added yet. Click "Add Receipt" to get started.</p>
           </div>
         ) : (
           receipts.map((receipt) => (
-            <Card key={receipt.id} className="bg-gray-50">
+            <Card key={receipt.id} className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
-                    <div className="w-16 h-16 bg-white rounded-lg border border-gray-200 flex items-center justify-center mr-4">
-                      <ReceiptIcon className="text-gray-400" />
+                    <div className="w-16 h-16 bg-white dark:bg-gray-600 rounded-lg border border-gray-200 dark:border-gray-500 flex items-center justify-center mr-4">
+                      <ReceiptIcon className="text-gray-400 dark:text-gray-300" />
                     </div>
                     <div>
-                      <h4 className="font-medium text-gray-900">{receipt.vendor}</h4>
-                      <p className="text-sm text-gray-500">
+                      <h4 className="font-medium text-gray-900 dark:text-white">{receipt.vendor}</h4>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
                         {new Date(receipt.date).toLocaleDateString()}
                       </p>
                       {receipt.description && (
-                        <p className="text-sm text-gray-600">{receipt.description}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">{receipt.description}</p>
                       )}
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-gray-900">${receipt.amount.toFixed(2)}</p>
+                    <p className="font-bold text-gray-900 dark:text-white">${receipt.amount.toFixed(2)}</p>
                     {receipt.filename && (
                       <Button
                         variant="link"
