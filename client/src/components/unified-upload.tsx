@@ -68,7 +68,7 @@ export default function UnifiedUpload({
         ref={cameraInputRef}
         type="file"
         accept="image/*"
-        capture="environment"
+        capture="user"
         className="hidden"
         onChange={handlePhotoChange}
       />

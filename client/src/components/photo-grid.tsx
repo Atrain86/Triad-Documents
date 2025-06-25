@@ -16,8 +16,10 @@ export default function PhotoGrid({ projectId }: PhotoGridProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: photos = [], isLoading } = useQuery<Photo[]>({
+  const { data: photos = [], isLoading, refetch } = useQuery<Photo[]>({
     queryKey: ['/api/projects', projectId, 'photos'],
+    refetchOnWindowFocus: true,
+    staleTime: 0, // Always refetch
   });
 
   const uploadMutation = useMutation({
@@ -31,11 +33,14 @@ export default function PhotoGrid({ projectId }: PhotoGridProps) {
       console.log('Upload results:', results);
       return results;
     },
-    onSuccess: () => {
+    onSuccess: (results) => {
+      console.log('Upload successful, forcing photo refresh');
+      // Force immediate refetch
+      refetch();
       queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'photos'] });
       toast({
         title: "Success",
-        description: "Photos uploaded successfully.",
+        description: `${results.length} photo(s) uploaded successfully.`,
       });
       setDescription("");
     },
@@ -90,18 +95,7 @@ export default function PhotoGrid({ projectId }: PhotoGridProps) {
                   <span className="text-gray-500 dark:text-gray-400">No image available</span>
                 </div>
               )}
-              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-opacity duration-200 rounded-lg flex items-center justify-center">
-                <a
-                  href={`/uploads/${photo.filename}`}
-                  download={photo.originalName}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                >
-                  <Button size="sm" variant="secondary">
-                    <Download className="w-4 h-4 mr-2" />
-                    Download
-                  </Button>
-                </a>
-              </div>
+
               {photo.description && (
                 <div className="mt-2">
                   <p className="text-sm text-gray-600 dark:text-gray-400">{photo.description}</p>
