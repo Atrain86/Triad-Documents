@@ -23,7 +23,7 @@ export default function ProjectForm({ onSuccess }: ProjectFormProps) {
     defaultValues: {
       clientName: "",
       address: "",
-      projectType: "interior",
+      projectType: "exterior",
       roomCount: 1,
       difficulty: "easy",
       status: "estimating",

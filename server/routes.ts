@@ -96,6 +96,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/projects/:id/photos', upload.single('photo'), async (req, res) => {
     try {
       const projectId = parseInt(req.params.id);
+      console.log('Photo upload request for project:', projectId);
+      console.log('File uploaded:', req.file);
+      
       if (!req.file) {
         return res.status(400).json({ error: 'No file uploaded' });
       }
@@ -107,10 +110,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: req.body.description || null,
       };
 
+      console.log('Photo data to save:', photoData);
       const validatedData = insertPhotoSchema.parse(photoData);
+      console.log('Validated photo data:', validatedData);
+      
       const photo = await storage.createPhoto(validatedData);
+      console.log('Photo saved to storage:', photo);
+      
       res.status(201).json(photo);
     } catch (error) {
+      console.error('Photo upload error:', error);
       res.status(400).json({ error: 'Failed to upload photo' });
     }
   });
