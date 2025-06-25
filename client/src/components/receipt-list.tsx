@@ -22,6 +22,23 @@ export default function ReceiptList({ projectId }: ReceiptListProps) {
       {/* Receipt Upload */}
       <ReceiptUpload projectId={projectId} />
       
+      {/* Total Summary */}
+      {receipts.length > 0 && (
+        <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+          <CardContent className="p-4">
+            <div className="flex justify-between items-center">
+              <span className="text-lg font-medium text-gray-900 dark:text-white">Total Expenses</span>
+              <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                ${receipts.reduce((sum, receipt) => {
+                  const amount = typeof receipt.amount === 'string' ? parseFloat(receipt.amount) : receipt.amount;
+                  return sum + amount;
+                }, 0).toFixed(2)}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
       {/* Receipt List */}
       {receipts.length > 0 && (
         <div className="space-y-4">

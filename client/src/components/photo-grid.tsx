@@ -5,7 +5,7 @@ import { Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { Photo } from "@shared/schema";
 import { uploadPhoto } from "@/lib/api";
-import CameraUpload from "./camera-upload";
+import UnifiedUpload from "./unified-upload";
 
 interface PhotoGridProps {
   projectId: number;
@@ -60,11 +60,11 @@ export default function PhotoGrid({ projectId }: PhotoGridProps) {
 
   return (
     <div className="space-y-6">
-      {/* Camera Upload */}
-      <CameraUpload 
-        onFileSelect={handleFileSelect}
+      {/* Unified Upload */}
+      <UnifiedUpload 
+        onPhotoSelect={handleFileSelect}
+        onReceiptSelect={() => {}} // Handle receipts elsewhere
         title="Add Project Photos"
-        description="Take photos or upload from your device"
       />
       
       {/* Photo Grid */}
@@ -72,18 +72,24 @@ export default function PhotoGrid({ projectId }: PhotoGridProps) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {photos.map((photo) => (
             <div key={photo.id} className="relative group">
-              <img
-                src={`/uploads/${photo.filename}`}
-                alt={photo.description || photo.originalName}
-                className="w-full h-48 object-cover rounded-lg shadow-md bg-gray-100 dark:bg-gray-700"
-                onError={(e) => {
-                  console.log('Image failed to load:', `/uploads/${photo.filename}`);
-                  e.currentTarget.style.display = 'none';
-                }}
-                onLoad={() => {
-                  console.log('Image loaded successfully:', `/uploads/${photo.filename}`);
-                }}
-              />
+              {photo.filename ? (
+                <img
+                  src={`/uploads/${photo.filename}`}
+                  alt={photo.description || photo.originalName}
+                  className="w-full h-48 object-cover rounded-lg shadow-md bg-gray-100 dark:bg-gray-700"
+                  onError={(e) => {
+                    console.log('Image failed to load:', `/uploads/${photo.filename}`, photo);
+                    e.currentTarget.style.display = 'none';
+                  }}
+                  onLoad={() => {
+                    console.log('Image loaded successfully:', `/uploads/${photo.filename}`);
+                  }}
+                />
+              ) : (
+                <div className="w-full h-48 bg-gray-200 dark:bg-gray-600 rounded-lg flex items-center justify-center">
+                  <span className="text-gray-500 dark:text-gray-400">No image available</span>
+                </div>
+              )}
               <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-opacity duration-200 rounded-lg flex items-center justify-center">
                 <a
                   href={`/uploads/${photo.filename}`}
