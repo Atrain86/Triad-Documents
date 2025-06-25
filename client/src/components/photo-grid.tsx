@@ -1,10 +1,8 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import type { Photo } from "@shared/schema";
 import { uploadPhoto } from "@/lib/api";
+import { type Photo } from "@shared/schema";
 import UnifiedUpload from "./unified-upload";
 
 interface PhotoGridProps {
@@ -16,11 +14,16 @@ export default function PhotoGrid({ projectId }: PhotoGridProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: photos = [], isLoading, refetch } = useQuery<Photo[]>({
+  const { data: photosData, isLoading, refetch } = useQuery({
     queryKey: ['/api/projects', projectId, 'photos'],
     refetchOnWindowFocus: true,
-    staleTime: 0, // Always refetch
+    refetchOnMount: true,
+    staleTime: 0,
   });
+
+  const photos = (photosData as Photo[]) || [];
+  
+  console.log('Photo grid data:', { photosData, photos, projectId, isLoading });
 
   const uploadMutation = useMutation({
     mutationFn: async (data: { files: File[]; description: string }) => {
@@ -33,10 +36,11 @@ export default function PhotoGrid({ projectId }: PhotoGridProps) {
       console.log('Upload results:', results);
       return results;
     },
-    onSuccess: (results) => {
+    onSuccess: async (results) => {
       console.log('Upload successful, forcing photo refresh');
-      // Force immediate refetch
-      refetch();
+      // Clear cache and force refetch
+      queryClient.removeQueries({ queryKey: ['/api/projects', projectId, 'photos'] });
+      await refetch();
       queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'photos'] });
       toast({
         title: "Success",
@@ -44,10 +48,11 @@ export default function PhotoGrid({ projectId }: PhotoGridProps) {
       });
       setDescription("");
     },
-    onError: (error: any) => {
+    onError: (error) => {
+      console.error('Upload error:', error);
       toast({
-        title: "Upload Failed",
-        description: error.message || "Failed to upload photos. Please try again.",
+        title: "Error",
+        description: "Failed to upload photos. Please try again.",
         variant: "destructive",
       });
     },
@@ -55,6 +60,7 @@ export default function PhotoGrid({ projectId }: PhotoGridProps) {
 
   const handleFileSelect = (files: File[]) => {
     if (files.length > 0) {
+      console.log('Photo files selected:', files);
       uploadMutation.mutate({ files, description });
     }
   };
@@ -75,7 +81,7 @@ export default function PhotoGrid({ projectId }: PhotoGridProps) {
       {/* Photo Grid */}
       {photos.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {photos.map((photo) => (
+          {photos.map((photo: Photo) => (
             <div key={photo.id} className="relative group">
               {photo.filename ? (
                 <img
@@ -98,17 +104,17 @@ export default function PhotoGrid({ projectId }: PhotoGridProps) {
 
               {photo.description && (
                 <div className="mt-2">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">{photo.description}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">{photo.description}</p>
                 </div>
               )}
             </div>
           ))}
         </div>
       )}
-      
-      {photos.length === 0 && (
+
+      {photos.length === 0 && !isLoading && (
         <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-          No photos uploaded yet. Use the camera above to add your first photo.
+          No photos uploaded yet. Use the button above to add your first photo.
         </div>
       )}
     </div>
