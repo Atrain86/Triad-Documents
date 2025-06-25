@@ -14,16 +14,23 @@ export default function PhotoGrid({ projectId }: PhotoGridProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: photosData, isLoading, refetch } = useQuery({
-    queryKey: ['/api/projects', projectId, 'photos'],
+  const { data: photos, isLoading, refetch } = useQuery<Photo[]>({
+    queryKey: [`/api/projects/${projectId}/photos`],
+    queryFn: async () => {
+      const response = await fetch(`/api/projects/${projectId}/photos`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch photos');
+      }
+      return response.json();
+    },
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     staleTime: 0,
   });
 
-  const photos = (photosData as Photo[]) || [];
+  const photoList = photos || [];
   
-  console.log('Photo grid data:', { photosData, photos, projectId, isLoading });
+  console.log('Photo grid data:', { photos, projectId, isLoading });
 
   const uploadMutation = useMutation({
     mutationFn: async (data: { files: File[]; description: string }) => {
@@ -39,9 +46,9 @@ export default function PhotoGrid({ projectId }: PhotoGridProps) {
     onSuccess: async (results) => {
       console.log('Upload successful, forcing photo refresh');
       // Clear cache and force refetch
-      queryClient.removeQueries({ queryKey: ['/api/projects', projectId, 'photos'] });
+      queryClient.removeQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
       await refetch();
-      queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'photos'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
       toast({
         title: "Success",
         description: `${results.length} photo(s) uploaded successfully.`,
@@ -79,9 +86,9 @@ export default function PhotoGrid({ projectId }: PhotoGridProps) {
       />
       
       {/* Photo Grid */}
-      {photos.length > 0 && (
+      {photoList.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {photos.map((photo: Photo) => (
+          {photoList.map((photo: Photo) => (
             <div key={photo.id} className="relative group">
               {photo.filename ? (
                 <img
@@ -112,7 +119,7 @@ export default function PhotoGrid({ projectId }: PhotoGridProps) {
         </div>
       )}
 
-      {photos.length === 0 && !isLoading && (
+      {photoList.length === 0 && !isLoading && (
         <div className="text-center text-gray-500 dark:text-gray-400 py-8">
           No photos uploaded yet. Use the button above to add your first photo.
         </div>

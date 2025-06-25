@@ -97,7 +97,7 @@ export default function CameraUpload({ onFileSelect, accept = "image/*", title =
         ref={cameraInputRef}
         type="file"
         accept="image/*"
-        capture="user"
+        capture="environment"
         onChange={handleFileChange}
         className="hidden"
       />

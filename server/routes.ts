@@ -14,13 +14,37 @@ if (!fs.existsSync(uploadDir)) {
 }
 
 const upload = multer({
-  dest: uploadDir,
+  storage: multer.diskStorage({
+    destination: uploadDir,
+    filename: (req, file, cb) => {
+      // Generate unique filename with original extension
+      const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      const ext = path.extname(file.originalname);
+      cb(null, uniqueName + ext);
+    }
+  }),
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Serve uploaded files
-  app.use('/uploads', express.static(uploadDir));
+  // Serve uploaded files with proper MIME types
+  app.use('/uploads', express.static(uploadDir, {
+    setHeaders: (res, filePath) => {
+      const ext = path.extname(filePath).toLowerCase();
+      if (ext === '.jpg' || ext === '.jpeg') {
+        res.setHeader('Content-Type', 'image/jpeg');
+      } else if (ext === '.png') {
+        res.setHeader('Content-Type', 'image/png');
+      } else if (ext === '.gif') {
+        res.setHeader('Content-Type', 'image/gif');
+      } else if (ext === '.webp') {
+        res.setHeader('Content-Type', 'image/webp');
+      } else {
+        // For files without extension, try to detect from content
+        res.setHeader('Content-Type', 'image/jpeg'); // Default fallback
+      }
+    }
+  }));
 
   // Projects
   app.get('/api/projects', async (req, res) => {
