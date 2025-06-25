@@ -67,7 +67,7 @@ export default function ProjectForm({ onSuccess }: ProjectFormProps) {
             <FormItem>
               <FormLabel>Client Name</FormLabel>
               <FormControl>
-                <Input placeholder="Enter client name" {...field} />
+                <Input placeholder="Enter client name" className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -81,7 +81,7 @@ export default function ProjectForm({ onSuccess }: ProjectFormProps) {
             <FormItem>
               <FormLabel>Address</FormLabel>
               <FormControl>
-                <Input placeholder="Enter project address" {...field} />
+                <Input placeholder="Enter project address" className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -99,6 +99,7 @@ export default function ProjectForm({ onSuccess }: ProjectFormProps) {
                   <Input 
                     type="number" 
                     min="1" 
+                    className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white"
                     {...field}
                     onChange={(e) => field.onChange(parseInt(e.target.value))}
                   />
@@ -164,9 +165,10 @@ export default function ProjectForm({ onSuccess }: ProjectFormProps) {
               <FormControl>
                 <Textarea 
                   placeholder="Add any initial notes about the project..."
-                  className="resize-none"
+                  className="resize-none bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
                   rows={3}
                   {...field}
+                  value={field.value ?? ""}
                 />
               </FormControl>
               <FormMessage />

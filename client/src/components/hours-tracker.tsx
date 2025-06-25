@@ -97,7 +97,7 @@ export default function HoursTracker({ projectId }: HoursTrackerProps) {
                 type="date"
                 value={formData.date}
                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                className="mt-1"
+                className="mt-1 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white"
               />
             </div>
             <div>
@@ -109,7 +109,7 @@ export default function HoursTracker({ projectId }: HoursTrackerProps) {
                 value={formData.hours}
                 onChange={(e) => setFormData({ ...formData, hours: e.target.value })}
                 placeholder="8.0"
-                className="mt-1"
+                className="mt-1 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
               />
             </div>
             <div>
@@ -119,7 +119,7 @@ export default function HoursTracker({ projectId }: HoursTrackerProps) {
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Work description"
-                className="mt-1"
+                className="mt-1 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
               />
             </div>
             <div className="flex items-end">

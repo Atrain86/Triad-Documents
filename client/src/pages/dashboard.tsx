@@ -49,7 +49,7 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
@@ -57,27 +57,11 @@ export default function Dashboard() {
                 <AFrameLogo className="w-8 h-8 mr-3" />
                 <h1 className="text-xl font-bold text-gray-900 dark:text-white">A-Frame Painting</h1>
               </div>
-              <div className="flex items-center space-x-4">
-                <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button className="bg-primary text-white hover:bg-blue-700">
-                      <Plus className="w-4 h-4 mr-2" />
-                      New Project
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl">
-                    <DialogHeader>
-                      <DialogTitle>Create New Project</DialogTitle>
-                    </DialogHeader>
-                    <ProjectForm onSuccess={() => setIsCreateDialogOpen(false)} />
-                  </DialogContent>
-                </Dialog>
-              </div>
             </div>
           </div>
         </header>
         <div className="flex items-center justify-center h-64">
-          <div className="text-gray-500">Loading...</div>
+          <div className="text-gray-500 dark:text-gray-400">Loading...</div>
         </div>
       </div>
     );
@@ -90,10 +74,25 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <PaintRollerIcon className="text-primary text-2xl mr-3" />
-              <h1 className="text-xl font-bold text-gray-900">PaintPro</h1>
+              <AFrameLogo className="w-8 h-8 mr-3" />
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white">A-Frame Painting</h1>
             </div>
-
+            <div className="flex items-center space-x-4">
+              <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="bg-primary text-white hover:bg-blue-700">
+                    <Plus className="w-4 h-4 mr-2" />
+                    New Project
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Create New Project</DialogTitle>
+                  </DialogHeader>
+                  <ProjectForm onSuccess={() => setIsCreateDialogOpen(false)} />
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
         </div>
       </header>
@@ -154,11 +153,9 @@ export default function Dashboard() {
           <div className="divide-y divide-gray-200 dark:divide-gray-700">
             {projects.length === 0 ? (
               <div className="px-6 py-12 text-center">
-                <div className="text-gray-500">
-                  <Home className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No projects yet</h3>
-                  <p className="text-gray-500">Get started by creating your first project.</p>
-                </div>
+                <Home className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No projects yet</h3>
+                <p className="text-gray-500 dark:text-gray-400">Get started by creating your first project.</p>
               </div>
             ) : (
               projects.map((project) => (

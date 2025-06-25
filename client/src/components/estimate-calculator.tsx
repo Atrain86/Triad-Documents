@@ -151,7 +151,7 @@ export default function EstimateCalculator({ project }: EstimateCalculatorProps)
               type="number"
               value={formData.roomCount}
               onChange={(e) => setFormData({ ...formData, roomCount: e.target.value })}
-              className="mt-1"
+              className="mt-1 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white"
             />
           </div>
 
@@ -193,7 +193,7 @@ export default function EstimateCalculator({ project }: EstimateCalculatorProps)
                 type="number"
                 value={formData.baseRate}
                 onChange={(e) => setFormData({ ...formData, baseRate: e.target.value })}
-                className="pl-8"
+                className="pl-8 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
                 placeholder="800"
               />
             </div>

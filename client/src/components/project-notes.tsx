@@ -57,7 +57,7 @@ export default function ProjectNotes({ project }: ProjectNotesProps) {
           placeholder="Add notes about the project, special requirements, client preferences, etc..."
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          className="resize-none"
+          className="resize-none bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
         />
       </div>
 

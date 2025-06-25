@@ -112,7 +112,7 @@ export default function ReceiptList({ projectId }: ReceiptListProps) {
                     value={formData.vendor}
                     onChange={(e) => setFormData({ ...formData, vendor: e.target.value })}
                     placeholder="e.g., Home Depot"
-                    className="mt-1"
+                    className="mt-1 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
                   />
                 </div>
                 <div>
@@ -124,7 +124,7 @@ export default function ReceiptList({ projectId }: ReceiptListProps) {
                     value={formData.amount}
                     onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                     placeholder="127.89"
-                    className="mt-1"
+                    className="mt-1 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
                   />
                 </div>
                 <div>
@@ -134,7 +134,7 @@ export default function ReceiptList({ projectId }: ReceiptListProps) {
                     type="date"
                     value={formData.date}
                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    className="mt-1"
+                    className="mt-1 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white"
                   />
                 </div>
                 <div>
@@ -144,7 +144,7 @@ export default function ReceiptList({ projectId }: ReceiptListProps) {
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     placeholder="Paint & Brushes"
-                    className="mt-1"
+                    className="mt-1 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
                     rows={2}
                   />
                 </div>
@@ -155,7 +155,7 @@ export default function ReceiptList({ projectId }: ReceiptListProps) {
                     type="file"
                     accept="image/*"
                     onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-                    className="mt-1"
+                    className="mt-1 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white"
                   />
                 </div>
                 <div className="flex justify-end space-x-3">

@@ -86,7 +86,7 @@ export default function PhotoGrid({ projectId }: PhotoGridProps) {
                 type="file"
                 accept="image/*"
                 onChange={handleFileChange}
-                className="mt-1"
+                className="mt-1 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white"
               />
             </div>
             <div>
@@ -96,7 +96,7 @@ export default function PhotoGrid({ projectId }: PhotoGridProps) {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="e.g., Front exterior - Before"
-                className="mt-1"
+                className="mt-1 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
               />
             </div>
             <div className="flex justify-end space-x-3">
