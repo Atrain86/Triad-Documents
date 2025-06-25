@@ -101,6 +101,7 @@ This is a full-stack web application designed for managing painting projects. Th
 ## Changelog
 - June 25, 2025. Initial setup
 - June 25, 2025. Rebranded to "A-Frame Painting" with custom logo and dark mode implementation
+- June 25, 2025. Enhanced project management features: Advanced status tracking, multiple worker support with hourly rates, project scheduling, live cost calculations, profit analysis, and comprehensive project summary dashboard
 
 ## User Preferences
 

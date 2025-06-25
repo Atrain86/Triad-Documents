@@ -79,6 +79,11 @@ export class MemStorage implements IStorage {
       notes: insertProject.notes || null,
       clientPreferences: insertProject.clientPreferences || null,
       specialRequirements: insertProject.specialRequirements || null,
+      statusDetails: insertProject.statusDetails ?? null,
+      scheduledStartDate: insertProject.scheduledStartDate ?? null,
+      scheduledEndDate: insertProject.scheduledEndDate ?? null,
+      hourlyRate: insertProject.hourlyRate ?? 50,
+      helperRate: insertProject.helperRate ?? 35,
       createdAt: new Date()
     };
     this.projects.set(id, project);
@@ -129,6 +134,7 @@ export class MemStorage implements IStorage {
     const receipt: Receipt = { 
       ...insertReceipt,
       id,
+      amount: insertReceipt.amount.toString(),
       filename: insertReceipt.filename || null,
       originalName: insertReceipt.originalName || null,
       description: insertReceipt.description || null,
@@ -162,6 +168,8 @@ export class MemStorage implements IStorage {
       ...insertHours,
       id,
       description: insertHours.description || null,
+      workerName: insertHours.workerName || "Primary Worker",
+      hourlyRate: insertHours.hourlyRate || 50,
       createdAt: new Date()
     };
     this.dailyHours.set(id, hours);

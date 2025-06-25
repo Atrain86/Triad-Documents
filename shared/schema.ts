@@ -13,6 +13,11 @@ export const projects = pgTable("projects", {
   notes: text("notes"),
   clientPreferences: text("client_preferences"),
   specialRequirements: text("special_requirements"),
+  statusDetails: text("status_details"), // For tracking estimate approval status, etc.
+  scheduledStartDate: timestamp("scheduled_start_date"),
+  scheduledEndDate: timestamp("scheduled_end_date"),
+  hourlyRate: real("hourly_rate").default(50), // Default painter rate
+  helperRate: real("helper_rate").default(35), // Default helper rate
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -29,7 +34,7 @@ export const receipts = pgTable("receipts", {
   id: serial("id").primaryKey(),
   projectId: integer("project_id").notNull(),
   vendor: text("vendor").notNull(),
-  amount: real("amount").notNull(),
+  amount: text("amount").notNull(), // Store as text for decimal precision
   description: text("description"),
   filename: text("filename"),
   originalName: text("original_name"),
@@ -43,6 +48,8 @@ export const dailyHours = pgTable("daily_hours", {
   date: timestamp("date").notNull(),
   hours: real("hours").notNull(),
   description: text("description"),
+  workerName: text("worker_name").default("Primary Worker"),
+  hourlyRate: real("hourly_rate").notNull().default(50),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

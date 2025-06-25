@@ -18,6 +18,8 @@ export default function HoursTracker({ projectId }: HoursTrackerProps) {
     date: new Date().toISOString().split('T')[0],
     hours: "",
     description: "",
+    workerName: "Primary Worker",
+    hourlyRate: "50",
   });
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -27,7 +29,7 @@ export default function HoursTracker({ projectId }: HoursTrackerProps) {
   });
 
   const addHoursMutation = useMutation({
-    mutationFn: async (data: { date: string; hours: number; description?: string }) => {
+    mutationFn: async (data: { date: string; hours: number; description?: string; workerName: string; hourlyRate: number }) => {
       const response = await apiRequest("POST", `/api/projects/${projectId}/hours`, data);
       return response.json();
     },
@@ -41,6 +43,8 @@ export default function HoursTracker({ projectId }: HoursTrackerProps) {
         date: new Date().toISOString().split('T')[0],
         hours: "",
         description: "",
+        workerName: "Primary Worker",
+        hourlyRate: "50",
       });
     },
     onError: (error) => {
@@ -66,6 +70,8 @@ export default function HoursTracker({ projectId }: HoursTrackerProps) {
       date: formData.date,
       hours: parseFloat(formData.hours),
       description: formData.description || undefined,
+      workerName: formData.workerName,
+      hourlyRate: parseFloat(formData.hourlyRate),
     });
   };
 

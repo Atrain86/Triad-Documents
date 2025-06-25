@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Camera, Receipt, Clock, Calculator, StickyNote, Edit } from "lucide-react";
+import { ArrowLeft, Camera, Receipt, Clock, Calculator, StickyNote, Edit, DollarSign, Calendar } from "lucide-react";
 import { Link } from "wouter";
 import type { Project } from "@shared/schema";
 import PhotoGrid from "@/components/photo-grid";
@@ -13,6 +13,8 @@ import ReceiptList from "@/components/receipt-list";
 import HoursTracker from "@/components/hours-tracker";
 import EstimateCalculator from "@/components/estimate-calculator";
 import ProjectNotes from "@/components/project-notes";
+import ProjectStatus from "@/components/project-status";
+import ProjectSummary from "@/components/project-summary";
 
 export default function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
@@ -124,9 +126,23 @@ export default function ProjectDetail() {
 
         {/* Project Tabs */}
         <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-          <Tabs defaultValue="photos" className="w-full">
+          <Tabs defaultValue="summary" className="w-full">
             <div className="border-b border-gray-200 dark:border-gray-700">
               <TabsList className="h-auto bg-transparent p-0">
+                <TabsTrigger 
+                  value="summary" 
+                  className="border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary px-6 py-3 text-sm font-medium rounded-none"
+                >
+                  <DollarSign className="w-4 h-4 mr-2" />
+                  Summary
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="status" 
+                  className="border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary px-6 py-3 text-sm font-medium rounded-none"
+                >
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Status
+                </TabsTrigger>
                 <TabsTrigger 
                   value="photos" 
                   className="border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary px-6 py-3 text-sm font-medium rounded-none"
@@ -164,6 +180,14 @@ export default function ProjectDetail() {
                 </TabsTrigger>
               </TabsList>
             </div>
+
+            <TabsContent value="summary" className="p-6">
+              <ProjectSummary project={project} />
+            </TabsContent>
+
+            <TabsContent value="status" className="p-6">
+              <ProjectStatus project={project} />
+            </TabsContent>
 
             <TabsContent value="photos" className="p-6">
               <PhotoGrid projectId={projectId} />

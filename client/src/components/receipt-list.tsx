@@ -78,7 +78,7 @@ export default function ReceiptList({ projectId }: ReceiptListProps) {
     addReceiptMutation.mutate();
   };
 
-  const totalCost = receipts.reduce((sum, receipt) => sum + receipt.amount, 0);
+  const totalCost = receipts.reduce((sum, receipt) => sum + parseFloat(receipt.amount || "0"), 0);
 
   if (isLoading) {
     return <div className="text-center text-gray-500">Loading receipts...</div>;
@@ -204,7 +204,7 @@ export default function ReceiptList({ projectId }: ReceiptListProps) {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-gray-900 dark:text-white">${receipt.amount.toFixed(2)}</p>
+                    <p className="font-bold text-gray-900 dark:text-white">${parseFloat(receipt.amount || "0").toFixed(2)}</p>
                     {receipt.filename && (
                       <Button
                         variant="link"
