@@ -244,7 +244,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                   className="aspect-square rounded-lg overflow-hidden cursor-pointer border-2 border-transparent hover:border-blue-500 transition-all"
                 >
                   <img
-                    src={`/uploads/photos/${photo.filename}`}
+                    src={`/uploads/${photo.filename}`}
                     alt={photo.description || photo.originalName}
                     className="w-full h-full object-cover"
                   />
@@ -310,7 +310,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           
           {/* Current photo */}
           <img
-            src={`/uploads/photos/${photos[carouselIndex]?.filename}`}
+            src={`/uploads/${photos[carouselIndex]?.filename}`}
             alt="Project Photo"
             className="max-w-[90%] max-h-[90%] object-contain"
           />
