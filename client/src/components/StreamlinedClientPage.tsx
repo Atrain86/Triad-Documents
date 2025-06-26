@@ -20,7 +20,7 @@ interface StreamlinedClientPageProps {
 
 export default function StreamlinedClientPage({ projectId, onBack }: StreamlinedClientPageProps) {
   const { data: project, isLoading } = useQuery<Project>({
-    queryKey: ['/api/projects', projectId],
+    queryKey: [`/api/projects/${projectId}`],
   });
 
   const getStatusColor = (status: string) => {

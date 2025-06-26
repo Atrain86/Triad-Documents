@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { apiRequest } from '@/lib/queryClient';
 import type { Project, InsertProject } from '@shared/schema';
 
 type NewProject = InsertProject;
@@ -40,27 +41,16 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
   const queryClient = useQueryClient();
 
   const { data: projects = [], isLoading } = useQuery<Project[]>({
-    queryKey: ['projects'],
-    queryFn: async () => {
-      const response = await fetch('/api/projects');
-      if (!response.ok) throw new Error('Failed to fetch projects');
-      return response.json();
-    }
+    queryKey: ['/api/projects'],
   });
 
   const createProjectMutation = useMutation({
     mutationFn: async (projectData: NewProject) => {
-      const response = await fetch('/api/projects', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(projectData)
-      });
-
-      if (!response.ok) throw new Error('Failed to create project');
+      const response = await apiRequest('POST', '/api/projects', projectData);
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
       setShowAddClient(false);
       setNewProject({
         clientName: '',
