@@ -136,7 +136,13 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const handleCameraClick = () => {
     console.log('Camera button clicked');
     console.log('Camera input ref:', cameraInputRef.current);
-    cameraInputRef.current?.click();
+    console.log('Camera input element:', cameraInputRef.current?.outerHTML);
+    if (cameraInputRef.current) {
+      cameraInputRef.current.click();
+      console.log('File input click() called');
+    } else {
+      console.error('Camera input ref is null');
+    }
   };
 
   const handleReceiptClick = () => {
@@ -304,7 +310,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         ref={cameraInputRef}
         type="file"
         accept="image/*"
-        capture="environment"
         onChange={handlePhotoUpload}
         multiple
         className="hidden"
