@@ -21,16 +21,7 @@ const receiptsDir = path.join(uploadDir, 'receipts');
 
 const upload = multer({
   storage: multer.diskStorage({
-    destination: (req, file, cb) => {
-      // Determine destination based on route
-      if (req.path.includes('/photos')) {
-        cb(null, photosDir);
-      } else if (req.path.includes('/receipts')) {
-        cb(null, receiptsDir);
-      } else {
-        cb(null, uploadDir);
-      }
-    },
+    destination: uploadDir, // Always save to root uploads directory
     filename: (req, file, cb) => {
       // Generate unique filename with original extension
       const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1E9);
