@@ -136,16 +136,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     }
   });
 
-  const handleCameraClick = () => {
-    try {
-      console.log('Camera button clicked');
-      if (cameraInputRef.current) {
-        cameraInputRef.current.click();
-      }
-    } catch (error) {
-      console.error('Error clicking camera input:', error);
-    }
-  };
+
 
   const handleReceiptClick = () => {
     receiptInputRef.current?.click();
@@ -212,15 +203,21 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         </div>
 
         <div className="flex gap-5 mb-8 justify-center">
-          <button
-            onClick={handleCameraClick}
-            disabled={photoUploadMutation.isPending}
+          <label
             className="w-16 h-16 rounded-full border-none cursor-pointer flex items-center justify-center transition-transform hover:scale-105 shadow-lg"
             style={{ background: aframeTheme.gradients.primary }}
             title="Take Photo"
           >
             <Camera size={28} color="white" />
-          </button>
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={handlePhotoUpload}
+              multiple
+              className="hidden"
+            />
+          </label>
 
           <button
             onClick={handleReceiptClick}
@@ -300,15 +297,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         </Button>
       </div>
 
-      <input
-        ref={cameraInputRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        onChange={handlePhotoUpload}
-        multiple
-        className="hidden"
-      />
+
       
       <input
         ref={receiptInputRef}
