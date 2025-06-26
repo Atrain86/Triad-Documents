@@ -1,211 +1,346 @@
-import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Camera, Receipt, Clock, Calculator, StickyNote, Edit, DollarSign, Calendar } from "lucide-react";
-import type { Project } from "@shared/schema";
-import WorkingPhotoGrid from "@/components/working-photo-grid";
-import ReceiptList from "@/components/receipt-list";
-import DailyHoursTracker from "@/components/daily-hours-tracker";
-import EstimateCalculator from "@/components/estimate-calculator";
-import ProjectNotes from "@/components/project-notes";
-import ProjectStatus from "@/components/project-status";
-import ProjectSummary from "@/components/project-summary";
+import React, { useState, useRef } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Camera, FileText, ArrowLeft, Edit3, Download, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Card } from '@/components/ui/card';
+import { apiRequest } from '@/lib/queryClient';
+import type { Project, Photo, Receipt } from '@shared/schema';
 
 interface StreamlinedClientPageProps {
   projectId: number;
   onBack: () => void;
 }
 
+const aframeTheme = {
+  gradients: {
+    rainbow: 'linear-gradient(90deg, hsl(0, 100%, 60%), hsl(30, 100%, 60%), hsl(60, 100%, 60%), hsl(120, 100%, 50%), hsl(210, 100%, 60%))',
+    primary: 'linear-gradient(45deg, hsl(210, 100%, 60%), hsl(120, 100%, 50%))',
+    accent: 'linear-gradient(45deg, hsl(30, 100%, 60%), hsl(60, 100%, 60%))',
+    destructive: 'linear-gradient(45deg, hsl(0, 100%, 60%), hsl(30, 100%, 60%))'
+  }
+};
+
 export default function StreamlinedClientPage({ projectId, onBack }: StreamlinedClientPageProps) {
-  const { data: project, isLoading } = useQuery<Project>({
+  const [notes, setNotes] = useState('');
+  const [showPhotoCarousel, setShowPhotoCarousel] = useState(false);
+  const [carouselIndex, setCarouselIndex] = useState(0);
+  
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const receiptInputRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
+
+  const { data: project } = useQuery<Project>({
     queryKey: [`/api/projects/${projectId}`],
   });
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'in-progress':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
-      case 'completed':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      case 'estimating':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-      default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
+  const { data: photos = [] } = useQuery<Photo[]>({
+    queryKey: [`/api/projects/${projectId}/photos`],
+  });
+
+  const { data: receipts = [] } = useQuery<Receipt[]>({
+    queryKey: [`/api/projects/${projectId}/receipts`],
+  });
+
+  const photoUploadMutation = useMutation({
+    mutationFn: async (files: FileList) => {
+      const formData = new FormData();
+      Array.from(files).forEach(file => {
+        formData.append('photos', file);
+      });
+      
+      const response = await fetch(`/api/projects/${projectId}/photos`, {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (!response.ok) throw new Error('Failed to upload photos');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
+    }
+  });
+
+  const receiptUploadMutation = useMutation({
+    mutationFn: async (files: FileList) => {
+      const formData = new FormData();
+      Array.from(files).forEach(file => {
+        formData.append('receipts', file);
+      });
+      
+      const response = await fetch(`/api/projects/${projectId}/receipts`, {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (!response.ok) throw new Error('Failed to upload receipts');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/receipts`] });
+    }
+  });
+
+  const updateNotesMutation = useMutation({
+    mutationFn: async (newNotes: string) => {
+      const response = await apiRequest('PATCH', `/api/projects/${projectId}`, { notes: newNotes });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}`] });
+    }
+  });
+
+  const generateInvoiceMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch(`/api/projects/${projectId}/invoice`, {
+        method: 'POST'
+      });
+      
+      if (!response.ok) throw new Error('Failed to generate invoice');
+      return response.blob();
+    },
+    onSuccess: (blob) => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `invoice-${project?.clientName}-${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    }
+  });
+
+  const handleCameraClick = () => {
+    cameraInputRef.current?.click();
+  };
+
+  const handleReceiptClick = () => {
+    receiptInputRef.current?.click();
+  };
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      photoUploadMutation.mutate(e.target.files);
+      e.target.value = '';
     }
   };
 
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'in-progress':
-        return 'In Progress';
-      case 'completed':
-        return 'Completed';
-      case 'estimating':
-        return 'Estimating';
-      default:
-        return status;
+  const handleReceiptUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      receiptUploadMutation.mutate(e.target.files);
+      e.target.value = '';
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-muted-foreground">Loading project...</div>
-      </div>
-    );
-  }
+  const handleNotesBlur = () => {
+    if (notes !== project?.notes) {
+      updateNotesMutation.mutate(notes);
+    }
+  };
+
+  const openPhotoCarousel = (index: number) => {
+    setCarouselIndex(index);
+    setShowPhotoCarousel(true);
+  };
+
+  React.useEffect(() => {
+    if (project?.notes) {
+      setNotes(project.notes);
+    }
+  }, [project?.notes]);
 
   if (!project) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-xl font-bold text-foreground mb-2">Project not found</h2>
-          <Button variant="outline" onClick={onBack}>Back to Dashboard</Button>
-        </div>
-      </div>
-    );
+    return <div className="p-6">Loading...</div>;
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Project Header */}
-        <Card className="mb-6">
-          <div className="px-6 py-4 border-b">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <Button variant="ghost" size="sm" className="mr-4" onClick={onBack}>
-                  <ArrowLeft className="w-4 h-4" />
-                </Button>
-                <div>
-                  <h1 className="text-xl font-bold text-foreground">{project.clientName}</h1>
-                  <p className="text-sm text-muted-foreground">{project.address}</p>
+    <div className="min-h-screen bg-background text-foreground">
+      <div 
+        className="h-1"
+        style={{ background: aframeTheme.gradients.rainbow }}
+      />
+      
+      <div className="p-6">
+        <div className="flex items-center mb-6 pb-4 border-b border-border">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onBack}
+            className="mr-4 p-2"
+          >
+            <ArrowLeft size={20} />
+          </Button>
+          <div>
+            <h1 className="text-xl font-semibold mb-1">{project.clientName}</h1>
+            <p className="text-sm text-muted-foreground">{project.address}</p>
+          </div>
+        </div>
+
+        <div className="flex gap-5 mb-8 justify-center">
+          <button
+            onClick={handleCameraClick}
+            disabled={photoUploadMutation.isPending}
+            className="w-16 h-16 rounded-full border-none cursor-pointer flex items-center justify-center transition-transform hover:scale-105 shadow-lg"
+            style={{ background: aframeTheme.gradients.primary }}
+            title="Take Photo"
+          >
+            <Camera size={28} color="white" />
+          </button>
+
+          <button
+            onClick={handleReceiptClick}
+            disabled={receiptUploadMutation.isPending}
+            className="w-16 h-16 rounded-full border-none cursor-pointer flex items-center justify-center transition-transform hover:scale-105 shadow-lg"
+            style={{ background: aframeTheme.gradients.accent }}
+            title="Scan Receipt"
+          >
+            <FileText size={28} color="white" />
+          </button>
+        </div>
+
+        {photos.length > 0 && (
+          <div className="mb-7">
+            <div className="flex items-center gap-2 mb-4 text-muted-foreground">
+              <Camera size={16} />
+              <span className="font-medium">Photos ({photos.length})</span>
+            </div>
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+              {photos.map((photo, index) => (
+                <div
+                  key={photo.id}
+                  onClick={() => openPhotoCarousel(index)}
+                  className="aspect-square rounded-lg overflow-hidden cursor-pointer border-2 border-transparent hover:border-primary transition-all hover:scale-102"
+                >
+                  <img
+                    src={`/api/uploads/photos/${photo.filename}`}
+                    alt={photo.description || photo.originalName}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-              </div>
-              <div className="flex items-center space-x-3">
-                <Badge className={getStatusColor(project.status)}>
-                  {getStatusLabel(project.status)}
-                </Badge>
-                <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-                  <Edit className="w-4 h-4 mr-2" />
-                  Edit Project
-                </Button>
-              </div>
+              ))}
             </div>
           </div>
+        )}
 
-          {/* Project Stats Row */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6">
-            <div className="text-center">
-              <p className="text-2xl font-bold text-foreground">{project.roomCount || 0}</p>
-              <p className="text-sm text-muted-foreground">Rooms</p>
+        {receipts.length > 0 && (
+          <div className="mb-7">
+            <div className="flex items-center gap-2 mb-4 text-muted-foreground">
+              <FileText size={16} />
+              <span className="font-medium">Receipts ({receipts.length})</span>
             </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold text-foreground">0</p>
-              <p className="text-sm text-muted-foreground">Hours Logged</p>
-            </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold text-foreground">$0</p>
-              <p className="text-sm text-muted-foreground">Materials Cost</p>
-            </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold text-primary">
-                {project.estimate ? `$${project.estimate.toLocaleString()}` : '$0'}
-              </p>
-              <p className="text-sm text-muted-foreground">Estimate</p>
+            <div className="space-y-2">
+              {receipts.map(receipt => (
+                <Card key={receipt.id} className="p-3">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <div className="font-medium text-sm">{receipt.vendor}</div>
+                      <div className="text-xs text-muted-foreground">
+                        ${Number(receipt.amount).toFixed(2)} • {new Date(receipt.uploadedAt).toLocaleDateString()}
+                      </div>
+                    </div>
+                    <a
+                      href={`/api/uploads/receipts/${receipt.filename}`}
+                      download
+                      className="text-muted-foreground hover:text-foreground"
+                    >
+                      <Download size={16} />
+                    </a>
+                  </div>
+                </Card>
+              ))}
             </div>
           </div>
-        </Card>
+        )}
 
-        {/* Project Tabs */}
-        <Card>
-          <Tabs defaultValue="summary" className="w-full">
-            <div className="border-b">
-              <TabsList className="h-auto bg-transparent p-0">
-                <TabsTrigger 
-                  value="summary" 
-                  className="border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary px-6 py-3 text-sm font-medium rounded-none"
-                >
-                  <DollarSign className="w-4 h-4 mr-2" />
-                  Summary
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="status" 
-                  className="border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary px-6 py-3 text-sm font-medium rounded-none"
-                >
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Status
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="photos" 
-                  className="border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary px-6 py-3 text-sm font-medium rounded-none"
-                >
-                  <Camera className="w-4 h-4 mr-2" />
-                  Photos
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="receipts"
-                  className="border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary px-6 py-3 text-sm font-medium rounded-none"
-                >
-                  <Receipt className="w-4 h-4 mr-2" />
-                  Receipts
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="hours"
-                  className="border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary px-6 py-3 text-sm font-medium rounded-none"
-                >
-                  <Clock className="w-4 h-4 mr-2" />
-                  Daily Hours
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="estimate"
-                  className="border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary px-6 py-3 text-sm font-medium rounded-none"
-                >
-                  <Calculator className="w-4 h-4 mr-2" />
-                  Estimate
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="notes"
-                  className="border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary px-6 py-3 text-sm font-medium rounded-none"
-                >
-                  <StickyNote className="w-4 h-4 mr-2" />
-                  Notes
-                </TabsTrigger>
-              </TabsList>
-            </div>
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4 text-muted-foreground">
+            <Edit3 size={16} />
+            <span className="font-medium">Project Notes</span>
+          </div>
+          <Textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            onBlur={handleNotesBlur}
+            placeholder="Add project notes, materials needed, color preferences, timeline, special requirements..."
+            className="min-h-[120px] resize-vertical"
+          />
+        </div>
 
-            <TabsContent value="summary" className="p-6">
-              <ProjectSummary project={project} />
-            </TabsContent>
-
-            <TabsContent value="status" className="p-6">
-              <ProjectStatus project={project} />
-            </TabsContent>
-
-            <TabsContent value="photos" className="p-6">
-              <WorkingPhotoGrid projectId={projectId} />
-            </TabsContent>
-
-            <TabsContent value="receipts" className="p-6">
-              <ReceiptList projectId={projectId} />
-            </TabsContent>
-
-            <TabsContent value="hours" className="p-6">
-              <DailyHoursTracker projectId={projectId} />
-            </TabsContent>
-
-            <TabsContent value="estimate" className="p-6">
-              <EstimateCalculator project={project} />
-            </TabsContent>
-
-            <TabsContent value="notes" className="p-6">
-              <ProjectNotes project={project} />
-            </TabsContent>
-          </Tabs>
-        </Card>
+        <Button
+          onClick={() => generateInvoiceMutation.mutate()}
+          disabled={generateInvoiceMutation.isPending}
+          className="w-full py-4 text-base font-semibold"
+          style={{ background: aframeTheme.gradients.destructive }}
+        >
+          {generateInvoiceMutation.isPending ? 'Generating...' : 'Generate Invoice'}
+        </Button>
       </div>
+
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        onChange={handlePhotoUpload}
+        multiple
+        className="hidden"
+      />
+      
+      <input
+        ref={receiptInputRef}
+        type="file"
+        accept="image/*,application/pdf"
+        onChange={handleReceiptUpload}
+        multiple
+        className="hidden"
+      />
+
+      {showPhotoCarousel && photos.length > 0 && (
+        <div className="fixed inset-0 bg-black/95 flex items-center justify-center z-50">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowPhotoCarousel(false)}
+            className="absolute top-6 right-6 w-12 h-12 rounded-full bg-white/10 text-white"
+          >
+            <X size={24} />
+          </Button>
+          
+          <img
+            src={`/api/uploads/photos/${photos[carouselIndex]?.filename}`}
+            alt="Project Photo"
+            className="max-w-[90%] max-h-[90%] object-contain rounded-lg"
+          />
+          
+          {photos.length > 1 && (
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setCarouselIndex(prev => prev > 0 ? prev - 1 : photos.length - 1)}
+                className="absolute left-6 w-12 h-12 rounded-full bg-white/10 text-white text-2xl"
+              >
+                ‹
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setCarouselIndex(prev => prev < photos.length - 1 ? prev + 1 : 0)}
+                className="absolute right-6 w-12 h-12 rounded-full bg-white/10 text-white text-2xl"
+              >
+                ›
+              </Button>
+            </>
+          )}
+          
+          <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-white text-sm bg-black/50 px-4 py-2 rounded-full">
+            {carouselIndex + 1} of {photos.length}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
