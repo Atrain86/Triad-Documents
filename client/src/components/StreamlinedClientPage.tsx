@@ -164,7 +164,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       />
       
       <div className="p-6">
-        <div className="flex items-center mb-6 pb-4 border-b border-border">
+        <div className="flex items-center mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
           <Button
             variant="ghost"
             size="sm"
@@ -201,55 +201,26 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           </button>
         </div>
 
+        {/* Photo Thumbnails Grid - ADD THIS SECTION */}
         {photos.length > 0 && (
           <div className="mb-7">
             <div className="flex items-center gap-2 mb-4 text-muted-foreground">
               <Camera size={16} />
               <span className="font-medium">Photos ({photos.length})</span>
             </div>
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               {photos.map((photo, index) => (
                 <div
                   key={photo.id}
                   onClick={() => openPhotoCarousel(index)}
-                  className="aspect-square rounded-lg overflow-hidden cursor-pointer border-2 border-transparent hover:border-primary transition-all hover:scale-102"
+                  className="aspect-square rounded-lg overflow-hidden cursor-pointer border-2 border-transparent hover:border-blue-500 transition-all"
                 >
                   <img
-                    src={`/api/uploads/photos/${photo.filename}`}
+                    src={`/uploads/photos/${photo.filename}`}
                     alt={photo.description || photo.originalName}
                     className="w-full h-full object-cover"
                   />
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {receipts.length > 0 && (
-          <div className="mb-7">
-            <div className="flex items-center gap-2 mb-4 text-muted-foreground">
-              <FileText size={16} />
-              <span className="font-medium">Receipts ({receipts.length})</span>
-            </div>
-            <div className="space-y-2">
-              {receipts.map(receipt => (
-                <Card key={receipt.id} className="p-3">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <div className="font-medium text-sm">{receipt.vendor}</div>
-                      <div className="text-xs text-muted-foreground">
-                        ${Number(receipt.amount).toFixed(2)} • {new Date(receipt.uploadedAt).toLocaleDateString()}
-                      </div>
-                    </div>
-                    <a
-                      href={`/api/uploads/receipts/${receipt.filename}`}
-                      download
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      <Download size={16} />
-                    </a>
-                  </div>
-                </Card>
               ))}
             </div>
           </div>
@@ -298,44 +269,43 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         className="hidden"
       />
 
+      {/* Full Screen Photo Carousel - ADD THIS SECTION */}
       {showPhotoCarousel && photos.length > 0 && (
         <div className="fixed inset-0 bg-black/95 flex items-center justify-center z-50">
-          <Button
-            variant="ghost"
-            size="sm"
+          {/* Close button */}
+          <button
             onClick={() => setShowPhotoCarousel(false)}
-            className="absolute top-6 right-6 w-12 h-12 rounded-full bg-white/10 text-white"
+            className="absolute top-6 right-6 w-12 h-12 rounded-full bg-white/20 text-white flex items-center justify-center"
           >
             <X size={24} />
-          </Button>
+          </button>
           
+          {/* Current photo */}
           <img
-            src={`/api/uploads/photos/${photos[carouselIndex]?.filename}`}
+            src={`/uploads/photos/${photos[carouselIndex]?.filename}`}
             alt="Project Photo"
-            className="max-w-[90%] max-h-[90%] object-contain rounded-lg"
+            className="max-w-[90%] max-h-[90%] object-contain"
           />
           
+          {/* Navigation arrows (if more than 1 photo) */}
           {photos.length > 1 && (
             <>
-              <Button
-                variant="ghost"
-                size="sm"
+              <button
                 onClick={() => setCarouselIndex(prev => prev > 0 ? prev - 1 : photos.length - 1)}
-                className="absolute left-6 w-12 h-12 rounded-full bg-white/10 text-white text-2xl"
+                className="absolute left-6 w-12 h-12 rounded-full bg-white/20 text-white flex items-center justify-center text-2xl"
               >
                 ‹
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
+              </button>
+              <button
                 onClick={() => setCarouselIndex(prev => prev < photos.length - 1 ? prev + 1 : 0)}
-                className="absolute right-6 w-12 h-12 rounded-full bg-white/10 text-white text-2xl"
+                className="absolute right-6 w-12 h-12 rounded-full bg-white/20 text-white flex items-center justify-center text-2xl"
               >
                 ›
-              </Button>
+              </button>
             </>
           )}
           
+          {/* Photo counter */}
           <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-white text-sm bg-black/50 px-4 py-2 rounded-full">
             {carouselIndex + 1} of {photos.length}
           </div>
