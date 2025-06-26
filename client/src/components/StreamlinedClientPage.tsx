@@ -48,13 +48,30 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const photoUploadMutation = useMutation({
     mutationFn: async (files: FileList) => {
+      console.log('Starting upload for', files.length, 'files');
       const formData = new FormData();
-      Array.from(files).forEach(file => {
+      Array.from(files).forEach((file, index) => {
+        console.log(`Adding file ${index}:`, file.name, file.size, 'bytes');
         formData.append('photos', file);
       });
       
-      const response = await apiRequest('POST', `/api/projects/${projectId}/photos`, formData);
-      return response.json();
+      console.log('FormData prepared, making request...');
+      const response = await fetch(`/api/projects/${projectId}/photos`, {
+        method: 'POST',
+        body: formData,
+        credentials: 'include'
+      });
+      
+      console.log('Response status:', response.status);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Upload failed with status:', response.status, 'text:', errorText);
+        throw new Error(`Upload failed: ${response.status} - ${errorText}`);
+      }
+      
+      const result = await response.json();
+      console.log('Upload successful:', result);
+      return result;
     },
     onSuccess: (data) => {
       console.log('Photo upload successful:', data);
@@ -64,6 +81,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     },
     onError: (error) => {
       console.error('Photo upload failed:', error);
+      console.error('Error details:', JSON.stringify(error, null, 2));
     }
   });
 
