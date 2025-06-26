@@ -145,8 +145,24 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     console.log('File input changed:', e.target.files?.length, 'files');
     if (e.target.files && e.target.files.length > 0) {
+      // Convert FileList to File array immediately to prevent it from becoming empty
+      const filesArray = Array.from(e.target.files);
+      console.log('Files captured:', filesArray.length, 'files');
       console.log('Starting photo upload...');
-      photoUploadMutation.mutate(e.target.files);
+      
+      // Create a new FileList-like object that won't become empty
+      const fileListObj = {
+        ...filesArray,
+        length: filesArray.length,
+        item: (index: number) => filesArray[index] || null,
+        [Symbol.iterator]: function* () {
+          for (const file of filesArray) {
+            yield file;
+          }
+        }
+      } as FileList;
+      
+      photoUploadMutation.mutate(fileListObj);
       e.target.value = ''; // Reset input to allow re-uploading same files
     }
   };
