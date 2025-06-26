@@ -49,25 +49,18 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const photoUploadMutation = useMutation({
     mutationFn: async (files: FileList) => {
       const formData = new FormData();
-      Array.from(files).forEach(file => formData.append('photos', file));
-
-      const res = await fetch(`/api/projects/${projectId}/photos`, {
-        method: 'POST',
-        body: formData,
-        credentials: 'include',
+      Array.from(files).forEach(file => {
+        formData.append('photos', file);
       });
-
-      if (!res.ok) {
-        const errText = await res.text();
-        throw new Error(errText || 'Upload failed');
-      }
-      return res.json();
+      
+      const response = await apiRequest('POST', `/api/projects/${projectId}/photos`, formData);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
     },
-    onError: (error: any) => {
-      console.error('Photo upload error:', error.message);
+    onError: (error) => {
+      console.error('Photo upload failed:', error);
     }
   });
 
