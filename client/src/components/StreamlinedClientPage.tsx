@@ -48,45 +48,25 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const photoUploadMutation = useMutation({
     mutationFn: async (files: FileList) => {
-      console.log('Uploading photos:', files.length); // Debug log
-      console.log('FileList type:', typeof files);
-      console.log('Is FileList?', files instanceof FileList);
-      
       const formData = new FormData();
-      Array.from(files).forEach((file, index) => {
-        console.log(`Adding file ${index} to FormData:`, file.name, file.size);
-        formData.append('photos', file);
-      });
-      
-      // Debug FormData contents
-      console.log('FormData has photos:', formData.has('photos'));
-      console.log('FormData keys:', Array.from(formData.keys()));
-      console.log('Total FormData entries:', Array.from(formData.keys()).length);
-      
-      const response = await fetch(`/api/projects/${projectId}/photos`, {
+      Array.from(files).forEach(file => formData.append('photos', file));
+
+      const res = await fetch(`/api/projects/${projectId}/photos`, {
         method: 'POST',
-        body: formData
+        body: formData,
       });
-      
-      console.log('Upload response status:', response.status); // Debug log
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Upload failed:', errorText);
-        throw new Error(`Failed to upload photos: ${errorText}`);
+
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(errText || 'Upload failed');
       }
-      
-      const result = await response.json();
-      console.log('Upload successful:', result); // Debug log
-      return result;
+      return res.json();
     },
-    onSuccess: (data) => {
-      console.log('Photos uploaded successfully:', data);
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
     },
-    onError: (error) => {
-      console.error('Photo upload error:', error);
-      alert('Failed to upload photos: ' + error.message);
+    onError: (error: any) => {
+      console.error('Photo upload error:', error.message);
     }
   });
 
@@ -158,25 +138,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('Photo input changed');
-    console.log('Files selected:', e.target.files?.length);
-    console.log('Event target:', e.target);
-    console.log('Input element files:', e.target.files);
-    
     if (e.target.files && e.target.files.length > 0) {
-      console.log('Starting photo upload mutation');
-      console.log('FileList object:', e.target.files);
-      Array.from(e.target.files).forEach((file, index) => {
-        console.log(`File ${index}:`, file.name, file.type, file.size);
-      });
-      
-      // Trigger upload
-      console.log('About to call photoUploadMutation.mutate');
       photoUploadMutation.mutate(e.target.files);
-      console.log('photoUploadMutation.mutate called');
-      e.target.value = '';
-    } else {
-      console.log('No files selected');
+      e.target.value = ''; // Reset input to allow re-uploading same files
     }
   };
 
