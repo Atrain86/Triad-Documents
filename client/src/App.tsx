@@ -1,31 +1,52 @@
-import { Switch, Route } from "wouter";
-import { queryClient } from "./lib/queryClient";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { ThemeProvider } from "@/components/theme-provider";
-import Dashboard from "@/pages/dashboard";
-import ProjectDetail from "@/pages/project-detail";
-import NotFound from "@/pages/not-found";
+import React, { useState } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ThemeProvider } from "next-themes";
+import StreamlinedHomepage from "./components/StreamlinedHomepage";
+import StreamlinedClientPage from "./components/StreamlinedClientPage";
+import "./index.css";
 
-function Router() {
-  return (
-    <Switch>
-      <Route path="/" component={Dashboard} />
-      <Route path="/project/:id" component={ProjectDetail} />
-      <Route component={NotFound} />
-    </Switch>
-  );
-}
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,
+      retry: 1,
+    },
+  },
+});
+
+type View = "home" | "client";
 
 function App() {
+  const [currentView, setCurrentView] = useState<View>("home");
+  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(
+    null,
+  );
+
+  const handleSelectProject = (projectId: number) => {
+    setSelectedProjectId(projectId);
+    setCurrentView("client");
+  };
+
+  const handleBackToHome = () => {
+    setCurrentView("home");
+    setSelectedProjectId(null);
+  };
+
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="dark">
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
+      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+        <div className="min-h-screen bg-background">
+          {currentView === "home" && (
+            <StreamlinedHomepage onSelectProject={handleSelectProject} />
+          )}
+
+          {currentView === "client" && selectedProjectId && (
+            <StreamlinedClientPage
+              projectId={selectedProjectId}
+              onBack={handleBackToHome}
+            />
+          )}
+        </div>
       </ThemeProvider>
     </QueryClientProvider>
   );
