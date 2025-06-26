@@ -140,4 +140,97 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
             >
               <div className="flex justify-between items-start mb-2">
                 <div>
-                  <h3 className="font-semi
+                  <h3 className="font-semibold text-lg">{project.clientName}</h3>
+                  <p className="text-muted-foreground text-sm">{project.address}</p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div 
+                    className={`w-3 h-3 rounded-full ${statusColors[project.status]}`}
+                  />
+                  <span className="text-sm capitalize">{project.status.replace('-', ' ')}</span>
+                </div>
+              </div>
+              <div className="flex justify-between items-center mt-3">
+                <div className="text-sm text-muted-foreground">
+                  {project.email} • ${project.hourlyRate}/hr
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+
+        {projects.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">No projects yet. Add your first client to get started!</p>
+          </div>
+        )}
+      </div>
+
+      <Dialog open={showAddClient} onOpenChange={setShowAddClient}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add New Client</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <Input
+              placeholder="Project Name"
+              value={newProject.name}
+              onChange={(e) => handleInputChange('name', e.target.value)}
+            />
+            
+            <Input
+              placeholder="Client Name"
+              value={newProject.clientName}
+              onChange={(e) => handleInputChange('clientName', e.target.value)}
+            />
+            
+            <Input
+              placeholder="Address"
+              value={newProject.address}
+              onChange={(e) => handleInputChange('address', e.target.value)}
+            />
+            
+            <Input
+              placeholder="Email"
+              type="email"
+              value={newProject.email}
+              onChange={(e) => handleInputChange('email', e.target.value)}
+            />
+            
+            <Input
+              placeholder="Phone (optional)"
+              value={newProject.phone}
+              onChange={(e) => handleInputChange('phone', e.target.value)}
+            />
+            
+            <Input
+              placeholder="Hourly Rate"
+              type="number"
+              value={newProject.hourlyRate}
+              onChange={(e) => handleInputChange('hourlyRate', Number(e.target.value))}
+            />
+            
+            <div className="flex gap-3 pt-4">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowAddClient(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleAddProject}
+                className="flex-1"
+                style={{ background: aframeTheme.gradients.primary }}
+                disabled={createProjectMutation.isPending}
+              >
+                {createProjectMutation.isPending ? 'Adding...' : 'Add Client'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
