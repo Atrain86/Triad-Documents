@@ -49,11 +49,19 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const photoUploadMutation = useMutation({
     mutationFn: async (files: FileList) => {
       console.log('Uploading photos:', files.length); // Debug log
+      console.log('FileList type:', typeof files);
+      console.log('Is FileList?', files instanceof FileList);
       
       const formData = new FormData();
-      Array.from(files).forEach(file => {
+      Array.from(files).forEach((file, index) => {
+        console.log(`Adding file ${index} to FormData:`, file.name, file.size);
         formData.append('photos', file);
       });
+      
+      // Debug FormData contents
+      console.log('FormData has photos:', formData.has('photos'));
+      console.log('FormData keys:', Array.from(formData.keys()));
+      console.log('Total FormData entries:', Array.from(formData.keys()).length);
       
       const response = await fetch(`/api/projects/${projectId}/photos`, {
         method: 'POST',
@@ -152,14 +160,20 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     console.log('Photo input changed');
     console.log('Files selected:', e.target.files?.length);
+    console.log('Event target:', e.target);
+    console.log('Input element files:', e.target.files);
     
     if (e.target.files && e.target.files.length > 0) {
       console.log('Starting photo upload mutation');
+      console.log('FileList object:', e.target.files);
       Array.from(e.target.files).forEach((file, index) => {
         console.log(`File ${index}:`, file.name, file.type, file.size);
       });
       
+      // Trigger upload
+      console.log('About to call photoUploadMutation.mutate');
       photoUploadMutation.mutate(e.target.files);
+      console.log('photoUploadMutation.mutate called');
       e.target.value = '';
     } else {
       console.log('No files selected');

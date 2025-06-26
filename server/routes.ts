@@ -130,9 +130,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const projectId = parseInt(req.params.id);
       console.log('Photo upload request for project:', projectId);
-      console.log('Files uploaded:', req.files);
+      console.log('Request files:', req.files);
+      console.log('Request body:', req.body);
+      console.log('Files array length:', req.files ? req.files.length : 'undefined');
       
       if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
+        console.log('No files received - req.files:', req.files);
         return res.status(400).json({ error: 'No files uploaded' });
       }
 
