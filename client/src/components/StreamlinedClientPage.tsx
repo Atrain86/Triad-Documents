@@ -54,6 +54,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       const res = await fetch(`/api/projects/${projectId}/photos`, {
         method: 'POST',
         body: formData,
+        credentials: 'include',
       });
 
       if (!res.ok) {
