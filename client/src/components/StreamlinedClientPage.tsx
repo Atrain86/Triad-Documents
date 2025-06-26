@@ -38,6 +38,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     queryKey: [`/api/projects/${projectId}/photos`],
   });
 
+  // Debug logging
+  console.log('Photos data:', photos);
+  console.log('Photos length:', photos.length);
+
   const { data: receipts = [] } = useQuery<Receipt[]>({
     queryKey: [`/api/projects/${projectId}/receipts`],
   });
@@ -229,7 +233,15 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           </button>
         </div>
 
-        {/* Photo Thumbnails Grid - ADD THIS SECTION */}
+        {/* Debug info - temporary */}
+        <div className="mb-4 p-4 bg-gray-100 dark:bg-gray-800 rounded">
+          <p>Debug: Photos array has {photos.length} items</p>
+          {photos.length > 0 && (
+            <p>First photo: {photos[0].filename}</p>
+          )}
+        </div>
+
+        {/* Photo Thumbnails Grid */}
         {photos.length > 0 && (
           <div className="mb-7">
             <div className="flex items-center gap-2 mb-4 text-muted-foreground">
@@ -247,10 +259,20 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                     src={`/uploads/${photo.filename}`}
                     alt={photo.description || photo.originalName}
                     className="w-full h-full object-cover"
+                    onError={(e) => console.error('Image failed to load:', photo.filename)}
+                    onLoad={() => console.log('Image loaded successfully:', photo.filename)}
                   />
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Show if no photos */}
+        {photos.length === 0 && (
+          <div className="mb-7 p-4 text-center text-muted-foreground">
+            <Camera size={24} className="mx-auto mb-2" />
+            <p>No photos yet. Use the camera button to add some!</p>
           </div>
         )}
 
