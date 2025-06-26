@@ -5,28 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import type { Project, InsertProject } from '@shared/schema';
 
-interface Project {
-  id: number;
-  name: string;
-  clientName: string;
-  address: string;
-  email: string;
-  phone?: string;
-  status: 'estimating' | 'in-progress' | 'completed';
-  hourlyRate: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface NewProject {
-  name: string;
-  clientName: string;
-  address: string;
-  email: string;
-  phone: string;
-  hourlyRate: number;
-}
+type NewProject = InsertProject;
 
 interface StreamlinedHomepageProps {
   onSelectProject: (projectId: number) => void;
@@ -48,11 +29,11 @@ const statusColors = {
 export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHomepageProps) {
   const [showAddClient, setShowAddClient] = useState(false);
   const [newProject, setNewProject] = useState<NewProject>({
-    name: '',
     clientName: '',
     address: '',
-    email: '',
-    phone: '',
+    projectType: 'exterior',
+    roomCount: 1,
+    difficulty: 'medium',
     hourlyRate: 60
   });
 
@@ -82,18 +63,18 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       setShowAddClient(false);
       setNewProject({
-        name: '',
         clientName: '',
         address: '',
-        email: '',
-        phone: '',
+        projectType: 'exterior',
+        roomCount: 1,
+        difficulty: 'medium',
         hourlyRate: 60
       });
     }
   });
 
   const handleAddProject = () => {
-    if (newProject.name && newProject.clientName && newProject.address) {
+    if (newProject.clientName && newProject.address) {
       createProjectMutation.mutate(newProject);
     }
   };
@@ -145,14 +126,14 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
                 </div>
                 <div className="flex items-center space-x-2">
                   <div 
-                    className={`w-3 h-3 rounded-full ${statusColors[project.status]}`}
+                    className={`w-3 h-3 rounded-full ${statusColors[project.status as keyof typeof statusColors] || 'bg-gray-500'}`}
                   />
                   <span className="text-sm capitalize">{project.status.replace('-', ' ')}</span>
                 </div>
               </div>
               <div className="flex justify-between items-center mt-3">
                 <div className="text-sm text-muted-foreground">
-                  {project.email} • ${project.hourlyRate}/hr
+                  {project.projectType} • {project.roomCount} rooms • ${project.hourlyRate}/hr
                 </div>
               </div>
             </Card>
@@ -174,12 +155,6 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
           
           <div className="space-y-4">
             <Input
-              placeholder="Project Name"
-              value={newProject.name}
-              onChange={(e) => handleInputChange('name', e.target.value)}
-            />
-            
-            <Input
               placeholder="Client Name"
               value={newProject.clientName}
               onChange={(e) => handleInputChange('clientName', e.target.value)}
@@ -191,23 +166,37 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
               onChange={(e) => handleInputChange('address', e.target.value)}
             />
             
-            <Input
-              placeholder="Email"
-              type="email"
-              value={newProject.email}
-              onChange={(e) => handleInputChange('email', e.target.value)}
-            />
+            <select
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              value={newProject.projectType}
+              onChange={(e) => handleInputChange('projectType', e.target.value)}
+            >
+              <option value="exterior">Exterior Painting</option>
+              <option value="interior">Interior Painting</option>
+            </select>
             
             <Input
-              placeholder="Phone (optional)"
-              value={newProject.phone}
-              onChange={(e) => handleInputChange('phone', e.target.value)}
+              placeholder="Number of Rooms"
+              type="number"
+              min="1"
+              value={newProject.roomCount || 1}
+              onChange={(e) => handleInputChange('roomCount', Number(e.target.value))}
             />
+            
+            <select
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              value={newProject.difficulty}
+              onChange={(e) => handleInputChange('difficulty', e.target.value)}
+            >
+              <option value="easy">Easy</option>
+              <option value="medium">Medium</option>
+              <option value="hard">Hard</option>
+            </select>
             
             <Input
               placeholder="Hourly Rate"
               type="number"
-              value={newProject.hourlyRate}
+              value={String(newProject.hourlyRate || 60)}
               onChange={(e) => handleInputChange('hourlyRate', Number(e.target.value))}
             />
             
