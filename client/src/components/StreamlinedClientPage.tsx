@@ -56,8 +56,11 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       const response = await apiRequest('POST', `/api/projects/${projectId}/photos`, formData);
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Photo upload successful:', data);
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
+      // Force refetch
+      queryClient.refetchQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
     },
     onError: (error) => {
       console.error('Photo upload failed:', error);
@@ -131,7 +134,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('File input changed:', e.target.files?.length, 'files');
     if (e.target.files && e.target.files.length > 0) {
+      console.log('Starting photo upload...');
       photoUploadMutation.mutate(e.target.files);
       e.target.value = ''; // Reset input to allow re-uploading same files
     }
