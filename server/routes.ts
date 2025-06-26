@@ -9,13 +9,28 @@ import fs from "fs";
 
 // Configure multer for file uploads
 const uploadDir = path.join(process.cwd(), 'uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+const photosDir = path.join(uploadDir, 'photos');
+const receiptsDir = path.join(uploadDir, 'receipts');
+
+// Ensure directories exist
+[uploadDir, photosDir, receiptsDir].forEach(dir => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+});
 
 const upload = multer({
   storage: multer.diskStorage({
-    destination: uploadDir,
+    destination: (req, file, cb) => {
+      // Determine destination based on route
+      if (req.path.includes('/photos')) {
+        cb(null, photosDir);
+      } else if (req.path.includes('/receipts')) {
+        cb(null, receiptsDir);
+      } else {
+        cb(null, uploadDir);
+      }
+    },
     filename: (req, file, cb) => {
       // Generate unique filename with original extension
       const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -120,34 +135,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/projects/:id/photos', upload.single('photo'), async (req, res) => {
+  app.post('/api/projects/:id/photos', upload.array('photos', 10), async (req, res) => {
     try {
       const projectId = parseInt(req.params.id);
       console.log('Photo upload request for project:', projectId);
-      console.log('File uploaded:', req.file);
+      console.log('Files uploaded:', req.files);
       
-      if (!req.file) {
-        return res.status(400).json({ error: 'No file uploaded' });
+      if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
+        return res.status(400).json({ error: 'No files uploaded' });
       }
 
-      const photoData = {
-        projectId,
-        filename: req.file.filename,
-        originalName: req.file.originalname,
-        description: req.body.description || null,
-      };
+      const uploadedPhotos = [];
+      
+      for (const file of req.files) {
+        const photoData = {
+          projectId,
+          filename: file.filename,
+          originalName: file.originalname,
+          description: req.body.description || null,
+        };
 
-      console.log('Photo data to save:', photoData);
-      const validatedData = insertPhotoSchema.parse(photoData);
-      console.log('Validated photo data:', validatedData);
+        console.log('Photo data to save:', photoData);
+        const validatedData = insertPhotoSchema.parse(photoData);
+        console.log('Validated photo data:', validatedData);
+        
+        const photo = await storage.createPhoto(validatedData);
+        console.log('Photo saved to database:', photo);
+        uploadedPhotos.push(photo);
+      }
       
-      const photo = await storage.createPhoto(validatedData);
-      console.log('Photo saved to database:', photo);
-      
-      res.status(201).json(photo);
+      res.status(201).json(uploadedPhotos);
     } catch (error) {
       console.error('Photo upload error:', error);
-      res.status(400).json({ error: 'Failed to upload photo' });
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      res.status(400).json({ error: 'Failed to upload photos: ' + errorMessage });
     }
   });
 

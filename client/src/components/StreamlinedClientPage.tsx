@@ -44,6 +44,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const photoUploadMutation = useMutation({
     mutationFn: async (files: FileList) => {
+      console.log('Uploading photos:', files.length); // Debug log
+      
       const formData = new FormData();
       Array.from(files).forEach(file => {
         formData.append('photos', file);
@@ -54,11 +56,25 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         body: formData
       });
       
-      if (!response.ok) throw new Error('Failed to upload photos');
-      return response.json();
+      console.log('Upload response status:', response.status); // Debug log
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Upload failed:', errorText);
+        throw new Error(`Failed to upload photos: ${errorText}`);
+      }
+      
+      const result = await response.json();
+      console.log('Upload successful:', result); // Debug log
+      return result;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Photos uploaded successfully:', data);
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
+    },
+    onError: (error) => {
+      console.error('Photo upload error:', error);
+      alert('Failed to upload photos: ' + error.message);
     }
   });
 
@@ -114,6 +130,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   });
 
   const handleCameraClick = () => {
+    console.log('Camera button clicked');
+    console.log('Camera input ref:', cameraInputRef.current);
     cameraInputRef.current?.click();
   };
 
@@ -122,9 +140,19 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('Photo input changed');
+    console.log('Files selected:', e.target.files?.length);
+    
     if (e.target.files && e.target.files.length > 0) {
+      console.log('Starting photo upload mutation');
+      Array.from(e.target.files).forEach((file, index) => {
+        console.log(`File ${index}:`, file.name, file.type, file.size);
+      });
+      
       photoUploadMutation.mutate(e.target.files);
       e.target.value = '';
+    } else {
+      console.log('No files selected');
     }
   };
 
