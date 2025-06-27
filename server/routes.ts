@@ -29,7 +29,7 @@ const upload = multer({
       cb(null, uniqueName + ext);
     }
   }),
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit for high-res photos
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
