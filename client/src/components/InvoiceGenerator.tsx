@@ -343,9 +343,18 @@ ${invoiceData.businessName}`;
       }
     } catch (error) {
       console.error('Email sending failed:', error);
+      
+      // Fallback to clipboard method
+      const emailContent = `To: ${invoiceData.clientEmail}
+Subject: ${subject}
+
+${textBody}`;
+
+      navigator.clipboard.writeText(emailContent).catch(() => {});
+      
       toast({
-        title: "Email Failed",
-        description: "Could not send email. Please try downloading PDF and sending manually.",
+        title: "Email Setup Required",
+        description: "Please verify cortespainter@gmail.com in your SendGrid account first. Email content copied to clipboard.",
         variant: "destructive",
       });
     }
