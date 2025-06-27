@@ -224,6 +224,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/projects/:id/receipts', upload.single('receipt'), async (req, res) => {
     try {
+      console.log('Receipt upload request for project:', req.params.id);
+      console.log('Request body:', req.body);
+      console.log('Request file:', req.file ? { filename: req.file.filename, originalname: req.file.originalname, mimetype: req.file.mimetype, size: req.file.size } : 'No file');
+      
       const projectId = parseInt(req.params.id);
       
       const receiptData = {
@@ -236,11 +240,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         originalName: req.file?.originalname || null,
       };
 
+      console.log('Receipt data to validate:', receiptData);
       const validatedData = insertReceiptSchema.parse(receiptData);
+      console.log('Validated receipt data:', validatedData);
+      
       const receipt = await storage.createReceipt(validatedData);
+      console.log('Receipt saved to database:', receipt);
+      
       res.status(201).json(receipt);
     } catch (error) {
-      res.status(400).json({ error: 'Failed to create receipt' });
+      console.error('Receipt creation error:', error);
+      if (error instanceof Error) {
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+      }
+      res.status(400).json({ error: 'Failed to create receipt', details: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
