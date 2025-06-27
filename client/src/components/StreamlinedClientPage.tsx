@@ -341,26 +341,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         <div className="flex gap-5 mb-8 justify-center">
           <label
             className="w-16 h-16 rounded-full border-none cursor-pointer flex items-center justify-center transition-transform hover:scale-105 shadow-lg"
-            style={{ background: aframeTheme.gradients.primary }}
-            title="Take Photo"
+            style={{ backgroundColor: '#EA580C' }}
+            title="Photos"
           >
             <Camera size={28} color="white" />
-            <input
-              type="file"
-              accept="image/*,image/heic,image/heif,.heic,.heif"
-              capture="environment"
-              onChange={handlePhotoUpload}
-              multiple
-              className="hidden"
-            />
-          </label>
-          
-          <label
-            className="w-16 h-16 rounded-full border-none cursor-pointer flex items-center justify-center transition-transform hover:scale-105 shadow-lg"
-            style={{ background: aframeTheme.gradients.accent }}
-            title="Photo Library"
-          >
-            <ImageIcon size={28} color="white" />
             <input
               type="file"
               accept="image/*,image/heic,image/heif,.heic,.heif"
@@ -374,8 +358,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             onClick={handleReceiptClick}
             disabled={receiptUploadMutation.isPending}
             className="w-16 h-16 rounded-full border-none cursor-pointer flex items-center justify-center transition-transform hover:scale-105 shadow-lg"
-            style={{ background: aframeTheme.gradients.accent }}
-            title="Scan Receipt"
+            style={{ backgroundColor: '#1E40AF' }}
+            title="Files"
           >
             <FileText size={28} color="white" />
           </button>
