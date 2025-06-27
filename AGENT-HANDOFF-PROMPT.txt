@@ -1,0 +1,45 @@
+AGENT HANDOFF: Fix File Display Bug in Painting Project App
+
+Project Context:
+You're working on "A-Frame Painting" - a React/Express painting business management app. The upload system works perfectly (photos and PDFs save to database), but uploaded files don't display in the UI.
+
+Immediate Problem:
+PDF files upload successfully but don't appear in the file list. Root cause identified: Frontend query returns wrong data type.
+
+Key Evidence:
+- Database: 9 PDF receipts stored (confirmed working)
+- Backend API: GET /api/projects/1/receipts returns correct receipt data
+- Frontend Query: Returns project objects instead of receipt objects
+- Console Debug: "SimpleFilesList - receipts:" [{"id":1,"clientName":"","address":"","projectType":"exterior"...}]
+
+Technical Stack:
+- Frontend: React + TypeScript + TanStack Query + Wouter
+- Backend: Express.js + Drizzle ORM + PostgreSQL
+- UI: Radix UI + Tailwind CSS
+
+Critical Files:
+- client/src/components/StreamlinedClientPage.tsx (lines 10-25: SimpleFilesList component)
+- DEBUG-SNAPSHOT.md (complete technical details)
+- replit.md (project context and user preferences)
+
+User Expectations:
+- Simple, clean interface (user prefers minimal complexity)
+- Files should appear immediately after upload
+- Two-button upload system: Photos (burnt orange) + Files (vintage blue)
+
+The Fix Needed:
+Resolve why the query queryKey: ['/api/projects', projectId, 'receipts'] returns project data instead of receipt data. Backend works correctly - this is a frontend query/routing issue.
+
+Workflow to Test:
+1. Navigate to project 1
+2. Click Files button
+3. Upload PDF
+4. File should appear in list with "View" link
+
+Important Notes:
+- Don't break existing photo upload (works perfectly)
+- Follow user preferences in replit.md 
+- App uses port 5000 with workflow "Start application"
+- Database already contains test data to verify fix
+
+Start by checking the query configuration and data flow between backend and frontend.
