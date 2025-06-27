@@ -288,12 +288,7 @@ export default function InvoiceGenerator({
 
     const body = `Dear ${invoiceData.clientName},
 
-Please find attached your invoice for painting services.
-
-Invoice Details:
-- Invoice #: ${invoiceData.invoiceNumber}
-- Date: ${invoiceData.date}
-- Total Amount: $${calculateTotal().toFixed(2)} CAD (including tax)${receiptAttachmentNote}
+Please find attached your invoice for painting services.${receiptAttachmentNote}
 
 Payment Instructions:
 ${invoiceData.notes}
@@ -303,16 +298,16 @@ Thank you for your business!
 Best regards,
 ${invoiceData.businessName}`;
 
-    // Open Gmail in browser with pre-filled email
-    const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(invoiceData.clientEmail)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.open(gmailComposeUrl, '_blank');
+    // Create mailto URL (works more reliably than Gmail direct link)
+    const mailtoUrl = `mailto:${invoiceData.clientEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailtoUrl;
     
     const attachmentInstructions = hasReceiptAttachments 
       ? "Download the PDF invoice first, then manually attach any receipt files from your Files section to the email."
       : "Download the PDF invoice first, then attach it to your email.";
 
     toast({
-      title: "Gmail Opened",
+      title: "Email Client Opened",
       description: attachmentInstructions,
     });
   };
@@ -590,7 +585,7 @@ ${invoiceData.businessName}`;
                 style={{ backgroundColor: invoiceData.clientEmail ? '#1E40AF' : '#9ca3af' }}
               >
                 <Send className="mr-2 h-5 w-5" />
-                Open Gmail
+                Send Invoice
               </Button>
             </div>
           </div>
