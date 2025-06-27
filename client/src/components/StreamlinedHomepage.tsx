@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus } from 'lucide-react';
+import { Plus, Search, MapPin, Clock, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -21,14 +21,33 @@ const aframeTheme = {
   }
 };
 
-const statusColors = {
-  'estimating': 'bg-yellow-500',
-  'in-progress': 'bg-green-500',
-  'completed': 'bg-blue-500'
+const statusConfig = {
+  'in-progress': { 
+    dot: 'bg-red-500', 
+    text: 'text-red-600 dark:text-red-400',
+    label: 'In Progress'
+  },
+  'pending': { 
+    dot: 'bg-yellow-500', 
+    text: 'text-yellow-600 dark:text-yellow-400',
+    label: 'Pending'
+  },
+  'completed': { 
+    dot: 'bg-green-500', 
+    text: 'text-green-600 dark:text-green-400',
+    label: 'Completed'
+  },
+  // Fallback for any legacy status values
+  'estimating': { 
+    dot: 'bg-yellow-500', 
+    text: 'text-yellow-600 dark:text-yellow-400',
+    label: 'Estimating'
+  }
 };
 
 export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHomepageProps) {
   const [showAddClient, setShowAddClient] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const [newProject, setNewProject] = useState<NewProject>({
     clientName: '',
     address: '',
@@ -43,6 +62,13 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
   const { data: projects = [], isLoading } = useQuery<Project[]>({
     queryKey: ['/api/projects'],
   });
+
+  // Filter projects based on search term
+  const filteredProjects = projects.filter(project =>
+    project.clientName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    project.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    project.projectType?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const createProjectMutation = useMutation({
     mutationFn: async (projectData: NewProject) => {
@@ -95,44 +121,89 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
 
         <Button
           onClick={() => setShowAddClient(true)}
-          className="w-full py-4 text-base font-semibold mb-7"
+          className="w-full py-4 text-base font-semibold mb-6"
           style={{ background: aframeTheme.gradients.primary }}
         >
           <Plus size={20} className="mr-2" />
           Add New Client
         </Button>
 
+        {/* Search Bar */}
+        <div className="relative mb-6">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
+          <Input
+            placeholder="Search clients, addresses, or project types..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 py-3"
+          />
+        </div>
+
+        {/* Project Count */}
+        {projects.length > 0 && (
+          <div className="flex justify-between items-center mb-4">
+            <p className="text-sm text-muted-foreground">
+              {filteredProjects.length} of {projects.length} project{projects.length !== 1 ? 's' : ''}
+              {searchTerm && ` matching "${searchTerm}"`}
+            </p>
+          </div>
+        )}
+
         <div className="space-y-4">
-          {projects.map(project => (
+          {filteredProjects.map(project => (
             <Card
               key={project.id}
-              className="p-5 cursor-pointer transition-all hover:shadow-md hover:scale-[1.01] hover:border-primary/50"
+              className="p-5 cursor-pointer transition-all hover:shadow-md hover:scale-[1.01] hover:border-primary/50 bg-card"
               onClick={() => onSelectProject(project.id)}
             >
-              <div className="flex justify-between items-start mb-2">
-                <div>
-                  <h3 className="font-semibold text-lg">{project.clientName}</h3>
-                  <p className="text-muted-foreground text-sm">{project.address}</p>
+              <div className="flex justify-between items-start mb-3">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <User size={16} className="text-muted-foreground" />
+                    <h3 className="font-semibold text-lg">{project.clientName || 'Unnamed Client'}</h3>
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground text-sm mb-2">
+                    <MapPin size={14} />
+                    <p>{project.address || 'No address'}</p>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 ml-4">
                   <div 
-                    className={`w-3 h-3 rounded-full ${statusColors[project.status as keyof typeof statusColors] || 'bg-gray-500'}`}
+                    className={`w-3 h-3 rounded-full ${statusConfig[project.status as keyof typeof statusConfig]?.dot || 'bg-gray-500'}`}
                   />
-                  <span className="text-sm capitalize">{project.status.replace('-', ' ')}</span>
+                  <span 
+                    className={`text-sm font-medium ${statusConfig[project.status as keyof typeof statusConfig]?.text || 'text-gray-600 dark:text-gray-400'}`}
+                  >
+                    {statusConfig[project.status as keyof typeof statusConfig]?.label || 'Unknown'}
+                  </span>
                 </div>
               </div>
-              <div className="flex justify-between items-center mt-3">
-                <div className="text-sm text-muted-foreground">
-                  {project.projectType} • {project.roomCount} rooms • ${project.hourlyRate}/hr
+              
+              <div className="flex items-center justify-between pt-3 border-t border-border">
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <span className="capitalize">{project.projectType}</span>
+                  <span>•</span>
+                  <span>{project.roomCount} room{project.roomCount !== 1 ? 's' : ''}</span>
+                  <span>•</span>
+                  <span className="font-medium">${project.hourlyRate}/hr</span>
+                </div>
+                <div className="text-xs text-muted-foreground capitalize">
+                  {project.difficulty} difficulty
                 </div>
               </div>
             </Card>
           ))}
         </div>
 
-        {projects.length === 0 && (
+        {projects.length === 0 && !isLoading && (
           <div className="text-center py-12">
             <p className="text-muted-foreground">No projects yet. Add your first client to get started!</p>
+          </div>
+        )}
+
+        {projects.length > 0 && filteredProjects.length === 0 && searchTerm && (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">No projects match "{searchTerm}". Try a different search term.</p>
           </div>
         )}
       </div>
