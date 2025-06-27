@@ -57,3 +57,9 @@ The photo viewing system is now stable and ready for careful, incremental improv
 
 ## User Feedback
 User confirmed: "Yes, it's working again" - Photo thumbnails now successfully open in full-screen mode without issues.
+
+## Backup Created
+- **Location**: `backups/pre-zoom-snapshot/` 
+- **Purpose**: Preserves working photo viewing before any zoom/crop features
+- **Memorable name**: Indicates this is the stable version without zoom functionality
+- **Contains**: clean-photo-grid.tsx (working version) + documentation
