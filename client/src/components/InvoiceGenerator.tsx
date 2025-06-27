@@ -616,21 +616,13 @@ ${invoiceData.businessName}`;
           <div className="p-8">
             {/* Header Section */}
             <div className="mb-8">
-              {/* Logo and Business Info */}
-              <div className="flex items-center space-x-4">
+              {/* Logo Only */}
+              <div className="flex justify-center">
                 <img 
                   src={invoiceData.businessLogo} 
                   alt="A-Frame Painting Logo" 
                   className="h-24 w-auto"
                 />
-                <div>
-                  <h1 className="text-2xl font-bold text-white">{invoiceData.businessName}</h1>
-                  <div className="mt-2 text-gray-300 text-sm">
-                    <p>884 Hayes Rd</p>
-                    <p>Manson's Landing, BC V0P1K0</p>
-                    <p>cortespainter@gmail.com</p>
-                  </div>
-                </div>
               </div>
             </div>
 
