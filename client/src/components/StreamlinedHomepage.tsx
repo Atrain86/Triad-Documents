@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Search, MapPin, Clock, User, Trash2, ChevronDown } from 'lucide-react';
+import { Plus, Search, MapPin, Clock, User, Trash2, ChevronDown, Archive, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -126,6 +126,8 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
     }
   });
 
+
+
   const handleAddProject = () => {
     if (newProject.clientName && newProject.address) {
       createProjectMutation.mutate(newProject);
@@ -156,14 +158,16 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
           <h1 className="text-2xl font-bold tracking-tight">A-FRAME PAINTING</h1>
         </div>
 
-        <Button
-          onClick={() => setShowAddClient(true)}
-          className="w-full py-4 text-base font-semibold mb-6"
-          style={{ background: aframeTheme.gradients.primary }}
-        >
-          <Plus size={20} className="mr-2" />
-          Add New Client
-        </Button>
+        <div className="flex justify-center mb-6">
+          <Button
+            onClick={() => setShowAddClient(true)}
+            className="px-8 py-4 text-base font-semibold text-white hover:opacity-90"
+            style={{ backgroundColor: '#B05A4E' }}
+          >
+            <Plus size={20} className="mr-2" />
+            Add New Client
+          </Button>
+        </div>
 
         {/* Search Bar and Archive Toggle */}
         <div className="flex gap-3 mb-6">
@@ -220,19 +224,38 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
                     </div>
                   </div>
                   
-                  {/* Delete Button */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (confirm(`Are you sure you want to delete ${project.clientName || 'this client'}?`)) {
-                        deleteProjectMutation.mutate(project.id);
-                      }
-                    }}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity p-2 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
-                    title="Delete client"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                  {/* Action Buttons */}
+                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {/* Archive Button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const newStatus = project.status === 'archived' ? 'completed' : 'archived';
+                        const action = project.status === 'archived' ? 'restore' : 'archive';
+                        if (confirm(`Are you sure you want to ${action} ${project.clientName || 'this client'}?`)) {
+                          updateStatusMutation.mutate({ projectId: project.id, status: newStatus });
+                        }
+                      }}
+                      className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
+                      title={project.status === 'archived' ? 'Restore client' : 'Archive client'}
+                    >
+                      {project.status === 'archived' ? <RotateCcw size={16} /> : <Archive size={16} />}
+                    </button>
+                    
+                    {/* Delete Button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (confirm(`Are you sure you want to delete ${project.clientName || 'this client'}?`)) {
+                          deleteProjectMutation.mutate(project.id);
+                        }
+                      }}
+                      className="p-2 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
+                      title="Delete client"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </div>
               </div>
               
