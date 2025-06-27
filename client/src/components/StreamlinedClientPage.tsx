@@ -853,36 +853,17 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
           {/* Hours Dashboard */}
           <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-            {/* Hours Summary */}
-            {dailyHours.length > 0 && (
-              <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                <div className="flex justify-between items-start">
-                  <div className="text-2xl font-bold text-green-700 dark:text-green-300">
-                    ${60}/hr
-                  </div>
-                </div>
-                <div className="mt-2 pt-2 border-t border-green-200 dark:border-green-700">
-                  <div className="font-semibold text-green-700 dark:text-green-300">
-                    Total Hours: {dailyHours.reduce((sum, h) => sum + h.hours, 0).toFixed(1)}
-                  </div>
-                  <div className="text-sm text-green-600 dark:text-green-400">
-                    Total Earned: ${(dailyHours.reduce((sum, h) => sum + (h.hours * 60), 0)).toFixed(2)}
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* Compact Hours List */}
-            <div className="h-40 overflow-y-auto">
+            <div className="h-48 overflow-y-auto mb-4">
               {dailyHours.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-8">
                   No hours logged yet. Click "Log Hours for a Day" to start tracking.
                 </p>
               ) : (
                 dailyHours.map((hours) => (
-                  <div key={hours.id} className="flex items-center justify-between py-1 px-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded">
+                  <div key={hours.id} className="flex items-center justify-between py-0.5 px-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded text-sm">
                     <div className="flex-1">
-                      <span className="font-medium text-sm">
+                      <span className="font-medium">
                         {new Date(hours.date).toLocaleDateString('en-US', { 
                           weekday: 'short', 
                           month: 'short',
@@ -902,16 +883,33 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                       <button
                         onClick={() => deleteHoursMutation.mutate(hours.id)}
                         disabled={deleteHoursMutation.isPending}
-                        className="p-1 text-red-500 hover:text-red-700 transition-colors opacity-60 hover:opacity-100"
+                        className="p-0.5 text-red-500 hover:text-red-700 transition-colors opacity-60 hover:opacity-100"
                         title="Delete"
                       >
-                        <Trash2 size={12} />
+                        <Trash2 size={10} />
                       </button>
                     </div>
                   </div>
                 ))
               )}
             </div>
+
+            {/* Hours Summary at Bottom */}
+            {dailyHours.length > 0 && (
+              <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <div className="text-2xl font-bold text-green-700 dark:text-green-300 mb-2">
+                  ${60}/hr
+                </div>
+                <div className="pt-2 border-t border-green-200 dark:border-green-700">
+                  <div className="font-semibold text-green-700 dark:text-green-300">
+                    Total Hours: {dailyHours.reduce((sum, h) => sum + h.hours, 0).toFixed(1)}
+                  </div>
+                  <div className="text-sm text-green-600 dark:text-green-400">
+                    Total Earned: ${(dailyHours.reduce((sum, h) => sum + (h.hours * 60), 0)).toFixed(2)}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
