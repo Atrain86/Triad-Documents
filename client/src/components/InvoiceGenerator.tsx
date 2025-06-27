@@ -25,6 +25,7 @@ export default function InvoiceGenerator({
   isOpen, 
   onClose 
 }: InvoiceGeneratorProps) {
+
   const { toast } = useToast();
   const [invoiceData, setInvoiceData] = useState({
     invoiceNumber: 101,
@@ -438,7 +439,18 @@ ${invoiceData.businessName}`;
                     {dailyHours.map((hourEntry, index) => (
                       <tr key={index}>
                         <td className="border p-3" style={{ borderColor: darkTheme.border, color: darkTheme.text }}>
-                          {format(new Date(hourEntry.date), 'MMM dd, yyyy')}
+                          {(() => {
+                            // Parse date string directly to avoid timezone conversion
+                            const dateStr = hourEntry.date.toString();
+                            const datePart = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr.split(' ')[0];
+                            const [year, month, day] = datePart.split('-').map(Number);
+                            const localDate = new Date(year, month - 1, day);
+                            return localDate.toLocaleDateString('en-US', { 
+                              year: 'numeric', 
+                              month: 'short', 
+                              day: 'numeric' 
+                            });
+                          })()}
                         </td>
                         <td className="border p-3" style={{ borderColor: darkTheme.border, color: darkTheme.text }}>
                           {hourEntry.description || 'Painting'}
@@ -644,7 +656,18 @@ ${invoiceData.businessName}`;
                           <div className="flex items-center">
                             <div className="w-2 h-2 rounded-full mr-3" style={{ backgroundColor: brandColors.accent }}></div>
                             <span className="font-medium text-white">
-                              {format(new Date(hourEntry.date), 'EEE, MMM dd')}
+                              {(() => {
+                              // Parse date string directly to avoid timezone conversion
+                              const dateStr = hourEntry.date.toString();
+                              const datePart = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr.split(' ')[0];
+                              const [year, month, day] = datePart.split('-').map(Number);
+                              const localDate = new Date(year, month - 1, day);
+                              return localDate.toLocaleDateString('en-US', { 
+                                weekday: 'short', 
+                                month: 'short', 
+                                day: 'numeric' 
+                              });
+                            })()}
                             </span>
                           </div>
                         </td>

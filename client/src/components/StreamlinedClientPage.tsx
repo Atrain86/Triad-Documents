@@ -269,6 +269,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     queryKey: [`/api/projects/${projectId}/hours`],
   });
 
+
+
   const photoUploadMutation = useMutation({
     mutationFn: async (files: FileList) => {
       console.log('Starting upload for', files.length, 'files');
