@@ -213,8 +213,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       return results;
     },
     onSuccess: (results) => {
-      console.log('All receipts uploaded successfully:', results);
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/receipts`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'receipts'] });
     },
     onError: (error) => {
       console.error('Receipt upload failed:', error);
