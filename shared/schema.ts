@@ -62,6 +62,34 @@ export const toolsChecklist = pgTable("tools_checklist", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const estimates = pgTable("estimates", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").notNull(),
+  estimateNumber: text("estimate_number").notNull(),
+  date: timestamp("date").notNull(),
+  projectTitle: text("project_title"),
+  projectDescription: text("project_description"),
+  
+  // Work stages (stored as JSON)
+  workStages: text("work_stages").notNull(), // JSON string
+  
+  // Additional services (stored as JSON)
+  additionalServices: text("additional_services").notNull(), // JSON string
+  
+  // Paint details
+  primerCoats: integer("primer_coats").default(1),
+  topCoats: integer("top_coats").default(2),
+  paintSuppliedBy: text("paint_supplied_by").notNull(), // 'contractor' or 'client'
+  paintCost: real("paint_cost").default(0),
+  deliveryCost: real("delivery_cost").default(0),
+  
+  // Status
+  status: text("status").default("draft"), // 'draft', 'sent', 'approved', 'rejected'
+  
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const insertProjectSchema = createInsertSchema(projects).omit({
   id: true,
   createdAt: true,
@@ -87,6 +115,12 @@ export const insertToolsChecklistSchema = createInsertSchema(toolsChecklist).omi
   createdAt: true,
 });
 
+export const insertEstimateSchema = createInsertSchema(estimates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type InsertProject = z.infer<typeof insertProjectSchema>;
 export type Project = typeof projects.$inferSelect;
 export type InsertPhoto = z.infer<typeof insertPhotoSchema>;
@@ -97,3 +131,5 @@ export type InsertDailyHours = z.infer<typeof insertDailyHoursSchema>;
 export type DailyHours = typeof dailyHours.$inferSelect;
 export type InsertToolsChecklist = z.infer<typeof insertToolsChecklistSchema>;
 export type ToolsChecklist = typeof toolsChecklist.$inferSelect;
+export type InsertEstimate = z.infer<typeof insertEstimateSchema>;
+export type Estimate = typeof estimates.$inferSelect;

@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Camera, FileText, ArrowLeft, Edit3, Download, X, Image as ImageIcon, DollarSign, Calendar, Wrench, Plus, Trash2 } from 'lucide-react';
+import { Camera, FileText, ArrowLeft, Edit3, Download, X, Image as ImageIcon, DollarSign, Calendar, Wrench, Plus, Trash2, Calculator } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { apiRequest } from '@/lib/queryClient';
 import type { Project, Photo, Receipt, ToolsChecklist, DailyHours } from '@shared/schema';
 import InvoiceGenerator from './InvoiceGenerator';
+import EstimateGenerator from './EstimateGenerator';
 // Improved file list component inspired by the PDF uploader
 function SimpleFilesList({ projectId }: { projectId: number }) {
   const queryClient = useQueryClient();
@@ -115,6 +116,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const [touchStarted, setTouchStarted] = useState(false);
   const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
   const [showInvoiceGenerator, setShowInvoiceGenerator] = useState(false);
+  const [showEstimateGenerator, setShowEstimateGenerator] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [hoursInput, setHoursInput] = useState('');
@@ -1144,14 +1146,23 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
         <SimpleFilesList projectId={project.id} />
 
-        <Button
-          onClick={() => setShowInvoiceGenerator(true)}
-          className="w-full py-4 text-base font-semibold"
-          style={{ background: aframeTheme.gradients.destructive }}
-        >
-          <FileText size={20} className="mr-2" />
-          Generate Invoice
-        </Button>
+        <div className="grid grid-cols-2 gap-4">
+          <Button
+            onClick={() => setShowEstimateGenerator(true)}
+            className="py-4 text-base font-semibold bg-purple-600 hover:bg-purple-700 text-white"
+          >
+            <Calculator size={20} className="mr-2" />
+            Generate Estimate
+          </Button>
+          <Button
+            onClick={() => setShowInvoiceGenerator(true)}
+            className="py-4 text-base font-semibold"
+            style={{ background: aframeTheme.gradients.destructive }}
+          >
+            <FileText size={20} className="mr-2" />
+            Generate Invoice
+          </Button>
+        </div>
       </div>
 
 
@@ -1216,6 +1227,15 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           receipts={receipts}
           isOpen={showInvoiceGenerator}
           onClose={() => setShowInvoiceGenerator(false)}
+        />
+      )}
+
+      {/* Estimate Generator */}
+      {project && (
+        <EstimateGenerator
+          project={project}
+          isOpen={showEstimateGenerator}
+          onClose={() => setShowEstimateGenerator(false)}
         />
       )}
     </div>

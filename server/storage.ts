@@ -4,16 +4,19 @@ import {
   receipts, 
   dailyHours,
   toolsChecklist,
+  estimates,
   type Project, 
   type Photo, 
   type Receipt, 
   type DailyHours,
   type ToolsChecklist,
+  type Estimate,
   type InsertProject, 
   type InsertPhoto, 
   type InsertReceipt, 
   type InsertDailyHours,
-  type InsertToolsChecklist
+  type InsertToolsChecklist,
+  type InsertEstimate
 } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
@@ -48,6 +51,13 @@ export interface IStorage {
   createTool(tool: InsertToolsChecklist): Promise<ToolsChecklist>;
   updateTool(id: number, tool: Partial<InsertToolsChecklist>): Promise<ToolsChecklist | undefined>;
   deleteTool(id: number): Promise<boolean>;
+
+  // Estimates
+  getProjectEstimates(projectId: number): Promise<Estimate[]>;
+  getEstimate(id: number): Promise<Estimate | undefined>;
+  createEstimate(estimate: InsertEstimate): Promise<Estimate>;
+  updateEstimate(id: number, estimate: Partial<InsertEstimate>): Promise<Estimate | undefined>;
+  deleteEstimate(id: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -190,6 +200,31 @@ export class DatabaseStorage implements IStorage {
 
   async deleteTool(id: number): Promise<boolean> {
     const result = await db.delete(toolsChecklist).where(eq(toolsChecklist.id, id));
+    return (result.rowCount || 0) > 0;
+  }
+
+  async getProjectEstimates(projectId: number): Promise<Estimate[]> {
+    const result = await db.select().from(estimates).where(eq(estimates.projectId, projectId));
+    return result;
+  }
+
+  async getEstimate(id: number): Promise<Estimate | undefined> {
+    const result = await db.select().from(estimates).where(eq(estimates.id, id));
+    return result[0];
+  }
+
+  async createEstimate(insertEstimate: InsertEstimate): Promise<Estimate> {
+    const result = await db.insert(estimates).values(insertEstimate).returning();
+    return result[0];
+  }
+
+  async updateEstimate(id: number, updates: Partial<InsertEstimate>): Promise<Estimate | undefined> {
+    const result = await db.update(estimates).set(updates).where(eq(estimates.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteEstimate(id: number): Promise<boolean> {
+    const result = await db.delete(estimates).where(eq(estimates.id, id));
     return (result.rowCount || 0) > 0;
   }
 }

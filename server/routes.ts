@@ -2,7 +2,7 @@ import type { Express } from "express";
 import express from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertProjectSchema, insertPhotoSchema, insertReceiptSchema, insertDailyHoursSchema, insertToolsChecklistSchema } from "@shared/schema";
+import { insertProjectSchema, insertPhotoSchema, insertReceiptSchema, insertDailyHoursSchema, insertToolsChecklistSchema, insertEstimateSchema } from "@shared/schema";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -459,6 +459,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: 'Failed to delete tool' });
+    }
+  });
+
+  // Estimates
+  app.get('/api/projects/:id/estimates', async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const estimates = await storage.getProjectEstimates(projectId);
+      res.json(estimates);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch estimates' });
+    }
+  });
+
+  app.get('/api/estimates/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const estimate = await storage.getEstimate(id);
+      if (!estimate) {
+        return res.status(404).json({ error: 'Estimate not found' });
+      }
+      res.json(estimate);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch estimate' });
+    }
+  });
+
+  app.post('/api/projects/:id/estimates', async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      
+      const estimateData = {
+        projectId,
+        estimateNumber: req.body.estimateNumber,
+        date: new Date(req.body.date),
+        projectTitle: req.body.projectTitle || null,
+        projectDescription: req.body.projectDescription || null,
+        workStages: req.body.workStages, // JSON string
+        additionalServices: req.body.additionalServices, // JSON string
+        primerCoats: req.body.primerCoats || 1,
+        topCoats: req.body.topCoats || 2,
+        paintSuppliedBy: req.body.paintSuppliedBy,
+        paintCost: req.body.paintCost || 0,
+        deliveryCost: req.body.deliveryCost || 0,
+        status: req.body.status || 'draft',
+      };
+
+      const validatedData = insertEstimateSchema.parse(estimateData);
+      const estimate = await storage.createEstimate(validatedData);
+      res.status(201).json(estimate);
+    } catch (error) {
+      res.status(400).json({ error: 'Failed to create estimate' });
+    }
+  });
+
+  app.put('/api/estimates/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = insertEstimateSchema.partial().parse(req.body);
+      const estimate = await storage.updateEstimate(id, updates);
+      if (!estimate) {
+        return res.status(404).json({ error: 'Estimate not found' });
+      }
+      res.json(estimate);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid estimate data' });
+    }
+  });
+
+  app.delete('/api/estimates/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteEstimate(id);
+      if (!deleted) {
+        return res.status(404).json({ error: 'Estimate not found' });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to delete estimate' });
     }
   });
 
