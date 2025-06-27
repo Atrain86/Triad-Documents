@@ -653,7 +653,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
               type="text"
               value={newTool}
               onChange={(e) => setNewTool(e.target.value)}
-              placeholder="Add a tool (e.g. Paint brushes, Drop cloths, Ladder...)"
+              placeholder="Paint brushes, Drop cloths, Ladder, Rollers..."
               className="flex-1 px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-background"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && newTool.trim()) {
@@ -686,15 +686,15 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                       isCompleted: tool.isCompleted ? 0 : 1 
                     })}
                     className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
-                      tool.isCompleted 
+                      tool.isCompleted === 1
                         ? 'bg-green-500 border-green-500 text-white' 
                         : 'border-gray-300 dark:border-gray-600 hover:border-green-500'
                     }`}
                   >
-                    {tool.isCompleted && <Check size={12} />}
+                    {tool.isCompleted === 1 && <Check size={12} />}
                   </button>
                   <span className={`flex-1 text-sm ${
-                    tool.isCompleted 
+                    tool.isCompleted === 1
                       ? 'text-muted-foreground line-through' 
                       : 'text-foreground'
                   }`}>
