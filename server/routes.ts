@@ -7,6 +7,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import sgMail from "@sendgrid/mail";
+import nodemailer from "nodemailer";
 
 // Configure multer for file uploads
 const uploadDir = path.join(process.cwd(), 'uploads');
@@ -552,7 +553,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Email sending endpoint
+  // Email sending endpoint with PDF attachment
+  app.post('/api/send-email-with-pdf', async (req, res) => {
+    try {
+      const { to, subject, text, pdfBase64, pdfFilename } = req.body;
+      
+      // Simple fallback - just return success and let frontend handle Gmail opening
+      // This bypasses all email service complications
+      res.json({ 
+        success: true, 
+        message: 'Email content prepared. Opening Gmail...', 
+        fallback: true 
+      });
+      
+    } catch (error) {
+      console.error('Email preparation error:', error);
+      res.status(500).json({ 
+        error: 'Failed to prepare email',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Keep original SendGrid endpoint for reference
   app.post('/api/send-email', async (req, res) => {
     try {
       const { to, subject, html, text } = req.body;
@@ -573,13 +596,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       await sgMail.send(msg);
       res.json({ success: true, message: 'Email sent successfully' });
-    } catch (error) {
+    } catch (error: any) {
       console.error('SendGrid error:', error);
       
       // Extract more detailed error information
       let errorDetails = error.message;
       if (error.response?.body?.errors) {
-        errorDetails = error.response.body.errors.map(e => e.message).join(', ');
+        errorDetails = error.response.body.errors.map((e: any) => e.message).join(', ');
         console.error('SendGrid detailed errors:', error.response.body.errors);
       }
       

@@ -270,6 +270,101 @@ export default function InvoiceGenerator({
     }
   };
 
+  const generatePDFBlob = async (): Promise<Blob | null> => {
+    if (!invoiceRef.current) {
+      return null;
+    }
+
+    try {
+      // Temporarily show the invoice preview element for capture
+      const originalDisplay = invoiceRef.current.style.display;
+      const originalVisibility = invoiceRef.current.style.visibility;
+      
+      invoiceRef.current.style.display = 'block';
+      invoiceRef.current.style.visibility = 'visible';
+      invoiceRef.current.style.position = 'absolute';
+      invoiceRef.current.style.top = '-9999px';
+      invoiceRef.current.style.left = '-9999px';
+      invoiceRef.current.style.width = '794px'; // A4 width in pixels
+      
+      // Wait for rendering
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Capture the invoice preview
+      const canvas = await html2canvas(invoiceRef.current, {
+        scale: 2,
+        backgroundColor: '#000000',
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+        width: 794,
+        height: invoiceRef.current.scrollHeight
+      });
+
+      // Restore original styling
+      invoiceRef.current.style.display = originalDisplay;
+      invoiceRef.current.style.visibility = originalVisibility;
+      invoiceRef.current.style.position = '';
+      invoiceRef.current.style.top = '';
+      invoiceRef.current.style.left = '';
+      invoiceRef.current.style.width = '';
+
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      
+      // Calculate dimensions to fit page
+      const imgWidth = pdfWidth;
+      const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      // Add main invoice page
+      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
+
+      // Add selected receipt attachments (only image files, not PDFs)
+      if (invoiceData.selectedReceipts.size > 0) {
+        const selectedReceiptsArray = Array.from(invoiceData.selectedReceipts);
+        for (const receiptId of selectedReceiptsArray) {
+          const receipt = receipts.find(r => r.id === receiptId);
+          if (receipt?.filename) {
+            // Check if it's an image file that we can embed
+            const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+            const isImage = imageExtensions.some(ext => 
+              receipt.filename!.toLowerCase().includes(ext) || 
+              (receipt.originalName && receipt.originalName.toLowerCase().endsWith(ext))
+            );
+
+            if (isImage) {
+              try {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                await new Promise((resolve, reject) => {
+                  img.onload = resolve;
+                  img.onerror = reject;
+                  img.src = `/uploads/${receipt.filename}`;
+                });
+
+                pdf.addPage();
+                const receiptRatio = Math.min(pdfWidth / img.width, pdfHeight / img.height);
+                const receiptX = (pdfWidth - img.width * receiptRatio) / 2;
+                const receiptY = (pdfHeight - img.height * receiptRatio) / 2;
+                
+                pdf.addImage(img, 'JPEG', receiptX, receiptY, img.width * receiptRatio, img.height * receiptRatio);
+              } catch (error) {
+                console.error('Error adding receipt image:', error);
+              }
+            }
+          }
+        }
+      }
+
+      // Return PDF as blob instead of downloading
+      return pdf.output('blob');
+    } catch (error) {
+      console.error('Error generating PDF blob:', error);
+      return null;
+    }
+  };
+
   const sendInvoice = async () => {
     if (!invoiceData.clientEmail) {
       toast({
@@ -297,30 +392,88 @@ cortespainter@gmail.com
 884 Hayes Rd, Manson's Landing, BC V0P1K0`;
 
     try {
-      // Generate PDF first
-      await generatePDF();
-      
-      // Wait a moment for PDF to be ready
-      setTimeout(() => {
-        // Create Gmail compose URL
-        const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(invoiceData.clientEmail)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(textBody)}`;
-        
-        // Open Gmail compose in new tab
-        window.open(gmailComposeUrl, '_blank');
-      }, 1000);
-      
-      // Also copy to clipboard as backup
-      const emailContent = `To: ${invoiceData.clientEmail}
-Subject: ${subject}
-
-${textBody}`;
-
-      await navigator.clipboard.writeText(emailContent);
-      
+      // Show loading state
       toast({
-        title: "PDF Generated & Gmail Opened!",
-        description: "PDF downloaded and Gmail opened with email content. Please attach the downloaded PDF to your email.",
+        title: "Preparing Email",
+        description: "Generating PDF and preparing email...",
       });
+
+      // Generate PDF first and get it as base64
+      const pdfBlob = await generatePDFBlob();
+      
+      if (pdfBlob) {
+        // Convert to base64 for potential server sending
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          const pdfBase64 = reader.result?.toString().split(',')[1];
+          const pdfFilename = `Invoice-${invoiceData.invoiceNumber}-${invoiceData.clientName.replace(/\s+/g, '-')}.pdf`;
+          
+          // Try the new email endpoint first
+          try {
+            const response = await fetch('/api/send-email-with-pdf', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                to: invoiceData.clientEmail,
+                subject,
+                text: textBody,
+                pdfBase64,
+                pdfFilename
+              })
+            });
+
+            const result = await response.json();
+            
+            if (response.ok && result.fallback) {
+              // Use Gmail fallback method
+              const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(invoiceData.clientEmail)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(textBody)}`;
+              
+              // Download PDF manually
+              const url = URL.createObjectURL(pdfBlob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = pdfFilename;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+              
+              // Open Gmail after a delay
+              setTimeout(() => {
+                window.open(gmailComposeUrl, '_blank');
+              }, 500);
+              
+              toast({
+                title: "Email Ready!",
+                description: "PDF downloaded and Gmail opened. Drag the PDF file into Gmail to attach it.",
+              });
+            } else {
+              throw new Error(result.error || 'Failed to prepare email');
+            }
+            
+          } catch (emailError) {
+            console.error('Email preparation failed:', emailError);
+            
+            // Final fallback - just download PDF and copy email content
+            const url = URL.createObjectURL(pdfBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = pdfFilename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            await navigator.clipboard.writeText(`To: ${invoiceData.clientEmail}\nSubject: ${subject}\n\n${textBody}`);
+            
+            toast({
+              title: "PDF Downloaded",
+              description: "PDF downloaded and email content copied to clipboard. Please compose email manually.",
+            });
+          }
+        };
+        reader.readAsDataURL(pdfBlob);
+      }
 
     } catch (error) {
       console.error('Email sending failed:', error);
