@@ -130,8 +130,18 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const receiptUploadMutation = useMutation({
     mutationFn: async (files: FileList) => {
-      const uploadPromises = Array.from(files).map(async (file) => {
+      console.log('Upload mutation started with', files.length, 'files');
+      
+      if (!files || files.length === 0) {
+        throw new Error('No files to upload');
+      }
+      
+      const results = [];
+      
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
         console.log(`Starting upload for ${file.name} (${file.type})`);
+        
         const formData = new FormData();
         formData.append('receipt', file);
         formData.append('vendor', file.name);
@@ -139,44 +149,27 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         formData.append('description', `File upload: ${file.name}`);
         formData.append('date', new Date().toISOString().split('T')[0]);
         
-        console.log('FormData contents:', {
-          file: file.name,
-          vendor: file.name,
-          amount: '0',
-          description: `File upload: ${file.name}`,
-          date: new Date().toISOString().split('T')[0]
+        console.log('FormData prepared, making request to:', `/api/projects/${projectId}/receipts`);
+        
+        const response = await fetch(`/api/projects/${projectId}/receipts`, {
+          method: 'POST',
+          body: formData
         });
         
-        console.log('Making request to:', `/api/projects/${projectId}/receipts`);
-        
-        try {
-          const response = await fetch(`/api/projects/${projectId}/receipts`, {
-            method: 'POST',
-            body: formData
-          });
-          
-          console.log(`Upload response for ${file.name}:`, response.status, response.statusText);
-          const responseText = await response.text();
-          console.log('Response body:', responseText);
-          
-          if (!response.ok) {
-            throw new Error(`Failed to upload ${file.name}: ${response.status} ${responseText}`);
-          }
-          
-          return JSON.parse(responseText);
-        } catch (error) {
-          console.error('Fetch error:', error);
-          throw error;
-        }
+        console.log(`Upload response for ${file.name}:`, response.status, response.statusText);
+        const responseText = await response.text();
+        console.log('Response body:', responseText);
         
         if (!response.ok) {
           throw new Error(`Failed to upload ${file.name}: ${response.status} ${responseText}`);
         }
         
-        return JSON.parse(responseText);
-      });
+        const result = JSON.parse(responseText);
+        results.push(result);
+        console.log('File uploaded successfully:', result);
+      }
       
-      return Promise.all(uploadPromises);
+      return results;
     },
     onSuccess: (results) => {
       console.log('All receipts uploaded successfully:', results);
