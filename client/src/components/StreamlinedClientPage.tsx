@@ -113,8 +113,14 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       return results;
     },
     onSuccess: () => {
+      // Clear selection state completely
       setSelectedPhotos(new Set());
       setIsSelecting(false);
+      setTouchStarted(false);
+      if (longPressTimer) {
+        clearTimeout(longPressTimer);
+        setLongPressTimer(null);
+      }
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
     },
     onError: (error) => {
@@ -281,6 +287,11 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const clearSelection = () => {
     setSelectedPhotos(new Set());
     setIsSelecting(false);
+    setTouchStarted(false);
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    }
   };
 
   const deleteSelectedPhotos = () => {
@@ -410,9 +421,14 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             <div className="flex items-center gap-2 mb-4 text-muted-foreground">
               <Camera size={16} />
               <span className="font-medium">Photos ({photos.length})</span>
-              {selectedPhotos.size === 0 && (
+              {selectedPhotos.size === 0 && !isSelecting && (
                 <span className="text-xs text-muted-foreground ml-2">
                   Long press and drag to select multiple
+                </span>
+              )}
+              {isSelecting && selectedPhotos.size === 0 && (
+                <span className="text-xs text-blue-600 dark:text-blue-400 ml-2">
+                  Selection mode active - tap photos to select
                 </span>
               )}
             </div>
