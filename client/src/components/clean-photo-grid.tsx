@@ -108,29 +108,10 @@ export default function CleanPhotoGrid({ projectId }: CleanPhotoGridProps) {
     return Math.sqrt(dx * dx + dy * dy);
   };
 
-  // Mobile-optimized touch handlers
+  // Simplified touch handlers - pinch-to-zoom disabled due to iOS limitations
   const handleTouchStart = (e: React.TouchEvent) => {
-    const touchCount = e.touches.length;
-    console.log('Touch start:', touchCount, 'fingers');
-    
-    if (touchCount === 2) {
-      // Two fingers - start pinch zoom
-      e.preventDefault();
-      e.stopPropagation();
-      console.log('Starting pinch zoom');
-      const touch1 = e.touches[0];
-      const touch2 = e.touches[1];
-      const distance = Math.sqrt(
-        Math.pow(touch1.clientX - touch2.clientX, 2) + 
-        Math.pow(touch1.clientY - touch2.clientY, 2)
-      );
-      setInitialPinchDistance(distance);
-      setInitialZoom(zoom);
-      console.log('Initial pinch distance:', distance);
-    } else if (touchCount === 1 && zoom > 1) {
+    if (e.touches.length === 1 && zoom > 1) {
       // One finger on zoomed image - start pan
-      e.preventDefault();
-      console.log('Starting pan');
       setIsDragging(true);
       setDragStart({ 
         x: e.touches[0].clientX - panPosition.x, 
@@ -140,29 +121,8 @@ export default function CleanPhotoGrid({ projectId }: CleanPhotoGridProps) {
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    const touchCount = e.touches.length;
-    
-    if (touchCount === 2 && initialPinchDistance > 0) {
-      // Two fingers - pinch zoom
-      e.preventDefault();
-      e.stopPropagation();
-      const touch1 = e.touches[0];
-      const touch2 = e.touches[1];
-      const currentDistance = Math.sqrt(
-        Math.pow(touch1.clientX - touch2.clientX, 2) + 
-        Math.pow(touch1.clientY - touch2.clientY, 2)
-      );
-      const scale = currentDistance / initialPinchDistance;
-      const newZoom = Math.min(5, Math.max(1, initialZoom * scale));
-      console.log('Pinch zoom scale:', scale.toFixed(2), 'new zoom:', newZoom.toFixed(2));
-      setZoom(newZoom);
-      
-      // Reset pan if zooming out to 1x
-      if (newZoom <= 1) {
-        setPanPosition({ x: 0, y: 0 });
-      }
-    } else if (touchCount === 1 && isDragging && zoom > 1) {
-      // One finger - pan
+    if (e.touches.length === 1 && isDragging && zoom > 1) {
+      // One finger - pan only
       e.preventDefault();
       setPanPosition({
         x: e.touches[0].clientX - dragStart.x,
@@ -171,12 +131,8 @@ export default function CleanPhotoGrid({ projectId }: CleanPhotoGridProps) {
     }
   };
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    console.log('Touch end');
+  const handleTouchEnd = () => {
     setIsDragging(false);
-    if (e.touches.length === 0) {
-      setInitialPinchDistance(0);
-    }
   };
 
   // Crop to screen edges function
@@ -335,7 +291,7 @@ export default function CleanPhotoGrid({ projectId }: CleanPhotoGridProps) {
             onWheel={handleWheel}
             style={{ 
               cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default',
-              touchAction: 'none' // Prevent default touch behavior
+              touchAction: 'pan-x pan-y' // Allow standard touch behavior
             }}
           >
             <img
