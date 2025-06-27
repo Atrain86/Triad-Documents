@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
 import type { Project, Receipt, DailyHours } from '@shared/schema';
 
 interface InvoiceGeneratorProps {
@@ -23,6 +24,7 @@ export default function InvoiceGenerator({
   isOpen, 
   onClose 
 }: InvoiceGeneratorProps) {
+  const { toast } = useToast();
   const [invoiceData, setInvoiceData] = useState({
     invoiceNumber: 101,
     date: new Date().toISOString().split('T')[0],
@@ -142,9 +144,22 @@ export default function InvoiceGenerator({
   };
 
   const generatePDF = async () => {
-    if (!invoiceRef.current) return;
+    if (!invoiceRef.current) {
+      toast({
+        title: "Error",
+        description: "Invoice preview not ready. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Generating PDF",
+      description: "Creating your invoice PDF...",
+    });
 
     try {
+      // Capture the invoice preview
       const canvas = await html2canvas(invoiceRef.current, {
         scale: 2,
         backgroundColor: '#000000', // Pure black background
@@ -166,7 +181,8 @@ export default function InvoiceGenerator({
 
       // Add selected receipt attachments
       if (invoiceData.selectedReceipts.size > 0) {
-        for (const receiptId of invoiceData.selectedReceipts) {
+        const selectedReceiptsArray = Array.from(invoiceData.selectedReceipts);
+        for (const receiptId of selectedReceiptsArray) {
           const receipt = receipts.find(r => r.id === receiptId);
           if (receipt?.filename) {
             try {
@@ -194,18 +210,43 @@ export default function InvoiceGenerator({
               }
             } catch (error) {
               console.error('Error adding receipt:', error);
+              toast({
+                title: "Receipt Warning",
+                description: `Could not attach receipt: ${receipt.originalName || receipt.filename}`,
+                variant: "destructive",
+              });
             }
           }
         }
       }
 
-      pdf.save(`Invoice-${invoiceData.invoiceNumber}-${project.clientName}.pdf`);
+      const filename = `Invoice-${invoiceData.invoiceNumber}-${project.clientName || 'Client'}.pdf`;
+      pdf.save(filename);
+      
+      toast({
+        title: "PDF Generated!",
+        description: `Invoice downloaded as ${filename}`,
+      });
     } catch (error) {
       console.error('Error generating PDF:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate PDF. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
   const sendInvoice = () => {
+    if (!invoiceData.clientEmail) {
+      toast({
+        title: "No Email Address",
+        description: "Please add client email to send invoice",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const subject = `Invoice #${invoiceData.invoiceNumber} - ${invoiceData.businessName}`;
     const body = `Dear ${invoiceData.clientName},
 
@@ -226,6 +267,11 @@ ${invoiceData.businessName}`;
 
     const mailtoLink = `mailto:${invoiceData.clientEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.open(mailtoLink);
+    
+    toast({
+      title: "Email Opened",
+      description: "Please manually attach the PDF file to your email",
+    });
   };
 
   if (!isOpen) return null;
@@ -528,7 +574,7 @@ ${invoiceData.businessName}`;
                 style={{ backgroundColor: brandColors.primary }}
               >
                 <Download className="mr-2 h-5 w-5" />
-                Generate PDF
+                Download PDF
               </Button>
               <Button
                 onClick={sendInvoice}
