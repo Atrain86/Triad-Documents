@@ -147,14 +147,27 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           date: new Date().toISOString().split('T')[0]
         });
         
-        const response = await fetch(`/api/projects/${projectId}/receipts`, {
-          method: 'POST',
-          body: formData
-        });
+        console.log('Making request to:', `/api/projects/${projectId}/receipts`);
         
-        console.log(`Upload response for ${file.name}:`, response.status, response.statusText);
-        const responseText = await response.text();
-        console.log('Response body:', responseText);
+        try {
+          const response = await fetch(`/api/projects/${projectId}/receipts`, {
+            method: 'POST',
+            body: formData
+          });
+          
+          console.log(`Upload response for ${file.name}:`, response.status, response.statusText);
+          const responseText = await response.text();
+          console.log('Response body:', responseText);
+          
+          if (!response.ok) {
+            throw new Error(`Failed to upload ${file.name}: ${response.status} ${responseText}`);
+          }
+          
+          return JSON.parse(responseText);
+        } catch (error) {
+          console.error('Fetch error:', error);
+          throw error;
+        }
         
         if (!response.ok) {
           throw new Error(`Failed to upload ${file.name}: ${response.status} ${responseText}`);
