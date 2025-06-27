@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Camera, FileText, ArrowLeft, Edit3, Download, X, Image as ImageIcon, DollarSign, Calendar, Wrench, Plus, Trash2, Calculator } from 'lucide-react';
+import { Camera, FileText, ArrowLeft, Edit3, Download, X, Image as ImageIcon, DollarSign, Calendar, Wrench, Plus, Trash2, Calculator, Receipt as ReceiptIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -1260,14 +1260,20 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
 
 
-        {/* Simple Files List */}
-        {/* Quick Receipt Entry Form */}
-        <div className="mb-6">
-          <div className="flex items-center gap-2 mb-3 text-muted-foreground">
-            <DollarSign size={16} />
-            <span className="font-medium">Add Receipt Amount</span>
+        {/* Receipts Section */}
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4 text-muted-foreground">
+            <ReceiptIcon size={16} />
+            <span className="font-medium">Receipts & Expenses</span>
           </div>
-          <form 
+          
+          {/* Quick Receipt Entry Form */}
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-3 text-sm text-muted-foreground">
+              <DollarSign size={14} />
+              <span>Quick Add Receipt Amount</span>
+            </div>
+            <form 
             onSubmit={(e) => {
               e.preventDefault();
               const formData = new FormData(e.target as HTMLFormElement);
@@ -1326,9 +1332,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
               Add
             </Button>
           </form>
+          </div>
+          
+          <SimpleFilesList projectId={project.id} />
         </div>
-
-        <SimpleFilesList projectId={project.id} />
 
         <div className="grid grid-cols-2 gap-4">
           <Button

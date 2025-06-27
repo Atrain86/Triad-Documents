@@ -280,6 +280,12 @@ export default function InvoiceGenerator({
     }
 
     const subject = `Invoice #${invoiceData.invoiceNumber} - ${invoiceData.businessName}`;
+    // Check if any receipts are selected for attachment
+    const hasReceiptAttachments = invoiceData.selectedReceipts.size > 0;
+    const receiptAttachmentNote = hasReceiptAttachments 
+      ? "\n\nNote: Additional receipt files may be attached separately for your records."
+      : "";
+
     const body = `Dear ${invoiceData.clientName},
 
 Please find attached your invoice for painting services.
@@ -287,7 +293,7 @@ Please find attached your invoice for painting services.
 Invoice Details:
 - Invoice #: ${invoiceData.invoiceNumber}
 - Date: ${invoiceData.date}
-- Total Amount: $${calculateTotal().toFixed(2)} CAD (including tax)
+- Total Amount: $${calculateTotal().toFixed(2)} CAD (including tax)${receiptAttachmentNote}
 
 Payment Instructions:
 ${invoiceData.notes}
@@ -301,9 +307,13 @@ ${invoiceData.businessName}`;
     const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(invoiceData.clientEmail)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.open(gmailComposeUrl, '_blank');
     
+    const attachmentInstructions = hasReceiptAttachments 
+      ? "Download the PDF invoice first, then manually attach any receipt files from your Files section to the email."
+      : "Download the PDF invoice first, then attach it to your email.";
+
     toast({
       title: "Gmail Opened",
-      description: "Gmail compose window opened in new tab. Please download the PDF first, then attach it to your email.",
+      description: attachmentInstructions,
     });
   };
 
@@ -510,7 +520,7 @@ ${invoiceData.businessName}`;
                     className="rounded"
                   />
                   <span style={{ color: darkTheme.text }}>
-                    Attach receipt images to PDF (PDFs and documents cannot be embedded)
+                    Include receipt images in PDF (separate from house photos)
                   </span>
                 </label>
               </div>
