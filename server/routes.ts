@@ -361,14 +361,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const projectId = parseInt(req.params.id);
       console.log('Creating hours entry with date:', req.body.date);
       
-      // Parse date as local date to avoid timezone conversion issues
-      const dateParts = req.body.date.split('-');
-      const localDate = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
-      console.log('Parsed local date:', localDate);
+      // Parse date string directly as YYYY-MM-DD without timezone conversion
+      const dateString = req.body.date;
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+        throw new Error('Invalid date format. Expected YYYY-MM-DD');
+      }
+      
+      // Create date in UTC but treat it as local date to prevent shifting
+      const [year, month, day] = dateString.split('-').map(Number);
+      const localDate = new Date(year, month - 1, day);
+      
+      // Ensure the date is stored correctly without timezone conversion
+      const utcDate = new Date(Date.UTC(year, month - 1, day));
+      console.log('Input date:', dateString, '-> Local date:', localDate.toLocaleDateString(), '-> UTC date:', utcDate.toISOString());
       
       const hoursData = {
         projectId,
-        date: localDate,
+        date: utcDate, // Use UTC date to prevent timezone shifts
         hours: parseFloat(req.body.hours),
         description: req.body.description || null,
       };
@@ -377,6 +386,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const hours = await storage.createDailyHours(validatedData);
       res.status(201).json(hours);
     } catch (error) {
+      console.error('Error creating hours:', error);
       res.status(400).json({ error: 'Failed to create hours entry' });
     }
   });
