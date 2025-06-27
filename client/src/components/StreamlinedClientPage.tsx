@@ -367,21 +367,26 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         const datePart = date.split('T')[0];
         const [year, month, day] = datePart.split('-').map(Number);
         dateObj = new Date(year, month - 1, day);
+        console.log('Parsing ISO date:', date, '-> datePart:', datePart, '-> final date:', dateObj.toLocaleDateString());
       } else {
         // If it's just a date string like "2025-06-21"
         const [year, month, day] = date.split('-').map(Number);
         dateObj = new Date(year, month - 1, day);
+        console.log('Parsing simple date:', date, '-> final date:', dateObj.toLocaleDateString());
       }
     } else {
       dateObj = date;
+      console.log('Using Date object:', dateObj.toLocaleDateString());
     }
     
-    return dateObj.toLocaleDateString('en-US', { 
+    const formatted = dateObj.toLocaleDateString('en-US', { 
       weekday: 'long', 
       year: 'numeric', 
       month: 'long', 
       day: 'numeric' 
     });
+    console.log('Final formatted date:', formatted);
+    return formatted;
   };
 
   const formatDateForInput = (date: Date) => {
