@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { uploadPhoto } from "@/lib/api";
 import { type Photo } from "@shared/schema";
 import SimplifiedUpload from "@/components/simplified-upload";
-import { X, Crop } from "lucide-react";
+import { X, Crop, Minimize2, Maximize2 } from "lucide-react";
+import Cropper from "react-easy-crop";
 
 interface CleanPhotoGridProps {
   projectId: number;
@@ -15,6 +16,10 @@ export default function CleanPhotoGrid({ projectId }: CleanPhotoGridProps) {
   const queryClient = useQueryClient();
   const [showViewer, setShowViewer] = useState(false);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
+  const [showCropper, setShowCropper] = useState(false);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
 
   // Fetch photos with aggressive refresh
   const { data: photos = [], isLoading, refetch } = useQuery<Photo[]>({
@@ -65,6 +70,83 @@ export default function CleanPhotoGrid({ projectId }: CleanPhotoGridProps) {
   const handleFileSelect = (files: File[]) => {
     if (files.length > 0) {
       uploadMutation.mutate(files);
+    }
+  };
+
+  // Cropping callback
+  const onCropComplete = useCallback((croppedArea: any, croppedAreaPixels: any) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  }, []);
+
+  // Helper to create image from src
+  const createImage = (url: string): Promise<HTMLImageElement> =>
+    new Promise((resolve, reject) => {
+      const image = new Image();
+      image.addEventListener('load', () => resolve(image));
+      image.addEventListener('error', (error) => reject(error));
+      image.setAttribute('crossOrigin', 'anonymous');
+      image.src = url;
+    });
+
+  // Perform the actual crop
+  const getCroppedImg = async (): Promise<Blob | null> => {
+    try {
+      const currentPhoto = photos[selectedPhotoIndex];
+      if (!currentPhoto || !croppedAreaPixels) return null;
+
+      const image = await createImage(`/uploads/${currentPhoto.filename}`);
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      if (!ctx) return null;
+
+      // Set canvas size to match cropped area
+      canvas.width = croppedAreaPixels.width;
+      canvas.height = croppedAreaPixels.height;
+      
+      // Draw cropped image
+      ctx.drawImage(
+        image,
+        croppedAreaPixels.x,
+        croppedAreaPixels.y,
+        croppedAreaPixels.width,
+        croppedAreaPixels.height,
+        0,
+        0,
+        croppedAreaPixels.width,
+        croppedAreaPixels.height
+      );
+
+      // Convert to blob
+      return new Promise((resolve) => {
+        canvas.toBlob((blob) => {
+          resolve(blob);
+        }, 'image/jpeg', 0.9);
+      });
+    } catch (e) {
+      console.error('Crop error:', e);
+      return null;
+    }
+  };
+
+  // Handle crop and save
+  const handleCrop = async () => {
+    try {
+      const croppedBlob = await getCroppedImg();
+      if (croppedBlob) {
+        const fileName = `cropped-${Date.now()}.jpg`;
+        const file = new File([croppedBlob], fileName, { type: 'image/jpeg' });
+        croppedUploadMutation.mutate(file);
+        setShowCropper(false);
+        setShowViewer(false);
+        // Reset crop state
+        setCrop({ x: 0, y: 0 });
+        setZoom(1);
+        setCroppedAreaPixels(null);
+      }
+    } catch (e) {
+      console.error('Crop failed:', e);
+      toast({ title: "Crop failed", variant: "destructive" });
     }
   };
 
@@ -149,8 +231,10 @@ export default function CleanPhotoGrid({ projectId }: CleanPhotoGridProps) {
             </span>
             <button 
               onClick={() => {
-                // For now, just show an alert - we can add cropping later
-                alert('Crop feature coming soon!');
+                setShowCropper(true);
+                setCrop({ x: 0, y: 0 });
+                setZoom(1);
+                setCroppedAreaPixels(null);
               }}
               className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg flex items-center gap-2"
             >
@@ -189,6 +273,63 @@ export default function CleanPhotoGrid({ projectId }: CleanPhotoGridProps) {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Crop Interface */}
+      {showCropper && photos.length > 0 && (
+        <div className="fixed inset-0 bg-black z-50 flex flex-col">
+          <div className="flex justify-between items-center p-4 text-white">
+            <button 
+              onClick={() => setShowCropper(false)}
+              className="p-2 hover:bg-gray-700 rounded"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <span className="text-sm">Crop Photo</span>
+            <button 
+              onClick={handleCrop}
+              disabled={croppedUploadMutation.isPending}
+              className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg disabled:opacity-50"
+            >
+              {croppedUploadMutation.isPending ? 'Saving...' : 'Save Crop'}
+            </button>
+          </div>
+
+          <div className="relative flex-1">
+            <Cropper
+              image={`/uploads/${photos[selectedPhotoIndex]?.filename}`}
+              crop={crop}
+              zoom={zoom}
+              aspect={4 / 3}
+              onCropChange={setCrop}
+              onCropComplete={onCropComplete}
+              onZoomChange={setZoom}
+            />
+          </div>
+
+          {/* Zoom Controls */}
+          <div className="flex items-center justify-center p-4 space-x-4 bg-gray-900">
+            <Minimize2 
+              onClick={() => setZoom(Math.max(1, zoom - 0.1))} 
+              className="cursor-pointer text-white hover:text-blue-400"
+              size={20}
+            />
+            <input 
+              type="range"
+              min={1}
+              max={3}
+              step={0.1}
+              value={zoom}
+              onChange={(e) => setZoom(Number(e.target.value))}
+              className="flex-1 max-w-xs"
+            />
+            <Maximize2 
+              onClick={() => setZoom(Math.min(3, zoom + 0.1))} 
+              className="cursor-pointer text-white hover:text-blue-400"
+              size={20}
+            />
+          </div>
         </div>
       )}
     </div>
