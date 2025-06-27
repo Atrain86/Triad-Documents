@@ -284,12 +284,13 @@ Thank you for your business!
 Best regards,
 ${invoiceData.businessName}`;
 
-    const mailtoLink = `mailto:${invoiceData.clientEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.open(mailtoLink);
+    // Open Gmail in browser with pre-filled email
+    const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(invoiceData.clientEmail)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.open(gmailComposeUrl, '_blank');
     
     toast({
-      title: "Email Opened",
-      description: "Please manually attach the PDF file to your email",
+      title: "Gmail Opened",
+      description: "Gmail compose window opened in new tab. Please download the PDF first, then attach it to your email.",
     });
   };
 
@@ -419,7 +420,7 @@ ${invoiceData.businessName}`;
               </div>
             </div>
 
-            {/* Services & Labor - Clean Read-Only Layout */}
+            {/* Services & Labor - Daily Hours Layout */}
             <div className="space-y-4">
               <h2 className="text-xl font-semibold" style={{ color: darkTheme.text }}>Services & Labor</h2>
               
@@ -427,22 +428,26 @@ ${invoiceData.businessName}`;
                 <table className="w-full border-collapse" style={{ borderColor: darkTheme.border }}>
                   <thead>
                     <tr style={{ backgroundColor: darkTheme.inputBg }}>
+                      <th className="border p-3 text-left" style={{ borderColor: darkTheme.border, color: darkTheme.text }}>Date</th>
                       <th className="border p-3 text-left" style={{ borderColor: darkTheme.border, color: darkTheme.text }}>Description</th>
                       <th className="border p-3 text-center" style={{ borderColor: darkTheme.border, color: darkTheme.text }}>Hours</th>
                       <th className="border p-3 text-right" style={{ borderColor: darkTheme.border, color: darkTheme.text }}>Total</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {invoiceData.lineItems.map((item, index) => (
+                    {dailyHours.map((hourEntry, index) => (
                       <tr key={index}>
                         <td className="border p-3" style={{ borderColor: darkTheme.border, color: darkTheme.text }}>
-                          {item.description || 'Painting Services'}
+                          {format(new Date(hourEntry.date), 'MMM dd, yyyy')}
+                        </td>
+                        <td className="border p-3" style={{ borderColor: darkTheme.border, color: darkTheme.text }}>
+                          {hourEntry.description || 'Painting'}
                         </td>
                         <td className="border p-3 text-center" style={{ borderColor: darkTheme.border, color: darkTheme.text }}>
-                          {item.hours}
+                          {hourEntry.hours}
                         </td>
                         <td className="border p-3 text-right font-semibold" style={{ borderColor: darkTheme.border, color: darkTheme.text }}>
-                          ${item.total.toFixed(2)}
+                          ${(hourEntry.hours * (project.hourlyRate || 60)).toFixed(2)}
                         </td>
                       </tr>
                     ))}
@@ -451,32 +456,39 @@ ${invoiceData.businessName}`;
               </div>
             </div>
 
-            {/* Receipt Attachment Selection */}
+            {/* Receipt Attachment Option */}
             {receipts.length > 0 && (
               <div className="p-4 rounded-lg" style={{ backgroundColor: darkTheme.cardBg }}>
-                <h3 className="text-sm font-medium mb-3" style={{ color: darkTheme.text }}>Attach Receipts to Invoice (as additional pages)</h3>
-                <div className="space-y-2">
+                <h3 className="text-sm font-medium mb-3" style={{ color: darkTheme.text }}>Receipts & Materials</h3>
+                
+                {/* Display receipt items */}
+                <div className="space-y-2 mb-4">
                   {receipts.map((receipt) => (
-                    <label key={receipt.id} className="flex items-center space-x-2 text-sm">
-                      <input
-                        type="checkbox"
-                        checked={invoiceData.selectedReceipts.has(receipt.id)}
-                        onChange={(e) => {
-                          const newSelection = new Set(invoiceData.selectedReceipts);
-                          if (e.target.checked) {
-                            newSelection.add(receipt.id);
-                          } else {
-                            newSelection.delete(receipt.id);
-                          }
-                          setInvoiceData({...invoiceData, selectedReceipts: newSelection});
-                        }}
-                        className="rounded"
-                      />
-                      <span style={{ color: darkTheme.text }}>{receipt.vendor} - ${receipt.amount}</span>
-                      {receipt.filename && <span className="text-xs" style={{ color: darkTheme.textSecondary }}>({receipt.filename})</span>}
-                    </label>
+                    <div key={receipt.id} className="flex justify-between items-center text-sm">
+                      <span style={{ color: darkTheme.text }}>{receipt.vendor}</span>
+                      <span style={{ color: darkTheme.text }}>${receipt.amount}</span>
+                    </div>
                   ))}
                 </div>
+                
+                {/* Single checkbox for all receipts */}
+                <label className="flex items-center space-x-2 text-sm border-t pt-3" style={{ borderColor: darkTheme.border }}>
+                  <input
+                    type="checkbox"
+                    checked={receipts.length > 0 && receipts.every(r => invoiceData.selectedReceipts.has(r.id))}
+                    onChange={(e) => {
+                      const newSelection = new Set<number>();
+                      if (e.target.checked) {
+                        receipts.forEach(receipt => newSelection.add(receipt.id));
+                      }
+                      setInvoiceData({...invoiceData, selectedReceipts: newSelection});
+                    }}
+                    className="rounded"
+                  />
+                  <span style={{ color: darkTheme.text }}>
+                    Attach receipt photos to PDF (as additional pages)
+                  </span>
+                </label>
               </div>
             )}
 
@@ -485,7 +497,7 @@ ${invoiceData.businessName}`;
               <div className="w-64 space-y-2">
                 <div className="flex justify-between py-2 border-b" style={{ borderColor: darkTheme.border }}>
                   <span className="font-medium" style={{ color: darkTheme.text }}>Labor:</span>
-                  <span className="font-semibold" style={{ color: darkTheme.text }}>${invoiceData.lineItems.reduce((sum, item) => sum + item.total, 0).toFixed(2)}</span>
+                  <span className="font-semibold" style={{ color: darkTheme.text }}>${dailyHours.reduce((sum, hourEntry) => sum + (hourEntry.hours * (project.hourlyRate || 60)), 0).toFixed(2)}</span>
                 </div>
                 {invoiceData.suppliesCost > 0 && (
                   <div className="flex justify-between py-2 border-b" style={{ borderColor: darkTheme.border }}>
@@ -544,7 +556,7 @@ ${invoiceData.businessName}`;
                 style={{ backgroundColor: invoiceData.clientEmail ? '#1E40AF' : '#9ca3af' }}
               >
                 <Send className="mr-2 h-5 w-5" />
-                Send Invoice
+                Open Gmail
               </Button>
             </div>
           </div>
