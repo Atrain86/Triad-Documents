@@ -551,6 +551,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Email sending endpoint
+  app.post('/api/send-email', async (req, res) => {
+    try {
+      const { to, subject, html, text } = req.body;
+      
+      if (!process.env.SENDGRID_API_KEY) {
+        return res.status(500).json({ error: 'SendGrid API key not configured' });
+      }
+
+      const sgMail = require('@sendgrid/mail');
+      sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+      const msg = {
+        to,
+        from: 'cortespainter@gmail.com', // Must be verified in SendGrid
+        subject,
+        text,
+        html
+      };
+
+      await sgMail.send(msg);
+      res.json({ success: true, message: 'Email sent successfully' });
+    } catch (error) {
+      console.error('SendGrid error:', error);
+      res.status(500).json({ 
+        error: 'Failed to send email', 
+        details: error.response?.body?.errors || error.message 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

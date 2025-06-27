@@ -270,7 +270,7 @@ export default function InvoiceGenerator({
     }
   };
 
-  const sendInvoice = () => {
+  const sendInvoice = async () => {
     if (!invoiceData.clientEmail) {
       toast({
         title: "No Email Address",
@@ -281,15 +281,10 @@ export default function InvoiceGenerator({
     }
 
     const subject = `Invoice #${invoiceData.invoiceNumber} - ${invoiceData.businessName}`;
-    // Check if any receipts are selected for attachment
-    const hasReceiptAttachments = invoiceData.selectedReceipts.size > 0;
-    const receiptAttachmentNote = hasReceiptAttachments 
-      ? "\n\nNote: Additional receipt files may be attached separately for your records."
-      : "";
+    
+    const textBody = `Dear ${invoiceData.clientName},
 
-    const body = `Dear ${invoiceData.clientName},
-
-${invoiceData.emailMessage}${receiptAttachmentNote}
+${invoiceData.emailMessage}
 
 Payment Instructions:
 ${invoiceData.notes}
@@ -299,33 +294,61 @@ Thank you for your business!
 Best regards,
 ${invoiceData.businessName}`;
 
-    const emailContent = `To: ${invoiceData.clientEmail}
-Subject: ${subject}
+    const htmlBody = `
+      <html>
+        <body style="font-family: Arial, sans-serif; color: #333;">
+          <p>Dear ${invoiceData.clientName},</p>
+          
+          <p>${invoiceData.emailMessage.replace(/\n/g, '<br>')}</p>
+          
+          <h3>Payment Instructions:</h3>
+          <p>${invoiceData.notes.replace(/\n/g, '<br>')}</p>
+          
+          <p>Thank you for your business!</p>
+          
+          <p>Best regards,<br>
+          <strong>${invoiceData.businessName}</strong></p>
+        </body>
+      </html>
+    `;
 
-${body}`;
+    try {
+      toast({
+        title: "Sending Email",
+        description: "Please wait while we send your invoice...",
+      });
 
-    // Try to copy email content to clipboard as backup
-    navigator.clipboard.writeText(emailContent).catch(() => {});
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          to: invoiceData.clientEmail,
+          subject,
+          text: textBody,
+          html: htmlBody,
+        }),
+      });
 
-    // Create mailto URL and try to open
-    const mailtoUrl = `mailto:${invoiceData.clientEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    
-    // Try multiple methods for better compatibility
-    const opened = window.open(mailtoUrl, '_blank');
-    
-    if (!opened) {
-      // If popup was blocked, try direct assignment
-      window.location.href = mailtoUrl;
+      const result = await response.json();
+
+      if (response.ok) {
+        toast({
+          title: "Email Sent Successfully!",
+          description: `Invoice sent to ${invoiceData.clientEmail}`,
+        });
+      } else {
+        throw new Error(result.error || 'Failed to send email');
+      }
+    } catch (error) {
+      console.error('Email sending failed:', error);
+      toast({
+        title: "Email Failed",
+        description: "Could not send email. Please try downloading PDF and sending manually.",
+        variant: "destructive",
+      });
     }
-    
-    const attachmentInstructions = hasReceiptAttachments 
-      ? "Email content copied to clipboard. Download the PDF and attach receipt files manually."
-      : "Email content copied to clipboard. Download the PDF and attach it manually.";
-
-    toast({
-      title: "Email Ready",
-      description: "Opening email client. If nothing opens, check your clipboard for email content.",
-    });
   };
 
   if (!isOpen) return null;
