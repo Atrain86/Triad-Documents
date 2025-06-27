@@ -953,11 +953,18 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                   <div key={hours.id} className="flex items-center justify-between py-0.5 px-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded text-sm">
                     <div className="flex-1">
                       <span className="font-medium">
-                        {new Date(hours.date).toLocaleDateString('en-US', { 
-                          weekday: 'short', 
-                          month: 'short',
-                          day: 'numeric'
-                        })} - {hours.hours}hr
+                        {(() => {
+                          // Parse date string directly to avoid timezone conversion
+                          const dateStr = hours.date.toString();
+                          const datePart = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr.split(' ')[0];
+                          const [year, month, day] = datePart.split('-').map(Number);
+                          const localDate = new Date(year, month - 1, day);
+                          return localDate.toLocaleDateString('en-US', { 
+                            weekday: 'short', 
+                            month: 'short', 
+                            day: 'numeric' 
+                          });
+                        })()} - {hours.hours}hr
                       </span>
                       {hours.description && hours.description !== 'Work performed' && (
                         <span className="text-xs text-muted-foreground ml-2">
