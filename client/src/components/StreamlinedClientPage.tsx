@@ -330,7 +330,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   });
 
   const addHoursMutation = useMutation({
-    mutationFn: async (hoursData: { date: string; hours: number; description: string }) => {
+    mutationFn: async (hoursData: { date: string; hours: number; description: string; hourlyRate: number }) => {
       const response = await apiRequest('POST', `/api/projects/${projectId}/hours`, {
         ...hoursData,
         projectId: Number(projectId)
@@ -376,7 +376,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       addHoursMutation.mutate({
         date: selectedDate,
         hours: parseFloat(hoursInput),
-        description: descriptionInput || 'Work performed'
+        description: descriptionInput || 'Work performed',
+        hourlyRate: project?.hourlyRate || 60 // Default to $60/hour
       });
     }
   };
@@ -850,36 +851,67 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             </div>
           )}
 
-          {/* Hours List */}
-          <div className="h-48 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg p-3 space-y-2">
-            {dailyHours.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-8">
-                No hours logged yet. Click "Log Hours for a Day" to start tracking your time.
-              </p>
-            ) : (
-              dailyHours.map((hours) => (
-                <div key={hours.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                  <div className="flex-1">
-                    <div className="font-medium text-sm">
-                      {formatDate(hours.date)} - {hours.hours} hours
+          {/* Hours Dashboard */}
+          <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+            {/* Hours Summary */}
+            {dailyHours.length > 0 && (
+              <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <div className="font-semibold text-green-700 dark:text-green-300">
+                      Total Hours: {dailyHours.reduce((sum, h) => sum + h.hours, 0).toFixed(1)}
                     </div>
-                    {hours.description && (
-                      <div className="text-xs text-muted-foreground mt-1">
-                        {hours.description}
-                      </div>
-                    )}
+                    <div className="text-sm text-green-600 dark:text-green-400">
+                      Total Earned: ${(dailyHours.reduce((sum, h) => sum + (h.hours * 60), 0)).toFixed(2)}
+                    </div>
                   </div>
-                  <button
-                    onClick={() => deleteHoursMutation.mutate(hours.id)}
-                    disabled={deleteHoursMutation.isPending}
-                    className="ml-2 p-1 text-red-500 hover:text-red-700 transition-colors"
-                    title="Delete hours entry"
-                  >
-                    <Trash2 size={14} />
-                  </button>
+                  <div className="text-2xl font-bold text-green-700 dark:text-green-300">
+                    ${60}/hr
+                  </div>
                 </div>
-              ))
+              </div>
             )}
+
+            {/* Compact Hours List */}
+            <div className="h-40 overflow-y-auto space-y-1">
+              {dailyHours.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-8">
+                  No hours logged yet. Click "Log Hours for a Day" to start tracking.
+                </p>
+              ) : (
+                dailyHours.map((hours) => (
+                  <div key={hours.id} className="flex items-center justify-between py-2 px-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded">
+                    <div className="flex-1">
+                      <span className="font-medium text-sm">
+                        {new Date(hours.date).toLocaleDateString('en-US', { 
+                          weekday: 'short', 
+                          month: 'short',
+                          day: 'numeric'
+                        })} - {hours.hours}hr
+                      </span>
+                      {hours.description && hours.description !== 'Work performed' && (
+                        <span className="text-xs text-muted-foreground ml-2">
+                          ({hours.description})
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-green-600 dark:text-green-400 font-medium">
+                        ${(hours.hours * 60).toFixed(0)}
+                      </span>
+                      <button
+                        onClick={() => deleteHoursMutation.mutate(hours.id)}
+                        disabled={deleteHoursMutation.isPending}
+                        className="p-1 text-red-500 hover:text-red-700 transition-colors opacity-60 hover:opacity-100"
+                        title="Delete"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
 
