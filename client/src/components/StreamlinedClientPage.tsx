@@ -353,7 +353,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             <Camera size={28} color="white" />
             <input
               type="file"
-              accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/heic,image/heif,.heic,.heif"
+              accept=".jpg,.jpeg,.png,.gif,.webp,.heic,.heif"
               onChange={handlePhotoUpload}
               multiple
               className="hidden"
@@ -522,7 +522,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       <input
         ref={receiptInputRef}
         type="file"
-        accept="application/pdf,.pdf,image/jpeg,image/jpg,image/png,image/gif,image/webp,text/plain,.txt,.doc,.docx"
+        accept=".pdf,.doc,.docx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
         onChange={handleReceiptUpload}
         multiple
         className="hidden"
