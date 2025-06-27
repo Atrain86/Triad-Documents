@@ -543,12 +543,14 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                 project.status === 'in-progress' ? 'text-red-600 bg-red-50 dark:bg-red-900/20' :
                 project.status === 'pending' ? 'text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20' :
                 project.status === 'completed' ? 'text-green-600 bg-green-50 dark:bg-green-900/20' :
+                project.status === 'archived' ? 'text-gray-600 bg-gray-50 dark:bg-gray-900/20' :
                 'text-gray-600 bg-gray-50 dark:bg-gray-900/20'
               } hover:opacity-80`}
             >
               {project.status === 'in-progress' ? 'In Progress' :
                project.status === 'pending' ? 'Pending' :
                project.status === 'completed' ? 'Completed' :
+               project.status === 'archived' ? 'Archived' :
                'Status'} ▼
             </button>
 
@@ -587,9 +589,21 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                     updateStatusMutation.mutate('completed');
                   }}
                   disabled={updateStatusMutation.isPending}
-                  className="w-full text-left px-3 py-2 text-sm text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"
+                  className="w-full text-left px-3 py-2 text-sm text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors border-b border-gray-100 dark:border-gray-600"
                 >
                   🟢 Completed
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Updating status to: archived');
+                    updateStatusMutation.mutate('archived');
+                  }}
+                  disabled={updateStatusMutation.isPending}
+                  className="w-full text-left px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-900/20 transition-colors"
+                >
+                  📁 Archived
                 </button>
               </div>
             )}

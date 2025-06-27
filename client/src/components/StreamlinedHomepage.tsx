@@ -37,6 +37,11 @@ const statusConfig = {
     text: 'text-green-600 dark:text-green-400',
     label: 'Completed'
   },
+  'archived': { 
+    dot: 'bg-gray-500', 
+    text: 'text-gray-600 dark:text-gray-400',
+    label: 'Archived'
+  },
   // Fallback for any legacy status values
   'estimating': { 
     dot: 'bg-yellow-500', 
@@ -48,6 +53,7 @@ const statusConfig = {
 export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHomepageProps) {
   const [showAddClient, setShowAddClient] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showArchived, setShowArchived] = useState(false);
   const [newProject, setNewProject] = useState<NewProject>({
     clientName: '',
     address: '',
@@ -63,12 +69,23 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
     queryKey: ['/api/projects'],
   });
 
-  // Filter projects based on search term
-  const filteredProjects = projects.filter(project =>
-    project.clientName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    project.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    project.projectType?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter projects based on archive status and search term
+  const filteredProjects = projects.filter(project => {
+    // First filter by archive status
+    const isArchived = project.status === 'archived';
+    if (showArchived !== isArchived) {
+      return false;
+    }
+    
+    // Then filter by search term
+    if (!searchTerm) return true;
+    
+    return (
+      project.clientName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      project.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      project.projectType?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
 
   const createProjectMutation = useMutation({
     mutationFn: async (projectData: NewProject) => {
@@ -148,23 +165,33 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
           Add New Client
         </Button>
 
-        {/* Search Bar */}
-        <div className="relative mb-6">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
-          <Input
-            placeholder="Search clients, addresses, or project types..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 py-3"
-          />
+        {/* Search Bar and Archive Toggle */}
+        <div className="flex gap-3 mb-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
+            <Input
+              placeholder="Search clients, addresses, or project types..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 py-3"
+            />
+          </div>
+          <Button
+            variant={showArchived ? "default" : "outline"}
+            onClick={() => setShowArchived(!showArchived)}
+            className={`px-4 py-3 ${showArchived ? 'bg-gray-600 hover:bg-gray-700' : ''}`}
+          >
+            {showArchived ? 'Active' : 'Archive'}
+          </Button>
         </div>
 
         {/* Project Count */}
         {projects.length > 0 && (
           <div className="flex justify-between items-center mb-4">
             <p className="text-sm text-muted-foreground">
-              {filteredProjects.length} of {projects.length} project{projects.length !== 1 ? 's' : ''}
+              {filteredProjects.length} {showArchived ? 'archived' : 'active'} project{filteredProjects.length !== 1 ? 's' : ''}
               {searchTerm && ` matching "${searchTerm}"`}
+              {projects.length > filteredProjects.length && ` (${projects.length} total)`}
             </p>
           </div>
         )}
@@ -256,6 +283,12 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
         {projects.length > 0 && filteredProjects.length === 0 && searchTerm && (
           <div className="text-center py-12">
             <p className="text-muted-foreground">No projects match "{searchTerm}". Try a different search term.</p>
+          </div>
+        )}
+
+        {projects.length > 0 && filteredProjects.length === 0 && !searchTerm && showArchived && (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">No archived projects yet. Complete and archive projects to organize your workflow.</p>
           </div>
         )}
       </div>
