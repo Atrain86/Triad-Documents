@@ -299,9 +299,16 @@ Thank you for your business!
 Best regards,
 ${invoiceData.businessName}`;
 
-    // Create mailto URL (works more reliably than Gmail direct link)
+    // Create mailto URL and open in new window/tab
     const mailtoUrl = `mailto:${invoiceData.clientEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.location.href = mailtoUrl;
+    
+    // Try multiple methods for better compatibility
+    try {
+      window.open(mailtoUrl);
+    } catch (error) {
+      // Fallback to location.href
+      window.location.href = mailtoUrl;
+    }
     
     const attachmentInstructions = hasReceiptAttachments 
       ? "Download the PDF invoice first, then manually attach any receipt files from your Files section to the email."
@@ -765,11 +772,10 @@ ${invoiceData.businessName}`;
                     </div>
 
                     <div className="border-t border-gray-600 pt-3">
-                      <div className="flex justify-between text-xl font-bold">
-                        <span className="text-white">Total</span>
-                        <span className="px-4 py-2 rounded-lg text-white" style={{ backgroundColor: brandColors.primary }}>
-                          ${calculateTotal().toFixed(2)}
-                        </span>
+                      <div className="flex justify-center">
+                        <div className="px-6 py-3 rounded-lg text-center text-xl font-bold text-white" style={{ backgroundColor: '#059669', minWidth: '200px' }}>
+                          Total: ${calculateTotal().toFixed(2)}
+                        </div>
                       </div>
                     </div>
                   </div>
