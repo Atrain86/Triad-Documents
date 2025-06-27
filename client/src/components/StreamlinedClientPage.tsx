@@ -25,6 +25,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const [notes, setNotes] = useState('');
   const [showPhotoCarousel, setShowPhotoCarousel] = useState(false);
   const [carouselIndex, setCarouselIndex] = useState(0);
+  const [selectedPhotos, setSelectedPhotos] = useState<Set<number>>(new Set());
+  const [isSelecting, setIsSelecting] = useState(false);
+  const [touchStarted, setTouchStarted] = useState(false);
   
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const receiptInputRef = useRef<HTMLInputElement>(null);
@@ -96,6 +99,25 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     },
     onError: (error) => {
       console.error('Photo deletion failed:', error);
+    }
+  });
+
+  const deleteSelectedPhotosMutation = useMutation({
+    mutationFn: async (photoIds: number[]) => {
+      const results = await Promise.allSettled(
+        photoIds.map(id => 
+          apiRequest('DELETE', `/api/projects/${projectId}/photos/${id}`)
+        )
+      );
+      return results;
+    },
+    onSuccess: () => {
+      setSelectedPhotos(new Set());
+      setIsSelecting(false);
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
+    },
+    onError: (error) => {
+      console.error('Bulk photo deletion failed:', error);
     }
   });
 
@@ -194,6 +216,54 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     }
   };
 
+  const handlePhotoTouchStart = (photoId: number, e: React.TouchEvent | React.MouseEvent) => {
+    e.preventDefault();
+    setTouchStarted(true);
+    setIsSelecting(true);
+    togglePhotoSelection(photoId);
+  };
+
+  const handlePhotoTouchMove = (photoId: number, e: React.TouchEvent | React.MouseEvent) => {
+    if (!touchStarted || !isSelecting) return;
+    e.preventDefault();
+    
+    // Add photo to selection if not already selected
+    if (!selectedPhotos.has(photoId)) {
+      setSelectedPhotos(prev => {
+        const newSet = new Set(prev);
+        newSet.add(photoId);
+        return newSet;
+      });
+    }
+  };
+
+  const handlePhotoTouchEnd = () => {
+    setTouchStarted(false);
+  };
+
+  const togglePhotoSelection = (photoId: number) => {
+    setSelectedPhotos(prev => {
+      const newSelection = new Set(prev);
+      if (newSelection.has(photoId)) {
+        newSelection.delete(photoId);
+      } else {
+        newSelection.add(photoId);
+      }
+      return newSelection;
+    });
+  };
+
+  const clearSelection = () => {
+    setSelectedPhotos(new Set());
+    setIsSelecting(false);
+  };
+
+  const deleteSelectedPhotos = () => {
+    if (selectedPhotos.size > 0) {
+      deleteSelectedPhotosMutation.mutate(Array.from(selectedPhotos));
+    }
+  };
+
   const openPhotoCarousel = (index: number) => {
     setCarouselIndex(index);
     setShowPhotoCarousel(true);
@@ -283,38 +353,96 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           )}
         </div>
 
+        {/* Selection Toolbar */}
+        {selectedPhotos.size > 0 && (
+          <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-between">
+            <span className="text-sm font-medium">
+              {selectedPhotos.size} photo{selectedPhotos.size !== 1 ? 's' : ''} selected
+            </span>
+            <div className="flex gap-2">
+              <Button
+                onClick={clearSelection}
+                variant="outline"
+                size="sm"
+              >
+                Clear
+              </Button>
+              <Button
+                onClick={deleteSelectedPhotos}
+                disabled={deleteSelectedPhotosMutation.isPending}
+                variant="destructive"
+                size="sm"
+              >
+                {deleteSelectedPhotosMutation.isPending ? 'Deleting...' : 'Delete Selected'}
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Photo Thumbnails Grid */}
         {photos.length > 0 && (
           <div className="mb-7">
             <div className="flex items-center gap-2 mb-4 text-muted-foreground">
               <Camera size={16} />
               <span className="font-medium">Photos ({photos.length})</span>
+              {selectedPhotos.size === 0 && (
+                <span className="text-xs text-muted-foreground ml-2">
+                  Long press and drag to select multiple
+                </span>
+              )}
             </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div 
+              className="grid grid-cols-3 gap-3"
+              onTouchEnd={handlePhotoTouchEnd}
+              onMouseUp={handlePhotoTouchEnd}
+            >
               {photos.map((photo, index) => (
                 <div
                   key={photo.id}
-                  className="aspect-square rounded-lg overflow-hidden cursor-pointer border-2 border-transparent hover:border-blue-500 transition-all relative group"
+                  className={`aspect-square rounded-lg overflow-hidden cursor-pointer border-2 transition-all relative group ${
+                    selectedPhotos.has(photo.id) 
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
+                      : 'border-transparent hover:border-blue-500'
+                  }`}
+                  onTouchStart={(e) => handlePhotoTouchStart(photo.id, e)}
+                  onMouseDown={(e) => handlePhotoTouchStart(photo.id, e)}
+                  onTouchMove={(e) => handlePhotoTouchMove(photo.id, e)}
+                  onMouseEnter={(e) => touchStarted && handlePhotoTouchMove(photo.id, e)}
                 >
                   <img
                     src={`/uploads/${photo.filename}`}
                     alt={photo.description || photo.originalName}
-                    className="w-full h-full object-cover"
-                    onClick={() => openPhotoCarousel(index)}
+                    className={`w-full h-full object-cover ${selectedPhotos.has(photo.id) ? 'opacity-80' : ''}`}
+                    onClick={(e) => {
+                      if (!isSelecting) {
+                        openPhotoCarousel(index);
+                      }
+                    }}
                     onError={(e) => console.error('Image failed to load:', photo.filename)}
                     onLoad={() => console.log('Image loaded successfully:', photo.filename)}
                   />
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      deletePhotoMutation.mutate(photo.id);
-                    }}
-                    disabled={deletePhotoMutation.isPending}
-                    className="absolute top-2 right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                    title="Delete photo"
-                  >
-                    <X size={14} />
-                  </button>
+                  
+                  {/* Selection Indicator */}
+                  {selectedPhotos.has(photo.id) && (
+                    <div className="absolute top-2 left-2 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                      ✓
+                    </div>
+                  )}
+                  
+                  {/* Individual Delete Button (hidden during selection) */}
+                  {!isSelecting && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deletePhotoMutation.mutate(photo.id);
+                      }}
+                      disabled={deletePhotoMutation.isPending}
+                      className="absolute top-2 right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                      title="Delete photo"
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
