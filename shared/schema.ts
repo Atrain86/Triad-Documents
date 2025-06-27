@@ -54,6 +54,14 @@ export const dailyHours = pgTable("daily_hours", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const toolsChecklist = pgTable("tools_checklist", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").notNull(),
+  toolName: text("tool_name").notNull(),
+  isCompleted: integer("is_completed").default(0), // 0 = unchecked, 1 = checked
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const insertProjectSchema = createInsertSchema(projects).omit({
   id: true,
   createdAt: true,
@@ -74,6 +82,11 @@ export const insertDailyHoursSchema = createInsertSchema(dailyHours).omit({
   createdAt: true,
 });
 
+export const insertToolsChecklistSchema = createInsertSchema(toolsChecklist).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type InsertProject = z.infer<typeof insertProjectSchema>;
 export type Project = typeof projects.$inferSelect;
 export type InsertPhoto = z.infer<typeof insertPhotoSchema>;
@@ -82,3 +95,5 @@ export type InsertReceipt = z.infer<typeof insertReceiptSchema>;
 export type Receipt = typeof receipts.$inferSelect;
 export type InsertDailyHours = z.infer<typeof insertDailyHoursSchema>;
 export type DailyHours = typeof dailyHours.$inferSelect;
+export type InsertToolsChecklist = z.infer<typeof insertToolsChecklistSchema>;
+export type ToolsChecklist = typeof toolsChecklist.$inferSelect;

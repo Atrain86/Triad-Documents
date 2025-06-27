@@ -1,11 +1,11 @@
 import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Camera, FileText, ArrowLeft, Edit3, Download, X, Image as ImageIcon, DollarSign, Calendar, Trash2 } from 'lucide-react';
+import { Camera, FileText, ArrowLeft, Edit3, Download, X, Image as ImageIcon, DollarSign, Calendar, Trash2, Wrench, Plus, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { apiRequest } from '@/lib/queryClient';
-import type { Project, Photo, Receipt } from '@shared/schema';
+import type { Project, Photo, Receipt, ToolsChecklist } from '@shared/schema';
 // Improved file list component inspired by the PDF uploader
 function SimpleFilesList({ projectId }: { projectId: number }) {
   const queryClient = useQueryClient();
@@ -104,6 +104,7 @@ const aframeTheme = {
 
 export default function StreamlinedClientPage({ projectId, onBack }: StreamlinedClientPageProps) {
   const [notes, setNotes] = useState('');
+  const [newTool, setNewTool] = useState('');
   const [showPhotoCarousel, setShowPhotoCarousel] = useState(false);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [selectedPhotos, setSelectedPhotos] = useState<Set<number>>(new Set());
@@ -129,6 +130,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const { data: receipts = [] } = useQuery<Receipt[]>({
     queryKey: [`/api/projects/${projectId}/receipts`],
+  });
+
+  const { data: tools = [] } = useQuery<ToolsChecklist[]>({
+    queryKey: [`/api/projects/${projectId}/tools`],
   });
 
   const photoUploadMutation = useMutation({
@@ -288,6 +293,37 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
+    }
+  });
+
+  const addToolMutation = useMutation({
+    mutationFn: async (toolName: string) => {
+      const response = await apiRequest('POST', `/api/projects/${projectId}/tools`, { toolName });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/tools`] });
+      setNewTool('');
+    }
+  });
+
+  const toggleToolMutation = useMutation({
+    mutationFn: async ({ toolId, isCompleted }: { toolId: number; isCompleted: number }) => {
+      const response = await apiRequest('PUT', `/api/tools/${toolId}`, { isCompleted });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/tools`] });
+    }
+  });
+
+  const deleteToolMutation = useMutation({
+    mutationFn: async (toolId: number) => {
+      const response = await apiRequest('DELETE', `/api/tools/${toolId}`);
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/tools`] });
     }
   });
 
@@ -463,7 +499,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             <ArrowLeft size={20} />
           </Button>
           <div>
-            <h1 className="text-2xl font-semibold mb-1">{project.clientName || 'Unnamed Client'}</h1>
+            <h1 className="text-2xl font-semibold mb-1">{project.clientName || project.address || 'New Project'}</h1>
             <p className="text-sm text-muted-foreground">{project.address}</p>
           </div>
         </div>
@@ -502,6 +538,78 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           </div>
         </div>
 
+        {/* Tools Checklist Section */}
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4 text-muted-foreground">
+            <Wrench size={16} />
+            <span className="font-medium">Tools Checklist</span>
+          </div>
+          
+          {/* Add Tool Input */}
+          <div className="flex gap-2 mb-4">
+            <input
+              type="text"
+              value={newTool}
+              onChange={(e) => setNewTool(e.target.value)}
+              placeholder="Add a tool (e.g. Paint brushes, Drop cloths, Ladder...)"
+              className="flex-1 px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-background"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && newTool.trim()) {
+                  addToolMutation.mutate(newTool.trim());
+                }
+              }}
+            />
+            <Button
+              onClick={() => newTool.trim() && addToolMutation.mutate(newTool.trim())}
+              disabled={!newTool.trim() || addToolMutation.isPending}
+              size="sm"
+              className="px-3"
+            >
+              <Plus size={16} />
+            </Button>
+          </div>
+
+          {/* Tools List */}
+          <div className="h-48 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg p-3 space-y-2">
+            {tools.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                No tools added yet. Add tools you need to bring to this job.
+              </p>
+            ) : (
+              tools.map((tool) => (
+                <div key={tool.id} className="flex items-center gap-3 group">
+                  <button
+                    onClick={() => toggleToolMutation.mutate({ 
+                      toolId: tool.id, 
+                      isCompleted: tool.isCompleted ? 0 : 1 
+                    })}
+                    className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                      tool.isCompleted 
+                        ? 'bg-green-500 border-green-500 text-white' 
+                        : 'border-gray-300 dark:border-gray-600 hover:border-green-500'
+                    }`}
+                  >
+                    {tool.isCompleted && <Check size={12} />}
+                  </button>
+                  <span className={`flex-1 text-sm ${
+                    tool.isCompleted 
+                      ? 'text-muted-foreground line-through' 
+                      : 'text-foreground'
+                  }`}>
+                    {tool.toolName}
+                  </span>
+                  <button
+                    onClick={() => deleteToolMutation.mutate(tool.id)}
+                    className="opacity-0 group-hover:opacity-100 p-1 text-red-500 hover:text-red-700 transition-opacity"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
         {/* Notes Section */}
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4 text-muted-foreground">
@@ -513,7 +621,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             onChange={(e) => setNotes(e.target.value)}
             onBlur={handleNotesBlur}
             placeholder="Add project notes, client preferences, or special instructions..."
-            className="w-full min-h-24 resize-none rounded-lg border border-gray-200 dark:border-gray-700 p-3 text-sm"
+            className="w-full min-h-96 resize-none rounded-lg border border-gray-200 dark:border-gray-700 p-3 text-sm"
           />
         </div>
 
