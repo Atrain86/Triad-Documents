@@ -112,6 +112,7 @@ This is a full-stack web application designed for managing painting projects. Th
 - June 27, 2025. Simplified upload interface as requested: Removed camera capture functionality and consolidated to two direct-access buttons. Photos button (burnt orange #EA580C) opens photo library directly, Files button (vintage blue #1E40AF) opens file directory. Eliminated complexity while preserving all working upload functionality.
 - June 27, 2025. Fixed PDF upload functionality: Files button now successfully accepts .pdf, .doc, .docx, and .txt files with proper server support. Added visual labels under buttons for clarity. Addressed iOS Safari menu limitation with improved user experience design.
 - June 27, 2025. Completed upload interface optimization: Successfully resolved FileList persistence issues and schema validation problems. PDF uploads now working perfectly with proper receipt creation in database. Both Photos and Files buttons fully functional with streamlined two-button interface.
+- June 27, 2025. Debug session paused: Identified core issue preventing file display. PDFs upload successfully to database (9 files stored) but SimpleFilesList component receives project data instead of receipt data from query. Backend API working correctly, frontend query routing issue needs resolution. Created DEBUG-SNAPSHOT.md for continuation.
 
 ## User Preferences
 
