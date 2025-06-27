@@ -85,6 +85,20 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     }
   });
 
+  const deletePhotoMutation = useMutation({
+    mutationFn: async (photoId: number) => {
+      const response = await apiRequest('DELETE', `/api/projects/${projectId}/photos/${photoId}`);
+      if (!response.ok) throw new Error('Failed to delete photo');
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
+    },
+    onError: (error) => {
+      console.error('Photo deletion failed:', error);
+    }
+  });
+
   const receiptUploadMutation = useMutation({
     mutationFn: async (files: FileList) => {
       const formData = new FormData();
@@ -280,16 +294,27 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
               {photos.map((photo, index) => (
                 <div
                   key={photo.id}
-                  onClick={() => openPhotoCarousel(index)}
-                  className="aspect-square rounded-lg overflow-hidden cursor-pointer border-2 border-transparent hover:border-blue-500 transition-all"
+                  className="aspect-square rounded-lg overflow-hidden cursor-pointer border-2 border-transparent hover:border-blue-500 transition-all relative group"
                 >
                   <img
                     src={`/uploads/${photo.filename}`}
                     alt={photo.description || photo.originalName}
                     className="w-full h-full object-cover"
+                    onClick={() => openPhotoCarousel(index)}
                     onError={(e) => console.error('Image failed to load:', photo.filename)}
                     onLoad={() => console.log('Image loaded successfully:', photo.filename)}
                   />
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deletePhotoMutation.mutate(photo.id);
+                    }}
+                    disabled={deletePhotoMutation.isPending}
+                    className="absolute top-2 right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                    title="Delete photo"
+                  >
+                    <X size={14} />
+                  </button>
                 </div>
               ))}
             </div>

@@ -168,15 +168,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/photos/:id', async (req, res) => {
+  app.delete('/api/projects/:projectId/photos/:id', async (req, res) => {
     try {
       const id = parseInt(req.params.id);
+      
+      // Get photo info before deleting to access filename
+      const photos = await storage.getProjectPhotos(parseInt(req.params.projectId));
+      const photo = photos.find(p => p.id === id);
+      
+      if (!photo) {
+        return res.status(404).json({ error: 'Photo not found' });
+      }
+      
+      // Delete from database
       const deleted = await storage.deletePhoto(id);
       if (!deleted) {
         return res.status(404).json({ error: 'Photo not found' });
       }
+      
+      // Delete physical file
+      try {
+        const filePath = path.join(uploadDir, photo.filename);
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+          console.log('Deleted photo file:', photo.filename);
+        }
+      } catch (fileError) {
+        console.error('Failed to delete photo file:', fileError);
+        // Continue anyway - database deletion succeeded
+      }
+      
       res.status(204).send();
     } catch (error) {
+      console.error('Photo deletion error:', error);
       res.status(500).json({ error: 'Failed to delete photo' });
     }
   });
