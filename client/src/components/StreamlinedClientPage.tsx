@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Camera, FileText, ArrowLeft, Edit3, Download, X } from 'lucide-react';
+import { Camera, FileText, ArrowLeft, Edit3, Download, X, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
@@ -227,8 +227,23 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             <Camera size={28} color="white" />
             <input
               type="file"
-              accept="image/*,.heic"
+              accept="image/*,image/heic,image/heif,.heic,.heif"
               capture="environment"
+              onChange={handlePhotoUpload}
+              multiple
+              className="hidden"
+            />
+          </label>
+          
+          <label
+            className="w-16 h-16 rounded-full border-none cursor-pointer flex items-center justify-center transition-transform hover:scale-105 shadow-lg"
+            style={{ background: aframeTheme.gradients.accent }}
+            title="Photo Library"
+          >
+            <ImageIcon size={28} color="white" />
+            <input
+              type="file"
+              accept="image/*,image/heic,image/heif,.heic,.heif"
               onChange={handlePhotoUpload}
               multiple
               className="hidden"
