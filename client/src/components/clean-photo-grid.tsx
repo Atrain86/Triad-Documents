@@ -108,12 +108,15 @@ export default function CleanPhotoGrid({ projectId }: CleanPhotoGridProps) {
     return Math.sqrt(dx * dx + dy * dy);
   };
 
-  // Touch handlers for pinch-to-zoom
+  // Mobile-optimized touch handlers
   const handleTouchStart = (e: React.TouchEvent) => {
-    console.log('Touch start:', e.touches.length, 'fingers');
-    if (e.touches.length === 2) {
+    const touchCount = e.touches.length;
+    console.log('Touch start:', touchCount, 'fingers');
+    
+    if (touchCount === 2) {
       // Two fingers - start pinch zoom
       e.preventDefault();
+      e.stopPropagation();
       console.log('Starting pinch zoom');
       const touch1 = e.touches[0];
       const touch2 = e.touches[1];
@@ -124,7 +127,7 @@ export default function CleanPhotoGrid({ projectId }: CleanPhotoGridProps) {
       setInitialPinchDistance(distance);
       setInitialZoom(zoom);
       console.log('Initial pinch distance:', distance);
-    } else if (e.touches.length === 1 && zoom > 1) {
+    } else if (touchCount === 1 && zoom > 1) {
       // One finger on zoomed image - start pan
       e.preventDefault();
       console.log('Starting pan');
@@ -137,9 +140,12 @@ export default function CleanPhotoGrid({ projectId }: CleanPhotoGridProps) {
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (e.touches.length === 2 && initialPinchDistance > 0) {
+    const touchCount = e.touches.length;
+    
+    if (touchCount === 2 && initialPinchDistance > 0) {
       // Two fingers - pinch zoom
       e.preventDefault();
+      e.stopPropagation();
       const touch1 = e.touches[0];
       const touch2 = e.touches[1];
       const currentDistance = Math.sqrt(
@@ -147,15 +153,15 @@ export default function CleanPhotoGrid({ projectId }: CleanPhotoGridProps) {
         Math.pow(touch1.clientY - touch2.clientY, 2)
       );
       const scale = currentDistance / initialPinchDistance;
-      const newZoom = Math.min(3, Math.max(1, initialZoom * scale));
-      console.log('Pinch zoom scale:', scale, 'new zoom:', newZoom);
+      const newZoom = Math.min(5, Math.max(1, initialZoom * scale));
+      console.log('Pinch zoom scale:', scale.toFixed(2), 'new zoom:', newZoom.toFixed(2));
       setZoom(newZoom);
       
       // Reset pan if zooming out to 1x
       if (newZoom <= 1) {
         setPanPosition({ x: 0, y: 0 });
       }
-    } else if (e.touches.length === 1 && isDragging && zoom > 1) {
+    } else if (touchCount === 1 && isDragging && zoom > 1) {
       // One finger - pan
       e.preventDefault();
       setPanPosition({
@@ -166,8 +172,25 @@ export default function CleanPhotoGrid({ projectId }: CleanPhotoGridProps) {
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
+    console.log('Touch end');
     setIsDragging(false);
-    setInitialPinchDistance(0);
+    if (e.touches.length === 0) {
+      setInitialPinchDistance(0);
+    }
+  };
+
+  // Crop to screen edges function
+  const handleCropToScreen = () => {
+    if (photos.length === 0 || selectedPhotoIndex < 0) return;
+    
+    const currentPhoto = photos[selectedPhotoIndex];
+    console.log('Cropping to screen edges with zoom:', zoom);
+    console.log('Pan position:', panPosition);
+    console.log('Current photo:', currentPhoto?.originalName);
+    
+    // For now, just show an alert to confirm the feature works
+    // In a real implementation, this would capture the visible area
+    alert(`Crop feature triggered!\nPhoto: ${currentPhoto?.originalName}\nZoom: ${zoom.toFixed(2)}x\nPan: ${panPosition.x}, ${panPosition.y}\n\nThis would crop the image to the current screen view.`);
   };
 
   // Mouse wheel zoom for desktop
@@ -281,11 +304,22 @@ export default function CleanPhotoGrid({ projectId }: CleanPhotoGridProps) {
               <button 
                 onClick={handleZoomIn}
                 className="p-3 hover:bg-gray-600 rounded-lg bg-gray-700 text-white transition-colors"
-                disabled={zoom >= 3}
+                disabled={zoom >= 5}
                 title="Zoom In"
               >
                 <ZoomIn className="w-6 h-6" />
               </button>
+              {zoom > 1 && (
+                <button 
+                  onClick={handleCropToScreen}
+                  className="p-3 hover:bg-orange-600 rounded-lg bg-orange-500 text-white transition-colors font-medium ml-2"
+                  title="Crop to Screen Edges"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 3v4a1 1 0 001 1h4m0-5L9 6m8 0v5a1 1 0 01-1 1h-4m5-6l-3 3m-10 4v4a1 1 0 001 1h4m-5-5l3 3m8 0v5a1 1 0 01-1 1h-4m5-5l-3 3" />
+                  </svg>
+                </button>
+              )}
             </div>
           </div>
           
