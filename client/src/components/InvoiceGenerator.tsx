@@ -207,34 +207,46 @@ export default function InvoiceGenerator({
       // Add main invoice page
       pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
 
-      // Add selected receipt attachments
+      // Add selected receipt attachments (only image files, not PDFs)
       if (invoiceData.selectedReceipts.size > 0) {
         const selectedReceiptsArray = Array.from(invoiceData.selectedReceipts);
         for (const receiptId of selectedReceiptsArray) {
           const receipt = receipts.find(r => r.id === receiptId);
           if (receipt?.filename) {
-            try {
-              const img = new Image();
-              img.crossOrigin = 'anonymous';
-              await new Promise((resolve, reject) => {
-                img.onload = resolve;
-                img.onerror = reject;
-                img.src = `/uploads/${receipt.filename}`;
-              });
+            // Check if it's an image file that we can embed
+            const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+            const isImage = imageExtensions.some(ext => 
+              receipt.filename.toLowerCase().includes(ext) || 
+              (receipt.originalName && receipt.originalName.toLowerCase().endsWith(ext))
+            );
 
-              pdf.addPage();
-              const receiptRatio = Math.min(pdfWidth / img.width, pdfHeight / img.height);
-              const receiptX = (pdfWidth - img.width * receiptRatio) / 2;
-              const receiptY = (pdfHeight - img.height * receiptRatio) / 2;
-              
-              pdf.addImage(img, 'JPEG', receiptX, receiptY, img.width * receiptRatio, img.height * receiptRatio);
-            } catch (error) {
-              console.error('Error adding receipt:', error);
-              toast({
-                title: "Receipt Warning",
-                description: `Could not attach receipt: ${receipt.originalName || receipt.filename}`,
-                variant: "destructive",
-              });
+            if (isImage) {
+              try {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                await new Promise((resolve, reject) => {
+                  img.onload = resolve;
+                  img.onerror = reject;
+                  img.src = `/uploads/${receipt.filename}`;
+                });
+
+                pdf.addPage();
+                const receiptRatio = Math.min(pdfWidth / img.width, pdfHeight / img.height);
+                const receiptX = (pdfWidth - img.width * receiptRatio) / 2;
+                const receiptY = (pdfHeight - img.height * receiptRatio) / 2;
+                
+                pdf.addImage(img, 'JPEG', receiptX, receiptY, img.width * receiptRatio, img.height * receiptRatio);
+              } catch (error) {
+                console.error('Error adding receipt image:', error);
+                toast({
+                  title: "Receipt Warning",
+                  description: `Could not attach receipt image: ${receipt.originalName || receipt.filename}`,
+                  variant: "destructive",
+                });
+              }
+            } else {
+              // For PDFs and other files, we can't embed them in the PDF
+              console.log(`Skipping non-image receipt: ${receipt.originalName || receipt.filename}`);
             }
           }
         }
@@ -498,7 +510,7 @@ ${invoiceData.businessName}`;
                     className="rounded"
                   />
                   <span style={{ color: darkTheme.text }}>
-                    Attach receipt photos to PDF (as additional pages)
+                    Attach receipt images to PDF (PDFs and documents cannot be embedded)
                   </span>
                 </label>
               </div>
