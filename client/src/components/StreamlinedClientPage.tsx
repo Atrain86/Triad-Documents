@@ -131,6 +131,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const receiptUploadMutation = useMutation({
     mutationFn: async (files: FileList) => {
       const uploadPromises = Array.from(files).map(async (file) => {
+        console.log(`Starting upload for ${file.name} (${file.type})`);
         const formData = new FormData();
         formData.append('receipt', file);
         formData.append('vendor', file.name);
@@ -138,19 +139,38 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         formData.append('description', `File upload: ${file.name}`);
         formData.append('date', new Date().toISOString().split('T')[0]);
         
+        console.log('FormData contents:', {
+          file: file.name,
+          vendor: file.name,
+          amount: '0',
+          description: `File upload: ${file.name}`,
+          date: new Date().toISOString().split('T')[0]
+        });
+        
         const response = await fetch(`/api/projects/${projectId}/receipts`, {
           method: 'POST',
           body: formData
         });
         
-        if (!response.ok) throw new Error(`Failed to upload ${file.name}`);
-        return response.json();
+        console.log(`Upload response for ${file.name}:`, response.status, response.statusText);
+        const responseText = await response.text();
+        console.log('Response body:', responseText);
+        
+        if (!response.ok) {
+          throw new Error(`Failed to upload ${file.name}: ${response.status} ${responseText}`);
+        }
+        
+        return JSON.parse(responseText);
       });
       
       return Promise.all(uploadPromises);
     },
-    onSuccess: () => {
+    onSuccess: (results) => {
+      console.log('All receipts uploaded successfully:', results);
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/receipts`] });
+    },
+    onError: (error) => {
+      console.error('Receipt upload failed:', error);
     }
   });
 
