@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Camera, FileText, ArrowLeft, Edit3, Download, X, Image as ImageIcon, DollarSign, Calendar, Trash2, Wrench, Plus, Check } from 'lucide-react';
+import { Camera, FileText, ArrowLeft, Edit3, Download, X, Image as ImageIcon, DollarSign, Calendar, Wrench, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
@@ -309,17 +309,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   });
 
   const toggleToolMutation = useMutation({
-    mutationFn: async ({ toolId, isCompleted }: { toolId: number; isCompleted: number }) => {
-      const response = await apiRequest('PUT', `/api/tools/${toolId}`, { isCompleted });
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/tools`] });
-    }
-  });
-
-  const deleteToolMutation = useMutation({
     mutationFn: async (toolId: number) => {
+      // Instead of toggling, we delete the tool when checked
       const response = await apiRequest('DELETE', `/api/tools/${toolId}`);
       return response;
     },
@@ -327,6 +318,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/tools`] });
     }
   });
+
+
 
   const updateStatusMutation = useMutation({
     mutationFn: async (status: string) => {
@@ -681,31 +674,15 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
               tools.map((tool) => (
                 <div key={tool.id} className="flex items-center gap-3 group">
                   <button
-                    onClick={() => toggleToolMutation.mutate({ 
-                      toolId: tool.id, 
-                      isCompleted: tool.isCompleted ? 0 : 1 
-                    })}
-                    className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
-                      tool.isCompleted === 1
-                        ? 'bg-green-500 border-green-500 text-white' 
-                        : 'border-gray-300 dark:border-gray-600 hover:border-green-500'
-                    }`}
+                    onClick={() => toggleToolMutation.mutate(tool.id)}
+                    className="w-5 h-5 rounded border-2 flex items-center justify-center transition-colors border-gray-300 dark:border-gray-600 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20"
+                    title="Click to mark as complete and remove from list"
                   >
-                    {tool.isCompleted === 1 && <Check size={12} />}
+                    {/* Empty checkbox - clicking it will delete the tool */}
                   </button>
-                  <span className={`flex-1 text-sm ${
-                    tool.isCompleted === 1
-                      ? 'text-muted-foreground line-through' 
-                      : 'text-foreground'
-                  }`}>
+                  <span className="flex-1 text-sm text-foreground">
                     {tool.toolName}
                   </span>
-                  <button
-                    onClick={() => deleteToolMutation.mutate(tool.id)}
-                    className="opacity-0 group-hover:opacity-100 p-1 text-red-500 hover:text-red-700 transition-opacity"
-                  >
-                    <Trash2 size={14} />
-                  </button>
                 </div>
               ))
             )}
