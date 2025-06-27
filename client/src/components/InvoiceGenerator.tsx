@@ -673,7 +673,7 @@ ${invoiceData.businessName}`;
                         </td>
                         <td className="px-6 py-4 text-center text-gray-300">{hourEntry.hours}hr</td>
                         <td className="px-6 py-4 text-gray-300">
-                          {hourEntry.description || 'Painting services'}
+                          {hourEntry.description || 'Painting'}
                         </td>
                         <td className="px-6 py-4 text-right font-semibold text-white">
                           ${(hourEntry.hours * (project.hourlyRate || 60)).toFixed(2)}

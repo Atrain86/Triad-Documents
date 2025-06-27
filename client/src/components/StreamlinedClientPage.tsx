@@ -529,7 +529,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       addHoursMutation.mutate({
         date: formattedDate,
         hours: parseFloat(hoursInput),
-        description: descriptionInput || 'Work performed',
+        description: descriptionInput || 'Painting',
         hourlyRate: project?.hourlyRate || 60 // Default to $60/hour
       });
     }
