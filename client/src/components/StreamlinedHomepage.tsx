@@ -23,8 +23,8 @@ const aframeTheme = {
 
 const statusConfig = {
   'in-progress': { 
-    dot: 'bg-red-500', 
-    text: 'text-red-600 dark:text-red-400',
+    dot: 'bg-green-500', 
+    text: 'text-green-600 dark:text-green-400',
     label: 'In Progress'
   },
   'pending': { 
@@ -33,8 +33,8 @@ const statusConfig = {
     label: 'Pending'
   },
   'completed': { 
-    dot: 'bg-green-500', 
-    text: 'text-green-600 dark:text-green-400',
+    dot: 'bg-orange-600', 
+    text: 'text-orange-600 dark:text-orange-400',
     label: 'Completed'
   },
   'archived': { 
@@ -204,10 +204,9 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
         <div className="flex justify-center mb-6">
           <Button
             onClick={() => setShowAddClient(true)}
-            className="px-6 py-3 text-sm font-semibold text-white hover:opacity-90"
-            style={{ backgroundColor: '#6366F1' }}
+            className="px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
+            style={{ backgroundColor: '#4F46E5' }}
           >
-            <Plus size={18} className="mr-2" />
             New Client
           </Button>
         </div>
