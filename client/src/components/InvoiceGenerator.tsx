@@ -128,15 +128,11 @@ export default function InvoiceGenerator({
               {/* Header */}
               <div className="flex justify-between items-start mb-8">
                 <div>
-                  <div className="flex items-center mb-2">
-                    <div className="flex flex-col mr-2">
-                      <div className="w-1 h-3 bg-red-500 rounded-sm"></div>
-                      <div className="w-1 h-3 bg-orange-500 rounded-sm -mt-0.5"></div>
-                      <div className="w-1 h-3 bg-yellow-500 rounded-sm -mt-0.5"></div>
-                      <div className="w-1 h-3 bg-blue-500 rounded-sm -mt-0.5"></div>
-                    </div>
-                    <h1 className="text-2xl font-bold text-blue-800">A-FRAME PAINTING</h1>
-                  </div>
+                  <img 
+                    src="/aframe-logo.png" 
+                    alt="A-Frame Painting" 
+                    className="h-12 w-auto object-contain mb-2"
+                  />
                   <p className="text-gray-600">Professional Painting Services</p>
                 </div>
                 <div className="text-right">

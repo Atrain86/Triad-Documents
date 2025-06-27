@@ -49,10 +49,9 @@ app.use((req, res, next) => {
       res.status(status).json({ message });
     });
 
-    // importantly only setup vite in development and after
-    // setting up all the other routes so the catch-all route
-    // doesn't interfere with the other routes
+    // Serve static files from public directory in development
     if (app.get("env") === "development") {
+      app.use(express.static("public"));
       await setupVite(app, server);
     } else {
       serveStatic(app);
