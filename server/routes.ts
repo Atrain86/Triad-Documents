@@ -47,9 +47,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.setHeader('Content-Type', 'image/webp');
       } else if (ext === '.heic' || ext === '.heif') {
         res.setHeader('Content-Type', 'image/heic');
+      } else if (ext === '.pdf') {
+        res.setHeader('Content-Type', 'application/pdf');
+      } else if (ext === '.txt') {
+        res.setHeader('Content-Type', 'text/plain');
+      } else if (ext === '.doc' || ext === '.docx') {
+        res.setHeader('Content-Type', 'application/msword');
       } else {
         // For files without extension, try to detect from content
-        res.setHeader('Content-Type', 'image/jpeg'); // Default fallback
+        res.setHeader('Content-Type', 'application/octet-stream'); // Generic binary
       }
     }
   }));
