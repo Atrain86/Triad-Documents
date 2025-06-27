@@ -64,6 +64,7 @@ export default function InvoiceGenerator({
     
     // Notes and payment
     notes: 'Please send e-transfer to cortespainter@gmail.com',
+    emailMessage: 'Please find attached your invoice for painting services.',
     gstRate: 0.05, // 5% GST on labor services only
     suppliesCost: 0,
     selectedReceipts: new Set<number>()
@@ -288,7 +289,7 @@ export default function InvoiceGenerator({
 
     const body = `Dear ${invoiceData.clientName},
 
-Please find attached your invoice for painting services.${receiptAttachmentNote}
+${invoiceData.emailMessage}${receiptAttachmentNote}
 
 Payment Instructions:
 ${invoiceData.notes}
@@ -435,6 +436,25 @@ ${invoiceData.businessName}`;
                     placeholder="Postal Code"
                   />
                 </div>
+              </div>
+            </div>
+
+            {/* Email Message */}
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold flex items-center" style={{ color: darkTheme.text }}>
+                <Send className="mr-2 h-5 w-5" />
+                Email Message
+              </h2>
+              <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: darkTheme.textSecondary }}>
+                  Custom message for email body
+                </label>
+                <Textarea
+                  value={invoiceData.emailMessage}
+                  onChange={(e) => setInvoiceData({...invoiceData, emailMessage: e.target.value})}
+                  className="bg-gray-900 border-gray-700 text-white min-h-20"
+                  placeholder="Enter your custom message..."
+                />
               </div>
             </div>
 
