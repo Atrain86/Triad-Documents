@@ -94,6 +94,7 @@ export default function CleanPhotoGrid({ projectId }: CleanPhotoGridProps) {
               <div key={photo.id} className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg border border-gray-200 dark:border-gray-700">
                 <button
                   onClick={() => {
+                    console.log('Photo clicked, index:', index, 'showViewer will be:', true);
                     setSelectedPhotoIndex(index);
                     setShowViewer(true);
                   }}
@@ -135,12 +136,15 @@ export default function CleanPhotoGrid({ projectId }: CleanPhotoGridProps) {
 
       {/* Zoom & Crop Viewer */}
       {showViewer && photos.length > 0 && (
-        <SimpleZoomCrop
-          photos={photos}
-          initialIndex={selectedPhotoIndex}
-          onAddCroppedPhoto={(file) => croppedUploadMutation.mutate(file)}
-          onClose={() => setShowViewer(false)}
-        />
+        <>
+          {console.log('Rendering SimpleZoomCrop with showViewer:', showViewer, 'photos.length:', photos.length, 'selectedIndex:', selectedPhotoIndex)}
+          <SimpleZoomCrop
+            photos={photos}
+            initialIndex={selectedPhotoIndex}
+            onAddCroppedPhoto={(file) => croppedUploadMutation.mutate(file)}
+            onClose={() => setShowViewer(false)}
+          />
+        </>
       )}
     </div>
   );
