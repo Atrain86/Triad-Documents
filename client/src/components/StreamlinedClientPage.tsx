@@ -27,6 +27,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [selectedPhotos, setSelectedPhotos] = useState<Set<number>>(new Set());
   const [isSelecting, setIsSelecting] = useState(false);
+  const [touchStarted, setTouchStarted] = useState(false);
+  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
   
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const receiptInputRef = useRef<HTMLInputElement>(null);
@@ -111,18 +113,20 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       return results;
     },
     onSuccess: () => {
+      // Clear selection state completely
       setSelectedPhotos(new Set());
       setIsSelecting(false);
+      setTouchStarted(false);
+      if (longPressTimer) {
+        clearTimeout(longPressTimer);
+        setLongPressTimer(null);
+      }
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
     },
     onError: (error) => {
       console.error('Bulk photo deletion failed:', error);
     }
   });
-
-
-
-
 
   const receiptUploadMutation = useMutation({
     mutationFn: async (files: FileList) => {
@@ -219,9 +223,54 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     }
   };
 
+  const handlePhotoTouchStart = (photoId: number, e: React.TouchEvent | React.MouseEvent) => {
+    // Clear any existing timer
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+    }
+    
+    setTouchStarted(true);
+    
+    // Set a timer for long press detection (500ms)
+    const timer = setTimeout(() => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsSelecting(true);
+      setSelectedPhotos(new Set([photoId]));
+    }, 500);
+    
+    setLongPressTimer(timer);
+  };
 
+  const handlePhotoTouchMove = (photoId: number, e: React.TouchEvent | React.MouseEvent) => {
+    if (!isSelecting || !touchStarted) return;
+    
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Add photo to selection if not already selected
+    setSelectedPhotos(prev => {
+      const newSet = new Set(prev);
+      newSet.add(photoId);
+      return newSet;
+    });
+  };
 
-
+  const handlePhotoTouchEnd = (e: React.TouchEvent | React.MouseEvent) => {
+    // Clear the long press timer
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    }
+    
+    setTouchStarted(false);
+    
+    // If we weren't in selection mode, this was just a tap
+    if (!isSelecting) {
+      // Let the click event handle opening carousel
+      return;
+    }
+  };
 
   const togglePhotoSelection = (photoId: number) => {
     setSelectedPhotos(prev => {
@@ -238,6 +287,11 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const clearSelection = () => {
     setSelectedPhotos(new Set());
     setIsSelecting(false);
+    setTouchStarted(false);
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    }
   };
 
   const deleteSelectedPhotos = () => {
@@ -335,8 +389,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           )}
         </div>
 
-
-
         {/* Selection Toolbar */}
         {selectedPhotos.size > 0 && (
           <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-between">
@@ -366,20 +418,25 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         {/* Photo Thumbnails Grid */}
         {photos.length > 0 && (
           <div className="mb-7">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Camera size={16} />
-                <span className="font-medium">Photos ({photos.length})</span>
-              </div>
-              <Button
-                onClick={() => setIsSelecting(!isSelecting)}
-                variant="outline"
-                size="sm"
-              >
-                {isSelecting ? 'Done' : 'Select'}
-              </Button>
+            <div className="flex items-center gap-2 mb-4 text-muted-foreground">
+              <Camera size={16} />
+              <span className="font-medium">Photos ({photos.length})</span>
+              {selectedPhotos.size === 0 && !isSelecting && (
+                <span className="text-xs text-muted-foreground ml-2">
+                  Long press and drag to select multiple
+                </span>
+              )}
+              {isSelecting && selectedPhotos.size === 0 && (
+                <span className="text-xs text-blue-600 dark:text-blue-400 ml-2">
+                  Selection mode active - tap photos to select
+                </span>
+              )}
             </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div 
+              className="grid grid-cols-3 gap-3"
+              onTouchEnd={(e) => handlePhotoTouchEnd(e)}
+              onMouseUp={(e) => handlePhotoTouchEnd(e)}
+            >
               {photos.map((photo, index) => (
                 <div
                   key={photo.id}
@@ -388,8 +445,14 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                       ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
                       : 'border-transparent hover:border-blue-500'
                   }`}
-                  onClick={() => {
+                  onTouchStart={(e) => handlePhotoTouchStart(photo.id, e)}
+                  onMouseDown={(e) => handlePhotoTouchStart(photo.id, e)}
+                  onTouchMove={(e) => handlePhotoTouchMove(photo.id, e)}
+                  onMouseEnter={(e) => touchStarted && handlePhotoTouchMove(photo.id, e)}
+                  onClick={(e) => {
                     if (isSelecting) {
+                      e.preventDefault();
+                      e.stopPropagation();
                       togglePhotoSelection(photo.id);
                     } else {
                       openPhotoCarousel(index);
@@ -405,7 +468,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                     onLoad={() => console.log('Image loaded successfully:', photo.filename)}
                   />
                   
-                  {/* Selection Checkmark */}
+                  {/* Selection Indicator */}
                   {selectedPhotos.has(photo.id) && (
                     <div className="absolute top-2 left-2 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
                       ✓

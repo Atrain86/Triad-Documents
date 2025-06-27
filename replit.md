@@ -108,7 +108,6 @@ This is a full-stack web application designed for managing painting projects. Th
 - June 26, 2025. Photo upload debugging session: Confirmed existing photos work perfectly (10 photos in project 1 with functional carousel). Photo upload failing for new uploads despite successful file selection. Added comprehensive debugging to track FormData construction and transmission. Issue appears to be in file transfer between frontend and backend. Session paused to manage costs.
 - June 26, 2025. Applied ChatGPT's suggested photo upload improvements and fixed camera functionality. Added capture="environment" attribute and error handling. Ready for deployment as camera issues may be resolved in production environment with proper HTTPS and file permissions.
 - June 27, 2025. Fixed critical photo upload bug by solving FileList persistence issue. Implemented stable file capture system that prevents files from becoming empty during upload process. Added HEIC support for iPhone photos including .heic and .heif formats. Photo uploads now working reliably for JPEG, PNG, GIF, WebP, and HEIC files with proper MIME type handling.
-- June 27, 2025. Fixed app startup issues by improving Neon database connection configuration and error handling. Reverted photo selection functionality to simple, working version after complex multi-select logic caused buggy behavior with inconsistent checkmarks and X buttons. Photos now work reliably with basic click-to-view and hover-to-delete functionality.
 
 ## User Preferences
 
@@ -116,4 +115,3 @@ Preferred communication style: Simple, everyday language.
 Brand name: A-Frame Painting
 Theme preference: Dark mode by default
 Logo: Custom A-frame house structure with paint brush accent
-Development workflow: Always check with user before creating new versions or making changes to working functionality
