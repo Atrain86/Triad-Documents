@@ -297,11 +297,17 @@ cortespainter@gmail.com
 884 Hayes Rd, Manson's Landing, BC V0P1K0`;
 
     try {
-      // Create Gmail compose URL
-      const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(invoiceData.clientEmail)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(textBody)}`;
+      // Generate PDF first
+      await generatePDF();
       
-      // Open Gmail compose in new tab
-      window.open(gmailComposeUrl, '_blank');
+      // Wait a moment for PDF to be ready
+      setTimeout(() => {
+        // Create Gmail compose URL
+        const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(invoiceData.clientEmail)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(textBody)}`;
+        
+        // Open Gmail compose in new tab
+        window.open(gmailComposeUrl, '_blank');
+      }, 1000);
       
       // Also copy to clipboard as backup
       const emailContent = `To: ${invoiceData.clientEmail}
@@ -312,8 +318,8 @@ ${textBody}`;
       await navigator.clipboard.writeText(emailContent);
       
       toast({
-        title: "Gmail Opened!",
-        description: "Gmail compose window opened with your invoice. Email content also copied to clipboard as backup.",
+        title: "PDF Generated & Gmail Opened!",
+        description: "PDF downloaded and Gmail opened with email content. Please attach the downloaded PDF to your email.",
       });
 
     } catch (error) {
