@@ -110,6 +110,7 @@ This is a full-stack web application designed for managing painting projects. Th
 - June 27, 2025. Fixed critical photo upload bug by solving FileList persistence issue. Implemented stable file capture system that prevents files from becoming empty during upload process. Added HEIC support for iPhone photos including .heic and .heif formats. Photo uploads now working reliably for JPEG, PNG, GIF, WebP, and HEIC files with proper MIME type handling.
 - June 27, 2025. Created comprehensive code snapshot and backup system. All critical functionality is now preserved in `backups/working-snapshot/` directory and documented in `SNAPSHOT-BACKUP.md`. Established safe development process for adding moderate improvements without breaking existing features. App is stable and ready for careful enhancement.
 - June 27, 2025. Simplified upload interface as requested: Removed camera capture functionality and consolidated to two direct-access buttons. Photos button (burnt orange #EA580C) opens photo library directly, Files button (vintage blue #1E40AF) opens file directory. Eliminated complexity while preserving all working upload functionality.
+- June 27, 2025. Fixed PDF upload functionality: Files button now successfully accepts .pdf, .doc, .docx, and .txt files with proper server support. Added visual labels under buttons for clarity. Addressed iOS Safari menu limitation with improved user experience design.
 
 ## User Preferences
 

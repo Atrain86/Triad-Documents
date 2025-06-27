@@ -217,7 +217,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   };
 
   const handleReceiptUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('Receipt upload triggered:', e.target.files?.length, 'files');
     if (e.target.files && e.target.files.length > 0) {
+      console.log('Files selected for receipt upload:', Array.from(e.target.files).map(f => `${f.name} (${f.type})`));
       receiptUploadMutation.mutate(e.target.files);
       e.target.value = '';
     }
@@ -345,30 +347,36 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         </div>
 
         <div className="flex gap-5 mb-8 justify-center">
-          <label
-            className="w-16 h-16 rounded-full border-none cursor-pointer flex items-center justify-center transition-transform hover:scale-105 shadow-lg"
-            style={{ backgroundColor: '#EA580C' }}
-            title="Photos"
-          >
-            <Camera size={28} color="white" />
-            <input
-              type="file"
-              accept=".jpg,.jpeg,.png,.gif,.webp,.heic,.heif"
-              onChange={handlePhotoUpload}
-              multiple
-              className="hidden"
-            />
-          </label>
+          <div className="flex flex-col items-center">
+            <label
+              className="w-16 h-16 rounded-full border-none cursor-pointer flex items-center justify-center transition-transform hover:scale-105 shadow-lg"
+              style={{ backgroundColor: '#EA580C' }}
+              title="Photos"
+            >
+              <Camera size={28} color="white" />
+              <input
+                type="file"
+                accept=".jpg,.jpeg,.png,.gif,.webp,.heic,.heif"
+                onChange={handlePhotoUpload}
+                multiple
+                className="hidden"
+              />
+            </label>
+            <span className="text-xs text-center mt-2 text-muted-foreground">Photos</span>
+          </div>
 
-          <button
-            onClick={handleReceiptClick}
-            disabled={receiptUploadMutation.isPending}
-            className="w-16 h-16 rounded-full border-none cursor-pointer flex items-center justify-center transition-transform hover:scale-105 shadow-lg"
-            style={{ backgroundColor: '#1E40AF' }}
-            title="Files"
-          >
-            <FileText size={28} color="white" />
-          </button>
+          <div className="flex flex-col items-center">
+            <button
+              onClick={handleReceiptClick}
+              disabled={receiptUploadMutation.isPending}
+              className="w-16 h-16 rounded-full border-none cursor-pointer flex items-center justify-center transition-transform hover:scale-105 shadow-lg"
+              style={{ backgroundColor: '#1E40AF' }}
+              title="Files"
+            >
+              <FileText size={28} color="white" />
+            </button>
+            <span className="text-xs text-center mt-2 text-muted-foreground">Files</span>
+          </div>
         </div>
 
         {/* Debug info - temporary */}
@@ -522,7 +530,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       <input
         ref={receiptInputRef}
         type="file"
-        accept=".pdf,.doc,.docx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+        accept=".pdf,.doc,.docx,.txt"
         onChange={handleReceiptUpload}
         multiple
         className="hidden"
