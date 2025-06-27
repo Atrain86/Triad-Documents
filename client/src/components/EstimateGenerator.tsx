@@ -95,28 +95,28 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     projectTitle: `${project.projectType} - ${project.clientName}`,
     projectDescription: project.notes || '',
 
-    // Default Work Stages
+    // Default Work Stages - reset to zero
     workStages: [
       {
         name: 'Surface Preparation',
         description: 'Cleaning, scraping, sanding surfaces',
-        hours: 8,
+        hours: 0,
         rate: 60,
-        total: 480,
+        total: 0,
       },
       {
         name: 'Priming',
         description: 'Apply primer coat to prepared surfaces',
-        hours: 4,
+        hours: 0,
         rate: 60,
-        total: 240,
+        total: 0,
       },
       {
         name: 'Painting',
         description: 'Apply finish coats',
-        hours: 6,
+        hours: 0,
         rate: 60,
-        total: 360,
+        total: 0,
       },
     ],
 
@@ -124,33 +124,33 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     additionalServices: [
       {
         name: 'Power Washing',
-        hours: 2,
+        hours: 0,
         rate: 100,
-        total: 200,
+        total: 0,
         included: false,
       },
       {
-        name: 'Wood Repair',
-        hours: 4,
-        rate: 80,
-        total: 320,
+        name: 'Wood Reconditioning',
+        hours: 0,
+        rate: 100,
+        total: 0,
         included: false,
       },
       {
-        name: 'Caulking & Sealing',
-        hours: 2,
+        name: 'Drywall Repair',
+        hours: 0,
         rate: 60,
-        total: 120,
+        total: 0,
         included: false,
       },
     ],
 
     // Paint Details
-    primerCoats: 1,
-    topCoats: 2,
+    primerCoats: 0,
+    topCoats: 0,
     paintSuppliedBy: 'contractor',
-    paintCost: 300,
-    deliveryCost: 50,
+    paintCost: 0,
+    deliveryCost: 0,
   });
 
   // Calculate functions
@@ -497,16 +497,16 @@ A-Frame Painting`;
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-1 block">Paint Supplied By</label>
+                  <label className="text-sm font-medium mb-1 block">Paint and Supplies</label>
                   <Select
                     value={estimateData.paintSuppliedBy}
                     onValueChange={(value: 'contractor' | 'client') => setEstimateData({...estimateData, paintSuppliedBy: value})}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="contractor">A-Frame Painting (Contractor)</SelectItem>
+                    <SelectContent className="z-50">
+                      <SelectItem value="contractor">A-Frame Painting</SelectItem>
                       <SelectItem value="client">Client</SelectItem>
                     </SelectContent>
                   </Select>
@@ -726,7 +726,7 @@ A-Frame Painting`;
             <div className="text-gray-700 space-y-1">
               <p><strong>Primer Coats:</strong> {estimateData.primerCoats}</p>
               <p><strong>Top Coats:</strong> {estimateData.topCoats}</p>
-              <p><strong>Paint Supplied By:</strong> {estimateData.paintSuppliedBy === 'contractor' ? 'A-Frame Painting' : 'Client'}</p>
+              <p><strong>Paint and Supplies:</strong> {estimateData.paintSuppliedBy === 'contractor' ? 'A-Frame Painting' : 'Client'}</p>
               {estimateData.paintSuppliedBy === 'contractor' && (
                 <>
                   <p><strong>Paint Cost:</strong> ${estimateData.paintCost.toFixed(2)}</p>
