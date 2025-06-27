@@ -233,7 +233,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const receiptData = {
         projectId,
         vendor: req.body.vendor,
-        amount: parseFloat(req.body.amount),
+        amount: req.body.amount, // Keep as string since schema expects text
         description: req.body.description || null,
         date: new Date(req.body.date),
         filename: req.file?.filename || null,
