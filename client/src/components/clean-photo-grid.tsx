@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { uploadPhoto } from "@/lib/api";
 import { type Photo } from "@shared/schema";
 import SimplifiedUpload from "@/components/simplified-upload";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from "lucide-react";
 
 interface CleanPhotoGridProps {
   projectId: number;
@@ -15,6 +15,10 @@ export default function CleanPhotoGrid({ projectId }: CleanPhotoGridProps) {
   const queryClient = useQueryClient();
   const [showViewer, setShowViewer] = useState(false);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
+  const [zoom, setZoom] = useState(1);
+  const [panPosition, setPanPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
   // Fetch photos with aggressive refresh
   const { data: photos = [], isLoading, refetch } = useQuery<Photo[]>({
@@ -53,6 +57,45 @@ export default function CleanPhotoGrid({ projectId }: CleanPhotoGridProps) {
     if (files.length > 0) {
       uploadMutation.mutate(files);
     }
+  };
+
+  // Reset zoom and pan when changing photos
+  const resetZoomAndPan = () => {
+    setZoom(1);
+    setPanPosition({ x: 0, y: 0 });
+  };
+
+  // Zoom controls
+  const handleZoomIn = () => {
+    setZoom(prev => Math.min(3, prev + 0.2));
+  };
+
+  const handleZoomOut = () => {
+    setZoom(prev => Math.max(1, prev - 0.2));
+    if (zoom <= 1.2) {
+      setPanPosition({ x: 0, y: 0 }); // Reset pan when zooming out to normal
+    }
+  };
+
+  // Mouse/touch handlers for pan
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (zoom > 1) {
+      setIsDragging(true);
+      setDragStart({ x: e.clientX - panPosition.x, y: e.clientY - panPosition.y });
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging && zoom > 1) {
+      setPanPosition({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
   };
 
   if (isLoading) {
@@ -126,7 +169,10 @@ export default function CleanPhotoGrid({ projectId }: CleanPhotoGridProps) {
         <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex flex-col">
           <div className="flex justify-between items-center p-4 text-white">
             <button 
-              onClick={() => setShowViewer(false)}
+              onClick={() => {
+                setShowViewer(false);
+                resetZoomAndPan();
+              }}
               className="p-2 hover:bg-gray-700 rounded"
             >
               <X className="w-6 h-6" />
@@ -134,14 +180,46 @@ export default function CleanPhotoGrid({ projectId }: CleanPhotoGridProps) {
             <span className="text-sm">
               {selectedPhotoIndex + 1} of {photos.length}
             </span>
-            <div></div> {/* Spacer for layout balance */}
+            
+            {/* Zoom Controls */}
+            <div className="flex items-center space-x-2">
+              <button 
+                onClick={handleZoomOut}
+                className="p-2 hover:bg-gray-700 rounded"
+                disabled={zoom <= 1}
+              >
+                <ZoomOut className="w-5 h-5" />
+              </button>
+              <span className="text-xs text-gray-300 min-w-[3rem] text-center">
+                {Math.round(zoom * 100)}%
+              </span>
+              <button 
+                onClick={handleZoomIn}
+                className="p-2 hover:bg-gray-700 rounded"
+                disabled={zoom >= 3}
+              >
+                <ZoomIn className="w-5 h-5" />
+              </button>
+            </div>
           </div>
           
-          <div className="flex-1 flex items-center justify-center p-4">
+          <div 
+            className="flex-1 flex items-center justify-center p-4 overflow-hidden"
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            style={{ cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default' }}
+          >
             <img
               src={`/uploads/${photos[selectedPhotoIndex]?.filename}`}
               alt={photos[selectedPhotoIndex]?.originalName}
-              className="max-w-full max-h-full object-contain"
+              className="max-w-full max-h-full object-contain transition-transform duration-200"
+              style={{
+                transform: `scale(${zoom}) translate(${panPosition.x / zoom}px, ${panPosition.y / zoom}px)`,
+                transformOrigin: 'center center'
+              }}
+              draggable={false}
             />
           </div>
 
@@ -149,7 +227,10 @@ export default function CleanPhotoGrid({ projectId }: CleanPhotoGridProps) {
           {photos.length > 1 && (
             <div className="flex justify-center items-center space-x-4 p-4 bg-black bg-opacity-50">
               <button
-                onClick={() => setSelectedPhotoIndex((prev) => (prev > 0 ? prev - 1 : photos.length - 1))}
+                onClick={() => {
+                  setSelectedPhotoIndex((prev) => (prev > 0 ? prev - 1 : photos.length - 1));
+                  resetZoomAndPan();
+                }}
                 className="p-2 text-white hover:bg-gray-700 rounded"
               >
                 <ChevronLeft className="w-6 h-6" />
@@ -160,7 +241,10 @@ export default function CleanPhotoGrid({ projectId }: CleanPhotoGridProps) {
                 {photos.map((photo, index) => (
                   <button
                     key={photo.id}
-                    onClick={() => setSelectedPhotoIndex(index)}
+                    onClick={() => {
+                      setSelectedPhotoIndex(index);
+                      resetZoomAndPan();
+                    }}
                     className={`flex-shrink-0 w-16 h-16 rounded border-2 overflow-hidden ${
                       index === selectedPhotoIndex ? 'border-blue-500' : 'border-gray-600'
                     }`}
@@ -175,7 +259,10 @@ export default function CleanPhotoGrid({ projectId }: CleanPhotoGridProps) {
               </div>
               
               <button
-                onClick={() => setSelectedPhotoIndex((prev) => (prev < photos.length - 1 ? prev + 1 : 0))}
+                onClick={() => {
+                  setSelectedPhotoIndex((prev) => (prev < photos.length - 1 ? prev + 1 : 0));
+                  resetZoomAndPan();
+                }}
                 className="p-2 text-white hover:bg-gray-700 rounded"
               >
                 <ChevronRight className="w-6 h-6" />
