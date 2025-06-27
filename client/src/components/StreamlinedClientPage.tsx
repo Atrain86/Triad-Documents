@@ -13,6 +13,11 @@ import EstimateGenerator from './EstimateGenerator';
 // Improved file list component inspired by the PDF uploader
 function SimpleFilesList({ projectId }: { projectId: number }) {
   const queryClient = useQueryClient();
+  const [editingReceipt, setEditingReceipt] = useState<Receipt | null>(null);
+  const [editVendor, setEditVendor] = useState('');
+  const [editAmount, setEditAmount] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+
   const { data: receipts = [], isLoading, error } = useQuery<Receipt[]>({
     queryKey: [`/api/projects/${projectId}/receipts`],
   });
@@ -37,6 +42,50 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
     },
   });
 
+  const updateReceiptMutation = useMutation({
+    mutationFn: async ({ id, vendor, amount, description }: { id: number; vendor: string; amount: string; description: string }) => {
+      const response = await fetch(`/api/receipts/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ vendor, amount, description }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to update receipt: ${response.status}`);
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/receipts`] });
+      setEditingReceipt(null);
+    },
+    onError: (error) => {
+      console.error('Update failed:', error);
+      alert('Failed to update receipt. Please try again.');
+    },
+  });
+
+  const startEditing = (receipt: Receipt) => {
+    setEditingReceipt(receipt);
+    setEditVendor(receipt.vendor);
+    setEditAmount(receipt.amount);
+    setEditDescription(receipt.description || '');
+  };
+
+  const saveEdit = () => {
+    if (!editingReceipt || !editVendor.trim() || !editAmount.trim()) return;
+    
+    updateReceiptMutation.mutate({
+      id: editingReceipt.id,
+      vendor: editVendor,
+      amount: editAmount,
+      description: editDescription,
+    });
+  };
+
   if (isLoading) {
     return <div className="mb-8 text-center text-gray-500">Loading files...</div>;
   }
@@ -53,38 +102,105 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
       </div>
       <div className="space-y-2">
         {receipts.map((receipt) => (
-          <div key={receipt.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <div className="flex items-center gap-3">
-              <FileText size={16} className="text-blue-600" />
-              <div>
-                <div className="text-sm font-medium text-gray-900 dark:text-white">
-                  {receipt.originalName || receipt.vendor}
+          <div key={receipt.id} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            {editingReceipt?.id === receipt.id ? (
+              /* Edit Mode */
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs text-gray-600 dark:text-gray-400 block mb-1">Item/Vendor</label>
+                    <Input
+                      value={editVendor}
+                      onChange={(e) => setEditVendor(e.target.value)}
+                      placeholder="Item name or vendor"
+                      className="h-8 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-600 dark:text-gray-400 block mb-1">Amount</label>
+                    <Input
+                      value={editAmount}
+                      onChange={(e) => setEditAmount(e.target.value)}
+                      placeholder="0.00"
+                      type="number"
+                      step="0.01"
+                      className="h-8 text-sm"
+                    />
+                  </div>
                 </div>
-                <div className="text-xs text-gray-500">
-                  {receipt.description}
+                <div>
+                  <label className="text-xs text-gray-600 dark:text-gray-400 block mb-1">Description</label>
+                  <Input
+                    value={editDescription}
+                    onChange={(e) => setEditDescription(e.target.value)}
+                    placeholder="Optional description"
+                    className="h-8 text-sm"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={saveEdit}
+                    disabled={updateReceiptMutation.isPending}
+                    size="sm"
+                    className="h-8 px-3 text-xs"
+                  >
+                    {updateReceiptMutation.isPending ? 'Saving...' : 'Save'}
+                  </Button>
+                  <Button
+                    onClick={() => setEditingReceipt(null)}
+                    variant="outline"
+                    size="sm"
+                    className="h-8 px-3 text-xs"
+                  >
+                    Cancel
+                  </Button>
                 </div>
               </div>
-            </div>
-            <div className="flex items-center gap-2">
-              {receipt.filename && (
-                <a
-                  href={`/uploads/${receipt.filename}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm px-3 py-1 rounded bg-blue-50 dark:bg-blue-900/20"
-                >
-                  View
-                </a>
-              )}
-              <button
-                onClick={() => deleteReceiptMutation.mutate(receipt.id)}
-                disabled={deleteReceiptMutation.isPending}
-                className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50"
-                title="Delete file"
-              >
-                <Trash2 size={16} />
-              </button>
-            </div>
+            ) : (
+              /* Display Mode */
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <FileText size={16} className="text-blue-600" />
+                  <div>
+                    <div className="text-sm font-medium text-gray-900 dark:text-white">
+                      {receipt.vendor} - ${receipt.amount}
+                    </div>
+                    {receipt.description && receipt.description !== `Manual entry: ${receipt.vendor}` && (
+                      <div className="text-xs text-gray-500">
+                        {receipt.description}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {receipt.filename && (
+                    <a
+                      href={`/uploads/${receipt.filename}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm px-3 py-1 rounded bg-blue-50 dark:bg-blue-900/20"
+                    >
+                      View
+                    </a>
+                  )}
+                  <button
+                    onClick={() => startEditing(receipt)}
+                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+                    title="Edit receipt"
+                  >
+                    <Edit3 size={16} />
+                  </button>
+                  <button
+                    onClick={() => deleteReceiptMutation.mutate(receipt.id)}
+                    disabled={deleteReceiptMutation.isPending}
+                    className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50"
+                    title="Delete file"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         ))}
       </div>
