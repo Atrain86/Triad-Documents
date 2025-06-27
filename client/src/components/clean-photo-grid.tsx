@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { uploadPhoto } from "@/lib/api";
 import { type Photo } from "@shared/schema";
-import SimpleCamera from "@/components/simple-camera";
+import SimplifiedUpload from "@/components/simplified-upload";
 
 interface CleanPhotoGridProps {
   projectId: number;
@@ -59,7 +59,7 @@ export default function CleanPhotoGrid({ projectId }: CleanPhotoGridProps) {
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 text-center">
           {photos.length > 0 ? 'Add More Photos' : 'Add Project Photos'}
         </h3>
-        <SimpleCamera onFileSelect={handleFileSelect} />
+        <SimplifiedUpload onFileSelect={handleFileSelect} />
       </div>
 
       {/* Only show photos section if photos exist */}

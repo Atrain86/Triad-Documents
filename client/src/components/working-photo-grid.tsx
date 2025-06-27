@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { uploadPhoto } from "@/lib/api";
 import { type Photo } from "@shared/schema";
-import SimpleCamera from "@/components/simple-camera";
+import SimplifiedUpload from "@/components/simplified-upload";
 
 interface WorkingPhotoGridProps {
   projectId: number;
@@ -64,7 +64,7 @@ export default function WorkingPhotoGrid({ projectId }: WorkingPhotoGridProps) {
         <h3 className="text-lg font-semibold mb-4 text-center">
           {photos.length > 0 ? `Add More Photos (${photos.length} current)` : 'Add Project Photos'}
         </h3>
-        <SimpleCamera onFileSelect={handleFileSelect} />
+        <SimplifiedUpload onFileSelect={handleFileSelect} />
         {uploadMutation.isPending && (
           <div className="mt-4 text-center text-blue-600">Uploading...</div>
         )}
