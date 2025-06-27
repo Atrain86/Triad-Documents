@@ -359,7 +359,23 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   // Helper functions for date handling
   const formatDate = (date: Date | string) => {
-    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    let dateObj: Date;
+    if (typeof date === 'string') {
+      // Parse UTC date string as local date to avoid timezone conversion
+      if (date.includes('T')) {
+        // If it's an ISO string like "2025-06-21T00:00:00.000Z"
+        const datePart = date.split('T')[0];
+        const [year, month, day] = datePart.split('-').map(Number);
+        dateObj = new Date(year, month - 1, day);
+      } else {
+        // If it's just a date string like "2025-06-21"
+        const [year, month, day] = date.split('-').map(Number);
+        dateObj = new Date(year, month - 1, day);
+      }
+    } else {
+      dateObj = date;
+    }
+    
     return dateObj.toLocaleDateString('en-US', { 
       weekday: 'long', 
       year: 'numeric', 
