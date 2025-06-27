@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { apiRequest } from '@/lib/queryClient';
 import type { Project, Photo, Receipt, ToolsChecklist, DailyHours } from '@shared/schema';
 import InvoiceGenerator from './InvoiceGenerator';
@@ -117,6 +118,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
   const [showInvoiceGenerator, setShowInvoiceGenerator] = useState(false);
   const [showEstimateGenerator, setShowEstimateGenerator] = useState(false);
+  const [showEditClient, setShowEditClient] = useState(false);
+  const [editForm, setEditForm] = useState<Partial<Project>>({});
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [hoursInput, setHoursInput] = useState('');
@@ -434,6 +437,29 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     }
   });
 
+  const updateClientMutation = useMutation({
+    mutationFn: async (updates: Partial<Project>) => {
+      const response = await apiRequest('PUT', `/api/projects/${projectId}`, updates);
+      const result = await response.json();
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}`] });
+      setShowEditClient(false);
+    },
+    onError: (error) => {
+      console.error('Client update failed:', error);
+    }
+  });
+
+  const handleEditInputChange = (field: string, value: any) => {
+    setEditForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleSaveClient = () => {
+    updateClientMutation.mutate(editForm);
+  };
+
 
 
   const handleReceiptClick = () => {
@@ -621,7 +647,28 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             <ArrowLeft size={20} />
           </Button>
           <div className="flex-1">
-            <h1 className="text-2xl font-semibold mb-1 text-blue-600 dark:text-blue-400">{project.clientName || project.address || 'New Project'}</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-semibold mb-1 text-blue-600 dark:text-blue-400">{project.clientName || project.address || 'New Project'}</h1>
+              <button
+                onClick={() => {
+                  setEditForm({
+                    clientName: project.clientName,
+                    address: project.address,
+                    clientEmail: project.clientEmail,
+                    clientPhone: project.clientPhone,
+                    projectType: project.projectType,
+                    roomCount: project.roomCount,
+                    difficulty: project.difficulty,
+                    hourlyRate: project.hourlyRate
+                  });
+                  setShowEditClient(true);
+                }}
+                className="p-1 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded transition-colors"
+                title="Edit client information"
+              >
+                <Edit3 size={16} />
+              </button>
+            </div>
             <p className="text-sm text-green-600 dark:text-green-400">{project.address}</p>
           </div>
         </div>
@@ -1238,6 +1285,121 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           onClose={() => setShowEstimateGenerator(false)}
         />
       )}
+
+      {/* Edit Client Dialog */}
+      <Dialog open={showEditClient} onOpenChange={setShowEditClient}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Client Information</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Client Name</label>
+              <Input
+                value={editForm.clientName || ''}
+                onChange={(e) => handleEditInputChange('clientName', e.target.value)}
+                placeholder="Enter client name"
+              />
+            </div>
+            
+            <div>
+              <label className="text-sm font-medium mb-2 block">Address</label>
+              <Input
+                value={editForm.address || ''}
+                onChange={(e) => handleEditInputChange('address', e.target.value)}
+                placeholder="Enter project address"
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-sm font-medium mb-2 block">Email Address</label>
+                <Input
+                  type="email"
+                  value={editForm.clientEmail || ''}
+                  onChange={(e) => handleEditInputChange('clientEmail', e.target.value)}
+                  placeholder="Enter email address"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">Phone Number</label>
+                <Input
+                  type="tel"
+                  value={editForm.clientPhone || ''}
+                  onChange={(e) => handleEditInputChange('clientPhone', e.target.value)}
+                  placeholder="Enter phone number"
+                />
+              </div>
+            </div>
+            
+            <div>
+              <label className="text-sm font-medium mb-2 block">Project Type</label>
+              <select
+                value={editForm.projectType || 'exterior'}
+                onChange={(e) => handleEditInputChange('projectType', e.target.value)}
+                className="w-full p-2 border border-input rounded-md bg-background"
+              >
+                <option value="exterior">Exterior</option>
+                <option value="interior">Interior</option>
+                <option value="both">Both</option>
+              </select>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-sm font-medium mb-2 block">Room Count</label>
+                <Input
+                  type="number"
+                  value={editForm.roomCount || 1}
+                  onChange={(e) => handleEditInputChange('roomCount', parseInt(e.target.value))}
+                  min="1"
+                />
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium mb-2 block">Hourly Rate</label>
+                <Input
+                  type="number"
+                  value={editForm.hourlyRate || 60}
+                  onChange={(e) => handleEditInputChange('hourlyRate', parseInt(e.target.value))}
+                  min="1"
+                />
+              </div>
+            </div>
+            
+            <div>
+              <label className="text-sm font-medium mb-2 block">Difficulty</label>
+              <select
+                value={editForm.difficulty || 'medium'}
+                onChange={(e) => handleEditInputChange('difficulty', e.target.value)}
+                className="w-full p-2 border border-input rounded-md bg-background"
+              >
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+              </select>
+            </div>
+            
+            <div className="flex gap-3 pt-4">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowEditClient(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleSaveClient}
+                className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
+                disabled={updateClientMutation.isPending}
+              >
+                {updateClientMutation.isPending ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

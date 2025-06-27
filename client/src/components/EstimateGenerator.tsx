@@ -86,8 +86,8 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     clientAddress: project.address || '',
     clientCity: '',
     clientPostal: '',
-    clientEmail: '',
-    clientPhone: '',
+    clientEmail: project.clientEmail || '',
+    clientPhone: project.clientPhone || '',
 
     // Estimate Details
     estimateNumber: `EST-${Date.now()}`,

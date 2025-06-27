@@ -59,6 +59,8 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
   const [newProject, setNewProject] = useState<NewProject>({
     clientName: '',
     address: '',
+    clientEmail: '',
+    clientPhone: '',
     projectType: 'exterior',
     roomCount: 1,
     difficulty: 'medium',
@@ -386,6 +388,21 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
               onChange={(e) => handleInputChange('address', e.target.value)}
             />
             
+            <div className="grid grid-cols-2 gap-3">
+              <Input
+                placeholder="Email Address"
+                type="email"
+                value={newProject.clientEmail || ''}
+                onChange={(e) => handleInputChange('clientEmail', e.target.value)}
+              />
+              <Input
+                placeholder="Phone Number"
+                type="tel"
+                value={newProject.clientPhone || ''}
+                onChange={(e) => handleInputChange('clientPhone', e.target.value)}
+              />
+            </div>
+            
             <select
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
               value={newProject.projectType}
@@ -450,6 +467,27 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
                 onChange={(e) => handleEditInputChange('address', e.target.value)}
                 placeholder="Enter project address"
               />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-sm font-medium mb-2 block">Email Address</label>
+                <Input
+                  type="email"
+                  value={editForm.clientEmail || ''}
+                  onChange={(e) => handleEditInputChange('clientEmail', e.target.value)}
+                  placeholder="Enter email address"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">Phone Number</label>
+                <Input
+                  type="tel"
+                  value={editForm.clientPhone || ''}
+                  onChange={(e) => handleEditInputChange('clientPhone', e.target.value)}
+                  placeholder="Enter phone number"
+                />
+              </div>
             </div>
             
             <div>
