@@ -43,21 +43,36 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   async getProjects(): Promise<Project[]> {
-    const result = await db.select().from(projects);
-    return result;
+    try {
+      const result = await db.select().from(projects);
+      return result;
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+      throw new Error('Failed to fetch projects');
+    }
   }
 
   async getProject(id: number): Promise<Project | undefined> {
-    const [project] = await db.select().from(projects).where(eq(projects.id, id));
-    return project || undefined;
+    try {
+      const [project] = await db.select().from(projects).where(eq(projects.id, id));
+      return project || undefined;
+    } catch (error) {
+      console.error('Error fetching project:', error);
+      throw new Error('Failed to fetch project');
+    }
   }
 
   async createProject(insertProject: InsertProject): Promise<Project> {
-    const [project] = await db
-      .insert(projects)
-      .values(insertProject)
-      .returning();
-    return project;
+    try {
+      const [project] = await db
+        .insert(projects)
+        .values(insertProject)
+        .returning();
+      return project;
+    } catch (error) {
+      console.error('Error creating project:', error);
+      throw new Error('Failed to create project');
+    }
   }
 
   async updateProject(id: number, updates: Partial<InsertProject>): Promise<Project | undefined> {
