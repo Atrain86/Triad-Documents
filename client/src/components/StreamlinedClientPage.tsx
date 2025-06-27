@@ -227,7 +227,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             <Camera size={28} color="white" />
             <input
               type="file"
-              accept="image/*"
+              accept="image/*,.heic"
               capture="environment"
               onChange={handlePhotoUpload}
               multiple

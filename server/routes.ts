@@ -45,6 +45,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.setHeader('Content-Type', 'image/gif');
       } else if (ext === '.webp') {
         res.setHeader('Content-Type', 'image/webp');
+      } else if (ext === '.heic' || ext === '.heif') {
+        res.setHeader('Content-Type', 'image/heic');
       } else {
         // For files without extension, try to detect from content
         res.setHeader('Content-Type', 'image/jpeg'); // Default fallback
