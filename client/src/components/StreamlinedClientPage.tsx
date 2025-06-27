@@ -1162,6 +1162,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                 vendor: item,
                 amount: price,
                 description: `Manual entry: ${item}`,
+                date: new Date().toISOString().split('T')[0],
                 filename: null
               };
               
@@ -1171,9 +1172,18 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                   'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(receiptData),
-              }).then(() => {
-                queryClient.invalidateQueries({ queryKey: [`/api/projects/${project.id}/receipts`] });
-                (e.target as HTMLFormElement).reset();
+              }).then(async (response) => {
+                if (response.ok) {
+                  queryClient.invalidateQueries({ queryKey: [`/api/projects/${project.id}/receipts`] });
+                  (e.target as HTMLFormElement).reset();
+                } else {
+                  const errorData = await response.text();
+                  console.error('Receipt creation failed:', errorData);
+                  alert('Failed to add receipt. Please try again.');
+                }
+              }).catch((error) => {
+                console.error('Network error:', error);
+                alert('Network error. Please check your connection and try again.');
               });
             }}
             className="flex gap-2"

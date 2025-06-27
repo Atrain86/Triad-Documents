@@ -26,6 +26,7 @@ export default function InvoiceGenerator({
   const [suppliesCost, setSuppliesCost] = useState(0);
   const [notes, setNotes] = useState('');
   const [sending, setSending] = useState(false);
+  const [selectedReceipts, setSelectedReceipts] = useState<Set<number>>(new Set());
 
   // Calculate totals
   const totalHours = dailyHours.reduce((sum, entry) => sum + (entry.hours || 0), 0);
@@ -64,7 +65,65 @@ export default function InvoiceGenerator({
       const width = imgWidth * ratio;
       const height = imgHeight * ratio;
 
+      // Add invoice as first page
       pdf.addImage(imgData, 'PNG', 0, 0, width, height);
+
+      // Add selected receipt attachments as additional pages
+      if (selectedReceipts.size > 0) {
+        const selectedReceiptList = receipts.filter(r => selectedReceipts.has(r.id));
+        
+        for (const receipt of selectedReceiptList) {
+          if (receipt.filename) {
+            try {
+              // Add new page for each receipt
+              pdf.addPage();
+              
+              // Add header for receipt page
+              pdf.setFontSize(16);
+              pdf.text('Receipt Attachment', 40, 40);
+              pdf.setFontSize(12);
+              pdf.text(`Vendor: ${receipt.vendor}`, 40, 70);
+              pdf.text(`Amount: $${receipt.amount}`, 40, 90);
+              pdf.text(`Date: ${receipt.date}`, 40, 110);
+              if (receipt.description && receipt.description !== `Manual entry: ${receipt.vendor}`) {
+                pdf.text(`Description: ${receipt.description}`, 40, 130);
+              }
+              
+              // Try to load and add receipt image if it's an image file
+              const fileExt = receipt.filename.toLowerCase().split('.').pop();
+              if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExt || '')) {
+                try {
+                  const img = new Image();
+                  img.crossOrigin = 'anonymous';
+                  await new Promise((resolve, reject) => {
+                    img.onload = resolve;
+                    img.onerror = reject;
+                    img.src = `/uploads/${receipt.filename}`;
+                  });
+                  
+                  // Calculate dimensions to fit on page
+                  const maxWidth = pageWidth - 80;
+                  const maxHeight = pageHeight - 200;
+                  const imgRatio = Math.min(maxWidth / img.width, maxHeight / img.height);
+                  const receiptImgWidth = img.width * imgRatio;
+                  const receiptImgHeight = img.height * imgRatio;
+                  
+                  pdf.addImage(img.src, 'JPEG', 40, 150, receiptImgWidth, receiptImgHeight);
+                } catch (imgError) {
+                  console.warn('Could not load receipt image:', imgError);
+                  pdf.text('Receipt file could not be displayed', 40, 150);
+                }
+              } else {
+                pdf.text(`Receipt file: ${receipt.filename}`, 40, 150);
+                pdf.text('(Non-image file - cannot be displayed in PDF)', 40, 170);
+              }
+            } catch (receiptError) {
+              console.warn('Error adding receipt:', receiptError);
+            }
+          }
+        }
+      }
+
       pdf.save(`invoice-${project.clientName?.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`);
     } catch (err) {
       console.error('Error generating PDF:', err);
@@ -122,6 +181,35 @@ export default function InvoiceGenerator({
             </div>
           </div>
 
+          {/* Receipt Attachment Selection */}
+          {receipts.length > 0 && (
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <h3 className="text-sm font-medium mb-3">Attach Receipts to Invoice (as second page)</h3>
+              <div className="space-y-2">
+                {receipts.map((receipt) => (
+                  <label key={receipt.id} className="flex items-center space-x-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={selectedReceipts.has(receipt.id)}
+                      onChange={(e) => {
+                        const newSelection = new Set(selectedReceipts);
+                        if (e.target.checked) {
+                          newSelection.add(receipt.id);
+                        } else {
+                          newSelection.delete(receipt.id);
+                        }
+                        setSelectedReceipts(newSelection);
+                      }}
+                      className="rounded"
+                    />
+                    <span>{receipt.vendor} - ${receipt.amount}</span>
+                    {receipt.filename && <span className="text-xs text-gray-500">({receipt.filename})</span>}
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Invoice Preview */}
           <Card className="p-0">
             <div id="invoice-preview" className="p-8 bg-white text-black">
@@ -148,9 +236,17 @@ export default function InvoiceGenerator({
                 <div className="bg-gray-50 p-4 rounded">
                   <p className="font-medium text-lg">{project.clientName}</p>
                   <p className="text-gray-600">{project.address}</p>
-                  <p className="text-sm text-gray-500 mt-2">
-                    Project Type: {project.projectType} • Difficulty: {project.difficulty}
-                  </p>
+                  {(project.clientCity || project.clientPostal) && (
+                    <p className="text-gray-600">
+                      {project.clientCity}{project.clientCity && project.clientPostal ? ', ' : ''}{project.clientPostal}
+                    </p>
+                  )}
+                  {project.clientPhone && (
+                    <p className="text-gray-600">Phone: {project.clientPhone}</p>
+                  )}
+                  {project.clientEmail && (
+                    <p className="text-gray-600">Email: {project.clientEmail}</p>
+                  )}
                 </div>
               </div>
 
