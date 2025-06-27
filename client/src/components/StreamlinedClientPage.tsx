@@ -25,10 +25,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const [notes, setNotes] = useState('');
   const [showPhotoCarousel, setShowPhotoCarousel] = useState(false);
   const [carouselIndex, setCarouselIndex] = useState(0);
-  const [selectedPhotos, setSelectedPhotos] = useState<Set<number>>(new Set());
-  const [isSelecting, setIsSelecting] = useState(false);
-  const [touchStarted, setTouchStarted] = useState(false);
-  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
   
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const receiptInputRef = useRef<HTMLInputElement>(null);
@@ -103,30 +99,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     }
   });
 
-  const deleteSelectedPhotosMutation = useMutation({
-    mutationFn: async (photoIds: number[]) => {
-      const results = await Promise.allSettled(
-        photoIds.map(id => 
-          apiRequest('DELETE', `/api/projects/${projectId}/photos/${id}`)
-        )
-      );
-      return results;
-    },
-    onSuccess: () => {
-      // Clear selection state completely
-      setSelectedPhotos(new Set());
-      setIsSelecting(false);
-      setTouchStarted(false);
-      if (longPressTimer) {
-        clearTimeout(longPressTimer);
-        setLongPressTimer(null);
-      }
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
-    },
-    onError: (error) => {
-      console.error('Bulk photo deletion failed:', error);
-    }
-  });
+
 
   const receiptUploadMutation = useMutation({
     mutationFn: async (files: FileList) => {
@@ -223,82 +196,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     }
   };
 
-  const handlePhotoTouchStart = (photoId: number, e: React.TouchEvent | React.MouseEvent) => {
-    // Clear any existing timer
-    if (longPressTimer) {
-      clearTimeout(longPressTimer);
-    }
-    
-    setTouchStarted(true);
-    
-    // Set a timer for long press detection (500ms)
-    const timer = setTimeout(() => {
-      e.preventDefault();
-      e.stopPropagation();
-      setIsSelecting(true);
-      setSelectedPhotos(new Set([photoId]));
-    }, 500);
-    
-    setLongPressTimer(timer);
-  };
 
-  const handlePhotoTouchMove = (photoId: number, e: React.TouchEvent | React.MouseEvent) => {
-    if (!isSelecting || !touchStarted) return;
-    
-    e.preventDefault();
-    e.stopPropagation();
-    
-    // Add photo to selection if not already selected
-    setSelectedPhotos(prev => {
-      const newSet = new Set(prev);
-      newSet.add(photoId);
-      return newSet;
-    });
-  };
-
-  const handlePhotoTouchEnd = (e: React.TouchEvent | React.MouseEvent) => {
-    // Clear the long press timer
-    if (longPressTimer) {
-      clearTimeout(longPressTimer);
-      setLongPressTimer(null);
-    }
-    
-    setTouchStarted(false);
-    
-    // If we weren't in selection mode, this was just a tap
-    if (!isSelecting) {
-      // Let the click event handle opening carousel
-      return;
-    }
-  };
-
-  const togglePhotoSelection = (photoId: number) => {
-    setSelectedPhotos(prev => {
-      const newSelection = new Set(prev);
-      if (newSelection.has(photoId)) {
-        newSelection.delete(photoId);
-      } else {
-        newSelection.add(photoId);
-      }
-      return newSelection;
-    });
-  };
-
-  const clearSelection = () => {
-    setSelectedPhotos(new Set());
-    setIsSelecting(false);
-    setTouchStarted(false);
-    if (longPressTimer) {
-      clearTimeout(longPressTimer);
-      setLongPressTimer(null);
-    }
-  };
-
-  const deleteSelectedPhotos = () => {
-    if (selectedPhotos.size > 0) {
-      deleteSelectedPhotosMutation.mutate(Array.from(selectedPhotos));
-    }
-  };
 
   const openPhotoCarousel = (index: number) => {
     setCarouselIndex(index);
@@ -389,31 +287,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           )}
         </div>
 
-        {/* Selection Toolbar */}
-        {selectedPhotos.size > 0 && (
-          <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-between">
-            <span className="text-sm font-medium">
-              {selectedPhotos.size} photo{selectedPhotos.size !== 1 ? 's' : ''} selected
-            </span>
-            <div className="flex gap-2">
-              <Button
-                onClick={clearSelection}
-                variant="outline"
-                size="sm"
-              >
-                Clear
-              </Button>
-              <Button
-                onClick={deleteSelectedPhotos}
-                disabled={deleteSelectedPhotosMutation.isPending}
-                variant="destructive"
-                size="sm"
-              >
-                {deleteSelectedPhotosMutation.isPending ? 'Deleting...' : 'Delete Selected'}
-              </Button>
-            </div>
-          </div>
-        )}
+
 
         {/* Photo Thumbnails Grid */}
         {photos.length > 0 && (
@@ -421,74 +295,35 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             <div className="flex items-center gap-2 mb-4 text-muted-foreground">
               <Camera size={16} />
               <span className="font-medium">Photos ({photos.length})</span>
-              {selectedPhotos.size === 0 && !isSelecting && (
-                <span className="text-xs text-muted-foreground ml-2">
-                  Long press and drag to select multiple
-                </span>
-              )}
-              {isSelecting && selectedPhotos.size === 0 && (
-                <span className="text-xs text-blue-600 dark:text-blue-400 ml-2">
-                  Selection mode active - tap photos to select
-                </span>
-              )}
             </div>
-            <div 
-              className="grid grid-cols-3 gap-3"
-              onTouchEnd={(e) => handlePhotoTouchEnd(e)}
-              onMouseUp={(e) => handlePhotoTouchEnd(e)}
-            >
+            <div className="grid grid-cols-3 gap-3">
               {photos.map((photo, index) => (
                 <div
                   key={photo.id}
-                  className={`aspect-square rounded-lg overflow-hidden cursor-pointer border-2 transition-all relative group ${
-                    selectedPhotos.has(photo.id) 
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
-                      : 'border-transparent hover:border-blue-500'
-                  }`}
-                  onTouchStart={(e) => handlePhotoTouchStart(photo.id, e)}
-                  onMouseDown={(e) => handlePhotoTouchStart(photo.id, e)}
-                  onTouchMove={(e) => handlePhotoTouchMove(photo.id, e)}
-                  onMouseEnter={(e) => touchStarted && handlePhotoTouchMove(photo.id, e)}
-                  onClick={(e) => {
-                    if (isSelecting) {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      togglePhotoSelection(photo.id);
-                    } else {
-                      openPhotoCarousel(index);
-                    }
-                  }}
+                  className="aspect-square rounded-lg overflow-hidden cursor-pointer border-2 border-transparent hover:border-blue-500 transition-all relative group"
+                  onClick={() => openPhotoCarousel(index)}
                 >
                   <img
                     src={`/uploads/${photo.filename}`}
                     alt={photo.description || photo.originalName}
-                    className={`w-full h-full object-cover ${selectedPhotos.has(photo.id) ? 'opacity-80' : ''}`}
+                    className="w-full h-full object-cover"
                     draggable={false}
                     onError={(e) => console.error('Image failed to load:', photo.filename)}
                     onLoad={() => console.log('Image loaded successfully:', photo.filename)}
                   />
                   
-                  {/* Selection Indicator */}
-                  {selectedPhotos.has(photo.id) && (
-                    <div className="absolute top-2 left-2 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
-                      ✓
-                    </div>
-                  )}
-                  
-                  {/* Individual Delete Button (hidden during selection) */}
-                  {!isSelecting && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deletePhotoMutation.mutate(photo.id);
-                      }}
-                      disabled={deletePhotoMutation.isPending}
-                      className="absolute top-2 right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                      title="Delete photo"
-                    >
-                      <X size={14} />
-                    </button>
-                  )}
+                  {/* Individual Delete Button */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deletePhotoMutation.mutate(photo.id);
+                    }}
+                    disabled={deletePhotoMutation.isPending}
+                    className="absolute top-2 right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                    title="Delete photo"
+                  >
+                    <X size={14} />
+                  </button>
                 </div>
               ))}
             </div>
