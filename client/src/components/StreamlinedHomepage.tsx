@@ -188,8 +188,12 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
       />
 
       <div className="p-6">
-        <div className="flex items-center mb-8 pb-5 border-b border-border">
-          <h1 className="text-2xl font-bold tracking-tight">A-FRAME PAINTING</h1>
+        <div className="flex justify-center mb-8 pb-5 border-b border-border">
+          <img 
+            src="/aframe-logo.png" 
+            alt="A-Frame Painting" 
+            className="h-16 w-auto object-contain"
+          />
         </div>
 
         <div className="flex justify-center mb-6">

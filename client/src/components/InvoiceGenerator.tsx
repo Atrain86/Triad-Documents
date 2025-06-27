@@ -128,8 +128,12 @@ export default function InvoiceGenerator({
               {/* Header */}
               <div className="flex justify-between items-start mb-8">
                 <div>
-                  <h1 className="text-3xl font-bold text-blue-800">A-FRAME PAINTING</h1>
-                  <p className="text-gray-600 mt-2">Professional Painting Services</p>
+                  <img 
+                    src="/aframe-logo.png" 
+                    alt="A-Frame Painting" 
+                    className="h-12 w-auto object-contain mb-2"
+                  />
+                  <p className="text-gray-600">Professional Painting Services</p>
                 </div>
                 <div className="text-right">
                   <h2 className="text-2xl font-semibold text-gray-800">INVOICE</h2>
