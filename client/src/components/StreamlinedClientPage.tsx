@@ -105,6 +105,7 @@ const aframeTheme = {
 export default function StreamlinedClientPage({ projectId, onBack }: StreamlinedClientPageProps) {
   const [notes, setNotes] = useState('');
   const [newTool, setNewTool] = useState('');
+  const [showStatusSelect, setShowStatusSelect] = useState(false);
   const [showPhotoCarousel, setShowPhotoCarousel] = useState(false);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [selectedPhotos, setSelectedPhotos] = useState<Set<number>>(new Set());
@@ -327,6 +328,17 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     }
   });
 
+  const updateStatusMutation = useMutation({
+    mutationFn: async (status: string) => {
+      const response = await apiRequest('PATCH', `/api/projects/${projectId}`, { status });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}`] });
+      setShowStatusSelect(false);
+    }
+  });
+
 
 
   const handleReceiptClick = () => {
@@ -477,6 +489,20 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     }
   }, [project?.notes]);
 
+  // Close status dropdown when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showStatusSelect) {
+        setShowStatusSelect(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showStatusSelect]);
+
   if (!project) {
     return <div className="p-6">Loading...</div>;
   }
@@ -498,9 +524,51 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           >
             <ArrowLeft size={20} />
           </Button>
-          <div>
+          <div className="flex-1">
             <h1 className="text-2xl font-semibold mb-1">{project.clientName || project.address || 'New Project'}</h1>
             <p className="text-sm text-muted-foreground">{project.address}</p>
+            
+            {/* Status Selector */}
+            <div className="mt-3 relative">
+              <button
+                onClick={() => setShowStatusSelect(!showStatusSelect)}
+                className={`text-sm px-3 py-1 rounded-md transition-colors ${
+                  project.status === 'in-progress' ? 'text-red-600 bg-red-50 dark:bg-red-900/20' :
+                  project.status === 'pending' ? 'text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20' :
+                  project.status === 'completed' ? 'text-green-600 bg-green-50 dark:bg-green-900/20' :
+                  'text-gray-600 bg-gray-50 dark:bg-gray-900/20'
+                } hover:opacity-80`}
+              >
+                {project.status === 'in-progress' ? 'In Progress' :
+                 project.status === 'pending' ? 'Pending' :
+                 project.status === 'completed' ? 'Completed' :
+                 'Set Status'} ▼
+              </button>
+
+              {/* Status Dropdown */}
+              {showStatusSelect && (
+                <div className="absolute top-full left-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-10 min-w-[120px]">
+                  <button
+                    onClick={() => updateStatusMutation.mutate('in-progress')}
+                    className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                  >
+                    🔴 In Progress
+                  </button>
+                  <button
+                    onClick={() => updateStatusMutation.mutate('pending')}
+                    className="w-full text-left px-3 py-2 text-sm text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition-colors"
+                  >
+                    🟡 Pending
+                  </button>
+                  <button
+                    onClick={() => updateStatusMutation.mutate('completed')}
+                    className="w-full text-left px-3 py-2 text-sm text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"
+                  >
+                    🟢 Completed
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -741,19 +809,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           </div>
         )}
 
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4 text-muted-foreground">
-            <Edit3 size={16} />
-            <span className="font-medium">Project Notes</span>
-          </div>
-          <Textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            onBlur={handleNotesBlur}
-            placeholder="Add project notes, materials needed, color preferences, timeline, special requirements..."
-            className="min-h-[120px] resize-vertical"
-          />
-        </div>
+
 
         {/* Simple Files List */}
         <SimpleFilesList projectId={project.id} />

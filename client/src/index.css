@@ -1,9 +1,4 @@
-@font-face {
-  font-family: 'TestTiempoText';
-  src: url('../fonts/TestTiemposText-Regular.woff') format('woff');
-  font-weight: normal;
-  font-style: normal;
-}
+
 
 @tailwind base;
 @tailwind components;
@@ -66,6 +61,5 @@
 
   body {
     @apply antialiased bg-background text-foreground;
-    font-family: 'TestTiempoText', ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   }
 }
