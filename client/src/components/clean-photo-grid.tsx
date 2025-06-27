@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { uploadPhoto } from "@/lib/api";
 import { type Photo } from "@shared/schema";
 import SimplifiedUpload from "@/components/simplified-upload";
-import SimpleZoomCrop from "@/components/zoom-crop-viewer";
+import { X, Crop } from "lucide-react";
 
 interface CleanPhotoGridProps {
   projectId: number;
@@ -94,7 +94,7 @@ export default function CleanPhotoGrid({ projectId }: CleanPhotoGridProps) {
               <div key={photo.id} className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg border border-gray-200 dark:border-gray-700">
                 <button
                   onClick={() => {
-                    console.log('Photo clicked, index:', index, 'showViewer will be:', true);
+                    console.log('Photo clicked, index:', index);
                     setSelectedPhotoIndex(index);
                     setShowViewer(true);
                   }}
@@ -134,17 +134,62 @@ export default function CleanPhotoGrid({ projectId }: CleanPhotoGridProps) {
         </div>
       )}
 
-      {/* Zoom & Crop Viewer */}
+      {/* Simple Photo Viewer with Zoom */}
       {showViewer && photos.length > 0 && (
-        <>
-          {console.log('Rendering SimpleZoomCrop with showViewer:', showViewer, 'photos.length:', photos.length, 'selectedIndex:', selectedPhotoIndex)}
-          <SimpleZoomCrop
-            photos={photos}
-            initialIndex={selectedPhotoIndex}
-            onAddCroppedPhoto={(file) => croppedUploadMutation.mutate(file)}
-            onClose={() => setShowViewer(false)}
-          />
-        </>
+        <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex flex-col">
+          <div className="flex justify-between items-center p-4 text-white">
+            <button 
+              onClick={() => setShowViewer(false)}
+              className="p-2 hover:bg-gray-700 rounded"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <span className="text-sm">
+              {selectedPhotoIndex + 1} of {photos.length}
+            </span>
+            <button 
+              onClick={() => {
+                // For now, just show an alert - we can add cropping later
+                alert('Crop feature coming soon!');
+              }}
+              className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg flex items-center gap-2"
+            >
+              <Crop className="w-4 h-4" />
+              Crop
+            </button>
+          </div>
+          
+          <div className="flex-1 flex items-center justify-center p-4">
+            <img
+              src={`/uploads/${photos[selectedPhotoIndex]?.filename}`}
+              alt={photos[selectedPhotoIndex]?.originalName}
+              className="max-w-full max-h-full object-contain"
+              style={{ maxHeight: 'calc(100vh - 120px)' }}
+            />
+          </div>
+          
+          {photos.length > 1 && (
+            <div className="p-4 bg-gray-900">
+              <div className="flex gap-2 overflow-x-auto justify-center">
+                {photos.map((photo, index) => (
+                  <button
+                    key={photo.id}
+                    onClick={() => setSelectedPhotoIndex(index)}
+                    className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 ${
+                      index === selectedPhotoIndex ? 'border-blue-500' : 'border-gray-600'
+                    }`}
+                  >
+                    <img
+                      src={`/uploads/${photo.filename}`}
+                      alt={`Thumbnail ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );
