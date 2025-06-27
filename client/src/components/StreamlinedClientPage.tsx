@@ -6,13 +6,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { apiRequest } from '@/lib/queryClient';
 import type { Project, Photo, Receipt } from '@shared/schema';
-// Simple clean file list component
+// Improved file list component inspired by the PDF uploader
 function SimpleFilesList({ projectId }: { projectId: number }) {
   const { data: receipts = [], isLoading, error } = useQuery<Receipt[]>({
-    queryKey: ['/api/projects', projectId, 'receipts'],
+    queryKey: [`/api/projects/${projectId}/receipts`],
   });
-
-  console.log('SimpleFilesList - receipts:', receipts, 'loading:', isLoading, 'error:', error);
 
   if (isLoading) {
     return <div className="mb-8 text-center text-gray-500">Loading files...</div>;
@@ -33,16 +31,21 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
           <div key={receipt.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <div className="flex items-center gap-3">
               <FileText size={16} className="text-blue-600" />
-              <span className="text-sm font-medium text-gray-900 dark:text-white">
-                {receipt.originalName || receipt.vendor}
-              </span>
+              <div>
+                <div className="text-sm font-medium text-gray-900 dark:text-white">
+                  {receipt.originalName || receipt.vendor}
+                </div>
+                <div className="text-xs text-gray-500">
+                  {receipt.description}
+                </div>
+              </div>
             </div>
             {receipt.filename && (
               <a
                 href={`/uploads/${receipt.filename}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 dark:text-blue-400 hover:underline text-sm"
+                className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm px-3 py-1 rounded bg-blue-50 dark:bg-blue-900/20"
               >
                 View
               </a>
@@ -219,7 +222,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       return results;
     },
     onSuccess: (results) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'receipts'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/receipts`] });
     },
     onError: (error) => {
       console.error('Receipt upload failed:', error);
