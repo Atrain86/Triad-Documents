@@ -378,8 +378,12 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const handleAddHours = () => {
     if (selectedDate && hoursInput && !isNaN(parseFloat(hoursInput))) {
+      // Ensure the date is sent as YYYY-MM-DD format without timezone conversion
+      const formattedDate = selectedDate;
+      console.log('Adding hours for date:', formattedDate, 'hours:', hoursInput);
+      
       addHoursMutation.mutate({
-        date: selectedDate,
+        date: formattedDate,
         hours: parseFloat(hoursInput),
         description: descriptionInput || 'Work performed',
         hourlyRate: project?.hourlyRate || 60 // Default to $60/hour
@@ -794,13 +798,21 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           {showDatePicker && (
             <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg space-y-3">
               <div>
-                <label className="text-sm font-medium mb-2 block">Select Date</label>
+                <label className="text-sm font-medium mb-2 block">
+                  Select Date
+                  <span className="ml-2 text-xs px-2 py-1 bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-300 rounded">
+                    Today: {formatDateForInput(new Date())}
+                  </span>
+                </label>
                 <input
                   type="date"
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-background"
+                  className="w-full px-3 py-2 text-sm border-2 border-blue-300 dark:border-blue-600 rounded-lg bg-blue-50 dark:bg-blue-900/20 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800"
                   max={formatDateForInput(new Date())}
+                  style={{
+                    colorScheme: 'light'
+                  }}
                 />
               </div>
               

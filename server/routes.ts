@@ -359,9 +359,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/projects/:id/hours', async (req, res) => {
     try {
       const projectId = parseInt(req.params.id);
+      console.log('Creating hours entry with date:', req.body.date);
+      
+      // Parse date as local date to avoid timezone conversion issues
+      const dateParts = req.body.date.split('-');
+      const localDate = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
+      console.log('Parsed local date:', localDate);
+      
       const hoursData = {
         projectId,
-        date: new Date(req.body.date),
+        date: localDate,
         hours: parseFloat(req.body.hours),
         description: req.body.description || null,
       };
