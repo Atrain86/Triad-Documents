@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { apiRequest } from '@/lib/queryClient';
-import type { Project, Photo, Receipt, ToolsChecklist } from '@shared/schema';
+import type { Project, Photo, Receipt, ToolsChecklist, DailyHours } from '@shared/schema';
+import InvoiceGenerator from './InvoiceGenerator';
 // Improved file list component inspired by the PDF uploader
 function SimpleFilesList({ projectId }: { projectId: number }) {
   const queryClient = useQueryClient();
@@ -112,6 +113,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const [isSelecting, setIsSelecting] = useState(false);
   const [touchStarted, setTouchStarted] = useState(false);
   const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
+  const [showInvoiceGenerator, setShowInvoiceGenerator] = useState(false);
   
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const receiptInputRef = useRef<HTMLInputElement>(null);
@@ -135,6 +137,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const { data: tools = [] } = useQuery<ToolsChecklist[]>({
     queryKey: [`/api/projects/${projectId}/tools`],
+  });
+
+  const { data: dailyHours = [] } = useQuery<DailyHours[]>({
+    queryKey: [`/api/projects/${projectId}/hours`],
   });
 
   const photoUploadMutation = useMutation({
@@ -840,12 +846,12 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         <SimpleFilesList projectId={project.id} />
 
         <Button
-          onClick={() => generateInvoiceMutation.mutate()}
-          disabled={generateInvoiceMutation.isPending}
+          onClick={() => setShowInvoiceGenerator(true)}
           className="w-full py-4 text-base font-semibold"
           style={{ background: aframeTheme.gradients.destructive }}
         >
-          {generateInvoiceMutation.isPending ? 'Generating...' : 'Generate Invoice'}
+          <FileText size={20} className="mr-2" />
+          Generate Invoice
         </Button>
       </div>
 
@@ -901,6 +907,17 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             {carouselIndex + 1} of {photos.length}
           </div>
         </div>
+      )}
+
+      {/* Invoice Generator */}
+      {project && (
+        <InvoiceGenerator
+          project={project}
+          dailyHours={dailyHours}
+          receipts={receipts}
+          isOpen={showInvoiceGenerator}
+          onClose={() => setShowInvoiceGenerator(false)}
+        />
       )}
     </div>
   );
