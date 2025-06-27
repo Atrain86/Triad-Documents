@@ -1,3 +1,10 @@
+@font-face {
+  font-family: 'TestTiempoText';
+  src: url('../fonts/TestTiemposText-Regular.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -58,6 +65,7 @@
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    @apply antialiased bg-background text-foreground;
+    font-family: 'TestTiempoText', ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   }
 }

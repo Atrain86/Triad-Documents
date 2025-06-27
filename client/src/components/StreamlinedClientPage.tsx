@@ -463,11 +463,12 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             <ArrowLeft size={20} />
           </Button>
           <div>
-            <h1 className="text-xl font-semibold mb-1">{project.clientName}</h1>
+            <h1 className="text-2xl font-semibold mb-1">{project.clientName || 'Unnamed Client'}</h1>
             <p className="text-sm text-muted-foreground">{project.address}</p>
           </div>
         </div>
 
+        {/* Upload Controls */}
         <div className="flex gap-5 mb-8 justify-center">
           <div className="flex flex-col items-center">
             <label
@@ -501,13 +502,22 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           </div>
         </div>
 
-        {/* Debug info - temporary */}
-        <div className="mb-4 p-4 bg-gray-100 dark:bg-gray-800 rounded">
-          <p>Debug: Photos array has {photos.length} items</p>
-          {photos.length > 0 && (
-            <p>First photo: {photos[0].filename}</p>
-          )}
+        {/* Notes Section */}
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4 text-muted-foreground">
+            <Edit3 size={16} />
+            <span className="font-medium">Project Notes</span>
+          </div>
+          <Textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            onBlur={handleNotesBlur}
+            placeholder="Add project notes, client preferences, or special instructions..."
+            className="w-full min-h-24 resize-none rounded-lg border border-gray-200 dark:border-gray-700 p-3 text-sm"
+          />
         </div>
+
+
 
         {/* Selection Toolbar */}
         {selectedPhotos.size > 0 && (
