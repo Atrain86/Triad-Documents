@@ -159,25 +159,49 @@ export default function InvoiceGenerator({
     });
 
     try {
+      // Temporarily show the invoice preview element for capture
+      const originalDisplay = invoiceRef.current.style.display;
+      const originalVisibility = invoiceRef.current.style.visibility;
+      
+      invoiceRef.current.style.display = 'block';
+      invoiceRef.current.style.visibility = 'visible';
+      invoiceRef.current.style.position = 'absolute';
+      invoiceRef.current.style.top = '-9999px';
+      invoiceRef.current.style.left = '-9999px';
+      invoiceRef.current.style.width = '794px'; // A4 width in pixels
+      
+      // Wait for rendering
+      await new Promise(resolve => setTimeout(resolve, 100));
+
       // Capture the invoice preview
       const canvas = await html2canvas(invoiceRef.current, {
         scale: 2,
-        backgroundColor: '#000000', // Pure black background
+        backgroundColor: '#000000',
         useCORS: true,
         allowTaint: true,
-        logging: false
+        logging: false,
+        width: 794,
+        height: invoiceRef.current.scrollHeight
       });
+
+      // Restore original styling
+      invoiceRef.current.style.display = originalDisplay;
+      invoiceRef.current.style.visibility = originalVisibility;
+      invoiceRef.current.style.position = '';
+      invoiceRef.current.style.top = '';
+      invoiceRef.current.style.left = '';
+      invoiceRef.current.style.width = '';
 
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
-      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-      const imgX = (pdfWidth - imgWidth * ratio) / 2;
-      const imgY = 0;
-
-      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+      
+      // Calculate dimensions to fit page
+      const imgWidth = pdfWidth;
+      const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      // Add main invoice page
+      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
 
       // Add selected receipt attachments
       if (invoiceData.selectedReceipts.size > 0) {
@@ -194,20 +218,12 @@ export default function InvoiceGenerator({
                 img.src = `/uploads/${receipt.filename}`;
               });
 
-              const receiptCanvas = document.createElement('canvas');
-              const ctx = receiptCanvas.getContext('2d');
-              if (ctx) {
-                receiptCanvas.width = img.width;
-                receiptCanvas.height = img.height;
-                ctx.drawImage(img, 0, 0);
-                
-                pdf.addPage();
-                const receiptRatio = Math.min(pdfWidth / img.width, pdfHeight / img.height);
-                const receiptX = (pdfWidth - img.width * receiptRatio) / 2;
-                const receiptY = (pdfHeight - img.height * receiptRatio) / 2;
-                
-                pdf.addImage(receiptCanvas.toDataURL('image/png'), 'PNG', receiptX, receiptY, img.width * receiptRatio, img.height * receiptRatio);
-              }
+              pdf.addPage();
+              const receiptRatio = Math.min(pdfWidth / img.width, pdfHeight / img.height);
+              const receiptX = (pdfWidth - img.width * receiptRatio) / 2;
+              const receiptY = (pdfHeight - img.height * receiptRatio) / 2;
+              
+              pdf.addImage(img, 'JPEG', receiptX, receiptY, img.width * receiptRatio, img.height * receiptRatio);
             } catch (error) {
               console.error('Error adding receipt:', error);
               toast({
@@ -408,19 +424,9 @@ ${invoiceData.businessName}`;
               </div>
             </div>
 
-            {/* Line Items */}
+            {/* Services & Labor - Clean Read-Only Layout */}
             <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold" style={{ color: darkTheme.text }}>Services</h2>
-                <Button
-                  onClick={addLineItem}
-                  className="text-white hover:opacity-90"
-                  style={{ backgroundColor: brandColors.accent }}
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Item
-                </Button>
-              </div>
+              <h2 className="text-xl font-semibold" style={{ color: darkTheme.text }}>Services & Labor</h2>
               
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse" style={{ borderColor: darkTheme.border }}>
@@ -428,60 +434,20 @@ ${invoiceData.businessName}`;
                     <tr style={{ backgroundColor: darkTheme.inputBg }}>
                       <th className="border p-3 text-left" style={{ borderColor: darkTheme.border, color: darkTheme.text }}>Description</th>
                       <th className="border p-3 text-center" style={{ borderColor: darkTheme.border, color: darkTheme.text }}>Hours</th>
-                      <th className="border p-3 text-center" style={{ borderColor: darkTheme.border, color: darkTheme.text }}>Rate ($/hr)</th>
-                      <th className="border p-3 text-left" style={{ borderColor: darkTheme.border, color: darkTheme.text }}>Detail</th>
                       <th className="border p-3 text-right" style={{ borderColor: darkTheme.border, color: darkTheme.text }}>Total</th>
-                      <th className="border p-3 text-center" style={{ borderColor: darkTheme.border, color: darkTheme.text }}>Action</th>
                     </tr>
                   </thead>
                   <tbody>
                     {invoiceData.lineItems.map((item, index) => (
                       <tr key={index}>
-                        <td className="border p-2" style={{ borderColor: darkTheme.border }}>
-                          <Input
-                            value={item.description}
-                            onChange={(e) => updateLineItem(index, 'description', e.target.value)}
-                            className="bg-gray-900 border-gray-700 text-white"
-                            placeholder="Service description"
-                          />
+                        <td className="border p-3" style={{ borderColor: darkTheme.border, color: darkTheme.text }}>
+                          {item.description || 'Painting Services'}
                         </td>
-                        <td className="border p-2" style={{ borderColor: darkTheme.border }}>
-                          <Input
-                            type="number"
-                            step="0.5"
-                            value={item.hours}
-                            onChange={(e) => updateLineItem(index, 'hours', parseFloat(e.target.value) || 0)}
-                            className="bg-gray-900 border-gray-700 text-white text-center"
-                          />
+                        <td className="border p-3 text-center" style={{ borderColor: darkTheme.border, color: darkTheme.text }}>
+                          {item.hours}
                         </td>
-                        <td className="border p-2" style={{ borderColor: darkTheme.border }}>
-                          <Input
-                            type="number"
-                            value={item.unitPrice}
-                            onChange={(e) => updateLineItem(index, 'unitPrice', parseFloat(e.target.value) || 0)}
-                            className="bg-gray-900 border-gray-700 text-white text-center"
-                          />
-                        </td>
-                        <td className="border p-2" style={{ borderColor: darkTheme.border }}>
-                          <Input
-                            value={item.detail}
-                            onChange={(e) => updateLineItem(index, 'detail', e.target.value)}
-                            className="bg-gray-900 border-gray-700 text-white"
-                            placeholder="Additional details"
-                          />
-                        </td>
-                        <td className="border p-2 text-right font-semibold" style={{ borderColor: darkTheme.border, color: darkTheme.text }}>
+                        <td className="border p-3 text-right font-semibold" style={{ borderColor: darkTheme.border, color: darkTheme.text }}>
                           ${item.total.toFixed(2)}
-                        </td>
-                        <td className="border p-2 text-center" style={{ borderColor: darkTheme.border }}>
-                          <Button
-                            onClick={() => removeLineItem(index)}
-                            variant="ghost"
-                            size="sm"
-                            className="text-red-400 hover:text-red-300 hover:bg-red-900/20"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
                         </td>
                       </tr>
                     ))}
@@ -580,7 +546,7 @@ ${invoiceData.businessName}`;
                 onClick={sendInvoice}
                 disabled={!invoiceData.clientEmail}
                 className="text-white hover:opacity-90 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                style={{ backgroundColor: invoiceData.clientEmail ? brandColors.accent : '#9ca3af' }}
+                style={{ backgroundColor: invoiceData.clientEmail ? '#1E40AF' : '#9ca3af' }}
               >
                 <Send className="mr-2 h-5 w-5" />
                 Send Invoice
