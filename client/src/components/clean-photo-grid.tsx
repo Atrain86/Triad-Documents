@@ -181,24 +181,26 @@ export default function CleanPhotoGrid({ projectId }: CleanPhotoGridProps) {
               {selectedPhotoIndex + 1} of {photos.length}
             </span>
             
-            {/* Zoom Controls */}
-            <div className="flex items-center space-x-2">
+            {/* Zoom Controls - Made More Prominent */}
+            <div className="flex items-center space-x-2 bg-black bg-opacity-50 rounded-lg p-2">
               <button 
                 onClick={handleZoomOut}
-                className="p-2 hover:bg-gray-700 rounded"
+                className="p-3 hover:bg-gray-600 rounded-lg bg-gray-700 text-white transition-colors"
                 disabled={zoom <= 1}
+                title="Zoom Out"
               >
-                <ZoomOut className="w-5 h-5" />
+                <ZoomOut className="w-6 h-6" />
               </button>
-              <span className="text-xs text-gray-300 min-w-[3rem] text-center">
+              <span className="text-sm text-white font-medium min-w-[4rem] text-center bg-gray-800 px-2 py-1 rounded">
                 {Math.round(zoom * 100)}%
               </span>
               <button 
                 onClick={handleZoomIn}
-                className="p-2 hover:bg-gray-700 rounded"
+                className="p-3 hover:bg-gray-600 rounded-lg bg-gray-700 text-white transition-colors"
                 disabled={zoom >= 3}
+                title="Zoom In"
               >
-                <ZoomIn className="w-5 h-5" />
+                <ZoomIn className="w-6 h-6" />
               </button>
             </div>
           </div>
