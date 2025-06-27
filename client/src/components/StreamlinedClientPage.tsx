@@ -371,23 +371,13 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                 <Camera size={16} />
                 <span className="font-medium">Photos ({photos.length})</span>
               </div>
-              {!isSelecting ? (
-                <Button
-                  onClick={() => setIsSelecting(true)}
-                  variant="outline"
-                  size="sm"
-                >
-                  Select Multiple
-                </Button>
-              ) : (
-                <Button
-                  onClick={clearSelection}
-                  variant="outline"
-                  size="sm"
-                >
-                  Done
-                </Button>
-              )}
+              <Button
+                onClick={() => setIsSelecting(!isSelecting)}
+                variant="outline"
+                size="sm"
+              >
+                {isSelecting ? 'Done' : 'Select'}
+              </Button>
             </div>
             <div className="grid grid-cols-3 gap-3">
               {photos.map((photo, index) => (
