@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { Calendar, Download, Send, Plus, Trash2, User, MapPin, Phone, Mail, X } from 'lucide-react';
+import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -126,7 +127,9 @@ export default function InvoiceGenerator({
   };
 
   const calculateSubtotal = () => {
-    const laborTotal = invoiceData.lineItems.reduce((sum, item) => sum + item.total, 0);
+    // Calculate labor total from daily hours
+    const laborTotal = dailyHours.reduce((sum, hourEntry) => sum + (hourEntry.hours * (project.hourlyRate || 60)), 0);
+    // Calculate materials total from selected receipts
     const selectedReceiptsTotal = receipts
       .filter(receipt => invoiceData.selectedReceipts.has(receipt.id))
       .reduce((sum, receipt) => sum + parseFloat(receipt.amount), 0);
@@ -134,8 +137,8 @@ export default function InvoiceGenerator({
   };
 
   const calculateGST = () => {
-    // Only apply GST to labor, not to materials (receipts already include taxes)
-    const laborTotal = invoiceData.lineItems.reduce((sum, item) => sum + item.total, 0);
+    // Only apply GST to labor and supplies, not to materials (receipts already include taxes)
+    const laborTotal = dailyHours.reduce((sum, hourEntry) => sum + (hourEntry.hours * (project.hourlyRate || 60)), 0);
     return (laborTotal + invoiceData.suppliesCost) * invoiceData.gstRate;
   };
 
@@ -297,19 +300,11 @@ ${invoiceData.businessName}`;
       <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto p-0" style={{ backgroundColor: darkTheme.background }}>
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b" style={{ backgroundColor: darkTheme.headerBg, borderColor: darkTheme.border }}>
-            <div>
+          <div className="flex items-center justify-center p-6 border-b" style={{ backgroundColor: darkTheme.headerBg, borderColor: darkTheme.border }}>
+            <div className="text-center">
               <h1 className="text-2xl font-bold" style={{ color: darkTheme.text }}>Invoice Generator</h1>
               <p style={{ color: darkTheme.textSecondary }}>Professional painting services</p>
             </div>
-            <Button
-              onClick={onClose}
-              variant="ghost"
-              size="sm"
-              className="hover:bg-gray-700"
-            >
-              <X className="h-4 w-4" />
-            </Button>
           </div>
 
           <div className="flex-1 p-6 space-y-6" style={{ backgroundColor: darkTheme.background }}>
@@ -559,7 +554,7 @@ ${invoiceData.businessName}`;
         <div ref={invoiceRef} className="hidden print:block print:max-w-none" style={{ backgroundColor: '#000000', color: '#fff' }}>
           <div className="p-8">
             {/* Header Section */}
-            <div className="flex justify-between items-start mb-8">
+            <div className="mb-8">
               {/* Logo and Business Info */}
               <div className="flex items-center space-x-4">
                 <img 
@@ -570,22 +565,10 @@ ${invoiceData.businessName}`;
                 <div>
                   <h1 className="text-2xl font-bold text-white">{invoiceData.businessName}</h1>
                   <div className="mt-2 text-gray-300 text-sm">
-                    <p>{invoiceData.businessAddress}</p>
-                    <p>{invoiceData.businessCity}</p>
-                    <p>{invoiceData.businessPostal}</p>
+                    <p>884 Hayes Rd</p>
+                    <p>Manson's Landing, BC V0P1K0</p>
+                    <p>cortespainter@gmail.com</p>
                   </div>
-                </div>
-              </div>
-
-              {/* Contact Info Pills */}
-              <div className="flex flex-col space-y-2">
-                <div className="flex items-center px-3 py-1 rounded-full text-xs" style={{ backgroundColor: brandColors.primary, color: 'white' }}>
-                  <Phone className="h-3 w-3 mr-2" />
-                  Contact Info
-                </div>
-                <div className="flex items-center px-3 py-1 rounded-full text-xs" style={{ backgroundColor: brandColors.accent, color: 'white' }}>
-                  <Mail className="h-3 w-3 mr-2" />
-                  {invoiceData.businessEmail}
                 </div>
               </div>
             </div>
@@ -629,46 +612,72 @@ ${invoiceData.businessName}`;
               </div>
             </div>
 
-            {/* Line Items */}
+            {/* Daily Hours - Detailed Work Description */}
             <div className="mb-8">
-              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Work Description</h3>
+              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Daily Work Log</h3>
               <div className="overflow-hidden rounded-lg border border-gray-600">
                 <table className="w-full">
                   <thead style={{ backgroundColor: '#2d3748' }}>
                     <tr>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Description</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Date</th>
                       <th className="px-6 py-4 text-center text-xs font-semibold text-gray-300 uppercase tracking-wider">Hours</th>
-                      <th className="px-6 py-4 text-center text-xs font-semibold text-gray-300 uppercase tracking-wider">Rate</th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Notes</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Work Description</th>
                       <th className="px-6 py-4 text-right text-xs font-semibold text-gray-300 uppercase tracking-wider">Amount</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {invoiceData.lineItems.map((item, index) => (
+                    {dailyHours.map((hourEntry, index) => (
                       <tr key={index} className={index % 2 === 0 ? '' : 'bg-gray-800'}>
                         <td className="px-6 py-4">
                           <div className="flex items-center">
                             <div className="w-2 h-2 rounded-full mr-3" style={{ backgroundColor: brandColors.accent }}></div>
-                            <span className="font-medium text-white">{item.description}</span>
+                            <span className="font-medium text-white">
+                              {format(new Date(hourEntry.date), 'EEE, MMM dd')}
+                            </span>
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-center text-gray-300">{item.hours}</td>
-                        <td className="px-6 py-4 text-center text-gray-300">${item.unitPrice}</td>
-                        <td className="px-6 py-4 text-gray-300">{item.detail}</td>
-                        <td className="px-6 py-4 text-right font-semibold text-white">${item.total.toFixed(2)}</td>
+                        <td className="px-6 py-4 text-center text-gray-300">{hourEntry.hours}hr</td>
+                        <td className="px-6 py-4 text-gray-300">
+                          {hourEntry.description || 'Painting services'}
+                        </td>
+                        <td className="px-6 py-4 text-right font-semibold text-white">
+                          ${(hourEntry.hours * (project.hourlyRate || 60)).toFixed(2)}
+                        </td>
                       </tr>
                     ))}
+                    
+                    {/* Materials from receipts */}
+                    {receipts.filter(receipt => invoiceData.selectedReceipts.has(receipt.id)).length > 0 && (
+                      <tr>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center">
+                            <div className="w-2 h-2 rounded-full mr-3" style={{ backgroundColor: brandColors.primary }}></div>
+                            <span className="font-medium text-white">Materials (incl. taxes)</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-center text-gray-300">-</td>
+                        <td className="px-6 py-4 text-gray-300">
+                          {receipts.filter(receipt => invoiceData.selectedReceipts.has(receipt.id))
+                            .map(receipt => receipt.vendor).join(', ')}
+                        </td>
+                        <td className="px-6 py-4 text-right font-semibold text-white">
+                          ${receipts.filter(receipt => invoiceData.selectedReceipts.has(receipt.id))
+                            .reduce((sum, receipt) => sum + parseFloat(receipt.amount), 0).toFixed(2)}
+                        </td>
+                      </tr>
+                    )}
+
+                    {/* Additional supplies */}
                     {invoiceData.suppliesCost > 0 && (
                       <tr>
                         <td className="px-6 py-4">
                           <div className="flex items-center">
                             <div className="w-2 h-2 rounded-full mr-3" style={{ backgroundColor: brandColors.primary }}></div>
-                            <span className="font-medium text-white">Materials & Supplies</span>
+                            <span className="font-medium text-white">Additional Supplies</span>
                           </div>
                         </td>
                         <td className="px-6 py-4 text-center text-gray-300">-</td>
-                        <td className="px-6 py-4 text-center text-gray-300">-</td>
-                        <td className="px-6 py-4 text-gray-300">Additional supplies and materials</td>
+                        <td className="px-6 py-4 text-gray-300">Additional materials and supplies</td>
                         <td className="px-6 py-4 text-right font-semibold text-white">${invoiceData.suppliesCost.toFixed(2)}</td>
                       </tr>
                     )}
