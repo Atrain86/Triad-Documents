@@ -330,12 +330,19 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const updateStatusMutation = useMutation({
     mutationFn: async (status: string) => {
-      const response = await apiRequest('PATCH', `/api/projects/${projectId}`, { status });
-      return response.json();
+      console.log('Sending status update:', status, 'for project:', projectId);
+      const response = await apiRequest('PUT', `/api/projects/${projectId}`, { status });
+      const result = await response.json();
+      console.log('Status update response:', result);
+      return result;
     },
     onSuccess: () => {
+      console.log('Status update successful');
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}`] });
       setShowStatusSelect(false);
+    },
+    onError: (error) => {
+      console.error('Status update failed:', error);
     }
   });
 
@@ -492,7 +499,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   // Close status dropdown when clicking outside
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (showStatusSelect) {
+      const target = event.target as Element;
+      if (showStatusSelect && !target.closest('.status-dropdown')) {
         setShowStatusSelect(false);
       }
     };
@@ -515,7 +523,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       />
       
       <div className="p-6">
-        <div className="flex items-center mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center mb-4 pb-2">
           <Button
             variant="ghost"
             size="sm"
@@ -527,50 +535,76 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           <div className="flex-1">
             <h1 className="text-2xl font-semibold mb-1">{project.clientName || project.address || 'New Project'}</h1>
             <p className="text-sm text-muted-foreground">{project.address}</p>
-            
-            {/* Status Selector */}
-            <div className="mt-3 relative">
-              <button
-                onClick={() => setShowStatusSelect(!showStatusSelect)}
-                className={`text-sm px-3 py-1 rounded-md transition-colors ${
-                  project.status === 'in-progress' ? 'text-red-600 bg-red-50 dark:bg-red-900/20' :
-                  project.status === 'pending' ? 'text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20' :
-                  project.status === 'completed' ? 'text-green-600 bg-green-50 dark:bg-green-900/20' :
-                  'text-gray-600 bg-gray-50 dark:bg-gray-900/20'
-                } hover:opacity-80`}
-              >
-                {project.status === 'in-progress' ? 'In Progress' :
-                 project.status === 'pending' ? 'Pending' :
-                 project.status === 'completed' ? 'Completed' :
-                 'Set Status'} ▼
-              </button>
-
-              {/* Status Dropdown */}
-              {showStatusSelect && (
-                <div className="absolute top-full left-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-10 min-w-[120px]">
-                  <button
-                    onClick={() => updateStatusMutation.mutate('in-progress')}
-                    className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                  >
-                    🔴 In Progress
-                  </button>
-                  <button
-                    onClick={() => updateStatusMutation.mutate('pending')}
-                    className="w-full text-left px-3 py-2 text-sm text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition-colors"
-                  >
-                    🟡 Pending
-                  </button>
-                  <button
-                    onClick={() => updateStatusMutation.mutate('completed')}
-                    className="w-full text-left px-3 py-2 text-sm text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"
-                  >
-                    🟢 Completed
-                  </button>
-                </div>
-              )}
-            </div>
           </div>
         </div>
+
+        {/* Status Selector - positioned right above the horizontal line */}
+        <div className="flex justify-end mb-2">
+          <div className="relative status-dropdown">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowStatusSelect(!showStatusSelect);
+              }}
+              className={`text-sm px-3 py-1 rounded-md transition-colors ${
+                project.status === 'in-progress' ? 'text-red-600 bg-red-50 dark:bg-red-900/20' :
+                project.status === 'pending' ? 'text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20' :
+                project.status === 'completed' ? 'text-green-600 bg-green-50 dark:bg-green-900/20' :
+                'text-gray-600 bg-gray-50 dark:bg-gray-900/20'
+              } hover:opacity-80`}
+            >
+              {project.status === 'in-progress' ? 'In Progress' :
+               project.status === 'pending' ? 'Pending' :
+               project.status === 'completed' ? 'Completed' :
+               'Status'} ▼
+            </button>
+
+            {/* Status Dropdown */}
+            {showStatusSelect && (
+              <div className="absolute top-full right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-50 min-w-[120px]">
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Updating status to: in-progress');
+                    updateStatusMutation.mutate('in-progress');
+                  }}
+                  disabled={updateStatusMutation.isPending}
+                  className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors border-b border-gray-100 dark:border-gray-600"
+                >
+                  🔴 In Progress
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Updating status to: pending');
+                    updateStatusMutation.mutate('pending');
+                  }}
+                  disabled={updateStatusMutation.isPending}
+                  className="w-full text-left px-3 py-2 text-sm text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition-colors border-b border-gray-100 dark:border-gray-600"
+                >
+                  🟡 Pending
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Updating status to: completed');
+                    updateStatusMutation.mutate('completed');
+                  }}
+                  disabled={updateStatusMutation.isPending}
+                  className="w-full text-left px-3 py-2 text-sm text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"
+                >
+                  🟢 Completed
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Horizontal divider line */}
+        <div className="border-b border-gray-200 dark:border-gray-700 mb-6"></div>
 
         {/* Upload Controls */}
         <div className="flex gap-5 mb-8 justify-center">
