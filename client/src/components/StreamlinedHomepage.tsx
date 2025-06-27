@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Search, MapPin, Clock, User, Trash2, ChevronDown, Archive, RotateCcw } from 'lucide-react';
+import { Plus, Search, MapPin, Clock, User, Trash2, ChevronDown, Archive, RotateCcw, Edit3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -54,6 +54,8 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
   const [showAddClient, setShowAddClient] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [showArchived, setShowArchived] = useState(false);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [editForm, setEditForm] = useState<Partial<InsertProject>>({});
   const [newProject, setNewProject] = useState<NewProject>({
     clientName: '',
     address: '',
@@ -126,7 +128,17 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
     }
   });
 
-
+  const updateProjectMutation = useMutation({
+    mutationFn: async ({ id, updates }: { id: number; updates: Partial<InsertProject> }) => {
+      const response = await apiRequest('PUT', `/api/projects/${id}`, updates);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      setEditingProject(null);
+      setEditForm({});
+    }
+  });
 
   const handleAddProject = () => {
     if (newProject.clientName && newProject.address) {
@@ -136,6 +148,28 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
 
   const handleInputChange = (field: keyof NewProject, value: string | number) => {
     setNewProject(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleEditProject = (project: Project) => {
+    setEditingProject(project);
+    setEditForm({
+      clientName: project.clientName,
+      address: project.address,
+      projectType: project.projectType,
+      roomCount: project.roomCount,
+      difficulty: project.difficulty,
+      hourlyRate: project.hourlyRate
+    });
+  };
+
+  const handleEditInputChange = (field: keyof InsertProject, value: string | number) => {
+    setEditForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleUpdateProject = () => {
+    if (editingProject && editForm.clientName && editForm.address) {
+      updateProjectMutation.mutate({ id: editingProject.id, updates: editForm });
+    }
   };
 
   if (isLoading) {
@@ -161,11 +195,11 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
         <div className="flex justify-center mb-6">
           <Button
             onClick={() => setShowAddClient(true)}
-            className="px-8 py-4 text-base font-semibold text-white hover:opacity-90"
-            style={{ backgroundColor: '#B05A4E' }}
+            className="px-6 py-3 text-sm font-semibold text-white hover:opacity-90"
+            style={{ backgroundColor: '#6366F1' }}
           >
-            <Plus size={20} className="mr-2" />
-            Add New Client
+            <Plus size={18} className="mr-2" />
+            New Client
           </Button>
         </div>
 
@@ -226,6 +260,18 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
                   
                   {/* Action Buttons */}
                   <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {/* Edit Button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditProject(project);
+                      }}
+                      className="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
+                      title="Edit client"
+                    >
+                      <Edit3 size={16} />
+                    </button>
+                    
                     {/* Archive Button */}
                     <button
                       onClick={(e) => {
@@ -369,6 +415,101 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
                 disabled={createProjectMutation.isPending}
               >
                 {createProjectMutation.isPending ? 'Adding...' : 'Add Client'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Client Dialog */}
+      <Dialog open={!!editingProject} onOpenChange={() => setEditingProject(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Client</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Client Name</label>
+              <Input
+                value={editForm.clientName || ''}
+                onChange={(e) => handleEditInputChange('clientName', e.target.value)}
+                placeholder="Enter client name"
+              />
+            </div>
+            
+            <div>
+              <label className="text-sm font-medium mb-2 block">Address</label>
+              <Input
+                value={editForm.address || ''}
+                onChange={(e) => handleEditInputChange('address', e.target.value)}
+                placeholder="Enter project address"
+              />
+            </div>
+            
+            <div>
+              <label className="text-sm font-medium mb-2 block">Project Type</label>
+              <select
+                value={editForm.projectType || 'exterior'}
+                onChange={(e) => handleEditInputChange('projectType', e.target.value)}
+                className="w-full p-2 border border-input rounded-md bg-background"
+              >
+                <option value="exterior">Exterior</option>
+                <option value="interior">Interior</option>
+                <option value="both">Both</option>
+              </select>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-sm font-medium mb-2 block">Room Count</label>
+                <Input
+                  type="number"
+                  value={editForm.roomCount || 1}
+                  onChange={(e) => handleEditInputChange('roomCount', parseInt(e.target.value))}
+                  min="1"
+                />
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium mb-2 block">Hourly Rate</label>
+                <Input
+                  type="number"
+                  value={editForm.hourlyRate || 60}
+                  onChange={(e) => handleEditInputChange('hourlyRate', parseInt(e.target.value))}
+                  min="1"
+                />
+              </div>
+            </div>
+            
+            <div>
+              <label className="text-sm font-medium mb-2 block">Difficulty</label>
+              <select
+                value={editForm.difficulty || 'medium'}
+                onChange={(e) => handleEditInputChange('difficulty', e.target.value)}
+                className="w-full p-2 border border-input rounded-md bg-background"
+              >
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+              </select>
+            </div>
+            
+            <div className="flex gap-3 pt-4">
+              <Button 
+                variant="outline" 
+                onClick={() => setEditingProject(null)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleUpdateProject}
+                className="flex-1"
+                style={{ backgroundColor: '#6366F1' }}
+                disabled={updateProjectMutation.isPending}
+              >
+                {updateProjectMutation.isPending ? 'Updating...' : 'Update Client'}
               </Button>
             </div>
           </div>
