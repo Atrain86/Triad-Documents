@@ -192,7 +192,7 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
           <img 
             src="/aframe-logo.png" 
             alt="A-Frame Painting" 
-            className="h-16 w-auto object-contain"
+            className="h-32 w-auto object-contain"
           />
         </div>
 

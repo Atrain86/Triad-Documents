@@ -131,7 +131,7 @@ export default function InvoiceGenerator({
                   <img 
                     src="/aframe-logo.png" 
                     alt="A-Frame Painting" 
-                    className="h-12 w-auto object-contain mb-2"
+                    className="h-24 w-auto object-contain mb-2"
                   />
                   <p className="text-gray-600">Professional Painting Services</p>
                 </div>
