@@ -114,6 +114,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const [touchStarted, setTouchStarted] = useState(false);
   const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
   const [showInvoiceGenerator, setShowInvoiceGenerator] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string>('');
+  const [hoursInput, setHoursInput] = useState('');
+  const [descriptionInput, setDescriptionInput] = useState('');
   
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const receiptInputRef = useRef<HTMLInputElement>(null);
@@ -324,6 +328,58 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/tools`] });
     }
   });
+
+  const addHoursMutation = useMutation({
+    mutationFn: async (hoursData: { date: string; hours: number; description: string }) => {
+      const response = await apiRequest('POST', `/api/projects/${projectId}/hours`, {
+        ...hoursData,
+        projectId: Number(projectId)
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/hours`] });
+      setSelectedDate('');
+      setHoursInput('');
+      setDescriptionInput('');
+      setShowDatePicker(false);
+    }
+  });
+
+  const deleteHoursMutation = useMutation({
+    mutationFn: async (hoursId: number) => {
+      const response = await apiRequest('DELETE', `/api/hours/${hoursId}`);
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/hours`] });
+    }
+  });
+
+  // Helper functions for date handling
+  const formatDate = (date: Date | string) => {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    return dateObj.toLocaleDateString('en-US', { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+  };
+
+  const formatDateForInput = (date: Date) => {
+    return date.toISOString().split('T')[0];
+  };
+
+  const handleAddHours = () => {
+    if (selectedDate && hoursInput && !isNaN(parseFloat(hoursInput))) {
+      addHoursMutation.mutate({
+        date: selectedDate,
+        hours: parseFloat(hoursInput),
+        description: descriptionInput || 'Work performed'
+      });
+    }
+  };
 
 
 
@@ -703,6 +759,124 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                   <span className="flex-1 text-sm text-foreground">
                     {tool.toolName}
                   </span>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Daily Hours Section */}
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4 text-muted-foreground">
+            <Calendar size={16} />
+            <span className="font-medium">Daily Hours</span>
+          </div>
+          
+          {/* Add Hours Button */}
+          {!showDatePicker && (
+            <Button
+              onClick={() => setShowDatePicker(true)}
+              className="w-full mb-4 py-2 text-sm"
+              variant="outline"
+            >
+              <Plus size={16} className="mr-2" />
+              Log Hours for a Day
+            </Button>
+          )}
+
+          {/* Date Picker and Hours Input */}
+          {showDatePicker && (
+            <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg space-y-3">
+              <div>
+                <label className="text-sm font-medium mb-2 block">Select Date</label>
+                <input
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-background"
+                  max={formatDateForInput(new Date())}
+                />
+              </div>
+              
+              {selectedDate && (
+                <>
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Hours Worked</label>
+                    <input
+                      type="number"
+                      step="0.5"
+                      min="0"
+                      max="24"
+                      value={hoursInput}
+                      onChange={(e) => setHoursInput(e.target.value)}
+                      placeholder="8.0"
+                      className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-background"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Description (Optional)</label>
+                    <input
+                      type="text"
+                      value={descriptionInput}
+                      onChange={(e) => setDescriptionInput(e.target.value)}
+                      placeholder="Painting living room, prep work..."
+                      className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-background"
+                    />
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={handleAddHours}
+                      disabled={!hoursInput || addHoursMutation.isPending}
+                      className="flex-1"
+                    >
+                      {addHoursMutation.isPending ? 'Adding...' : 'Add Hours'}
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setShowDatePicker(false);
+                        setSelectedDate('');
+                        setHoursInput('');
+                        setDescriptionInput('');
+                      }}
+                      variant="outline"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
+          {/* Hours List */}
+          <div className="h-48 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg p-3 space-y-2">
+            {dailyHours.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                No hours logged yet. Click "Log Hours for a Day" to start tracking your time.
+              </p>
+            ) : (
+              dailyHours.map((hours) => (
+                <div key={hours.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex-1">
+                    <div className="font-medium text-sm">
+                      {formatDate(hours.date)} - {hours.hours} hours
+                    </div>
+                    {hours.description && (
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {hours.description}
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => deleteHoursMutation.mutate(hours.id)}
+                    disabled={deleteHoursMutation.isPending}
+                    className="ml-2 p-1 text-red-500 hover:text-red-700 transition-colors"
+                    title="Delete hours entry"
+                  >
+                    <Trash2 size={14} />
+                  </button>
                 </div>
               ))
             )}
