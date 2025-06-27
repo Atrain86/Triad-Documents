@@ -6,6 +6,7 @@ import { insertProjectSchema, insertPhotoSchema, insertReceiptSchema, insertDail
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import sgMail from "@sendgrid/mail";
 
 // Configure multer for file uploads
 const uploadDir = path.join(process.cwd(), 'uploads');
@@ -560,7 +561,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ error: 'SendGrid API key not configured' });
       }
 
-      const sgMail = require('@sendgrid/mail');
       sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
       const msg = {
