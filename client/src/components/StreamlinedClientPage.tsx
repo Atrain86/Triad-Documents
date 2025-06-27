@@ -28,6 +28,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const [selectedPhotos, setSelectedPhotos] = useState<Set<number>>(new Set());
   const [isSelecting, setIsSelecting] = useState(false);
   const [touchStarted, setTouchStarted] = useState(false);
+  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
   
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const receiptInputRef = useRef<HTMLInputElement>(null);
@@ -217,28 +218,52 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   };
 
   const handlePhotoTouchStart = (photoId: number, e: React.TouchEvent | React.MouseEvent) => {
-    e.preventDefault();
+    // Clear any existing timer
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+    }
+    
     setTouchStarted(true);
-    setIsSelecting(true);
-    togglePhotoSelection(photoId);
+    
+    // Set a timer for long press detection (500ms)
+    const timer = setTimeout(() => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsSelecting(true);
+      setSelectedPhotos(new Set([photoId]));
+    }, 500);
+    
+    setLongPressTimer(timer);
   };
 
   const handlePhotoTouchMove = (photoId: number, e: React.TouchEvent | React.MouseEvent) => {
-    if (!touchStarted || !isSelecting) return;
+    if (!isSelecting || !touchStarted) return;
+    
     e.preventDefault();
+    e.stopPropagation();
     
     // Add photo to selection if not already selected
-    if (!selectedPhotos.has(photoId)) {
-      setSelectedPhotos(prev => {
-        const newSet = new Set(prev);
-        newSet.add(photoId);
-        return newSet;
-      });
-    }
+    setSelectedPhotos(prev => {
+      const newSet = new Set(prev);
+      newSet.add(photoId);
+      return newSet;
+    });
   };
 
-  const handlePhotoTouchEnd = () => {
+  const handlePhotoTouchEnd = (e: React.TouchEvent | React.MouseEvent) => {
+    // Clear the long press timer
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    }
+    
     setTouchStarted(false);
+    
+    // If we weren't in selection mode, this was just a tap
+    if (!isSelecting) {
+      // Let the click event handle opening carousel
+      return;
+    }
   };
 
   const togglePhotoSelection = (photoId: number) => {
@@ -393,8 +418,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             </div>
             <div 
               className="grid grid-cols-3 gap-3"
-              onTouchEnd={handlePhotoTouchEnd}
-              onMouseUp={handlePhotoTouchEnd}
+              onTouchEnd={(e) => handlePhotoTouchEnd(e)}
+              onMouseUp={(e) => handlePhotoTouchEnd(e)}
             >
               {photos.map((photo, index) => (
                 <div
@@ -408,16 +433,21 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                   onMouseDown={(e) => handlePhotoTouchStart(photo.id, e)}
                   onTouchMove={(e) => handlePhotoTouchMove(photo.id, e)}
                   onMouseEnter={(e) => touchStarted && handlePhotoTouchMove(photo.id, e)}
+                  onClick={(e) => {
+                    if (isSelecting) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      togglePhotoSelection(photo.id);
+                    } else {
+                      openPhotoCarousel(index);
+                    }
+                  }}
                 >
                   <img
                     src={`/uploads/${photo.filename}`}
                     alt={photo.description || photo.originalName}
                     className={`w-full h-full object-cover ${selectedPhotos.has(photo.id) ? 'opacity-80' : ''}`}
-                    onClick={(e) => {
-                      if (!isSelecting) {
-                        openPhotoCarousel(index);
-                      }
-                    }}
+                    draggable={false}
                     onError={(e) => console.error('Image failed to load:', photo.filename)}
                     onLoad={() => console.log('Image loaded successfully:', photo.filename)}
                   />
