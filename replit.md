@@ -116,3 +116,4 @@ Preferred communication style: Simple, everyday language.
 Brand name: A-Frame Painting
 Theme preference: Dark mode by default
 Logo: Custom A-frame house structure with paint brush accent
+Development workflow: Always check with user before creating new versions or making changes to working functionality
