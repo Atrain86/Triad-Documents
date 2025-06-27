@@ -182,19 +182,20 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <div 
-        className="h-1"
-        style={{ background: aframeTheme.gradients.rainbow }}
-      />
-
       <div className="p-6">
-        <div className="flex justify-center mb-8 pb-5 border-b border-border">
+        <div className="flex justify-center mb-6">
           <img 
             src="/aframe-logo.png" 
             alt="A-Frame Painting" 
             className="h-32 w-auto object-contain"
           />
         </div>
+
+        {/* Rainbow gradient divider */}
+        <div 
+          className="h-1 w-full mb-8"
+          style={{ background: aframeTheme.gradients.rainbow }}
+        />
 
         <div className="flex justify-center mb-6">
           <Button

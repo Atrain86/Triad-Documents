@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Camera, FileText, ArrowLeft, Edit3, Download, X, Image as ImageIcon, DollarSign, Calendar, Wrench, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { apiRequest } from '@/lib/queryClient';
@@ -368,7 +369,11 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   };
 
   const formatDateForInput = (date: Date) => {
-    return date.toISOString().split('T')[0];
+    // Use local date to avoid timezone offset issues
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
   const handleAddHours = () => {
@@ -1047,6 +1052,63 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
 
         {/* Simple Files List */}
+        {/* Quick Receipt Entry Form */}
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-3 text-muted-foreground">
+            <DollarSign size={16} />
+            <span className="font-medium">Add Receipt Amount</span>
+          </div>
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target as HTMLFormElement);
+              const item = formData.get('item') as string;
+              const price = formData.get('price') as string;
+              
+              if (!item.trim() || !price.trim()) return;
+              
+              const receiptData = {
+                vendor: item,
+                amount: price,
+                description: `Manual entry: ${item}`,
+                filename: null
+              };
+              
+              fetch(`/api/projects/${project.id}/receipts`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(receiptData),
+              }).then(() => {
+                queryClient.invalidateQueries({ queryKey: [`/api/projects/${project.id}/receipts`] });
+                (e.target as HTMLFormElement).reset();
+              });
+            }}
+            className="flex gap-2"
+          >
+            <Input
+              name="item"
+              placeholder="Item (e.g., Paint brushes)"
+              className="flex-1 h-9"
+            />
+            <Input
+              name="price"
+              type="number"
+              step="0.01"
+              placeholder="$0.00"
+              className="w-24 h-9"
+            />
+            <Button 
+              type="submit" 
+              size="sm"
+              className="h-9 px-3 text-xs"
+            >
+              Add
+            </Button>
+          </form>
+        </div>
+
         <SimpleFilesList projectId={project.id} />
 
         <Button

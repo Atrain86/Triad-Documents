@@ -1,65 +1,62 @@
-# Current Working State Snapshot
-*Created: June 27, 2025 at 5:05 AM*
+# Current Snapshot - June 27, 2025 9:25 AM
 
-## Summary
-Photo viewing functionality has been successfully restored to working state. The app now has clean, simple photo management without any complex cropping features that were causing issues.
+## Working State Summary
+Application is fully functional with custom A-Frame Painting logo integration complete. Photo uploads working perfectly, hours tracking functional, invoice generation operational.
 
-## What's Working ✓
-1. **Photo Upload**: Two-button interface (Photos/Files) working perfectly
-2. **Photo Display**: Grid layout with 9 photos currently stored in project 1
-3. **Photo Viewing**: Click thumbnail → full-screen viewer with navigation
-4. **PDF Upload**: Files button uploads PDFs to receipts table successfully  
-5. **PDF Display**: PDFs show in SimpleFilesList with delete functionality
-6. **Database**: PostgreSQL with all photos and receipts properly stored
-7. **Navigation**: Arrow buttons and thumbnail strip in photo viewer
-8. **Upload Interface**: Simplified two-button design as requested
+## Recent Achievements
+✅ Successfully integrated user's custom A-Frame Painting logo with colorful stripes
+✅ Fixed static file serving configuration (express.static("public"))  
+✅ Doubled logo size - h-32 on homepage, h-24 on invoices
+✅ Photo upload system working perfectly (just uploaded IMG_1547.jpeg successfully)
+✅ Hours tracking system with $60/hour calculations functional
+✅ Invoice PDF generation with logo branding operational
+✅ Tools checklist with click-to-complete workflow working
+✅ Project status management (Red/Yellow/Green/Gray) functional
+✅ Archive system for completed projects working
+✅ Client editing functionality operational
 
-## Current Photo Viewer Features
-- Click any photo thumbnail to open full-screen viewer
-- Clean black overlay with white controls
-- Photo counter (e.g., "3 of 9")
-- Left/right arrow navigation
-- Thumbnail strip at bottom for quick jumping
-- X button to close viewer
-- Responsive design works on mobile and desktop
+## Known Issues to Address
+🔧 Calendar date selection jumping (June 21→22, June 22→21 bug)
+🔧 Need receipt amount entry form (item/price fields)  
+🔧 Move rainbow gradient from top to divider between logo and "New Client" button
 
-## File Structure Status
-- `client/src/components/clean-photo-grid.tsx` - **CLEAN AND WORKING**
-- `client/src/components/simplified-upload.tsx` - Two-button interface
-- `server/routes.ts` - Photo and PDF upload endpoints functional
-- `shared/schema.ts` - Database schema supports photos and receipts
+## Current Database State
+- Projects: Multiple active projects (Don Henly, Blanca Sharpe, etc.)
+- Photos: Working upload system, photos displaying correctly
+- Hours: Time tracking with wage calculations functional
+- Receipts: File upload working, need amount entry form
+- Tools: Checklist system operational
 
-## Database State
-- **Project 1**: 9 photos successfully stored and displaying
-- **PDF receipts**: Multiple PDFs uploaded and accessible
-- **File storage**: `/uploads/` directory with all files intact
+## Technical Architecture
+- Frontend: React + TypeScript + Tailwind CSS
+- Backend: Express.js + Drizzle ORM  
+- Database: PostgreSQL via Neon
+- File Storage: Local uploads directory
+- Logo: /public/aframe-logo.png (112KB PNG)
 
-## What Was Removed
-- React-easy-crop library integration (was causing UI conflicts)
-- Complex zoom and crop controls
-- Cropping state management
-- Crop save functionality
-- All "View & Crop" hover text changed to "View Full Size"
+## Key Files
+- client/src/components/StreamlinedHomepage.tsx (main homepage)
+- client/src/components/StreamlinedClientPage.tsx (project details)
+- client/src/components/InvoiceGenerator.tsx (PDF generation)
+- server/routes.ts (API endpoints)
+- shared/schema.ts (database schema)
+- public/aframe-logo.png (custom logo file)
 
-## Key Success Factors
-1. **Simple click-to-view**: No complex interaction patterns
-2. **Clean UI**: Removed confusing crop buttons and interfaces
-3. **Reliable navigation**: Thumbnail strip and arrow controls work smoothly
-4. **Two-button upload**: Photos and Files buttons clearly separated
-5. **Database integrity**: All uploads persist correctly
+## User Preferences
+- Simple, everyday language communication
+- Dark mode interface
+- A-Frame Painting branding with custom logo
+- Streamlined workflow-focused interface
+- $60/hour standard rate
+- Compact, dense information display
 
-## Ready for Enhancement
-The photo viewing system is now stable and ready for careful, incremental improvements. Any future enhancements should be:
-- Built incrementally
-- Tested thoroughly before integration
-- Designed to not interfere with basic photo viewing
-- Backed up before implementation
+## Next Steps
+1. Fix calendar date selection bug
+2. Add receipt amount entry form
+3. Move rainbow gradient to logo/button divider
+4. Continue refining user experience
 
-## User Feedback
-User confirmed: "Yes, it's working again" - Photo thumbnails now successfully open in full-screen mode without issues.
-
-## Backup Created
-- **Location**: `backups/pre-zoom-snapshot/` 
-- **Purpose**: Preserves working photo viewing before any zoom/crop features
-- **Memorable name**: Indicates this is the stable version without zoom functionality
-- **Contains**: clean-photo-grid.tsx (working version) + documentation
+---
+*Snapshot created: June 27, 2025 9:25 AM*
+*Logo integration and basic functionality: COMPLETE*
+*Ready for next phase improvements*
