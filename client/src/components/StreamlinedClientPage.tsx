@@ -6,90 +6,43 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { apiRequest } from '@/lib/queryClient';
 import type { Project, Photo, Receipt } from '@shared/schema';
-// Receipt display component without upload interface
-function ReceiptDisplayOnly({ projectId }: { projectId: number }) {
-  const { data: receipts = [], isLoading } = useQuery<Receipt[]>({
+// Simple clean file list component
+function SimpleFilesList({ projectId }: { projectId: number }) {
+  const { data: receipts = [] } = useQuery<Receipt[]>({
     queryKey: ['/api/projects', projectId, 'receipts'],
   });
 
-  if (isLoading) {
-    return <div className="text-center text-gray-500 dark:text-gray-400">Loading receipts...</div>;
-  }
-
   if (receipts.length === 0) {
-    return (
-      <div className="p-4 text-center text-muted-foreground">
-        <FileText size={24} className="mx-auto mb-2" />
-        <p>No files uploaded yet. Use the Files button to add receipts!</p>
-      </div>
-    );
+    return null; // Hide section if no files
   }
 
   return (
-    <div className="space-y-6">
-      {/* Total Summary */}
-      <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
-        <CardContent className="p-4">
-          <div className="flex justify-between items-center">
-            <span className="text-lg font-medium text-gray-900 dark:text-white">Total Expenses</span>
-            <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-              ${receipts.reduce((sum, receipt) => {
-                const amount = typeof receipt.amount === 'string' ? parseFloat(receipt.amount) : receipt.amount;
-                return sum + amount;
-              }, 0).toFixed(2)}
-            </span>
+    <div className="mb-8">
+      <div className="flex items-center gap-2 mb-4 text-muted-foreground">
+        <FileText size={16} />
+        <span className="font-medium">Files ({receipts.length})</span>
+      </div>
+      <div className="space-y-2">
+        {receipts.map((receipt) => (
+          <div key={receipt.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div className="flex items-center gap-3">
+              <FileText size={16} className="text-blue-600" />
+              <span className="text-sm font-medium text-gray-900 dark:text-white">
+                {receipt.originalName || receipt.vendor}
+              </span>
+            </div>
+            {receipt.filename && (
+              <a
+                href={`/uploads/${receipt.filename}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 dark:text-blue-400 hover:underline text-sm"
+              >
+                View
+              </a>
+            )}
           </div>
-        </CardContent>
-      </Card>
-      
-      {/* Receipt List */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white">Receipts</h3>
-        <div className="grid gap-4">
-          {receipts.map((receipt) => (
-            <Card key={receipt.id} className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start space-x-3">
-                    <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                      <FileText size={20} className="text-blue-600 dark:text-blue-400" />
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-900 dark:text-white mb-1">
-                        {receipt.vendor}
-                      </h4>
-                      {receipt.description && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                          {receipt.description}
-                        </p>
-                      )}
-                      <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                        <div className="flex items-center gap-1">
-                          <DollarSign size={12} />
-                          <span>${parseFloat(receipt.amount || '0').toFixed(2)}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Calendar size={12} />
-                          <span>{new Date(receipt.date).toLocaleDateString()}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  {receipt.filename && (
-                    <a
-                      href={`/uploads/${receipt.filename}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 dark:text-blue-400 hover:underline text-sm"
-                    >
-                      View File
-                    </a>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        ))}
       </div>
     </div>
   );
@@ -631,15 +584,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           </div>
         )}
 
-        {/* Receipts Section */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4 text-muted-foreground">
-            <FileText size={16} />
-            <span className="font-medium">Receipts & Files</span>
-          </div>
-          <ReceiptDisplayOnly projectId={project.id} />
-        </div>
-
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4 text-muted-foreground">
             <Edit3 size={16} />
@@ -653,6 +597,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             className="min-h-[120px] resize-vertical"
           />
         </div>
+
+        {/* Simple Files List */}
+        <SimpleFilesList projectId={project.id} />
 
         <Button
           onClick={() => generateInvoiceMutation.mutate()}
