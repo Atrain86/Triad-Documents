@@ -130,18 +130,24 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const receiptUploadMutation = useMutation({
     mutationFn: async (files: FileList) => {
-      const formData = new FormData();
-      Array.from(files).forEach(file => {
-        formData.append('receipts', file);
+      const uploadPromises = Array.from(files).map(async (file) => {
+        const formData = new FormData();
+        formData.append('receipt', file);
+        formData.append('vendor', file.name);
+        formData.append('amount', '0');
+        formData.append('description', `File upload: ${file.name}`);
+        formData.append('date', new Date().toISOString().split('T')[0]);
+        
+        const response = await fetch(`/api/projects/${projectId}/receipts`, {
+          method: 'POST',
+          body: formData
+        });
+        
+        if (!response.ok) throw new Error(`Failed to upload ${file.name}`);
+        return response.json();
       });
       
-      const response = await fetch(`/api/projects/${projectId}/receipts`, {
-        method: 'POST',
-        body: formData
-      });
-      
-      if (!response.ok) throw new Error('Failed to upload receipts');
-      return response.json();
+      return Promise.all(uploadPromises);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/receipts`] });
