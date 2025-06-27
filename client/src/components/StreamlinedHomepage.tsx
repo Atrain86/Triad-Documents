@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Search, MapPin, Clock, User } from 'lucide-react';
+import { Plus, Search, MapPin, Clock, User, Trash2, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -89,6 +89,26 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
     }
   });
 
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ projectId, status }: { projectId: number, status: string }) => {
+      const response = await apiRequest('PUT', `/api/projects/${projectId}`, { status });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+    }
+  });
+
+  const deleteProjectMutation = useMutation({
+    mutationFn: async (projectId: number) => {
+      const response = await apiRequest('DELETE', `/api/projects/${projectId}`);
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+    }
+  });
+
   const handleAddProject = () => {
     if (newProject.clientName && newProject.address) {
       createProjectMutation.mutate(newProject);
@@ -153,42 +173,74 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
           {filteredProjects.map(project => (
             <Card
               key={project.id}
-              className="p-5 cursor-pointer transition-all hover:shadow-md hover:scale-[1.01] hover:border-primary/50 bg-card"
-              onClick={() => onSelectProject(project.id)}
+              className="p-5 transition-all hover:shadow-md hover:border-primary/50 bg-card relative group"
             >
-              <div className="flex justify-between items-start mb-3">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <User size={16} className="text-muted-foreground" />
-                    <h3 className="font-semibold text-lg">{project.clientName || 'Unnamed Client'}</h3>
+              <div 
+                className="cursor-pointer"
+                onClick={() => onSelectProject(project.id)}
+              >
+                <div className="flex justify-between items-start mb-3">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <User size={16} className="text-muted-foreground" />
+                      <h3 className="font-semibold text-lg text-blue-600 dark:text-blue-400">
+                        {project.clientName || 'Unnamed Client'}
+                      </h3>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm mb-2">
+                      <MapPin size={14} className="text-muted-foreground" />
+                      <p className="text-green-600 dark:text-green-400">{project.address || 'No address'}</p>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 text-muted-foreground text-sm mb-2">
-                    <MapPin size={14} />
-                    <p>{project.address || 'No address'}</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2 ml-4">
-                  <div 
-                    className={`w-3 h-3 rounded-full ${statusConfig[project.status as keyof typeof statusConfig]?.dot || 'bg-gray-500'}`}
-                  />
-                  <span 
-                    className={`text-sm font-medium ${statusConfig[project.status as keyof typeof statusConfig]?.text || 'text-gray-600 dark:text-gray-400'}`}
+                  
+                  {/* Delete Button */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (confirm(`Are you sure you want to delete ${project.clientName || 'this client'}?`)) {
+                        deleteProjectMutation.mutate(project.id);
+                      }
+                    }}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity p-2 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
+                    title="Delete client"
                   >
-                    {statusConfig[project.status as keyof typeof statusConfig]?.label || 'Unknown'}
-                  </span>
+                    <Trash2 size={16} />
+                  </button>
                 </div>
               </div>
               
               <div className="flex items-center justify-between pt-3 border-t border-border">
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   <span className="capitalize">{project.projectType}</span>
-                  <span>•</span>
-                  <span>{project.roomCount} room{project.roomCount !== 1 ? 's' : ''}</span>
-                  <span>•</span>
-                  <span className="font-medium">${project.hourlyRate}/hr</span>
+                  {project.projectType === 'interior' && (
+                    <>
+                      <span>•</span>
+                      <span>{project.roomCount} room{project.roomCount !== 1 ? 's' : ''}</span>
+                    </>
+                  )}
                 </div>
-                <div className="text-xs text-muted-foreground capitalize">
-                  {project.difficulty} difficulty
+                
+                {/* Status Selector */}
+                <div className="flex items-center gap-2">
+                  <select
+                    value={project.status}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      updateStatusMutation.mutate({ 
+                        projectId: project.id, 
+                        status: e.target.value 
+                      });
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                    className={`text-xs font-medium border-none bg-transparent cursor-pointer focus:outline-none ${statusConfig[project.status as keyof typeof statusConfig]?.text || 'text-gray-600 dark:text-gray-400'}`}
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="in-progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                  </select>
+                  <div 
+                    className={`w-3 h-3 rounded-full ${statusConfig[project.status as keyof typeof statusConfig]?.dot || 'bg-gray-500'}`}
+                  />
                 </div>
               </div>
             </Card>
@@ -236,30 +288,15 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
               <option value="interior">Interior Painting</option>
             </select>
             
-            <Input
-              placeholder="Number of Rooms"
-              type="number"
-              min="1"
-              value={newProject.roomCount || 1}
-              onChange={(e) => handleInputChange('roomCount', Number(e.target.value))}
-            />
-            
-            <select
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-              value={newProject.difficulty}
-              onChange={(e) => handleInputChange('difficulty', e.target.value)}
-            >
-              <option value="easy">Easy</option>
-              <option value="medium">Medium</option>
-              <option value="hard">Hard</option>
-            </select>
-            
-            <Input
-              placeholder="Hourly Rate"
-              type="number"
-              value={String(newProject.hourlyRate || 60)}
-              onChange={(e) => handleInputChange('hourlyRate', Number(e.target.value))}
-            />
+            {newProject.projectType === 'interior' && (
+              <Input
+                placeholder="Number of Rooms"
+                type="number"
+                min="1"
+                value={newProject.roomCount || 1}
+                onChange={(e) => handleInputChange('roomCount', Number(e.target.value))}
+              />
+            )}
             
             <div className="flex gap-3 pt-4">
               <Button 

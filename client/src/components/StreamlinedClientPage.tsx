@@ -526,8 +526,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             <ArrowLeft size={20} />
           </Button>
           <div className="flex-1">
-            <h1 className="text-2xl font-semibold mb-1">{project.clientName || project.address || 'New Project'}</h1>
-            <p className="text-sm text-muted-foreground">{project.address}</p>
+            <h1 className="text-2xl font-semibold mb-1 text-blue-600 dark:text-blue-400">{project.clientName || project.address || 'New Project'}</h1>
+            <p className="text-sm text-green-600 dark:text-green-400">{project.address}</p>
           </div>
         </div>
 
