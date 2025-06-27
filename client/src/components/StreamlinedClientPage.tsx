@@ -8,9 +8,15 @@ import { apiRequest } from '@/lib/queryClient';
 import type { Project, Photo, Receipt } from '@shared/schema';
 // Simple clean file list component
 function SimpleFilesList({ projectId }: { projectId: number }) {
-  const { data: receipts = [] } = useQuery<Receipt[]>({
+  const { data: receipts = [], isLoading, error } = useQuery<Receipt[]>({
     queryKey: ['/api/projects', projectId, 'receipts'],
   });
+
+  console.log('SimpleFilesList - receipts:', receipts, 'loading:', isLoading, 'error:', error);
+
+  if (isLoading) {
+    return <div className="mb-8 text-center text-gray-500">Loading files...</div>;
+  }
 
   if (receipts.length === 0) {
     return null; // Hide section if no files
