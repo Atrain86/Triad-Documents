@@ -292,59 +292,34 @@ ${invoiceData.notes}
 Thank you for your business!
 
 Best regards,
-${invoiceData.businessName}`;
-
-    const htmlBody = `
-      <html>
-        <body style="font-family: Arial, sans-serif; color: #333;">
-          <p>Dear ${invoiceData.clientName},</p>
-          
-          <p>${invoiceData.emailMessage.replace(/\n/g, '<br>')}</p>
-          
-          <h3>Payment Instructions:</h3>
-          <p>${invoiceData.notes.replace(/\n/g, '<br>')}</p>
-          
-          <p>Thank you for your business!</p>
-          
-          <p>Best regards,<br>
-          <strong>${invoiceData.businessName}</strong></p>
-        </body>
-      </html>
-    `;
+${invoiceData.businessName}
+cortespainter@gmail.com
+884 Hayes Rd, Manson's Landing, BC V0P1K0`;
 
     try {
+      // Create Gmail compose URL
+      const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(invoiceData.clientEmail)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(textBody)}`;
+      
+      // Open Gmail compose in new tab
+      window.open(gmailComposeUrl, '_blank');
+      
+      // Also copy to clipboard as backup
+      const emailContent = `To: ${invoiceData.clientEmail}
+Subject: ${subject}
+
+${textBody}`;
+
+      await navigator.clipboard.writeText(emailContent);
+      
       toast({
-        title: "Sending Email",
-        description: "Please wait while we send your invoice...",
+        title: "Gmail Opened!",
+        description: "Gmail compose window opened with your invoice. Email content also copied to clipboard as backup.",
       });
 
-      const response = await fetch('/api/send-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          to: invoiceData.clientEmail,
-          subject,
-          text: textBody,
-          html: htmlBody,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        toast({
-          title: "Email Sent Successfully!",
-          description: `Invoice sent to ${invoiceData.clientEmail}`,
-        });
-      } else {
-        throw new Error(result.error || 'Failed to send email');
-      }
     } catch (error) {
       console.error('Email sending failed:', error);
       
-      // Fallback to clipboard method
+      // Fallback to clipboard only
       const emailContent = `To: ${invoiceData.clientEmail}
 Subject: ${subject}
 
@@ -353,8 +328,8 @@ ${textBody}`;
       navigator.clipboard.writeText(emailContent).catch(() => {});
       
       toast({
-        title: "Email Setup Required",
-        description: "Please verify cortespainter@gmail.com in your SendGrid account first. Email content copied to clipboard.",
+        title: "Content Copied",
+        description: "Invoice email copied to clipboard. Please paste into Gmail manually.",
         variant: "destructive",
       });
     }
