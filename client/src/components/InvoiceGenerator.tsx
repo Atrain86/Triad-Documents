@@ -44,17 +44,23 @@ export default function InvoiceGenerator({
     clientPhone: project.clientPhone || '',
     
     // Line items (populated from daily hours)
-    lineItems: dailyHours.map(hour => ({
+    lineItems: dailyHours.length > 0 ? dailyHours.map(hour => ({
       description: hour.description || 'Painting Services',
       hours: hour.hours,
       unitPrice: hour.hourlyRate || 60,
       detail: `Date: ${new Date(hour.date).toLocaleDateString()}`,
       total: hour.hours * (hour.hourlyRate || 60)
-    })),
+    })) : [{
+      description: 'Painting Services',
+      hours: 0,
+      unitPrice: 60,
+      detail: '',
+      total: 0
+    }],
     
     // Notes and payment
     notes: 'Please send e-transfer to kohlmeister@gmail.com',
-    gstRate: 0.0875, // 8.75% tax rate
+    gstRate: 0.05, // 5% GST on labor services only
     suppliesCost: 0,
     selectedReceipts: new Set<number>()
   });
@@ -118,11 +124,17 @@ export default function InvoiceGenerator({
   };
 
   const calculateSubtotal = () => {
-    return invoiceData.lineItems.reduce((sum, item) => sum + item.total, 0) + invoiceData.suppliesCost;
+    const laborTotal = invoiceData.lineItems.reduce((sum, item) => sum + item.total, 0);
+    const selectedReceiptsTotal = receipts
+      .filter(receipt => invoiceData.selectedReceipts.has(receipt.id))
+      .reduce((sum, receipt) => sum + parseFloat(receipt.amount), 0);
+    return laborTotal + invoiceData.suppliesCost + selectedReceiptsTotal;
   };
 
   const calculateGST = () => {
-    return calculateSubtotal() * invoiceData.gstRate;
+    // Only apply GST to labor, not to materials (receipts already include taxes)
+    const laborTotal = invoiceData.lineItems.reduce((sum, item) => sum + item.total, 0);
+    return (laborTotal + invoiceData.suppliesCost) * invoiceData.gstRate;
   };
 
   const calculateTotal = () => {
@@ -465,21 +477,30 @@ ${invoiceData.businessName}`;
             <div className="flex justify-end">
               <div className="w-64 space-y-2">
                 <div className="flex justify-between py-2 border-b" style={{ borderColor: darkTheme.border }}>
-                  <span className="font-medium" style={{ color: darkTheme.text }}>Labor Subtotal:</span>
+                  <span className="font-medium" style={{ color: darkTheme.text }}>Labor:</span>
                   <span className="font-semibold" style={{ color: darkTheme.text }}>${invoiceData.lineItems.reduce((sum, item) => sum + item.total, 0).toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between py-2 border-b" style={{ borderColor: darkTheme.border }}>
-                  <span className="font-medium" style={{ color: darkTheme.text }}>Supplies:</span>
-                  <span className="font-semibold" style={{ color: darkTheme.text }}>${invoiceData.suppliesCost.toFixed(2)}</span>
-                </div>
+                {invoiceData.suppliesCost > 0 && (
+                  <div className="flex justify-between py-2 border-b" style={{ borderColor: darkTheme.border }}>
+                    <span className="font-medium" style={{ color: darkTheme.text }}>Additional Supplies:</span>
+                    <span className="font-semibold" style={{ color: darkTheme.text }}>${invoiceData.suppliesCost.toFixed(2)}</span>
+                  </div>
+                )}
+                {receipts.filter(receipt => invoiceData.selectedReceipts.has(receipt.id)).length > 0 && (
+                  <div className="flex justify-between py-2 border-b" style={{ borderColor: darkTheme.border }}>
+                    <span className="font-medium" style={{ color: darkTheme.text }}>Materials (incl. taxes):</span>
+                    <span className="font-semibold" style={{ color: darkTheme.text }}>${receipts.filter(receipt => invoiceData.selectedReceipts.has(receipt.id)).reduce((sum, receipt) => sum + parseFloat(receipt.amount), 0).toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between py-2 border-b" style={{ borderColor: darkTheme.border }}>
                   <span className="font-medium" style={{ color: darkTheme.text }}>Subtotal:</span>
                   <span className="font-semibold" style={{ color: darkTheme.text }}>${calculateSubtotal().toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between py-2 border-b" style={{ borderColor: darkTheme.border }}>
-                  <span className="font-medium" style={{ color: darkTheme.text }}>Tax (8.75%):</span>
+                  <span className="font-medium" style={{ color: darkTheme.text }}>GST (5%):</span>
                   <span className="font-semibold" style={{ color: darkTheme.text }}>${calculateGST().toFixed(2)}</span>
                 </div>
+
                 <div className="flex justify-between py-2 text-lg font-bold px-4 rounded" style={{ backgroundColor: `${brandColors.primary}20`, color: darkTheme.text }}>
                   <span>Total:</span>
                   <span>${calculateTotal().toFixed(2)}</span>
@@ -654,9 +675,10 @@ ${invoiceData.businessName}`;
                       <span className="font-semibold">${calculateSubtotal().toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-gray-300">
-                      <span>Tax (8.75%)</span>
+                      <span>GST (5%)</span>
                       <span className="font-semibold">${calculateGST().toFixed(2)}</span>
                     </div>
+
                     <div className="border-t border-gray-600 pt-3">
                       <div className="flex justify-between text-xl font-bold">
                         <span className="text-white">Total</span>
