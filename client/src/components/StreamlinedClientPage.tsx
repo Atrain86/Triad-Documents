@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Camera, FileText, ArrowLeft, Edit3, Download, X, Image as ImageIcon, DollarSign, Calendar } from 'lucide-react';
+import { Camera, FileText, ArrowLeft, Edit3, Download, X, Image as ImageIcon, DollarSign, Calendar, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,8 +8,29 @@ import { apiRequest } from '@/lib/queryClient';
 import type { Project, Photo, Receipt } from '@shared/schema';
 // Improved file list component inspired by the PDF uploader
 function SimpleFilesList({ projectId }: { projectId: number }) {
+  const queryClient = useQueryClient();
   const { data: receipts = [], isLoading, error } = useQuery<Receipt[]>({
     queryKey: [`/api/projects/${projectId}/receipts`],
+  });
+
+  const deleteReceiptMutation = useMutation({
+    mutationFn: async (receiptId: number) => {
+      const response = await fetch(`/api/receipts/${receiptId}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to delete file: ${response.status}`);
+      }
+      
+      return receiptId; // Return the ID for optimistic updates
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/receipts`] });
+    },
+    onError: (error) => {
+      console.error('Delete failed:', error);
+    },
   });
 
   if (isLoading) {
@@ -40,16 +61,26 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
                 </div>
               </div>
             </div>
-            {receipt.filename && (
-              <a
-                href={`/uploads/${receipt.filename}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm px-3 py-1 rounded bg-blue-50 dark:bg-blue-900/20"
+            <div className="flex items-center gap-2">
+              {receipt.filename && (
+                <a
+                  href={`/uploads/${receipt.filename}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm px-3 py-1 rounded bg-blue-50 dark:bg-blue-900/20"
+                >
+                  View
+                </a>
+              )}
+              <button
+                onClick={() => deleteReceiptMutation.mutate(receipt.id)}
+                disabled={deleteReceiptMutation.isPending}
+                className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50"
+                title="Delete file"
               >
-                View
-              </a>
-            )}
+                <Trash2 size={16} />
+              </button>
+            </div>
           </div>
         ))}
       </div>
