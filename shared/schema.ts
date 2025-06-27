@@ -6,6 +6,8 @@ export const projects = pgTable("projects", {
   id: serial("id").primaryKey(),
   clientName: text("client_name").notNull(),
   address: text("address").notNull(),
+  clientCity: text("client_city"),
+  clientPostal: text("client_postal"),
   clientEmail: text("client_email"),
   clientPhone: text("client_phone"),
   projectType: text("project_type").notNull().default("exterior"), // interior or exterior

@@ -654,6 +654,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                   setEditForm({
                     clientName: project.clientName,
                     address: project.address,
+                    clientCity: project.clientCity,
+                    clientPostal: project.clientPostal,
                     clientEmail: project.clientEmail,
                     clientPhone: project.clientPhone,
                     projectType: project.projectType,
@@ -1310,6 +1312,25 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                 onChange={(e) => handleEditInputChange('address', e.target.value)}
                 placeholder="Enter project address"
               />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-sm font-medium mb-2 block">City</label>
+                <Input
+                  value={editForm.clientCity || ''}
+                  onChange={(e) => handleEditInputChange('clientCity', e.target.value)}
+                  placeholder="Enter city"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">Postal Code</label>
+                <Input
+                  value={editForm.clientPostal || ''}
+                  onChange={(e) => handleEditInputChange('clientPostal', e.target.value)}
+                  placeholder="Enter postal code"
+                />
+              </div>
             </div>
             
             <div className="grid grid-cols-2 gap-3">

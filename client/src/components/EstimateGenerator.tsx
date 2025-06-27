@@ -84,13 +84,13 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     // Client Information from project
     clientName: project.clientName || '',
     clientAddress: project.address || '',
-    clientCity: '',
-    clientPostal: '',
+    clientCity: project.clientCity || '',
+    clientPostal: project.clientPostal || '',
     clientEmail: project.clientEmail || '',
     clientPhone: project.clientPhone || '',
 
     // Estimate Details
-    estimateNumber: `EST-${Date.now()}`,
+    estimateNumber: 'EST #',
     date: new Date().toISOString().split('T')[0],
     projectTitle: `${project.projectType} - ${project.clientName}`,
     projectDescription: project.notes || '',

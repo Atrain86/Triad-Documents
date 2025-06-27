@@ -59,6 +59,8 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
   const [newProject, setNewProject] = useState<NewProject>({
     clientName: '',
     address: '',
+    clientCity: '',
+    clientPostal: '',
     clientEmail: '',
     clientPhone: '',
     projectType: 'exterior',
@@ -390,6 +392,19 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
             
             <div className="grid grid-cols-2 gap-3">
               <Input
+                placeholder="City"
+                value={newProject.clientCity || ''}
+                onChange={(e) => handleInputChange('clientCity', e.target.value)}
+              />
+              <Input
+                placeholder="Postal Code"
+                value={newProject.clientPostal || ''}
+                onChange={(e) => handleInputChange('clientPostal', e.target.value)}
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3">
+              <Input
                 placeholder="Email Address"
                 type="email"
                 value={newProject.clientEmail || ''}
@@ -467,6 +482,25 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
                 onChange={(e) => handleEditInputChange('address', e.target.value)}
                 placeholder="Enter project address"
               />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-sm font-medium mb-2 block">City</label>
+                <Input
+                  value={editForm.clientCity || ''}
+                  onChange={(e) => handleEditInputChange('clientCity', e.target.value)}
+                  placeholder="Enter city"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">Postal Code</label>
+                <Input
+                  value={editForm.clientPostal || ''}
+                  onChange={(e) => handleEditInputChange('clientPostal', e.target.value)}
+                  placeholder="Enter postal code"
+                />
+              </div>
             </div>
             
             <div className="grid grid-cols-2 gap-3">
