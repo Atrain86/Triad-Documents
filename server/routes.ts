@@ -575,9 +575,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true, message: 'Email sent successfully' });
     } catch (error) {
       console.error('SendGrid error:', error);
+      
+      // Extract more detailed error information
+      let errorDetails = error.message;
+      if (error.response?.body?.errors) {
+        errorDetails = error.response.body.errors.map(e => e.message).join(', ');
+        console.error('SendGrid detailed errors:', error.response.body.errors);
+      }
+      
       res.status(500).json({ 
         error: 'Failed to send email', 
-        details: error.response?.body?.errors || error.message 
+        details: errorDetails,
+        sendgridErrors: error.response?.body?.errors || []
       });
     }
   });
