@@ -261,7 +261,6 @@ Total Estimate: $${calculateTotal().toFixed(2)}
 This estimate is valid for 30 days. Please let me know if you have any questions.
 
 Best regards,
-Alan Kohl
 A-Frame Painting`;
 
     const emailUrl = `mailto:${estimateData.clientEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
@@ -625,10 +624,10 @@ A-Frame Painting`;
               </div>
               <p className="text-lg text-gray-600 font-medium">ESTIMATE</p>
               <div className="mt-4 text-sm text-gray-600">
-                <p>Alan Kohl</p>
+                <p>A-Frame Painting</p>
                 <p>884 Hayes Rd</p>
                 <p>Manson's Landing, BC V0P1K0</p>
-                <p>kohlmeister@gmail.com</p>
+                <p>cortespainter@gmail.com</p>
               </div>
             </div>
             <div className="text-right">
@@ -779,7 +778,7 @@ A-Frame Painting`;
                   <strong>Thank you for considering A-Frame Painting for your project!</strong>
                 </p>
                 <p className="text-center mt-2">
-                  Alan Kohl • A-Frame Painting • kohlmeister@gmail.com
+                  A-Frame Painting • cortespainter@gmail.com
                 </p>
               </div>
             </div>

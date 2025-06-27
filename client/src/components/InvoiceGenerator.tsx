@@ -36,7 +36,7 @@ export default function InvoiceGenerator({
     businessAddress: '884 Hayes Rd',
     businessCity: 'Manson\'s Landing, BC',
     businessPostal: 'V0P1K0',
-    businessEmail: 'kohlmeister@gmail.com',
+    businessEmail: 'cortespainter@gmail.com',
     businessLogo: '/aframe-logo.png', // A-Frame Painting logo
     
     // Client info (populated from project)
@@ -63,7 +63,7 @@ export default function InvoiceGenerator({
     }],
     
     // Notes and payment
-    notes: 'Please send e-transfer to kohlmeister@gmail.com',
+    notes: 'Please send e-transfer to cortespainter@gmail.com',
     gstRate: 0.05, // 5% GST on labor services only
     suppliesCost: 0,
     selectedReceipts: new Set<number>()
