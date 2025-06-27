@@ -299,24 +299,32 @@ Thank you for your business!
 Best regards,
 ${invoiceData.businessName}`;
 
-    // Create mailto URL and open in new window/tab
+    const emailContent = `To: ${invoiceData.clientEmail}
+Subject: ${subject}
+
+${body}`;
+
+    // Try to copy email content to clipboard as backup
+    navigator.clipboard.writeText(emailContent).catch(() => {});
+
+    // Create mailto URL and try to open
     const mailtoUrl = `mailto:${invoiceData.clientEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     
     // Try multiple methods for better compatibility
-    try {
-      window.open(mailtoUrl);
-    } catch (error) {
-      // Fallback to location.href
+    const opened = window.open(mailtoUrl, '_blank');
+    
+    if (!opened) {
+      // If popup was blocked, try direct assignment
       window.location.href = mailtoUrl;
     }
     
     const attachmentInstructions = hasReceiptAttachments 
-      ? "Download the PDF invoice first, then manually attach any receipt files from your Files section to the email."
-      : "Download the PDF invoice first, then attach it to your email.";
+      ? "Email content copied to clipboard. Download the PDF and attach receipt files manually."
+      : "Email content copied to clipboard. Download the PDF and attach it manually.";
 
     toast({
-      title: "Email Client Opened",
-      description: attachmentInstructions,
+      title: "Email Ready",
+      description: "Opening email client. If nothing opens, check your clipboard for email content.",
     });
   };
 
