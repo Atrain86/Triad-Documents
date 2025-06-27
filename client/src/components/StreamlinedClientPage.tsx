@@ -245,8 +245,24 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const handleReceiptUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     console.log('Receipt upload triggered:', e.target.files?.length, 'files');
     if (e.target.files && e.target.files.length > 0) {
-      console.log('Files selected for receipt upload:', Array.from(e.target.files).map(f => `${f.name} (${f.type})`));
-      receiptUploadMutation.mutate(e.target.files);
+      // Convert FileList to File array immediately to prevent it from becoming empty
+      const filesArray = Array.from(e.target.files);
+      console.log('Files selected for receipt upload:', filesArray.map(f => `${f.name} (${f.type})`));
+      console.log('Files captured:', filesArray.length, 'files');
+      
+      // Create a new FileList-like object that won't become empty
+      const fileListObj = {
+        ...filesArray,
+        length: filesArray.length,
+        item: (index: number) => filesArray[index] || null,
+        [Symbol.iterator]: function* () {
+          for (const file of filesArray) {
+            yield file;
+          }
+        }
+      } as FileList;
+      
+      receiptUploadMutation.mutate(fileListObj);
       e.target.value = '';
     }
   };
