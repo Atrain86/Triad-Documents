@@ -331,10 +331,9 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
           
           <Button
             onClick={() => openWorkCalendar()}
-            className="flex items-center px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
+            className="flex items-center px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90"
             style={{ backgroundColor: '#3b82f6' }}
           >
-            <Calendar className="mr-2 h-4 w-4" />
             Work Schedule
           </Button>
         </div>

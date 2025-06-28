@@ -1432,9 +1432,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         <div className="grid grid-cols-2 gap-4">
           <Button
             onClick={() => setShowEstimateGenerator(true)}
-            className="py-4 text-base font-semibold bg-purple-600 hover:bg-purple-700 text-white"
+            className="py-3 text-sm font-semibold bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center"
           >
-            <Calculator size={20} className="mr-2" />
+            <Calculator size={18} className="mr-2" />
             Generate Estimate
           </Button>
           <Button
