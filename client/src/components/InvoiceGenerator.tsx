@@ -424,7 +424,13 @@ cortespainter@gmail.com
 
             const result = await response.json();
             
-            if (response.ok && result.fallback) {
+            if (response.ok && result.direct) {
+              // Email sent successfully via SMTP
+              toast({
+                title: "Email Sent!",
+                description: "Invoice emailed successfully with PDF attachment.",
+              });
+            } else if (response.ok && result.fallback) {
               // Use Gmail fallback method
               const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(invoiceData.clientEmail)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(textBody)}`;
               

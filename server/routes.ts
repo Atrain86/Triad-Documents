@@ -553,24 +553,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Email sending endpoint with PDF attachment
+  // Email sending endpoint with PDF attachment using Gmail SMTP
   app.post('/api/send-email-with-pdf', async (req, res) => {
     try {
       const { to, subject, text, pdfBase64, pdfFilename } = req.body;
       
-      // Simple fallback - just return success and let frontend handle Gmail opening
-      // This bypasses all email service complications
+      // Check if Gmail SMTP credentials are available
+      if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+        return res.json({ 
+          success: false, 
+          message: 'Gmail SMTP not configured. Opening Gmail manually...', 
+          fallback: true 
+        });
+      }
+
+      // Create Gmail SMTP transporter
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.GMAIL_USER,
+          pass: process.env.GMAIL_APP_PASSWORD
+        }
+      });
+
+      // Prepare email with PDF attachment
+      const mailOptions = {
+        from: process.env.GMAIL_USER,
+        to: to,
+        subject: subject,
+        text: text,
+        attachments: pdfBase64 ? [{
+          filename: pdfFilename,
+          content: pdfBase64,
+          encoding: 'base64'
+        }] : []
+      };
+
+      // Send email
+      await transporter.sendMail(mailOptions);
+      
       res.json({ 
         success: true, 
-        message: 'Email content prepared. Opening Gmail...', 
-        fallback: true 
+        message: 'Email sent successfully with PDF attachment!',
+        direct: true
       });
       
     } catch (error) {
-      console.error('Email preparation error:', error);
-      res.status(500).json({ 
-        error: 'Failed to prepare email',
-        details: error instanceof Error ? error.message : 'Unknown error'
+      console.error('Gmail SMTP error:', error);
+      
+      // Fallback to manual Gmail opening
+      res.json({ 
+        success: false, 
+        message: 'SMTP failed. Opening Gmail manually...', 
+        fallback: true,
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   });
