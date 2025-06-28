@@ -29,6 +29,8 @@ export default function InvoiceGenerator({
   const { toast } = useToast();
   const [isSending, setIsSending] = useState(false);
   const [testEmail, setTestEmail] = useState('');
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const [invoiceData, setInvoiceData] = useState({
     invoiceNumber: 101,
     date: new Date().toISOString().split('T')[0],
@@ -476,16 +478,12 @@ cortespainter@gmail.com
             const result = await response.json();
             
             if (response.ok && result.success) {
-              // Email sent successfully via nodemailer Gmail
-              toast({
-                title: "🎉 Invoice Email Sent Successfully!",
-                description: `✅ Invoice #${invoiceData.invoiceNumber} delivered to ${invoiceData.clientEmail}\n📎 PDF attachment included\n📧 Check your sent folder for confirmation`,
-                duration: 10000, // Show for 10 seconds
-                className: "bg-green-600 border-green-400 text-white",
-              });
+              // Show success dialog instead of toast
+              setSuccessMessage(`Invoice #${invoiceData.invoiceNumber} sent successfully to ${invoiceData.clientEmail} with PDF attachment!`);
+              setShowSuccessDialog(true);
               
-              // Close the dialog after success
-              setTimeout(() => onClose(), 3000);
+              // Close the main dialog after showing success
+              setTimeout(() => onClose(), 1000);
             } else {
               throw new Error(result.error || 'Failed to send email via nodemailer');
             }
@@ -601,13 +599,9 @@ cortespainter@gmail.com
             const result = await response.json();
             
             if (response.ok && result.success) {
-              // Email sent successfully
-              toast({
-                title: "🎉 Test Email Sent Successfully!",
-                description: `✅ Test invoice delivered to ${testEmail}\n📎 PDF attachment included\n✉️ Email system confirmed working!`,
-                duration: 10000,
-                className: "bg-green-600 border-green-400 text-white",
-              });
+              // Show success dialog for test email
+              setSuccessMessage(`Test invoice sent successfully to ${testEmail}! Email system confirmed working.`);
+              setShowSuccessDialog(true);
             } else {
               throw new Error(result.error || 'Failed to send test email');
             }
@@ -639,7 +633,8 @@ cortespainter@gmail.com
   if (!isOpen) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <>
+      <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto p-0" style={{ backgroundColor: darkTheme.background }}>
         <DialogHeader className="sr-only">
           <DialogTitle>Invoice Generator</DialogTitle>
@@ -1181,5 +1176,40 @@ cortespainter@gmail.com
         </div>
       </DialogContent>
     </Dialog>
+
+    {/* Success Dialog */}
+    <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-center text-xl font-bold text-green-600 flex items-center justify-center">
+            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-3">
+              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            Email Sent Successfully!
+          </DialogTitle>
+          <DialogDescription className="text-center pt-4">
+            <div className="space-y-2">
+              <p className="text-gray-700">{successMessage}</p>
+              <div className="text-sm text-gray-500">
+                ✓ PDF invoice attached<br/>
+                ✓ Email delivered successfully<br/>
+                ✓ Check your sent folder for confirmation
+              </div>
+            </div>
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex justify-center pt-4">
+          <Button 
+            onClick={() => setShowSuccessDialog(false)}
+            className="bg-green-600 hover:bg-green-700 text-white px-8"
+          >
+            Great!
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }
