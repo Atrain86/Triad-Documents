@@ -287,8 +287,8 @@ export default function InvoiceGenerator({
       invoiceRef.current.style.left = '-9999px';
       invoiceRef.current.style.width = '794px'; // A4 width in pixels
       
-      // Wait for rendering
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Wait for rendering and images to load
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       // Capture the invoice preview with optimized settings for smaller file size
       const canvas = await html2canvas(invoiceRef.current, {
@@ -298,7 +298,16 @@ export default function InvoiceGenerator({
         allowTaint: true,
         logging: false,
         width: 794,
-        height: invoiceRef.current.scrollHeight
+        height: invoiceRef.current.scrollHeight,
+        onclone: (clonedDoc) => {
+          // Ensure all images are loaded in the cloned document
+          const images = clonedDoc.querySelectorAll('img');
+          images.forEach(img => {
+            if (img.src) {
+              img.style.display = 'block';
+            }
+          });
+        }
       });
 
       // Restore original styling
@@ -309,6 +318,11 @@ export default function InvoiceGenerator({
       invoiceRef.current.style.left = '';
       invoiceRef.current.style.width = '';
 
+      // Validate canvas dimensions
+      if (canvas.width === 0 || canvas.height === 0) {
+        throw new Error('Canvas has invalid dimensions');
+      }
+
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
@@ -317,8 +331,14 @@ export default function InvoiceGenerator({
       const imgWidth = pdfWidth;
       const imgHeight = (canvas.height * pdfWidth) / canvas.width;
       
+      // Convert canvas to JPEG with quality setting for smaller file size
+      const imageData = canvas.toDataURL('image/jpeg', 0.8);
+      if (!imageData || imageData === 'data:,') {
+        throw new Error('Failed to generate image data from canvas');
+      }
+
       // Add main invoice page
-      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
+      pdf.addImage(imageData, 'JPEG', 0, 0, imgWidth, imgHeight);
 
       // Add selected receipt attachments (only image files, not PDFs)
       if (invoiceData.selectedReceipts.size > 0) {
