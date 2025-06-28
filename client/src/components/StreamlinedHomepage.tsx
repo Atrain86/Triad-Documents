@@ -148,8 +148,11 @@ const openWorkCalendar = (clientContext: Project | null = null) => {
     // From homepage - open ONLY your A-Frame work calendar (isolated view with dark mode and current date)
     // This direct URL shows just the A-Frame calendar without your other calendars, starting at current month
     const today = new Date();
-    const currentDate = today.toISOString().split('T')[0]; // Format: YYYY-MM-DD
-    const workCalendarDirectUrl = `https://calendar.google.com/calendar/u/0?cid=NmI5OTBhZjU2NTg0MDg0MjJjNDI2Nzc1NzJmMmVmMTk3NDAwOTZhMTYwODE2NWYxNWY1OTEzNWRiNGYyYTk4MUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&color=%23039BE5&bgcolor=%23000000&dates=${currentDate}/${currentDate}`;
+    const year = today.getFullYear();
+    const month = (today.getMonth() + 1).toString().padStart(2, '0'); // JavaScript months are 0-indexed
+    const day = today.getDate().toString().padStart(2, '0');
+    const formattedDate = `${year}${month}${day}`;
+    const workCalendarDirectUrl = `https://calendar.google.com/calendar/u/0?cid=NmI5OTBhZjU2NTg0MDg0MjJjNDI2Nzc1NzJmMmVmMTk3NDAwOTZhMTYwODE2NWYxNWY1OTEzNWRiNGYyYTk4MUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&color=%23039BE5&bgcolor=%23000000&dates=${formattedDate}`;
     window.open(workCalendarDirectUrl, '_blank');
   }
 };
