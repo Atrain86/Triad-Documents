@@ -63,6 +63,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
+  // Simple passcode authentication
+  app.post("/api/auth/verify", (req, res) => {
+    const { passcode } = req.body;
+    const correctPasscode = process.env.APP_PASSCODE || "aframe2025";
+    
+    if (passcode === correctPasscode) {
+      res.json({ success: true });
+    } else {
+      res.status(401).json({ error: "Invalid passcode" });
+    }
+  });
+
   // Projects
   app.get('/api/projects', async (req, res) => {
     try {
