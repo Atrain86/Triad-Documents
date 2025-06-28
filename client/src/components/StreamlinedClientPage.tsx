@@ -1,12 +1,13 @@
 import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Camera, FileText, ArrowLeft, Edit3, Download, X, Image as ImageIcon, DollarSign, Calendar, Wrench, Plus, Trash2, Calculator, Receipt as ReceiptIcon } from 'lucide-react';
+import { Camera, FileText, ArrowLeft, Edit3, Download, X, Image as ImageIcon, DollarSign, Calendar, Wrench, Plus, Trash2, Calculator, Receipt as ReceiptIcon, MapPin, Navigation, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { apiRequest } from '@/lib/queryClient';
+import { generateMapsLink, generateDirectionsLink } from '@/lib/maps';
 import type { Project, Photo, Receipt, ToolsChecklist, DailyHours } from '@shared/schema';
 import InvoiceGenerator from './InvoiceGenerator';
 import EstimateGenerator from './EstimateGenerator';
@@ -767,6 +768,33 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           <div className="flex-1">
             <div className="flex items-center gap-2">
               <h1 className="text-2xl font-semibold mb-1 text-blue-600 dark:text-blue-400">{project.clientName || project.address || 'New Project'}</h1>
+              
+              {/* Maps Buttons */}
+              {project.address && (
+                <div className="flex gap-1 ml-2">
+                  <button
+                    onClick={() => {
+                      const mapsUrl = generateMapsLink(project.address, project.clientCity || undefined, 'BC', project.clientPostal || undefined);
+                      window.open(mapsUrl, '_blank');
+                    }}
+                    className="p-2 text-gray-500 hover:text-green-600 dark:text-gray-400 dark:hover:text-green-400 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
+                    title="View on Maps"
+                  >
+                    <MapPin size={18} />
+                  </button>
+                  <button
+                    onClick={() => {
+                      const directionsUrl = generateDirectionsLink(project.address, project.clientCity || undefined, 'BC', project.clientPostal || undefined);
+                      window.open(directionsUrl, '_blank');
+                    }}
+                    className="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
+                    title="Get Directions"
+                  >
+                    <Navigation size={18} />
+                  </button>
+                </div>
+              )}
+              
               <button
                 onClick={() => {
                   setEditForm({
@@ -789,7 +817,28 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                 <Edit3 size={16} />
               </button>
             </div>
-            <p className="text-sm text-green-600 dark:text-green-400">{project.address}</p>
+            {/* Enhanced Address Display */}
+            <div className="text-sm space-y-1">
+              <div className="text-green-600 dark:text-green-400">
+                <span className="font-medium">{project.address}</span>
+                {(project.clientCity || project.clientPostal) && (
+                  <span className="ml-2 text-gray-600 dark:text-gray-400">
+                    {project.clientCity && `${project.clientCity}, BC`}
+                    {project.clientPostal && ` ${project.clientPostal}`}
+                  </span>
+                )}
+              </div>
+              {(project.clientEmail || project.clientPhone) && (
+                <div className="text-gray-600 dark:text-gray-400 space-x-4">
+                  {project.clientEmail && (
+                    <span>📧 {project.clientEmail}</span>
+                  )}
+                  {project.clientPhone && (
+                    <span>📞 {project.clientPhone}</span>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -908,6 +957,44 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             <span className="text-xs text-center mt-2 text-muted-foreground">Files</span>
           </div>
         </div>
+
+        {/* Location Tools Section */}
+        {project.address && (
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-4 text-muted-foreground">
+              <MapPin size={16} />
+              <span className="font-medium">Location Tools</span>
+            </div>
+            
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => {
+                  const mapsUrl = generateMapsLink(project.address, project.clientCity || undefined, 'BC', project.clientPostal || undefined);
+                  window.open(mapsUrl, '_blank');
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm"
+                title="View client location on Google Maps"
+              >
+                <MapPin size={16} />
+                View on Maps
+                <ExternalLink size={12} />
+              </button>
+              
+              <button
+                onClick={() => {
+                  const directionsUrl = generateDirectionsLink(project.address, project.clientCity || undefined, 'BC', project.clientPostal || undefined);
+                  window.open(directionsUrl, '_blank');
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm"
+                title="Get driving directions from office to client"
+              >
+                <Navigation size={16} />
+                Get Directions
+                <ExternalLink size={12} />
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Tools Checklist Section */}
         <div className="mb-8">

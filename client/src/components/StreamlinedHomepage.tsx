@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Search, MapPin, Clock, User, Trash2, ChevronDown, Archive, RotateCcw, Edit3 } from 'lucide-react';
+import { Plus, Search, MapPin, Clock, User, Trash2, ChevronDown, Archive, RotateCcw, Edit3, ExternalLink, Navigation } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { apiRequest } from '@/lib/queryClient';
+import { generateMapsLink, generateDirectionsLink } from '@/lib/maps';
 import type { Project, InsertProject } from '@shared/schema';
 
 type NewProject = InsertProject;
@@ -268,6 +269,21 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
                   
                   {/* Action Buttons */}
                   <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {/* Maps Button */}
+                    {project.address && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const mapsUrl = generateMapsLink(project.address, project.clientCity || undefined, 'BC', project.clientPostal || undefined);
+                          window.open(mapsUrl, '_blank');
+                        }}
+                        className="p-2 text-gray-500 hover:text-green-600 dark:text-gray-400 dark:hover:text-green-400 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
+                        title="View on Maps"
+                      >
+                        <Navigation size={16} />
+                      </button>
+                    )}
+                    
                     {/* Edit Button */}
                     <button
                       onClick={(e) => {
