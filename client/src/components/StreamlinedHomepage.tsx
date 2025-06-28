@@ -132,8 +132,8 @@ const statusConfig = {
 
 // Context-aware calendar function with your A-Frame calendar ONLY
 const openWorkCalendar = (clientContext: Project | null = null) => {
-  // Direct link to ONLY your A-Frame calendar (not all calendars)
-  const aframeCalendarOnlyUrl = 'https://calendar.google.com/calendar/embed?src=6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981%40group.calendar.google.com&ctz=America%2FWinnipeg';
+  // Direct link to ONLY your A-Frame calendar with Vancouver timezone, dark mode, and proper display settings
+  const aframeCalendarOnlyUrl = 'https://calendar.google.com/calendar/embed?src=6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981%40group.calendar.google.com&ctz=America%2FVancouver&mode=WEEK&showTitle=1&showNav=1&showDate=1&showPrint=0&showTabs=1&showCalendars=0&showTz=0&bgcolor=%23000000&color=%23ffffff';
   
   if (clientContext) {
     // When opened from client details, create new event in A-Frame calendar
@@ -145,8 +145,10 @@ const openWorkCalendar = (clientContext: Project | null = null) => {
     
     window.open(createEventUrl, '_blank');
   } else {
-    // From homepage - open ONLY your A-Frame calendar view
-    window.open(aframeCalendarOnlyUrl, '_blank');
+    // From homepage - open your A-Frame calendar in a new tab (shows existing entries)
+    // This direct calendar link should show all your existing calendar entries
+    const directCalendarUrl = 'https://calendar.google.com/calendar/u/0/r?cid=6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981@group.calendar.google.com';
+    window.open(directCalendarUrl, '_blank');
   }
 };
 
