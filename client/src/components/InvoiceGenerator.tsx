@@ -276,12 +276,25 @@ export default function InvoiceGenerator({
       return null;
     }
 
+    let originalOpacity = '';
+    let originalPointerEvents = '';
+    
     try {
+      // Temporarily make the element visible for PDF generation
+      originalOpacity = invoiceRef.current.style.opacity;
+      originalPointerEvents = invoiceRef.current.style.pointerEvents;
+      
+      invoiceRef.current.style.opacity = '1';
+      invoiceRef.current.style.pointerEvents = 'auto';
+      
       // Wait for rendering and images to load
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Check if element is properly rendered
       if (!invoiceRef.current || invoiceRef.current.scrollHeight === 0) {
+        // Restore original styles before throwing error
+        invoiceRef.current.style.opacity = originalOpacity;
+        invoiceRef.current.style.pointerEvents = originalPointerEvents;
         throw new Error('Invoice preview not properly rendered');
       }
 
@@ -364,10 +377,21 @@ export default function InvoiceGenerator({
         }
       }
 
+      // Restore original styles
+      invoiceRef.current.style.opacity = originalOpacity;
+      invoiceRef.current.style.pointerEvents = originalPointerEvents;
+
       // Return PDF as blob instead of downloading
       return pdf.output('blob');
     } catch (error) {
       console.error('Error generating PDF blob:', error);
+      
+      // Restore original styles even if error occurs
+      if (invoiceRef.current) {
+        invoiceRef.current.style.opacity = originalOpacity || '';
+        invoiceRef.current.style.pointerEvents = originalPointerEvents || '';
+      }
+      
       return null;
     }
   };
@@ -807,7 +831,7 @@ ${textBody}`;
         </div>
 
         {/* Invoice Preview (for PDF generation) */}
-        <div ref={invoiceRef} className="absolute -top-[9999px] -left-[9999px] w-[794px] print:static print:block print:max-w-none" style={{ backgroundColor: '#000000', color: '#fff' }}>
+        <div ref={invoiceRef} className="opacity-0 pointer-events-none w-[794px] print:opacity-100 print:pointer-events-auto print:static print:block print:max-w-none" style={{ backgroundColor: '#000000', color: '#fff' }}>
           <div className="p-8">
             {/* Header Section */}
             <div className="mb-8">
