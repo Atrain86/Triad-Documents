@@ -277,19 +277,13 @@ export default function InvoiceGenerator({
     }
 
     try {
-      // Temporarily show the invoice preview element for capture
-      const originalDisplay = invoiceRef.current.style.display;
-      const originalVisibility = invoiceRef.current.style.visibility;
-      
-      invoiceRef.current.style.display = 'block';
-      invoiceRef.current.style.visibility = 'visible';
-      invoiceRef.current.style.position = 'absolute';
-      invoiceRef.current.style.top = '-9999px';
-      invoiceRef.current.style.left = '-9999px';
-      invoiceRef.current.style.width = '794px'; // A4 width in pixels
-      
       // Wait for rendering and images to load
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Check if element is properly rendered
+      if (!invoiceRef.current || invoiceRef.current.scrollHeight === 0) {
+        throw new Error('Invoice preview not properly rendered');
+      }
 
       // Capture the invoice preview with optimized settings for smaller file size
       const canvas = await html2canvas(invoiceRef.current, {
@@ -310,14 +304,6 @@ export default function InvoiceGenerator({
           });
         }
       });
-
-      // Restore original styling
-      invoiceRef.current.style.display = originalDisplay;
-      invoiceRef.current.style.visibility = originalVisibility;
-      invoiceRef.current.style.position = '';
-      invoiceRef.current.style.top = '';
-      invoiceRef.current.style.left = '';
-      invoiceRef.current.style.width = '';
 
       // Validate canvas dimensions
       if (canvas.width === 0 || canvas.height === 0) {
@@ -821,7 +807,7 @@ ${textBody}`;
         </div>
 
         {/* Invoice Preview (for PDF generation) */}
-        <div ref={invoiceRef} className="hidden print:block print:max-w-none" style={{ backgroundColor: '#000000', color: '#fff' }}>
+        <div ref={invoiceRef} className="absolute -top-[9999px] -left-[9999px] w-[794px] print:static print:block print:max-w-none" style={{ backgroundColor: '#000000', color: '#fff' }}>
           <div className="p-8">
             {/* Header Section */}
             <div className="mb-8">
