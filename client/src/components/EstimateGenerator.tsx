@@ -950,98 +950,35 @@ cortespainter@gmail.com`;
             </div>
           )}
 
-          {/* Compact Totals */}
-          <div className="mb-4">
-            <div className="flex justify-end">
-              <div className="w-64 space-y-2">
-                <div className="flex justify-between items-center py-1 border-b border-gray-600 text-xs">
-                  <span className="text-gray-300">Subtotal:</span>
-                  <span className="font-bold text-white">${calculateSubtotal().toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between items-center py-1 border-b border-gray-600 text-xs">
-                  <span className="text-gray-300">Paint & Materials:</span>
-                  <span className="font-bold text-white">${(estimateData.paintCost + estimateData.deliveryCost).toFixed(2)}</span>
-                </div>
-                <div className="flex justify-center pt-2">
-                  <div className="bg-green-600 text-white px-6 py-2 rounded text-center">
-                    <div className="text-sm font-bold">Total Estimate: ${calculateTotal().toFixed(2)}</div>
-                  </div>
+          {/* Single-Page Layout: Totals on Right, Footer on Left */}
+          <div className="flex justify-between items-start mb-2">
+            {/* Footer on Left */}
+            <div className="flex-1 text-xs text-gray-300 pr-4">
+              <p className="font-medium text-white mb-1">Thank you for considering A-Frame Painting!</p>
+              <p className="mb-1">A-Frame Painting • cortespainter@gmail.com</p>
+              <p className="mb-1">884 Hayes Rd, Manson's Landing, BC V0P1K0</p>
+              <p>This estimate is valid for 30 days from the date above.</p>
+            </div>
+            
+            {/* Totals on Right */}
+            <div className="w-64 space-y-1">
+              <div className="flex justify-between items-center py-1 border-b border-gray-600 text-xs">
+                <span className="text-white">Subtotal:</span>
+                <span className="font-bold text-white">${calculateSubtotal().toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between items-center py-1 border-b border-gray-600 text-xs">
+                <span className="text-white">Paint & Materials:</span>
+                <span className="font-bold text-white">${(estimateData.paintCost + estimateData.deliveryCost).toFixed(2)}</span>
+              </div>
+              <div className="flex justify-center pt-1">
+                <div className="bg-green-600 text-white px-4 py-1 rounded text-center">
+                  <div className="text-sm font-bold">Total Estimate: ${calculateTotal().toFixed(2)}</div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Compact Footer */}
-          <div className="text-center text-gray-400 text-xs border-t border-gray-700 pt-3">
-            <p className="font-medium text-white">Thank you for considering A-Frame Painting for your project!</p>
-            <p>A-Frame Painting • cortespainter@gmail.com</p>
-            <p className="mt-1">This estimate is valid for 30 days from the date above.</p>
-          </div>
 
-          {/* Paint Details */}
-          <div className="mb-6">
-            <h3 className="font-semibold text-gray-800 mb-2">Paint & Materials:</h3>
-            <div className="text-gray-700 space-y-1">
-              <p><strong>Primer Coats:</strong> {estimateData.primerCoats}</p>
-              <p><strong>Top Coats:</strong> {estimateData.topCoats}</p>
-              <p><strong>Paint and Supplies:</strong> {estimateData.paintSuppliedBy === 'contractor' ? 'A-Frame Painting' : 'Client'}</p>
-              {estimateData.paintSuppliedBy === 'contractor' && (
-                <>
-                  <p><strong>Paint Cost:</strong> ${estimateData.paintCost.toFixed(2)}</p>
-                  <p><strong>Delivery Cost:</strong> ${estimateData.deliveryCost.toFixed(2)}</p>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Totals */}
-          <div className="flex justify-end mb-6">
-            <div className="w-64">
-              <div className="space-y-2">
-                <div className="flex justify-between py-2 border-b">
-                  <span className="font-medium">Subtotal</span>
-                  <span className="font-semibold">${calculateSubtotal().toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between py-2 border-b">
-                  <span className="font-medium">GST (5%)</span>
-                  <span className="font-semibold">${calculateGST().toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between py-2 text-lg font-bold bg-gray-100 px-3 rounded">
-                  <span>Total Estimate</span>
-                  <span>${calculateTotal().toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between py-1 text-sm text-gray-600">
-                  <span>Maximum (w/ 20% buffer)</span>
-                  <span>${(calculateTotal() * 1.2).toFixed(2)}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Terms */}
-          <div className="border-t pt-6">
-            <h3 className="font-semibold text-gray-800 mb-3">Terms & Conditions:</h3>
-            <div className="text-sm text-gray-700 space-y-2">
-              <p><strong>IMPORTANT:</strong> This is an ESTIMATE, not a quote. While I do my best to stay within the proposed time limits, painting projects can sometimes reveal unexpected conditions.</p>
-              <ul className="list-disc list-inside space-y-1 ml-4">
-                <li>Estimates include a 20% tolerance for unforeseen circumstances</li>
-                <li>I will contact you when we reach the original estimate to discuss options</li>
-                <li>Extra work (wood rot, extensive repairs) will be charged hourly as outlined</li>
-                <li>Power washing rate: $100/hour when required</li>
-                <li>Paint costs {estimateData.paintSuppliedBy === 'client' ? 'are the responsibility of the client' : 'include delivery to remote location'}</li>
-                <li>Weather conditions may affect project timeline</li>
-                <li>Final costs may vary up to 20% from this estimate</li>
-              </ul>
-              <div className="mt-4 pt-4 border-t">
-                <p className="text-center">
-                  <strong>Thank you for considering A-Frame Painting for your project!</strong>
-                </p>
-                <p className="text-center mt-2">
-                  A-Frame Painting • cortespainter@gmail.com
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
       </DialogContent>
     </Dialog>
