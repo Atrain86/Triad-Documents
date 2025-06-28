@@ -651,91 +651,85 @@ A-Frame Painting`;
         {/* Hidden Print Version */}
         <div
           ref={printRef}
-          className="absolute left-[-9999px] bg-white text-black p-8"
+          className="absolute left-[-9999px] bg-black text-white p-6"
           style={{ ...fontStyles, minHeight: '297mm', width: '210mm', visibility: 'hidden' }}
         >
-          {/* Header */}
-          <div className="flex justify-between items-start mb-6">
-            <div>
-              <div className="flex items-center mb-4">
-                <img src="/aframe-logo.png" alt="A-Frame Painting" className="h-20" />
+          {/* Compact Header with Side-by-Side Layout */}
+          <div className="flex justify-between items-start mb-4">
+            <div className="flex-1">
+              <div className="flex items-center mb-2">
+                <img src="/aframe-logo.png" alt="A-Frame Painting" className="h-16" />
               </div>
-              <div className="text-sm text-gray-700">
-                <p className="font-bold text-lg">A-Frame Painting</p>
-                <p>884 Hayes Rd</p>
-                <p>Manson's Landing, BC V0P1K0</p>
+              <div className="text-xs text-gray-300">
+                <p className="font-bold text-sm text-white">A-Frame Painting</p>
+                <p>884 Hayes Rd, Manson's Landing, BC V0P1K0</p>
                 <p>cortespainter@gmail.com</p>
               </div>
             </div>
+            
+            <div className="flex-1 mx-4">
+              <h3 className="text-sm font-bold text-white mb-2">Estimate For:</h3>
+              <div className="bg-gray-800 p-3 rounded text-xs">
+                <p className="font-bold text-white">{estimateData.clientName}</p>
+                <p className="text-gray-300">{estimateData.clientAddress}</p>
+                <p className="text-gray-300">{estimateData.clientCity} {estimateData.clientPostal}</p>
+                <p className="text-gray-300">{estimateData.clientEmail} • {estimateData.clientPhone}</p>
+              </div>
+            </div>
+            
             <div className="text-right">
-              <div className="bg-gray-100 p-4 rounded">
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">ESTIMATE</h2>
-                <div className="text-sm">
-                  <p><strong>Estimate #:</strong> {estimateData.estimateNumber}</p>
-                  <p><strong>Date:</strong> {estimateData.date}</p>
+              <div className="bg-gray-800 p-3 rounded">
+                <h2 className="text-lg font-bold text-white mb-1">ESTIMATE</h2>
+                <div className="text-xs text-gray-300">
+                  <p><strong>#{estimateData.estimateNumber}</strong></p>
+                  <p>{estimateData.date}</p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Client Information */}
-          <div className="mb-6">
-            <h3 className="text-lg font-bold text-gray-800 mb-3">Estimate For:</h3>
-            <div className="bg-gray-50 p-4 rounded">
-              <p className="font-bold text-lg">{estimateData.clientName}</p>
-              <p>{estimateData.clientAddress}</p>
-              <p>{estimateData.clientCity} {estimateData.clientPostal}</p>
-              <p>{estimateData.clientEmail}</p>
-              <p>{estimateData.clientPhone}</p>
-            </div>
-          </div>
-
-          {/* Project Details */}
+          {/* Project Details - Compact */}
           {(estimateData.projectTitle || estimateData.projectDescription) && (
-            <div className="mb-6">
+            <div className="mb-4">
               {estimateData.projectTitle && (
-                <h3 className="text-lg font-bold text-gray-800 mb-2">{estimateData.projectTitle}</h3>
+                <h3 className="text-sm font-bold text-white mb-1">{estimateData.projectTitle}</h3>
               )}
               {estimateData.projectDescription && (
-                <div className="bg-gray-50 p-4 rounded">
-                  <p className="text-gray-700">{estimateData.projectDescription}</p>
-                </div>
+                <p className="text-xs text-gray-300 bg-gray-800 p-2 rounded">{estimateData.projectDescription}</p>
               )}
             </div>
           )}
 
-          {/* Work Breakdown */}
-          <div className="mb-6">
-            <h3 className="text-lg font-bold text-gray-800 mb-4">Services & Labor</h3>
-            <div className="space-y-2">
+          {/* Work Breakdown - Compact */}
+          <div className="mb-4">
+            <h3 className="text-sm font-bold text-white mb-2">Services & Labor</h3>
+            <div className="space-y-1">
               {estimateData.workStages.map((stage, index) => (
-                <div key={index} className="flex justify-between items-center py-2 border-b border-gray-200">
+                <div key={index} className="flex justify-between items-center py-1 border-b border-gray-700">
                   <div className="flex-1">
-                    <span className="font-medium text-gray-800">{stage.name}</span>
-                    {stage.description && <span className="text-gray-600 ml-2">- {stage.description}</span>}
+                    <span className="font-medium text-white text-xs">{stage.name}</span>
+                    {stage.description && <span className="text-gray-400 ml-1 text-xs">- {stage.description}</span>}
                   </div>
-                  <div className="text-right">
-                    <span className="text-gray-600">{stage.hours}h × ${stage.rate}/h</span>
-                    <div className="font-bold">${stage.total.toFixed(2)}</div>
+                  <div className="text-right text-xs">
+                    <span className="text-gray-400">{stage.hours}h × ${stage.rate}/h</span>
+                    <div className="font-bold text-white">${stage.total.toFixed(2)}</div>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Additional Services */}
+          {/* Additional Services - Compact */}
           {estimateData.additionalServices.some(service => service.included) && (
-            <div className="mb-6">
-              <h3 className="text-lg font-bold text-gray-800 mb-4">Additional Services</h3>
-              <div className="space-y-2">
+            <div className="mb-3">
+              <h3 className="text-sm font-bold text-white mb-2">Additional Services</h3>
+              <div className="space-y-1">
                 {estimateData.additionalServices.filter(service => service.included).map((service, index) => (
-                  <div key={index} className="flex justify-between items-center py-2 border-b border-gray-200">
-                    <div className="flex-1">
-                      <span className="font-medium text-gray-800">{service.name}</span>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-gray-600">{service.hours}h × ${service.rate}/h</span>
-                      <div className="font-bold">${service.total.toFixed(2)}</div>
+                  <div key={index} className="flex justify-between items-center py-1 border-b border-gray-700">
+                    <span className="font-medium text-white text-xs">{service.name}</span>
+                    <div className="text-right text-xs">
+                      <span className="text-gray-400">{service.hours}h × ${service.rate}/h</span>
+                      <div className="font-bold text-white">${service.total.toFixed(2)}</div>
                     </div>
                   </div>
                 ))}
@@ -743,53 +737,53 @@ A-Frame Painting`;
             </div>
           )}
 
-          {/* Materials & Paint */}
+          {/* Materials & Paint - Compact */}
           {(estimateData.paintCost > 0 || estimateData.deliveryCost > 0) && (
-            <div className="mb-6">
-              <h3 className="text-lg font-bold text-gray-800 mb-4">Materials & Paint</h3>
-              <div className="space-y-2">
+            <div className="mb-3">
+              <h3 className="text-sm font-bold text-white mb-2">Materials & Paint</h3>
+              <div className="space-y-1">
                 {estimateData.paintCost > 0 && (
-                  <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                    <span className="font-medium text-gray-800">Paint & Supplies</span>
-                    <div className="font-bold">${estimateData.paintCost.toFixed(2)}</div>
+                  <div className="flex justify-between items-center py-1 border-b border-gray-700">
+                    <span className="font-medium text-white text-xs">Paint & Supplies</span>
+                    <div className="font-bold text-white text-xs">${estimateData.paintCost.toFixed(2)}</div>
                   </div>
                 )}
                 {estimateData.deliveryCost > 0 && (
-                  <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                    <span className="font-medium text-gray-800">Delivery</span>
-                    <div className="font-bold">${estimateData.deliveryCost.toFixed(2)}</div>
+                  <div className="flex justify-between items-center py-1 border-b border-gray-700">
+                    <span className="font-medium text-white text-xs">Delivery</span>
+                    <div className="font-bold text-white text-xs">${estimateData.deliveryCost.toFixed(2)}</div>
                   </div>
                 )}
               </div>
             </div>
           )}
 
-          {/* Totals */}
-          <div className="mb-8">
+          {/* Compact Totals */}
+          <div className="mb-4">
             <div className="flex justify-end">
-              <div className="w-80 space-y-3">
-                <div className="flex justify-between items-center py-2 border-b border-gray-300">
-                  <span className="font-medium">Subtotal:</span>
-                  <span className="font-bold">${calculateSubtotal().toFixed(2)}</span>
+              <div className="w-64 space-y-2">
+                <div className="flex justify-between items-center py-1 border-b border-gray-600 text-xs">
+                  <span className="text-gray-300">Subtotal:</span>
+                  <span className="font-bold text-white">${calculateSubtotal().toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between items-center py-2 border-b border-gray-300">
-                  <span className="font-medium">Paint & Materials:</span>
-                  <span className="font-bold">${(estimateData.paintCost + estimateData.deliveryCost).toFixed(2)}</span>
+                <div className="flex justify-between items-center py-1 border-b border-gray-600 text-xs">
+                  <span className="text-gray-300">Paint & Materials:</span>
+                  <span className="font-bold text-white">${(estimateData.paintCost + estimateData.deliveryCost).toFixed(2)}</span>
                 </div>
-                <div className="flex justify-center pt-4">
-                  <div className="bg-green-600 text-white px-8 py-4 rounded-lg text-center">
-                    <div className="text-xl font-bold">Total Estimate: ${calculateTotal().toFixed(2)}</div>
+                <div className="flex justify-center pt-2">
+                  <div className="bg-green-600 text-white px-6 py-2 rounded text-center">
+                    <div className="text-sm font-bold">Total Estimate: ${calculateTotal().toFixed(2)}</div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Footer */}
-          <div className="text-center text-gray-600 text-sm border-t border-gray-300 pt-4">
-            <p className="font-medium">Thank you for considering A-Frame Painting for your project!</p>
+          {/* Compact Footer */}
+          <div className="text-center text-gray-400 text-xs border-t border-gray-700 pt-3">
+            <p className="font-medium text-white">Thank you for considering A-Frame Painting for your project!</p>
             <p>A-Frame Painting • cortespainter@gmail.com</p>
-            <p className="text-xs mt-2">This estimate is valid for 30 days from the date above.</p>
+            <p className="mt-1">This estimate is valid for 30 days from the date above.</p>
           </div>
 
           {/* Paint Details */}
