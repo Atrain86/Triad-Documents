@@ -49,13 +49,13 @@ export default function InvoiceGenerator({
     
     // Line items (populated from daily hours)
     lineItems: dailyHours.length > 0 ? dailyHours.map(hour => ({
-      description: hour.description || 'Painting Services',
+      description: hour.description || 'Painting',
       hours: hour.hours,
       unitPrice: hour.hourlyRate || 60,
       detail: `Date: ${new Date(hour.date).toLocaleDateString()}`,
       total: hour.hours * (hour.hourlyRate || 60)
     })) : [{
-      description: 'Painting Services',
+      description: 'Painting',
       hours: 0,
       unitPrice: 60,
       detail: '',
