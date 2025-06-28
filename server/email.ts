@@ -7,14 +7,14 @@ const createTransporter = () => {
     throw new Error("GMAIL_APP_PASSWORD environment variable is required");
   }
   
-  if (!process.env.GMAIL_USER) {
-    throw new Error("GMAIL_USER environment variable is required");
+  if (!process.env.GMAIL_EMAIL) {
+    throw new Error("GMAIL_EMAIL environment variable is required");
   }
 
   return nodemailer.createTransport({
     service: "gmail",
     auth: {
-      user: process.env.GMAIL_USER,
+      user: process.env.GMAIL_EMAIL,
       pass: process.env.GMAIL_APP_PASSWORD,
     },
   });
@@ -37,7 +37,7 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
     const transporter = createTransporter();
     
     const mailOptions = {
-      from: `"A-Frame Painting" <${process.env.GMAIL_USER}>`,
+      from: `"A-Frame Painting" <${process.env.GMAIL_EMAIL}>`,
       to: options.to,
       subject: options.subject,
       text: options.text,
