@@ -8,6 +8,7 @@ import path from "path";
 import fs from "fs";
 import sgMail from "@sendgrid/mail";
 import nodemailer from "nodemailer";
+import { sendInvoiceEmail, sendEmail } from "./email";
 
 // Configure multer for file uploads
 const uploadDir = path.join(process.cwd(), 'uploads');
@@ -607,6 +608,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: 'SMTP failed. Opening Gmail manually...', 
         fallback: true,
         error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Nodemailer Gmail direct sending endpoint
+  app.post('/api/send-invoice-email', async (req, res) => {
+    try {
+      const { recipientEmail, clientName, invoiceNumber, pdfData } = req.body;
+      
+      if (!recipientEmail || !clientName || !invoiceNumber || !pdfData) {
+        return res.status(400).json({ error: 'Missing required fields' });
+      }
+
+      // Convert base64 PDF data to buffer
+      const pdfBuffer = Buffer.from(pdfData, 'base64');
+      
+      const success = await sendInvoiceEmail(recipientEmail, clientName, invoiceNumber, pdfBuffer);
+      
+      if (success) {
+        res.json({ success: true, message: 'Invoice email sent successfully via Gmail' });
+      } else {
+        res.status(500).json({ error: 'Failed to send invoice email' });
+      }
+    } catch (error) {
+      console.error('Email sending error:', error);
+      res.status(500).json({ 
+        error: 'Failed to send invoice email', 
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Generic email sending endpoint
+  app.post('/api/send-email-direct', async (req, res) => {
+    try {
+      const { to, subject, text, html } = req.body;
+      
+      if (!to || !subject || !text) {
+        return res.status(400).json({ error: 'Missing required email fields' });
+      }
+
+      const success = await sendEmail({ to, subject, text, html });
+      
+      if (success) {
+        res.json({ success: true, message: 'Email sent successfully via Gmail' });
+      } else {
+        res.status(500).json({ error: 'Failed to send email' });
+      }
+    } catch (error) {
+      console.error('Email sending error:', error);
+      res.status(500).json({ 
+        error: 'Failed to send email', 
+        details: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   });

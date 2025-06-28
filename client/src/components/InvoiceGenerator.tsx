@@ -408,53 +408,29 @@ cortespainter@gmail.com
           const pdfBase64 = reader.result?.toString().split(',')[1];
           const pdfFilename = `Invoice-${invoiceData.invoiceNumber}-${invoiceData.clientName.replace(/\s+/g, '-')}.pdf`;
           
-          // Try the new email endpoint first
+          // Try the new nodemailer Gmail endpoint first
           try {
-            const response = await fetch('/api/send-email-with-pdf', {
+            const response = await fetch('/api/send-invoice-email', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                to: invoiceData.clientEmail,
-                subject,
-                text: textBody,
-                pdfBase64,
-                pdfFilename
+                recipientEmail: invoiceData.clientEmail,
+                clientName: invoiceData.clientName,
+                invoiceNumber: invoiceData.invoiceNumber,
+                pdfData: pdfBase64
               })
             });
 
             const result = await response.json();
             
-            if (response.ok && result.direct) {
-              // Email sent successfully via SMTP
+            if (response.ok && result.success) {
+              // Email sent successfully via nodemailer Gmail
               toast({
                 title: "Email Sent!",
-                description: "Invoice emailed successfully with PDF attachment.",
-              });
-            } else if (response.ok && result.fallback) {
-              // Use Gmail fallback method
-              const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(invoiceData.clientEmail)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(textBody)}`;
-              
-              // Download PDF manually
-              const url = URL.createObjectURL(pdfBlob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = pdfFilename;
-              document.body.appendChild(a);
-              a.click();
-              document.body.removeChild(a);
-              URL.revokeObjectURL(url);
-              
-              // Open Gmail after a delay
-              setTimeout(() => {
-                window.open(gmailComposeUrl, '_blank');
-              }, 500);
-              
-              toast({
-                title: "Email Ready!",
-                description: "PDF downloaded and Gmail opened. Drag the PDF file into Gmail to attach it.",
+                description: "Invoice emailed successfully with PDF attachment via Gmail.",
               });
             } else {
-              throw new Error(result.error || 'Failed to prepare email');
+              throw new Error(result.error || 'Failed to send email via nodemailer');
             }
             
           } catch (emailError) {
