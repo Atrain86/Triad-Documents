@@ -53,6 +53,9 @@ interface EstimateData {
   paintSuppliedBy: 'contractor' | 'client';
   paintCost: number;
   deliveryCost: number;
+
+  // Custom Message
+  customMessage: string;
 }
 
 interface EstimateGeneratorProps {
@@ -151,6 +154,9 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     paintSuppliedBy: 'contractor',
     paintCost: 0,
     deliveryCost: 0,
+
+    // Custom Message
+    customMessage: '',
   });
 
   // Calculate functions
@@ -270,11 +276,14 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   // Send estimate email (placeholder)
   const generateClientEmail = () => {
     const subject = `Painting Estimate ${estimateData.estimateNumber} - ${estimateData.projectTitle}`;
+    const customMessageSection = estimateData.customMessage 
+      ? `\n\n${estimateData.customMessage}\n\n` 
+      : '\n\n';
+    
     const body = `Dear ${estimateData.clientName},
 
 Please find attached your painting estimate for ${estimateData.projectTitle}.
-
-Total Estimate: $${calculateTotal().toFixed(2)}
+${customMessageSection}Total Estimate: $${calculateTotal().toFixed(2)}
 
 This estimate is valid for 30 days. Please let me know if you have any questions.
 
@@ -606,6 +615,17 @@ A-Frame Painting`;
                 </CardContent>
               </Card>
 
+              {/* Custom Message */}
+              <div className="mb-4">
+                <label className="text-sm font-medium mb-2 block">Custom Message (optional)</label>
+                <Textarea
+                  placeholder="Add a personal note to include with the estimate..."
+                  value={estimateData.customMessage}
+                  onChange={(e) => setEstimateData({...estimateData, customMessage: e.target.value})}
+                  className="min-h-20"
+                />
+              </div>
+
               {/* Action Buttons */}
               <div className="flex flex-wrap gap-3">
                 <Button
@@ -635,16 +655,15 @@ A-Frame Painting`;
           style={{ ...fontStyles, minHeight: '297mm', width: '210mm', visibility: 'hidden' }}
         >
           {/* Header */}
-          <div className="flex justify-between items-start mb-8">
+          <div className="flex justify-between items-start mb-4">
             <div>
-              <div className="flex items-center mb-4">
-                <img src="/aframe-logo.png" alt="A-Frame Painting" className="h-16" />
+              <div className="flex items-center mb-2">
+                <img src="/aframe-logo.png" alt="A-Frame Painting" className="h-12" />
               </div>
-              <p className="text-lg text-gray-600 font-medium">ESTIMATE</p>
-              <div className="mt-4 text-sm text-gray-600">
+              <p className="text-base text-gray-600 font-medium">ESTIMATE</p>
+              <div className="mt-2 text-xs text-gray-600">
                 <p>A-Frame Painting</p>
-                <p>884 Hayes Rd</p>
-                <p>Manson's Landing, BC V0P1K0</p>
+                <p>884 Hayes Rd, Manson's Landing, BC V0P1K0</p>
                 <p>cortespainter@gmail.com</p>
               </div>
             </div>
@@ -657,53 +676,48 @@ A-Frame Painting`;
           </div>
 
           {/* Client Info */}
-          <div className="mb-8">
-            <h3 className="font-semibold text-gray-800 mb-2">Estimate For:</h3>
-            <div className="text-gray-700">
-              <p>{estimateData.clientName}</p>
-              <p>{estimateData.clientAddress}</p>
-              <p>{estimateData.clientCity} {estimateData.clientPostal}</p>
-              <p>{estimateData.clientEmail}</p>
-              <p>{estimateData.clientPhone}</p>
+          <div className="mb-4">
+            <h3 className="font-semibold text-gray-800 mb-1 text-sm">Estimate For:</h3>
+            <div className="text-gray-700 text-sm">
+              <p className="font-medium">{estimateData.clientName}</p>
+              <p>{estimateData.clientAddress}, {estimateData.clientCity} {estimateData.clientPostal}</p>
+              <p>{estimateData.clientEmail} • {estimateData.clientPhone}</p>
             </div>
           </div>
 
-          {/* Project Title */}
-          {estimateData.projectTitle && (
-            <div className="mb-6">
-              <h2 className="text-xl font-bold text-gray-800">{estimateData.projectTitle}</h2>
-            </div>
-          )}
-
-          {/* Project Description */}
-          {estimateData.projectDescription && (
-            <div className="mb-6">
-              <h3 className="font-semibold text-gray-800 mb-2">Project Description:</h3>
-              <p className="text-gray-700 whitespace-pre-line">{estimateData.projectDescription}</p>
+          {/* Project Title & Description */}
+          {(estimateData.projectTitle || estimateData.projectDescription) && (
+            <div className="mb-4">
+              {estimateData.projectTitle && (
+                <h2 className="text-lg font-bold text-gray-800 mb-1">{estimateData.projectTitle}</h2>
+              )}
+              {estimateData.projectDescription && (
+                <p className="text-gray-700 text-sm whitespace-pre-line">{estimateData.projectDescription}</p>
+              )}
             </div>
           )}
 
           {/* Work Stages */}
-          <div className="mb-6">
-            <h3 className="font-semibold text-gray-800 mb-3">Work Breakdown:</h3>
-            <table className="w-full border-collapse border border-gray-300">
+          <div className="mb-4">
+            <h3 className="font-semibold text-gray-800 mb-2 text-sm">Work Breakdown:</h3>
+            <table className="w-full border-collapse border border-gray-300 text-xs">
               <thead>
                 <tr className="bg-gray-100">
-                  <th className="border border-gray-300 p-3 text-left">Stage</th>
-                  <th className="border border-gray-300 p-3 text-left">Description</th>
-                  <th className="border border-gray-300 p-3 text-center">Hours</th>
-                  <th className="border border-gray-300 p-3 text-center">Rate</th>
-                  <th className="border border-gray-300 p-3 text-right">Total</th>
+                  <th className="border border-gray-300 p-2 text-left">Stage</th>
+                  <th className="border border-gray-300 p-2 text-left">Description</th>
+                  <th className="border border-gray-300 p-2 text-center">Hours</th>
+                  <th className="border border-gray-300 p-2 text-center">Rate</th>
+                  <th className="border border-gray-300 p-2 text-right">Total</th>
                 </tr>
               </thead>
               <tbody>
                 {estimateData.workStages.map((stage, index) => (
                   <tr key={index}>
-                    <td className="border border-gray-300 p-3 font-medium">{stage.name}</td>
-                    <td className="border border-gray-300 p-3">{stage.description}</td>
-                    <td className="border border-gray-300 p-3 text-center">{stage.hours}</td>
-                    <td className="border border-gray-300 p-3 text-center">${stage.rate}</td>
-                    <td className="border border-gray-300 p-3 text-right">${stage.total.toFixed(2)}</td>
+                    <td className="border border-gray-300 p-2 font-medium">{stage.name}</td>
+                    <td className="border border-gray-300 p-2">{stage.description}</td>
+                    <td className="border border-gray-300 p-2 text-center">{stage.hours}</td>
+                    <td className="border border-gray-300 p-2 text-center">${stage.rate}</td>
+                    <td className="border border-gray-300 p-2 text-right">${stage.total.toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>
