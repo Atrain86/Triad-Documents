@@ -651,105 +651,146 @@ A-Frame Painting`;
         {/* Hidden Print Version */}
         <div
           ref={printRef}
-          className="absolute left-[-9999px] bg-white p-8"
+          className="absolute left-[-9999px] bg-white text-black p-8"
           style={{ ...fontStyles, minHeight: '297mm', width: '210mm', visibility: 'hidden' }}
         >
           {/* Header */}
-          <div className="flex justify-between items-start mb-4">
+          <div className="flex justify-between items-start mb-6">
             <div>
-              <div className="flex items-center mb-2">
-                <img src="/aframe-logo.png" alt="A-Frame Painting" className="h-12" />
+              <div className="flex items-center mb-4">
+                <img src="/aframe-logo.png" alt="A-Frame Painting" className="h-20" />
               </div>
-              <p className="text-base text-gray-600 font-medium">ESTIMATE</p>
-              <div className="mt-2 text-xs text-gray-600">
-                <p>A-Frame Painting</p>
-                <p>884 Hayes Rd, Manson's Landing, BC V0P1K0</p>
+              <div className="text-sm text-gray-700">
+                <p className="font-bold text-lg">A-Frame Painting</p>
+                <p>884 Hayes Rd</p>
+                <p>Manson's Landing, BC V0P1K0</p>
                 <p>cortespainter@gmail.com</p>
               </div>
             </div>
             <div className="text-right">
-              <div className="text-sm">
-                <p><strong>Estimate #:</strong> {estimateData.estimateNumber}</p>
-                <p><strong>Date:</strong> {estimateData.date}</p>
+              <div className="bg-gray-100 p-4 rounded">
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">ESTIMATE</h2>
+                <div className="text-sm">
+                  <p><strong>Estimate #:</strong> {estimateData.estimateNumber}</p>
+                  <p><strong>Date:</strong> {estimateData.date}</p>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Client Info */}
-          <div className="mb-4">
-            <h3 className="font-semibold text-gray-800 mb-1 text-sm">Estimate For:</h3>
-            <div className="text-gray-700 text-sm">
-              <p className="font-medium">{estimateData.clientName}</p>
-              <p>{estimateData.clientAddress}, {estimateData.clientCity} {estimateData.clientPostal}</p>
-              <p>{estimateData.clientEmail} • {estimateData.clientPhone}</p>
+          {/* Client Information */}
+          <div className="mb-6">
+            <h3 className="text-lg font-bold text-gray-800 mb-3">Estimate For:</h3>
+            <div className="bg-gray-50 p-4 rounded">
+              <p className="font-bold text-lg">{estimateData.clientName}</p>
+              <p>{estimateData.clientAddress}</p>
+              <p>{estimateData.clientCity} {estimateData.clientPostal}</p>
+              <p>{estimateData.clientEmail}</p>
+              <p>{estimateData.clientPhone}</p>
             </div>
           </div>
 
-          {/* Project Title & Description */}
+          {/* Project Details */}
           {(estimateData.projectTitle || estimateData.projectDescription) && (
-            <div className="mb-4">
+            <div className="mb-6">
               {estimateData.projectTitle && (
-                <h2 className="text-lg font-bold text-gray-800 mb-1">{estimateData.projectTitle}</h2>
+                <h3 className="text-lg font-bold text-gray-800 mb-2">{estimateData.projectTitle}</h3>
               )}
               {estimateData.projectDescription && (
-                <p className="text-gray-700 text-sm whitespace-pre-line">{estimateData.projectDescription}</p>
+                <div className="bg-gray-50 p-4 rounded">
+                  <p className="text-gray-700">{estimateData.projectDescription}</p>
+                </div>
               )}
             </div>
           )}
 
-          {/* Work Stages */}
-          <div className="mb-4">
-            <h3 className="font-semibold text-gray-800 mb-2 text-sm">Work Breakdown:</h3>
-            <table className="w-full border-collapse border border-gray-300 text-xs">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th className="border border-gray-300 p-2 text-left">Stage</th>
-                  <th className="border border-gray-300 p-2 text-left">Description</th>
-                  <th className="border border-gray-300 p-2 text-center">Hours</th>
-                  <th className="border border-gray-300 p-2 text-center">Rate</th>
-                  <th className="border border-gray-300 p-2 text-right">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {estimateData.workStages.map((stage, index) => (
-                  <tr key={index}>
-                    <td className="border border-gray-300 p-2 font-medium">{stage.name}</td>
-                    <td className="border border-gray-300 p-2">{stage.description}</td>
-                    <td className="border border-gray-300 p-2 text-center">{stage.hours}</td>
-                    <td className="border border-gray-300 p-2 text-center">${stage.rate}</td>
-                    <td className="border border-gray-300 p-2 text-right">${stage.total.toFixed(2)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          {/* Work Breakdown */}
+          <div className="mb-6">
+            <h3 className="text-lg font-bold text-gray-800 mb-4">Services & Labor</h3>
+            <div className="space-y-2">
+              {estimateData.workStages.map((stage, index) => (
+                <div key={index} className="flex justify-between items-center py-2 border-b border-gray-200">
+                  <div className="flex-1">
+                    <span className="font-medium text-gray-800">{stage.name}</span>
+                    {stage.description && <span className="text-gray-600 ml-2">- {stage.description}</span>}
+                  </div>
+                  <div className="text-right">
+                    <span className="text-gray-600">{stage.hours}h × ${stage.rate}/h</span>
+                    <div className="font-bold">${stage.total.toFixed(2)}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Additional Services */}
           {estimateData.additionalServices.some(service => service.included) && (
             <div className="mb-6">
-              <h3 className="font-semibold text-gray-800 mb-3">Additional Services:</h3>
-              <table className="w-full border-collapse border border-gray-300">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border border-gray-300 p-3 text-left">Service</th>
-                    <th className="border border-gray-300 p-3 text-center">Hours</th>
-                    <th className="border border-gray-300 p-3 text-center">Rate</th>
-                    <th className="border border-gray-300 p-3 text-right">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {estimateData.additionalServices.filter(service => service.included).map((service, index) => (
-                    <tr key={index}>
-                      <td className="border border-gray-300 p-3 font-medium">{service.name}</td>
-                      <td className="border border-gray-300 p-3 text-center">{service.hours}</td>
-                      <td className="border border-gray-300 p-3 text-center">${service.rate}</td>
-                      <td className="border border-gray-300 p-3 text-right">${service.total.toFixed(2)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <h3 className="text-lg font-bold text-gray-800 mb-4">Additional Services</h3>
+              <div className="space-y-2">
+                {estimateData.additionalServices.filter(service => service.included).map((service, index) => (
+                  <div key={index} className="flex justify-between items-center py-2 border-b border-gray-200">
+                    <div className="flex-1">
+                      <span className="font-medium text-gray-800">{service.name}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-gray-600">{service.hours}h × ${service.rate}/h</span>
+                      <div className="font-bold">${service.total.toFixed(2)}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
+
+          {/* Materials & Paint */}
+          {(estimateData.paintCost > 0 || estimateData.deliveryCost > 0) && (
+            <div className="mb-6">
+              <h3 className="text-lg font-bold text-gray-800 mb-4">Materials & Paint</h3>
+              <div className="space-y-2">
+                {estimateData.paintCost > 0 && (
+                  <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                    <span className="font-medium text-gray-800">Paint & Supplies</span>
+                    <div className="font-bold">${estimateData.paintCost.toFixed(2)}</div>
+                  </div>
+                )}
+                {estimateData.deliveryCost > 0 && (
+                  <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                    <span className="font-medium text-gray-800">Delivery</span>
+                    <div className="font-bold">${estimateData.deliveryCost.toFixed(2)}</div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Totals */}
+          <div className="mb-8">
+            <div className="flex justify-end">
+              <div className="w-80 space-y-3">
+                <div className="flex justify-between items-center py-2 border-b border-gray-300">
+                  <span className="font-medium">Subtotal:</span>
+                  <span className="font-bold">${calculateSubtotal().toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-gray-300">
+                  <span className="font-medium">Paint & Materials:</span>
+                  <span className="font-bold">${(estimateData.paintCost + estimateData.deliveryCost).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-center pt-4">
+                  <div className="bg-green-600 text-white px-8 py-4 rounded-lg text-center">
+                    <div className="text-xl font-bold">Total Estimate: ${calculateTotal().toFixed(2)}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="text-center text-gray-600 text-sm border-t border-gray-300 pt-4">
+            <p className="font-medium">Thank you for considering A-Frame Painting for your project!</p>
+            <p>A-Frame Painting • cortespainter@gmail.com</p>
+            <p className="text-xs mt-2">This estimate is valid for 30 days from the date above.</p>
+          </div>
 
           {/* Paint Details */}
           <div className="mb-6">
