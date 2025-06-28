@@ -278,14 +278,24 @@ export default function InvoiceGenerator({
 
     let originalOpacity = '';
     let originalPointerEvents = '';
+    let originalPosition = '';
+    let originalTop = '';
+    let originalLeft = '';
     
     try {
       // Temporarily make the element visible for PDF generation
       originalOpacity = invoiceRef.current.style.opacity;
       originalPointerEvents = invoiceRef.current.style.pointerEvents;
+      originalPosition = invoiceRef.current.style.position;
+      originalTop = invoiceRef.current.style.top;
+      originalLeft = invoiceRef.current.style.left;
       
       invoiceRef.current.style.opacity = '1';
       invoiceRef.current.style.pointerEvents = 'auto';
+      invoiceRef.current.style.position = 'absolute';
+      invoiceRef.current.style.top = '0';
+      invoiceRef.current.style.left = '0';
+      invoiceRef.current.style.zIndex = '-1';
       
       // Wait for rendering and images to load
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -380,6 +390,10 @@ export default function InvoiceGenerator({
       // Restore original styles
       invoiceRef.current.style.opacity = originalOpacity;
       invoiceRef.current.style.pointerEvents = originalPointerEvents;
+      invoiceRef.current.style.position = originalPosition;
+      invoiceRef.current.style.top = originalTop;
+      invoiceRef.current.style.left = originalLeft;
+      invoiceRef.current.style.zIndex = '';
 
       // Return PDF as blob instead of downloading
       return pdf.output('blob');
@@ -390,6 +404,10 @@ export default function InvoiceGenerator({
       if (invoiceRef.current) {
         invoiceRef.current.style.opacity = originalOpacity || '';
         invoiceRef.current.style.pointerEvents = originalPointerEvents || '';
+        invoiceRef.current.style.position = originalPosition || '';
+        invoiceRef.current.style.top = originalTop || '';
+        invoiceRef.current.style.left = originalLeft || '';
+        invoiceRef.current.style.zIndex = '';
       }
       
       return null;
@@ -831,7 +849,7 @@ ${textBody}`;
         </div>
 
         {/* Invoice Preview (for PDF generation) */}
-        <div ref={invoiceRef} className="opacity-0 pointer-events-none w-[794px] print:opacity-100 print:pointer-events-auto print:static print:block print:max-w-none" style={{ backgroundColor: '#000000', color: '#fff' }}>
+        <div ref={invoiceRef} className="fixed -top-[9999px] -left-[9999px] w-[794px] opacity-0 pointer-events-none print:static print:opacity-100 print:pointer-events-auto print:block print:max-w-none" style={{ backgroundColor: '#000000', color: '#fff' }}>
           <div className="p-8">
             {/* Header Section */}
             <div className="mb-8">
