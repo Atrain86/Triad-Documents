@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Search, MapPin, Clock, User, Trash2, ChevronDown, Archive, RotateCcw, Edit3, ExternalLink, Navigation } from 'lucide-react';
+import { Plus, Search, MapPin, Clock, User, Trash2, ChevronDown, Archive, RotateCcw, Edit3, ExternalLink, Navigation, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -26,29 +26,142 @@ const statusConfig = {
   'in-progress': { 
     dot: 'bg-green-500', 
     text: 'text-green-600 dark:text-green-400',
-    label: 'In Progress'
+    label: 'In Progress',
+    color: '#10b981',
+    priority: 1,
+    icon: '🟢'
+  },
+  'scheduled': { 
+    dot: 'bg-blue-500', 
+    text: 'text-blue-600 dark:text-blue-400',
+    label: 'Scheduled',
+    color: '#3b82f6',
+    priority: 2,
+    icon: '🔵'
+  },
+  'estimate-sent': { 
+    dot: 'bg-amber-500', 
+    text: 'text-amber-600 dark:text-amber-400',
+    label: 'Estimate Sent',
+    color: '#f59e0b',
+    priority: 3,
+    icon: '📝'
+  },
+  'awaiting-confirmation': { 
+    dot: 'bg-orange-500', 
+    text: 'text-orange-600 dark:text-orange-400',
+    label: 'Awaiting Confirmation',
+    color: '#f97316',
+    priority: 4,
+    icon: '⏳'
+  },
+  'site-visit-needed': { 
+    dot: 'bg-purple-500', 
+    text: 'text-purple-600 dark:text-purple-400',
+    label: 'Site Visit Needed',
+    color: '#8b5cf6',
+    priority: 5,
+    icon: '📍'
+  },
+  'initial-contact': { 
+    dot: 'bg-gray-500', 
+    text: 'text-gray-600 dark:text-gray-400',
+    label: 'Initial Contact',
+    color: '#6b7280',
+    priority: 6,
+    icon: '📞'
+  },
+  'follow-up-needed': { 
+    dot: 'bg-lime-500', 
+    text: 'text-lime-600 dark:text-lime-400',
+    label: 'Follow-up Needed',
+    color: '#84cc16',
+    priority: 7,
+    icon: '🔄'
+  },
+  'on-hold': { 
+    dot: 'bg-slate-500', 
+    text: 'text-slate-600 dark:text-slate-400',
+    label: 'On Hold',
+    color: '#64748b',
+    priority: 8,
+    icon: '⏸️'
   },
   'pending': { 
     dot: 'bg-yellow-500', 
     text: 'text-yellow-600 dark:text-yellow-400',
-    label: 'Pending'
+    label: 'Pending',
+    color: '#f59e0b',
+    priority: 9,
+    icon: '🟡'
   },
   'completed': { 
     dot: 'bg-orange-600', 
     text: 'text-orange-600 dark:text-orange-400',
-    label: 'Completed'
+    label: 'Completed',
+    color: '#ea580c',
+    priority: 10,
+    icon: '✅'
   },
   'archived': { 
     dot: 'bg-gray-500', 
     text: 'text-gray-600 dark:text-gray-400',
-    label: 'Archived'
+    label: 'Archived',
+    color: '#6b7280',
+    priority: 11,
+    icon: '📦'
+  },
+  'cancelled': { 
+    dot: 'bg-gray-800', 
+    text: 'text-gray-800 dark:text-gray-600',
+    label: 'Cancelled',
+    color: '#374151',
+    priority: 12,
+    icon: '❌'
   },
   // Fallback for any legacy status values
   'estimating': { 
     dot: 'bg-yellow-500', 
     text: 'text-yellow-600 dark:text-yellow-400',
-    label: 'Estimating'
+    label: 'Estimating',
+    color: '#f59e0b',
+    priority: 9,
+    icon: '🟡'
   }
+};
+
+// Context-aware calendar function with your A-Frame calendar ONLY
+const openWorkCalendar = (clientContext: Project | null = null) => {
+  // Direct link to ONLY your A-Frame calendar (not all calendars)
+  const aframeCalendarOnlyUrl = 'https://calendar.google.com/calendar/embed?src=6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981%40group.calendar.google.com&ctz=America%2FWinnipeg';
+  
+  if (clientContext) {
+    // When opened from client details, create new event in A-Frame calendar
+    const eventTitle = `${clientContext.clientName} - ${clientContext.projectType}`;
+    const eventLocation = `${clientContext.address}, ${clientContext.clientCity || ''}`;
+    
+    // Create event specifically in your A-Frame calendar
+    const createEventUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventTitle)}&location=${encodeURIComponent(eventLocation)}&details=${encodeURIComponent(`Client: ${clientContext.clientName}\nProject: ${clientContext.projectType}`)}&cid=6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981@group.calendar.google.com`;
+    
+    window.open(createEventUrl, '_blank');
+  } else {
+    // From homepage - open ONLY your A-Frame calendar view
+    window.open(aframeCalendarOnlyUrl, '_blank');
+  }
+};
+
+// Smart sorting function
+const sortProjectsByPriorityAndDate = (projectList: Project[]) => {
+  return [...projectList].sort((a, b) => {
+    const statusA = statusConfig[a.status as keyof typeof statusConfig] || { priority: 99 };
+    const statusB = statusConfig[b.status as keyof typeof statusConfig] || { priority: 99 };
+    
+    if (statusA.priority !== statusB.priority) {
+      return statusA.priority - statusB.priority;
+    }
+    
+    return a.clientName.localeCompare(b.clientName);
+  });
 };
 
 export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHomepageProps) {
@@ -76,23 +189,26 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
     queryKey: ['/api/projects'],
   });
 
-  // Filter projects based on archive status and search term
-  const filteredProjects = projects.filter(project => {
-    // First filter by archive status
-    const isArchived = project.status === 'archived';
-    if (showArchived !== isArchived) {
-      return false;
-    }
-    
-    // Then filter by search term
-    if (!searchTerm) return true;
-    
-    return (
-      project.clientName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      project.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      project.projectType?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  });
+  // Filter and sort projects based on archive status, search term, and priority
+  const filteredProjects = sortProjectsByPriorityAndDate(
+    projects.filter(project => {
+      // First filter by archive status
+      const isArchived = project.status === 'archived';
+      if (showArchived !== isArchived) {
+        return false;
+      }
+      
+      // Then filter by search term
+      if (!searchTerm) return true;
+      
+      return (
+        project.clientName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.projectType?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (statusConfig[project.status as keyof typeof statusConfig] && statusConfig[project.status as keyof typeof statusConfig].label.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    })
+  );
 
   const createProjectMutation = useMutation({
     mutationFn: async (projectData: NewProject) => {
@@ -202,13 +318,22 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
           style={{ background: aframeTheme.gradients.rainbow }}
         />
 
-        <div className="flex justify-center mb-6">
+        <div className="flex justify-center gap-4 mb-6">
           <Button
             onClick={() => setShowAddClient(true)}
             className="px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
             style={{ backgroundColor: '#4F46E5' }}
           >
             New Client
+          </Button>
+          
+          <Button
+            onClick={() => openWorkCalendar()}
+            className="flex items-center px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
+            style={{ backgroundColor: '#3b82f6' }}
+          >
+            <Calendar className="mr-2 h-4 w-4" />
+            Work Schedule
           </Button>
         </div>
 
@@ -284,6 +409,18 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
                       </button>
                     )}
                     
+                    {/* Calendar Button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openWorkCalendar(project);
+                      }}
+                      className="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
+                      title="Schedule Work"
+                    >
+                      <Calendar size={16} />
+                    </button>
+                    
                     {/* Edit Button */}
                     <button
                       onClick={(e) => {
@@ -354,9 +491,18 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
                     onClick={(e) => e.stopPropagation()}
                     className={`text-xs font-medium border-none bg-transparent cursor-pointer focus:outline-none ${statusConfig[project.status as keyof typeof statusConfig]?.text || 'text-gray-600 dark:text-gray-400'}`}
                   >
-                    <option value="pending">Pending</option>
-                    <option value="in-progress">In Progress</option>
-                    <option value="completed">Completed</option>
+                    <option value="in-progress">🟢 In Progress</option>
+                    <option value="scheduled">🔵 Scheduled</option>
+                    <option value="estimate-sent">📝 Estimate Sent</option>
+                    <option value="awaiting-confirmation">⏳ Awaiting Confirmation</option>
+                    <option value="site-visit-needed">📍 Site Visit Needed</option>
+                    <option value="initial-contact">📞 Initial Contact</option>
+                    <option value="follow-up-needed">🔄 Follow-up Needed</option>
+                    <option value="on-hold">⏸️ On Hold</option>
+                    <option value="pending">🟡 Pending</option>
+                    <option value="completed">✅ Completed</option>
+                    <option value="cancelled">❌ Cancelled</option>
+                    <option value="archived">📦 Archived</option>
                   </select>
                   <div 
                     className={`w-3 h-3 rounded-full ${statusConfig[project.status as keyof typeof statusConfig]?.dot || 'bg-gray-500'}`}

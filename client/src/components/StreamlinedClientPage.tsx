@@ -11,6 +11,22 @@ import { generateMapsLink, generateDirectionsLink } from '@/lib/maps';
 import type { Project, Photo, Receipt, ToolsChecklist, DailyHours } from '@shared/schema';
 import InvoiceGenerator from './InvoiceGenerator';
 import EstimateGenerator from './EstimateGenerator';
+
+// Calendar function for A-Frame calendar integration
+const openWorkCalendar = (clientProject: Project | null = null) => {
+  const aframeCalendarOnlyUrl = 'https://calendar.google.com/calendar/embed?src=6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981%40group.calendar.google.com&ctz=America%2FWinnipeg';
+  
+  if (clientProject) {
+    const eventTitle = `${clientProject.clientName} - ${clientProject.projectType}`;
+    const eventLocation = `${clientProject.address}, ${clientProject.clientCity || ''}`;
+    
+    const createEventUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventTitle)}&location=${encodeURIComponent(eventLocation)}&details=${encodeURIComponent(`Client: ${clientProject.clientName}\nProject: ${clientProject.projectType}`)}&cid=6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981@group.calendar.google.com`;
+    
+    window.open(createEventUrl, '_blank');
+  } else {
+    window.open(aframeCalendarOnlyUrl, '_blank');
+  }
+};
 // Improved file list component inspired by the PDF uploader
 function SimpleFilesList({ projectId }: { projectId: number }) {
   const queryClient = useQueryClient();
@@ -794,6 +810,14 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                   </button>
                 </div>
               )}
+              
+              <button
+                onClick={() => openWorkCalendar(project)}
+                className="p-1 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded transition-colors"
+                title="Schedule work"
+              >
+                <Calendar size={16} />
+              </button>
               
               <button
                 onClick={() => {
