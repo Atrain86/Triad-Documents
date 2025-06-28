@@ -210,11 +210,26 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     if (!printRef.current) return;
 
     try {
-      const canvas = await html2canvas(printRef.current, {
-        scale: 2,
+      // Temporarily make the element visible for proper rendering
+      const element = printRef.current;
+      element.style.visibility = 'visible';
+      element.style.position = 'absolute';
+      element.style.left = '-9999px';
+      element.style.top = '0';
+
+      // Wait a moment for rendering
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      const canvas = await html2canvas(element, {
+        scale: 1,
         useCORS: true,
         allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false,
       });
+
+      // Hide the element again
+      element.style.visibility = 'hidden';
 
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
@@ -235,12 +250,15 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
         heightLeft -= pageHeight;
       }
 
-      pdf.save(`estimate-${estimateData.estimateNumber}.pdf`);
+      const filename = `estimate-${estimateData.estimateNumber.replace(/[^a-zA-Z0-9]/g, '')}-${estimateData.clientName.replace(/[^a-zA-Z0-9]/g, '')}.pdf`;
+      pdf.save(filename);
+      
       toast({
         title: "PDF Generated",
         description: "Estimate PDF has been downloaded",
       });
     } catch (error) {
+      console.error('PDF generation error:', error);
       toast({
         title: "Error",
         description: "Failed to generate PDF",
