@@ -6,7 +6,7 @@ import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import type { Project, Receipt, DailyHours } from '@shared/schema';
 
@@ -27,6 +27,7 @@ export default function InvoiceGenerator({
 }: InvoiceGeneratorProps) {
 
   const { toast } = useToast();
+  const [isSending, setIsSending] = useState(false);
   const [invoiceData, setInvoiceData] = useState({
     invoiceNumber: 101,
     date: new Date().toISOString().split('T')[0],
@@ -395,6 +396,8 @@ export default function InvoiceGenerator({
       return;
     }
 
+    setIsSending(true);
+
     const subject = `Invoice #${invoiceData.invoiceNumber} - ${invoiceData.businessName}`;
     
     const textBody = `Dear ${invoiceData.clientName},
@@ -446,9 +449,13 @@ cortespainter@gmail.com
             if (response.ok && result.success) {
               // Email sent successfully via nodemailer Gmail
               toast({
-                title: "Email Sent!",
-                description: "Invoice emailed successfully with PDF attachment via Gmail.",
+                title: "✅ Email Sent Successfully!",
+                description: `Invoice #${invoiceData.invoiceNumber} emailed to ${invoiceData.clientEmail} with PDF attachment.`,
+                duration: 8000, // Show for 8 seconds
               });
+              
+              // Close the dialog after success
+              setTimeout(() => onClose(), 2000);
             } else {
               throw new Error(result.error || 'Failed to send email via nodemailer');
             }
@@ -497,6 +504,8 @@ ${textBody}`;
         description: "Invoice email copied to clipboard. Please paste into Gmail manually.",
         variant: "destructive",
       });
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -505,6 +514,10 @@ ${textBody}`;
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto p-0" style={{ backgroundColor: darkTheme.background }}>
+        <DialogHeader className="sr-only">
+          <DialogTitle>Invoice Generator</DialogTitle>
+          <DialogDescription>Create and send professional painting service invoices</DialogDescription>
+        </DialogHeader>
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-center p-6 border-b" style={{ backgroundColor: darkTheme.headerBg, borderColor: darkTheme.border }}>
@@ -787,12 +800,21 @@ ${textBody}`;
               </Button>
               <Button
                 onClick={sendInvoice}
-                disabled={!invoiceData.clientEmail}
+                disabled={!invoiceData.clientEmail || isSending}
                 className="text-white hover:opacity-90 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                style={{ backgroundColor: invoiceData.clientEmail ? '#1E40AF' : '#9ca3af' }}
+                style={{ backgroundColor: (invoiceData.clientEmail && !isSending) ? '#1E40AF' : '#9ca3af' }}
               >
-                <Send className="mr-2 h-5 w-5" />
-                Send Invoice
+                {isSending ? (
+                  <>
+                    <div className="mr-2 h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Send className="mr-2 h-5 w-5" />
+                    Send Invoice
+                  </>
+                )}
               </Button>
             </div>
           </div>
