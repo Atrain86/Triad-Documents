@@ -273,25 +273,169 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     }
   };
 
-  // Send estimate email (placeholder)
-  const generateClientEmail = () => {
-    const subject = `Painting Estimate ${estimateData.estimateNumber} - ${estimateData.projectTitle}`;
-    const customMessageSection = estimateData.customMessage 
-      ? `\n\n${estimateData.customMessage}\n\n` 
-      : '\n\n';
-    
-    const body = `Dear ${estimateData.clientName},
+  // Generate PDF and send email with attachment
+  const sendEstimateEmail = async () => {
+    if (!estimateData.clientEmail) {
+      toast({
+        title: "Email Required",
+        description: "Please add client email to send estimate",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      toast({
+        title: "Preparing Email",
+        description: "Generating PDF and preparing email...",
+      });
+
+      // Generate PDF first and get it as base64
+      const pdfBlob = await generatePDFBlob();
+      
+      if (pdfBlob) {
+        // Convert to base64 for server sending
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          const pdfBase64 = reader.result?.toString().split(',')[1];
+          const pdfFilename = `Estimate-${estimateData.estimateNumber}-${estimateData.clientName.replace(/\s+/g, '-')}.pdf`;
+          
+          // Try nodemailer Gmail endpoint
+          try {
+            const customMessageSection = estimateData.customMessage 
+              ? `\n\n${estimateData.customMessage}\n\n` 
+              : '\n\n';
+
+            const response = await fetch('/api/send-estimate-email', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                recipientEmail: estimateData.clientEmail,
+                clientName: estimateData.clientName,
+                estimateNumber: estimateData.estimateNumber,
+                projectTitle: estimateData.projectTitle,
+                totalAmount: calculateTotal().toFixed(2),
+                customMessage: estimateData.customMessage,
+                pdfData: pdfBase64
+              })
+            });
+
+            const result = await response.json();
+            
+            if (response.ok && result.success) {
+              toast({
+                title: "Email Sent Successfully!",
+                description: `Estimate sent to ${estimateData.clientEmail} with PDF attachment`,
+              });
+            } else {
+              throw new Error(result.error || 'Failed to send email');
+            }
+            
+          } catch (emailError) {
+            console.error('Email sending failed:', emailError);
+            
+            // Fallback - improved mobile-friendly PDF download
+            try {
+              const url = URL.createObjectURL(pdfBlob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = pdfFilename;
+              a.style.display = 'none';
+              document.body.appendChild(a);
+              
+              // Enhanced mobile compatibility
+              a.click();
+              
+              // For iOS Safari - open PDF in new tab if download fails
+              setTimeout(() => {
+                if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
+                  window.open(url, '_blank');
+                }
+              }, 100);
+              
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+            } catch (downloadError) {
+              console.error('Download failed:', downloadError);
+              // Mobile fallback - display PDF in new window
+              const url = URL.createObjectURL(pdfBlob);
+              window.open(url, '_blank');
+            }
+            
+            // Copy email content to clipboard
+            const emailContent = `Subject: Painting Estimate ${estimateData.estimateNumber} - ${estimateData.projectTitle}
+
+Dear ${estimateData.clientName},
 
 Please find attached your painting estimate for ${estimateData.projectTitle}.
-${customMessageSection}Total Estimate: $${calculateTotal().toFixed(2)}
+${estimateData.customMessage ? `\n${estimateData.customMessage}\n` : ''}
+Total Estimate: $${calculateTotal().toFixed(2)}
 
 This estimate is valid for 30 days. Please let me know if you have any questions.
 
 Best regards,
-A-Frame Painting`;
+A-Frame Painting
+cortespainter@gmail.com`;
 
-    const emailUrl = `mailto:${estimateData.clientEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.open(emailUrl);
+            navigator.clipboard.writeText(emailContent).then(() => {
+              toast({
+                title: "Email content copied to clipboard",
+                description: "PDF downloaded. Paste email content into Gmail manually.",
+              });
+            });
+          }
+        };
+        reader.readAsDataURL(pdfBlob);
+      }
+    } catch (error) {
+      console.error('PDF generation failed:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate estimate PDF",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Generate PDF blob for email attachment
+  const generatePDFBlob = async (): Promise<Blob | null> => {
+    if (!printRef.current) return null;
+
+    try {
+      // Temporarily make the element visible for proper rendering
+      const element = printRef.current;
+      element.style.visibility = 'visible';
+      element.style.position = 'absolute';
+      element.style.left = '-9999px';
+      element.style.top = '0';
+
+      // Wait a moment for rendering
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      const canvas = await html2canvas(element, {
+        scale: 1,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#000000',
+        logging: false,
+      });
+
+      // Hide the element again
+      element.style.visibility = 'hidden';
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgWidth = 210;
+      const pageHeight = 295;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      
+      return pdf.output('blob');
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      return null;
+    }
   };
 
   return (
@@ -636,7 +780,7 @@ A-Frame Painting`;
                   Generate PDF
                 </Button>
                 <Button
-                  onClick={generateClientEmail}
+                  onClick={sendEstimateEmail}
                   disabled={!estimateData.clientEmail}
                   className="flex items-center bg-green-600 hover:bg-green-700 disabled:bg-gray-400"
                 >

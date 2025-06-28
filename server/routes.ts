@@ -8,7 +8,7 @@ import path from "path";
 import fs from "fs";
 import sgMail from "@sendgrid/mail";
 import nodemailer from "nodemailer";
-import { sendInvoiceEmail, sendEmail } from "./email";
+import { sendInvoiceEmail, sendEstimateEmail, sendEmail } from "./email";
 
 // Configure multer for file uploads
 const uploadDir = path.join(process.cwd(), 'uploads');
@@ -663,6 +663,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('Email sending error:', error);
       res.status(500).json({ 
         error: 'Failed to send invoice email', 
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Estimate email sending endpoint
+  app.post('/api/send-estimate-email', async (req, res) => {
+    try {
+      const { 
+        recipientEmail, 
+        clientName, 
+        estimateNumber, 
+        projectTitle, 
+        totalAmount, 
+        customMessage,
+        pdfData 
+      } = req.body;
+      
+      if (!recipientEmail || !clientName || !estimateNumber || !pdfData) {
+        return res.status(400).json({ error: 'Missing required fields' });
+      }
+
+      // Convert base64 PDF data to buffer
+      const pdfBuffer = Buffer.from(pdfData, 'base64');
+      
+      const success = await sendEstimateEmail(
+        recipientEmail, 
+        clientName, 
+        estimateNumber, 
+        projectTitle, 
+        totalAmount, 
+        customMessage, 
+        pdfBuffer
+      );
+      
+      if (success) {
+        res.json({ success: true, message: 'Estimate email sent successfully via Gmail' });
+      } else {
+        res.status(500).json({ error: 'Failed to send estimate email' });
+      }
+    } catch (error) {
+      console.error('Estimate email sending error:', error);
+      res.status(500).json({ 
+        error: 'Failed to send estimate email', 
         details: error instanceof Error ? error.message : 'Unknown error'
       });
     }

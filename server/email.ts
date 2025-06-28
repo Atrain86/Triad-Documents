@@ -104,3 +104,68 @@ Phone: (Your phone number)`;
     ]
   });
 }
+
+export async function sendEstimateEmail(
+  recipientEmail: string,
+  clientName: string,
+  estimateNumber: string,
+  projectTitle: string,
+  totalAmount: string,
+  customMessage: string,
+  pdfBuffer: Buffer
+): Promise<boolean> {
+  const subject = `Painting Estimate ${estimateNumber} - ${projectTitle}`;
+  
+  const customMessageSection = customMessage 
+    ? `\n\n${customMessage}\n\n` 
+    : '\n\n';
+
+  const text = `Dear ${clientName},
+
+Please find attached your painting estimate for ${projectTitle}.
+${customMessageSection}Total Estimate: $${totalAmount}
+
+This estimate is valid for 30 days. Please let me know if you have any questions.
+
+Best regards,
+A-Frame Painting
+cortespainter@gmail.com
+884 Hayes Rd, Manson's Landing, BC V0P1K0`;
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2 style="color: #EA580C;">A-Frame Painting</h2>
+      <p>Dear <strong>${clientName}</strong>,</p>
+      
+      <p>Please find attached your painting estimate for <strong>${projectTitle}</strong>.</p>
+      
+      ${customMessage ? `<div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0; border-left: 4px solid #EA580C;">
+        <p style="margin: 0; font-style: italic;">${customMessage}</p>
+      </div>` : ''}
+      
+      <p><strong>Total Estimate: $${totalAmount}</strong></p>
+      
+      <p>This estimate is valid for 30 days. Please let me know if you have any questions.</p>
+      
+      <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+        <p><strong>Best regards,</strong><br>
+        A-Frame Painting<br>
+        <a href="mailto:cortespainter@gmail.com">cortespainter@gmail.com</a><br>
+        884 Hayes Rd, Manson's Landing, BC V0P1K0</p>
+      </div>
+    </div>
+  `;
+
+  return sendEmail({
+    to: recipientEmail,
+    subject,
+    text,
+    html,
+    attachments: [
+      {
+        filename: `Estimate-${estimateNumber}-${clientName.replace(/[^a-zA-Z0-9]/g, '')}.pdf`,
+        content: pdfBuffer,
+      }
+    ]
+  });
+}
