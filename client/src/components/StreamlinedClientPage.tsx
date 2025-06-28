@@ -24,8 +24,10 @@ const openWorkCalendar = (clientProject: Project | null = null) => {
     
     window.open(createEventUrl, '_blank');
   } else {
-    // Open ONLY the A-Frame work calendar (isolated view with dark mode)
-    const workCalendarDirectUrl = 'https://calendar.google.com/calendar/u/0?cid=NmI5OTBhZjU2NTg0MDg0MjJjNDI2Nzc1NzJmMmVmMTk3NDAwOTZhMTYwODE2NWYxNWY1OTEzNWRiNGYyYTk4MUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&color=%23039BE5&bgcolor=%23000000';
+    // Open ONLY the A-Frame work calendar (isolated view with dark mode and current date)
+    const today = new Date();
+    const currentDate = today.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+    const workCalendarDirectUrl = `https://calendar.google.com/calendar/u/0?cid=NmI5OTBhZjU2NTg0MDg0MjJjNDI2Nzc1NzJmMmVmMTk3NDAwOTZhMTYwODE2NWYxNWY1OTEzNWRiNGYyYTk4MUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&color=%23039BE5&bgcolor=%23000000&dates=${currentDate}/${currentDate}`;
     window.open(workCalendarDirectUrl, '_blank');
   }
 };
