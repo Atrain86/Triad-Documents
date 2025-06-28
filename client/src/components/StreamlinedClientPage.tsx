@@ -24,13 +24,9 @@ const openWorkCalendar = (clientProject: Project | null = null) => {
     
     window.open(createEventUrl, '_blank');
   } else {
-    // Open ONLY the A-Frame work calendar (isolated view with dark mode and current date)
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = (today.getMonth() + 1).toString().padStart(2, '0'); // JavaScript months are 0-indexed
-    const day = today.getDate().toString().padStart(2, '0');
-    const formattedDate = `${year}${month}${day}`;
-    const workCalendarDirectUrl = `https://calendar.google.com/calendar/u/0?cid=NmI5OTBhZjU2NTg0MDg0MjJjNDI2Nzc1NzJmMmVmMTk3NDAwOTZhMTYwODE2NWYxNWY1OTEzNWRiNGYyYTk4MUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&color=%23039BE5&bgcolor=%23000000&dates=${formattedDate}`;
+    // Open ONLY the A-Frame work calendar (isolated view with dark mode)
+    // Simple approach: just open the calendar and let Google handle the current month navigation
+    const workCalendarDirectUrl = 'https://calendar.google.com/calendar/u/0?cid=NmI5OTBhZjU2NTg0MDg0MjJjNDI2Nzc1NzJmMmVmMTk3NDAwOTZhMTYwODE2NWYxNWY1OTEzNWRiNGYyYTk4MUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&color=%23039BE5&bgcolor=%23000000';
     window.open(workCalendarDirectUrl, '_blank');
   }
 };
