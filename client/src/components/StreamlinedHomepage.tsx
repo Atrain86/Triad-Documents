@@ -146,8 +146,11 @@ const openWorkCalendar = (clientContext: Project | null = null) => {
     window.open(createEventUrl, '_blank');
   } else {
     // From homepage - open ONLY your A-Frame work calendar (isolated view with dark mode)
-    // Simple approach: just open the calendar and let Google handle the current month navigation
-    const workCalendarDirectUrl = 'https://calendar.google.com/calendar/u/0?cid=NmI5OTBhZjU2NTg0MDg0MjJjNDI2Nzc1NzJmMmVmMTk3NDAwOTZhMTYwODE2NWYxNWY1OTEzNWRiNGYyYTk4MUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&color=%23039BE5&bgcolor=%23000000';
+    // Try using the embed format which might handle current date better
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0'); // Convert to 1-based month
+    const workCalendarDirectUrl = `https://calendar.google.com/calendar/embed?src=6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981%40group.calendar.google.com&ctz=America%2FVancouver&color=%23039BE5&bgcolor=%23000000&mode=MONTH&dates=${year}${month}01%2F${year}${month}31`;
     window.open(workCalendarDirectUrl, '_blank');
   }
 };
