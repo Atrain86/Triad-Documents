@@ -24,6 +24,7 @@ const openWorkCalendar = (clientProject: Project | null = null) => {
     
     window.open(createEventUrl, '_blank');
   } else {
+    // Open ONLY the A-Frame work calendar (isolated view)
     window.open(aframeCalendarOnlyUrl, '_blank');
   }
 };

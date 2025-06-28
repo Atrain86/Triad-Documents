@@ -145,10 +145,9 @@ const openWorkCalendar = (clientContext: Project | null = null) => {
     
     window.open(createEventUrl, '_blank');
   } else {
-    // From homepage - open your A-Frame calendar in a new tab (shows existing entries)
-    // This direct calendar link should show all your existing calendar entries
-    const directCalendarUrl = 'https://calendar.google.com/calendar/u/0/r?cid=6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981@group.calendar.google.com';
-    window.open(directCalendarUrl, '_blank');
+    // From homepage - open ONLY your A-Frame work calendar (isolated view)
+    // This should show just the A-Frame calendar without your other calendars
+    window.open(aframeCalendarOnlyUrl, '_blank');
   }
 };
 
