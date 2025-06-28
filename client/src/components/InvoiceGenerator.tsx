@@ -290,9 +290,9 @@ export default function InvoiceGenerator({
       // Wait for rendering
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      // Capture the invoice preview
+      // Capture the invoice preview with optimized settings for smaller file size
       const canvas = await html2canvas(invoiceRef.current, {
-        scale: 2,
+        scale: 1, // Reduced from 2 to 1 for smaller file size
         backgroundColor: '#000000',
         useCORS: true,
         allowTaint: true,
