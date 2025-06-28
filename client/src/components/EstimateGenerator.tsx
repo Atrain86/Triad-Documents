@@ -230,7 +230,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
         scale: 1,
         useCORS: true,
         allowTaint: true,
-        backgroundColor: '#ffffff',
+        backgroundColor: '#000000',
         logging: false,
       });
 
@@ -256,13 +256,60 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
         heightLeft -= pageHeight;
       }
 
-      const filename = `estimate-${estimateData.estimateNumber.replace(/[^a-zA-Z0-9]/g, '')}-${estimateData.clientName.replace(/[^a-zA-Z0-9]/g, '')}.pdf`;
-      pdf.save(filename);
+      const filename = `Estimate-${estimateData.estimateNumber}-${estimateData.clientName.replace(/\s+/g, '-')}.pdf`;
       
-      toast({
-        title: "PDF Generated",
-        description: "Estimate PDF has been downloaded",
-      });
+      // Get PDF as blob for better mobile compatibility
+      const pdfBlob = pdf.output('blob');
+      
+      // Enhanced mobile-friendly download
+      try {
+        const url = URL.createObjectURL(pdfBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        
+        // Enhanced mobile compatibility with better iOS handling
+        if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
+          // iOS Safari specific handling
+          const iframe = document.createElement('iframe');
+          iframe.style.display = 'none';
+          iframe.src = url;
+          document.body.appendChild(iframe);
+          
+          // Also open in new tab as backup
+          setTimeout(() => {
+            window.open(url, '_blank');
+            document.body.removeChild(iframe);
+          }, 500);
+        } else {
+          // Standard download for other devices
+          a.click();
+        }
+        
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        toast({
+          title: "✅ PDF Generated",
+          description: navigator.userAgent.match(/iPhone|iPad|iPod/i) 
+            ? "PDF opened in new tab - you can save from there"
+            : "Estimate PDF has been downloaded",
+          duration: 4000,
+        });
+      } catch (downloadError) {
+        console.error('Download failed:', downloadError);
+        // Mobile fallback - display PDF in new window
+        const url = URL.createObjectURL(pdfBlob);
+        window.open(url, '_blank');
+        
+        toast({
+          title: "✅ PDF Generated",
+          description: "PDF opened in new tab - tap Share → Save to Files",
+          duration: 5000,
+        });
+      }
     } catch (error) {
       console.error('PDF generation error:', error);
       toast({
@@ -324,8 +371,9 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             
             if (response.ok && result.success) {
               toast({
-                title: "Email Sent Successfully!",
-                description: `Estimate sent to ${estimateData.clientEmail} with PDF attachment`,
+                title: "✅ Email Sent Successfully!",
+                description: `Estimate with PDF sent to ${estimateData.clientEmail}. Check your email!`,
+                duration: 5000, // Show for 5 seconds
               });
             } else {
               throw new Error(result.error || 'Failed to send email');
