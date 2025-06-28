@@ -478,13 +478,14 @@ cortespainter@gmail.com
             if (response.ok && result.success) {
               // Email sent successfully via nodemailer Gmail
               toast({
-                title: "✅ Email Sent Successfully!",
-                description: `Invoice #${invoiceData.invoiceNumber} emailed to ${invoiceData.clientEmail} with PDF attachment.`,
-                duration: 8000, // Show for 8 seconds
+                title: "🎉 Invoice Email Sent Successfully!",
+                description: `✅ Invoice #${invoiceData.invoiceNumber} delivered to ${invoiceData.clientEmail}\n📎 PDF attachment included\n📧 Check your sent folder for confirmation`,
+                duration: 10000, // Show for 10 seconds
+                className: "bg-green-600 border-green-400 text-white",
               });
               
               // Close the dialog after success
-              setTimeout(() => onClose(), 2000);
+              setTimeout(() => onClose(), 3000);
             } else {
               throw new Error(result.error || 'Failed to send email via nodemailer');
             }
@@ -602,9 +603,10 @@ cortespainter@gmail.com
             if (response.ok && result.success) {
               // Email sent successfully
               toast({
-                title: "✅ Test Email Sent!",
-                description: `Test invoice sent to ${testEmail}. Check your inbox to confirm the email system is working!`,
-                duration: 8000,
+                title: "🎉 Test Email Sent Successfully!",
+                description: `✅ Test invoice delivered to ${testEmail}\n📎 PDF attachment included\n✉️ Email system confirmed working!`,
+                duration: 10000,
+                className: "bg-green-600 border-green-400 text-white",
               });
             } else {
               throw new Error(result.error || 'Failed to send test email');
