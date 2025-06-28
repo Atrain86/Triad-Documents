@@ -1065,14 +1065,12 @@ ${textBody}`;
             </div>
             Email Sent Successfully!
           </DialogTitle>
-          <DialogDescription className="text-center pt-4">
-            <div className="space-y-2">
-              <p className="text-gray-700">{successMessage}</p>
-              <div className="text-sm text-gray-500">
-                ✓ PDF invoice attached<br/>
-                ✓ Email delivered successfully<br/>
-                ✓ Check your sent folder for confirmation
-              </div>
+          <DialogDescription className="text-center pt-4 space-y-3">
+            <div className="text-gray-700 font-medium">{successMessage}</div>
+            <div className="text-sm text-gray-500 space-y-1">
+              <div>✓ PDF invoice attached</div>
+              <div>✓ Email delivered successfully</div>
+              <div>✓ Check your sent folder for confirmation</div>
             </div>
           </DialogDescription>
         </DialogHeader>

@@ -1439,10 +1439,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           </Button>
           <Button
             onClick={() => setShowInvoiceGenerator(true)}
-            className="py-4 text-base font-semibold"
-            style={{ background: aframeTheme.gradients.destructive }}
+            className="py-3 text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white"
           >
-            <FileText size={20} className="mr-2" />
+            <FileText size={18} className="mr-2" />
             Generate Invoice
           </Button>
         </div>
