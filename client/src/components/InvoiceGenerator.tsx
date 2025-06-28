@@ -446,7 +446,11 @@ cortespainter@gmail.com
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
             
-            await navigator.clipboard.writeText(`To: ${invoiceData.clientEmail}\nSubject: ${subject}\n\n${textBody}`);
+            try {
+              await navigator.clipboard.writeText(`To: ${invoiceData.clientEmail}\nSubject: ${subject}\n\n${textBody}`);
+            } catch (clipboardError) {
+              console.log('Clipboard access denied, skipping email content copy');
+            }
             
             toast({
               title: "PDF Downloaded",
