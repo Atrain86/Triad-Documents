@@ -28,6 +28,7 @@ export default function InvoiceGenerator({
 
   const { toast } = useToast();
   const [isSending, setIsSending] = useState(false);
+  const [testEmail, setTestEmail] = useState('');
   const [invoiceData, setInvoiceData] = useState({
     invoiceNumber: 101,
     date: new Date().toISOString().split('T')[0],
@@ -537,6 +538,102 @@ ${textBody}`;
     }
   };
 
+  const sendTestInvoice = async () => {
+    if (!testEmail) {
+      toast({
+        title: "Error",
+        description: "Test email is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSending(true);
+
+    const subject = `TEST Invoice #${invoiceData.invoiceNumber} - ${invoiceData.businessName}`;
+    
+    const textBody = `Dear ${invoiceData.clientName},
+
+This is a TEST EMAIL to verify delivery works.
+
+${invoiceData.emailMessage}
+
+Payment Instructions:
+${invoiceData.notes}
+
+Thank you for your business!
+
+Best regards,
+${invoiceData.businessName}
+cortespainter@gmail.com
+884 Hayes Rd, Manson's Landing, BC V0P1K0`;
+
+    try {
+      // Show loading state
+      toast({
+        title: "Sending Test Email",
+        description: "Generating PDF and sending test invoice...",
+      });
+
+      // Generate PDF first and get it as base64
+      const pdfBlob = await generatePDFBlob();
+      
+      if (pdfBlob) {
+        // Convert to base64 for server sending
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          const pdfBase64 = reader.result?.toString().split(',')[1];
+          
+          // Send via nodemailer Gmail endpoint
+          try {
+            const response = await fetch('/api/send-invoice-email', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                recipientEmail: testEmail,
+                clientName: `TEST - ${invoiceData.clientName}`,
+                invoiceNumber: `TEST-${invoiceData.invoiceNumber}`,
+                pdfData: pdfBase64
+              })
+            });
+
+            const result = await response.json();
+            
+            if (response.ok && result.success) {
+              // Email sent successfully
+              toast({
+                title: "✅ Test Email Sent!",
+                description: `Test invoice sent to ${testEmail}. Check your inbox to confirm the email system is working!`,
+                duration: 8000,
+              });
+            } else {
+              throw new Error(result.error || 'Failed to send test email');
+            }
+            
+          } catch (emailError) {
+            console.error('Test email failed:', emailError);
+            toast({
+              title: "Test Email Failed",
+              description: "Could not send test email. Check your email settings.",
+              variant: "destructive",
+            });
+          }
+        };
+        reader.readAsDataURL(pdfBlob);
+      }
+
+    } catch (error) {
+      console.error('Test email sending failed:', error);
+      toast({
+        title: "Test Failed",
+        description: "Could not send test email. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -814,6 +911,40 @@ ${textBody}`;
                 rows={3}
                 placeholder="Payment instructions, additional notes, etc."
               />
+            </div>
+
+            {/* Test Email Section */}
+            <div className="space-y-3 p-4 rounded-lg" style={{ backgroundColor: `${brandColors.primary}10`, border: `1px solid ${brandColors.primary}30` }}>
+              <h3 className="text-sm font-medium" style={{ color: darkTheme.text }}>Test Email System</h3>
+              <div className="flex gap-2">
+                <Input
+                  type="email"
+                  value={testEmail}
+                  onChange={(e) => setTestEmail(e.target.value)}
+                  className="bg-gray-900 border-gray-700 text-white flex-1"
+                  placeholder="Your email for testing"
+                />
+                <Button
+                  onClick={sendTestInvoice}
+                  disabled={!testEmail || isSending}
+                  className="text-white hover:opacity-90 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  style={{ backgroundColor: (testEmail && !isSending) ? '#059669' : '#9ca3af' }}
+                >
+                  {isSending ? (
+                    <>
+                      <div className="mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Testing...
+                    </>
+                  ) : (
+                    <>
+                      Test Send
+                    </>
+                  )}
+                </Button>
+              </div>
+              <p className="text-xs" style={{ color: darkTheme.textSecondary }}>
+                Send invoice to your own email to confirm delivery works
+              </p>
             </div>
 
             {/* Action Buttons */}
