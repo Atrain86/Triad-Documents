@@ -613,8 +613,8 @@ A-Frame Painting`;
         {/* Hidden Print Version */}
         <div
           ref={printRef}
-          className="hidden print:block print:max-w-none bg-white p-8"
-          style={{ ...fontStyles, minHeight: '297mm', width: '210mm' }}
+          className="absolute left-[-9999px] bg-white p-8"
+          style={{ ...fontStyles, minHeight: '297mm', width: '210mm', visibility: 'hidden' }}
         >
           {/* Header */}
           <div className="flex justify-between items-start mb-8">
