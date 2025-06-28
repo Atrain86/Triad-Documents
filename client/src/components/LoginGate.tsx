@@ -27,6 +27,7 @@ export default function LoginGate({ onAuthenticated }: LoginGateProps) {
 
       if (response.ok) {
         sessionStorage.setItem('authenticated', 'true');
+        sessionStorage.setItem('userType', 'demo');
         onAuthenticated();
       } else {
         setError('Invalid passcode. Please try again.');

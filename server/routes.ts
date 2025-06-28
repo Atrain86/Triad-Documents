@@ -66,19 +66,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Simple passcode authentication
   app.post("/api/auth/verify", (req, res) => {
     const { passcode } = req.body;
-    const correctPasscode = process.env.APP_PASSCODE || "aframe2025";
+    const demoPasscode = process.env.DEMO_PASSCODE || "demo2025";
     
-    if (passcode === correctPasscode) {
+    if (passcode === demoPasscode) {
       res.json({ success: true });
     } else {
       res.status(401).json({ error: "Invalid passcode" });
     }
   });
 
+  // Helper function to determine user type from request
+  const getUserType = (req: any) => {
+    const userAgent = req.get('User-Agent') || '';
+    const referer = req.get('Referer') || '';
+    const host = req.get('Host') || '';
+    
+    // Check if this is coming from owner's direct access (Replit workspace)
+    if (host.includes('replit.app') || host.includes('replit.dev') || host.includes('localhost')) {
+      return 'owner';
+    }
+    
+    // Otherwise, it's demo access
+    return 'demo';
+  };
+
   // Projects
   app.get('/api/projects', async (req, res) => {
     try {
-      const projects = await storage.getProjects();
+      const userType = getUserType(req);
+      const projects = await storage.getProjects(userType);
       res.json(projects);
     } catch (error) {
       res.status(500).json({ error: 'Failed to fetch projects' });

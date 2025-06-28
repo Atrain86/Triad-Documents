@@ -18,9 +18,19 @@ function App() {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   useEffect(() => {
-    // Check if user is already authenticated
+    // Check if user is already authenticated or if this is owner access
     const authStatus = sessionStorage.getItem('authenticated');
-    setIsAuthenticated(authStatus === 'true');
+    const isOwnerAccess = window.location.hostname.includes('replit.app') || 
+                         window.location.hostname.includes('replit.dev') ||
+                         window.location.hostname === 'localhost';
+    
+    // Owner gets direct access, others need passcode
+    if (isOwnerAccess) {
+      setIsAuthenticated(true);
+      sessionStorage.setItem('userType', 'owner');
+    } else {
+      setIsAuthenticated(authStatus === 'true');
+    }
     setIsCheckingAuth(false);
   }, []);
 

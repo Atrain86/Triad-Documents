@@ -19,15 +19,15 @@ import {
   type InsertEstimate
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and } from "drizzle-orm";
+import { eq, and, like, not, isNotNull } from "drizzle-orm";
 
 export interface IStorage {
   // Projects
-  getProjects(): Promise<Project[]>;
-  getProject(id: number): Promise<Project | undefined>;
-  createProject(project: InsertProject): Promise<Project>;
-  updateProject(id: number, project: Partial<InsertProject>): Promise<Project | undefined>;
-  deleteProject(id: number): Promise<boolean>;
+  getProjects(userType?: string): Promise<Project[]>;
+  getProject(id: number, userType?: string): Promise<Project | undefined>;
+  createProject(project: InsertProject, userType?: string): Promise<Project>;
+  updateProject(id: number, project: Partial<InsertProject>, userType?: string): Promise<Project | undefined>;
+  deleteProject(id: number, userType?: string): Promise<boolean>;
 
   // Photos
   getProjectPhotos(projectId: number): Promise<Photo[]>;
@@ -61,8 +61,14 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
-  async getProjects(): Promise<Project[]> {
+  async getProjects(userType?: string): Promise<Project[]> {
     try {
+      // For demo mode, return empty array (clean slate)
+      if (userType === 'demo') {
+        return [];
+      }
+      
+      // For owner, return all real projects
       const result = await db.select().from(projects);
       return result;
     } catch (error) {
@@ -71,7 +77,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getProject(id: number): Promise<Project | undefined> {
+  async getProject(id: number, userType?: string): Promise<Project | undefined> {
     try {
       const [project] = await db.select().from(projects).where(eq(projects.id, id));
       return project || undefined;
