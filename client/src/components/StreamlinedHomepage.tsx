@@ -145,9 +145,10 @@ const openWorkCalendar = (clientContext: Project | null = null) => {
     
     window.open(createEventUrl, '_blank');
   } else {
-    // From homepage - open ONLY your A-Frame work calendar (isolated view)
-    // This should show just the A-Frame calendar without your other calendars
-    window.open(aframeCalendarOnlyUrl, '_blank');
+    // From homepage - open ONLY your A-Frame work calendar (isolated view with dark mode)
+    // This direct URL shows just the A-Frame calendar without your other calendars
+    const workCalendarDirectUrl = 'https://calendar.google.com/calendar/u/0?cid=NmI5OTBhZjU2NTg0MDg0MjJjNDI2Nzc1NzJmMmVmMTk3NDAwOTZhMTYwODE2NWYxNWY1OTEzNWRiNGYyYTk4MUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&color=%23039BE5&bgcolor=%23000000';
+    window.open(workCalendarDirectUrl, '_blank');
   }
 };
 
