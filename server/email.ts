@@ -1,18 +1,20 @@
 import nodemailer from 'nodemailer';
 import fs from 'fs';
 
-const YOUR_EMAIL = "cortespainter@gmail.com";
-
 // Create reusable transporter object using Gmail
 const createTransporter = () => {
   if (!process.env.GMAIL_APP_PASSWORD) {
     throw new Error("GMAIL_APP_PASSWORD environment variable is required");
   }
+  
+  if (!process.env.GMAIL_USER) {
+    throw new Error("GMAIL_USER environment variable is required");
+  }
 
   return nodemailer.createTransport({
     service: "gmail",
     auth: {
-      user: YOUR_EMAIL,
+      user: process.env.GMAIL_USER,
       pass: process.env.GMAIL_APP_PASSWORD,
     },
   });
@@ -35,7 +37,7 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
     const transporter = createTransporter();
     
     const mailOptions = {
-      from: `"A-Frame Painting" <${YOUR_EMAIL}>`,
+      from: `"A-Frame Painting" <${process.env.GMAIL_USER}>`,
       to: options.to,
       subject: options.subject,
       text: options.text,
