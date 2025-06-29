@@ -298,13 +298,17 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
         cropHeight = disclaimerRect.bottom - containerRect.top + 15; // 15px padding after disclaimer
       }
 
+      // FIXED: Capture with EXACT dimensions - no dynamic height
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#1a1a1a',
         logging: false,
-        width: 794
+        width: 794,        // EXACT width (8.5in at 96dpi)
+        height: 1056,      // EXACT height (11in at 96dpi) - NO DYNAMIC
+        scrollX: 0,
+        scrollY: 0
       });
 
       // Hide the element again
@@ -312,18 +316,15 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
       const imgData = canvas.toDataURL('image/png');
       
-      // Calculate exact dimensions based on content
-      const imgWidth = 210;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
-      // Create PDF with exact content height
+      // FIXED: Standard letter size - no dynamic height calculations
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
-        format: [imgWidth, imgHeight] // Use exact image height, no capping
+        format: 'letter'   // STANDARD LETTER SIZE
       });
       
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      // Add image to fit exact letter size
+      pdf.addImage(imgData, 'PNG', 0, 0, 210, 297); // Letter size in mm
 
       const filename = `Estimate-${estimateData.estimateNumber}-${estimateData.clientName.replace(/\s+/g, '-')}.pdf`;
       
@@ -997,10 +998,13 @@ cortespainter@gmail.com`;
             background: '#1a1a1a',
             color: '#ffffff',
             lineHeight: '1.4',
-            width: '8.5in',
-            height: '10.4in',
-            overflow: 'hidden',
-            padding: '0.3in'
+            width: '794px',        // EXACT: 8.5in at 96dpi
+            height: '1056px',      // EXACT: 11in at 96dpi - FIXED HEIGHT
+            overflow: 'hidden',    // CRITICAL: No overflow
+            padding: '30px',       // Fixed pixel padding
+            margin: '0',
+            boxSizing: 'border-box',
+            position: 'relative'
           }}
         >
           {/* Header */}
