@@ -1086,7 +1086,6 @@ cortespainter@gmail.com`;
 
           {/* Footer */}
           <div style={{ marginTop: '20px', paddingTop: '15px', borderTop: '1px solid #374151', textAlign: 'center' }}>
-            <p style={{ color: '#d1d5db', fontSize: '12px', marginBottom: '4px' }}><strong>Thanks for considering A-Frame Painting!</strong></p>
             <p style={{ color: '#9ca3af', fontSize: '11px' }}>Valid for 30 days.</p>
             
             {/* Disclaimer */}
