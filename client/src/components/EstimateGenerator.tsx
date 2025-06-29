@@ -1081,14 +1081,14 @@ cortespainter@gmail.com`;
               <span>Grand Total:</span>
               <span>${calculateTotal().toFixed(2)}</span>
             </div>
+            
+            {/* Disclaimer immediately after Grand Total */}
+            <div style={{ borderTop: '1px solid #374151', paddingTop: '15px', marginTop: '20px' }}>
+              <p data-disclaimer style={{ color: '#f97316', fontSize: '11px', fontWeight: '600', lineHeight: '1.3', textAlign: 'center', margin: '0' }}>
+                <strong>NOTE:</strong> This is an estimate only. Price excludes structural repairs discovered during work (charged hourly). If total cost may exceed estimate by 20%+, you'll be notified for approval first.
+              </p>
+            </div>
           </div>
-          </div>
-
-          {/* Natural Bottom Disclaimer */}
-          <div style={{ borderTop: '1px solid #374151', paddingTop: '15px', marginTop: 'auto' }}>
-            <p data-disclaimer style={{ color: '#f97316', fontSize: '11px', fontWeight: '600', lineHeight: '1.3', textAlign: 'center', margin: '0' }}>
-              <strong>NOTE:</strong> This is an estimate only. Price excludes structural repairs discovered during work (charged hourly). If total cost may exceed estimate by 20%+, you'll be notified for approval first.
-            </p>
           </div>
         </div>
       </DialogContent>
