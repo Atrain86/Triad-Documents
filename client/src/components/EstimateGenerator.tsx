@@ -95,7 +95,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     // Estimate Details
     estimateNumber: '',
     date: new Date().toISOString().split('T')[0],
-    projectTitle: `${project.projectType} - ${project.clientName}`,
+    projectTitle: '',
     projectDescription: project.notes || '',
 
     // Default Work Stages - simplified
@@ -567,21 +567,23 @@ cortespainter@gmail.com`;
                 <CardTitle>Estimate Details</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium mb-1 block">Project Title</label>
-                  <Input
-                    value={estimateData.projectTitle}
-                    onChange={(e) => setEstimateData({...estimateData, projectTitle: e.target.value})}
-                    placeholder="I'll fill it out"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-1 block">Date</label>
-                  <Input
-                    type="date"
-                    value={estimateData.date}
-                    onChange={(e) => setEstimateData({...estimateData, date: e.target.value})}
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">Project Title</label>
+                    <Input
+                      value={estimateData.projectTitle}
+                      onChange={(e) => setEstimateData({...estimateData, projectTitle: e.target.value})}
+                      placeholder="I'll fill it out"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">Date</label>
+                    <Input
+                      type="date"
+                      value={estimateData.date}
+                      onChange={(e) => setEstimateData({...estimateData, date: e.target.value})}
+                    />
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -751,7 +753,7 @@ cortespainter@gmail.com`;
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => updateAdditionalServiceHours(index, Math.max(0, service.hours - 1))}
+                          onClick={() => updateAdditionalServiceHours(index, Math.max(0, service.hours - 0.5))}
                           className="h-6 w-6 p-0"
                         >
                           -
@@ -760,7 +762,7 @@ cortespainter@gmail.com`;
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => updateAdditionalServiceHours(index, service.hours + 1)}
+                          onClick={() => updateAdditionalServiceHours(index, service.hours + 0.5)}
                           className="h-6 w-6 p-0"
                         >
                           +

@@ -183,7 +183,19 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
                   <FileText size={16} className="text-blue-600" />
                   <div>
                     <div className="text-sm font-medium text-gray-900 dark:text-white">
-                      {receipt.vendor} - ${receipt.amount}
+                      {receipt.filename ? (
+                        <a
+                          href={`/uploads/${receipt.filename}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline cursor-pointer"
+                          title="Click to open file"
+                        >
+                          {receipt.vendor} - ${receipt.amount}
+                        </a>
+                      ) : (
+                        <span>{receipt.vendor} - ${receipt.amount}</span>
+                      )}
                     </div>
                     {receipt.description && receipt.description !== `Manual entry: ${receipt.vendor}` && (
                       <div className="text-xs text-gray-500">
@@ -193,16 +205,6 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  {receipt.filename && (
-                    <a
-                      href={`/uploads/${receipt.filename}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm px-3 py-1 rounded bg-blue-50 dark:bg-blue-900/20"
-                    >
-                      View
-                    </a>
-                  )}
                   <button
                     onClick={() => startEditing(receipt)}
                     className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -248,6 +250,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const [showStatusSelect, setShowStatusSelect] = useState(false);
   const [showPhotoCarousel, setShowPhotoCarousel] = useState(false);
   const [carouselIndex, setCarouselIndex] = useState(0);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [selectedPhotos, setSelectedPhotos] = useState<Set<number>>(new Set());
   const [isSelecting, setIsSelecting] = useState(false);
   const [touchStarted, setTouchStarted] = useState(false);
@@ -742,6 +746,35 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     setShowPhotoCarousel(true);
   };
 
+  // Touch/swipe handlers for photo carousel
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe && photos.length > 1) {
+      // Swipe left - next photo
+      setCarouselIndex(prev => prev < photos.length - 1 ? prev + 1 : 0);
+    }
+    if (isRightSwipe && photos.length > 1) {
+      // Swipe right - previous photo
+      setCarouselIndex(prev => prev > 0 ? prev - 1 : photos.length - 1);
+    }
+  };
+
   React.useEffect(() => {
     if (project?.notes) {
       setNotes(project.notes);
@@ -1089,7 +1122,16 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                 <input
                   type="date"
                   value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
+                  onChange={(e) => {
+                    setSelectedDate(e.target.value);
+                    // Auto-focus hours input when date is selected
+                    if (e.target.value) {
+                      setTimeout(() => {
+                        const hoursInput = document.querySelector('input[placeholder="0"]') as HTMLInputElement;
+                        if (hoursInput) hoursInput.focus();
+                      }, 100);
+                    }
+                  }}
                   className="w-full px-3 py-2 text-sm border-2 border-blue-300 dark:border-blue-600 rounded-lg bg-blue-50 dark:bg-blue-900/20 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800"
                   max={formatDateForInput(new Date())}
                   style={{
@@ -1109,6 +1151,11 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                       max="24"
                       value={hoursInput}
                       onChange={(e) => setHoursInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && hoursInput) {
+                          handleAddHours();
+                        }
+                      }}
                       placeholder="0"
                       className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-background"
                     />
@@ -1472,6 +1519,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             src={`/uploads/${photos[carouselIndex]?.filename}`}
             alt="Project Photo"
             className="max-w-[90%] max-h-[90%] object-contain"
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
           />
           
           {/* Navigation arrows (if more than 1 photo) */}
