@@ -471,8 +471,14 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
               toast({
                 title: "✅ Email Sent Successfully!",
                 description: `Estimate with PDF sent to ${estimateData.clientEmail}. Check your email!`,
-                duration: 3000,
+                duration: 4000,
+                className: "bg-green-600 text-white border-green-700",
               });
+              
+              // Close the dialog after successful send
+              setTimeout(() => {
+                onClose();
+              }, 1000);
             } else {
               console.error('Email failed with result:', result);
               throw new Error(result.error || 'Failed to send email');
@@ -966,18 +972,18 @@ cortespainter@gmail.com`;
         {/* Hidden Print Version */}
         <div
           ref={printRef}
-          className="absolute left-[-9999px] bg-black text-white p-6"
-          style={{ ...fontStyles, maxHeight: '250mm', width: '210mm', visibility: 'hidden', overflow: 'hidden' }}
+          className="absolute left-[-9999px] bg-black text-white p-4"
+          style={{ ...fontStyles, maxHeight: '230mm', width: '210mm', visibility: 'hidden', overflow: 'hidden' }}
         >
           {/* Header with Logo Only */}
-          <div className="flex justify-center items-center mb-8">
+          <div className="flex justify-center items-center mb-4">
             <div className="text-center">
-              <img src="/aframe-logo.png" alt="A-Frame Painting" className="h-16 mx-auto" />
+              <img src="/aframe-logo.png" alt="A-Frame Painting" className="h-12 mx-auto" />
             </div>
           </div>
 
           {/* Estimate To and From - Side by Side */}
-          <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="grid grid-cols-2 gap-4 mb-4">
             {/* Estimate To */}
             <div>
               <h3 className="text-sm font-bold text-white mb-2">Estimate To:</h3>
@@ -1068,7 +1074,7 @@ cortespainter@gmail.com`;
           )}
 
           {/* Single-Page Layout: Totals on Right, Footer on Left - Minimal padding */}
-          <div className="flex justify-between items-start">
+          <div className="flex justify-between items-start mt-2">
             {/* Footer on Left */}
             <div className="flex-1 text-xs text-gray-300 pr-4">
               <p className="font-medium text-white mb-1">Thanks for considering A-Frame Painting!</p>
