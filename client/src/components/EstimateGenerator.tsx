@@ -287,26 +287,15 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       // Wait a moment for rendering
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      // Find the disclaimer element to get its bottom position
-      const disclaimerElement = element.querySelector('[data-disclaimer]') as HTMLElement;
-      let cropHeight = element.scrollHeight;
-      
-      if (disclaimerElement) {
-        // Calculate the exact bottom position of the disclaimer
-        const disclaimerRect = disclaimerElement.getBoundingClientRect();
-        const containerRect = element.getBoundingClientRect();
-        cropHeight = disclaimerRect.bottom - containerRect.top + 15; // 15px padding after disclaimer
-      }
-
-      // FIXED: Capture with EXACT dimensions - no dynamic height
+      // FIXED: Capture with FLEXIBLE height - let content determine natural height
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#1a1a1a',
         logging: false,
-        width: 794,        // EXACT width (8.5in at 96dpi)
-        height: 1056,      // EXACT height (11in at 96dpi) - NO DYNAMIC
+        width: 794,        // Fixed width
+        // Remove fixed height - let it be natural
         scrollX: 0,
         scrollY: 0
       });
@@ -999,17 +988,20 @@ cortespainter@gmail.com`;
             color: '#ffffff',
             lineHeight: '1.4',
             width: '794px',        // EXACT: 8.5in at 96dpi
-            height: '1056px',      // EXACT: 11in at 96dpi - FIXED HEIGHT
-            overflow: 'hidden',    // CRITICAL: No overflow
+            minHeight: '1000px',   // Minimum height
+            maxHeight: '1056px',   // Maximum 11in - prevents overflow
             padding: '30px',       // Fixed pixel padding
             margin: '0',
             boxSizing: 'border-box',
-            position: 'relative'
+            position: 'relative',
+            display: 'flex',
+            flexDirection: 'column'
           }}
         >
-          {/* Header */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
-            {/* Logo Section */}
+          <div style={{ flex: '1', display: 'flex', flexDirection: 'column' }}>
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+              {/* Logo Section */}
             <div>
               <img src="/aframe-logo.png" alt="A-Frame Painting" style={{ height: '48px', marginBottom: '8px' }} />
               <p style={{ fontSize: '12px', color: '#ffffff', letterSpacing: '1px', fontWeight: '500' }}>PAINTING</p>
@@ -1090,11 +1082,11 @@ cortespainter@gmail.com`;
               <span>${calculateTotal().toFixed(2)}</span>
             </div>
           </div>
+          </div>
 
-          {/* Footer */}
-          <div style={{ marginTop: '20px', paddingTop: '15px', borderTop: '1px solid #374151', textAlign: 'center' }}>
-            {/* Disclaimer */}
-            <p data-disclaimer style={{ color: '#f97316', fontSize: '11px', fontWeight: '600', lineHeight: '1.4' }}>
+          {/* Natural Bottom Disclaimer */}
+          <div style={{ borderTop: '1px solid #374151', paddingTop: '15px', marginTop: 'auto' }}>
+            <p data-disclaimer style={{ color: '#f97316', fontSize: '11px', fontWeight: '600', lineHeight: '1.3', textAlign: 'center', margin: '0' }}>
               <strong>NOTE:</strong> This is an estimate only. Price excludes structural repairs discovered during work (charged hourly). If total cost may exceed estimate by 20%+, you'll be notified for approval first.
             </p>
           </div>
