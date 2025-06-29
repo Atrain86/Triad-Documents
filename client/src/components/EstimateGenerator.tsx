@@ -271,12 +271,11 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       // Wait a moment for rendering
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      // Calculate content height to minimize white space
-      const contentHeight = Math.min(
-        element.scrollHeight,
-        element.offsetHeight,
-        element.clientHeight
-      );
+      // Calculate actual content height by measuring the last child element
+      const lastChild = element.lastElementChild as HTMLElement;
+      const contentHeight = lastChild ? 
+        lastChild.offsetTop + lastChild.offsetHeight + 20 : // 20px padding
+        element.scrollHeight;
 
       const canvas = await html2canvas(element, {
         scale: 1,
@@ -284,7 +283,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
         allowTaint: true,
         backgroundColor: '#000000',
         logging: false,
-        height: contentHeight + 50, // Add minimal padding
+        height: contentHeight,
         width: 794, // Standard width
       });
 
@@ -296,18 +295,15 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       const imgWidth = 210;
       const pageHeight = 295;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
 
-      let position = 0;
-
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+      // Ensure single page by scaling down if content is too tall
+      if (imgHeight > pageHeight) {
+        const scaleFactor = pageHeight / imgHeight;
+        const scaledWidth = imgWidth * scaleFactor;
+        const scaledHeight = pageHeight;
+        pdf.addImage(imgData, 'PNG', (210 - scaledWidth) / 2, 0, scaledWidth, scaledHeight);
+      } else {
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
       }
 
       const filename = `Estimate-${estimateData.estimateNumber}-${estimateData.clientName.replace(/\s+/g, '-')}.pdf`;
