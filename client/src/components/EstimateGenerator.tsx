@@ -376,7 +376,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
   // Generate PDF and send email with attachment
   const sendEstimateEmail = async () => {
-    if (!estimateData.clientEmail) {
+    if (!estimateData.clientEmail || !estimateData.clientEmail.trim()) {
       toast({
         title: "Email Required",
         description: "Please add client email to send estimate",
@@ -398,27 +398,56 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
         // Convert to base64 for server sending
         const reader = new FileReader();
         reader.onloadend = async () => {
-          const pdfBase64 = reader.result?.toString().split(',')[1];
-          const pdfFilename = `Estimate-${estimateData.estimateNumber}-${estimateData.clientName.replace(/\s+/g, '-')}.pdf`;
+          const base64Result = reader.result?.toString();
+          if (!base64Result) {
+            console.error('Failed to convert PDF to base64');
+            toast({
+              title: "Error",
+              description: "Failed to process PDF for email",
+              variant: "destructive",
+            });
+            return;
+          }
+
+          const pdfBase64 = base64Result.split(',')[1];
+          if (!pdfBase64 || pdfBase64.length === 0) {
+            console.error('Invalid PDF base64 data');
+            toast({
+              title: "Error", 
+              description: "Invalid PDF data generated",
+              variant: "destructive",
+            });
+            return;
+          }
+
+          const pdfFilename = `Estimate-${estimateData.estimateNumber || 'EST'}-${estimateData.clientName.replace(/\s+/g, '-')}.pdf`;
           
           // Try nodemailer Gmail endpoint
           try {
-            const customMessageSection = estimateData.customMessage 
-              ? `\n\n${estimateData.customMessage}\n\n` 
-              : '\n\n';
+            // Ensure all required fields have values
+            const emailData = {
+              recipientEmail: estimateData.clientEmail,
+              clientName: estimateData.clientName || 'Client',
+              estimateNumber: estimateData.estimateNumber || 'EST-001',
+              projectTitle: estimateData.projectTitle || 'Painting Estimate',
+              totalAmount: calculateTotal().toFixed(2),
+              customMessage: estimateData.customMessage || '',
+              pdfData: pdfBase64
+            };
+
+            // Debug logging
+            console.log('Sending estimate email with data:', {
+              recipientEmail: emailData.recipientEmail,
+              clientName: emailData.clientName,
+              estimateNumber: emailData.estimateNumber,
+              projectTitle: emailData.projectTitle,
+              hasPdfData: !!emailData.pdfData
+            });
 
             const response = await fetch('/api/send-estimate-email', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                recipientEmail: estimateData.clientEmail,
-                clientName: estimateData.clientName,
-                estimateNumber: estimateData.estimateNumber,
-                projectTitle: estimateData.projectTitle,
-                totalAmount: calculateTotal().toFixed(2),
-                customMessage: estimateData.customMessage,
-                pdfData: pdfBase64
-              })
+              body: JSON.stringify(emailData)
             });
 
             const result = await response.json();
