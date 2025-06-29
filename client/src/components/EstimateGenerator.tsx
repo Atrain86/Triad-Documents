@@ -730,16 +730,20 @@ cortespainter@gmail.com`;
                     <label className="text-sm font-medium mb-1 block">Primer Coats</label>
                     <Input
                       type="number"
-                      value={estimateData.primerCoats}
-                      onChange={(e) => setEstimateData({...estimateData, primerCoats: parseInt(e.target.value) || 1})}
+                      inputMode="numeric"
+                      value={estimateData.primerCoats === 0 ? '' : estimateData.primerCoats}
+                      onChange={(e) => setEstimateData({...estimateData, primerCoats: parseInt(e.target.value) || 0})}
+                      placeholder="0"
                     />
                   </div>
                   <div>
                     <label className="text-sm font-medium mb-1 block">Top Coats</label>
                     <Input
                       type="number"
-                      value={estimateData.topCoats}
-                      onChange={(e) => setEstimateData({...estimateData, topCoats: parseInt(e.target.value) || 2})}
+                      inputMode="numeric"
+                      value={estimateData.topCoats === 0 ? '' : estimateData.topCoats}
+                      onChange={(e) => setEstimateData({...estimateData, topCoats: parseInt(e.target.value) || 0})}
+                      placeholder="0"
                     />
                   </div>
                 </div>
@@ -764,18 +768,22 @@ cortespainter@gmail.com`;
                       <label className="text-sm font-medium mb-1 block">Paint Cost</label>
                       <Input
                         type="number"
-                        value={estimateData.paintCost}
+                        inputMode="decimal"
+                        value={estimateData.paintCost === 0 ? '' : estimateData.paintCost}
                         onChange={(e) => setEstimateData({...estimateData, paintCost: parseFloat(e.target.value) || 0})}
                         step="0.01"
+                        placeholder="0.00"
                       />
                     </div>
                     <div>
                       <label className="text-sm font-medium mb-1 block">Delivery Cost</label>
                       <Input
                         type="number"
-                        value={estimateData.deliveryCost}
+                        inputMode="decimal"
+                        value={estimateData.deliveryCost === 0 ? '' : estimateData.deliveryCost}
                         onChange={(e) => setEstimateData({...estimateData, deliveryCost: parseFloat(e.target.value) || 0})}
                         step="0.01"
+                        placeholder="0.00"
                       />
                     </div>
                   </div>
