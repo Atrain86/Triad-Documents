@@ -1109,7 +1109,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                       max="24"
                       value={hoursInput}
                       onChange={(e) => setHoursInput(e.target.value)}
-                      placeholder="8.0"
+                      placeholder="0"
                       className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-background"
                     />
                   </div>
@@ -1230,7 +1230,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             onChange={(e) => setNotes(e.target.value)}
             onBlur={handleNotesBlur}
             placeholder="Add project notes, client preferences, or special instructions..."
-            className="w-full min-h-96 resize-none rounded-lg border border-gray-200 dark:border-gray-700 p-3 text-sm"
+            className="w-full min-h-48 resize-none rounded-lg border border-gray-200 dark:border-gray-700 p-3 text-sm"
           />
         </div>
 
@@ -1361,10 +1361,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           
           {/* Quick Receipt Entry Form */}
           <div className="mb-4">
-            <div className="flex items-center gap-2 mb-3 text-sm text-muted-foreground">
-              <DollarSign size={14} />
-              <span>Quick Add Receipt Amount</span>
-            </div>
+
             <form 
             onSubmit={(e) => {
               e.preventDefault();
@@ -1406,7 +1403,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           >
             <Input
               name="item"
-              placeholder="Item (e.g., Paint brushes)"
+              placeholder=""
               className="flex-1 h-9"
             />
             <Input
@@ -1419,9 +1416,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             <Button 
               type="submit" 
               size="sm"
-              className="h-9 px-3 text-xs"
+              className="h-9 px-3 text-xs text-white"
+              style={{ backgroundColor: '#D97706' }}
             >
-              Add
+              Add Item
             </Button>
           </form>
           </div>

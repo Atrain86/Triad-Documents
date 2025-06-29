@@ -93,7 +93,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     clientPhone: project.clientPhone || '',
 
     // Estimate Details
-    estimateNumber: 'EST #',
+    estimateNumber: '',
     date: new Date().toISOString().split('T')[0],
     projectTitle: `${project.projectType} - ${project.clientName}`,
     projectDescription: project.notes || '',
@@ -208,6 +208,14 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   const toggleAdditionalService = (index: number) => {
     const newServices = [...estimateData.additionalServices];
     newServices[index].included = !newServices[index].included;
+    setEstimateData({ ...estimateData, additionalServices: newServices });
+  };
+
+  // Update additional service hours
+  const updateAdditionalServiceHours = (index: number, hours: number) => {
+    const newServices = [...estimateData.additionalServices];
+    newServices[index].hours = hours;
+    newServices[index].total = hours * newServices[index].rate;
     setEstimateData({ ...estimateData, additionalServices: newServices });
   };
 
@@ -565,6 +573,7 @@ cortespainter@gmail.com`;
                     <Input
                       value={estimateData.estimateNumber}
                       onChange={(e) => setEstimateData({...estimateData, estimateNumber: e.target.value})}
+                      placeholder="001"
                     />
                   </div>
                   <div>
@@ -635,9 +644,10 @@ cortespainter@gmail.com`;
                         <label className="text-xs font-medium mb-1 block">Hours</label>
                         <Input
                           type="number"
-                          value={stage.hours}
+                          value={stage.hours === 0 ? '' : stage.hours}
                           onChange={(e) => updateWorkStage(index, 'hours', parseFloat(e.target.value) || 0)}
                           step="0.5"
+                          placeholder="0"
                         />
                       </div>
                       <div>
@@ -670,21 +680,40 @@ cortespainter@gmail.com`;
               <CardContent className="space-y-3">
                 {estimateData.additionalServices.map((service, index) => (
                   <div key={index} className="flex items-center justify-between p-3 border rounded-lg bg-gray-50 dark:bg-gray-800">
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-3 flex-1">
                       <input
                         type="checkbox"
                         checked={service.included}
                         onChange={() => toggleAdditionalService(index)}
                         className="w-4 h-4"
                       />
-                      <div>
+                      <div className="flex-1">
                         <div className="font-medium">{service.name}</div>
-                        <div className="text-sm text-gray-600 dark:text-gray-300">
-                          {service.hours}h × ${service.rate}/h
+                        <div className="text-sm text-gray-600 dark:text-gray-300 text-left">
+                          ${service.rate}/hr
                         </div>
                       </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => updateAdditionalServiceHours(index, Math.max(0, service.hours - 1))}
+                          className="h-6 w-6 p-0"
+                        >
+                          -
+                        </Button>
+                        <span className="w-8 text-center text-sm font-medium">{service.hours}h</span>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => updateAdditionalServiceHours(index, service.hours + 1)}
+                          className="h-6 w-6 p-0"
+                        >
+                          +
+                        </Button>
+                      </div>
                     </div>
-                    <div className="font-medium">${service.total.toFixed(2)}</div>
+                    <div className="font-medium ml-4">${service.total.toFixed(2)}</div>
                   </div>
                 ))}
               </CardContent>
@@ -873,7 +902,7 @@ cortespainter@gmail.com`;
               <div className="bg-gray-800 p-3 rounded">
                 <h2 className="text-lg font-bold text-white mb-1">ESTIMATE</h2>
                 <div className="text-xs text-gray-300">
-                  <p><strong>#{estimateData.estimateNumber}</strong></p>
+                  <p><strong>EST #{estimateData.estimateNumber}</strong></p>
                   <p>{estimateData.date}</p>
                 </div>
               </div>
