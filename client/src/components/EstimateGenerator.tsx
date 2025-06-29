@@ -469,19 +469,32 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             if (response.ok && result.success) {
               console.log('Showing success toast notification');
               
-              // Show visible alert first, then toast
+              // Show multiple forms of feedback for visibility
               alert("✅ Email Sent Successfully!\n\nEstimate PDF sent to " + estimateData.clientEmail);
               
               toast({
                 title: "✅ Email Sent Successfully!",
-                description: `Estimate with PDF sent to ${estimateData.clientEmail}. Check your email!`,
-                duration: 5000,
+                description: `Estimate PDF sent to ${estimateData.clientEmail}`,
+                duration: 6000,
+                className: "bg-green-500 text-white border-green-600",
               });
+              
+              // Also update button text temporarily  
+              const button = document.querySelector('[data-send-email-btn]') as HTMLButtonElement;
+              if (button) {
+                const originalText = button.textContent;
+                button.textContent = "✅ Email Sent!";
+                button.className = button.className.replace('bg-green-600', 'bg-green-500').replace('hover:bg-green-700', 'hover:bg-green-600');
+                setTimeout(() => {
+                  button.textContent = originalText;
+                  button.className = button.className.replace('bg-green-500', 'bg-green-600').replace('hover:bg-green-600', 'hover:bg-green-700');
+                }, 3000);
+              }
               
               // Close the dialog after successful send
               setTimeout(() => {
                 onClose();
-              }, 2000);
+              }, 3000);
             } else {
               console.error('Email failed with result:', result);
               throw new Error(result.error || 'Failed to send email');
@@ -963,6 +976,7 @@ cortespainter@gmail.com`;
                   onClick={sendEstimateEmail}
                   disabled={!estimateData.clientEmail}
                   className="flex items-center bg-green-600 hover:bg-green-700 disabled:bg-gray-400"
+                  data-send-email-btn
                 >
                   <Send className="mr-2 h-4 w-4" />
                   Send Estimate
@@ -972,146 +986,111 @@ cortespainter@gmail.com`;
           </div>
         </div>
 
-        {/* Hidden Print Version */}
+        {/* Hidden Print Version - Professional Template */}
         <div
           ref={printRef}
-          className="absolute left-[-9999px] bg-black text-white p-2"
+          className="absolute left-[-9999px]"
           style={{ 
-            ...fontStyles, 
-            height: '180mm', 
-            width: '210mm', 
-            visibility: 'hidden', 
-            overflow: 'hidden',
-            pageBreakAfter: 'avoid',
-            pageBreakInside: 'avoid',
-            fontSize: '11px'
+            visibility: 'hidden',
+            fontFamily: 'Inter, sans-serif',
+            background: '#1a1a1a',
+            color: '#ffffff',
+            lineHeight: '1.4',
+            width: '8.5in',
+            height: '11in',
+            padding: '20px',
+            overflow: 'hidden'
           }}
         >
-          {/* Header with Logo Only */}
-          <div className="flex justify-center items-center mb-1">
-            <div className="text-center">
-              <img src="/aframe-logo.png" alt="A-Frame Painting" className="h-8 mx-auto" />
+          {/* Header */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+            {/* Logo Section */}
+            <div>
+              <img src="/aframe-logo.png" alt="A-Frame Painting" style={{ height: '48px', marginBottom: '8px' }} />
+              <p style={{ fontSize: '12px', color: '#ffffff', letterSpacing: '1px', fontWeight: '500' }}>PAINTING</p>
+            </div>
+            
+            {/* Estimate Title */}
+            <div style={{ textAlign: 'right' }}>
+              <h2 style={{ fontSize: '28px', fontWeight: '700', color: '#f97316', marginBottom: '6px' }}>Estimate</h2>
+              <div style={{ color: '#9ca3af', fontSize: '12px' }}>
+                <p style={{ marginBottom: '3px' }}><strong>Estimate #:</strong> {estimateData.estimateNumber}</p>
+                <p><strong>Date:</strong> {new Date(estimateData.date).toLocaleDateString()}</p>
+              </div>
             </div>
           </div>
 
-          {/* Estimate To and From - Side by Side */}
-          <div className="grid grid-cols-2 gap-2 mb-2">
-            {/* Estimate To */}
-            <div>
-              <h3 className="text-sm font-bold text-white mb-2">Estimate To:</h3>
-              <div className="bg-gray-800 p-3 rounded text-xs">
-                <p className="font-bold text-white">{estimateData.clientName}</p>
-                <p className="text-gray-300">{estimateData.clientAddress}</p>
-                <p className="text-gray-300">{estimateData.clientCity} {estimateData.clientPostal}</p>
-                <p className="text-gray-300">{estimateData.clientEmail}</p>
-                <p className="text-gray-300">{estimateData.clientPhone}</p>
-              </div>
-            </div>
-            
+          {/* Billing Information */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
             {/* Estimate From */}
-            <div>
-              <h3 className="text-sm font-bold text-white mb-2">Estimate From:</h3>
-              <div className="bg-gray-700 p-3 rounded text-xs">
-                <p className="font-bold text-white">A-Frame Painting</p>
-                <p className="text-gray-300">884 Hayes Rd</p>
-                <p className="text-gray-300">Manson's Landing, BC V0P1K0</p>
-                <p className="text-gray-300">cortespainter@gmail.com</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Project Description Only */}
-          {estimateData.projectDescription && (
-            <div className="mb-4">
-              <p className="text-xs text-gray-300 bg-gray-800 p-2 rounded">{estimateData.projectDescription}</p>
-            </div>
-          )}
-
-          {/* Work Breakdown - Compact */}
-          <div className="mb-2">
-            <h3 className="text-sm font-bold text-white mb-1">Work Breakdown</h3>
-            <div className="space-y-1">
-              {estimateData.workStages.map((stage, index) => (
-                <div key={index} className="flex justify-between items-center py-1 border-b border-gray-700">
-                  <div className="flex-1">
-                    <span className="font-medium text-white text-xs">{stage.name}</span>
-                    {stage.description && <span className="text-gray-400 ml-1 text-xs">- {stage.description}</span>}
-                  </div>
-                  <div className="text-right text-xs">
-                    <span className="text-gray-400">{stage.hours}h × ${stage.rate}/h</span>
-                    <div className="font-bold text-white">${stage.total.toFixed(2)}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Additional Services - Compact */}
-          {estimateData.additionalServices.some(service => service.included) && (
-            <div className="mb-2">
-              <h3 className="text-sm font-bold text-white mb-1">Additional Services</h3>
-              <div className="space-y-1">
-                {estimateData.additionalServices.filter(service => service.included).map((service, index) => (
-                  <div key={index} className="flex justify-between items-center py-1 border-b border-gray-700">
-                    <span className="font-medium text-white text-xs">{service.name}</span>
-                    <div className="text-right text-xs">
-                      <span className="text-gray-400">{service.hours}h × ${service.rate}/h</span>
-                      <div className="font-bold text-white">${service.total.toFixed(2)}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Materials & Paint - Compact */}
-          {(estimateData.paintCost > 0 || estimateData.deliveryCost > 0) && (
-            <div className="mb-2">
-              <h3 className="text-sm font-bold text-white mb-1">Materials & Paint</h3>
-              <div className="space-y-1">
-                {estimateData.paintCost > 0 && (
-                  <div className="flex justify-between items-center py-1 border-b border-gray-700">
-                    <span className="font-medium text-white text-xs">Paint & Supplies</span>
-                    <div className="font-bold text-white text-xs">${estimateData.paintCost.toFixed(2)}</div>
-                  </div>
-                )}
-                {estimateData.deliveryCost > 0 && (
-                  <div className="flex justify-between items-center py-1 border-b border-gray-700">
-                    <span className="font-medium text-white text-xs">Delivery</span>
-                    <div className="font-bold text-white text-xs">${estimateData.deliveryCost.toFixed(2)}</div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Single-Page Layout: Totals on Right, Footer on Left - Minimal padding */}
-          <div className="flex justify-between items-start mt-1">
-            {/* Footer on Left */}
-            <div className="flex-1 text-xs text-gray-300 pr-3">
-              <p className="font-medium text-white">Thanks for considering A-Frame Painting!</p>
-              <p className="text-xs">Valid for 30 days.</p>
+            <div style={{ background: '#374151', borderRadius: '6px', padding: '15px' }}>
+              <h3 style={{ fontSize: '12px', fontWeight: '600', color: '#d1d5db', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Estimate From:</h3>
+              <p style={{ fontSize: '13px', marginBottom: '3px', color: '#ffffff', lineHeight: '1.3' }}><strong>A-Frame Painting</strong></p>
+              <p style={{ fontSize: '13px', marginBottom: '3px', color: '#ffffff' }}>884 Hayes Rd</p>
+              <p style={{ fontSize: '13px', marginBottom: '3px', color: '#ffffff' }}>Manson's Landing, BC V0P1K0</p>
+              <p style={{ fontSize: '13px', marginBottom: '3px', color: '#ffffff' }}>cortespainter@gmail.com</p>
             </div>
             
-            {/* Totals on Right */}
-            <div className="w-64 space-y-1">
-              <div className="flex justify-between items-center py-1 border-b border-gray-600 text-xs">
-                <span className="text-white">Subtotal:</span>
-                <span className="font-bold text-white">${calculateSubtotal().toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between items-center py-1 border-b border-gray-600 text-xs">
-                <span className="text-white">Paint & Materials:</span>
-                <span className="font-bold text-white">${(estimateData.paintCost + estimateData.deliveryCost).toFixed(2)}</span>
-              </div>
-              <div className="flex justify-end pt-1">
-                <div className="bg-green-600 text-white px-6 py-3 rounded flex items-center justify-center">
-                  <div className="text-sm font-bold text-center">Grand Total: ${calculateTotal().toFixed(2)}</div>
-                </div>
-              </div>
+            {/* Estimate To */}
+            <div style={{ background: '#374151', borderRadius: '6px', padding: '15px' }}>
+              <h3 style={{ fontSize: '12px', fontWeight: '600', color: '#d1d5db', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Estimate To:</h3>
+              <p style={{ fontSize: '13px', marginBottom: '3px', color: '#ffffff', lineHeight: '1.3' }}><strong>{estimateData.clientName}</strong></p>
+              <p style={{ fontSize: '13px', marginBottom: '3px', color: '#ffffff' }}>{estimateData.clientAddress}</p>
+              <p style={{ fontSize: '13px', marginBottom: '3px', color: '#ffffff' }}>{estimateData.clientCity}, {estimateData.clientPostal}</p>
+              <p style={{ fontSize: '13px', marginBottom: '3px', color: '#ffffff' }}>{estimateData.clientEmail}</p>
+              <p style={{ fontSize: '13px', marginBottom: '3px', color: '#ffffff' }}>{estimateData.clientPhone}</p>
             </div>
           </div>
 
+          {/* Work Breakdown */}
+          <div style={{ marginBottom: '20px' }}>
+            <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#f97316', marginBottom: '12px' }}>Work Breakdown</h3>
+            
+            {/* Work Stages */}
+            {estimateData.workStages.map((stage, index) => (
+              <div key={index} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #374151', fontSize: '13px' }}>
+                <span style={{ color: '#e5e7eb', fontWeight: '500' }}>{stage.name}</span>
+                <span style={{ color: '#9ca3af', fontSize: '12px', marginRight: 'auto', marginLeft: '15px' }}>{stage.hours}h × ${stage.rate}/h</span>
+                <span style={{ color: '#ffffff', fontWeight: '600', textAlign: 'right', minWidth: '70px' }}>${stage.total.toFixed(2)}</span>
+              </div>
+            ))}
 
+            {/* Additional Services */}
+            {estimateData.additionalServices.filter(service => service.included).map((service, index) => (
+              <div key={`additional-${index}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #374151', fontSize: '13px' }}>
+                <span style={{ color: '#e5e7eb', fontWeight: '500' }}>{service.name}</span>
+                <span style={{ color: '#9ca3af', fontSize: '12px', marginRight: 'auto', marginLeft: '15px' }}>{service.hours}h × ${service.rate}/h</span>
+                <span style={{ color: '#ffffff', fontWeight: '600', textAlign: 'right', minWidth: '70px' }}>${service.total.toFixed(2)}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Totals Section */}
+          <div style={{ marginTop: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', fontSize: '13px', borderTop: '1px solid #374151', paddingTop: '10px', marginTop: '15px' }}>
+              <span style={{ color: '#d1d5db', fontWeight: '500' }}>Subtotal:</span>
+              <span style={{ color: '#ffffff', fontWeight: '600', textAlign: 'right', minWidth: '80px' }}>${calculateSubtotal().toFixed(2)}</span>
+            </div>
+            
+            {(estimateData.paintCost > 0 || estimateData.deliveryCost > 0) && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', fontSize: '13px' }}>
+                <span style={{ color: '#d1d5db', fontWeight: '500' }}>Paint & Materials:</span>
+                <span style={{ color: '#ffffff', fontWeight: '600', textAlign: 'right', minWidth: '80px' }}>${(estimateData.paintCost + estimateData.deliveryCost).toFixed(2)}</span>
+              </div>
+            )}
+            
+            {/* Grand Total */}
+            <div style={{ background: '#10b981', color: '#ffffff', padding: '10px 15px', borderRadius: '6px', marginTop: '10px', fontSize: '16px', fontWeight: '700', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>Grand Total:</span>
+              <span>${calculateTotal().toFixed(2)}</span>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div style={{ marginTop: '20px', paddingTop: '15px', borderTop: '1px solid #374151', textAlign: 'center' }}>
+            <p style={{ color: '#d1d5db', fontSize: '12px', marginBottom: '4px' }}><strong>Thanks for considering A-Frame Painting!</strong></p>
+            <p style={{ color: '#9ca3af', fontSize: '11px' }}>Valid for 30 days.</p>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
