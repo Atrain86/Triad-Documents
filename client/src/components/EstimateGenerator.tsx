@@ -204,19 +204,8 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
   // Calculate labor subtotal from actual daily hours
   const calculateLaborFromDailyHours = () => {
-    console.log('Daily hours data:', dailyHours);
-    console.log('Is array?', Array.isArray(dailyHours));
-    console.log('Length:', dailyHours?.length);
-    
     if (!dailyHours || !Array.isArray(dailyHours) || dailyHours.length === 0) return 0;
-    
-    const total = dailyHours.reduce((total: number, entry: any) => {
-      console.log('Processing entry:', entry, 'Hours:', entry.hours, 'Rate: 60');
-      return total + (entry.hours * 60);
-    }, 0);
-    
-    console.log('Calculated total:', total);
-    return total;
+    return dailyHours.reduce((total: number, entry: any) => total + (entry.hours * 60), 0);
   };
 
   // Calculate functions
@@ -482,11 +471,8 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
               toast({
                 title: "✅ Email Sent Successfully!",
                 description: `Estimate with PDF sent to ${estimateData.clientEmail}. Check your email!`,
-                duration: 5000,
+                duration: 3000,
               });
-              
-              // Also show browser alert as backup
-              alert(`✅ Estimate Email Sent Successfully!\n\nPDF sent to: ${estimateData.clientEmail}\nCheck your email inbox!`);
             } else {
               console.error('Email failed with result:', result);
               throw new Error(result.error || 'Failed to send email');
