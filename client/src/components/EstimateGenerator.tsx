@@ -451,11 +451,15 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             console.log('Email response result:', result);
             
             if (response.ok && result.success) {
+              console.log('Showing success toast notification');
               toast({
                 title: "✅ Email Sent Successfully!",
                 description: `Estimate with PDF sent to ${estimateData.clientEmail}. Check your email!`,
                 duration: 5000,
               });
+              
+              // Also show browser alert as backup
+              alert(`✅ Estimate Email Sent Successfully!\n\nPDF sent to: ${estimateData.clientEmail}\nCheck your email inbox!`);
             } else {
               console.error('Email failed with result:', result);
               throw new Error(result.error || 'Failed to send email');

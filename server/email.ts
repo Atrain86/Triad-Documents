@@ -114,7 +114,7 @@ export async function sendEstimateEmail(
   customMessage: string,
   pdfBuffer: Buffer
 ): Promise<boolean> {
-  const subject = `Painting Estimate ${estimateNumber} - ${projectTitle}`;
+  const subject = `Your Painting Estimate from A-Frame Painting - ${projectTitle}`;
   
   const customMessageSection = customMessage 
     ? `\n\n${customMessage}\n\n` 
