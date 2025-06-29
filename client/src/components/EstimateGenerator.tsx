@@ -324,6 +324,10 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
         format: [imgWidth, Math.min(imgHeight, 295)] // Cap at A4 height but use actual content height
       });
       
+      // Fill any remaining space with black background
+      pdf.setFillColor(0, 0, 0); // Black color
+      pdf.rect(0, 0, imgWidth, Math.min(imgHeight, 295), 'F'); // Fill background
+      
       pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
 
       const filename = `Estimate-${estimateData.estimateNumber}-${estimateData.clientName.replace(/\s+/g, '-')}.pdf`;
