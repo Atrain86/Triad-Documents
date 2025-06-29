@@ -881,57 +881,41 @@ cortespainter@gmail.com`;
         <div
           ref={printRef}
           className="absolute left-[-9999px] bg-black text-white p-6"
-          style={{ ...fontStyles, minHeight: '297mm', width: '210mm', visibility: 'hidden' }}
+          style={{ ...fontStyles, maxHeight: '280mm', width: '210mm', visibility: 'hidden', overflow: 'hidden' }}
         >
-          {/* Compact Header with Side-by-Side Layout */}
-          <div className="flex justify-between items-start mb-4">
-            <div className="flex-1">
-              <div className="flex items-center mb-2">
-                <img src="/aframe-logo.png" alt="A-Frame Painting" className="h-16" />
-              </div>
+          {/* Header with Logo Only */}
+          <div className="flex justify-center items-center mb-8">
+            <div className="text-center">
+              <img src="/aframe-logo.png" alt="A-Frame Painting" className="h-16 mx-auto mb-2" />
               <div className="text-xs text-gray-300">
                 <p className="font-bold text-sm text-white">A-Frame Painting</p>
                 <p>884 Hayes Rd, Manson's Landing, BC V0P1K0</p>
                 <p>cortespainter@gmail.com</p>
               </div>
             </div>
-            
-            <div className="flex-1 mx-4">
-              <h3 className="text-sm font-bold text-white mb-2">Estimate For:</h3>
-              <div className="bg-gray-800 p-3 rounded text-xs">
-                <p className="font-bold text-white">{estimateData.clientName}</p>
-                <p className="text-gray-300">{estimateData.clientAddress}</p>
-                <p className="text-gray-300">{estimateData.clientCity} {estimateData.clientPostal}</p>
-                <p className="text-gray-300">{estimateData.clientEmail} • {estimateData.clientPhone}</p>
-              </div>
-            </div>
-            
-            <div className="text-right">
-              <div className="bg-gray-800 p-3 rounded">
-                <h2 className="text-lg font-bold text-white mb-1">ESTIMATE</h2>
-                <div className="text-xs text-gray-300">
-                  <p><strong>EST #{estimateData.estimateNumber}</strong></p>
-                  <p>{estimateData.date}</p>
-                </div>
-              </div>
+          </div>
+
+          {/* Client Info - Lower Position */}
+          <div className="mb-6">
+            <h3 className="text-sm font-bold text-white mb-2">Estimate For:</h3>
+            <div className="bg-gray-800 p-3 rounded text-xs w-1/2">
+              <p className="font-bold text-white">{estimateData.clientName}</p>
+              <p className="text-gray-300">{estimateData.clientAddress}</p>
+              <p className="text-gray-300">{estimateData.clientCity} {estimateData.clientPostal}</p>
+              <p className="text-gray-300">{estimateData.clientEmail} • {estimateData.clientPhone}</p>
             </div>
           </div>
 
-          {/* Project Details - Compact */}
-          {(estimateData.projectTitle || estimateData.projectDescription) && (
+          {/* Project Description Only */}
+          {estimateData.projectDescription && (
             <div className="mb-4">
-              {estimateData.projectTitle && (
-                <h3 className="text-sm font-bold text-white mb-1">{estimateData.projectTitle}</h3>
-              )}
-              {estimateData.projectDescription && (
-                <p className="text-xs text-gray-300 bg-gray-800 p-2 rounded">{estimateData.projectDescription}</p>
-              )}
+              <p className="text-xs text-gray-300 bg-gray-800 p-2 rounded">{estimateData.projectDescription}</p>
             </div>
           )}
 
           {/* Work Breakdown - Compact */}
           <div className="mb-4">
-            <h3 className="text-sm font-bold text-white mb-2">Services & Labor</h3>
+            <h3 className="text-sm font-bold text-white mb-2">Work Breakdown</h3>
             <div className="space-y-1">
               {estimateData.workStages.map((stage, index) => (
                 <div key={index} className="flex justify-between items-center py-1 border-b border-gray-700">
@@ -991,9 +975,7 @@ cortespainter@gmail.com`;
           <div className="flex justify-between items-start mb-2">
             {/* Footer on Left */}
             <div className="flex-1 text-xs text-gray-300 pr-4">
-              <p className="font-medium text-white mb-1">Thank you for considering A-Frame Painting!</p>
-              <p className="mb-1">A-Frame Painting • cortespainter@gmail.com</p>
-              <p className="mb-1">884 Hayes Rd, Manson's Landing, BC V0P1K0</p>
+              <p className="font-medium text-white mb-1">Thanks for considering A-Frame Painting!</p>
               <p>This estimate is valid for 30 days from the date above.</p>
             </div>
             
@@ -1007,9 +989,9 @@ cortespainter@gmail.com`;
                 <span className="text-white">Paint & Materials:</span>
                 <span className="font-bold text-white">${(estimateData.paintCost + estimateData.deliveryCost).toFixed(2)}</span>
               </div>
-              <div className="flex justify-center pt-1">
-                <div className="bg-green-600 text-white px-4 py-1 rounded text-center">
-                  <div className="text-sm font-bold">Total Estimate: ${calculateTotal().toFixed(2)}</div>
+              <div className="flex justify-end pt-1">
+                <div className="bg-green-600 text-white px-6 py-3 rounded flex items-center justify-center">
+                  <div className="text-sm font-bold text-center">Grand Total: ${calculateTotal().toFixed(2)}</div>
                 </div>
               </div>
             </div>
