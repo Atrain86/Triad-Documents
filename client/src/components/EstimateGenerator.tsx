@@ -98,25 +98,25 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     projectTitle: `${project.projectType} - ${project.clientName}`,
     projectDescription: project.notes || '',
 
-    // Default Work Stages - reset to zero
+    // Default Work Stages - simplified
     workStages: [
       {
-        name: 'Surface Preparation',
-        description: 'Cleaning, scraping, sanding surfaces',
+        name: 'Prep',
+        description: '',
         hours: 0,
         rate: 60,
         total: 0,
       },
       {
         name: 'Priming',
-        description: 'Apply primer coat to prepared surfaces',
+        description: '',
         hours: 0,
         rate: 60,
         total: 0,
       },
       {
         name: 'Painting',
-        description: 'Apply finish coats',
+        description: '',
         hours: 0,
         rate: 60,
         total: 0,
@@ -135,7 +135,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       {
         name: 'Wood Reconditioning',
         hours: 0,
-        rate: 100,
+        rate: 60,
         total: 0,
         included: false,
       },
@@ -567,38 +567,20 @@ cortespainter@gmail.com`;
                 <CardTitle>Estimate Details</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium mb-1 block">Estimate #</label>
-                    <Input
-                      value={estimateData.estimateNumber}
-                      onChange={(e) => setEstimateData({...estimateData, estimateNumber: e.target.value})}
-                      placeholder="001"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium mb-1 block">Date</label>
-                    <Input
-                      type="date"
-                      value={estimateData.date}
-                      onChange={(e) => setEstimateData({...estimateData, date: e.target.value})}
-                    />
-                  </div>
-                </div>
                 <div>
                   <label className="text-sm font-medium mb-1 block">Project Title</label>
                   <Input
                     value={estimateData.projectTitle}
                     onChange={(e) => setEstimateData({...estimateData, projectTitle: e.target.value})}
+                    placeholder="I'll fill it out"
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-1 block">Project Description</label>
-                  <Textarea
-                    value={estimateData.projectDescription}
-                    onChange={(e) => setEstimateData({...estimateData, projectDescription: e.target.value})}
-                    rows={3}
-                    placeholder="Detailed description of the painting project..."
+                  <label className="text-sm font-medium mb-1 block">Date</label>
+                  <Input
+                    type="date"
+                    value={estimateData.date}
+                    onChange={(e) => setEstimateData({...estimateData, date: e.target.value})}
                   />
                 </div>
               </CardContent>
@@ -672,6 +654,78 @@ cortespainter@gmail.com`;
               </CardContent>
             </Card>
 
+            {/* Paint Details */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Paint & Materials</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">Primer Coats</label>
+                    <Input
+                      type="number"
+                      inputMode="numeric"
+                      value={estimateData.primerCoats === 0 ? '' : estimateData.primerCoats}
+                      onChange={(e) => setEstimateData({...estimateData, primerCoats: parseInt(e.target.value) || 0})}
+                      placeholder="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">Top Coats</label>
+                    <Input
+                      type="number"
+                      inputMode="numeric"
+                      value={estimateData.topCoats === 0 ? '' : estimateData.topCoats}
+                      onChange={(e) => setEstimateData({...estimateData, topCoats: parseInt(e.target.value) || 0})}
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Paint and Supplies</label>
+                  <Select
+                    value={estimateData.paintSuppliedBy}
+                    onValueChange={(value: 'contractor' | 'client') => setEstimateData({...estimateData, paintSuppliedBy: value})}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="z-50">
+                      <SelectItem value="contractor">A-Frame</SelectItem>
+                      <SelectItem value="client">Client</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                {estimateData.paintSuppliedBy === 'contractor' && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium mb-1 block">Paint Cost</label>
+                      <Input
+                        type="number"
+                        inputMode="decimal"
+                        value={estimateData.paintCost === 0 ? '' : estimateData.paintCost}
+                        onChange={(e) => setEstimateData({...estimateData, paintCost: parseFloat(e.target.value) || 0})}
+                        step="0.01"
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-1 block">Delivery Cost</label>
+                      <Input
+                        type="number"
+                        inputMode="decimal"
+                        value={estimateData.deliveryCost === 0 ? '' : estimateData.deliveryCost}
+                        onChange={(e) => setEstimateData({...estimateData, deliveryCost: parseFloat(e.target.value) || 0})}
+                        step="0.01"
+                        placeholder="0.00"
+                      />
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
             {/* Additional Services */}
             <Card>
               <CardHeader>
@@ -716,78 +770,6 @@ cortespainter@gmail.com`;
                     <div className="font-medium ml-4">${service.total.toFixed(2)}</div>
                   </div>
                 ))}
-              </CardContent>
-            </Card>
-
-            {/* Paint Details */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Paint & Materials</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium mb-1 block">Primer Coats</label>
-                    <Input
-                      type="number"
-                      inputMode="numeric"
-                      value={estimateData.primerCoats === 0 ? '' : estimateData.primerCoats}
-                      onChange={(e) => setEstimateData({...estimateData, primerCoats: parseInt(e.target.value) || 0})}
-                      placeholder="0"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium mb-1 block">Top Coats</label>
-                    <Input
-                      type="number"
-                      inputMode="numeric"
-                      value={estimateData.topCoats === 0 ? '' : estimateData.topCoats}
-                      onChange={(e) => setEstimateData({...estimateData, topCoats: parseInt(e.target.value) || 0})}
-                      placeholder="0"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-1 block">Paint and Supplies</label>
-                  <Select
-                    value={estimateData.paintSuppliedBy}
-                    onValueChange={(value: 'contractor' | 'client') => setEstimateData({...estimateData, paintSuppliedBy: value})}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="z-50">
-                      <SelectItem value="contractor">A-Frame Painting</SelectItem>
-                      <SelectItem value="client">Client</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                {estimateData.paintSuppliedBy === 'contractor' && (
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium mb-1 block">Paint Cost</label>
-                      <Input
-                        type="number"
-                        inputMode="decimal"
-                        value={estimateData.paintCost === 0 ? '' : estimateData.paintCost}
-                        onChange={(e) => setEstimateData({...estimateData, paintCost: parseFloat(e.target.value) || 0})}
-                        step="0.01"
-                        placeholder="0.00"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium mb-1 block">Delivery Cost</label>
-                      <Input
-                        type="number"
-                        inputMode="decimal"
-                        value={estimateData.deliveryCost === 0 ? '' : estimateData.deliveryCost}
-                        onChange={(e) => setEstimateData({...estimateData, deliveryCost: parseFloat(e.target.value) || 0})}
-                        step="0.01"
-                        placeholder="0.00"
-                      />
-                    </div>
-                  </div>
-                )}
               </CardContent>
             </Card>
           </div>
