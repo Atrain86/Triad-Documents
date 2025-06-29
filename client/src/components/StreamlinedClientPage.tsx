@@ -250,8 +250,11 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const [showStatusSelect, setShowStatusSelect] = useState(false);
   const [showPhotoCarousel, setShowPhotoCarousel] = useState(false);
   const [carouselIndex, setCarouselIndex] = useState(0);
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState(0);
+  const [dragOffset, setDragOffset] = useState(0);
+  const galleryRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [selectedPhotos, setSelectedPhotos] = useState<Set<number>>(new Set());
   const [isSelecting, setIsSelecting] = useState(false);
   const [touchStarted, setTouchStarted] = useState(false);
@@ -746,34 +749,119 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     setShowPhotoCarousel(true);
   };
 
-  // Touch/swipe handlers for photo carousel
-  const minSwipeDistance = 50;
-
-  const onTouchStart = (e: React.TouchEvent) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
+  // iPhone-style smooth swipe handlers
+  const goToNext = () => {
+    if (carouselIndex < photos.length - 1) {
+      setCarouselIndex(carouselIndex + 1);
+      setDragOffset(0);
+    }
   };
 
-  const onTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
+  const goToPrevious = () => {
+    if (carouselIndex > 0) {
+      setCarouselIndex(carouselIndex - 1);
+      setDragOffset(0);
+    }
   };
 
-  const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
+  // Touch/Mouse event handlers for smooth dragging
+  const handleStart = (clientX: number) => {
+    setIsDragging(true);
+    setDragStart(clientX);
+    setDragOffset(0);
+  };
+
+  const handleMove = (clientX: number) => {
+    if (!isDragging) return;
     
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-
-    if (isLeftSwipe && photos.length > 1) {
-      // Swipe left - next photo
-      setCarouselIndex(prev => prev < photos.length - 1 ? prev + 1 : 0);
-    }
-    if (isRightSwipe && photos.length > 1) {
-      // Swipe right - previous photo
-      setCarouselIndex(prev => prev > 0 ? prev - 1 : photos.length - 1);
-    }
+    const diff = clientX - dragStart;
+    setDragOffset(diff);
   };
+
+  const handleEnd = () => {
+    if (!isDragging) return;
+    
+    const threshold = 100; // Minimum swipe distance
+    const velocity = Math.abs(dragOffset);
+    
+    if (velocity > threshold) {
+      if (dragOffset > 0 && carouselIndex > 0) {
+        // Swipe right - go to previous
+        goToPrevious();
+      } else if (dragOffset < 0 && carouselIndex < photos.length - 1) {
+        // Swipe left - go to next
+        goToNext();
+      }
+    }
+    
+    setIsDragging(false);
+    setDragOffset(0);
+  };
+
+  // Mouse events
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    handleStart(e.clientX);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    e.preventDefault();
+    handleMove(e.clientX);
+  };
+
+  const handleMouseUp = () => {
+    handleEnd();
+  };
+
+  // Touch events
+  const handleTouchStart = (e: React.TouchEvent) => {
+    handleStart(e.touches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    handleMove(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    handleEnd();
+  };
+
+  // Calculate transform for smooth sliding
+  const getTransform = () => {
+    const baseOffset = -carouselIndex * 100;
+    const dragPercentage = dragOffset / (containerRef.current?.offsetWidth || 1) * 100;
+    return `translateX(${baseOffset + dragPercentage}%)`;
+  };
+
+  // Add mouse event listeners when dragging
+  React.useEffect(() => {
+    if (!isDragging) return;
+
+    const handleGlobalMouseMove = (e: MouseEvent) => handleMove(e.clientX);
+    const handleGlobalMouseUp = () => handleEnd();
+
+    document.addEventListener('mousemove', handleGlobalMouseMove);
+    document.addEventListener('mouseup', handleGlobalMouseUp);
+
+    return () => {
+      document.removeEventListener('mousemove', handleGlobalMouseMove);
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+    };
+  }, [isDragging, dragStart]);
+
+  // Keyboard navigation
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!showPhotoCarousel) return;
+      
+      if (e.key === 'ArrowLeft') goToPrevious();
+      if (e.key === 'ArrowRight') goToNext();
+      if (e.key === 'Escape') setShowPhotoCarousel(false);
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showPhotoCarousel, carouselIndex]);
 
   React.useEffect(() => {
     if (project?.notes) {
@@ -1499,32 +1587,69 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         className="hidden"
       />
 
-      {/* Full Screen Photo Carousel - ADD THIS SECTION */}
+      {/* Full Screen Photo Carousel with Smooth iPhone-style Swiping */}
       {showPhotoCarousel && photos.length > 0 && (
-        <div className="fixed inset-0 bg-black/95 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center">
           {/* Close button */}
           <button
             onClick={() => setShowPhotoCarousel(false)}
-            className="absolute top-6 right-6 w-12 h-12 rounded-full bg-white/20 text-white flex items-center justify-center"
+            className="absolute top-4 right-4 z-60 p-2 rounded-full bg-black/50 text-white hover:bg-white/20 transition-colors"
           >
-            <X size={24} />
+            <X className="w-6 h-6" />
           </button>
-          
-          {/* Current photo */}
-          <img
-            src={`/uploads/${photos[carouselIndex]?.filename}`}
-            alt="Project Photo"
-            className="max-w-[90%] max-h-[90%] object-contain"
-            onTouchStart={onTouchStart}
-            onTouchMove={onTouchMove}
-            onTouchEnd={onTouchEnd}
-          />
-          
 
-          
           {/* Photo counter */}
-          <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-white text-sm bg-black/50 px-4 py-2 rounded-full">
+          <div className="absolute top-4 left-4 z-60 text-white text-sm bg-black/50 px-3 py-1 rounded-full">
             {carouselIndex + 1} of {photos.length}
+          </div>
+
+          {/* Photo Container with Smooth Dragging */}
+          <div
+            ref={containerRef}
+            className="w-full h-full flex items-center justify-center overflow-hidden"
+            onMouseDown={handleMouseDown}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+          >
+            {/* Photo Slider */}
+            <div
+              ref={galleryRef}
+              className="flex w-full h-full"
+              style={{
+                transform: getTransform(),
+                transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                willChange: 'transform'
+              }}
+            >
+              {photos.map((photo, index) => (
+                <div
+                  key={photo.id}
+                  className="w-full h-full flex-shrink-0 flex items-center justify-center p-4"
+                >
+                  <img
+                    src={`/uploads/${photo.filename}`}
+                    alt={photo.description || 'Project Photo'}
+                    className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl"
+                    draggable={false}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Dot Indicators */}
+          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+            {photos.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCarouselIndex(index)}
+                className={`w-2 h-2 rounded-full transition-colors ${
+                  index === carouselIndex ? 'bg-white' : 'bg-white/50'
+                }`}
+              />
+            ))}
           </div>
         </div>
       )}
