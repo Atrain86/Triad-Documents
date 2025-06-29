@@ -869,7 +869,7 @@ ${textBody}`;
         </div>
 
         {/* Invoice Preview (for PDF generation) */}
-        <div ref={invoiceRef} data-invoice-ref className="fixed -top-[9999px] -left-[9999px] w-[794px] opacity-0 pointer-events-none print:static print:opacity-100 print:pointer-events-auto print:block print:max-w-none" style={{ backgroundColor: '#000000', color: '#fff', minHeight: '1200px' }}>
+        <div ref={invoiceRef} data-invoice-ref className="fixed -top-[9999px] -left-[9999px] w-[794px] opacity-0 pointer-events-none print:static print:opacity-100 print:pointer-events-auto print:block print:max-w-none" style={{ backgroundColor: '#000000', color: '#fff', minHeight: '1600px' }}>
           <div className="p-8">
             {/* Header Section */}
             <div className="mb-8">
@@ -1054,7 +1054,7 @@ ${textBody}`;
             </div>
 
             {/* Footer */}
-            <div className="text-center pt-6 border-t border-gray-600">
+            <div className="text-center pt-6 border-t border-gray-600 pb-24">
               <div className="flex items-center justify-center mb-4">
                 <div className="w-8 h-1 rounded mr-2" style={{ backgroundColor: brandColors.primary }}></div>
                 <span className="text-lg font-bold text-white">Thank You For Your Business!</span>
@@ -1063,6 +1063,9 @@ ${textBody}`;
               <p className="text-gray-400 text-sm">
                 For questions about this invoice, please contact {invoiceData.businessEmail}
               </p>
+              
+              {/* Extra padding to prevent PDF truncation */}
+              <div className="h-16"></div>
             </div>
           </div>
         </div>
