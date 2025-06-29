@@ -950,23 +950,33 @@ cortespainter@gmail.com`;
           {/* Header with Logo Only */}
           <div className="flex justify-center items-center mb-8">
             <div className="text-center">
-              <img src="/aframe-logo.png" alt="A-Frame Painting" className="h-16 mx-auto mb-2" />
-              <div className="text-xs text-gray-300">
-                <p className="font-bold text-sm text-white">A-Frame Painting</p>
-                <p>884 Hayes Rd, Manson's Landing, BC V0P1K0</p>
-                <p>cortespainter@gmail.com</p>
-              </div>
+              <img src="/aframe-logo.png" alt="A-Frame Painting" className="h-16 mx-auto" />
             </div>
           </div>
 
-          {/* Client Info - Lower Position */}
-          <div className="mb-6">
-            <h3 className="text-sm font-bold text-white mb-2">Estimate For:</h3>
-            <div className="bg-gray-800 p-3 rounded text-xs w-1/2">
-              <p className="font-bold text-white">{estimateData.clientName}</p>
-              <p className="text-gray-300">{estimateData.clientAddress}</p>
-              <p className="text-gray-300">{estimateData.clientCity} {estimateData.clientPostal}</p>
-              <p className="text-gray-300">{estimateData.clientEmail} • {estimateData.clientPhone}</p>
+          {/* Estimate To and From - Side by Side */}
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            {/* Estimate To */}
+            <div>
+              <h3 className="text-sm font-bold text-white mb-2">Estimate To:</h3>
+              <div className="bg-gray-800 p-3 rounded text-xs">
+                <p className="font-bold text-white">{estimateData.clientName}</p>
+                <p className="text-gray-300">{estimateData.clientAddress}</p>
+                <p className="text-gray-300">{estimateData.clientCity} {estimateData.clientPostal}</p>
+                <p className="text-gray-300">{estimateData.clientEmail}</p>
+                <p className="text-gray-300">{estimateData.clientPhone}</p>
+              </div>
+            </div>
+            
+            {/* Estimate From */}
+            <div>
+              <h3 className="text-sm font-bold text-white mb-2">Estimate From:</h3>
+              <div className="bg-gray-700 p-3 rounded text-xs">
+                <p className="font-bold text-white">A-Frame Painting</p>
+                <p className="text-gray-300">884 Hayes Rd</p>
+                <p className="text-gray-300">Manson's Landing, BC V0P1K0</p>
+                <p className="text-gray-300">cortespainter@gmail.com</p>
+              </div>
             </div>
           </div>
 
