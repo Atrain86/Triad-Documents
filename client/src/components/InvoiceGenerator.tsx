@@ -499,12 +499,19 @@ cortespainter@gmail.com
             const result = await response.json();
             
             if (response.ok && result.success) {
-              // Show success dialog instead of toast
+              // Show immediate toast feedback
+              toast({
+                title: "✅ Email Sent Successfully!",
+                description: `Invoice #${invoiceData.invoiceNumber} sent to ${invoiceData.clientEmail}`,
+                duration: 5000,
+              });
+              
+              // Also show success dialog
               setSuccessMessage(`Invoice #${invoiceData.invoiceNumber} sent successfully to ${invoiceData.clientEmail} with PDF attachment!`);
               setShowSuccessDialog(true);
               
               // Close the main dialog after showing success
-              setTimeout(() => onClose(), 1000);
+              setTimeout(() => onClose(), 2000);
             } else {
               throw new Error(result.error || 'Failed to send email via nodemailer');
             }
@@ -1060,7 +1067,7 @@ ${textBody}`;
             </div>
 
             {/* Footer */}
-            <div className="text-center pt-6 border-t border-gray-600 pb-48">
+            <div className="text-center pt-6 border-t border-gray-600 pb-6">
               <div className="flex items-center justify-center mb-4">
                 <div className="w-8 h-1 rounded mr-2" style={{ backgroundColor: brandColors.primary }}></div>
                 <span className="text-lg font-bold text-white">Thank You For Your Business!</span>
@@ -1069,9 +1076,6 @@ ${textBody}`;
               <p className="text-gray-400 text-sm">
                 For questions about this invoice, please contact {invoiceData.businessEmail}
               </p>
-              
-              {/* Massive extra padding to prevent PDF truncation */}
-              <div className="h-48"></div>
             </div>
           </div>
         </div>
