@@ -317,16 +317,12 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       const imgWidth = 210;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       
-      // Create PDF with exact content height to avoid extra pages
+      // Create PDF with exact content height
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
-        format: [imgWidth, Math.min(imgHeight, 295)] // Cap at A4 height but use actual content height
+        format: [imgWidth, imgHeight] // Use exact image height, no capping
       });
-      
-      // Fill any remaining space with black background
-      pdf.setFillColor(0, 0, 0); // Black color
-      pdf.rect(0, 0, imgWidth, Math.min(imgHeight, 295), 'F'); // Fill background
       
       pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
 
