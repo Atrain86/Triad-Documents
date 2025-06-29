@@ -469,13 +469,11 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             if (response.ok && result.success) {
               console.log('Showing success toast notification');
               
-              // Show multiple forms of feedback for visibility
-              alert("✅ Email Sent Successfully!\n\nEstimate PDF sent to " + estimateData.clientEmail);
-              
+              // Show automatic toast notification that disappears on its own
               toast({
                 title: "✅ Email Sent Successfully!",
                 description: `Estimate PDF sent to ${estimateData.clientEmail}`,
-                duration: 6000,
+                duration: 4000,
                 className: "bg-green-500 text-white border-green-600",
               });
               
@@ -997,7 +995,7 @@ cortespainter@gmail.com`;
             color: '#ffffff',
             lineHeight: '1.4',
             width: '8.5in',
-            height: '11in',
+            height: '8.8in',
             padding: '20px',
             overflow: 'hidden'
           }}
