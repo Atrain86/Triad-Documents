@@ -972,18 +972,26 @@ cortespainter@gmail.com`;
         {/* Hidden Print Version */}
         <div
           ref={printRef}
-          className="absolute left-[-9999px] bg-black text-white p-4"
-          style={{ ...fontStyles, maxHeight: '230mm', width: '210mm', visibility: 'hidden', overflow: 'hidden' }}
+          className="absolute left-[-9999px] bg-black text-white p-3"
+          style={{ 
+            ...fontStyles, 
+            height: '200mm', 
+            width: '210mm', 
+            visibility: 'hidden', 
+            overflow: 'hidden',
+            pageBreakAfter: 'avoid',
+            pageBreakInside: 'avoid'
+          }}
         >
           {/* Header with Logo Only */}
-          <div className="flex justify-center items-center mb-4">
+          <div className="flex justify-center items-center mb-2">
             <div className="text-center">
-              <img src="/aframe-logo.png" alt="A-Frame Painting" className="h-12 mx-auto" />
+              <img src="/aframe-logo.png" alt="A-Frame Painting" className="h-10 mx-auto" />
             </div>
           </div>
 
           {/* Estimate To and From - Side by Side */}
-          <div className="grid grid-cols-2 gap-4 mb-4">
+          <div className="grid grid-cols-2 gap-3 mb-3">
             {/* Estimate To */}
             <div>
               <h3 className="text-sm font-bold text-white mb-2">Estimate To:</h3>
@@ -1016,8 +1024,8 @@ cortespainter@gmail.com`;
           )}
 
           {/* Work Breakdown - Compact */}
-          <div className="mb-4">
-            <h3 className="text-sm font-bold text-white mb-2">Work Breakdown</h3>
+          <div className="mb-2">
+            <h3 className="text-sm font-bold text-white mb-1">Work Breakdown</h3>
             <div className="space-y-1">
               {estimateData.workStages.map((stage, index) => (
                 <div key={index} className="flex justify-between items-center py-1 border-b border-gray-700">
@@ -1036,8 +1044,8 @@ cortespainter@gmail.com`;
 
           {/* Additional Services - Compact */}
           {estimateData.additionalServices.some(service => service.included) && (
-            <div className="mb-3">
-              <h3 className="text-sm font-bold text-white mb-2">Additional Services</h3>
+            <div className="mb-2">
+              <h3 className="text-sm font-bold text-white mb-1">Additional Services</h3>
               <div className="space-y-1">
                 {estimateData.additionalServices.filter(service => service.included).map((service, index) => (
                   <div key={index} className="flex justify-between items-center py-1 border-b border-gray-700">
@@ -1054,8 +1062,8 @@ cortespainter@gmail.com`;
 
           {/* Materials & Paint - Compact */}
           {(estimateData.paintCost > 0 || estimateData.deliveryCost > 0) && (
-            <div className="mb-3">
-              <h3 className="text-sm font-bold text-white mb-2">Materials & Paint</h3>
+            <div className="mb-2">
+              <h3 className="text-sm font-bold text-white mb-1">Materials & Paint</h3>
               <div className="space-y-1">
                 {estimateData.paintCost > 0 && (
                   <div className="flex justify-between items-center py-1 border-b border-gray-700">
@@ -1074,11 +1082,11 @@ cortespainter@gmail.com`;
           )}
 
           {/* Single-Page Layout: Totals on Right, Footer on Left - Minimal padding */}
-          <div className="flex justify-between items-start mt-2">
+          <div className="flex justify-between items-start mt-1">
             {/* Footer on Left */}
-            <div className="flex-1 text-xs text-gray-300 pr-4">
-              <p className="font-medium text-white mb-1">Thanks for considering A-Frame Painting!</p>
-              <p>This estimate is valid for 30 days from the date above.</p>
+            <div className="flex-1 text-xs text-gray-300 pr-3">
+              <p className="font-medium text-white">Thanks for considering A-Frame Painting!</p>
+              <p className="text-xs">Valid for 30 days.</p>
             </div>
             
             {/* Totals on Right */}
