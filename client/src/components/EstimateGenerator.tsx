@@ -295,7 +295,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
         // Calculate the exact bottom position of the disclaimer
         const disclaimerRect = disclaimerElement.getBoundingClientRect();
         const containerRect = element.getBoundingClientRect();
-        cropHeight = disclaimerRect.bottom - containerRect.top + 20; // 20px padding after disclaimer
+        cropHeight = disclaimerRect.bottom - containerRect.top + 15; // 15px padding after disclaimer
       }
 
       const canvas = await html2canvas(element, {
