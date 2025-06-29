@@ -446,15 +446,18 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
               body: JSON.stringify(emailData)
             });
 
+            console.log('Email response status:', response.status);
             const result = await response.json();
+            console.log('Email response result:', result);
             
             if (response.ok && result.success) {
               toast({
                 title: "✅ Email Sent Successfully!",
                 description: `Estimate with PDF sent to ${estimateData.clientEmail}. Check your email!`,
-                duration: 5000, // Show for 5 seconds
+                duration: 5000,
               });
             } else {
+              console.error('Email failed with result:', result);
               throw new Error(result.error || 'Failed to send email');
             }
             
