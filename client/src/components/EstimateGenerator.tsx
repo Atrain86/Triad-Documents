@@ -468,17 +468,20 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             
             if (response.ok && result.success) {
               console.log('Showing success toast notification');
+              
+              // Show visible alert first, then toast
+              alert("✅ Email Sent Successfully!\n\nEstimate PDF sent to " + estimateData.clientEmail);
+              
               toast({
                 title: "✅ Email Sent Successfully!",
                 description: `Estimate with PDF sent to ${estimateData.clientEmail}. Check your email!`,
-                duration: 4000,
-                className: "bg-green-600 text-white border-green-700",
+                duration: 5000,
               });
               
               // Close the dialog after successful send
               setTimeout(() => {
                 onClose();
-              }, 1000);
+              }, 2000);
             } else {
               console.error('Email failed with result:', result);
               throw new Error(result.error || 'Failed to send email');
@@ -972,26 +975,27 @@ cortespainter@gmail.com`;
         {/* Hidden Print Version */}
         <div
           ref={printRef}
-          className="absolute left-[-9999px] bg-black text-white p-3"
+          className="absolute left-[-9999px] bg-black text-white p-2"
           style={{ 
             ...fontStyles, 
-            height: '200mm', 
+            height: '180mm', 
             width: '210mm', 
             visibility: 'hidden', 
             overflow: 'hidden',
             pageBreakAfter: 'avoid',
-            pageBreakInside: 'avoid'
+            pageBreakInside: 'avoid',
+            fontSize: '11px'
           }}
         >
           {/* Header with Logo Only */}
-          <div className="flex justify-center items-center mb-2">
+          <div className="flex justify-center items-center mb-1">
             <div className="text-center">
-              <img src="/aframe-logo.png" alt="A-Frame Painting" className="h-10 mx-auto" />
+              <img src="/aframe-logo.png" alt="A-Frame Painting" className="h-8 mx-auto" />
             </div>
           </div>
 
           {/* Estimate To and From - Side by Side */}
-          <div className="grid grid-cols-2 gap-3 mb-3">
+          <div className="grid grid-cols-2 gap-2 mb-2">
             {/* Estimate To */}
             <div>
               <h3 className="text-sm font-bold text-white mb-2">Estimate To:</h3>
