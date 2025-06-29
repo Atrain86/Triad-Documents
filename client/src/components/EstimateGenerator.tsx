@@ -83,6 +83,43 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   const queryClient = useQueryClient();
   const printRef = useRef<HTMLDivElement>(null);
 
+  // Email sending mutation
+  const sendEmailMutation = useMutation({
+    mutationFn: async (emailData: { 
+      clientEmail: string; 
+      clientName: string; 
+      estimateNumber: string; 
+      pdfBuffer: Buffer 
+    }) => {
+      const response = await fetch('/api/send-estimate-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(emailData)
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to send email');
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Email sent successfully!",
+        description: "The estimate has been sent to your client.",
+      });
+    },
+    onError: (error: Error) => {
+      console.error('Email sending failed:', error);
+      toast({
+        title: "Email failed",
+        description: error.message || "Failed to send estimate email. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
   const [estimateData, setEstimateData] = useState<EstimateData>({
     // Client Information from project
     clientName: project.clientName || '',
@@ -219,7 +256,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     setEstimateData({ ...estimateData, additionalServices: newServices });
   };
 
-  // Generate PDF
+  // Generate PDF for download
   const generatePDF = async () => {
     if (!printRef.current) return;
 
@@ -234,12 +271,21 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       // Wait a moment for rendering
       await new Promise(resolve => setTimeout(resolve, 100));
 
+      // Calculate content height to minimize white space
+      const contentHeight = Math.min(
+        element.scrollHeight,
+        element.offsetHeight,
+        element.clientHeight
+      );
+
       const canvas = await html2canvas(element, {
         scale: 1,
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#000000',
         logging: false,
+        height: contentHeight + 50, // Add minimal padding
+        width: 794, // Standard width
       });
 
       // Hide the element again
@@ -468,12 +514,21 @@ cortespainter@gmail.com`;
       // Wait a moment for rendering
       await new Promise(resolve => setTimeout(resolve, 100));
 
+      // Calculate actual content height to minimize white space
+      const contentHeight = Math.min(
+        element.scrollHeight,
+        element.offsetHeight,
+        element.clientHeight
+      );
+
       const canvas = await html2canvas(element, {
         scale: 1,
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#000000',
         logging: false,
+        height: contentHeight + 50, // Add minimal padding
+        width: 794, // Standard width
       });
 
       // Hide the element again
@@ -955,8 +1010,8 @@ cortespainter@gmail.com`;
             </div>
           )}
 
-          {/* Single-Page Layout: Totals on Right, Footer on Left */}
-          <div className="flex justify-between items-start mb-2">
+          {/* Single-Page Layout: Totals on Right, Footer on Left - Minimal padding */}
+          <div className="flex justify-between items-start">
             {/* Footer on Left */}
             <div className="flex-1 text-xs text-gray-300 pr-4">
               <p className="font-medium text-white mb-1">Thanks for considering A-Frame Painting!</p>
