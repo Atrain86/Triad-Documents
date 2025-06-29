@@ -10,7 +10,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { generateMapsLink, generateDirectionsLink } from '@/lib/maps';
 import type { Project, Photo, Receipt, ToolsChecklist, DailyHours } from '@shared/schema';
 import InvoiceGenerator from './InvoiceGenerator';
-import EstimateGenerator from './EstimateGenerator';
+import EstimateGenerator from './EstimateGeneratorNew';
 
 // Calendar function for A-Frame calendar integration
 const openWorkCalendar = (clientProject: Project | null = null) => {
