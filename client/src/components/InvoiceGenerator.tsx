@@ -313,11 +313,17 @@ export default function InvoiceGenerator({
       }
 
       // Get the actual full height of the element including all content
-      const fullHeight = Math.max(
+      // Add extra padding to accommodate varying amounts of daily hours and receipts
+      const baseHeight = Math.max(
         invoiceRef.current.scrollHeight,
         invoiceRef.current.offsetHeight,
-        invoiceRef.current.clientHeight
+        invoiceRef.current.clientHeight,
+        1600 // Minimum height
       );
+      
+      // Add dynamic padding based on content amount - extra generous to prevent truncation
+      const contentPadding = Math.max(400, dailyHours.length * 60 + 200);
+      const fullHeight = baseHeight + contentPadding;
       
       // Capture the invoice preview with optimized settings for smaller file size
       const canvas = await html2canvas(invoiceRef.current, {
@@ -929,16 +935,16 @@ ${textBody}`;
                 <table className="w-full">
                   <thead style={{ backgroundColor: '#2d3748' }}>
                     <tr>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Date</th>
-                      <th className="px-6 py-4 text-center text-xs font-semibold text-gray-300 uppercase tracking-wider">Hours</th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Work Description</th>
-                      <th className="px-6 py-4 text-right text-xs font-semibold text-gray-300 uppercase tracking-wider">Amount</th>
+                      <th className="px-6 py-2 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Date</th>
+                      <th className="px-6 py-2 text-center text-xs font-semibold text-gray-300 uppercase tracking-wider">Hours</th>
+                      <th className="px-6 py-2 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Work Description</th>
+                      <th className="px-6 py-2 text-right text-xs font-semibold text-gray-300 uppercase tracking-wider">Amount</th>
                     </tr>
                   </thead>
                   <tbody>
                     {dailyHours.map((hourEntry, index) => (
                       <tr key={index} className={index % 2 === 0 ? '' : 'bg-gray-800'}>
-                        <td className="px-6 py-4">
+                        <td className="px-6 py-2">
                           <div className="flex items-center">
                             <div className="w-2 h-2 rounded-full mr-3" style={{ backgroundColor: brandColors.accent }}></div>
                             <span className="font-medium text-white">
@@ -957,11 +963,11 @@ ${textBody}`;
                             </span>
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-center text-gray-300">{hourEntry.hours}hr</td>
-                        <td className="px-6 py-4 text-gray-300">
+                        <td className="px-6 py-2 text-center text-gray-300">{hourEntry.hours}hr</td>
+                        <td className="px-6 py-2 text-gray-300">
                           {hourEntry.description || 'Painting'}
                         </td>
-                        <td className="px-6 py-4 text-right font-semibold text-white">
+                        <td className="px-6 py-2 text-right font-semibold text-white">
                           ${(hourEntry.hours * (project.hourlyRate || 60)).toFixed(2)}
                         </td>
                       </tr>
@@ -970,18 +976,18 @@ ${textBody}`;
                     {/* Materials from receipts */}
                     {receipts.filter(receipt => invoiceData.selectedReceipts.has(receipt.id)).length > 0 && (
                       <tr>
-                        <td className="px-6 py-4">
+                        <td className="px-6 py-2">
                           <div className="flex items-center">
                             <div className="w-2 h-2 rounded-full mr-3" style={{ backgroundColor: brandColors.primary }}></div>
                             <span className="font-medium text-white">Materials (incl. taxes)</span>
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-center text-gray-300">-</td>
-                        <td className="px-6 py-4 text-gray-300">
+                        <td className="px-6 py-2 text-center text-gray-300">-</td>
+                        <td className="px-6 py-2 text-gray-300">
                           {receipts.filter(receipt => invoiceData.selectedReceipts.has(receipt.id))
                             .map(receipt => receipt.vendor).join(', ')}
                         </td>
-                        <td className="px-6 py-4 text-right font-semibold text-white">
+                        <td className="px-6 py-2 text-right font-semibold text-white">
                           ${receipts.filter(receipt => invoiceData.selectedReceipts.has(receipt.id))
                             .reduce((sum, receipt) => sum + parseFloat(receipt.amount), 0).toFixed(2)}
                         </td>
@@ -1054,7 +1060,7 @@ ${textBody}`;
             </div>
 
             {/* Footer */}
-            <div className="text-center pt-6 border-t border-gray-600 pb-24">
+            <div className="text-center pt-6 border-t border-gray-600 pb-32">
               <div className="flex items-center justify-center mb-4">
                 <div className="w-8 h-1 rounded mr-2" style={{ backgroundColor: brandColors.primary }}></div>
                 <span className="text-lg font-bold text-white">Thank You For Your Business!</span>
@@ -1065,7 +1071,7 @@ ${textBody}`;
               </p>
               
               {/* Extra padding to prevent PDF truncation */}
-              <div className="h-16"></div>
+              <div className="h-32"></div>
             </div>
           </div>
         </div>
