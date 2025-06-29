@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, Trash2, Download, Send, Calculator } from 'lucide-react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -82,6 +82,12 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const printRef = useRef<HTMLDivElement>(null);
+
+  // Fetch daily hours data to calculate actual labor costs
+  const { data: dailyHours = [] } = useQuery({
+    queryKey: ['/api/projects', project.id, 'hours'],
+    enabled: isOpen && !!project.id,
+  });
 
   // Email sending mutation
   const sendEmailMutation = useMutation({
@@ -196,15 +202,25 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     customMessage: '',
   });
 
+  // Calculate labor subtotal from actual daily hours
+  const calculateLaborFromDailyHours = () => {
+    if (!dailyHours || !Array.isArray(dailyHours) || dailyHours.length === 0) return 0;
+    return dailyHours.reduce((total: number, entry: any) => total + (entry.hours * 60), 0);
+  };
+
   // Calculate functions
   const calculateSubtotal = () => {
-    const laborTotal = estimateData.workStages.reduce((sum, stage) => sum + stage.total, 0) +
-                      estimateData.additionalServices.filter(s => s.included).reduce((sum, service) => sum + service.total, 0);
+    // Use actual daily hours if available, otherwise use manual work stages
+    const laborFromDailyHours = calculateLaborFromDailyHours();
+    const workStagesTotal = estimateData.workStages.reduce((sum, stage) => sum + stage.total, 0);
+    const additionalServicesTotal = estimateData.additionalServices.filter(s => s.included).reduce((sum, service) => sum + service.total, 0);
+    
+    const laborTotal = laborFromDailyHours > 0 ? laborFromDailyHours : workStagesTotal;
     
     if (estimateData.paintSuppliedBy === 'contractor') {
-      return laborTotal + estimateData.paintCost + estimateData.deliveryCost;
+      return laborTotal + additionalServicesTotal + estimateData.paintCost + estimateData.deliveryCost;
     }
-    return laborTotal;
+    return laborTotal + additionalServicesTotal;
   };
 
   const calculateGST = () => calculateSubtotal() * 0.05;
@@ -877,9 +893,11 @@ cortespainter@gmail.com`;
                 <CardContent>
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span>Labor Subtotal:</span>
+                      <span>{calculateLaborFromDailyHours() > 0 ? 'Labor (from logged hours):' : 'Labor Subtotal:'}</span>
                       <span className="font-medium">
-                        ${(estimateData.workStages.reduce((sum, stage) => sum + stage.total, 0) + 
+                        ${calculateLaborFromDailyHours() > 0 ? 
+                          calculateLaborFromDailyHours().toFixed(2) : 
+                          (estimateData.workStages.reduce((sum, stage) => sum + stage.total, 0) + 
                            estimateData.additionalServices.filter(s => s.included).reduce((sum, service) => sum + service.total, 0)).toFixed(2)}
                       </span>
                     </div>
@@ -952,7 +970,7 @@ cortespainter@gmail.com`;
         <div
           ref={printRef}
           className="absolute left-[-9999px] bg-black text-white p-6"
-          style={{ ...fontStyles, maxHeight: '280mm', width: '210mm', visibility: 'hidden', overflow: 'hidden' }}
+          style={{ ...fontStyles, maxHeight: '250mm', width: '210mm', visibility: 'hidden', overflow: 'hidden' }}
         >
           {/* Header with Logo Only */}
           <div className="flex justify-center items-center mb-8">
