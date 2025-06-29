@@ -299,13 +299,12 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       }
 
       const canvas = await html2canvas(element, {
-        scale: 1,
+        scale: 2,
         useCORS: true,
         allowTaint: true,
-        backgroundColor: '#000000',
+        backgroundColor: '#1a1a1a',
         logging: false,
-        width: 794,
-        height: cropHeight, // Crop exactly at disclaimer bottom
+        width: 794
       });
 
       // Hide the element again
