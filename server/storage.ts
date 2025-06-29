@@ -58,6 +58,9 @@ export interface IStorage {
   createEstimate(estimate: InsertEstimate): Promise<Estimate>;
   updateEstimate(id: number, estimate: Partial<InsertEstimate>): Promise<Estimate | undefined>;
   deleteEstimate(id: number): Promise<boolean>;
+
+  // User management (for authentication)
+  upsertUser(user: { id: string; email: string; firstName: string; lastName: string; profileImageUrl: string }): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -232,6 +235,12 @@ export class DatabaseStorage implements IStorage {
   async deleteEstimate(id: number): Promise<boolean> {
     const result = await db.delete(estimates).where(eq(estimates.id, id));
     return (result.rowCount || 0) > 0;
+  }
+
+  async upsertUser(user: { id: string; email: string; firstName: string; lastName: string; profileImageUrl: string }): Promise<void> {
+    // For now, just log the user info since we don't have a users table
+    // This method is called by the authentication system but isn't critical for the core app functionality
+    console.log('User authentication:', user.email);
   }
 }
 
