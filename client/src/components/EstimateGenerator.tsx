@@ -995,7 +995,7 @@ cortespainter@gmail.com`;
             color: '#ffffff',
             lineHeight: '1.4',
             width: '8.5in',
-            height: '8in',
+            height: '7.2in',
             padding: '30px',
             overflow: 'hidden'
           }}
@@ -1086,14 +1086,10 @@ cortespainter@gmail.com`;
 
           {/* Footer */}
           <div style={{ marginTop: '20px', paddingTop: '15px', borderTop: '1px solid #374151', textAlign: 'center' }}>
-            <p style={{ color: '#9ca3af', fontSize: '11px' }}>Valid for 30 days.</p>
-            
             {/* Disclaimer */}
-            <div style={{ marginTop: '15px', paddingTop: '12px', borderTop: '1px solid #374151' }}>
-              <p style={{ color: '#f97316', fontSize: '11px', fontWeight: '600', lineHeight: '1.4' }}>
-                <strong>NOTE:</strong> This is an estimate only. Price excludes structural repairs discovered during work (charged hourly). If total cost may exceed estimate by 20%+, you'll be notified for approval first.
-              </p>
-            </div>
+            <p style={{ color: '#f97316', fontSize: '11px', fontWeight: '600', lineHeight: '1.4' }}>
+              <strong>NOTE:</strong> This is an estimate only. Price excludes structural repairs discovered during work (charged hourly). If total cost may exceed estimate by 20%+, you'll be notified for approval first.
+            </p>
           </div>
         </div>
       </DialogContent>
