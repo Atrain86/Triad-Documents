@@ -294,13 +294,15 @@ export default function InvoiceGenerator({
       
       invoiceRef.current.style.opacity = '1';
       invoiceRef.current.style.pointerEvents = 'auto';
-      invoiceRef.current.style.position = 'absolute';
+      invoiceRef.current.style.position = 'fixed';
       invoiceRef.current.style.top = '0';
       invoiceRef.current.style.left = '0';
-      invoiceRef.current.style.zIndex = '-1';
+      invoiceRef.current.style.zIndex = '9999';
+      invoiceRef.current.style.width = '794px';
+      invoiceRef.current.style.transform = 'none';
       
-      // Wait for rendering and images to load
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Wait for rendering and images to load - longer wait for better stability
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
       // Check if element is properly rendered
       if (!invoiceRef.current || invoiceRef.current.scrollHeight === 0) {
@@ -310,6 +312,13 @@ export default function InvoiceGenerator({
         throw new Error('Invoice preview not properly rendered');
       }
 
+      // Get the actual full height of the element including all content
+      const fullHeight = Math.max(
+        invoiceRef.current.scrollHeight,
+        invoiceRef.current.offsetHeight,
+        invoiceRef.current.clientHeight
+      );
+      
       // Capture the invoice preview with optimized settings for smaller file size
       const canvas = await html2canvas(invoiceRef.current, {
         scale: 1, // Reduced from 2 to 1 for smaller file size
@@ -318,13 +327,20 @@ export default function InvoiceGenerator({
         allowTaint: true,
         logging: false,
         width: 794,
-        height: invoiceRef.current.scrollHeight,
+        height: fullHeight,
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: 794,
+        windowHeight: fullHeight,
         onclone: (clonedDoc) => {
-          // Ensure all images are loaded in the cloned document
+          // Ensure all images are loaded and visible in the cloned document
           const images = clonedDoc.querySelectorAll('img');
           images.forEach(img => {
-            if (img.src) {
-              img.style.display = 'block';
+            const htmlImg = img as HTMLImageElement;
+            if (htmlImg.src) {
+              htmlImg.style.display = 'block';
+              htmlImg.style.opacity = '1';
+              htmlImg.style.visibility = 'visible';
             }
           });
         }
@@ -853,7 +869,7 @@ ${textBody}`;
         </div>
 
         {/* Invoice Preview (for PDF generation) */}
-        <div ref={invoiceRef} className="fixed -top-[9999px] -left-[9999px] w-[794px] opacity-0 pointer-events-none print:static print:opacity-100 print:pointer-events-auto print:block print:max-w-none" style={{ backgroundColor: '#000000', color: '#fff' }}>
+        <div ref={invoiceRef} data-invoice-ref className="fixed -top-[9999px] -left-[9999px] w-[794px] opacity-0 pointer-events-none print:static print:opacity-100 print:pointer-events-auto print:block print:max-w-none" style={{ backgroundColor: '#000000', color: '#fff', minHeight: '1200px' }}>
           <div className="p-8">
             {/* Header Section */}
             <div className="mb-8">
