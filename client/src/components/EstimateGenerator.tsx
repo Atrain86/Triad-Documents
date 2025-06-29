@@ -85,7 +85,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
   // Fetch daily hours data to calculate actual labor costs
   const { data: dailyHours = [] } = useQuery({
-    queryKey: ['/api/projects', project.id, 'hours'],
+    queryKey: [`/api/projects/${project.id}/hours`],
     enabled: isOpen && !!project.id,
   });
 
@@ -204,8 +204,19 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
   // Calculate labor subtotal from actual daily hours
   const calculateLaborFromDailyHours = () => {
+    console.log('Daily hours data:', dailyHours);
+    console.log('Is array?', Array.isArray(dailyHours));
+    console.log('Length:', dailyHours?.length);
+    
     if (!dailyHours || !Array.isArray(dailyHours) || dailyHours.length === 0) return 0;
-    return dailyHours.reduce((total: number, entry: any) => total + (entry.hours * 60), 0);
+    
+    const total = dailyHours.reduce((total: number, entry: any) => {
+      console.log('Processing entry:', entry, 'Hours:', entry.hours, 'Rate: 60');
+      return total + (entry.hours * 60);
+    }, 0);
+    
+    console.log('Calculated total:', total);
+    return total;
   };
 
   // Calculate functions
