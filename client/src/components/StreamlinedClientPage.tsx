@@ -1140,60 +1140,56 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                 />
               </div>
               
-              {selectedDate && (
-                <>
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Hours Worked</label>
-                    <input
-                      type="number"
-                      step="0.5"
-                      min="0"
-                      max="24"
-                      value={hoursInput}
-                      onChange={(e) => setHoursInput(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && hoursInput) {
-                          handleAddHours();
-                        }
-                      }}
-                      placeholder="0"
-                      className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-background"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Description (Optional)</label>
-                    <input
-                      type="text"
-                      value={descriptionInput}
-                      onChange={(e) => setDescriptionInput(e.target.value)}
-                      placeholder="Painting living room, prep work..."
-                      className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-background"
-                    />
-                  </div>
-                  
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={handleAddHours}
-                      disabled={!hoursInput || addHoursMutation.isPending}
-                      className="flex-1"
-                    >
-                      {addHoursMutation.isPending ? 'Adding...' : 'Add Hours'}
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        setShowDatePicker(false);
-                        setSelectedDate('');
-                        setHoursInput('');
-                        setDescriptionInput('');
-                      }}
-                      variant="outline"
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </>
-              )}
+              <div>
+                <label className="text-sm font-medium mb-2 block">Hours Worked</label>
+                <input
+                  type="number"
+                  step="0.5"
+                  min="0"
+                  max="24"
+                  value={hoursInput}
+                  onChange={(e) => setHoursInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && hoursInput) {
+                      handleAddHours();
+                    }
+                  }}
+                  placeholder="0"
+                  className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-background"
+                />
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium mb-2 block">Description</label>
+                <input
+                  type="text"
+                  value={descriptionInput}
+                  onChange={(e) => setDescriptionInput(e.target.value)}
+                  placeholder=""
+                  className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-background"
+                />
+              </div>
+              
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleAddHours}
+                  disabled={!hoursInput || addHoursMutation.isPending}
+                  className="flex-1"
+                >
+                  {addHoursMutation.isPending ? 'Adding...' : 'Add Hours'}
+                </Button>
+                <Button
+                  onClick={() => {
+                    setShowDatePicker(false);
+                    setSelectedDate('');
+                    setHoursInput('');
+                    setDescriptionInput('');
+                  }}
+                  variant="outline"
+                >
+                  Cancel
+                </Button>
+              </div>
             </div>
           )}
 
@@ -1276,7 +1272,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             onBlur={handleNotesBlur}
-            placeholder="Add project notes, client preferences, or special instructions..."
+            placeholder=""
             className="w-full min-h-48 resize-none rounded-lg border border-gray-200 dark:border-gray-700 p-3 text-sm"
           />
         </div>
@@ -1524,23 +1520,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             onTouchEnd={onTouchEnd}
           />
           
-          {/* Navigation arrows (if more than 1 photo) */}
-          {photos.length > 1 && (
-            <>
-              <button
-                onClick={() => setCarouselIndex(prev => prev > 0 ? prev - 1 : photos.length - 1)}
-                className="absolute left-6 w-12 h-12 rounded-full bg-white/20 text-white flex items-center justify-center text-2xl"
-              >
-                ‹
-              </button>
-              <button
-                onClick={() => setCarouselIndex(prev => prev < photos.length - 1 ? prev + 1 : 0)}
-                className="absolute right-6 w-12 h-12 rounded-full bg-white/20 text-white flex items-center justify-center text-2xl"
-              >
-                ›
-              </button>
-            </>
-          )}
+
           
           {/* Photo counter */}
           <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-white text-sm bg-black/50 px-4 py-2 rounded-full">

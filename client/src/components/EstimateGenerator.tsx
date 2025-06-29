@@ -573,7 +573,7 @@ cortespainter@gmail.com`;
                     <Input
                       value={estimateData.projectTitle}
                       onChange={(e) => setEstimateData({...estimateData, projectTitle: e.target.value})}
-                      placeholder="I'll fill it out"
+                      placeholder=""
                     />
                   </div>
                   <div>
