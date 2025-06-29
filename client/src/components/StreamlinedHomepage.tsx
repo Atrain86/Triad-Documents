@@ -343,7 +343,7 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
             <Input
-              placeholder="Search clients, addresses, or project types..."
+              placeholder="Search clients"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 py-3"
@@ -395,33 +395,6 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
                   
                   {/* Action Buttons */}
                   <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    {/* Maps Button */}
-                    {project.address && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const mapsUrl = generateMapsLink(project.address, project.clientCity || undefined, 'BC', project.clientPostal || undefined);
-                          window.open(mapsUrl, '_blank');
-                        }}
-                        className="p-2 text-gray-500 hover:text-green-600 dark:text-gray-400 dark:hover:text-green-400 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
-                        title="View on Maps"
-                      >
-                        <Navigation size={16} />
-                      </button>
-                    )}
-                    
-                    {/* Calendar Button */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openWorkCalendar(project);
-                      }}
-                      className="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
-                      title="Schedule Work"
-                    >
-                      <Calendar size={16} />
-                    </button>
-                    
                     {/* Edit Button */}
                     <button
                       onClick={(e) => {
