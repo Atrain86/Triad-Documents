@@ -1592,14 +1592,23 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         <div className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center">
           {/* Close button */}
           <button
-            onClick={() => setShowPhotoCarousel(false)}
-            className="absolute top-4 right-4 z-60 p-2 rounded-full bg-black/50 text-white hover:bg-white/20 transition-colors"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowPhotoCarousel(false);
+            }}
+            onMouseDown={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
+            className="absolute top-4 right-4 p-3 rounded-full bg-black/70 text-white hover:bg-white/20 transition-colors"
+            style={{ zIndex: 9999 }}
           >
             <X className="w-6 h-6" />
           </button>
 
           {/* Photo counter */}
-          <div className="absolute top-4 left-4 z-60 text-white text-sm bg-black/50 px-3 py-1 rounded-full">
+          <div 
+            className="absolute top-4 left-4 text-white text-sm bg-black/70 px-3 py-1 rounded-full pointer-events-none"
+            style={{ zIndex: 9999 }}
+          >
             {carouselIndex + 1} of {photos.length}
           </div>
 
