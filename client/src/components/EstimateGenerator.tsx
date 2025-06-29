@@ -1090,6 +1090,13 @@ cortespainter@gmail.com`;
           <div style={{ marginTop: '20px', paddingTop: '15px', borderTop: '1px solid #374151', textAlign: 'center' }}>
             <p style={{ color: '#d1d5db', fontSize: '12px', marginBottom: '4px' }}><strong>Thanks for considering A-Frame Painting!</strong></p>
             <p style={{ color: '#9ca3af', fontSize: '11px' }}>Valid for 30 days.</p>
+            
+            {/* Disclaimer */}
+            <div style={{ marginTop: '15px', paddingTop: '12px', borderTop: '1px solid #374151' }}>
+              <p style={{ color: '#f97316', fontSize: '11px', fontWeight: '600', lineHeight: '1.4' }}>
+                <strong>NOTE:</strong> This is an estimate only. Price excludes structural repairs discovered during work (charged hourly). If total cost may exceed estimate by 20%+, you'll be notified for approval first.
+              </p>
+            </div>
           </div>
         </div>
       </DialogContent>
