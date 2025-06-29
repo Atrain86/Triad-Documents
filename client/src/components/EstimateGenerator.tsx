@@ -287,13 +287,25 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       // Wait a moment for rendering
       await new Promise(resolve => setTimeout(resolve, 100));
 
+      // Find the disclaimer element to get its bottom position
+      const disclaimerElement = element.querySelector('[data-disclaimer]') as HTMLElement;
+      let cropHeight = element.scrollHeight;
+      
+      if (disclaimerElement) {
+        // Calculate the exact bottom position of the disclaimer
+        const disclaimerRect = disclaimerElement.getBoundingClientRect();
+        const containerRect = element.getBoundingClientRect();
+        cropHeight = disclaimerRect.bottom - containerRect.top + 20; // 20px padding after disclaimer
+      }
+
       const canvas = await html2canvas(element, {
         scale: 1,
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#000000',
         logging: false,
-        width: 794, // Standard width
+        width: 794,
+        height: cropHeight, // Crop exactly at disclaimer bottom
       });
 
       // Hide the element again
@@ -1078,7 +1090,7 @@ cortespainter@gmail.com`;
           {/* Footer */}
           <div style={{ marginTop: '20px', paddingTop: '15px', borderTop: '1px solid #374151', textAlign: 'center' }}>
             {/* Disclaimer */}
-            <p style={{ color: '#f97316', fontSize: '11px', fontWeight: '600', lineHeight: '1.4' }}>
+            <p data-disclaimer style={{ color: '#f97316', fontSize: '11px', fontWeight: '600', lineHeight: '1.4' }}>
               <strong>NOTE:</strong> This is an estimate only. Price excludes structural repairs discovered during work (charged hourly). If total cost may exceed estimate by 20%+, you'll be notified for approval first.
             </p>
           </div>
