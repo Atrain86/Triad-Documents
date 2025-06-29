@@ -5,6 +5,7 @@ import { queryClient } from "./lib/queryClient";
 import StreamlinedHomepage from "./components/StreamlinedHomepage";
 import StreamlinedClientPage from "./components/StreamlinedClientPage";
 import LoginGate from "./components/LoginGate";
+import { Toaster } from "@/components/ui/toaster";
 import "./index.css";
 
 type View = "home" | "client";
@@ -55,6 +56,7 @@ function App() {
           <div className="min-h-screen flex items-center justify-center bg-background">
             <div>Loading...</div>
           </div>
+          <Toaster />
         </ThemeProvider>
       </QueryClientProvider>
     );
@@ -65,6 +67,7 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <LoginGate onAuthenticated={handleAuthenticated} />
+          <Toaster />
         </ThemeProvider>
       </QueryClientProvider>
     );
@@ -85,6 +88,7 @@ function App() {
             />
           )}
         </div>
+        <Toaster />
       </ThemeProvider>
     </QueryClientProvider>
   );

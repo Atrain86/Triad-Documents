@@ -995,7 +995,7 @@ cortespainter@gmail.com`;
             color: '#ffffff',
             lineHeight: '1.4',
             width: '8.5in',
-            height: '8.8in',
+            height: '7.5in',
             padding: '20px',
             overflow: 'hidden'
           }}
