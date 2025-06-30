@@ -72,21 +72,25 @@ export default function PhotoCarousel({ photos, initialIndex, onClose }: PhotoCa
     setDragOffset(0);
   };
 
-  // Improved mouse events with better cursor handling
+  // Improved mouse events - only enable on desktop, not conflicting with touch
   const handleMouseDown = (e: React.MouseEvent) => {
+    // Only handle mouse events if no touch capability detected
+    if ('ontouchstart' in window) return;
+    
     e.preventDefault();
     e.stopPropagation();
     handleStart(e.clientX);
   };
 
   const handleMouseMove = (e: MouseEvent) => {
-    if (!isDragging) return;
+    if (!isDragging || 'ontouchstart' in window) return;
     e.preventDefault();
     e.stopPropagation();
     handleMove(e.clientX);
   };
 
   const handleMouseUp = (e: MouseEvent) => {
+    if ('ontouchstart' in window) return;
     e.preventDefault();
     e.stopPropagation();
     handleEnd();
@@ -117,21 +121,16 @@ export default function PhotoCarousel({ photos, initialIndex, onClose }: PhotoCa
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentIndex]);
 
-  // Add improved mouse event listeners
+  // Clean up any drag state on component mount/unmount
   useEffect(() => {
-    if (!isDragging) return;
-
-    const handleGlobalMouseMove = (e: MouseEvent) => handleMouseMove(e);
-    const handleGlobalMouseUp = (e: MouseEvent) => handleMouseUp(e);
-
-    document.addEventListener('mousemove', handleGlobalMouseMove, { passive: false });
-    document.addEventListener('mouseup', handleGlobalMouseUp, { passive: false });
-
     return () => {
-      document.removeEventListener('mousemove', handleGlobalMouseMove);
-      document.removeEventListener('mouseup', handleGlobalMouseUp);
+      // Clean up body styles on unmount
+      document.body.style.userSelect = '';
+      document.body.style.webkitUserSelect = '';
+      setIsDragging(false);
+      setDragOffset(0);
     };
-  }, [isDragging, dragStart]);
+  }, []);
 
   // Calculate transform for smooth sliding
   const getTransform = () => {
@@ -184,12 +183,10 @@ export default function PhotoCarousel({ photos, initialIndex, onClose }: PhotoCa
       <div
         ref={containerRef}
         className="w-full h-full flex items-center justify-center overflow-hidden select-none"
-        onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         style={{ 
-          cursor: isDragging ? 'grabbing' : 'grab',
           touchAction: 'pan-y pinch-zoom'
         }}
       >
