@@ -82,3 +82,35 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .dark input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(0.8) sepia(1) saturate(5) hue-rotate(175deg);
 }
+
+/* Hide scrollbars for photo carousel */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Prevent text selection during carousel dragging */
+.carousel-container {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Smooth carousel transitions */
+.carousel-slide {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Prevent image context menu during drag */
+.carousel-image {
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+}
