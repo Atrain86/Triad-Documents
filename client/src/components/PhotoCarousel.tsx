@@ -18,10 +18,26 @@ export default function PhotoCarousel({ photos, initialIndex, onClose }: PhotoCa
   const [isCarouselDragging, setIsCarouselDragging] = useState(false);
   const [carouselDragStart, setCarouselDragStart] = useState(0);
   const [carouselOffset, setCarouselOffset] = useState(0);
+  const [initialPinchDistance, setInitialPinchDistance] = useState(0);
+  const [initialZoom, setInitialZoom] = useState(1);
+  const [lastTouchTime, setLastTouchTime] = useState(0);
+  const [lastTouchX, setLastTouchX] = useState(0);
+  const [touchVelocity, setTouchVelocity] = useState(0);
 
   const imageRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const thumbnailsRef = useRef<HTMLDivElement>(null);
+
+  // Helper function to calculate distance between two touches
+  const getTouchDistance = (touches: React.TouchList) => {
+    if (touches.length < 2) return 0;
+    const touch1 = touches[0];
+    const touch2 = touches[1];
+    return Math.sqrt(
+      Math.pow(touch2.clientX - touch1.clientX, 2) + 
+      Math.pow(touch2.clientY - touch1.clientY, 2)
+    );
+  };
 
   // Reset zoom and pan when changing photos
   useEffect(() => {
@@ -152,9 +168,10 @@ export default function PhotoCarousel({ photos, initialIndex, onClose }: PhotoCa
     }
   }, [isDragging, isCarouselDragging, handleMouseMove, handleMouseUp]);
 
-  // Touch handlers
+  // Enhanced touch handlers with pinch-to-zoom
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     if (e.touches.length === 1) {
+      // Single touch - handle panning or carousel dragging
       const touch = e.touches[0];
       if (zoom > 1) {
         setIsDragging(true);
@@ -163,12 +180,24 @@ export default function PhotoCarousel({ photos, initialIndex, onClose }: PhotoCa
         setIsCarouselDragging(true);
         setCarouselDragStart(touch.clientX);
         setCarouselOffset(0);
+        setLastTouchTime(Date.now());
+        setLastTouchX(touch.clientX);
+        setTouchVelocity(0);
       }
+    } else if (e.touches.length === 2) {
+      // Two fingers - start pinch gesture
+      e.preventDefault();
+      const distance = getTouchDistance(e.touches);
+      setInitialPinchDistance(distance);
+      setInitialZoom(zoom);
+      setIsDragging(false);
+      setIsCarouselDragging(false);
     }
-  }, [zoom, panX, panY]);
+  }, [zoom, panX, panY, getTouchDistance]);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
     if (e.touches.length === 1) {
+      // Single finger - panning or carousel dragging
       const touch = e.touches[0];
       if (isDragging && zoom > 1) {
         e.preventDefault();
@@ -178,21 +207,50 @@ export default function PhotoCarousel({ photos, initialIndex, onClose }: PhotoCa
         e.preventDefault();
         const diff = touch.clientX - carouselDragStart;
         setCarouselOffset(diff);
-      }
-    }
-  }, [isDragging, isCarouselDragging, dragStart, carouselDragStart, zoom]);
-
-  const handleTouchEnd = useCallback(() => {
-    if (isCarouselDragging && zoom === 1) {
-      const threshold = 100;
-      if (Math.abs(carouselOffset) > threshold) {
-        if (carouselOffset > 0 && currentIndex > 0) {
-          setCurrentIndex(currentIndex - 1);
-        } else if (carouselOffset < 0 && currentIndex < photos.length - 1) {
-          setCurrentIndex(currentIndex + 1);
+        
+        // Calculate velocity for momentum
+        const now = Date.now();
+        const timeDiff = now - lastTouchTime;
+        if (timeDiff > 0) {
+          const velocityX = (touch.clientX - lastTouchX) / timeDiff;
+          setTouchVelocity(velocityX);
+          setLastTouchTime(now);
+          setLastTouchX(touch.clientX);
         }
       }
+    } else if (e.touches.length === 2 && initialPinchDistance > 0) {
+      // Two fingers - pinch to zoom
+      e.preventDefault();
+      const currentDistance = getTouchDistance(e.touches);
+      const scale = currentDistance / initialPinchDistance;
+      const newZoom = Math.min(Math.max(initialZoom * scale, 0.5), 5);
+      setZoom(newZoom);
+    }
+  }, [isDragging, isCarouselDragging, dragStart, carouselDragStart, zoom, initialPinchDistance, initialZoom, getTouchDistance]);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (isCarouselDragging && zoom === 1) {
+      // Check both distance threshold and velocity for momentum-based scrolling
+      const distanceThreshold = 100;
+      const velocityThreshold = 0.3; // Pixels per millisecond
+      
+      const shouldGoToPrevious = (carouselOffset > distanceThreshold || touchVelocity > velocityThreshold) && currentIndex > 0;
+      const shouldGoToNext = (carouselOffset < -distanceThreshold || touchVelocity < -velocityThreshold) && currentIndex < photos.length - 1;
+      
+      if (shouldGoToPrevious) {
+        setCurrentIndex(currentIndex - 1);
+      } else if (shouldGoToNext) {
+        setCurrentIndex(currentIndex + 1);
+      }
+      
       setCarouselOffset(0);
+      setTouchVelocity(0);
+    }
+    
+    // Reset pinch gesture state when lifting fingers
+    if (e.touches.length === 0) {
+      setInitialPinchDistance(0);
+      setInitialZoom(1);
     }
     
     setIsDragging(false);
@@ -288,9 +346,10 @@ export default function PhotoCarousel({ photos, initialIndex, onClose }: PhotoCa
 
         {/* Image Container */}
         <div
-          className="relative w-full h-full flex items-center justify-center cursor-grab active:cursor-grabbing"
+          className="relative w-full h-full flex items-center justify-center cursor-grab active:cursor-grabbing transition-transform duration-300 ease-out"
           style={{
-            transform: zoom === 1 ? `translateX(${carouselOffset}px)` : 'none'
+            transform: zoom === 1 ? `translateX(${carouselOffset}px)` : 'none',
+            transitionProperty: isCarouselDragging ? 'none' : 'transform'
           }}
           onMouseDown={handleMouseDown}
           onTouchStart={handleTouchStart}
