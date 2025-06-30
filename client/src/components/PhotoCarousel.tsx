@@ -1,6 +1,5 @@
-import React, { useState, useCallback, useRef, useEffect } from "react";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import React, { useState, useRef, useEffect } from 'react';
+import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface PhotoCarouselProps {
   photos: Array<{ id: number; filename: string; description?: string | null }>;
@@ -13,175 +12,227 @@ export default function PhotoCarousel({ photos, initialIndex, onClose }: PhotoCa
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState(0);
   const [dragOffset, setDragOffset] = useState(0);
-  const thumbnailsRef = useRef<HTMLDivElement>(null);
 
-  // Simple smooth scrolling navigation
-  const goToNext = useCallback(() => {
+  const galleryRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Enhanced navigation functions with smooth animations
+  const goToNext = () => {
     if (currentIndex < photos.length - 1) {
       setCurrentIndex(currentIndex + 1);
+      setDragOffset(0);
     }
-  }, [currentIndex, photos.length]);
+  };
 
-  const goToPrevious = useCallback(() => {
+  const goToPrevious = () => {
     if (currentIndex > 0) {
       setCurrentIndex(currentIndex - 1);
+      setDragOffset(0);
     }
-  }, [currentIndex]);
+  };
+
+  // Touch/Mouse event handlers with improved desktop support
+  const handleStart = (clientX: number) => {
+    setIsDragging(true);
+    setDragStart(clientX);
+    setDragOffset(0);
+    
+    // Prevent default to stop text selection, image dragging
+    document.body.style.userSelect = 'none';
+    document.body.style.webkitUserSelect = 'none';
+  };
+
+  const handleMove = (clientX: number) => {
+    if (!isDragging) return;
+    
+    const diff = clientX - dragStart;
+    setDragOffset(diff);
+  };
+
+  const handleEnd = () => {
+    if (!isDragging) return;
+    
+    document.body.style.userSelect = '';
+    document.body.style.webkitUserSelect = '';
+    
+    const threshold = 50; // Reduced threshold for easier swiping
+    const velocity = Math.abs(dragOffset);
+    
+    if (velocity > threshold) {
+      if (dragOffset > 0 && currentIndex > 0) {
+        // Swipe right - go to previous
+        goToPrevious();
+      } else if (dragOffset < 0 && currentIndex < photos.length - 1) {
+        // Swipe left - go to next
+        goToNext();
+      }
+    }
+    
+    setIsDragging(false);
+    setDragOffset(0);
+  };
+
+  // Improved mouse events with better cursor handling
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    handleStart(e.clientX);
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    e.stopPropagation();
+    handleMove(e.clientX);
+  };
+
+  const handleMouseUp = (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    handleEnd();
+  };
+
+  // Touch events
+  const handleTouchStart = (e: React.TouchEvent) => {
+    handleStart(e.touches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    handleMove(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    handleEnd();
+  };
 
   // Keyboard navigation
   useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") {
-        e.preventDefault();
-        goToPrevious();
-      } else if (e.key === "ArrowRight") {
-        e.preventDefault();
-        goToNext();
-      } else if (e.key === "Escape") {
-        e.preventDefault();
-        onClose();
-      }
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') goToPrevious();
+      if (e.key === 'ArrowRight') goToNext();
+      if (e.key === 'Escape') onClose();
     };
 
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [goToPrevious, goToNext, onClose]);
-
-  // Auto-scroll thumbnails to keep current photo visible
-  useEffect(() => {
-    if (thumbnailsRef.current) {
-      const thumbnail = thumbnailsRef.current.children[currentIndex] as HTMLElement;
-      if (thumbnail) {
-        thumbnail.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-          inline: 'center'
-        });
-      }
-    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentIndex]);
 
-  // Touch/swipe handlers for smooth scrolling
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    setIsDragging(true);
-    setDragStart(e.touches[0].clientX);
-    setDragOffset(0);
-  }, []);
+  // Add improved mouse event listeners
+  useEffect(() => {
+    if (!isDragging) return;
 
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (isDragging) {
-      const diff = e.touches[0].clientX - dragStart;
-      setDragOffset(diff);
-    }
+    const handleGlobalMouseMove = (e: MouseEvent) => handleMouseMove(e);
+    const handleGlobalMouseUp = (e: MouseEvent) => handleMouseUp(e);
+
+    document.addEventListener('mousemove', handleGlobalMouseMove, { passive: false });
+    document.addEventListener('mouseup', handleGlobalMouseUp, { passive: false });
+
+    return () => {
+      document.removeEventListener('mousemove', handleGlobalMouseMove);
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+    };
   }, [isDragging, dragStart]);
 
-  const handleTouchEnd = useCallback(() => {
-    if (isDragging) {
-      const threshold = 50; // Minimum distance for swipe
-      if (Math.abs(dragOffset) > threshold) {
-        if (dragOffset > 0 && currentIndex > 0) {
-          setCurrentIndex(currentIndex - 1);
-        } else if (dragOffset < 0 && currentIndex < photos.length - 1) {
-          setCurrentIndex(currentIndex + 1);
-        }
-      }
-      setDragOffset(0);
-      setIsDragging(false);
-    }
-  }, [isDragging, dragOffset, currentIndex, photos.length]);
-
-  const currentPhoto = photos[currentIndex];
+  // Calculate transform for smooth sliding
+  const getTransform = () => {
+    const baseOffset = -currentIndex * 100;
+    const dragPercentage = dragOffset / (containerRef.current?.offsetWidth || 1) * 100;
+    return `translateX(${baseOffset + dragPercentage}%)`;
+  };
 
   return (
-    <div className="fixed inset-0 bg-black z-50 flex flex-col">
-      {/* Header */}
-      <div className="flex justify-between items-center p-4 bg-black bg-opacity-50">
-        <div className="text-white text-sm">
-          {currentIndex + 1} of {photos.length}
-        </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onClose}
-          className="text-white hover:bg-white/20"
-        >
-          <X size={24} />
-        </Button>
+    <div className="fixed inset-0 bg-black bg-opacity-95 z-50 flex items-center justify-center">
+      {/* Close Button */}
+      <button
+        onClick={onClose}
+        className="absolute top-4 right-4 z-60 p-2 rounded-full bg-black bg-opacity-50 text-white hover:bg-opacity-70 transition-colors"
+      >
+        <X className="w-6 h-6" />
+      </button>
+
+      {/* Photo Counter */}
+      <div className="absolute top-4 left-4 z-60 text-white text-sm bg-black bg-opacity-50 px-3 py-1 rounded-full">
+        {currentIndex + 1} of {photos.length}
       </div>
 
-      {/* Main Image Area */}
-      <div className="flex-1 relative overflow-hidden flex items-center justify-center">
-        {/* Navigation Arrows */}
-        {currentIndex > 0 && (
-          <Button
-            variant="ghost"
-            size="lg"
-            onClick={goToPrevious}
-            className="absolute left-4 z-10 text-white hover:bg-white/20 rounded-full w-12 h-12"
-          >
-            <ChevronLeft size={32} />
-          </Button>
-        )}
-        
-        {currentIndex < photos.length - 1 && (
-          <Button
-            variant="ghost"
-            size="lg"
-            onClick={goToNext}
-            className="absolute right-4 z-10 text-white hover:bg-white/20 rounded-full w-12 h-12"
-          >
-            <ChevronRight size={32} />
-          </Button>
-        )}
-
-        {/* Image Container with Smooth Transitions */}
-        <div
-          className="relative w-full h-full flex items-center justify-center transition-transform duration-300 ease-out"
-          style={{
-            transform: isDragging ? `translateX(${dragOffset}px)` : 'none'
+      {/* Navigation Arrows - Enhanced for desktop */}
+      {currentIndex > 0 && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            goToPrevious();
           }}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
+          className="absolute left-4 top-1/2 transform -translate-y-1/2 z-60 p-3 rounded-full bg-black bg-opacity-60 text-white hover:bg-opacity-80 transition-all duration-200 hover:scale-110"
         >
-          <img
-            src={`/uploads/${currentPhoto.filename}`}
-            alt={currentPhoto.description || `Photo ${currentIndex + 1}`}
-            className="max-w-full max-h-full object-contain select-none"
-            draggable={false}
-          />
-        </div>
-      </div>
+          <ChevronLeft className="w-8 h-8" />
+        </button>
+      )}
 
-      {/* Thumbnail Strip */}
-      {photos.length > 1 && (
-        <div className="bg-black bg-opacity-50 p-4">
-          <div 
-            ref={thumbnailsRef}
-            className="flex gap-2 overflow-x-auto scrollbar-hide justify-center"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-          >
-            {photos.map((photo, index) => (
-              <button
-                key={photo.id}
-                onClick={() => setCurrentIndex(index)}
-                className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 hover:border-white/50 transition-all ${
-                  index === currentIndex 
-                    ? 'border-white shadow-lg scale-110' 
-                    : 'border-white/20'
-                }`}
-              >
+      {currentIndex < photos.length - 1 && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            goToNext();
+          }}
+          className="absolute right-4 top-1/2 transform -translate-y-1/2 z-60 p-3 rounded-full bg-black bg-opacity-60 text-white hover:bg-opacity-80 transition-all duration-200 hover:scale-110"
+        >
+          <ChevronRight className="w-8 h-8" />
+        </button>
+      )}
+
+      {/* Photo Container with improved touch/mouse handling */}
+      <div
+        ref={containerRef}
+        className="w-full h-full flex items-center justify-center overflow-hidden select-none"
+        onMouseDown={handleMouseDown}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        style={{ 
+          cursor: isDragging ? 'grabbing' : 'grab',
+          touchAction: 'pan-y pinch-zoom'
+        }}
+      >
+        {/* Photo Slider with smooth animations */}
+        <div
+          ref={galleryRef}
+          className="flex w-full h-full"
+          style={{
+            transform: getTransform(),
+            transition: isDragging ? 'none' : 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+            willChange: 'transform'
+          }}
+        >
+          {photos.map((photo, index) => (
+            <div
+              key={photo.id}
+              className="w-full h-full flex-shrink-0 flex items-center justify-center p-4"
+            >
+              <div className="max-w-full max-h-full flex flex-col items-center">
                 <img
                   src={`/uploads/${photo.filename}`}
-                  alt={`Thumbnail ${index + 1}`}
-                  className="w-full h-full object-cover"
+                  alt={photo.description || `Photo ${index + 1}`}
+                  className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl"
                   draggable={false}
                 />
-              </button>
-            ))}
-          </div>
+              </div>
+            </div>
+          ))}
         </div>
-      )}
+      </div>
+
+      {/* Dot Indicators */}
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+        {photos.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentIndex(index)}
+            className={`w-2 h-2 rounded-full transition-colors ${
+              index === currentIndex ? 'bg-white' : 'bg-white bg-opacity-50'
+            }`}
+          />
+        ))}
+      </div>
     </div>
   );
 }
