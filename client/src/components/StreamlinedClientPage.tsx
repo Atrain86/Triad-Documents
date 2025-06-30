@@ -756,54 +756,21 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     }
   };
 
-  const handlePhotoTouchStart = (photoId: number, e: React.TouchEvent | React.MouseEvent) => {
-    // Clear any existing timer
-    if (longPressTimer) {
-      clearTimeout(longPressTimer);
+  const handlePhotoSelect = (photoId: number) => {
+    if (isSelecting) {
+      setSelectedPhotos(prev => {
+        const newSet = new Set(prev);
+        if (newSet.has(photoId)) {
+          newSet.delete(photoId);
+        } else {
+          newSet.add(photoId);
+        }
+        return newSet;
+      });
     }
-    
-    setTouchStarted(true);
-    
-    // Set a timer for long press detection (500ms)
-    const timer = setTimeout(() => {
-      e.preventDefault();
-      e.stopPropagation();
-      setIsSelecting(true);
-      setSelectedPhotos(new Set([photoId]));
-    }, 500);
-    
-    setLongPressTimer(timer);
   };
 
-  const handlePhotoTouchMove = (photoId: number, e: React.TouchEvent | React.MouseEvent) => {
-    if (!isSelecting || !touchStarted) return;
-    
-    e.preventDefault();
-    e.stopPropagation();
-    
-    // Add photo to selection if not already selected
-    setSelectedPhotos(prev => {
-      const newSet = new Set(prev);
-      newSet.add(photoId);
-      return newSet;
-    });
-  };
-
-  const handlePhotoTouchEnd = (e: React.TouchEvent | React.MouseEvent) => {
-    // Clear the long press timer
-    if (longPressTimer) {
-      clearTimeout(longPressTimer);
-      setLongPressTimer(null);
-    }
-    
-    setTouchStarted(false);
-    
-    // If we weren't in selection mode, this was just a tap
-    if (!isSelecting) {
-      // Let the click event handle opening carousel
-      return;
-    }
-  };
+  // Simplified photo interaction for enhanced carousel
 
   const togglePhotoSelection = (photoId: number) => {
     setSelectedPhotos(prev => {
@@ -820,11 +787,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const clearSelection = () => {
     setSelectedPhotos(new Set());
     setIsSelecting(false);
-    setTouchStarted(false);
-    if (longPressTimer) {
-      clearTimeout(longPressTimer);
-      setLongPressTimer(null);
-    }
   };
 
   const deleteSelectedPhotos = () => {
@@ -840,19 +802,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
 
 
-  // Keyboard navigation
-  React.useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!showPhotoCarousel) return;
-      
-      if (e.key === 'ArrowLeft') goToPrevious();
-      if (e.key === 'ArrowRight') goToNext();
-      if (e.key === 'Escape') setShowPhotoCarousel(false);
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showPhotoCarousel, carouselIndex]);
+  // Enhanced PhotoCarousel handles all keyboard navigation internally
 
   React.useEffect(() => {
     if (project?.notes) {
@@ -1439,11 +1389,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                 </span>
               )}
             </div>
-            <div 
-              className="grid grid-cols-3 gap-3"
-              onTouchEnd={(e) => handlePhotoTouchEnd(e)}
-              onMouseUp={(e) => handlePhotoTouchEnd(e)}
-            >
+            <div className="grid grid-cols-3 gap-3">
               {photos.map((photo, index) => (
                 <div
                   key={photo.id}
@@ -1452,10 +1398,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                       ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
                       : 'border-transparent hover:border-blue-500'
                   }`}
-                  onTouchStart={(e) => handlePhotoTouchStart(photo.id, e)}
-                  onMouseDown={(e) => handlePhotoTouchStart(photo.id, e)}
-                  onTouchMove={(e) => handlePhotoTouchMove(photo.id, e)}
-                  onMouseEnter={(e) => touchStarted && handlePhotoTouchMove(photo.id, e)}
+
                   onClick={(e) => {
                     if (isSelecting) {
                       e.preventDefault();
