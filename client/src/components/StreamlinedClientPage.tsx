@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { apiRequest } from '@/lib/queryClient';
 import { generateMapsLink, generateDirectionsLink } from '@/lib/maps';
+import { compressMultipleImages, formatFileSize } from '@/lib/imageCompression';
 import type { Project, Photo, Receipt, ToolsChecklist, DailyHours } from '@shared/schema';
 import InvoiceGenerator from './InvoiceGenerator';
 import EstimateGenerator from './EstimateGenerator';
@@ -267,6 +268,19 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [hoursInput, setHoursInput] = useState('');
   const [descriptionInput, setDescriptionInput] = useState('');
+  const [compressionProgress, setCompressionProgress] = useState<{
+    isCompressing: boolean;
+    currentFile: number;
+    totalFiles: number;
+    originalSize: number;
+    compressedSize: number;
+  }>({
+    isCompressing: false,
+    currentFile: 0,
+    totalFiles: 0,
+    originalSize: 0,
+    compressedSize: 0
+  });
   
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const receiptInputRef = useRef<HTMLInputElement>(null);
@@ -300,10 +314,80 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const photoUploadMutation = useMutation({
     mutationFn: async (files: FileList) => {
-      console.log('Starting upload for', files.length, 'files');
+      const filesArray = Array.from(files);
+      console.log('Starting upload for', filesArray.length, 'files');
+      
+      // Start compression
+      setCompressionProgress({
+        isCompressing: true,
+        currentFile: 0,
+        totalFiles: filesArray.length,
+        originalSize: 0,
+        compressedSize: 0
+      });
+
+      let totalOriginalSize = 0;
+      let totalCompressedSize = 0;
+      const compressedFiles: File[] = [];
+
+      // Compress each file
+      for (let i = 0; i < filesArray.length; i++) {
+        const file = filesArray[i];
+        
+        setCompressionProgress(prev => ({
+          ...prev,
+          currentFile: i + 1
+        }));
+
+        if (file.type.startsWith('image/')) {
+          try {
+            const compressionResult = await compressMultipleImages([file], {
+              maxWidth: 1920,
+              maxHeight: 1080,
+              quality: 0.8,
+              format: 'jpeg'
+            });
+            
+            if (compressionResult.length > 0) {
+              const result = compressionResult[0];
+              compressedFiles.push(result.file);
+              totalOriginalSize += result.originalSize;
+              totalCompressedSize += result.compressedSize;
+              
+              console.log(`Compressed ${file.name}: ${formatFileSize(result.originalSize)} → ${formatFileSize(result.compressedSize)} (${result.compressionRatio.toFixed(1)}% reduction)`);
+            } else {
+              compressedFiles.push(file);
+              totalOriginalSize += file.size;
+              totalCompressedSize += file.size;
+            }
+          } catch (error) {
+            console.warn(`Failed to compress ${file.name}, using original:`, error);
+            compressedFiles.push(file);
+            totalOriginalSize += file.size;
+            totalCompressedSize += file.size;
+          }
+        } else {
+          // Non-image files go through unchanged
+          compressedFiles.push(file);
+          totalOriginalSize += file.size;
+          totalCompressedSize += file.size;
+        }
+      }
+
+      // Update final compression stats
+      setCompressionProgress(prev => ({
+        ...prev,
+        originalSize: totalOriginalSize,
+        compressedSize: totalCompressedSize,
+        isCompressing: false
+      }));
+
+      console.log(`Total compression: ${formatFileSize(totalOriginalSize)} → ${formatFileSize(totalCompressedSize)} (${((totalOriginalSize - totalCompressedSize) / totalOriginalSize * 100).toFixed(1)}% reduction)`);
+
+      // Upload compressed files
       const formData = new FormData();
-      Array.from(files).forEach((file, index) => {
-        console.log(`Adding file ${index}:`, file.name, file.size, 'bytes');
+      compressedFiles.forEach((file, index) => {
+        console.log(`Adding compressed file ${index}:`, file.name, file.size, 'bytes');
         formData.append('photos', file);
       });
       
@@ -328,12 +412,28 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     onSuccess: (data) => {
       console.log('Photo upload successful:', data);
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
-      // Force refetch
       queryClient.refetchQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
+      
+      // Reset compression progress after a delay
+      setTimeout(() => {
+        setCompressionProgress({
+          isCompressing: false,
+          currentFile: 0,
+          totalFiles: 0,
+          originalSize: 0,
+          compressedSize: 0
+        });
+      }, 3000);
     },
     onError: (error) => {
       console.error('Photo upload failed:', error);
-      console.error('Error details:', JSON.stringify(error, null, 2));
+      setCompressionProgress({
+        isCompressing: false,
+        currentFile: 0,
+        totalFiles: 0,
+        originalSize: 0,
+        compressedSize: 0
+      });
     }
   });
 
@@ -1090,7 +1190,11 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         <div className="flex gap-5 mb-8 justify-center">
           <div className="flex flex-col items-center">
             <label
-              className="w-16 h-16 rounded-full border-none cursor-pointer flex items-center justify-center transition-transform hover:scale-105 shadow-lg"
+              className={`w-16 h-16 rounded-full border-none cursor-pointer flex items-center justify-center transition-transform shadow-lg ${
+                compressionProgress.isCompressing || photoUploadMutation.isPending 
+                  ? 'opacity-50 cursor-not-allowed' 
+                  : 'hover:scale-105'
+              }`}
               style={{ backgroundColor: '#EA580C' }}
               title="Photos"
             >
@@ -1098,6 +1202,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
               <input
                 type="file"
                 accept=".jpg,.jpeg,.png,.gif,.webp,.heic,.heif"
+                disabled={compressionProgress.isCompressing || photoUploadMutation.isPending}
                 onChange={handlePhotoUpload}
                 multiple
                 className="hidden"
@@ -1120,7 +1225,40 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           </div>
         </div>
 
-
+        {/* Compression Progress Indicator */}
+        {(compressionProgress.isCompressing || compressionProgress.totalFiles > 0) && (
+          <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+            {compressionProgress.isCompressing ? (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-blue-700 dark:text-blue-300">
+                    Compressing images...
+                  </span>
+                  <span className="text-blue-600 dark:text-blue-400">
+                    {compressionProgress.currentFile} / {compressionProgress.totalFiles}
+                  </span>
+                </div>
+                <div className="w-full bg-blue-200 dark:bg-blue-800 rounded-full h-2">
+                  <div 
+                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                    style={{ 
+                      width: `${(compressionProgress.currentFile / compressionProgress.totalFiles) * 100}%` 
+                    }}
+                  />
+                </div>
+              </div>
+            ) : (
+              compressionProgress.originalSize > 0 && (
+                <div className="text-sm text-green-700 dark:text-green-300">
+                  ✅ Compressed {compressionProgress.totalFiles} files: {formatFileSize(compressionProgress.originalSize)} → {formatFileSize(compressionProgress.compressedSize)} 
+                  <span className="font-medium">
+                    ({((compressionProgress.originalSize - compressionProgress.compressedSize) / compressionProgress.originalSize * 100).toFixed(1)}% smaller)
+                  </span>
+                </div>
+              )
+            )}
+          </div>
+        )}
 
         {/* Tools Checklist Section */}
         <div className="mb-8">
