@@ -105,6 +105,72 @@ Phone: (Your phone number)`;
   });
 }
 
+export async function sendInvoiceEmailWithReceipts(
+  recipientEmail: string,
+  clientName: string,
+  invoiceNumber: string,
+  pdfBuffer: Buffer,
+  receiptAttachments: Array<{ filename: string; path: string }>
+): Promise<boolean> {
+  const subject = `Invoice #${invoiceNumber} from A-Frame Painting`;
+  
+  const receiptText = receiptAttachments.length > 0 
+    ? `\n\nI've also included ${receiptAttachments.length} receipt photo(s) showing the materials purchased for your project.`
+    : '';
+  
+  const text = `Hello ${clientName},
+
+Please find your invoice attached. Thank you for choosing A-Frame Painting for your project!${receiptText}
+
+If you have any questions about this invoice, please don't hesitate to contact us.
+
+Best regards,
+A-Frame Painting
+cortespainter@gmail.com
+884 Hayes Rd, Manson's Landing, BC V0P1K0`;
+
+  const receiptHtml = receiptAttachments.length > 0 
+    ? `<p>I've also included <strong>${receiptAttachments.length} receipt photo(s)</strong> showing the materials purchased for your project.</p>`
+    : '';
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2 style="color: #EA580C;">A-Frame Painting</h2>
+      <p>Hello <strong>${clientName}</strong>,</p>
+      
+      <p>Please find your invoice attached. Thank you for choosing A-Frame Painting for your project!</p>
+      
+      ${receiptHtml}
+      
+      <p>If you have any questions about this invoice, please don't hesitate to contact us.</p>
+      
+      <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+        <p><strong>Best regards,</strong><br>
+        A-Frame Painting<br>
+        <a href="mailto:cortespainter@gmail.com">cortespainter@gmail.com</a><br>
+        884 Hayes Rd, Manson's Landing, BC V0P1K0</p>
+      </div>
+    </div>
+  `;
+
+  // Prepare all attachments
+  const attachments = [
+    {
+      filename: `Invoice-${invoiceNumber}-${clientName.replace(/[^a-zA-Z0-9]/g, '')}.pdf`,
+      content: pdfBuffer,
+    },
+    ...receiptAttachments
+  ];
+
+  return sendEmail({
+    to: recipientEmail,
+    subject,
+    text,
+    html,
+    attachments
+  });
+}
+
 export async function sendEstimateEmail(
   recipientEmail: string,
   clientName: string,

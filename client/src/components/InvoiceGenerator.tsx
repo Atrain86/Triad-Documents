@@ -220,7 +220,7 @@ export default function InvoiceGenerator({
             // Check if it's an image file that we can embed
             const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
             const isImage = imageExtensions.some(ext => 
-              receipt.filename.toLowerCase().includes(ext) || 
+              receipt.filename!.toLowerCase().includes(ext) || 
               (receipt.originalName && receipt.originalName.toLowerCase().endsWith(ext))
             );
 
@@ -483,6 +483,18 @@ cortespainter@gmail.com
           const pdfBase64 = reader.result?.toString().split(',')[1];
           const pdfFilename = `Invoice-${invoiceData.invoiceNumber}-${invoiceData.clientName.replace(/\s+/g, '-')}.pdf`;
           
+          // Collect selected receipt filenames for email attachments
+          const selectedReceiptFilenames = [];
+          if (invoiceData.selectedReceipts.size > 0) {
+            const selectedReceiptsArray = Array.from(invoiceData.selectedReceipts);
+            for (const receiptId of selectedReceiptsArray) {
+              const receipt = receipts.find(r => r.id === receiptId);
+              if (receipt?.filename) {
+                selectedReceiptFilenames.push(receipt.filename);
+              }
+            }
+          }
+
           // Try the new nodemailer Gmail endpoint first
           try {
             const response = await fetch('/api/send-invoice-email', {
@@ -492,7 +504,8 @@ cortespainter@gmail.com
                 recipientEmail: invoiceData.clientEmail,
                 clientName: invoiceData.clientName,
                 invoiceNumber: invoiceData.invoiceNumber,
-                pdfData: pdfBase64
+                pdfData: pdfBase64,
+                receiptFilenames: selectedReceiptFilenames
               })
             });
 
@@ -1000,6 +1013,21 @@ ${textBody}`;
                         </td>
                       </tr>
                     )}
+
+                    {/* Materials from receipts */}
+                    {receipts.filter(receipt => invoiceData.selectedReceipts.has(receipt.id)).map((receipt, index) => (
+                      <tr key={`receipt-${receipt.id}`}>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center">
+                            <div className="w-2 h-2 rounded-full mr-3" style={{ backgroundColor: brandColors.accent }}></div>
+                            <span className="font-medium text-white">{receipt.vendor}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-center text-gray-300">-</td>
+                        <td className="px-6 py-4 text-gray-300">{receipt.description || 'Materials and supplies'}</td>
+                        <td className="px-6 py-4 text-right font-semibold text-white">${parseFloat(receipt.amount).toFixed(2)}</td>
+                      </tr>
+                    ))}
 
                     {/* Additional supplies */}
                     {invoiceData.suppliesCost > 0 && (

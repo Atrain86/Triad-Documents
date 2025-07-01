@@ -8,7 +8,7 @@ import path from "path";
 import fs from "fs";
 import sgMail from "@sendgrid/mail";
 import nodemailer from "nodemailer";
-import { sendInvoiceEmail, sendEstimateEmail, sendEmail } from "./email";
+import { sendInvoiceEmail, sendInvoiceEmailWithReceipts, sendEstimateEmail, sendEmail } from "./email";
 
 // Configure multer for file uploads
 const uploadDir = path.join(process.cwd(), 'uploads');
@@ -640,10 +640,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Nodemailer Gmail direct sending endpoint
+  // Nodemailer Gmail direct sending endpoint with receipt attachments
   app.post('/api/send-invoice-email', async (req, res) => {
     try {
-      const { recipientEmail, clientName, invoiceNumber, pdfData } = req.body;
+      const { recipientEmail, clientName, invoiceNumber, pdfData, receiptFilenames } = req.body;
       
       if (!recipientEmail || !clientName || !invoiceNumber || !pdfData) {
         return res.status(400).json({ error: 'Missing required fields' });
@@ -652,10 +652,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Convert base64 PDF data to buffer
       const pdfBuffer = Buffer.from(pdfData, 'base64');
       
-      const success = await sendInvoiceEmail(recipientEmail, clientName, invoiceNumber, pdfBuffer);
+      // Prepare receipt attachments
+      const receiptAttachments = [];
+      if (receiptFilenames && Array.isArray(receiptFilenames)) {
+        for (const filename of receiptFilenames) {
+          try {
+            const receiptPath = path.join(process.cwd(), 'uploads', filename);
+            if (fs.existsSync(receiptPath)) {
+              receiptAttachments.push({
+                filename: filename,
+                path: receiptPath
+              });
+            }
+          } catch (error) {
+            console.error(`Failed to attach receipt ${filename}:`, error);
+          }
+        }
+      }
+      
+      const success = await sendInvoiceEmailWithReceipts(
+        recipientEmail, 
+        clientName, 
+        invoiceNumber, 
+        pdfBuffer,
+        receiptAttachments
+      );
       
       if (success) {
-        res.json({ success: true, message: 'Invoice email sent successfully via Gmail' });
+        res.json({ 
+          success: true, 
+          message: `Invoice email sent successfully with ${receiptAttachments.length} receipt attachments` 
+        });
       } else {
         res.status(500).json({ error: 'Failed to send invoice email' });
       }
