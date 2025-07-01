@@ -374,42 +374,7 @@ export default function InvoiceGenerator({
       // Add main invoice page
       pdf.addImage(imageData, 'JPEG', 0, 0, imgWidth, imgHeight);
 
-      // Add selected receipt attachments (only image files, not PDFs)
-      if (invoiceData.selectedReceipts.size > 0) {
-        const selectedReceiptsArray = Array.from(invoiceData.selectedReceipts);
-        for (const receiptId of selectedReceiptsArray) {
-          const receipt = receipts.find(r => r.id === receiptId);
-          if (receipt?.filename) {
-            // Check if it's an image file that we can embed
-            const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
-            const isImage = imageExtensions.some(ext => 
-              receipt.filename!.toLowerCase().includes(ext) || 
-              (receipt.originalName && receipt.originalName.toLowerCase().endsWith(ext))
-            );
-
-            if (isImage) {
-              try {
-                const img = new Image();
-                img.crossOrigin = 'anonymous';
-                await new Promise((resolve, reject) => {
-                  img.onload = resolve;
-                  img.onerror = reject;
-                  img.src = `/uploads/${receipt.filename}`;
-                });
-
-                pdf.addPage();
-                const receiptRatio = Math.min(pdfWidth / img.width, pdfHeight / img.height);
-                const receiptX = (pdfWidth - img.width * receiptRatio) / 2;
-                const receiptY = (pdfHeight - img.height * receiptRatio) / 2;
-                
-                pdf.addImage(img, 'JPEG', receiptX, receiptY, img.width * receiptRatio, img.height * receiptRatio);
-              } catch (error) {
-                console.error('Error adding receipt image:', error);
-              }
-            }
-          }
-        }
-      }
+      // Receipts are now sent as separate email attachments only (not embedded in PDF)
 
       // Restore original styles
       invoiceRef.current.style.opacity = originalOpacity;
@@ -807,7 +772,7 @@ ${textBody}`;
                     className="rounded"
                   />
                   <span style={{ color: darkTheme.text }}>
-                    Include receipt images in PDF (separate from house photos)
+                    Include receipts as email attachments (not embedded in PDF)
                   </span>
                 </label>
               </div>
@@ -993,41 +958,23 @@ ${textBody}`;
                       </tr>
                     ))}
                     
-                    {/* Materials from receipts */}
+                    {/* Supplies - simplified single line (receipt details in attachments) */}
                     {receipts.filter(receipt => invoiceData.selectedReceipts.has(receipt.id)).length > 0 && (
                       <tr>
-                        <td className="px-6 py-1">
+                        <td className="px-6 py-3">
                           <div className="flex items-center">
                             <div className="w-2 h-2 rounded-full mr-3" style={{ backgroundColor: brandColors.primary }}></div>
-                            <span className="font-medium text-white">Materials (incl. taxes)</span>
+                            <span className="font-medium text-white">Supplies</span>
                           </div>
                         </td>
-                        <td className="px-6 py-1 text-center text-gray-300">-</td>
-                        <td className="px-6 py-1 text-gray-300">
-                          {receipts.filter(receipt => invoiceData.selectedReceipts.has(receipt.id))
-                            .map(receipt => receipt.vendor).join(', ')}
-                        </td>
-                        <td className="px-6 py-1 text-right font-semibold text-white">
+                        <td className="px-6 py-3 text-center text-gray-300">-</td>
+                        <td className="px-6 py-3 text-gray-300">Materials and supplies (see receipts)</td>
+                        <td className="px-6 py-3 text-right font-semibold text-white">
                           ${receipts.filter(receipt => invoiceData.selectedReceipts.has(receipt.id))
                             .reduce((sum, receipt) => sum + parseFloat(receipt.amount), 0).toFixed(2)}
                         </td>
                       </tr>
                     )}
-
-                    {/* Materials from receipts */}
-                    {receipts.filter(receipt => invoiceData.selectedReceipts.has(receipt.id)).map((receipt, index) => (
-                      <tr key={`receipt-${receipt.id}`}>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center">
-                            <div className="w-2 h-2 rounded-full mr-3" style={{ backgroundColor: brandColors.accent }}></div>
-                            <span className="font-medium text-white">{receipt.vendor}</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-center text-gray-300">-</td>
-                        <td className="px-6 py-4 text-gray-300">{receipt.description || 'Materials and supplies'}</td>
-                        <td className="px-6 py-4 text-right font-semibold text-white">${parseFloat(receipt.amount).toFixed(2)}</td>
-                      </tr>
-                    ))}
 
                     {/* Additional supplies */}
                     {invoiceData.suppliesCost > 0 && (
