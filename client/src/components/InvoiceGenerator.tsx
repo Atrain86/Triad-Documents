@@ -1021,36 +1021,15 @@ ${textBody}`;
               </div>
             </div>
 
-            {/* Payment Method and Notes */}
-            <div className="grid grid-cols-2 gap-8 mb-8">
-              <div>
-                <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Payment Method</h3>
-                <div className="p-4 rounded-lg border border-gray-600" style={{ backgroundColor: '#2d3748' }}>
-                  <div className="flex items-center">
-                    <div className="w-3 h-3 rounded-full mr-3" style={{ backgroundColor: brandColors.accent }}></div>
-                    <span className="text-white font-medium">E-Transfer</span>
-                  </div>
-                  <p className="text-gray-300 text-sm mt-2">Send payment to: {invoiceData.businessEmail}</p>
+            {/* Footer with payment instructions */}
+            <div className="mt-8 pt-6">
+              <div className="text-center">
+                <div className="inline-block px-8 py-4 rounded-lg text-center" style={{ backgroundColor: brandColors.primary }}>
+                  <p className="text-white font-medium text-sm">
+                    Please send e-transfer to {invoiceData.businessEmail}
+                  </p>
                 </div>
               </div>
-              <div>
-                <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Notes</h3>
-                <div className="p-4 rounded-lg border border-gray-600" style={{ backgroundColor: '#2d3748' }}>
-                  <p className="text-gray-300 text-sm">{invoiceData.notes}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="text-center pt-6 border-t border-gray-600 pb-6">
-              <div className="flex items-center justify-center mb-4">
-                <div className="w-8 h-1 rounded mr-2" style={{ backgroundColor: brandColors.primary }}></div>
-                <span className="text-lg font-bold text-white">Thank You For Your Business!</span>
-                <div className="w-8 h-1 rounded ml-2" style={{ backgroundColor: brandColors.primary }}></div>
-              </div>
-              <p className="text-gray-400 text-sm">
-                For questions about this invoice, please contact {invoiceData.businessEmail}
-              </p>
             </div>
           </div>
         </div>
