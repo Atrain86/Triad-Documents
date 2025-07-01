@@ -86,22 +86,43 @@ export default function ReceiptUpload({ onUpload }: ReceiptUploadProps) {
     setExtractedData(null);
 
     const file = files[0];
+    const isImage = file.type.startsWith('image/');
     
     // Create preview for images
-    if (file.type.startsWith('image/')) {
+    if (isImage) {
       const reader = new FileReader();
       reader.onload = (e) => {
         setPreviewImage(e.target?.result as string);
       };
       reader.readAsDataURL(file);
 
-      // Extract data using OpenAI
+      // Only extract receipt data if this looks like a receipt (has text like total, receipt, etc.)
+      // For regular photos, skip OCR to save API costs
       try {
         const data = await extractReceiptData(file);
         setExtractedData(data);
       } catch (error) {
         console.error('OCR extraction failed:', error);
+        // Set minimal data for photos without OCR
+        setExtractedData({
+          vendor: 'Photo',
+          amount: '0',
+          items: [],
+          total: '0',
+          confidence: 0,
+          method: 'photo'
+        });
       }
+    } else {
+      // For non-image files, set basic metadata
+      setExtractedData({
+        vendor: file.name.split('.')[0],
+        amount: '0',
+        items: [],
+        total: '0',
+        confidence: 0,
+        method: 'file'
+      });
     }
 
     setIsProcessing(false);

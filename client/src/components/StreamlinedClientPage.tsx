@@ -1013,44 +1013,35 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         {/* Horizontal divider line */}
         <div className="border-b border-gray-200 dark:border-gray-700 mb-6"></div>
 
-        {/* Upload Controls */}
-        <div className="space-y-6 mb-8">
-          {/* Photo Upload */}
-          <div className="flex justify-center">
-            <div className="flex flex-col items-center">
-              <label
-                className={`w-16 h-16 rounded-full border-none cursor-pointer flex items-center justify-center transition-transform shadow-lg ${
-                  compressionProgress.isCompressing || photoUploadMutation.isPending 
-                    ? 'opacity-50 cursor-not-allowed' 
-                    : 'hover:scale-105'
-                }`}
-                style={{ backgroundColor: '#EA580C' }}
-                title="Photos"
-              >
-                <Camera size={28} color="white" />
-                <input
-                  type="file"
-                  accept=".jpg,.jpeg,.png,.gif,.webp,.heic,.heif"
-                  disabled={compressionProgress.isCompressing || photoUploadMutation.isPending}
-                  onChange={handlePhotoUpload}
-                  multiple
-                  className="hidden"
-                />
-              </label>
-              <span className="text-xs text-center mt-2 text-muted-foreground">Photos</span>
-            </div>
-          </div>
-
-          {/* Enhanced Receipt Upload with OCR */}
-          <div className="flex justify-center">
-            <ReceiptUpload 
-              onUpload={(files, extractedData) => {
-                // Convert FileList to File array immediately to prevent it from becoming empty
-                const filesArray = Array.from(files);
-                console.log('Receipt upload via ReceiptUpload component:', filesArray.length, 'files');
-                console.log('OCR extracted data:', extractedData);
+        {/* Upload Controls - Enhanced with OpenAI OCR */}
+        <div className="mb-8">
+          <ReceiptUpload 
+            onUpload={(files, extractedData) => {
+              // Convert FileList to File array immediately to prevent it from becoming empty
+              const filesArray = Array.from(files);
+              console.log('Upload via ReceiptUpload component:', filesArray.length, 'files');
+              console.log('OCR extracted data:', extractedData);
+              
+              // Determine if this is a photo (for photos endpoint) or receipt (for receipts endpoint)
+              const firstFile = filesArray[0];
+              const isImage = firstFile?.type.startsWith('image/');
+              
+              if (isImage) {
+                // Create a new FileList-like object for photo upload
+                const fileListObj = {
+                  ...filesArray,
+                  length: filesArray.length,
+                  item: (index: number) => filesArray[index] || null,
+                  [Symbol.iterator]: function* () {
+                    for (const file of filesArray) {
+                      yield file;
+                    }
+                  }
+                } as FileList;
                 
-                // Create a new FileList-like object that won't become empty
+                photoUploadMutation.mutate(fileListObj);
+              } else {
+                // Handle as receipt upload with OCR data
                 const fileListObj = {
                   ...filesArray,
                   length: filesArray.length,
@@ -1063,9 +1054,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                 } as FileList;
                 
                 receiptUploadMutation.mutate({ files: fileListObj, ocrData: extractedData });
-              }}
-            />
-          </div>
+              }
+            }}
+          />
         </div>
 
         {/* Compression Progress Indicator */}
