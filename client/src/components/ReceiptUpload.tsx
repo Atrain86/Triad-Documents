@@ -40,41 +40,89 @@ export default function ReceiptUpload({ onUpload }: ReceiptUploadProps) {
 
       console.log('OCR extracted lines:', lines);
 
-      // Extract vendor name (usually first few lines)
-      const vendorCandidates = lines.slice(0, 5)
-        .filter(line => !line.match(/^\d/) && !line.includes('$') && line.length > 2);
-      const vendor = vendorCandidates[0] || 'Unknown Vendor';
+      // Extract vendor name (first meaningful line that's not a duplicate receipt notice)
+      const vendorCandidates = lines.slice(0, 8)
+        .filter(line => 
+          !line.match(/^\d/) && 
+          !line.includes('$') && 
+          !line.toLowerCase().includes('duplicate') &&
+          !line.toLowerCase().includes('receipt') &&
+          !line.toLowerCase().includes('-----') &&
+          line.length > 3
+        );
+      
+      // Look for company names specifically
+      let vendor = 'Unknown Vendor';
+      for (const line of vendorCandidates) {
+        const lower = line.toLowerCase();
+        if (lower.includes('starbucks') || lower.includes('coffee') || 
+            lower.includes('restaurant') || lower.includes('cafe') ||
+            lower.includes('ltd') || lower.includes('inc') || lower.includes('corp')) {
+          vendor = line.trim();
+          break;
+        }
+      }
+      
+      // Fallback to first candidate if no company keywords found
+      if (vendor === 'Unknown Vendor' && vendorCandidates.length > 0) {
+        vendor = vendorCandidates[0];
+      }
 
-      // Extract monetary amounts
+      // Extract monetary amounts from all lines
       const amounts = lines
-        .map(line => line.match(/\$?\d+\.?\d{0,2}/g))
+        .map(line => {
+          const matches = line.match(/\$?(\d+[.,]\d{2})/g);
+          return matches?.map(match => match.replace(/[,$]/g, ''));
+        })
         .filter(matches => matches !== null)
         .flat()
         .filter(amount => amount !== null) as string[];
 
-      // Find total (usually largest amount or line with "total")
-      const totalLine = lines.find(line => 
-        line.toLowerCase().includes('total') || 
-        line.toLowerCase().includes('amount')
+      console.log('All extracted amounts:', amounts);
+
+      // Find grand total - prioritize lines with "total" that come last
+      let total = '0.00';
+      const totalLines = lines.filter(line => 
+        line.toLowerCase().includes('total') && 
+        !line.toLowerCase().includes('subtotal')
       );
       
-      let total = '0.00';
-      if (totalLine) {
-        const totalMatch = totalLine.match(/\$?(\d+\.?\d{0,2})/);
-        if (totalMatch) total = totalMatch[1];
+      if (totalLines.length > 0) {
+        // Use the last total line (grand total)
+        const lastTotalLine = totalLines[totalLines.length - 1];
+        const totalMatch = lastTotalLine.match(/(\d+[.,]\d{2})/);
+        if (totalMatch) {
+          total = totalMatch[1].replace(',', '.');
+          console.log('Found total from line:', lastTotalLine, 'Amount:', total);
+        }
       } else if (amounts.length > 0) {
-        // Use largest amount as total
-        const numericAmounts = amounts.map(amt => parseFloat(amt.replace('$', '')));
+        // Use largest amount as fallback
+        const numericAmounts = amounts.map(amt => parseFloat(amt.replace(',', '.')));
         total = Math.max(...numericAmounts).toFixed(2);
+        console.log('Using largest amount as total:', total);
       }
 
-      // Extract potential items (lines with paint-related keywords or alphanumeric codes)
-      const itemKeywords = ['paint', 'brush', 'roller', 'tape', 'primer', 'sandpaper', 'drop', 'cloth'];
-      const items = lines.filter(line => {
+      // Extract actual food/item names - look for lines with equals signs and prices
+      const itemLines = lines.filter(line => {
         const lower = line.toLowerCase();
-        return itemKeywords.some(keyword => lower.includes(keyword)) ||
-               line.match(/^[A-Z0-9\-\s]{3,20}$/);
-      }).slice(0, 5); // Limit to 5 items
+        // Look for patterns like "Item Name = Price" or "Item Name Price"
+        return (line.includes('=') && line.match(/\d+[.,]\d{2}/)) ||
+               // Common food patterns
+               (lower.includes('coffee') || lower.includes('sandwich') || lower.includes('macchiato') ||
+                lower.includes('latte') || lower.includes('tea') || lower.includes('muffin') ||
+                lower.includes('bagel') || lower.includes('wrap') || lower.includes('salad'));
+      });
+
+      const items = itemLines.map(line => {
+        // Clean up the line to extract just the item name
+        let itemName = line.split('=')[0].trim(); // Take part before equals
+        itemName = itemName.replace(/^\d+\s*/, ''); // Remove leading numbers
+        itemName = itemName.replace(/\s+\d+[.,]\d{2}.*$/, ''); // Remove trailing prices
+        itemName = itemName.replace(/^\s*[-•]\s*/, ''); // Remove leading bullets
+        return itemName.trim();
+      }).filter(item => item.length > 2).slice(0, 5);
+
+      console.log('Extracted food items:', items);
 
       const result = {
         vendor: vendor.substring(0, 50), // Limit vendor name length
