@@ -13,6 +13,7 @@ import type { Project, Photo, Receipt, ToolsChecklist, DailyHours } from '@share
 import InvoiceGenerator from './InvoiceGenerator';
 import EstimateGenerator from './EstimateGenerator';
 import PhotoCarousel from './PhotoCarousel';
+import ReceiptUpload from './ReceiptUpload';
 
 // Calendar function for A-Frame calendar integration
 const openWorkCalendar = (clientProject: Project | null = null) => {
@@ -277,7 +278,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   });
   
   const cameraInputRef = useRef<HTMLInputElement>(null);
-  const receiptInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
   const { data: project } = useQuery<Project>({
@@ -696,9 +696,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
 
 
-  const handleReceiptClick = () => {
-    receiptInputRef.current?.click();
-  };
+
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     console.log('File input changed:', e.target.files?.length, 'files');
@@ -725,30 +723,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     }
   };
 
-  const handleReceiptUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('Receipt upload triggered:', e.target.files?.length, 'files');
-    if (e.target.files && e.target.files.length > 0) {
-      // Convert FileList to File array immediately to prevent it from becoming empty
-      const filesArray = Array.from(e.target.files);
-      console.log('Files selected for receipt upload:', filesArray.map(f => `${f.name} (${f.type})`));
-      console.log('Files captured:', filesArray.length, 'files');
-      
-      // Create a new FileList-like object that won't become empty
-      const fileListObj = {
-        ...filesArray,
-        length: filesArray.length,
-        item: (index: number) => filesArray[index] || null,
-        [Symbol.iterator]: function* () {
-          for (const file of filesArray) {
-            yield file;
-          }
-        }
-      } as FileList;
-      
-      receiptUploadMutation.mutate(fileListObj);
-      e.target.value = '';
-    }
-  };
+
 
   const handleNotesBlur = () => {
     if (notes !== project?.notes) {
@@ -1028,41 +1003,56 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         <div className="border-b border-gray-200 dark:border-gray-700 mb-6"></div>
 
         {/* Upload Controls */}
-        <div className="flex gap-5 mb-8 justify-center">
-          <div className="flex flex-col items-center">
-            <label
-              className={`w-16 h-16 rounded-full border-none cursor-pointer flex items-center justify-center transition-transform shadow-lg ${
-                compressionProgress.isCompressing || photoUploadMutation.isPending 
-                  ? 'opacity-50 cursor-not-allowed' 
-                  : 'hover:scale-105'
-              }`}
-              style={{ backgroundColor: '#EA580C' }}
-              title="Photos"
-            >
-              <Camera size={28} color="white" />
-              <input
-                type="file"
-                accept=".jpg,.jpeg,.png,.gif,.webp,.heic,.heif"
-                disabled={compressionProgress.isCompressing || photoUploadMutation.isPending}
-                onChange={handlePhotoUpload}
-                multiple
-                className="hidden"
-              />
-            </label>
-            <span className="text-xs text-center mt-2 text-muted-foreground">Photos</span>
+        <div className="space-y-6 mb-8">
+          {/* Photo Upload */}
+          <div className="flex justify-center">
+            <div className="flex flex-col items-center">
+              <label
+                className={`w-16 h-16 rounded-full border-none cursor-pointer flex items-center justify-center transition-transform shadow-lg ${
+                  compressionProgress.isCompressing || photoUploadMutation.isPending 
+                    ? 'opacity-50 cursor-not-allowed' 
+                    : 'hover:scale-105'
+                }`}
+                style={{ backgroundColor: '#EA580C' }}
+                title="Photos"
+              >
+                <Camera size={28} color="white" />
+                <input
+                  type="file"
+                  accept=".jpg,.jpeg,.png,.gif,.webp,.heic,.heif"
+                  disabled={compressionProgress.isCompressing || photoUploadMutation.isPending}
+                  onChange={handlePhotoUpload}
+                  multiple
+                  className="hidden"
+                />
+              </label>
+              <span className="text-xs text-center mt-2 text-muted-foreground">Photos</span>
+            </div>
           </div>
 
-          <div className="flex flex-col items-center">
-            <button
-              onClick={handleReceiptClick}
-              disabled={receiptUploadMutation.isPending}
-              className="w-16 h-16 rounded-full border-none cursor-pointer flex items-center justify-center transition-transform hover:scale-105 shadow-lg"
-              style={{ backgroundColor: '#1E40AF' }}
-              title="Files"
-            >
-              <FileText size={28} color="white" />
-            </button>
-            <span className="text-xs text-center mt-2 text-muted-foreground">Files</span>
+          {/* Enhanced Receipt Upload */}
+          <div className="flex justify-center">
+            <ReceiptUpload 
+              onUpload={(files) => {
+                // Convert FileList to File array immediately to prevent it from becoming empty
+                const filesArray = Array.from(files);
+                console.log('Receipt upload via ReceiptUpload component:', filesArray.length, 'files');
+                
+                // Create a new FileList-like object that won't become empty
+                const fileListObj = {
+                  ...filesArray,
+                  length: filesArray.length,
+                  item: (index: number) => filesArray[index] || null,
+                  [Symbol.iterator]: function* () {
+                    for (const file of filesArray) {
+                      yield file;
+                    }
+                  }
+                } as FileList;
+                
+                receiptUploadMutation.mutate(fileListObj);
+              }}
+            />
           </div>
         </div>
 
@@ -1549,15 +1539,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       </div>
 
 
-      
-      <input
-        ref={receiptInputRef}
-        type="file"
-        accept=".pdf,.doc,.docx,.txt"
-        onChange={handleReceiptUpload}
-        multiple
-        className="hidden"
-      />
+
 
       {/* Enhanced Photo Carousel */}
       {showPhotoCarousel && photos.length > 0 && (
