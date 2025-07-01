@@ -466,8 +466,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   });
 
   const receiptUploadMutation = useMutation({
-    mutationFn: async (files: FileList) => {
+    mutationFn: async ({ files, ocrData }: { files: FileList, ocrData?: { vendor: string; amount: string; items: string[]; total: string } }) => {
       console.log('Upload mutation started with', files.length, 'files');
+      console.log('OCR data available:', ocrData);
       
       if (!files || files.length === 0) {
         throw new Error('No files to upload');
@@ -481,9 +482,19 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         
         const formData = new FormData();
         formData.append('receipt', file);
-        formData.append('vendor', file.name);
-        formData.append('amount', '0');
-        formData.append('description', `File upload: ${file.name}`);
+        
+        // Use OCR data if available, otherwise use defaults
+        if (ocrData) {
+          formData.append('vendor', ocrData.vendor);
+          formData.append('amount', ocrData.amount);
+          formData.append('description', ocrData.items.length > 0 ? ocrData.items.join(', ') : `OCR scan: ${file.name}`);
+          console.log('Using OCR data - Vendor:', ocrData.vendor, 'Amount:', ocrData.amount);
+        } else {
+          formData.append('vendor', file.name);
+          formData.append('amount', '0');
+          formData.append('description', `File upload: ${file.name}`);
+        }
+        
         formData.append('date', new Date().toISOString().split('T')[0]);
         
         console.log('FormData prepared, making request to:', `/api/projects/${projectId}/receipts`);
@@ -1030,13 +1041,14 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             </div>
           </div>
 
-          {/* Enhanced Receipt Upload */}
+          {/* Enhanced Receipt Upload with OCR */}
           <div className="flex justify-center">
             <ReceiptUpload 
-              onUpload={(files) => {
+              onUpload={(files, extractedData) => {
                 // Convert FileList to File array immediately to prevent it from becoming empty
                 const filesArray = Array.from(files);
                 console.log('Receipt upload via ReceiptUpload component:', filesArray.length, 'files');
+                console.log('OCR extracted data:', extractedData);
                 
                 // Create a new FileList-like object that won't become empty
                 const fileListObj = {
@@ -1050,7 +1062,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                   }
                 } as FileList;
                 
-                receiptUploadMutation.mutate(fileListObj);
+                receiptUploadMutation.mutate({ files: fileListObj, ocrData: extractedData });
               }}
             />
           </div>
