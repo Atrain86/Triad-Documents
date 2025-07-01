@@ -1,12 +1,13 @@
 import React, { useRef, useState } from 'react';
-import { Camera, FileText, Loader2, Eye, X } from 'lucide-react';
-import Tesseract from 'tesseract.js';
+import { Camera, FileText, Loader2, Eye, X, Brain } from 'lucide-react';
 
 interface ExtractedData {
   vendor: string;
   amount: string;
   items: string[];
   total: string;
+  confidence?: number;
+  method?: string;
 }
 
 interface ReceiptUploadProps {
@@ -22,140 +23,69 @@ export default function ReceiptUpload({ onUpload }: ReceiptUploadProps) {
   const [showPreview, setShowPreview] = useState(false);
 
   const extractReceiptData = async (file: File): Promise<ExtractedData> => {
-    console.log('Starting OCR processing for:', file.name);
+    console.log('Starting OpenAI OCR processing for:', file.name);
     
     try {
-      const { data } = await Tesseract.recognize(file, 'eng', {
-        logger: (m) => {
-          if (m.status === 'recognizing text') {
-            console.log(`OCR Progress: ${Math.round(m.progress * 100)}%`);
-          }
-        }
+      // Create FormData and send to OpenAI OCR endpoint
+      const formData = new FormData();
+      formData.append('receipt', file);
+
+      const response = await fetch('/api/receipts/ocr', {
+        method: 'POST',
+        body: formData,
       });
 
-      const lines = data.text
-        .split('\n')
-        .map(line => line.trim())
-        .filter(line => line.length > 0);
-
-      console.log('OCR extracted lines:', lines);
-
-      // Extract vendor name (first meaningful line that's not a duplicate receipt notice)
-      const vendorCandidates = lines.slice(0, 8)
-        .filter(line => 
-          !line.match(/^\d/) && 
-          !line.includes('$') && 
-          !line.toLowerCase().includes('duplicate') &&
-          !line.toLowerCase().includes('receipt') &&
-          !line.toLowerCase().includes('-----') &&
-          line.length > 3
-        );
-      
-      // Look for company names specifically
-      let vendor = 'Unknown Vendor';
-      for (const line of vendorCandidates) {
-        const lower = line.toLowerCase();
-        if (lower.includes('starbucks') || lower.includes('coffee') || 
-            lower.includes('restaurant') || lower.includes('cafe') ||
-            lower.includes('ltd') || lower.includes('inc') || lower.includes('corp')) {
-          vendor = line.trim();
-          break;
-        }
-      }
-      
-      // Fallback to first candidate if no company keywords found
-      if (vendor === 'Unknown Vendor' && vendorCandidates.length > 0) {
-        vendor = vendorCandidates[0];
+      if (!response.ok) {
+        throw new Error(`OCR processing failed: ${response.status}`);
       }
 
-      // Extract monetary amounts from all lines
-      const amounts = lines
-        .map(line => {
-          const matches = line.match(/\$?(\d+[.,]\d{2})/g);
-          return matches?.map(match => match.replace(/[,$]/g, ''));
-        })
-        .filter(matches => matches !== null)
-        .flat()
-        .filter(amount => amount !== null) as string[];
+      const result = await response.json();
+      console.log('OpenAI OCR result:', result);
 
-      console.log('All extracted amounts:', amounts);
-
-      // Find grand total - prioritize lines with "total" that come last
-      let total = '0.00';
-      const totalLines = lines.filter(line => 
-        line.toLowerCase().includes('total') && 
-        !line.toLowerCase().includes('subtotal')
-      );
-      
-      if (totalLines.length > 0) {
-        // Use the last total line (grand total)
-        const lastTotalLine = totalLines[totalLines.length - 1];
-        const totalMatch = lastTotalLine.match(/(\d+[.,]\d{2})/);
-        if (totalMatch) {
-          total = totalMatch[1].replace(',', '.');
-          console.log('Found total from line:', lastTotalLine, 'Amount:', total);
-        }
-      } else if (amounts.length > 0) {
-        // Use largest amount as fallback
-        const numericAmounts = amounts.map(amt => parseFloat(amt.replace(',', '.')));
-        total = Math.max(...numericAmounts).toFixed(2);
-        console.log('Using largest amount as total:', total);
+      if (!result.success) {
+        throw new Error(result.error || 'OCR processing failed');
       }
 
-      // Extract actual food/item names - look for lines with equals signs and prices
-      const itemLines = lines.filter(line => {
-        const lower = line.toLowerCase();
-        // Look for patterns like "Item Name = Price" or "Item Name Price"
-        return (line.includes('=') && line.match(/\d+[.,]\d{2}/)) ||
-               // Common food patterns
-               (lower.includes('coffee') || lower.includes('sandwich') || lower.includes('macchiato') ||
-                lower.includes('latte') || lower.includes('tea') || lower.includes('muffin') ||
-                lower.includes('bagel') || lower.includes('wrap') || lower.includes('salad'));
-      });
+      const { data: ocrData } = result;
 
-      const items = itemLines.map(line => {
-        // Clean up the line to extract just the item name
-        let itemName = line.split('=')[0].trim(); // Take part before equals
-        itemName = itemName.replace(/^\d+\s*/, ''); // Remove leading numbers
-        itemName = itemName.replace(/\s+\d+[.,]\d{2}.*$/, ''); // Remove trailing prices
-        itemName = itemName.replace(/^\s*[-•]\s*/, ''); // Remove leading bullets
-        return itemName.trim();
-      }).filter(item => item.length > 2).slice(0, 5);
-
-      console.log('Extracted food items:', items);
-
-      const result = {
-        vendor: vendor.substring(0, 50), // Limit vendor name length
-        amount: total,
-        items: items,
-        total: total
+      return {
+        vendor: ocrData.vendor || 'Unknown Vendor',
+        amount: ocrData.amount ? ocrData.amount.toString() : '0',
+        items: ocrData.items || [],
+        total: ocrData.amount ? ocrData.amount.toString() : '0',
+        confidence: ocrData.confidence || 0,
+        method: result.method || 'openai'
       };
 
-      console.log('Extracted receipt data:', result);
-      return result;
-
     } catch (error) {
-      console.error('OCR processing failed:', error);
+      console.error('OpenAI OCR processing failed:', error);
       return {
         vendor: 'OCR Failed',
         amount: '0.00',
         items: [],
-        total: '0.00'
+        total: '0.00',
+        confidence: 0,
+        method: 'error'
       };
     }
   };
 
-  const handleTakePhoto = () => {
+  const handlePhotoClick = () => {
     photoInputRef.current?.click();
   };
 
-  const handleUploadFile = () => {
+  const handleFileClick = () => {
     fileInputRef.current?.click();
   };
 
-  const processFile = async (file: File) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
     setIsProcessing(true);
     setExtractedData(null);
+
+    const file = files[0];
     
     // Create preview for images
     if (file.type.startsWith('image/')) {
@@ -164,183 +94,213 @@ export default function ReceiptUpload({ onUpload }: ReceiptUploadProps) {
         setPreviewImage(e.target?.result as string);
       };
       reader.readAsDataURL(file);
-    }
 
-    // Extract data with OCR for images
-    if (file.type.startsWith('image/')) {
-      const data = await extractReceiptData(file);
-      setExtractedData(data);
+      // Extract data using OpenAI
+      try {
+        const data = await extractReceiptData(file);
+        setExtractedData(data);
+      } catch (error) {
+        console.error('OCR extraction failed:', error);
+      }
     }
 
     setIsProcessing(false);
   };
 
-  const onPhotoSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-      await processFile(file);
-      e.target.value = '';
+  const handleUpload = () => {
+    const input = extractedData?.method === 'openai' ? photoInputRef.current : fileInputRef.current;
+    if (input?.files && previewImage && extractedData) {
+      // Show preview for confirmation
+      setShowPreview(true);
+    } else if (input?.files) {
+      onUpload(input.files, extractedData || undefined);
     }
   };
 
-  const onFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-      await processFile(file);
-      e.target.value = '';
+  const confirmUpload = () => {
+    const input = extractedData?.method === 'openai' ? photoInputRef.current : fileInputRef.current;
+    if (input?.files) {
+      onUpload(input.files, extractedData || undefined);
+      setExtractedData(null);
+      setPreviewImage(null);
+      setShowPreview(false);
     }
   };
 
-  const handleUploadWithData = () => {
-    if (previewImage && extractedData) {
-      // Convert preview back to file for upload
-      fetch(previewImage)
-        .then(res => res.blob())
-        .then(blob => {
-          const file = new File([blob], 'receipt.jpg', { type: 'image/jpeg' });
-          const dt = new DataTransfer();
-          dt.items.add(file);
-          onUpload(dt.files, extractedData);
-          
-          // Reset state
-          setExtractedData(null);
-          setPreviewImage(null);
-          setShowPreview(false);
-        });
-    }
-  };
-
-  const handleCancel = () => {
+  const cancelUpload = () => {
     setExtractedData(null);
     setPreviewImage(null);
     setShowPreview(false);
   };
 
-  return (
-    <div className="space-y-4">
-      {!extractedData && !isProcessing && (
-        <div className="flex gap-4">
-          <button
-            type="button"
-            onClick={handleTakePhoto}
-            className="bg-blue-600 hover:bg-blue-700 text-white rounded px-4 py-2 transition-colors flex items-center gap-2"
-          >
-            <Camera size={16} />
-            Take Receipt Photo
-          </button>
-
-          <button
-            type="button"
-            onClick={handleUploadFile}
-            className="bg-orange-600 hover:bg-orange-700 text-white rounded px-4 py-2 transition-colors flex items-center gap-2"
-          >
-            <FileText size={16} />
-            Upload Receipt File
-          </button>
-        </div>
-      )}
-
-      {isProcessing && (
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-          <div className="flex items-center gap-3">
-            <Loader2 className="animate-spin text-blue-600" size={20} />
-            <div>
-              <h4 className="font-medium text-blue-900 dark:text-blue-100">Processing Receipt</h4>
-              <p className="text-sm text-blue-700 dark:text-blue-300">Reading receipt data with OCR...</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {extractedData && (
-        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-          <div className="flex justify-between items-start mb-3">
-            <h4 className="font-medium text-green-900 dark:text-green-100">Receipt Data Extracted</h4>
-            <div className="flex gap-2">
-              {previewImage && (
-                <button
-                  onClick={() => setShowPreview(true)}
-                  className="text-green-600 hover:text-green-700 p-1"
-                  title="View receipt image"
-                >
-                  <Eye size={16} />
-                </button>
-              )}
+  if (showPreview && previewImage && extractedData) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+        <div className="bg-white dark:bg-gray-900 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Confirm Receipt Data</h3>
               <button
-                onClick={handleCancel}
-                className="text-green-600 hover:text-green-700 p-1"
-                title="Cancel"
+                onClick={cancelUpload}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded"
               >
-                <X size={16} />
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Preview Image */}
+            <div className="mb-4">
+              <img
+                src={previewImage}
+                alt="Receipt preview"
+                className="max-h-64 mx-auto rounded border"
+              />
+            </div>
+
+            {/* Extracted Data */}
+            <div className="space-y-3 mb-6">
+              <div className="flex items-center gap-2 mb-2">
+                <Brain size={16} className="text-blue-500" />
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  OpenAI Extracted Data (Confidence: {Math.round((extractedData.confidence || 0) * 100)}%)
+                </span>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Vendor</label>
+                <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded border">
+                  {extractedData.vendor}
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Amount</label>
+                <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded border">
+                  ${extractedData.amount}
+                </div>
+              </div>
+              
+              {extractedData.items && extractedData.items.length > 0 && (
+                <div>
+                  <label className="block text-sm font-medium mb-1">Items</label>
+                  <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded border">
+                    {extractedData.items.join(', ')}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <button
+                onClick={confirmUpload}
+                className="flex-1 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors"
+              >
+                Upload with This Data
+              </button>
+              <button
+                onClick={cancelUpload}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              >
+                Cancel
               </button>
             </div>
           </div>
+        </div>
+      </div>
+    );
+  }
 
-          <div className="space-y-2 text-sm">
+  return (
+    <div className="space-y-4">
+      {/* Upload Buttons */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="text-center">
+          <button
+            onClick={handlePhotoClick}
+            disabled={isProcessing}
+            className="w-full py-8 px-4 bg-orange-600 hover:bg-orange-700 disabled:bg-orange-400 text-white rounded-lg transition-all duration-200 flex flex-col items-center gap-3"
+          >
+            {isProcessing ? (
+              <Loader2 size={32} className="animate-spin" />
+            ) : (
+              <Camera size={32} />
+            )}
+            <span className="font-medium">Photos</span>
+          </button>
+          <p className="text-xs text-gray-500 mt-2">Photo Library</p>
+        </div>
+
+        <div className="text-center">
+          <button
+            onClick={handleFileClick}
+            disabled={isProcessing}
+            className="w-full py-8 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg transition-all duration-200 flex flex-col items-center gap-3"
+          >
+            <FileText size={32} />
+            <span className="font-medium">Files</span>
+          </button>
+          <p className="text-xs text-gray-500 mt-2">Documents</p>
+        </div>
+      </div>
+
+      {/* Processing Status */}
+      {isProcessing && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+          <div className="flex items-center gap-3">
+            <Brain size={20} className="text-blue-600 animate-pulse" />
             <div>
-              <span className="font-medium text-green-800 dark:text-green-200">Vendor:</span>
-              <span className="ml-2 text-green-700 dark:text-green-300">{extractedData.vendor}</span>
+              <p className="text-blue-800 dark:text-blue-200 font-medium">
+                Processing with OpenAI Vision
+              </p>
+              <p className="text-blue-600 dark:text-blue-400 text-sm">
+                Extracting vendor, amount, and items from receipt...
+              </p>
             </div>
-            <div>
-              <span className="font-medium text-green-800 dark:text-green-200">Amount:</span>
-              <span className="ml-2 text-green-700 dark:text-green-300">${extractedData.amount}</span>
-            </div>
-            {extractedData.items.length > 0 && (
-              <div>
-                <span className="font-medium text-green-800 dark:text-green-200">Items:</span>
-                <div className="ml-2 text-green-700 dark:text-green-300">
-                  {extractedData.items.slice(0, 3).join(', ')}
-                  {extractedData.items.length > 3 && '...'}
-                </div>
-              </div>
+          </div>
+        </div>
+      )}
+
+      {/* Extracted Data Preview */}
+      {extractedData && !showPreview && (
+        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Brain size={16} className="text-green-600" />
+            <span className="text-green-800 dark:text-green-200 font-medium text-sm">
+              Data Extracted (Confidence: {Math.round((extractedData.confidence || 0) * 100)}%)
+            </span>
+          </div>
+          <div className="text-sm space-y-1">
+            <p><strong>Vendor:</strong> {extractedData.vendor}</p>
+            <p><strong>Amount:</strong> ${extractedData.amount}</p>
+            {extractedData.items && extractedData.items.length > 0 && (
+              <p><strong>Items:</strong> {extractedData.items.join(', ')}</p>
             )}
           </div>
-
-          <div className="flex gap-2 mt-4">
-            <button
-              onClick={handleUploadWithData}
-              className="bg-green-600 hover:bg-green-700 text-white rounded px-4 py-2 text-sm transition-colors"
-            >
-              Use This Data
-            </button>
-            <button
-              onClick={handleCancel}
-              className="bg-gray-500 hover:bg-gray-600 text-white rounded px-4 py-2 text-sm transition-colors"
-            >
-              Try Again
-            </button>
-          </div>
+          <button
+            onClick={handleUpload}
+            className="mt-3 w-full bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors"
+          >
+            <Eye size={16} className="inline mr-2" />
+            Review & Upload
+          </button>
         </div>
       )}
 
-      {/* Preview Modal */}
-      {showPreview && previewImage && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50" onClick={() => setShowPreview(false)}>
-          <div className="max-w-3xl max-h-3xl p-4">
-            <img 
-              src={previewImage} 
-              alt="Receipt preview" 
-              className="max-w-full max-h-full object-contain rounded-lg"
-              onClick={(e) => e.stopPropagation()}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Hidden inputs */}
+      {/* Hidden File Inputs */}
       <input
         ref={photoInputRef}
         type="file"
         accept="image/*"
         capture="environment"
-        onChange={onPhotoSelected}
+        onChange={handleFileChange}
         className="hidden"
       />
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*,application/pdf"
-        onChange={onFileSelected}
+        accept=".pdf,.doc,.docx,.txt"
+        onChange={handleFileChange}
         className="hidden"
       />
     </div>

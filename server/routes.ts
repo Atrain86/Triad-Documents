@@ -9,6 +9,7 @@ import fs from "fs";
 import sgMail from "@sendgrid/mail";
 import nodemailer from "nodemailer";
 import { sendInvoiceEmail, sendInvoiceEmailWithReceipts, sendEstimateEmail, sendEmail } from "./email";
+import { extractReceiptDataWithOpenAI, parseReceiptText, type ReceiptData } from "./openai";
 
 // Configure multer for file uploads
 const uploadDir = path.join(process.cwd(), 'uploads');
@@ -250,6 +251,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(receipts);
     } catch (error) {
       res.status(500).json({ error: 'Failed to fetch receipts' });
+    }
+  });
+
+  // OCR endpoint for receipt processing
+  app.post('/api/receipts/ocr', upload.single('receipt'), async (req, res) => {
+    try {
+      console.log('OCR processing request received');
+      
+      if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+      }
+
+      // Check if it's an image file
+      const isImage = req.file.mimetype.startsWith('image/');
+      if (!isImage) {
+        return res.status(400).json({ error: 'Only image files can be processed with OCR' });
+      }
+
+      // Convert image to base64
+      const filePath = path.join(uploadDir, req.file.filename);
+      const imageBuffer = fs.readFileSync(filePath);
+      const base64Image = imageBuffer.toString('base64');
+
+      try {
+        // Try OpenAI first for better accuracy
+        console.log('Processing with OpenAI Vision API...');
+        const ocrResult = await extractReceiptDataWithOpenAI(base64Image);
+        console.log('OpenAI OCR result:', ocrResult);
+
+        // Clean up temp file
+        fs.unlinkSync(filePath);
+
+        res.json({
+          success: true,
+          data: ocrResult,
+          method: 'openai',
+          confidence: ocrResult.confidence
+        });
+
+      } catch (openaiError) {
+        console.error('OpenAI processing failed:', openaiError);
+        
+        // Fallback to basic text parsing if available from tesseract
+        const fallbackResult = parseReceiptText(''); // Empty text for now
+        
+        // Clean up temp file
+        fs.unlinkSync(filePath);
+
+        res.json({
+          success: true,
+          data: {
+            vendor: 'Unknown Vendor',
+            amount: 0,
+            items: [],
+            confidence: 0.3
+          },
+          method: 'fallback',
+          error: 'OpenAI processing failed, manual entry required'
+        });
+      }
+
+    } catch (error) {
+      console.error('OCR processing error:', error);
+      
+      // Clean up temp file if it exists
+      if (req.file) {
+        const filePath = path.join(uploadDir, req.file.filename);
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      }
+      
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      res.status(500).json({ error: 'OCR processing failed: ' + errorMessage });
     }
   });
 
