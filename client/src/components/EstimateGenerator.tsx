@@ -141,7 +141,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     projectTitle: '',
     projectDescription: project.notes || '',
 
-    // Default Work Stages - simplified
+    // Default Work Stages - simplified (empty by default)
     workStages: [
       {
         name: 'Prep',
@@ -166,7 +166,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       },
     ],
 
-    // Additional Services
+    // Additional Services (start at 0 hours)
     additionalServices: [
       {
         name: 'Power Washing',
@@ -191,7 +191,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       },
     ],
 
-    // Paint Details
+    // Paint Details (empty by default)
     primerCoats: 0,
     topCoats: 0,
     paintSuppliedBy: 'contractor',
@@ -744,6 +744,7 @@ cortespainter@gmail.com`;
                           value={stage.hours === 0 ? '' : stage.hours}
                           onChange={(e) => updateWorkStage(index, 'hours', parseFloat(e.target.value) || 0)}
                           step="0.5"
+                          min="0"
                           placeholder="0"
                         />
                       </div>
@@ -753,6 +754,7 @@ cortespainter@gmail.com`;
                           type="number"
                           value={stage.rate}
                           onChange={(e) => updateWorkStage(index, 'rate', parseFloat(e.target.value) || 0)}
+                          min="0"
                         />
                       </div>
                       <div>
@@ -783,6 +785,7 @@ cortespainter@gmail.com`;
                       inputMode="numeric"
                       value={estimateData.primerCoats === 0 ? '' : estimateData.primerCoats}
                       onChange={(e) => setEstimateData({...estimateData, primerCoats: parseInt(e.target.value) || 0})}
+                      min="0"
                       placeholder="0"
                     />
                   </div>
@@ -793,6 +796,7 @@ cortespainter@gmail.com`;
                       inputMode="numeric"
                       value={estimateData.topCoats === 0 ? '' : estimateData.topCoats}
                       onChange={(e) => setEstimateData({...estimateData, topCoats: parseInt(e.target.value) || 0})}
+                      min="0"
                       placeholder="0"
                     />
                   </div>
@@ -822,6 +826,7 @@ cortespainter@gmail.com`;
                         value={estimateData.paintCost === 0 ? '' : estimateData.paintCost}
                         onChange={(e) => setEstimateData({...estimateData, paintCost: parseFloat(e.target.value) || 0})}
                         step="0.01"
+                        min="0"
                         placeholder="0.00"
                       />
                     </div>
@@ -833,6 +838,7 @@ cortespainter@gmail.com`;
                         value={estimateData.deliveryCost === 0 ? '' : estimateData.deliveryCost}
                         onChange={(e) => setEstimateData({...estimateData, deliveryCost: parseFloat(e.target.value) || 0})}
                         step="0.01"
+                        min="0"
                         placeholder="0.00"
                       />
                     </div>

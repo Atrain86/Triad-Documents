@@ -623,7 +623,8 @@ ${textBody}`;
                     <Input
                       type="number"
                       step="0.01"
-                      value={invoiceData.suppliesCost}
+                      min="0"
+                      value={invoiceData.suppliesCost === 0 ? '' : invoiceData.suppliesCost}
                       onChange={(e) => setInvoiceData({...invoiceData, suppliesCost: parseFloat(e.target.value) || 0})}
                       className="bg-gray-900 border-gray-700 text-white"
                       placeholder="0.00"
@@ -1021,16 +1022,7 @@ ${textBody}`;
               </div>
             </div>
 
-            {/* Footer with payment instructions */}
-            <div className="mt-8 pt-6">
-              <div className="text-center">
-                <div className="inline-block px-8 py-4 rounded-lg text-center" style={{ backgroundColor: brandColors.primary }}>
-                  <p className="text-white font-medium text-sm">
-                    Please send e-transfer to {invoiceData.businessEmail}
-                  </p>
-                </div>
-              </div>
-            </div>
+
           </div>
         </div>
       </DialogContent>
