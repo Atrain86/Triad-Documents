@@ -82,11 +82,13 @@ export default function ReceiptUpload({ onUpload }: ReceiptUploadProps) {
     const files = event.target.files;
     if (!files || files.length === 0) return;
 
+    // Handle multiple files by processing the first one for preview/OCR
+    // but upload all files
+    const firstFile = files[0];
+    const isImage = firstFile.type.startsWith('image/');
+    
     setIsProcessing(true);
     setExtractedData(null);
-
-    const file = files[0];
-    const isImage = file.type.startsWith('image/');
     
     // Create preview for images
     if (isImage) {
@@ -94,12 +96,11 @@ export default function ReceiptUpload({ onUpload }: ReceiptUploadProps) {
       reader.onload = (e) => {
         setPreviewImage(e.target?.result as string);
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(firstFile);
 
-      // Only extract receipt data if this looks like a receipt (has text like total, receipt, etc.)
-      // For regular photos, skip OCR to save API costs
+      // Try OCR extraction for receipt data
       try {
-        const data = await extractReceiptData(file);
+        const data = await extractReceiptData(firstFile);
         setExtractedData(data);
       } catch (error) {
         console.error('OCR extraction failed:', error);
@@ -116,7 +117,7 @@ export default function ReceiptUpload({ onUpload }: ReceiptUploadProps) {
     } else {
       // For non-image files, set basic metadata
       setExtractedData({
-        vendor: file.name.split('.')[0],
+        vendor: firstFile.name.split('.')[0],
         amount: '0',
         items: [],
         total: '0',
@@ -126,6 +127,9 @@ export default function ReceiptUpload({ onUpload }: ReceiptUploadProps) {
     }
 
     setIsProcessing(false);
+    
+    // Reset file inputs
+    event.target.value = '';
   };
 
   const handleUpload = () => {
@@ -240,14 +244,14 @@ export default function ReceiptUpload({ onUpload }: ReceiptUploadProps) {
           <button
             onClick={handlePhotoClick}
             disabled={isProcessing}
-            className="w-full py-8 px-4 bg-orange-600 hover:bg-orange-700 disabled:bg-orange-400 text-white rounded-lg transition-all duration-200 flex flex-col items-center gap-3"
+            className="w-full py-3 px-4 bg-orange-600 hover:bg-orange-700 disabled:bg-orange-400 text-white rounded-lg transition-all duration-200 flex flex-col items-center gap-2"
           >
             {isProcessing ? (
-              <Loader2 size={32} className="animate-spin" />
+              <Loader2 size={24} className="animate-spin" />
             ) : (
-              <Camera size={32} />
+              <Camera size={24} />
             )}
-            <span className="font-medium">Photos</span>
+            <span className="font-medium text-sm">Photos</span>
           </button>
           <p className="text-xs text-gray-500 mt-2">Photo Library</p>
         </div>
@@ -256,10 +260,10 @@ export default function ReceiptUpload({ onUpload }: ReceiptUploadProps) {
           <button
             onClick={handleFileClick}
             disabled={isProcessing}
-            className="w-full py-8 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg transition-all duration-200 flex flex-col items-center gap-3"
+            className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg transition-all duration-200 flex flex-col items-center gap-2"
           >
-            <FileText size={32} />
-            <span className="font-medium">Files</span>
+            <FileText size={24} />
+            <span className="font-medium text-sm">Files</span>
           </button>
           <p className="text-xs text-gray-500 mt-2">Documents</p>
         </div>
@@ -312,15 +316,16 @@ export default function ReceiptUpload({ onUpload }: ReceiptUploadProps) {
       <input
         ref={photoInputRef}
         type="file"
-        accept="image/*"
-        capture="environment"
+        accept="image/*,.heic,.heif"
+        multiple
         onChange={handleFileChange}
         className="hidden"
       />
       <input
         ref={fileInputRef}
         type="file"
-        accept=".pdf,.doc,.docx,.txt"
+        accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg,.gif,.webp,.heic,.heif"
+        multiple
         onChange={handleFileChange}
         className="hidden"
       />
