@@ -38,6 +38,7 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
     
     const mailOptions = {
       from: `"A-Frame Painting" <${process.env.GMAIL_EMAIL}>`,
+      replyTo: process.env.GMAIL_EMAIL,
       to: options.to,
       subject: options.subject,
       text: options.text,
@@ -75,16 +76,27 @@ export async function sendInvoiceEmail(
 ): Promise<boolean> {
   const subject = `Invoice #${invoiceNumber} from A-Frame Painting`;
   
-  const text = `Hello ${clientName},
+  const text = `Dear ${clientName},
 
-Please find your invoice attached. Thank you for choosing A-Frame Painting for your project!
+I hope this message finds you well. Please find attached Invoice #${invoiceNumber} for your recent painting project with A-Frame Painting.
 
-If you have any questions about this invoice, please don't hesitate to contact us.
+This invoice includes:
+- Professional painting services completed for your project
+- All materials and supplies used
+- Detailed breakdown of work performed
+
+Payment terms: Net 30 days from invoice date
+Accepted payment methods: E-transfer, cheque, or cash
+
+If you have any questions regarding this invoice or our services, please feel free to contact me directly.
+
+Thank you for choosing A-Frame Painting for your project. We appreciate your business and look forward to working with you again.
 
 Best regards,
+
 A-Frame Painting
 cortespainter@gmail.com
-Phone: (Your phone number)`;
+884 Hayes Rd, Manson's Landing, BC V0P1K0`;
 
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -131,13 +143,24 @@ export async function sendInvoiceEmailWithReceipts(
     ? `\n\nI've also included ${receiptAttachments.length} receipt photo(s) showing the materials purchased for your project.`
     : '';
   
-  const text = `Hello ${clientName},
+  const text = `Dear ${clientName},
 
-Please find your invoice attached. Thank you for choosing A-Frame Painting for your project!${receiptText}
+I hope this message finds you well. Please find attached Invoice #${invoiceNumber} for your recent painting project with A-Frame Painting.${receiptText}
 
-If you have any questions about this invoice, please don't hesitate to contact us.
+This invoice includes:
+- Professional painting services completed for your project
+- All materials and supplies used
+- Detailed breakdown of work performed
+
+Payment terms: Net 30 days from invoice date
+Accepted payment methods: E-transfer, cheque, or cash
+
+If you have any questions regarding this invoice or our services, please feel free to contact me directly.
+
+Thank you for choosing A-Frame Painting for your project. We appreciate your business and look forward to working with you again.
 
 Best regards,
+
 A-Frame Painting
 cortespainter@gmail.com
 884 Hayes Rd, Manson's Landing, BC V0P1K0`;
@@ -147,21 +170,43 @@ cortespainter@gmail.com
     : '';
 
   const html = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2 style="color: #EA580C;">A-Frame Painting</h2>
-      <p>Hello <strong>${clientName}</strong>,</p>
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: #EA580C; margin: 0; font-size: 28px;">A-Frame Painting</h1>
+        <p style="color: #666; margin: 5px 0 0 0;">Professional Painting Services</p>
+      </div>
       
-      <p>Please find your invoice attached. Thank you for choosing A-Frame Painting for your project!</p>
+      <p style="color: #333; font-size: 16px;">Dear <strong>${clientName}</strong>,</p>
+      
+      <p style="color: #333; line-height: 1.6;">I hope this message finds you well. Please find attached <strong>Invoice #${invoiceNumber}</strong> for your recent painting project with A-Frame Painting.</p>
       
       ${receiptHtml}
       
-      <p>If you have any questions about this invoice, please don't hesitate to contact us.</p>
+      <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <h3 style="color: #EA580C; margin-top: 0;">This invoice includes:</h3>
+        <ul style="color: #333; line-height: 1.6;">
+          <li>Professional painting services completed for your project</li>
+          <li>All materials and supplies used</li>
+          <li>Detailed breakdown of work performed</li>
+        </ul>
+      </div>
       
-      <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
-        <p><strong>Best regards,</strong><br>
-        A-Frame Painting<br>
-        <a href="mailto:cortespainter@gmail.com">cortespainter@gmail.com</a><br>
-        884 Hayes Rd, Manson's Landing, BC V0P1K0</p>
+      <div style="background-color: #e8f5e8; padding: 15px; border-radius: 8px; margin: 20px 0;">
+        <p style="margin: 0; color: #333;"><strong>Payment terms:</strong> Net 30 days from invoice date</p>
+        <p style="margin: 5px 0 0 0; color: #333;"><strong>Accepted payment methods:</strong> E-transfer, cheque, or cash</p>
+      </div>
+      
+      <p style="color: #333; line-height: 1.6;">If you have any questions regarding this invoice or our services, please feel free to contact me directly.</p>
+      
+      <p style="color: #333; line-height: 1.6;">Thank you for choosing A-Frame Painting for your project. We appreciate your business and look forward to working with you again.</p>
+      
+      <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #EA580C; text-align: center;">
+        <p style="margin: 0; color: #333;"><strong>Best regards,</strong></p>
+        <p style="margin: 10px 0 5px 0; color: #EA580C; font-size: 18px; font-weight: bold;">A-Frame Painting</p>
+        <p style="margin: 0; color: #666;">
+          <a href="mailto:cortespainter@gmail.com" style="color: #EA580C; text-decoration: none;">cortespainter@gmail.com</a><br>
+          884 Hayes Rd, Manson's Landing, BC V0P1K0
+        </p>
       </div>
     </div>
   `;
