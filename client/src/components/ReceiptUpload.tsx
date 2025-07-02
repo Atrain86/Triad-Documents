@@ -113,78 +113,73 @@ export default function ReceiptUpload({ onUpload }: ReceiptUploadProps) {
     }
   };
 
-  const extractTextWithTesseract = async () => {
+  const extractTextWithVision = async () => {
     if (!selectedFile) return;
 
     setIsProcessing(true);
+    setOcrError(null);
     
     try {
-      console.log('Starting Tesseract OCR processing...');
+      console.log('Starting Vision API processing...');
       console.log('File details:', {
         name: selectedFile.name,
         type: selectedFile.type,
         size: selectedFile.size
       });
 
-      // Create a safe image blob for processing
-      let processFile = selectedFile;
-      
-      // If file is HEIC/HEIF, try to convert or process differently
-      if (selectedFile.name.toLowerCase().includes('.heic') || selectedFile.name.toLowerCase().includes('.heif')) {
-        console.log('HEIC/HEIF file detected, may need special handling');
-      }
-
       // Check if file is valid image
       if (!selectedFile.type.startsWith('image/') && !selectedFile.name.match(/\.(jpg|jpeg|png|gif|webp|heic|heif)$/i)) {
         throw new Error('Selected file is not a valid image format');
       }
 
-      // Create image blob URL for verification
-      const imageUrl = URL.createObjectURL(selectedFile);
-      
-      // Verify image can be loaded
-      const img = new Image();
-      await new Promise((resolve, reject) => {
-        img.onload = resolve;
-        img.onerror = () => reject(new Error('Failed to load image - file may be corrupted'));
-        img.src = imageUrl;
-      });
-      
-      console.log('Image loaded successfully, starting OCR...');
-      
-      const { data: { text } } = await Tesseract.recognize(processFile, 'eng', {
-        logger: m => {
-          if (m.status === 'recognizing text') {
-            console.log(m);
-          }
-        },
-        errorHandler: (err) => {
-          console.error('Tesseract error:', err);
-        }
-      });
-      
-      // Clean up blob URL
-      URL.revokeObjectURL(imageUrl);
-      
-      setOcrText(text);
-      console.log('Tesseract OCR result:', text);
+      // Create FormData for server upload
+      const formData = new FormData();
+      formData.append('receipt', selectedFile);
 
-      // Process the text with enhanced logic
-      await processOCRResult(text);
+      console.log('Uploading to Vision API endpoint...');
+      
+      const response = await fetch('/api/receipts/ocr', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Server error: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('Vision API result:', result);
+
+      if (result.success && result.data) {
+        // Convert server response to component format
+        setExtractedData({
+          vendor: result.data.vendor,
+          amount: result.data.amount.toString(),
+          items: result.data.items || [],
+          total: result.data.amount.toString(),
+          confidence: result.data.confidence || 0.8,
+          method: result.method || 'openai-vision'
+        });
+
+        // Set OCR text for display (if available)
+        setOcrText(`Processed with ${result.method}\nVendor: ${result.data.vendor}\nAmount: $${result.data.amount}`);
+      } else {
+        throw new Error(result.error || 'Failed to process receipt');
+      }
       
     } catch (error) {
-      console.error('Tesseract OCR failed:', error);
+      console.error('Vision API processing failed:', error);
       
       // Show user-friendly error message
       const errorMessage = error instanceof Error ? error.message : 'Failed to process image';
-      console.error('Image processing error:', errorMessage);
       setOcrError(errorMessage);
       
       // Fallback to manual entry option
       setExtractedData({
         vendor: selectedFile.name.split('.')[0].replace(/[_-]/g, ' '),
         amount: '0',
-        items: ['Manual entry required - OCR failed'],
+        items: ['Manual entry required - Vision API failed'],
         total: '0',
         confidence: 0.1,
         method: 'manual-fallback'
@@ -279,16 +274,16 @@ export default function ReceiptUpload({ onUpload }: ReceiptUploadProps) {
                   {selectedFile.name}
                 </p>
                 <p className="text-blue-600 dark:text-blue-400 text-sm">
-                  Ready for OCR processing
+                  Ready for Vision API processing
                 </p>
               </div>
             </div>
             <button
-              onClick={extractTextWithTesseract}
+              onClick={extractTextWithVision}
               disabled={isProcessing}
               className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors disabled:bg-blue-400"
             >
-              {isProcessing ? 'Processing...' : 'Extract Text'}
+              {isProcessing ? 'Processing...' : 'Extract Data'}
             </button>
           </div>
         </div>
@@ -301,10 +296,10 @@ export default function ReceiptUpload({ onUpload }: ReceiptUploadProps) {
             <Brain size={20} className="text-yellow-600 animate-pulse" />
             <div>
               <p className="text-yellow-800 dark:text-yellow-200 font-medium">
-                Processing with Tesseract OCR
+                Processing with OpenAI Vision API
               </p>
               <p className="text-yellow-600 dark:text-yellow-400 text-sm">
-                Extracting text, then enhancing with AI...
+                Analyzing receipt image and extracting data...
               </p>
             </div>
           </div>

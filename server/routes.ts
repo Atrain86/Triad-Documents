@@ -10,6 +10,7 @@ import sgMail from "@sendgrid/mail";
 import nodemailer from "nodemailer";
 import { sendInvoiceEmail, sendInvoiceEmailWithReceipts, sendEstimateEmail, sendEmail } from "./email";
 import { extractReceiptDataWithOpenAI, parseReceiptText, type ReceiptData } from "./openai";
+import { extractReceiptWithVision, extractReceiptFallback, type VisionReceiptData } from "./visionReceiptHandler";
 
 // Configure multer for file uploads
 const uploadDir = path.join(process.cwd(), 'uploads');
@@ -275,10 +276,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const base64Image = imageBuffer.toString('base64');
 
       try {
-        // Try OpenAI first for better accuracy
+        // Try new OpenAI Vision API first for better accuracy
         console.log('Processing with OpenAI Vision API...');
-        const ocrResult = await extractReceiptDataWithOpenAI(base64Image);
-        console.log('OpenAI OCR result:', ocrResult);
+        const ocrResult = await extractReceiptWithVision(imageBuffer, req.file.originalname);
+        console.log('OpenAI Vision OCR result:', ocrResult);
 
         // Clean up temp file
         fs.unlinkSync(filePath);
@@ -286,29 +287,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.json({
           success: true,
           data: ocrResult,
-          method: 'openai',
+          method: 'openai-vision',
           confidence: ocrResult.confidence
         });
 
       } catch (openaiError) {
-        console.error('OpenAI processing failed:', openaiError);
+        console.error('OpenAI Vision processing failed:', openaiError);
         
-        // Fallback to basic text parsing if available from tesseract
-        const fallbackResult = parseReceiptText(''); // Empty text for now
+        // Use filename-based fallback extraction
+        const fallbackResult = extractReceiptFallback(req.file.originalname || 'receipt');
         
         // Clean up temp file
         fs.unlinkSync(filePath);
 
         res.json({
           success: true,
-          data: {
-            vendor: 'Unknown Vendor',
-            amount: 0,
-            items: [],
-            confidence: 0.3
-          },
-          method: 'fallback',
-          error: 'OpenAI processing failed, manual entry required'
+          data: fallbackResult,
+          method: 'filename-fallback',
+          error: 'OpenAI Vision API failed, using filename extraction'
         });
       }
 
