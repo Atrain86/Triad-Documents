@@ -1028,26 +1028,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
               console.log('Upload via ReceiptUpload component:', filesArray.length, 'files');
               console.log('OCR extracted data:', extractedData);
               
-              // Determine if this is a photo (for photos endpoint) or receipt (for receipts endpoint)
-              const firstFile = filesArray[0];
-              const isImage = firstFile?.type.startsWith('image/');
-              
-              if (isImage) {
-                // Create a new FileList-like object for photo upload
-                const fileListObj = {
-                  ...filesArray,
-                  length: filesArray.length,
-                  item: (index: number) => filesArray[index] || null,
-                  [Symbol.iterator]: function* () {
-                    for (const file of filesArray) {
-                      yield file;
-                    }
-                  }
-                } as FileList;
-                
-                photoUploadMutation.mutate(fileListObj);
-              } else {
-                // Handle as receipt upload with OCR data
+              // If we have OCR data, this should be treated as a receipt, not just a photo
+              if (extractedData) {
+                console.log('Routing to receipt upload due to OCR data');
                 const fileListObj = {
                   ...filesArray,
                   length: filesArray.length,
@@ -1060,6 +1043,21 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                 } as FileList;
                 
                 receiptUploadMutation.mutate({ files: fileListObj, ocrData: extractedData });
+              } else {
+                // No OCR data, treat as regular photo
+                console.log('Routing to photo upload (no OCR data)');
+                const fileListObj = {
+                  ...filesArray,
+                  length: filesArray.length,
+                  item: (index: number) => filesArray[index] || null,
+                  [Symbol.iterator]: function* () {
+                    for (const file of filesArray) {
+                      yield file;
+                    }
+                  }
+                } as FileList;
+                
+                photoUploadMutation.mutate(fileListObj);
               }
             }}
           />
