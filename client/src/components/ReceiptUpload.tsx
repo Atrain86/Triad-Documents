@@ -382,7 +382,7 @@ export default function ReceiptUpload({ onUpload }: ReceiptUploadProps) {
           {ocrText && (
             <details className="mb-4">
               <summary className="text-xs text-gray-600 dark:text-gray-400 cursor-pointer">
-                View Raw OCR Text
+                View Extraction Details
               </summary>
               <pre className="text-xs bg-gray-100 dark:bg-gray-800 p-2 rounded mt-2 whitespace-pre-wrap">
                 {ocrText}
