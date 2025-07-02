@@ -1075,49 +1075,131 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                 e.target.value = ''; // Reset input
               }}
             />
-            <div>
-              <Button
-                onClick={() => {
-                  // Trigger the hidden ReceiptUpload component's file input
-                  const receiptInput = document.querySelector('#receipt-processing-area input[type="file"]') as HTMLInputElement;
-                  if (receiptInput) {
-                    receiptInput.click();
+            <Button
+              onClick={() => document.getElementById('receipt-upload-input')?.click()}
+              className="h-16 bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+            >
+              <FileText className="mr-2 h-5 w-5" />
+              Receipts
+            </Button>
+            <input
+              id="receipt-upload-input"
+              type="file"
+              multiple
+              accept="image/*,.pdf,.doc,.docx,.txt"
+              className="hidden"
+              onChange={async (e) => {
+                const files = e.target.files;
+                if (files && files.length > 0) {
+                  console.log('Receipt upload triggered:', files.length, 'files');
+                  
+                  // Process first file with OpenAI Vision API
+                  const file = files[0];
+                  if (file.type.startsWith('image/')) {
+                    try {
+                      console.log('Processing image with OpenAI Vision API...');
+                      
+                      // Convert file to base64 for API
+                      const reader = new FileReader();
+                      reader.onload = async (event) => {
+                        const base64 = event.target?.result as string;
+                        
+                        try {
+                          // Call OpenAI Vision API
+                          const response = await fetch('/api/receipts/ocr', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                              image: base64.split(',')[1] // Remove data:image/jpeg;base64, prefix
+                            })
+                          });
+                          
+                          if (response.ok) {
+                            const result = await response.json();
+                            console.log('OpenAI Vision result:', result);
+                            
+                            // Convert to file list and upload with extracted data
+                            const filesArray = Array.from(files);
+                            const fileListObj = {
+                              ...filesArray,
+                              length: filesArray.length,
+                              item: (index: number) => filesArray[index] || null,
+                              [Symbol.iterator]: function* () {
+                                for (const file of filesArray) {
+                                  yield file;
+                                }
+                              }
+                            } as FileList;
+                            
+                            receiptUploadMutation.mutate({ 
+                              files: fileListObj, 
+                              ocrData: result.data 
+                            });
+                          } else {
+                            console.error('OpenAI Vision API failed');
+                            // Fallback to manual upload
+                            const filesArray = Array.from(files);
+                            const fileListObj = {
+                              ...filesArray,
+                              length: filesArray.length,
+                              item: (index: number) => filesArray[index] || null,
+                              [Symbol.iterator]: function* () {
+                                for (const file of filesArray) {
+                                  yield file;
+                                }
+                              }
+                            } as FileList;
+                            
+                            receiptUploadMutation.mutate({ files: fileListObj, ocrData: undefined });
+                          }
+                        } catch (error) {
+                          console.error('OpenAI processing error:', error);
+                          // Fallback to manual upload
+                          const filesArray = Array.from(files);
+                          const fileListObj = {
+                            ...filesArray,
+                            length: filesArray.length,
+                            item: (index: number) => filesArray[index] || null,
+                            [Symbol.iterator]: function* () {
+                              for (const file of filesArray) {
+                                yield file;
+                              }
+                            }
+                          } as FileList;
+                          
+                          receiptUploadMutation.mutate({ files: fileListObj, ocrData: undefined });
+                        }
+                      };
+                      reader.readAsDataURL(file);
+                    } catch (error) {
+                      console.error('File reading error:', error);
+                    }
+                  } else {
+                    // Non-image files go directly to receipt upload without OCR
+                    const filesArray = Array.from(files);
+                    const fileListObj = {
+                      ...filesArray,
+                      length: filesArray.length,
+                      item: (index: number) => filesArray[index] || null,
+                      [Symbol.iterator]: function* () {
+                        for (const file of filesArray) {
+                          yield file;
+                        }
+                      }
+                    } as FileList;
+                    
+                    receiptUploadMutation.mutate({ files: fileListObj, ocrData: undefined });
                   }
-                }}
-                className="h-16 w-full bg-blue-600 hover:bg-blue-700 text-white transition-colors"
-              >
-                <FileText className="mr-2 h-5 w-5" />
-                Receipts
-              </Button>
-            </div>
+                }
+                e.target.value = ''; // Reset input
+              }}
+            />
           </div>
         </div>
 
-        {/* Hidden Receipt Processing with OpenAI Vision */}
-        <div id="receipt-processing-area" style={{ display: 'none' }}>
-          <ReceiptUpload 
-            onUpload={(files, extractedData) => {
-              // Convert FileList to File array immediately to prevent it from becoming empty
-              const filesArray = Array.from(files);
-              console.log('Receipt processing upload:', filesArray.length, 'files');
-              console.log('OCR extracted data:', extractedData);
-              
-              // Always route to receipt processing with OpenAI Vision data
-              const fileListObj = {
-                ...filesArray,
-                length: filesArray.length,
-                item: (index: number) => filesArray[index] || null,
-                [Symbol.iterator]: function* () {
-                  for (const file of filesArray) {
-                    yield file;
-                  }
-                }
-              } as FileList;
-              
-              receiptUploadMutation.mutate({ files: fileListObj, ocrData: extractedData });
-            }}
-          />
-        </div>
+
 
         {/* Compression Progress Indicator */}
         {(compressionProgress.isCompressing || compressionProgress.totalFiles > 0) && (
