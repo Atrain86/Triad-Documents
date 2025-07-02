@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
-import { Camera, FileText, Loader2, Brain, Eye, X, Check } from 'lucide-react';
+import { Camera, FileText, Loader2, Brain, Eye, X, Check, DollarSign } from 'lucide-react';
 import Tesseract from 'tesseract.js';
+import { processReceiptText, ProcessedReceiptData } from '../utils/receiptProcessing';
 
 interface ExtractedData {
   vendor: string;
@@ -22,7 +23,9 @@ export default function ReceiptUpload({ onUpload }: ReceiptUploadProps) {
   const [ocrText, setOcrText] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [extractedData, setExtractedData] = useState<ExtractedData | null>(null);
+  const [processedData, setProcessedData] = useState<ProcessedReceiptData | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [manuallySelectedAmount, setManuallySelectedAmount] = useState<number | null>(null);
 
   const handlePhotoClick = () => {
     photoInputRef.current?.click();
@@ -53,6 +56,61 @@ export default function ReceiptUpload({ onUpload }: ReceiptUploadProps) {
     event.target.value = '';
   };
 
+  const processOCRResult = async (text: string) => {
+    try {
+      console.log('Processing OCR result with enhanced logic...');
+      
+      // Try GPT enhancement first
+      let gptEnhancement = null;
+      try {
+        const response = await fetch('/api/receipts/ocr-text', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ text }),
+        });
+
+        if (response.ok) {
+          gptEnhancement = await response.json();
+          console.log('GPT enhancement successful:', gptEnhancement);
+        }
+      } catch (error) {
+        console.warn('GPT enhancement failed, proceeding with Tesseract only:', error);
+      }
+
+      // Process with enhanced logic
+      const processed = processReceiptText(text, gptEnhancement);
+      setProcessedData(processed);
+      
+      // Convert to legacy format for compatibility
+      const finalAmount = processed.selectedAmount || (processed.amounts[0]?.value) || 0;
+      
+      setExtractedData({
+        vendor: processed.vendor,
+        amount: finalAmount.toString(),
+        items: processed.items,
+        total: finalAmount.toString(),
+        confidence: processed.confidence,
+        method: processed.method
+      });
+      
+    } catch (error) {
+      console.error('OCR processing failed:', error);
+      
+      // Ultimate fallback
+      const lines = text.split('\n').filter(line => line.trim());
+      setExtractedData({
+        vendor: lines[0] || selectedFile?.name.split('.')[0] || 'Unknown Vendor',
+        amount: '0',
+        items: lines.slice(1, 3),
+        total: '0',
+        confidence: 0.1,
+        method: 'fallback'
+      });
+    }
+  };
+
   const extractTextWithTesseract = async () => {
     if (!selectedFile) return;
 
@@ -67,8 +125,8 @@ export default function ReceiptUpload({ onUpload }: ReceiptUploadProps) {
       setOcrText(text);
       console.log('Tesseract OCR result:', text);
 
-      // Try to enhance with GPT-4 if available
-      await enhanceWithGPT(text);
+      // Process the text with enhanced logic
+      await processOCRResult(text);
       
     } catch (error) {
       console.error('Tesseract OCR failed:', error);
@@ -86,48 +144,14 @@ export default function ReceiptUpload({ onUpload }: ReceiptUploadProps) {
     setIsProcessing(false);
   };
 
-  const enhanceWithGPT = async (text: string) => {
-    try {
-      console.log('Attempting GPT-4 enhancement...');
-      
-      const response = await fetch('/api/receipts/ocr-text', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ text }),
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log('GPT enhancement successful:', result);
-        
-        setExtractedData({
-          vendor: result.vendor || 'Unknown Vendor',
-          amount: result.amount?.toString() || '0',
-          items: result.items || [],
-          total: result.amount?.toString() || '0',
-          confidence: 0.8,
-          method: 'tesseract+gpt'
-        });
-      } else {
-        throw new Error('GPT enhancement failed');
-      }
-    } catch (error) {
-      console.warn('GPT enhancement failed, using raw OCR:', error);
-      
-      // Parse basic info from OCR text
-      const lines = text.split('\n').filter(line => line.trim());
-      const amountMatch = text.match(/\$?(\d+\.?\d*)/);
-      const amount = amountMatch ? amountMatch[1] : '0';
-      
+  const handleAmountSelection = (amount: number) => {
+    setManuallySelectedAmount(amount);
+    
+    if (extractedData) {
       setExtractedData({
-        vendor: lines[0] || 'Unknown Vendor',
-        amount,
-        items: lines.slice(1, 4), // Take a few lines as items
-        total: amount,
-        confidence: 0.6,
-        method: 'tesseract'
+        ...extractedData,
+        amount: amount.toString(),
+        total: amount.toString()
       });
     }
   };
@@ -152,8 +176,10 @@ export default function ReceiptUpload({ onUpload }: ReceiptUploadProps) {
   const resetUpload = () => {
     setSelectedFile(null);
     setExtractedData(null);
+    setProcessedData(null);
     setOcrText('');
     setPreviewImage(null);
+    setManuallySelectedAmount(null);
     if (photoInputRef.current) photoInputRef.current.value = '';
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
@@ -251,6 +277,40 @@ export default function ReceiptUpload({ onUpload }: ReceiptUploadProps) {
               <p><strong>Items:</strong> {extractedData.items.join(', ')}</p>
             )}
           </div>
+
+          {/* Manual Amount Selection for Multiple Amounts */}
+          {processedData?.requiresManualSelection && processedData.amounts.length > 1 && (
+            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 mb-4">
+              <div className="flex items-center gap-2 mb-3">
+                <DollarSign size={16} className="text-amber-600" />
+                <span className="text-amber-800 dark:text-amber-200 font-medium text-sm">
+                  Multiple amounts detected - please select the correct total:
+                </span>
+              </div>
+              
+              <div className="space-y-2">
+                {processedData.amounts.map((amount, index) => (
+                  <label key={index} className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="amount-selection"
+                      value={amount.value}
+                      checked={manuallySelectedAmount === amount.value || 
+                               (!manuallySelectedAmount && parseFloat(extractedData.amount) === amount.value)}
+                      onChange={() => handleAmountSelection(amount.value)}
+                      className="text-amber-600"
+                    />
+                    <span className="text-sm font-mono">
+                      ${amount.value.toFixed(2)}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      (found as "{amount.original}")
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Raw OCR Text (collapsible) */}
           {ocrText && (
