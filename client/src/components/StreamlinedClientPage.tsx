@@ -340,79 +340,12 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const photoUploadMutation = useMutation({
     mutationFn: async (files: FileList) => {
       const filesArray = Array.from(files);
-      console.log('Starting upload for', filesArray.length, 'files');
+      console.log('Starting photo upload for', filesArray.length, 'files');
       
-      // Start compression
-      setCompressionProgress({
-        isCompressing: true,
-        currentFile: 0,
-        totalFiles: filesArray.length,
-        originalSize: 0,
-        compressedSize: 0
-      });
-
-      let totalOriginalSize = 0;
-      let totalCompressedSize = 0;
-      const compressedFiles: File[] = [];
-
-      // Compress each file
-      for (let i = 0; i < filesArray.length; i++) {
-        const file = filesArray[i];
-        
-        setCompressionProgress(prev => ({
-          ...prev,
-          currentFile: i + 1
-        }));
-
-        if (file.type.startsWith('image/')) {
-          try {
-            const compressionResult = await compressMultipleImages([file], {
-              maxWidth: 1920,
-              maxHeight: 1080,
-              quality: 0.8,
-              format: 'jpeg'
-            });
-            
-            if (compressionResult.length > 0) {
-              const result = compressionResult[0];
-              compressedFiles.push(result.file);
-              totalOriginalSize += result.originalSize;
-              totalCompressedSize += result.compressedSize;
-              
-              console.log(`Compressed ${file.name}: ${formatFileSize(result.originalSize)} → ${formatFileSize(result.compressedSize)} (${result.compressionRatio.toFixed(1)}% reduction)`);
-            } else {
-              compressedFiles.push(file);
-              totalOriginalSize += file.size;
-              totalCompressedSize += file.size;
-            }
-          } catch (error) {
-            console.warn(`Failed to compress ${file.name}, using original:`, error);
-            compressedFiles.push(file);
-            totalOriginalSize += file.size;
-            totalCompressedSize += file.size;
-          }
-        } else {
-          // Non-image files go through unchanged
-          compressedFiles.push(file);
-          totalOriginalSize += file.size;
-          totalCompressedSize += file.size;
-        }
-      }
-
-      // Update final compression stats
-      setCompressionProgress(prev => ({
-        ...prev,
-        originalSize: totalOriginalSize,
-        compressedSize: totalCompressedSize,
-        isCompressing: false
-      }));
-
-      console.log(`Total compression: ${formatFileSize(totalOriginalSize)} → ${formatFileSize(totalCompressedSize)} (${((totalOriginalSize - totalCompressedSize) / totalOriginalSize * 100).toFixed(1)}% reduction)`);
-
-      // Upload compressed files
+      // Simple direct upload without compression for now
       const formData = new FormData();
-      compressedFiles.forEach((file, index) => {
-        console.log(`Adding compressed file ${index}:`, file.name, file.size, 'bytes');
+      filesArray.forEach((file, index) => {
+        console.log(`Adding photo file ${index}:`, file.name, file.size, 'bytes');
         formData.append('photos', file);
       });
       
