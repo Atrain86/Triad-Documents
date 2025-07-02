@@ -37,6 +37,7 @@ const openWorkCalendar = (clientProject: Project | null = null) => {
 function SimpleFilesList({ projectId }: { projectId: number }) {
   const queryClient = useQueryClient();
   const [editingReceipt, setEditingReceipt] = useState<Receipt | null>(null);
+  const [viewingReceipt, setViewingReceipt] = useState<Receipt | null>(null);
   const [editVendor, setEditVendor] = useState('');
   const [editAmount, setEditAmount] = useState('');
   const [editDescription, setEditDescription] = useState('');
@@ -187,15 +188,13 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
                   <div>
                     <div className="text-sm font-medium text-gray-900 dark:text-white">
                       {receipt.filename ? (
-                        <a
-                          href={`/uploads/${receipt.filename}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline cursor-pointer"
-                          title="Click to open file"
+                        <button
+                          onClick={() => setViewingReceipt(receipt)}
+                          className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline cursor-pointer text-left"
+                          title="Click to view receipt"
                         >
                           {receipt.vendor} - ${receipt.amount}
-                        </a>
+                        </button>
                       ) : (
                         <span>{receipt.vendor} - ${receipt.amount}</span>
                       )}
@@ -229,6 +228,37 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
           </div>
         ))}
       </div>
+
+      {/* Receipt Viewer Modal */}
+      {viewingReceipt && (
+        <Dialog open={!!viewingReceipt} onOpenChange={() => setViewingReceipt(null)}>
+          <DialogContent className="max-w-4xl max-h-[90vh] p-0">
+            <DialogHeader className="p-6 pb-4">
+              <DialogTitle className="flex items-center gap-2">
+                <ReceiptIcon className="h-5 w-5" />
+                {viewingReceipt.vendor} - ${viewingReceipt.amount}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="px-6 pb-6">
+              <div className="bg-black rounded-lg overflow-hidden">
+                <img
+                  src={`/uploads/${viewingReceipt.filename}`}
+                  alt={`Receipt from ${viewingReceipt.vendor}`}
+                  className="w-full h-auto max-h-[60vh] object-contain"
+                />
+              </div>
+              <div className="mt-4 flex justify-end">
+                <Button
+                  onClick={() => setViewingReceipt(null)}
+                  variant="outline"
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
