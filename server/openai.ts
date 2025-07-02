@@ -22,36 +22,14 @@ export async function extractReceiptDataWithOpenAI(base64Image: string): Promise
       messages: [
         {
           role: "system",
-          content: `You are a receipt data extraction expert. Analyze receipt images and extract key information with high accuracy.
-
-EXTRACTION RULES:
-1. Find the VENDOR/STORE NAME (usually at top of receipt)
-2. Find the TOTAL AMOUNT (look for "Total", "Amount Due", "Balance Due", etc.)
-3. Extract the DATE if clearly visible
-4. List 3-5 main ITEMS purchased (focus on actual products, skip service charges)
-5. Provide CONFIDENCE score (0.0-1.0) based on image clarity
-
-RESPONSE FORMAT: Return JSON only with this exact structure:
-{
-  "vendor": "Store Name",
-  "amount": 99.99,
-  "date": "2024-12-31",
-  "items": ["item1", "item2", "item3"],
-  "confidence": 0.9
-}
-
-IMPORTANT:
-- Extract amount as number only (no currency symbols)
-- Use ISO date format (YYYY-MM-DD) or null if unclear
-- Focus on product names, not quantities or individual prices
-- Set confidence based on image quality and text clarity`
+          content: "You are an assistant that extracts structured data from receipt images. You only return JSON with these fields: 'vendor', 'amount', and 'items'."
         },
         {
           role: "user",
           content: [
             {
               type: "text",
-              text: "Please extract the receipt data from this image:"
+              text: "Extract vendor name, total amount, and main items from this receipt image. Return JSON only."
             },
             {
               type: "image_url",
@@ -63,7 +41,7 @@ IMPORTANT:
         },
       ],
       response_format: { type: "json_object" },
-      max_tokens: 1000,
+      max_tokens: 300,
     });
 
     const result = JSON.parse(response.choices[0].message.content || '{}');
@@ -72,9 +50,9 @@ IMPORTANT:
     return {
       vendor: result.vendor || "Unknown Vendor",
       amount: parseFloat(result.amount) || 0,
-      date: result.date || undefined,
-      items: Array.isArray(result.items) ? result.items.slice(0, 5) : [],
-      confidence: Math.max(0, Math.min(1, parseFloat(result.confidence) || 0.5))
+      date: undefined, // Simplified - no date extraction
+      items: Array.isArray(result.items) ? result.items.slice(0, 3) : [],
+      confidence: 0.8 // Fixed confidence since we simplified the extraction
     };
 
   } catch (error) {

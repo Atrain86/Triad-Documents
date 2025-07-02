@@ -21,6 +21,7 @@ export default function ReceiptUpload({ onUpload }: ReceiptUploadProps) {
   const [extractedData, setExtractedData] = useState<ExtractedData | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [currentFiles, setCurrentFiles] = useState<FileList | null>(null);
 
   const extractReceiptData = async (file: File): Promise<ExtractedData> => {
     console.log('Starting OpenAI OCR processing for:', file.name);
@@ -82,8 +83,10 @@ export default function ReceiptUpload({ onUpload }: ReceiptUploadProps) {
     const files = event.target.files;
     if (!files || files.length === 0) return;
 
+    // Store files for later upload
+    setCurrentFiles(files);
+    
     // Handle multiple files by processing the first one for preview/OCR
-    // but upload all files
     const firstFile = files[0];
     const isImage = firstFile.type.startsWith('image/');
     
@@ -127,35 +130,37 @@ export default function ReceiptUpload({ onUpload }: ReceiptUploadProps) {
     }
 
     setIsProcessing(false);
-    
-    // Reset file inputs
-    event.target.value = '';
   };
 
   const handleUpload = () => {
-    const input = extractedData?.method === 'openai' ? photoInputRef.current : fileInputRef.current;
-    if (input?.files && previewImage && extractedData) {
+    if (currentFiles && previewImage && extractedData) {
       // Show preview for confirmation
       setShowPreview(true);
-    } else if (input?.files) {
-      onUpload(input.files, extractedData || undefined);
+    } else if (currentFiles) {
+      onUpload(currentFiles, extractedData || undefined);
+      resetUpload();
     }
   };
 
   const confirmUpload = () => {
-    const input = extractedData?.method === 'openai' ? photoInputRef.current : fileInputRef.current;
-    if (input?.files) {
-      onUpload(input.files, extractedData || undefined);
-      setExtractedData(null);
-      setPreviewImage(null);
-      setShowPreview(false);
+    if (currentFiles) {
+      onUpload(currentFiles, extractedData || undefined);
+      resetUpload();
     }
   };
 
-  const cancelUpload = () => {
+  const resetUpload = () => {
     setExtractedData(null);
     setPreviewImage(null);
     setShowPreview(false);
+    setCurrentFiles(null);
+    // Reset file inputs
+    if (photoInputRef.current) photoInputRef.current.value = '';
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const cancelUpload = () => {
+    resetUpload();
   };
 
   if (showPreview && previewImage && extractedData) {
