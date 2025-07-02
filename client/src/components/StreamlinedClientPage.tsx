@@ -1050,109 +1050,62 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         {/* Horizontal divider line */}
         <div className="border-b border-gray-200 dark:border-gray-700 mb-6"></div>
 
-        {/* Upload Controls */}
+        {/* Photo Upload Section */}
         <div className="mb-8">
-          <div className="grid grid-cols-2 gap-4">
-            <Button
-              onClick={() => document.getElementById('photo-upload-input')?.click()}
-              className="h-16 bg-orange-600 hover:bg-orange-700 text-white transition-colors"
-            >
-              <Camera className="mr-2 h-5 w-5" />
-              Photos
-            </Button>
-            <input
-              id="photo-upload-input"
-              type="file"
-              multiple
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => {
-                const files = e.target.files;
-                if (files && files.length > 0) {
-                  console.log('Direct photo upload:', files.length, 'files');
-                  photoUploadMutation.mutate(files);
-                }
-                e.target.value = ''; // Reset input
-              }}
-            />
-            <Button
-              onClick={() => document.getElementById('file-upload-input')?.click()}
-              className="h-16 bg-blue-600 hover:bg-blue-700 text-white transition-colors"
-            >
-              <FileText className="mr-2 h-5 w-5" />
-              Receipts
-            </Button>
-            <input
-              id="file-upload-input"
-              type="file"
-              multiple
-              accept=".pdf,.doc,.docx,.txt,image/*"
-              className="hidden"
-              onChange={(e) => {
-                const files = e.target.files;
-                if (files && files.length > 0) {
-                  console.log('File upload triggered:', files.length, 'files');
-                  // Route files directly to receipt processing with OCR
-                  const filesArray = Array.from(files);
-                  const fileListObj = {
-                    ...filesArray,
-                    length: filesArray.length,
-                    item: (index: number) => filesArray[index] || null,
-                    [Symbol.iterator]: function* () {
-                      for (const file of filesArray) {
-                        yield file;
-                      }
-                    }
-                  } as FileList;
-                  
-                  receiptUploadMutation.mutate({ files: fileListObj, ocrData: undefined });
-                }
-                e.target.value = ''; // Reset input
-              }}
-            />
+          <div className="flex items-center gap-2 mb-4 text-muted-foreground">
+            <Camera size={16} />
+            <span className="font-medium">Project Photos</span>
           </div>
+          <Button
+            onClick={() => document.getElementById('photo-upload-input')?.click()}
+            className="h-16 w-full bg-orange-600 hover:bg-orange-700 text-white transition-colors"
+          >
+            <Camera className="mr-2 h-5 w-5" />
+            Add Photos
+          </Button>
+          <input
+            id="photo-upload-input"
+            type="file"
+            multiple
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const files = e.target.files;
+              if (files && files.length > 0) {
+                console.log('Direct photo upload:', files.length, 'files');
+                photoUploadMutation.mutate(files);
+              }
+              e.target.value = ''; // Reset input
+            }}
+          />
         </div>
 
-        {/* Hidden ReceiptUpload for OCR processing - no longer visible */}
-        <div style={{ display: 'none' }}>
+        {/* Receipt Processing Section with OpenAI Vision */}
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4 text-muted-foreground">
+            <FileText size={16} />
+            <span className="font-medium">Receipt Processing</span>
+          </div>
           <ReceiptUpload 
             onUpload={(files, extractedData) => {
               // Convert FileList to File array immediately to prevent it from becoming empty
               const filesArray = Array.from(files);
-              console.log('Upload via ReceiptUpload component:', filesArray.length, 'files');
+              console.log('Receipt processing upload:', filesArray.length, 'files');
               console.log('OCR extracted data:', extractedData);
               
-              // If we have OCR data, this should be treated as a receipt, not just a photo
-              if (extractedData) {
-                console.log('Routing to receipt upload due to OCR data');
-                const fileListObj = {
-                  ...filesArray,
-                  length: filesArray.length,
-                  item: (index: number) => filesArray[index] || null,
-                  [Symbol.iterator]: function* () {
-                    for (const file of filesArray) {
-                      yield file;
-                    }
+              // Always route to receipt processing since this is the receipt section
+              const fileListObj = {
+                ...filesArray,
+                length: filesArray.length,
+                item: (index: number) => filesArray[index] || null,
+                [Symbol.iterator]: function* () {
+                  for (const file of filesArray) {
+                    yield file;
                   }
-                } as FileList;
-                
-                receiptUploadMutation.mutate({ files: fileListObj, ocrData: extractedData });
-              } else {
-                // No OCR data, treat as regular photo
-                console.log('Routing to photo upload (no OCR data)');
-                const fileListObj = {
-                  ...filesArray,
-                  length: filesArray.length,
-                  item: (index: number) => filesArray[index] || null,
-                  [Symbol.iterator]: function* () {
-                    for (const file of filesArray) {
-                      yield file;
-                    }
-                  }
-                } as FileList;
-                
-                photoUploadMutation.mutate(fileListObj);
-              }
+                }
+              } as FileList;
+              
+              receiptUploadMutation.mutate({ files: fileListObj, ocrData: extractedData });
             }}
           />
         </div>
