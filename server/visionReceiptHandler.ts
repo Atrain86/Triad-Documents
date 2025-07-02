@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import sharp from 'sharp';
+import { storage } from './storage';
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
@@ -17,7 +18,7 @@ export interface VisionReceiptData {
  * Extract receipt data using OpenAI Vision API
  * More reliable than Tesseract for receipt processing
  */
-export async function extractReceiptWithVision(imageBuffer: Buffer, originalName?: string): Promise<VisionReceiptData> {
+export async function extractReceiptWithVision(imageBuffer: Buffer, originalName?: string, userId?: number): Promise<VisionReceiptData> {
   console.log('Vision API function called with buffer size:', imageBuffer.length);
   console.log('API key available:', !!OPENAI_API_KEY);
   
@@ -124,6 +125,29 @@ Focus on accuracy. If you're unsure about the total amount, look for keywords li
 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content;
+    
+    // Track token usage for admin analytics
+    if (userId && data.usage) {
+      try {
+        const tokensUsed = data.usage.total_tokens || 0;
+        const costPerToken = 0.00001; // Approximate cost for GPT-4o Vision
+        const totalCost = tokensUsed * costPerToken;
+        
+        await storage.logTokenUsage({
+          userId,
+          operation: 'receipt_ocr',
+          tokensUsed,
+          cost: totalCost,
+          model: 'gpt-4o',
+          imageSize: compressedBuffer.length,
+          success: true
+        });
+        
+        console.log(`Token usage logged: ${tokensUsed} tokens, $${totalCost.toFixed(4)} cost`);
+      } catch (error) {
+        console.error('Failed to log token usage:', error);
+      }
+    }
     
     if (!content) {
       throw new Error('No response from OpenAI Vision API');

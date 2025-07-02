@@ -38,7 +38,7 @@ export function verifyToken(token: string): TokenPayload | null {
 }
 
 export async function authenticateToken(
-  req: AuthenticatedRequest, 
+  req: any, 
   res: Response, 
   next: NextFunction
 ): Promise<void> {
@@ -72,7 +72,7 @@ export async function authenticateToken(
 }
 
 export async function requireAdmin(
-  req: AuthenticatedRequest, 
+  req: any, 
   res: Response, 
   next: NextFunction
 ): Promise<void> {
@@ -84,7 +84,7 @@ export async function requireAdmin(
 }
 
 export async function requireOwnershipOrAdmin(
-  req: AuthenticatedRequest, 
+  req: any, 
   res: Response, 
   next: NextFunction
 ): Promise<void> {

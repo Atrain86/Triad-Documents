@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { makeAuthenticatedRequest } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Activity, DollarSign, Users, Zap } from "lucide-react";
 
 interface TokenUsage {
@@ -22,6 +22,8 @@ interface AnalyticsData {
 }
 
 export default function AdminDashboard() {
+  const { makeAuthenticatedRequest } = useAuth();
+  
   const { data: analytics, isLoading, error } = useQuery<AnalyticsData>({
     queryKey: ["/api/admin/analytics"],
     queryFn: async () => {

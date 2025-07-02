@@ -1,59 +1,37 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
+import React, { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Loader2 } from 'lucide-react';
 
-interface LoginFormProps {
-  onSuccess: (user: any, token: string) => void;
-}
-
-export default function LoginForm({ onSuccess }: LoginFormProps) {
-  const [loginData, setLoginData] = useState({ email: "", password: "" });
-  const [registerData, setRegisterData] = useState({
-    email: "",
-    password: "",
-    firstName: "",
-    lastName: ""
-  });
+const LoginForm: React.FC = () => {
+  const { login, register } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+  const [error, setError] = useState<string | null>(null);
+  
+  // Login form state
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  
+  // Register form state
+  const [registerEmail, setRegisterEmail] = useState('');
+  const [registerPassword, setRegisterPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
 
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(loginData)
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        localStorage.setItem("auth_token", data.token);
-        onSuccess(data.user, data.token);
-        toast({
-          title: "Welcome back!",
-          description: `Logged in as ${data.user.firstName} ${data.user.lastName}`,
-        });
-      } else {
-        toast({
-          title: "Login failed",
-          description: data.error || "Invalid credentials",
-          variant: "destructive",
-        });
-      }
+      await login(loginEmail, loginPassword);
     } catch (error) {
-      toast({
-        title: "Login failed",
-        description: "Network error. Please try again.",
-        variant: "destructive",
-      });
+      setError(error instanceof Error ? error.message : 'Login failed');
     } finally {
       setIsLoading(false);
     }
@@ -62,151 +40,172 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
 
     try {
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(registerData)
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        localStorage.setItem("auth_token", data.token);
-        onSuccess(data.user, data.token);
-        toast({
-          title: "Account created!",
-          description: `Welcome, ${data.user.firstName}! ${data.user.role === 'admin' ? 'You are the admin.' : 'You are a client user.'}`,
-        });
-      } else {
-        toast({
-          title: "Registration failed",
-          description: data.error || "Failed to create account",
-          variant: "destructive",
-        });
-      }
+      await register(registerEmail, registerPassword, firstName, lastName);
     } catch (error) {
-      toast({
-        title: "Registration failed",
-        description: "Network error. Please try again.",
-        variant: "destructive",
-      });
+      setError(error instanceof Error ? error.message : 'Registration failed');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center space-y-4">
-          <div className="flex justify-center">
-            <img 
-              src="/aframe-logo.png" 
-              alt="A-Frame Painting" 
-              className="h-16 w-auto"
-            />
-          </div>
-          <div>
-            <CardTitle className="text-2xl">A-Frame Painting</CardTitle>
-            <CardDescription>Project Management System</CardDescription>
-          </div>
-        </CardHeader>
-        <CardContent>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
+      <div className="w-full max-w-md space-y-6">
+        {/* A-Frame Painting Logo */}
+        <div className="text-center">
+          <img 
+            src="/aframe-logo.png" 
+            alt="A-Frame Painting" 
+            className="h-24 mx-auto mb-4"
+          />
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            A-Frame Painting
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">
+            Project Management System
+          </p>
+        </div>
+
+        <Card className="border-0 shadow-xl">
           <Tabs defaultValue="login" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Login</TabsTrigger>
+              <TabsTrigger value="login">Sign In</TabsTrigger>
               <TabsTrigger value="register">Register</TabsTrigger>
             </TabsList>
             
-            <TabsContent value="login" className="space-y-4 mt-6">
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="Enter your email"
-                    value={loginData.email}
-                    onChange={(e) => setLoginData(prev => ({ ...prev, email: e.target.value }))}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Enter your password"
-                    value={loginData.password}
-                    onChange={(e) => setLoginData(prev => ({ ...prev, password: e.target.value }))}
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Signing in..." : "Sign In"}
-                </Button>
+            <TabsContent value="login">
+              <form onSubmit={handleLogin}>
+                <CardHeader>
+                  <CardTitle>Welcome Back</CardTitle>
+                  <CardDescription>
+                    Sign in to access your projects
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="login-email">Email</Label>
+                    <Input
+                      id="login-email"
+                      type="email"
+                      value={loginEmail}
+                      onChange={(e) => setLoginEmail(e.target.value)}
+                      required
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="login-password">Password</Label>
+                    <Input
+                      id="login-password"
+                      type="password"
+                      value={loginPassword}
+                      onChange={(e) => setLoginPassword(e.target.value)}
+                      required
+                      disabled={isLoading}
+                    />
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-orange-600 hover:bg-orange-700"
+                    disabled={isLoading}
+                  >
+                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Sign In
+                  </Button>
+                </CardFooter>
               </form>
             </TabsContent>
             
-            <TabsContent value="register" className="space-y-4 mt-6">
-              <form onSubmit={handleRegister} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+            <TabsContent value="register">
+              <form onSubmit={handleRegister}>
+                <CardHeader>
+                  <CardTitle>Create Account</CardTitle>
+                  <CardDescription>
+                    Register to get started with A-Frame Painting
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="first-name">First Name</Label>
+                      <Input
+                        id="first-name"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        required
+                        disabled={isLoading}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="last-name">Last Name</Label>
+                      <Input
+                        id="last-name"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        required
+                        disabled={isLoading}
+                      />
+                    </div>
+                  </div>
                   <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name</Label>
+                    <Label htmlFor="register-email">Email</Label>
                     <Input
-                      id="firstName"
-                      placeholder="First name"
-                      value={registerData.firstName}
-                      onChange={(e) => setRegisterData(prev => ({ ...prev, firstName: e.target.value }))}
+                      id="register-email"
+                      type="email"
+                      value={registerEmail}
+                      onChange={(e) => setRegisterEmail(e.target.value)}
                       required
+                      disabled={isLoading}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name</Label>
+                    <Label htmlFor="register-password">Password</Label>
                     <Input
-                      id="lastName"
-                      placeholder="Last name"
-                      value={registerData.lastName}
-                      onChange={(e) => setRegisterData(prev => ({ ...prev, lastName: e.target.value }))}
+                      id="register-password"
+                      type="password"
+                      value={registerPassword}
+                      onChange={(e) => setRegisterPassword(e.target.value)}
                       required
+                      disabled={isLoading}
+                      minLength={6}
                     />
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="regEmail">Email</Label>
-                  <Input
-                    id="regEmail"
-                    type="email"
-                    placeholder="Enter your email"
-                    value={registerData.email}
-                    onChange={(e) => setRegisterData(prev => ({ ...prev, email: e.target.value }))}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="regPassword">Password</Label>
-                  <Input
-                    id="regPassword"
-                    type="password"
-                    placeholder="Create a password"
-                    value={registerData.password}
-                    onChange={(e) => setRegisterData(prev => ({ ...prev, password: e.target.value }))}
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Creating account..." : "Create Account"}
-                </Button>
+                </CardContent>
+                <CardFooter>
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-orange-600 hover:bg-orange-700"
+                    disabled={isLoading}
+                  >
+                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Create Account
+                  </Button>
+                </CardFooter>
               </form>
-              <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
-                First user becomes admin, others are clients
-              </p>
             </TabsContent>
           </Tabs>
-        </CardContent>
-      </Card>
+          
+          {error && (
+            <div className="p-4">
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            </div>
+          )}
+        </Card>
+        
+        <div className="text-center text-sm text-gray-600 dark:text-gray-400">
+          <p>First user automatically becomes admin</p>
+          <p>Subsequent users are clients with project access</p>
+        </div>
+      </div>
     </div>
   );
-}
+};
+
+export default LoginForm;

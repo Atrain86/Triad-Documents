@@ -209,7 +209,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/projects/:id', async (req, res) => {
+  app.get('/api/projects/:id', authenticateToken, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
       const project = await storage.getProject(id);
@@ -222,12 +222,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/projects', async (req, res) => {
+  app.post('/api/projects', authenticateToken, async (req: any, res) => {
     try {
       console.log('Received project data:', req.body);
       const validatedData = insertProjectSchema.parse(req.body);
       console.log('Validated project data:', validatedData);
-      const project = await storage.createProject(validatedData);
+      // Add user ID to new projects
+      const projectWithUser = { ...validatedData, userId: req.user.id };
+      const project = await storage.createProject(projectWithUser);
       res.status(201).json(project);
     } catch (error) {
       console.error('Project validation error:', error);
@@ -362,7 +364,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // OCR endpoint for receipt processing
-  app.post('/api/receipts/ocr', upload.single('receipt'), async (req, res) => {
+  app.post('/api/receipts/ocr', authenticateToken, upload.single('receipt'), async (req, res) => {
     try {
       console.log('OCR processing request received');
       
@@ -385,7 +387,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Try new OpenAI Vision API first for better accuracy
         console.log('Processing with OpenAI Vision API...');
         console.log('OPENAI_API_KEY available:', !!process.env.OPENAI_API_KEY);
-        const ocrResult = await extractReceiptWithVision(imageBuffer, req.file.originalname);
+        const userId = (req as any).user?.id;
+        const ocrResult = await extractReceiptWithVision(imageBuffer, req.file.originalname, userId);
         console.log('OpenAI Vision OCR result:', ocrResult);
 
         // Clean up temp file
