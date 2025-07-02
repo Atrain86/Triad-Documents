@@ -180,20 +180,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Admin dashboard - token usage analytics
-  app.get("/api/admin/analytics", authenticateToken, requireAdmin, async (req: any, res) => {
+  // Admin dashboard - total token usage statistics
+  app.get("/api/admin/token-usage/total", authenticateToken, requireAdmin, async (req: any, res) => {
     try {
       const totalUsage = await storage.getTotalTokenUsage();
-      const userUsage = await storage.getTokenUsageByUser();
-      
-      res.json({
-        totalUsage,
-        userUsage,
-        timestamp: new Date().toISOString()
-      });
+      res.json(totalUsage);
     } catch (error) {
-      console.error('Error fetching analytics:', error);
-      res.status(500).json({ error: 'Failed to fetch analytics' });
+      console.error('Error fetching total token usage:', error);
+      res.status(500).json({ error: 'Failed to fetch total token usage' });
+    }
+  });
+
+  // Admin dashboard - token usage by user
+  app.get("/api/admin/token-usage/by-user", authenticateToken, requireAdmin, async (req: any, res) => {
+    try {
+      const userUsage = await storage.getTokenUsageByUser();
+      res.json(userUsage);
+    } catch (error) {
+      console.error('Error fetching user token usage:', error);
+      res.status(500).json({ error: 'Failed to fetch user token usage' });
+    }
+  });
+
+  // Admin dashboard - recent token usage activity
+  app.get("/api/admin/token-usage/recent", authenticateToken, requireAdmin, async (req: any, res) => {
+    try {
+      // Get recent token usage entries (we need to implement getAllRecentTokenUsage)
+      // For now, we'll return empty array until we have actual OpenAI usage
+      res.json([]);
+    } catch (error) {
+      console.error('Error fetching recent token usage:', error);
+      res.status(500).json({ error: 'Failed to fetch recent token usage' });
     }
   });
 
