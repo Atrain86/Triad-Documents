@@ -26,6 +26,7 @@ export default function ReceiptUpload({ onUpload }: ReceiptUploadProps) {
   const [processedData, setProcessedData] = useState<ProcessedReceiptData | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [manuallySelectedAmount, setManuallySelectedAmount] = useState<number | null>(null);
+  const [ocrError, setOcrError] = useState<string | null>(null);
 
   const handlePhotoClick = () => {
     photoInputRef.current?.click();
@@ -42,6 +43,7 @@ export default function ReceiptUpload({ onUpload }: ReceiptUploadProps) {
     setSelectedFile(file);
     setExtractedData(null);
     setOcrText('');
+    setOcrError(null);
 
     // Create preview for images
     if (file.type.startsWith('image/')) {
@@ -118,9 +120,51 @@ export default function ReceiptUpload({ onUpload }: ReceiptUploadProps) {
     
     try {
       console.log('Starting Tesseract OCR processing...');
-      const { data: { text } } = await Tesseract.recognize(selectedFile, 'eng', {
-        logger: m => console.log(m)
+      console.log('File details:', {
+        name: selectedFile.name,
+        type: selectedFile.type,
+        size: selectedFile.size
       });
+
+      // Create a safe image blob for processing
+      let processFile = selectedFile;
+      
+      // If file is HEIC/HEIF, try to convert or process differently
+      if (selectedFile.name.toLowerCase().includes('.heic') || selectedFile.name.toLowerCase().includes('.heif')) {
+        console.log('HEIC/HEIF file detected, may need special handling');
+      }
+
+      // Check if file is valid image
+      if (!selectedFile.type.startsWith('image/') && !selectedFile.name.match(/\.(jpg|jpeg|png|gif|webp|heic|heif)$/i)) {
+        throw new Error('Selected file is not a valid image format');
+      }
+
+      // Create image blob URL for verification
+      const imageUrl = URL.createObjectURL(selectedFile);
+      
+      // Verify image can be loaded
+      const img = new Image();
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = () => reject(new Error('Failed to load image - file may be corrupted'));
+        img.src = imageUrl;
+      });
+      
+      console.log('Image loaded successfully, starting OCR...');
+      
+      const { data: { text } } = await Tesseract.recognize(processFile, 'eng', {
+        logger: m => {
+          if (m.status === 'recognizing text') {
+            console.log(m);
+          }
+        },
+        errorHandler: (err) => {
+          console.error('Tesseract error:', err);
+        }
+      });
+      
+      // Clean up blob URL
+      URL.revokeObjectURL(imageUrl);
       
       setOcrText(text);
       console.log('Tesseract OCR result:', text);
@@ -130,14 +174,20 @@ export default function ReceiptUpload({ onUpload }: ReceiptUploadProps) {
       
     } catch (error) {
       console.error('Tesseract OCR failed:', error);
-      // Fallback to basic file info
+      
+      // Show user-friendly error message
+      const errorMessage = error instanceof Error ? error.message : 'Failed to process image';
+      console.error('Image processing error:', errorMessage);
+      setOcrError(errorMessage);
+      
+      // Fallback to manual entry option
       setExtractedData({
-        vendor: selectedFile.name.split('.')[0],
+        vendor: selectedFile.name.split('.')[0].replace(/[_-]/g, ' '),
         amount: '0',
-        items: [],
+        items: ['Manual entry required - OCR failed'],
         total: '0',
         confidence: 0.1,
-        method: 'fallback'
+        method: 'manual-fallback'
       });
     }
     
@@ -180,6 +230,7 @@ export default function ReceiptUpload({ onUpload }: ReceiptUploadProps) {
     setOcrText('');
     setPreviewImage(null);
     setManuallySelectedAmount(null);
+    setOcrError(null);
     if (photoInputRef.current) photoInputRef.current.value = '';
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
@@ -254,6 +305,26 @@ export default function ReceiptUpload({ onUpload }: ReceiptUploadProps) {
               </p>
               <p className="text-yellow-600 dark:text-yellow-400 text-sm">
                 Extracting text, then enhancing with AI...
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Error Display */}
+      {ocrError && (
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+          <div className="flex items-center gap-3">
+            <X size={20} className="text-red-600" />
+            <div>
+              <p className="text-red-800 dark:text-red-200 font-medium">
+                Image Processing Failed
+              </p>
+              <p className="text-red-600 dark:text-red-400 text-sm">
+                {ocrError}
+              </p>
+              <p className="text-red-500 dark:text-red-400 text-xs mt-2">
+                💡 Try selecting a different image or use manual entry below
               </p>
             </div>
           </div>
