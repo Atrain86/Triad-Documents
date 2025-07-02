@@ -14,6 +14,7 @@ import InvoiceGenerator from './InvoiceGenerator';
 import EstimateGenerator from './EstimateGenerator';
 import PhotoCarousel from './PhotoCarousel';
 import ReceiptUpload from './ReceiptUpload';
+import CleanPhotoGrid from './clean-photo-grid';
 
 // Calendar function for A-Frame calendar integration
 const openWorkCalendar = (clientProject: Project | null = null) => {
@@ -1049,8 +1050,44 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         {/* Horizontal divider line */}
         <div className="border-b border-gray-200 dark:border-gray-700 mb-6"></div>
 
-        {/* Upload Controls - Enhanced with OpenAI OCR */}
+        {/* Photo Upload Section */}
         <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4 text-muted-foreground">
+            <Camera size={16} />
+            <span className="font-medium">Add Project Photos</span>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <Button
+              onClick={() => document.getElementById('photo-upload-input')?.click()}
+              className="h-16 bg-orange-600 hover:bg-orange-700 text-white transition-colors"
+            >
+              <Camera className="mr-2 h-5 w-5" />
+              Photos
+            </Button>
+            <input
+              id="photo-upload-input"
+              type="file"
+              multiple
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const files = e.target.files;
+                if (files && files.length > 0) {
+                  console.log('Direct photo upload:', files.length, 'files');
+                  photoUploadMutation.mutate(files);
+                }
+                e.target.value = ''; // Reset input
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Receipt/Supplies Upload Section - Enhanced with OpenAI OCR */}
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4 text-muted-foreground">
+            <FileText size={16} />
+            <span className="font-medium">Add Receipts/Supplies</span>
+          </div>
           <ReceiptUpload 
             onUpload={(files, extractedData) => {
               // Convert FileList to File array immediately to prevent it from becoming empty
