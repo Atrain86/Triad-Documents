@@ -1050,12 +1050,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         {/* Horizontal divider line */}
         <div className="border-b border-gray-200 dark:border-gray-700 mb-6"></div>
 
-        {/* Photo Upload Section */}
+        {/* Upload Controls */}
         <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4 text-muted-foreground">
-            <Camera size={16} />
-            <span className="font-medium">Add Project Photos</span>
-          </div>
           <div className="grid grid-cols-2 gap-4">
             <Button
               onClick={() => document.getElementById('photo-upload-input')?.click()}
@@ -1079,15 +1075,46 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                 e.target.value = ''; // Reset input
               }}
             />
+            <Button
+              onClick={() => document.getElementById('file-upload-input')?.click()}
+              className="h-16 bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+            >
+              <FileText className="mr-2 h-5 w-5" />
+              Receipts
+            </Button>
+            <input
+              id="file-upload-input"
+              type="file"
+              multiple
+              accept=".pdf,.doc,.docx,.txt,image/*"
+              className="hidden"
+              onChange={(e) => {
+                const files = e.target.files;
+                if (files && files.length > 0) {
+                  console.log('File upload triggered:', files.length, 'files');
+                  // Route files directly to receipt processing with OCR
+                  const filesArray = Array.from(files);
+                  const fileListObj = {
+                    ...filesArray,
+                    length: filesArray.length,
+                    item: (index: number) => filesArray[index] || null,
+                    [Symbol.iterator]: function* () {
+                      for (const file of filesArray) {
+                        yield file;
+                      }
+                    }
+                  } as FileList;
+                  
+                  receiptUploadMutation.mutate({ files: fileListObj, ocrData: undefined });
+                }
+                e.target.value = ''; // Reset input
+              }}
+            />
           </div>
         </div>
 
-        {/* Receipt/Supplies Upload Section - Enhanced with OpenAI OCR */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4 text-muted-foreground">
-            <FileText size={16} />
-            <span className="font-medium">Add Receipts/Supplies</span>
-          </div>
+        {/* Hidden ReceiptUpload for OCR processing - no longer visible */}
+        <div style={{ display: 'none' }}>
           <ReceiptUpload 
             onUpload={(files, extractedData) => {
               // Convert FileList to File array immediately to prevent it from becoming empty
@@ -1591,7 +1618,14 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           </form>
           </div>
           
-          <SimpleFilesList projectId={project.id} />
+          {/* Receipts Section */}
+          <div className="mt-6">
+            <div className="flex items-center gap-2 mb-4 text-muted-foreground">
+              <FileText size={16} />
+              <span className="font-medium">Receipts & Supplies</span>
+            </div>
+            <SimpleFilesList projectId={project.id} />
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
