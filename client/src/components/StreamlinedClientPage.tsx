@@ -1075,42 +1075,48 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                 e.target.value = ''; // Reset input
               }}
             />
-            <Button
-              onClick={() => document.getElementById('receipt-upload-input')?.click()}
-              className="h-16 bg-blue-600 hover:bg-blue-700 text-white transition-colors"
-            >
-              <FileText className="mr-2 h-5 w-5" />
-              Receipts
-            </Button>
-            <input
-              id="receipt-upload-input"
-              type="file"
-              multiple
-              accept="image/*,.pdf,.doc,.docx,.txt"
-              className="hidden"
-              onChange={(e) => {
-                const files = e.target.files;
-                if (files && files.length > 0) {
-                  console.log('Receipt upload triggered:', files.length, 'files');
-                  // Convert to array to prevent FileList from becoming empty
-                  const filesArray = Array.from(files);
-                  const fileListObj = {
-                    ...filesArray,
-                    length: filesArray.length,
-                    item: (index: number) => filesArray[index] || null,
-                    [Symbol.iterator]: function* () {
-                      for (const file of filesArray) {
-                        yield file;
-                      }
-                    }
-                  } as FileList;
-                  
-                  receiptUploadMutation.mutate({ files: fileListObj, ocrData: undefined });
-                }
-                e.target.value = ''; // Reset input
-              }}
-            />
+            <div>
+              <Button
+                onClick={() => {
+                  // Trigger the hidden ReceiptUpload component's file input
+                  const receiptInput = document.querySelector('#receipt-processing-area input[type="file"]') as HTMLInputElement;
+                  if (receiptInput) {
+                    receiptInput.click();
+                  }
+                }}
+                className="h-16 w-full bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+              >
+                <FileText className="mr-2 h-5 w-5" />
+                Receipts
+              </Button>
+            </div>
           </div>
+        </div>
+
+        {/* Hidden Receipt Processing with OpenAI Vision */}
+        <div id="receipt-processing-area" style={{ display: 'none' }}>
+          <ReceiptUpload 
+            onUpload={(files, extractedData) => {
+              // Convert FileList to File array immediately to prevent it from becoming empty
+              const filesArray = Array.from(files);
+              console.log('Receipt processing upload:', filesArray.length, 'files');
+              console.log('OCR extracted data:', extractedData);
+              
+              // Always route to receipt processing with OpenAI Vision data
+              const fileListObj = {
+                ...filesArray,
+                length: filesArray.length,
+                item: (index: number) => filesArray[index] || null,
+                [Symbol.iterator]: function* () {
+                  for (const file of filesArray) {
+                    yield file;
+                  }
+                }
+              } as FileList;
+              
+              receiptUploadMutation.mutate({ files: fileListObj, ocrData: extractedData });
+            }}
+          />
         </div>
 
         {/* Compression Progress Indicator */}
