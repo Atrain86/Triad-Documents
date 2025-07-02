@@ -126,9 +126,9 @@ Focus on accuracy. If you're unsure about the total amount, look for keywords li
       console.log('Raw OpenAI response:', content);
       
       if (cleanContent.startsWith('```json')) {
-        cleanContent = cleanContent.replace(/^```json\s*/i, '').replace(/\s*```$/s, '');
+        cleanContent = cleanContent.replace(/^```json\s*/i, '').replace(/\s*```$/, '');
       } else if (cleanContent.startsWith('```')) {
-        cleanContent = cleanContent.replace(/^```\s*/s, '').replace(/\s*```$/s, '');
+        cleanContent = cleanContent.replace(/^```\s*/, '').replace(/\s*```$/, '');
       }
       
       console.log('Cleaned content for parsing:', cleanContent);

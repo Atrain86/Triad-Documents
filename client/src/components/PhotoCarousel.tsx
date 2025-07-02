@@ -140,18 +140,23 @@ export default function PhotoCarousel({ photos, initialIndex, onClose }: PhotoCa
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-95 z-50 flex items-center justify-center">
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-95 z-50 flex items-center justify-center"
+      onClick={(e) => {
+        // Close when clicking background
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+    >
       {/* Close Button */}
       <button
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          onClose();
-        }}
-        className="absolute top-4 right-4 z-60 p-2 rounded-full bg-black bg-opacity-50 text-white hover:bg-opacity-70 transition-colors"
+        onClick={onClose}
+        className="absolute top-4 right-4 z-[60] p-3 rounded-full bg-white bg-opacity-20 text-white hover:bg-opacity-30 transition-all duration-200 backdrop-blur-sm"
         type="button"
+        style={{ zIndex: 9999 }}
       >
-        <X className="w-6 h-6" />
+        <X className="w-8 h-8" />
       </button>
 
       {/* Photo Counter */}

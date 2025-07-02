@@ -748,12 +748,28 @@ ${textBody}`;
               <div className="p-4 rounded-lg" style={{ backgroundColor: darkTheme.cardBg }}>
                 <h3 className="text-sm font-medium mb-3" style={{ color: darkTheme.text }}>Receipts & Materials</h3>
                 
-                {/* Display receipt items */}
-                <div className="space-y-2 mb-4">
+                {/* Display receipt items with OCR data */}
+                <div className="space-y-3 mb-4">
                   {receipts.map((receipt) => (
-                    <div key={receipt.id} className="flex justify-between items-center text-sm">
-                      <span style={{ color: darkTheme.text }}>{receipt.vendor}</span>
-                      <span style={{ color: darkTheme.text }}>${receipt.amount}</span>
+                    <div key={receipt.id} className="border rounded p-2" style={{ borderColor: darkTheme.border }}>
+                      <div className="flex justify-between items-center text-sm mb-1">
+                        <span className="font-medium" style={{ color: darkTheme.text }}>{receipt.vendor}</span>
+                        <span className="font-semibold" style={{ color: darkTheme.text }}>${receipt.amount}</span>
+                      </div>
+                      {receipt.items && receipt.items.length > 0 && (
+                        <div className="text-xs space-y-1">
+                          {receipt.items.map((item, index) => (
+                            <div key={index} className="pl-2" style={{ color: darkTheme.textSecondary }}>
+                              • {item}
+                            </div>
+                          ))}
+                          {receipt.ocrMethod && (
+                            <div className="text-xs mt-1 opacity-60" style={{ color: darkTheme.textSecondary }}>
+                              Processed with {receipt.ocrMethod} ({Math.round((receipt.confidence || 0) * 100)}% confidence)
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

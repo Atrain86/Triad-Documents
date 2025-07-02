@@ -466,7 +466,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   });
 
   const receiptUploadMutation = useMutation({
-    mutationFn: async ({ files, ocrData }: { files: FileList, ocrData?: { vendor: string; amount: string; items: string[]; total: string } }) => {
+    mutationFn: async ({ files, ocrData }: { files: FileList, ocrData?: { vendor: string; amount: string; items: string[]; total: string; method?: string; confidence?: number } }) => {
       console.log('Upload mutation started with', files.length, 'files');
       console.log('OCR data available:', ocrData);
       
@@ -488,11 +488,17 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           formData.append('vendor', ocrData.vendor);
           formData.append('amount', ocrData.amount);
           formData.append('description', ocrData.items.length > 0 ? ocrData.items.join(', ') : `OCR scan: ${file.name}`);
-          console.log('Using OCR data - Vendor:', ocrData.vendor, 'Amount:', ocrData.amount);
+          formData.append('items', JSON.stringify(ocrData.items));
+          formData.append('ocrMethod', ocrData.method || 'openai-vision');
+          formData.append('confidence', (ocrData.confidence || 0.8).toString());
+          console.log('Using OCR data - Vendor:', ocrData.vendor, 'Amount:', ocrData.amount, 'Items:', ocrData.items);
         } else {
           formData.append('vendor', file.name);
           formData.append('amount', '0');
           formData.append('description', `File upload: ${file.name}`);
+          formData.append('items', JSON.stringify(['Manual entry required']));
+          formData.append('ocrMethod', 'manual');
+          formData.append('confidence', '0.1');
         }
         
         formData.append('date', new Date().toISOString().split('T')[0]);
