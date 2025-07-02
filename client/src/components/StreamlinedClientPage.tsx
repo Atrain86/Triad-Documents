@@ -1050,43 +1050,37 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         {/* Horizontal divider line */}
         <div className="border-b border-gray-200 dark:border-gray-700 mb-6"></div>
 
-        {/* Photo Upload Section */}
+        {/* Upload Controls */}
         <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4 text-muted-foreground">
-            <Camera size={16} />
-            <span className="font-medium">Project Photos</span>
-          </div>
-          <Button
-            onClick={() => document.getElementById('photo-upload-input')?.click()}
-            className="h-16 w-full bg-orange-600 hover:bg-orange-700 text-white transition-colors"
-          >
-            <Camera className="mr-2 h-5 w-5" />
-            Add Photos
-          </Button>
-          <input
-            id="photo-upload-input"
-            type="file"
-            multiple
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => {
-              const files = e.target.files;
-              if (files && files.length > 0) {
-                console.log('Direct photo upload:', files.length, 'files');
-                photoUploadMutation.mutate(files);
-              }
-              e.target.value = ''; // Reset input
-            }}
-          />
-        </div>
-
-        {/* Receipt Processing Section with OpenAI Vision */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4 text-muted-foreground">
-            <FileText size={16} />
-            <span className="font-medium">Receipt Processing</span>
-          </div>
-          <ReceiptUpload 
+          <div className="grid grid-cols-2 gap-4">
+            <Button
+              onClick={() => document.getElementById('photo-upload-input')?.click()}
+              className="h-16 bg-orange-600 hover:bg-orange-700 text-white transition-colors"
+            >
+              <Camera className="mr-2 h-5 w-5" />
+              Photos
+            </Button>
+            <input
+              id="photo-upload-input"
+              type="file"
+              multiple
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const files = e.target.files;
+                if (files && files.length > 0) {
+                  console.log('Direct photo upload:', files.length, 'files');
+                  photoUploadMutation.mutate(files);
+                }
+                e.target.value = ''; // Reset input
+              }}
+            />
+            <div>
+              <div className="flex items-center gap-2 mb-2 text-muted-foreground">
+                <FileText size={14} />
+                <span className="text-sm">Receipt Processing</span>
+              </div>
+              <ReceiptUpload 
             onUpload={(files, extractedData) => {
               // Convert FileList to File array immediately to prevent it from becoming empty
               const filesArray = Array.from(files);
@@ -1108,6 +1102,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
               receiptUploadMutation.mutate({ files: fileListObj, ocrData: extractedData });
             }}
           />
+            </div>
+          </div>
         </div>
 
         {/* Compression Progress Indicator */}
