@@ -791,6 +791,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { recipientEmail, clientName, invoiceNumber, pdfData, receiptFilenames } = req.body;
       
+      console.log('Email send request:', {
+        recipientEmail,
+        clientName,
+        invoiceNumber,
+        hasReceiptFilenames: !!receiptFilenames
+      });
+      
       if (!recipientEmail || !clientName || !invoiceNumber || !pdfData) {
         return res.status(400).json({ error: 'Missing required fields' });
       }
