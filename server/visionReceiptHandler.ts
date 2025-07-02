@@ -79,7 +79,7 @@ Focus on accuracy. If you're unsure about the total amount, look for keywords li
 `;
 
     const payload = {
-      model: "gpt-4o-mini", // Using mini version for better quota availability
+      model: "gpt-4o", // Using full model to avoid mini rate limits
       messages: [
         {
           role: "system",
