@@ -69,7 +69,7 @@ Focus on accuracy. If you're unsure about the total amount, look for keywords li
 `;
 
     const payload = {
-      model: "gpt-4o",
+      model: "gpt-4o-mini", // Using mini version for better quota availability
       messages: [
         {
           role: "system",
@@ -93,6 +93,8 @@ Focus on accuracy. If you're unsure about the total amount, look for keywords li
     };
 
     console.log('Sending Vision API request...');
+    console.log('API Key (first 10 chars):', OPENAI_API_KEY?.substring(0, 10) + '...');
+    
     const response = await global.fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
