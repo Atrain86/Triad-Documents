@@ -1,39 +1,22 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "next-themes";
 import { queryClient } from "./lib/queryClient";
 import StreamlinedHomepage from "./components/StreamlinedHomepage";
 import StreamlinedClientPage from "./components/StreamlinedClientPage";
-import LoginGate from "./components/LoginGate";
+import LoginForm from "./components/auth/LoginForm";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { Toaster } from "@/components/ui/toaster";
+import { Button } from "@/components/ui/button";
+import { LogOut, Settings } from "lucide-react";
 import "./index.css";
 
-type View = "home" | "client";
+type View = "home" | "client" | "admin";
 
-function App() {
+function AppContent() {
+  const { user, logout, isLoading } = useAuth();
   const [currentView, setCurrentView] = useState<View>("home");
-  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(
-    null,
-  );
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-
-  useEffect(() => {
-    // Check if user is already authenticated or if this is owner access
-    const authStatus = sessionStorage.getItem('authenticated');
-    const isOwnerAccess = window.location.hostname.includes('replit.app') || 
-                         window.location.hostname.includes('replit.dev') ||
-                         window.location.hostname === 'localhost';
-    
-    // Owner gets direct access, others need passcode
-    if (isOwnerAccess) {
-      setIsAuthenticated(true);
-      sessionStorage.setItem('userType', 'owner');
-    } else {
-      setIsAuthenticated(authStatus === 'true');
-    }
-    setIsCheckingAuth(false);
-  }, []);
+  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
 
   const handleSelectProject = (projectId: number) => {
     setSelectedProjectId(projectId);
@@ -45,50 +28,89 @@ function App() {
     setSelectedProjectId(null);
   };
 
-  const handleAuthenticated = () => {
-    setIsAuthenticated(true);
-  };
-
-  if (isCheckingAuth) {
+  if (isLoading) {
     return (
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <div className="min-h-screen flex items-center justify-center bg-background">
-            <div>Loading...</div>
-          </div>
-          <Toaster />
-        </ThemeProvider>
-      </QueryClientProvider>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-lg">Loading...</div>
+      </div>
     );
   }
 
-  if (!isAuthenticated) {
-    return (
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <LoginGate onAuthenticated={handleAuthenticated} />
-          <Toaster />
-        </ThemeProvider>
-      </QueryClientProvider>
-    );
+  if (!user) {
+    return <LoginForm onSuccess={() => {}} />;
   }
 
   return (
+    <div className="min-h-screen bg-background">
+      {/* Header with user info and logout */}
+      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center space-x-4">
+            <img src="/aframe-logo.png" alt="A-Frame Painting" className="h-8 w-auto" />
+            <div className="flex items-center space-x-2">
+              <span className="text-sm font-medium">{user.firstName} {user.lastName}</span>
+              <span className={`text-xs px-2 py-1 rounded ${
+                user.role === 'admin' 
+                  ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' 
+                  : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'
+              }`}>
+                {user.role}
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center space-x-2">
+            {user.role === 'admin' && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentView(currentView === 'admin' ? 'home' : 'admin')}
+              >
+                <Settings className="h-4 w-4 mr-1" />
+                {currentView === 'admin' ? 'Projects' : 'Admin'}
+              </Button>
+            )}
+            <Button variant="outline" size="sm" onClick={logout}>
+              <LogOut className="h-4 w-4 mr-1" />
+              Logout
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      {/* Main content */}
+      <main>
+        {currentView === "home" && (
+          <StreamlinedHomepage onSelectProject={handleSelectProject} />
+        )}
+
+        {currentView === "client" && selectedProjectId && (
+          <StreamlinedClientPage
+            projectId={selectedProjectId}
+            onBack={handleBackToHome}
+          />
+        )}
+
+        {currentView === "admin" && user.role === 'admin' && (
+          <div className="p-6">
+            <h1 className="text-3xl font-bold mb-4">Admin Dashboard</h1>
+            <p className="text-gray-600 dark:text-gray-400">
+              Admin dashboard coming soon - authentication system active!
+            </p>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
+
+function App() {
+  return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-        <div className="min-h-screen bg-background">
-          {currentView === "home" && (
-            <StreamlinedHomepage onSelectProject={handleSelectProject} />
-          )}
-
-          {currentView === "client" && selectedProjectId && (
-            <StreamlinedClientPage
-              projectId={selectedProjectId}
-              onBack={handleBackToHome}
-            />
-          )}
-        </div>
-        <Toaster />
+        <AuthProvider>
+          <AppContent />
+          <Toaster />
+        </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

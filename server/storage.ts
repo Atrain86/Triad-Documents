@@ -5,29 +5,35 @@ import {
   dailyHours,
   toolsChecklist,
   estimates,
+  users,
+  tokenUsage,
   type Project, 
   type Photo, 
   type Receipt, 
   type DailyHours,
   type ToolsChecklist,
   type Estimate,
+  type User,
+  type TokenUsage,
   type InsertProject, 
   type InsertPhoto, 
   type InsertReceipt, 
   type InsertDailyHours,
   type InsertToolsChecklist,
-  type InsertEstimate
+  type InsertEstimate,
+  type InsertUser,
+  type InsertTokenUsage
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, like, not, isNotNull } from "drizzle-orm";
+import { eq, and, like, not, isNotNull, desc, sum } from "drizzle-orm";
 
 export interface IStorage {
   // Projects
-  getProjects(userType?: string): Promise<Project[]>;
-  getProject(id: number, userType?: string): Promise<Project | undefined>;
-  createProject(project: InsertProject, userType?: string): Promise<Project>;
-  updateProject(id: number, project: Partial<InsertProject>, userType?: string): Promise<Project | undefined>;
-  deleteProject(id: number, userType?: string): Promise<boolean>;
+  getProjects(userId?: number): Promise<Project[]>;
+  getProject(id: number, userId?: number): Promise<Project | undefined>;
+  createProject(project: InsertProject): Promise<Project>;
+  updateProject(id: number, project: Partial<InsertProject>): Promise<Project | undefined>;
+  deleteProject(id: number): Promise<boolean>;
 
   // Photos
   getProjectPhotos(projectId: number): Promise<Photo[]>;
@@ -59,31 +65,50 @@ export interface IStorage {
   updateEstimate(id: number, estimate: Partial<InsertEstimate>): Promise<Estimate | undefined>;
   deleteEstimate(id: number): Promise<boolean>;
 
-  // User management (for authentication)
-  upsertUser(user: { id: string; email: string; firstName: string; lastName: string; profileImageUrl: string }): Promise<void>;
+  // User management
+  getUserById(id: number): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
+  updateUserLastLogin(id: number): Promise<void>;
+  
+  // Token usage tracking
+  logTokenUsage(usage: InsertTokenUsage): Promise<TokenUsage>;
+  getUserTokenUsage(userId: number, limit?: number): Promise<TokenUsage[]>;
+  getTotalTokenUsage(): Promise<{ totalTokens: number; totalCost: number; }>;
+  getTokenUsageByUser(): Promise<{ userId: number; email: string; totalTokens: number; totalCost: number; }[]>;
 }
 
 export class DatabaseStorage implements IStorage {
-  async getProjects(userType?: string): Promise<Project[]> {
+  async getProjects(userId?: number): Promise<Project[]> {
     try {
-      // For demo mode, return empty array (clean slate)
-      if (userType === 'demo') {
-        return [];
+      if (userId) {
+        // Return projects for specific user
+        const result = await db.select().from(projects).where(eq(projects.userId, userId));
+        return result;
+      } else {
+        // Admin access - return all projects
+        const result = await db.select().from(projects);
+        return result;
       }
-      
-      // For owner, return all real projects
-      const result = await db.select().from(projects);
-      return result;
     } catch (error) {
       console.error('Error fetching projects:', error);
       throw new Error('Failed to fetch projects');
     }
   }
 
-  async getProject(id: number, userType?: string): Promise<Project | undefined> {
+  async getProject(id: number, userId?: number): Promise<Project | undefined> {
     try {
-      const [project] = await db.select().from(projects).where(eq(projects.id, id));
-      return project || undefined;
+      if (userId) {
+        // User-specific access - ensure user owns the project
+        const [project] = await db.select()
+          .from(projects)
+          .where(and(eq(projects.id, id), eq(projects.userId, userId)));
+        return project || undefined;
+      } else {
+        // Admin access - return any project
+        const [project] = await db.select().from(projects).where(eq(projects.id, id));
+        return project || undefined;
+      }
     } catch (error) {
       console.error('Error fetching project:', error);
       throw new Error('Failed to fetch project');
@@ -237,10 +262,129 @@ export class DatabaseStorage implements IStorage {
     return (result.rowCount || 0) > 0;
   }
 
-  async upsertUser(user: { id: string; email: string; firstName: string; lastName: string; profileImageUrl: string }): Promise<void> {
-    // For now, just log the user info since we don't have a users table
-    // This method is called by the authentication system but isn't critical for the core app functionality
-    console.log('User authentication:', user.email);
+  // User management methods
+  async getUserById(id: number): Promise<User | undefined> {
+    try {
+      const [user] = await db.select().from(users).where(eq(users.id, id));
+      return user;
+    } catch (error) {
+      console.error('Error fetching user by id:', error);
+      throw new Error('Failed to fetch user');
+    }
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    try {
+      const [user] = await db.select().from(users).where(eq(users.email, email));
+      return user;
+    } catch (error) {
+      console.error('Error fetching user by email:', error);
+      throw new Error('Failed to fetch user');
+    }
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    try {
+      const [user] = await db.insert(users).values(insertUser).returning();
+      return user;
+    } catch (error) {
+      console.error('Error creating user:', error);
+      throw new Error('Failed to create user');
+    }
+  }
+
+  async updateUserLastLogin(id: number): Promise<void> {
+    try {
+      await db.update(users)
+        .set({ lastLoginAt: new Date() })
+        .where(eq(users.id, id));
+    } catch (error) {
+      console.error('Error updating user last login:', error);
+      throw new Error('Failed to update user last login');
+    }
+  }
+
+  // Token usage tracking methods
+  async logTokenUsage(usage: InsertTokenUsage): Promise<TokenUsage> {
+    try {
+      const [tokenUsageRecord] = await db.insert(tokenUsage).values(usage).returning();
+      return tokenUsageRecord;
+    } catch (error) {
+      console.error('Error logging token usage:', error);
+      throw new Error('Failed to log token usage');
+    }
+  }
+
+  async getUserTokenUsage(userId: number, limit = 50): Promise<TokenUsage[]> {
+    try {
+      return await db.select()
+        .from(tokenUsage)
+        .where(eq(tokenUsage.userId, userId))
+        .orderBy(desc(tokenUsage.createdAt))
+        .limit(limit);
+    } catch (error) {
+      console.error('Error fetching user token usage:', error);
+      throw new Error('Failed to fetch user token usage');
+    }
+  }
+
+  async getTotalTokenUsage(): Promise<{ totalTokens: number; totalCost: number; }> {
+    try {
+      const result = await db
+        .select({
+          totalTokens: tokenUsage.tokensUsed,
+          totalCost: tokenUsage.cost
+        })
+        .from(tokenUsage);
+      
+      const totals = result.reduce(
+        (acc, row) => ({
+          totalTokens: acc.totalTokens + (row.totalTokens || 0),
+          totalCost: acc.totalCost + (row.totalCost || 0)
+        }),
+        { totalTokens: 0, totalCost: 0 }
+      );
+      
+      return totals;
+    } catch (error) {
+      console.error('Error calculating total token usage:', error);
+      throw new Error('Failed to calculate total token usage');
+    }
+  }
+
+  async getTokenUsageByUser(): Promise<{ userId: number; email: string; totalTokens: number; totalCost: number; }[]> {
+    try {
+      const result = await db
+        .select({
+          userId: users.id,
+          email: users.email,
+          tokensUsed: tokenUsage.tokensUsed,
+          cost: tokenUsage.cost
+        })
+        .from(tokenUsage)
+        .innerJoin(users, eq(tokenUsage.userId, users.id));
+      
+      // Group by user and sum tokens/cost
+      const userTotals = result.reduce((acc, row) => {
+        const key = `${row.userId}-${row.email}`;
+        if (!acc[key]) {
+          acc[key] = {
+            userId: row.userId,
+            email: row.email,
+            totalTokens: 0,
+            totalCost: 0
+          };
+        }
+        acc[key].totalTokens += row.tokensUsed || 0;
+        acc[key].totalCost += row.cost || 0;
+        return acc;
+      }, {} as Record<string, { userId: number; email: string; totalTokens: number; totalCost: number; }>);
+      
+      return Object.values(userTotals);
+    } catch (error) {
+      console.error('Error fetching token usage by user:', error);
+      throw new Error('Failed to fetch token usage by user');
+    }
   }
 }
 

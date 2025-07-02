@@ -11,6 +11,8 @@ import nodemailer from "nodemailer";
 import { sendInvoiceEmail, sendInvoiceEmailWithReceipts, sendEstimateEmail, sendEmail } from "./email";
 import { extractReceiptDataWithOpenAI, parseReceiptText, type ReceiptData } from "./openai";
 import { extractReceiptWithVision, extractReceiptFallback, type VisionReceiptData } from "./visionReceiptHandler";
+import { authenticateToken, requireAdmin, requireOwnershipOrAdmin, hashPassword, verifyPassword, generateToken, type AuthenticatedRequest } from "./auth";
+import { insertUserSchema } from "@shared/schema";
 
 // Configure multer for file uploads
 const uploadDir = path.join(process.cwd(), 'uploads');
@@ -65,40 +67,144 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  // Simple passcode authentication
-  app.post("/api/auth/verify", (req, res) => {
-    const { passcode } = req.body;
-    const demoPasscode = process.env.DEMO_PASSCODE || "demo2025";
+  // Authentication Routes
+  
+  // Register new user (first user becomes admin)
+  app.post("/api/auth/register", async (req, res) => {
+    try {
+      const userData = insertUserSchema.parse(req.body);
+      
+      // Check if this is the first user (becomes admin)
+      const existingUsers = await storage.getProjects(); // Check if any users exist via projects
+      const isFirstUser = existingUsers.length === 0;
+      
+      // Hash password
+      const hashedPassword = await hashPassword(userData.password);
+      
+      // Create user
+      const user = await storage.createUser({
+        ...userData,
+        password: hashedPassword,
+        role: isFirstUser ? 'admin' : 'client'
+      });
+      
+      // Generate token
+      const token = generateToken({
+        userId: user.id,
+        email: user.email,
+        role: user.role as 'admin' | 'client'
+      });
+      
+      res.json({
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role
+        },
+        token
+      });
+    } catch (error) {
+      console.error('Registration error:', error);
+      res.status(400).json({ error: 'Registration failed' });
+    }
+  });
+  
+  // Login user
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      // Find user
+      const user = await storage.getUserByEmail(email);
+      if (!user || !user.isActive) {
+        return res.status(401).json({ error: 'Invalid credentials' });
+      }
+      
+      // Verify password
+      const isValidPassword = await verifyPassword(password, user.password);
+      if (!isValidPassword) {
+        return res.status(401).json({ error: 'Invalid credentials' });
+      }
+      
+      // Update last login
+      await storage.updateUserLastLogin(user.id);
+      
+      // Generate token
+      const token = generateToken({
+        userId: user.id,
+        email: user.email,
+        role: user.role as 'admin' | 'client'
+      });
+      
+      res.json({
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role
+        },
+        token
+      });
+    } catch (error) {
+      console.error('Login error:', error);
+      res.status(500).json({ error: 'Login failed' });
+    }
+  });
+  
+  // Get current user
+  app.get("/api/auth/me", authenticateToken, (req: any, res) => {
+    if (!req.user) {
+      return res.status(401).json({ error: 'No user found' });
+    }
     
-    if (passcode === demoPasscode) {
-      res.json({ success: true });
-    } else {
-      res.status(401).json({ error: "Invalid passcode" });
+    res.json({
+      id: req.user.id,
+      email: req.user.email,
+      firstName: req.user.firstName,
+      lastName: req.user.lastName,
+      role: req.user.role
+    });
+  });
+  
+  // Admin-only route to get all users
+  app.get("/api/admin/users", authenticateToken, requireAdmin, async (req: any, res) => {
+    try {
+      // This will be implemented when we add the getAllUsers method to storage
+      res.json({ message: "Admin users endpoint - to be implemented" });
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      res.status(500).json({ error: 'Failed to fetch users' });
+    }
+  });
+  
+  // Admin dashboard - token usage analytics
+  app.get("/api/admin/analytics", authenticateToken, requireAdmin, async (req: any, res) => {
+    try {
+      const totalUsage = await storage.getTotalTokenUsage();
+      const userUsage = await storage.getTokenUsageByUser();
+      
+      res.json({
+        totalUsage,
+        userUsage,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Error fetching analytics:', error);
+      res.status(500).json({ error: 'Failed to fetch analytics' });
     }
   });
 
-  // Helper function to determine user type from request
-  const getUserType = (req: any) => {
-    const userAgent = req.get('User-Agent') || '';
-    const referer = req.get('Referer') || '';
-    const host = req.get('Host') || '';
-    
-    // Check if this is coming from owner's direct access (Replit workspace)
-    if (host.includes('replit.app') || host.includes('replit.dev') || host.includes('localhost')) {
-      return 'owner';
-    }
-    
-    // Otherwise, it's demo access
-    return 'demo';
-  };
-
   // Projects
-  app.get('/api/projects', async (req, res) => {
+  app.get('/api/projects', authenticateToken, async (req: any, res) => {
     try {
-      const userType = getUserType(req);
-      const projects = await storage.getProjects(userType);
+      const userId = req.user?.role === 'admin' ? undefined : req.user?.id;
+      const projects = await storage.getProjects(userId);
       res.json(projects);
     } catch (error) {
+      console.error('Error fetching projects:', error);
       res.status(500).json({ error: 'Failed to fetch projects' });
     }
   });

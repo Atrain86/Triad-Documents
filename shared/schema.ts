@@ -1,9 +1,10 @@
-import { pgTable, text, serial, integer, real, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, real, timestamp, varchar, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export const projects = pgTable("projects", {
   id: serial("id").primaryKey(),
+  userId: integer("user_id").default(1), // Owner of the project (defaults to first admin user)
   clientName: text("client_name").notNull(),
   address: text("address").notNull(),
   clientCity: text("client_city"),
@@ -97,6 +98,33 @@ export const estimates = pgTable("estimates", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// User authentication table
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
+  password: text("password").notNull(), // bcrypt hashed
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  role: text("role").notNull().default("client"), // 'admin' or 'client'
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  lastLoginAt: timestamp("last_login_at"),
+});
+
+// Token usage tracking for OpenAI API calls
+export const tokenUsage = pgTable("token_usage", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  operation: text("operation").notNull(), // 'receipt_ocr', 'vision_analysis', etc.
+  tokensUsed: integer("tokens_used").notNull(),
+  cost: real("cost").notNull(), // Cost in USD
+  model: text("model").notNull(), // 'gpt-4o', etc.
+  imageSize: integer("image_size"), // Image size in bytes for vision calls
+  success: boolean("success").default(true),
+  errorMessage: text("error_message"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const insertProjectSchema = createInsertSchema(projects).omit({
   id: true,
   createdAt: true,
@@ -128,6 +156,17 @@ export const insertEstimateSchema = createInsertSchema(estimates).omit({
   updatedAt: true,
 });
 
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  lastLoginAt: true,
+});
+
+export const insertTokenUsageSchema = createInsertSchema(tokenUsage).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type InsertProject = z.infer<typeof insertProjectSchema>;
 export type Project = typeof projects.$inferSelect;
 export type InsertPhoto = z.infer<typeof insertPhotoSchema>;
@@ -140,3 +179,7 @@ export type InsertToolsChecklist = z.infer<typeof insertToolsChecklistSchema>;
 export type ToolsChecklist = typeof toolsChecklist.$inferSelect;
 export type InsertEstimate = z.infer<typeof insertEstimateSchema>;
 export type Estimate = typeof estimates.$inferSelect;
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type User = typeof users.$inferSelect;
+export type InsertTokenUsage = z.infer<typeof insertTokenUsageSchema>;
+export type TokenUsage = typeof tokenUsage.$inferSelect;
