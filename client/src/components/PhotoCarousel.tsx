@@ -143,8 +143,13 @@ export default function PhotoCarousel({ photos, initialIndex, onClose }: PhotoCa
     <div className="fixed inset-0 bg-black bg-opacity-95 z-50 flex items-center justify-center">
       {/* Close Button */}
       <button
-        onClick={onClose}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onClose();
+        }}
         className="absolute top-4 right-4 z-60 p-2 rounded-full bg-black bg-opacity-50 text-white hover:bg-opacity-70 transition-colors"
+        type="button"
       >
         <X className="w-6 h-6" />
       </button>

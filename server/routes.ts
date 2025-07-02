@@ -294,18 +294,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } catch (openaiError) {
         console.error('OpenAI Vision processing failed:', openaiError);
         
-        // Use filename-based fallback extraction
-        const fallbackResult = extractReceiptFallback(req.file.originalname || 'receipt');
-        
-        // Clean up temp file
-        fs.unlinkSync(filePath);
+        // Try Tesseract OCR as fallback
+        try {
+          console.log('Falling back to Tesseract OCR processing...');
+          const tesseractResult = await extractReceiptDataWithOpenAI(base64Image);
+          
+          // Clean up temp file
+          fs.unlinkSync(filePath);
 
-        res.json({
-          success: true,
-          data: fallbackResult,
-          method: 'filename-fallback',
-          error: 'OpenAI Vision API failed, using filename extraction'
-        });
+          res.json({
+            success: true,
+            data: tesseractResult,
+            method: 'tesseract-fallback',
+            note: 'OpenAI Vision quota exceeded, processed with Tesseract OCR'
+          });
+        } catch (tesseractError) {
+          console.error('Tesseract fallback also failed:', tesseractError);
+          
+          // Use filename-based fallback as last resort
+          const fallbackResult = extractReceiptFallback(req.file.originalname || 'receipt');
+          
+          // Clean up temp file
+          fs.unlinkSync(filePath);
+
+          res.json({
+            success: true,
+            data: fallbackResult,
+            method: 'filename-fallback',
+            error: 'Both Vision API and OCR failed, manual entry required'
+          });
+        }
       }
 
     } catch (error) {
