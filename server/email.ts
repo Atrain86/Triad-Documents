@@ -45,8 +45,21 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
       attachments: options.attachments || [],
     };
 
+    console.log("Sending email with options:", {
+      from: mailOptions.from,
+      to: mailOptions.to,
+      subject: mailOptions.subject,
+      hasHtml: !!mailOptions.html,
+      hasAttachments: mailOptions.attachments.length > 0
+    });
+    
     const info = await transporter.sendMail(mailOptions);
     console.log("Email sent successfully:", info.response);
+    console.log("Email info:", {
+      messageId: info.messageId,
+      accepted: info.accepted,
+      rejected: info.rejected
+    });
     return true;
   } catch (error) {
     console.error("Email sending failed:", error);
