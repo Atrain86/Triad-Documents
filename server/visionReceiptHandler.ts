@@ -123,12 +123,15 @@ Focus on accuracy. If you're unsure about the total amount, look for keywords li
     try {
       // Clean up response - remove markdown code blocks if present
       let cleanContent = content.trim();
+      console.log('Raw OpenAI response:', content);
+      
       if (cleanContent.startsWith('```json')) {
-        cleanContent = cleanContent.replace(/^```json\s*/i, '').replace(/\s*```$/, '');
+        cleanContent = cleanContent.replace(/^```json\s*/i, '').replace(/\s*```$/s, '');
       } else if (cleanContent.startsWith('```')) {
-        cleanContent = cleanContent.replace(/^```\s*/, '').replace(/\s*```$/, '');
+        cleanContent = cleanContent.replace(/^```\s*/s, '').replace(/\s*```$/s, '');
       }
       
+      console.log('Cleaned content for parsing:', cleanContent);
       const parsedData = JSON.parse(cleanContent);
       
       // Validate required fields
