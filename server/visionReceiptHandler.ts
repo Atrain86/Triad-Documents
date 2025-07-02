@@ -119,9 +119,17 @@ Focus on accuracy. If you're unsure about the total amount, look for keywords li
       throw new Error('No response from OpenAI Vision API');
     }
 
-    // Parse JSON response
+    // Parse JSON response (handle markdown code blocks)
     try {
-      const parsedData = JSON.parse(content);
+      // Clean up response - remove markdown code blocks if present
+      let cleanContent = content.trim();
+      if (cleanContent.startsWith('```json')) {
+        cleanContent = cleanContent.replace(/^```json\s*/i, '').replace(/\s*```$/, '');
+      } else if (cleanContent.startsWith('```')) {
+        cleanContent = cleanContent.replace(/^```\s*/, '').replace(/\s*```$/, '');
+      }
+      
+      const parsedData = JSON.parse(cleanContent);
       
       // Validate required fields
       return {
