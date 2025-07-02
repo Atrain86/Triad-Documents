@@ -1075,34 +1075,41 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                 e.target.value = ''; // Reset input
               }}
             />
-            <div>
-              <div className="flex items-center gap-2 mb-2 text-muted-foreground">
-                <FileText size={14} />
-                <span className="text-sm">Receipt Processing</span>
-              </div>
-              <ReceiptUpload 
-            onUpload={(files, extractedData) => {
-              // Convert FileList to File array immediately to prevent it from becoming empty
-              const filesArray = Array.from(files);
-              console.log('Receipt processing upload:', filesArray.length, 'files');
-              console.log('OCR extracted data:', extractedData);
-              
-              // Always route to receipt processing since this is the receipt section
-              const fileListObj = {
-                ...filesArray,
-                length: filesArray.length,
-                item: (index: number) => filesArray[index] || null,
-                [Symbol.iterator]: function* () {
-                  for (const file of filesArray) {
-                    yield file;
-                  }
+            <Button
+              onClick={() => document.getElementById('receipt-upload-input')?.click()}
+              className="h-16 bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+            >
+              <FileText className="mr-2 h-5 w-5" />
+              Receipts
+            </Button>
+            <input
+              id="receipt-upload-input"
+              type="file"
+              multiple
+              accept="image/*,.pdf,.doc,.docx,.txt"
+              className="hidden"
+              onChange={(e) => {
+                const files = e.target.files;
+                if (files && files.length > 0) {
+                  console.log('Receipt upload triggered:', files.length, 'files');
+                  // Convert to array to prevent FileList from becoming empty
+                  const filesArray = Array.from(files);
+                  const fileListObj = {
+                    ...filesArray,
+                    length: filesArray.length,
+                    item: (index: number) => filesArray[index] || null,
+                    [Symbol.iterator]: function* () {
+                      for (const file of filesArray) {
+                        yield file;
+                      }
+                    }
+                  } as FileList;
+                  
+                  receiptUploadMutation.mutate({ files: fileListObj, ocrData: undefined });
                 }
-              } as FileList;
-              
-              receiptUploadMutation.mutate({ files: fileListObj, ocrData: extractedData });
-            }}
-          />
-            </div>
+                e.target.value = ''; // Reset input
+              }}
+            />
           </div>
         </div>
 
