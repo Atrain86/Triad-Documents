@@ -25,7 +25,7 @@ import {
   type InsertTokenUsage
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, like, not, isNotNull, desc, sum } from "drizzle-orm";
+import { eq, and, like, not, isNotNull, desc, sum, sql } from "drizzle-orm";
 
 export interface IStorage {
   // Projects
@@ -68,6 +68,7 @@ export interface IStorage {
   // User management
   getUserById(id: number): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getUserCount(): Promise<number>;
   createUser(user: InsertUser): Promise<User>;
   updateUserLastLogin(id: number): Promise<void>;
   
@@ -280,6 +281,16 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error('Error fetching user by email:', error);
       throw new Error('Failed to fetch user');
+    }
+  }
+
+  async getUserCount(): Promise<number> {
+    try {
+      const allUsers = await db.select().from(users);
+      return allUsers.length;
+    } catch (error) {
+      console.error('Error counting users:', error);
+      throw new Error('Failed to count users');
     }
   }
 

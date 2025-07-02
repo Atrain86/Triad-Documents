@@ -75,8 +75,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userData = insertUserSchema.parse(req.body);
       
       // Check if this is the first user (becomes admin)
-      const existingUsers = await storage.getProjects(); // Check if any users exist via projects
-      const isFirstUser = existingUsers.length === 0;
+      const userCount = await storage.getUserCount();
+      const isFirstUser = userCount === 0;
       
       // Hash password
       const hashedPassword = await hashPassword(userData.password);
