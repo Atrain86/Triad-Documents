@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import sharp from 'sharp';
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
@@ -26,17 +27,26 @@ export async function extractReceiptWithVision(imageBuffer: Buffer, originalName
   }
 
   try {
-    // Convert buffer to base64
-    const imageBase64 = imageBuffer.toString("base64");
-    
-    // Determine image type from file extension or buffer
-    let mimeType = 'image/jpeg';
-    if (originalName) {
-      const ext = path.extname(originalName).toLowerCase();
-      if (ext === '.png') mimeType = 'image/png';
-      else if (ext === '.gif') mimeType = 'image/gif';
-      else if (ext === '.webp') mimeType = 'image/webp';
-    }
+    // Compress image to reduce token usage dramatically
+    // Resize to max 800px width while maintaining aspect ratio
+    // Reduce quality to 80% - still very readable for OCR
+    const compressedBuffer = await sharp(imageBuffer)
+      .resize(800, null, { 
+        withoutEnlargement: true,
+        fit: 'inside'
+      })
+      .jpeg({ 
+        quality: 80,
+        progressive: true
+      })
+      .toBuffer();
+
+    console.log('Compressed image from', imageBuffer.length, 'bytes to', compressedBuffer.length, 'bytes');
+    console.log('Token reduction: ~', Math.round((1 - compressedBuffer.length / imageBuffer.length) * 100), '%');
+
+    // Convert compressed buffer to base64
+    const imageBase64 = compressedBuffer.toString("base64");
+    const mimeType = 'image/jpeg'; // Always JPEG after compression
 
     const prompt = `
 You are a helpful assistant. Extract receipt information from this image.
