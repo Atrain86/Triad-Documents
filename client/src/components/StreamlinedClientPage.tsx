@@ -1003,7 +1003,25 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                 const files = e.target.files;
                 if (files && files.length > 0) {
                   console.log('Direct photo upload:', files.length, 'files');
-                  photoUploadMutation.mutate(files);
+                  console.log('Files before mutation:', Array.from(files).map(f => f.name));
+                  
+                  // Convert to array first to prevent FileList issues
+                  const filesArray = Array.from(files);
+                  console.log('Files array:', filesArray.length, 'files');
+                  
+                  // Create a new FileList-like object
+                  const fileListObj = {
+                    ...filesArray,
+                    length: filesArray.length,
+                    item: (index: number) => filesArray[index] || null,
+                    [Symbol.iterator]: function* () {
+                      for (const file of filesArray) {
+                        yield file;
+                      }
+                    }
+                  } as FileList;
+                  
+                  photoUploadMutation.mutate(fileListObj);
                 }
                 e.target.value = ''; // Reset input
               }}
