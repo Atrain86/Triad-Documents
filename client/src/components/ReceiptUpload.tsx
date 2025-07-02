@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Camera, FileText, Loader2, Brain, Eye, X, Check, DollarSign } from 'lucide-react';
-import Tesseract from 'tesseract.js';
+// Tesseract removed - using OpenAI Vision API only
 import { processReceiptText, ProcessedReceiptData } from '../utils/receiptProcessing';
 
 interface ExtractedData {

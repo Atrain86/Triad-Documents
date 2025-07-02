@@ -43,6 +43,9 @@ export const receipts = pgTable("receipts", {
   description: text("description"),
   filename: text("filename"),
   originalName: text("original_name"),
+  items: text("items").array(), // Store itemized list from OCR
+  ocrMethod: text("ocr_method"), // Track how data was extracted
+  confidence: real("confidence"), // OCR confidence score
   date: timestamp("date").notNull(),
   uploadedAt: timestamp("uploaded_at").defaultNow().notNull(),
 });

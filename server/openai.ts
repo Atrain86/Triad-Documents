@@ -13,7 +13,7 @@ export interface ReceiptData {
 
 /**
  * Extract receipt data using OpenAI Vision API
- * Provides more accurate results than tesseract.js for receipt processing
+ * Direct processing with GPT-4o Vision for maximum accuracy
  */
 export async function extractReceiptDataWithOpenAI(base64Image: string): Promise<ReceiptData> {
   try {
@@ -63,8 +63,8 @@ export async function extractReceiptDataWithOpenAI(base64Image: string): Promise
 }
 
 /**
- * Fallback function that combines tesseract.js with basic text parsing
- * Used when OpenAI processing fails or for redundancy
+ * Basic text parsing fallback
+ * Used when OpenAI Vision API fails
  */
 export function parseReceiptText(text: string): Partial<ReceiptData> {
   const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);

@@ -278,6 +278,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         // Try new OpenAI Vision API first for better accuracy
         console.log('Processing with OpenAI Vision API...');
+        console.log('OPENAI_API_KEY available:', !!process.env.OPENAI_API_KEY);
         const ocrResult = await extractReceiptWithVision(imageBuffer, req.file.originalname);
         console.log('OpenAI Vision OCR result:', ocrResult);
 
@@ -294,36 +295,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } catch (openaiError) {
         console.error('OpenAI Vision processing failed:', openaiError);
         
-        // Try Tesseract OCR as fallback
-        try {
-          console.log('Falling back to Tesseract OCR processing...');
-          const tesseractResult = await extractReceiptDataWithOpenAI(base64Image);
-          
-          // Clean up temp file
-          fs.unlinkSync(filePath);
+        // Use filename-based fallback as last resort
+        console.log('Falling back to filename-based extraction...');
+        const fallbackResult = extractReceiptFallback(req.file.originalname || 'receipt');
+        
+        // Clean up temp file
+        fs.unlinkSync(filePath);
 
-          res.json({
-            success: true,
-            data: tesseractResult,
-            method: 'tesseract-fallback',
-            note: 'OpenAI Vision quota exceeded, processed with Tesseract OCR'
-          });
-        } catch (tesseractError) {
-          console.error('Tesseract fallback also failed:', tesseractError);
-          
-          // Use filename-based fallback as last resort
-          const fallbackResult = extractReceiptFallback(req.file.originalname || 'receipt');
-          
-          // Clean up temp file
-          fs.unlinkSync(filePath);
-
-          res.json({
-            success: true,
-            data: fallbackResult,
-            method: 'filename-fallback',
-            error: 'Both Vision API and OCR failed, manual entry required'
-          });
-        }
+        res.json({
+          success: true,
+          data: fallbackResult,
+          method: 'filename-fallback',
+          error: 'OpenAI Vision API failed, manual entry required'
+        });
       }
 
     } catch (error) {
@@ -428,6 +412,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         date: new Date(req.body.date),
         filename: req.file?.filename || null,
         originalName: req.file?.originalname || null,
+        items: req.body.items ? JSON.parse(req.body.items) : null, // Parse items array from OCR
+        ocrMethod: req.body.ocrMethod || null,
+        confidence: req.body.confidence ? parseFloat(req.body.confidence) : null,
       };
 
       console.log('Receipt data to validate:', receiptData);

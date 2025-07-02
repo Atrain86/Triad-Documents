@@ -17,7 +17,11 @@ export interface VisionReceiptData {
  * More reliable than Tesseract for receipt processing
  */
 export async function extractReceiptWithVision(imageBuffer: Buffer, originalName?: string): Promise<VisionReceiptData> {
+  console.log('Vision API function called with buffer size:', imageBuffer.length);
+  console.log('API key available:', !!OPENAI_API_KEY);
+  
   if (!OPENAI_API_KEY) {
+    console.error('No OpenAI API key found in environment');
     throw new Error('OpenAI API key not configured');
   }
 
@@ -88,6 +92,7 @@ Focus on accuracy. If you're unsure about the total amount, look for keywords li
       temperature: 0.1, // Low temperature for consistent results
     };
 
+    console.log('Sending Vision API request...');
     const response = await global.fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -97,8 +102,11 @@ Focus on accuracy. If you're unsure about the total amount, look for keywords li
       body: JSON.stringify(payload)
     });
 
+    console.log('Vision API response status:', response.status);
+    
     if (!response.ok) {
       const errorData = await response.text();
+      console.error('Vision API error response:', errorData);
       throw new Error(`OpenAI API error: ${response.status} - ${errorData}`);
     }
 
