@@ -328,6 +328,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // OCR text enhancement endpoint (text-only, much cheaper than vision)
+  app.post('/api/receipts/ocr-text', async (req, res) => {
+    try {
+      const { text } = req.body;
+      
+      if (!text || typeof text !== 'string') {
+        return res.status(400).json({ error: 'Text content required' });
+      }
+
+      console.log('Enhancing OCR text with GPT...');
+      
+      try {
+        // Use much cheaper text-only GPT processing
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+          },
+          body: JSON.stringify({
+            model: "gpt-4", // Using text-only model, much cheaper than vision
+            messages: [
+              {
+                role: "system",
+                content: "You are an assistant that extracts structured data from receipt text. You only return JSON with these fields: 'vendor', 'amount', and 'items'."
+              },
+              {
+                role: "user",
+                content: `Extract vendor name, total amount, and main items from this receipt text. Return JSON only.\n\n${text}`
+              }
+            ],
+            response_format: { type: "json_object" },
+            max_tokens: 200
+          })
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          const parsedData = JSON.parse(result.choices[0].message.content || '{}');
+          
+          res.json({
+            vendor: parsedData.vendor || 'Unknown Vendor',
+            amount: parseFloat(parsedData.amount) || 0,
+            items: Array.isArray(parsedData.items) ? parsedData.items : []
+          });
+        } else {
+          throw new Error(`OpenAI API error: ${response.status}`);
+        }
+        
+      } catch (apiError) {
+        console.warn('OpenAI enhancement failed, using basic parsing:', apiError);
+        
+        // Fallback to basic text parsing
+        const lines = text.split('\n').filter(line => line.trim());
+        const amountMatch = text.match(/\$?(\d+\.?\d*)/);
+        const amount = amountMatch ? parseFloat(amountMatch[1]) : 0;
+        
+        res.json({
+          vendor: lines[0] || 'Unknown Vendor',
+          amount,
+          items: lines.slice(1, 4).filter(line => line.length > 2)
+        });
+      }
+
+    } catch (error) {
+      console.error('Text enhancement error:', error);
+      res.status(500).json({ error: 'Failed to enhance text' });
+    }
+  });
+
   app.post('/api/projects/:id/receipts', upload.single('receipt'), async (req, res) => {
     try {
       console.log('Receipt upload request for project:', req.params.id);
