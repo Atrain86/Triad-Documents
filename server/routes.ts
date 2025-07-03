@@ -214,6 +214,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin dashboard - add historical token usage
+  app.post("/api/admin/token-usage/historical", authenticateToken, requireAdmin, async (req: any, res) => {
+    try {
+      const { tokens, cost, description } = req.body;
+      
+      if (!tokens || !cost || tokens <= 0 || cost <= 0) {
+        return res.status(400).json({ error: 'Valid tokens and cost values are required' });
+      }
+      
+      // Log historical usage for the admin user
+      const historicalEntry = await storage.logTokenUsage({
+        userId: req.user.id,
+        operation: description || 'historical_entry',
+        tokensUsed: parseInt(tokens),
+        cost: parseFloat(cost),
+        model: 'historical',
+        imageSize: 0,
+        success: true
+      });
+      
+      res.json(historicalEntry);
+    } catch (error) {
+      console.error('Error adding historical token usage:', error);
+      res.status(500).json({ error: 'Failed to add historical token usage' });
+    }
+  });
+
   // Projects
   app.get('/api/projects', authenticateToken, async (req: any, res) => {
     try {

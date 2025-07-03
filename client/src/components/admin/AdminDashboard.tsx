@@ -1,6 +1,12 @@
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Activity, DollarSign, Users, Eye, Brain, Calendar } from 'lucide-react';
+import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Activity, DollarSign, Users, Eye, Brain, Calendar, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
 
 interface TokenUsageStats {
   totalTokens: number;
@@ -24,6 +30,13 @@ interface TokenUsageEntry {
 }
 
 const AdminDashboard: React.FC = () => {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [historicalTokens, setHistoricalTokens] = useState('');
+  const [historicalCost, setHistoricalCost] = useState('');
+  const [description, setDescription] = useState('');
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
   // Fetch overall token usage statistics
   const { data: totalStats, isLoading: totalStatsLoading } = useQuery<TokenUsageStats>({
     queryKey: ['/api/admin/token-usage/total'],
@@ -38,6 +51,58 @@ const AdminDashboard: React.FC = () => {
   const { data: recentUsage, isLoading: recentUsageLoading } = useQuery<TokenUsageEntry[]>({
     queryKey: ['/api/admin/token-usage/recent'],
   });
+
+  // Mutation for adding historical usage
+  const addHistoricalUsage = useMutation({
+    mutationFn: async (data: { tokens: number; cost: number; description: string }) => {
+      return await apiRequest('POST', '/api/admin/token-usage/historical', data);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Historical usage added",
+        description: "Previous token usage has been recorded successfully.",
+      });
+      // Refresh all token usage queries
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/token-usage/total'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/token-usage/by-user'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/token-usage/recent'] });
+      
+      // Reset form and close dialog
+      setHistoricalTokens('');
+      setHistoricalCost('');
+      setDescription('');
+      setIsDialogOpen(false);
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to add historical usage. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleAddHistoricalUsage = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const tokens = parseInt(historicalTokens);
+    const cost = parseFloat(historicalCost);
+    
+    if (tokens <= 0 || cost <= 0) {
+      toast({
+        title: "Invalid input",
+        description: "Please enter valid positive numbers for tokens and cost.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    addHistoricalUsage.mutate({
+      tokens,
+      cost,
+      description: description || 'Historical usage entry'
+    });
+  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -61,7 +126,76 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+        
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-orange-600 hover:bg-orange-700 text-white">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Historical Usage
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Add Historical Token Usage</DialogTitle>
+              <DialogDescription>
+                Record previous OpenAI API usage to ensure accurate analytics.
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleAddHistoricalUsage}>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="tokens" className="text-right">
+                    Tokens Used
+                  </Label>
+                  <Input
+                    id="tokens"
+                    type="number"
+                    placeholder="e.g. 15000"
+                    value={historicalTokens}
+                    onChange={(e) => setHistoricalTokens(e.target.value)}
+                    className="col-span-3"
+                    required
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="cost" className="text-right">
+                    Total Cost ($)
+                  </Label>
+                  <Input
+                    id="cost"
+                    type="number"
+                    step="0.01"
+                    placeholder="e.g. 0.45"
+                    value={historicalCost}
+                    onChange={(e) => setHistoricalCost(e.target.value)}
+                    className="col-span-3"
+                    required
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="description" className="text-right">
+                    Description
+                  </Label>
+                  <Input
+                    id="description"
+                    placeholder="e.g. Previous receipt processing"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    className="col-span-3"
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button type="submit" disabled={addHistoricalUsage.isPending}>
+                  {addHistoricalUsage.isPending ? 'Adding...' : 'Add Usage'}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
       
       {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
