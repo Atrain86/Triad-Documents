@@ -28,25 +28,47 @@ export async function extractReceiptWithVision(imageBuffer: Buffer, originalName
   }
 
   try {
-    // Compress image to reduce token usage dramatically
-    // Resize to max 800px width while maintaining aspect ratio
-    // Reduce quality to 80% - still very readable for OCR
+    // Aggressive compression to minimize API costs while maintaining readability
+    // Resize to max 600px width (receipts are usually tall, not wide)
+    // Reduce quality to 60% - still readable for text extraction
+    // Convert to grayscale to reduce file size further
     const compressedBuffer = await sharp(imageBuffer)
-      .resize(800, null, { 
+      .resize(600, null, { 
         withoutEnlargement: true,
         fit: 'inside'
       })
+      .greyscale() // Remove color data - receipts are mostly black text on white
       .jpeg({ 
-        quality: 80,
-        progressive: true
+        quality: 60,
+        progressive: true,
+        mozjpeg: true // Use mozjpeg encoder for better compression
       })
       .toBuffer();
 
     console.log('Compressed image from', imageBuffer.length, 'bytes to', compressedBuffer.length, 'bytes');
     console.log('Token reduction: ~', Math.round((1 - compressedBuffer.length / imageBuffer.length) * 100), '%');
+    
+    // If still too large (>200KB), apply ultra-compression
+    let finalBuffer = compressedBuffer;
+    if (compressedBuffer.length > 200000) {
+      console.log('Applying ultra-compression for maximum cost savings...');
+      finalBuffer = await sharp(imageBuffer)
+        .resize(400, null, { 
+          withoutEnlargement: true,
+          fit: 'inside'
+        })
+        .greyscale()
+        .jpeg({ 
+          quality: 45,
+          progressive: true,
+          mozjpeg: true
+        })
+        .toBuffer();
+      console.log('Ultra-compressed to:', finalBuffer.length, 'bytes');
+    }
 
     // Convert compressed buffer to base64
-    const imageBase64 = compressedBuffer.toString("base64");
+    const imageBase64 = finalBuffer.toString("base64");
     const mimeType = 'image/jpeg'; // Always JPEG after compression
 
     const prompt = `
