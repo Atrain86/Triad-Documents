@@ -556,19 +556,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('Request file:', req.file ? { filename: req.file.filename, originalname: req.file.originalname, mimetype: req.file.mimetype, size: req.file.size } : 'No file');
       
       const projectId = parseInt(req.params.id);
+      let receiptData;
       
-      const receiptData = {
-        projectId,
-        vendor: req.body.vendor,
-        amount: req.body.amount, // Keep as string since schema expects text
-        description: req.body.description || null,
-        date: new Date(req.body.date),
-        filename: req.file?.filename || null,
-        originalName: req.file?.originalname || null,
-        items: req.body.items ? JSON.parse(req.body.items) : null, // Parse items array from OCR
-        ocrMethod: req.body.ocrMethod || null,
-        confidence: req.body.confidence ? parseFloat(req.body.confidence) : null,
-      };
+      // Check if this is an image file that should be processed with Vision API
+      if (req.file && req.file.mimetype.startsWith('image/')) {
+        console.log('Image file detected, processing with OpenAI Vision API...');
+        
+        try {
+          const filePath = path.join(uploadDir, req.file.filename);
+          const imageBuffer = fs.readFileSync(filePath);
+          
+          // Get current user from session for token tracking
+          const userId = req.session?.user?.claims?.sub;
+          console.log('Processing receipt for user:', userId);
+          
+          const ocrResult = await extractReceiptWithVision(imageBuffer, req.file.originalname, userId);
+          console.log('OpenAI Vision OCR result:', ocrResult);
+          
+          // Use OCR results
+          receiptData = {
+            projectId,
+            vendor: ocrResult.vendor,
+            amount: ocrResult.amount.toString(),
+            description: ocrResult.items.length > 0 ? ocrResult.items.join(', ') : `OCR scan: ${req.file.originalname}`,
+            date: ocrResult.date ? new Date(ocrResult.date) : new Date(),
+            filename: req.file.filename,
+            originalName: req.file.originalname,
+            items: ocrResult.items,
+            ocrMethod: ocrResult.method,
+            confidence: ocrResult.confidence,
+          };
+          console.log('Using Vision API data:', receiptData);
+          
+        } catch (visionError) {
+          console.error('Vision API failed, using manual entry:', visionError);
+          
+          // Fallback to manual entry format
+          receiptData = {
+            projectId,
+            vendor: req.body.vendor || req.file.originalname,
+            amount: req.body.amount || '0',
+            description: req.body.description || `File upload: ${req.file.originalname}`,
+            date: new Date(req.body.date || new Date().toISOString().split('T')[0]),
+            filename: req.file.filename,
+            originalName: req.file.originalname,
+            items: ['Manual entry required'],
+            ocrMethod: 'manual',
+            confidence: 0.1,
+          };
+        }
+      } else {
+        // Non-image file or manual entry
+        receiptData = {
+          projectId,
+          vendor: req.body.vendor,
+          amount: req.body.amount,
+          description: req.body.description || null,
+          date: new Date(req.body.date),
+          filename: req.file?.filename || null,
+          originalName: req.file?.originalname || null,
+          items: req.body.items ? JSON.parse(req.body.items) : null,
+          ocrMethod: req.body.ocrMethod || null,
+          confidence: req.body.confidence ? parseFloat(req.body.confidence) : null,
+        };
+      }
 
       console.log('Receipt data to validate:', receiptData);
       const validatedData = insertReceiptSchema.parse(receiptData);

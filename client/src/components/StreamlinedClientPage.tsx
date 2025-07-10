@@ -1044,91 +1044,21 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                 if (files && files.length > 0) {
                   console.log('Receipt upload triggered:', files.length, 'files');
                   
-                  const file = files[0];
-                  if (file.type.startsWith('image/')) {
-                    try {
-                      console.log('Processing image with OpenAI Vision API...');
-                      
-                      // Send file to OCR endpoint
-                      const formData = new FormData();
-                      formData.append('receipt', file);
-                      
-                      const response = await fetch('/api/receipts/ocr', {
-                        method: 'POST',
-                        body: formData
-                      });
-                        
-                      if (response.ok) {
-                        const result = await response.json();
-                        console.log('OpenAI Vision result:', result);
-                        
-                        // Upload with extracted data
-                        const filesArray = Array.from(files);
-                        const fileListObj = {
-                          ...filesArray,
-                          length: filesArray.length,
-                          item: (index: number) => filesArray[index] || null,
-                          [Symbol.iterator]: function* () {
-                            for (const file of filesArray) {
-                              yield file;
-                            }
-                          }
-                        } as FileList;
-                        
-                        receiptUploadMutation.mutate({ 
-                          files: fileListObj, 
-                          ocrData: result.data 
-                        });
-                      } else {
-                        console.error('OpenAI Vision API failed');
-                        // Fallback to manual upload
-                        const filesArray = Array.from(files);
-                        const fileListObj = {
-                          ...filesArray,
-                          length: filesArray.length,
-                          item: (index: number) => filesArray[index] || null,
-                          [Symbol.iterator]: function* () {
-                            for (const file of filesArray) {
-                              yield file;
-                            }
-                          }
-                        } as FileList;
-                        
-                        receiptUploadMutation.mutate({ files: fileListObj, ocrData: undefined });
+                  // Convert to proper FileList object
+                  const filesArray = Array.from(files);
+                  const fileListObj = {
+                    ...filesArray,
+                    length: filesArray.length,
+                    item: (index: number) => filesArray[index] || null,
+                    [Symbol.iterator]: function* () {
+                      for (const file of filesArray) {
+                        yield file;
                       }
-                    } catch (error) {
-                      console.error('OpenAI processing error:', error);
-                      // Fallback to manual upload
-                      const filesArray = Array.from(files);
-                      const fileListObj = {
-                        ...filesArray,
-                        length: filesArray.length,
-                        item: (index: number) => filesArray[index] || null,
-                        [Symbol.iterator]: function* () {
-                          for (const file of filesArray) {
-                            yield file;
-                          }
-                        }
-                      } as FileList;
-                      
-                      receiptUploadMutation.mutate({ files: fileListObj, ocrData: undefined });
                     }
-                  } else {
-                    // Non-image files go directly to receipt upload without OCR
-                    const filesArray = Array.from(files);
-                    const fileListObj = {
-                      ...filesArray,
-                      length: filesArray.length,
-                      item: (index: number) => filesArray[index] || null,
-                      [Symbol.iterator]: function* () {
-                        for (const file of filesArray) {
-                          yield file;
-                        }
-                      }
-                    } as FileList;
-                    
-                    receiptUploadMutation.mutate({ files: fileListObj, ocrData: undefined });
-                  }
+                  } as FileList;
+                  
+                  // Direct upload - Vision API processing now handled by server
+                  receiptUploadMutation.mutate({ files: fileListObj, ocrData: undefined });
                 }
                 e.target.value = ''; // Reset input
               }}

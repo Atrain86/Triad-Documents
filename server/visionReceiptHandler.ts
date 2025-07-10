@@ -124,9 +124,11 @@ Focus on accuracy. If you're unsure about the total amount, look for keywords li
     };
 
     console.log('Sending Vision API request...');
-    console.log('API Key (first 10 chars):', OPENAI_API_KEY?.substring(0, 10) + '...');
+    console.log('API Key available:', !!OPENAI_API_KEY);
+    console.log('Image size:', finalBuffer.length, 'bytes');
+    console.log('Base64 preview (first 50 chars):', imageBase64.substring(0, 50) + '...');
     
-    const response = await global.fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${OPENAI_API_KEY}`,
