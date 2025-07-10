@@ -373,13 +373,14 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
           {filteredProjects.map(project => (
             <Card
               key={project.id}
-              className="p-5 transition-all hover:shadow-md hover:border-primary/50 bg-card relative group"
+              className="p-5 transition-all hover:shadow-md hover:border-primary/50 bg-card relative group cursor-pointer"
+              onClick={() => onSelectProject(project.id)}
+              style={{ 
+                touchAction: 'manipulation',
+                WebkitTapHighlightColor: 'transparent'
+              }}
             >
-              <div 
-                className="cursor-pointer"
-                onClick={() => onSelectProject(project.id)}
-              >
-                <div className="flex justify-between items-start mb-3">
+              <div className="flex justify-between items-start mb-3">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <User size={16} className="text-muted-foreground" />
@@ -438,7 +439,6 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
                     </button>
                   </div>
                 </div>
-              </div>
               
               <div className="flex items-center justify-between pt-3 border-t border-border">
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
