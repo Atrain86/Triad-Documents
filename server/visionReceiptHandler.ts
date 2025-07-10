@@ -40,8 +40,7 @@ export async function extractReceiptWithVision(imageBuffer: Buffer, originalName
       .greyscale() // Remove color data - receipts are mostly black text on white
       .jpeg({ 
         quality: 60,
-        progressive: true,
-        mozjpeg: true // Use mozjpeg encoder for better compression
+        progressive: true
       })
       .toBuffer();
 
@@ -60,8 +59,7 @@ export async function extractReceiptWithVision(imageBuffer: Buffer, originalName
         .greyscale()
         .jpeg({ 
           quality: 45,
-          progressive: true,
-          mozjpeg: true
+          progressive: true
         })
         .toBuffer();
       console.log('Ultra-compressed to:', finalBuffer.length, 'bytes');
@@ -161,7 +159,7 @@ Focus on accuracy. If you're unsure about the total amount, look for keywords li
           tokensUsed,
           cost: totalCost,
           model: 'gpt-4o',
-          imageSize: compressedBuffer.length,
+          imageSize: finalBuffer.length,
           success: true
         });
         
@@ -206,7 +204,28 @@ Focus on accuracy. If you're unsure about the total amount, look for keywords li
 
   } catch (error) {
     console.error('Vision API extraction failed:', error);
-    throw error;
+    console.error('Error details:', error.message);
+    
+    // Log failed token usage attempt for analytics
+    if (userId) {
+      try {
+        await storage.logTokenUsage({
+          userId,
+          operation: 'receipt_ocr_failed',
+          tokensUsed: 0,
+          cost: 0,
+          model: 'gpt-4o',
+          imageSize: imageBuffer.length,
+          success: false,
+          errorMessage: error.message || 'Unknown error'
+        });
+      } catch (logError) {
+        console.error('Failed to log failed token usage:', logError);
+      }
+    }
+    
+    // Return fallback data instead of throwing
+    return extractReceiptFallback(originalName || 'unknown');
   }
 }
 
