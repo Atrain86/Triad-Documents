@@ -985,10 +985,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
         {/* Upload Controls */}
         <div className="mb-8">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="flex justify-center">
             <Button
               onClick={() => document.getElementById('photo-upload-input')?.click()}
-              className="h-16 bg-orange-600 hover:bg-orange-700 text-white transition-colors"
+              className="h-16 w-48 bg-orange-600 hover:bg-orange-700 text-white transition-colors"
             >
               <Camera className="mr-2 h-5 w-5" />
               Photos
@@ -1022,43 +1022,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                   } as FileList;
                   
                   photoUploadMutation.mutate(fileListObj);
-                }
-                e.target.value = ''; // Reset input
-              }}
-            />
-            <Button
-              onClick={() => document.getElementById('receipt-upload-input')?.click()}
-              className="h-16 bg-blue-600 hover:bg-blue-700 text-white transition-colors"
-            >
-              <FileText className="mr-2 h-5 w-5" />
-              Receipts
-            </Button>
-            <input
-              id="receipt-upload-input"
-              type="file"
-              multiple
-              accept="image/*,.pdf,.doc,.docx,.txt"
-              className="hidden"
-              onChange={async (e) => {
-                const files = e.target.files;
-                if (files && files.length > 0) {
-                  console.log('Receipt upload triggered:', files.length, 'files');
-                  
-                  // Convert to proper FileList object
-                  const filesArray = Array.from(files);
-                  const fileListObj = {
-                    ...filesArray,
-                    length: filesArray.length,
-                    item: (index: number) => filesArray[index] || null,
-                    [Symbol.iterator]: function* () {
-                      for (const file of filesArray) {
-                        yield file;
-                      }
-                    }
-                  } as FileList;
-                  
-                  // Direct upload - Vision API processing now handled by server
-                  receiptUploadMutation.mutate({ files: fileListObj, ocrData: undefined });
                 }
                 e.target.value = ''; // Reset input
               }}
@@ -1459,6 +1422,47 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
         {/* Receipts Section */}
         <div className="mb-8">
+          {/* Receipts Upload Button */}
+          <div className="mb-4 flex justify-center">
+            <Button
+              onClick={() => document.getElementById('receipt-upload-input')?.click()}
+              className="h-12 w-48 bg-green-600 hover:bg-green-700 text-white transition-colors"
+            >
+              <FileText className="mr-2 h-5 w-5" />
+              Receipts
+            </Button>
+            <input
+              id="receipt-upload-input"
+              type="file"
+              multiple
+              accept="image/*,.pdf,.doc,.docx,.txt"
+              className="hidden"
+              onChange={async (e) => {
+                const files = e.target.files;
+                if (files && files.length > 0) {
+                  console.log('Receipt upload triggered:', files.length, 'files');
+                  
+                  // Convert to proper FileList object
+                  const filesArray = Array.from(files);
+                  const fileListObj = {
+                    ...filesArray,
+                    length: filesArray.length,
+                    item: (index: number) => filesArray[index] || null,
+                    [Symbol.iterator]: function* () {
+                      for (const file of filesArray) {
+                        yield file;
+                      }
+                    }
+                  } as FileList;
+                  
+                  // Direct upload - Vision API processing now handled by server
+                  receiptUploadMutation.mutate({ files: fileListObj, ocrData: undefined });
+                }
+                e.target.value = ''; // Reset input
+              }}
+            />
+          </div>
+
           <div className="flex items-center gap-2 mb-4 text-muted-foreground">
             <ReceiptIcon size={16} />
             <span className="font-medium">Receipts & Expenses</span>
