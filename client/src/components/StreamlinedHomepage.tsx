@@ -337,17 +337,37 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
         )}
 
         <div className="space-y-4">
-          {filteredProjects.map(project => (
-            <Card
-              key={project.id}
-              className="p-0 transition-all hover:shadow-md hover:border-primary/50 bg-card relative group"
-            >
-              <button
-                className="w-full p-5 text-left cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-                onClick={() => onSelectProject(project.id)}
+          {filteredProjects.map(project => {
+            const handleNavigation = () => {
+              console.log('Navigating to project:', project.id);
+              onSelectProject(project.id);
+            };
+
+            return (
+              <Card
+                key={project.id}
+                className="p-5 transition-all hover:shadow-md hover:border-primary/50 bg-card relative group cursor-pointer"
+                onClick={handleNavigation}
+                onTouchStart={(e) => {
+                  // Add visual feedback on touch
+                  e.currentTarget.style.opacity = '0.8';
+                }}
+                onTouchEnd={(e) => {
+                  // Reset visual feedback and trigger navigation
+                  e.currentTarget.style.opacity = '1';
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleNavigation();
+                }}
+                onTouchCancel={(e) => {
+                  // Reset visual feedback if touch is cancelled
+                  e.currentTarget.style.opacity = '1';
+                }}
                 style={{ 
                   touchAction: 'manipulation',
-                  WebkitTapHighlightColor: 'transparent'
+                  WebkitTapHighlightColor: 'rgba(0,0,0,0)',
+                  WebkitUserSelect: 'none',
+                  userSelect: 'none'
                 }}
               >
                 <div className="flex justify-between items-start mb-3">
@@ -407,10 +427,8 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
                     />
                   </div>
                 </div>
-              </button>
-              
-              {/* Action Buttons - Outside button to prevent nested button issues */}
-              <div className="absolute top-5 right-5 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                {/* Action Buttons */}
+                <div className="absolute top-5 right-5 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -449,9 +467,10 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
                 >
                   <Trash2 size={16} />
                 </button>
-              </div>
-            </Card>
-          ))}
+                </div>
+              </Card>
+            );
+          })}
         </div>
 
         {projects.length === 0 && !isLoading && (
