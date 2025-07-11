@@ -343,28 +343,54 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
               onSelectProject(project.id);
             };
 
+            let touchStartY = 0;
+            let touchStartTime = 0;
+            let hasMoved = false;
+
             return (
               <Card
                 key={project.id}
                 className="p-5 transition-all hover:shadow-md hover:border-primary/50 bg-card relative group cursor-pointer"
                 onClick={handleNavigation}
                 onTouchStart={(e) => {
+                  // Record initial touch position and time
+                  touchStartY = e.touches[0].clientY;
+                  touchStartTime = Date.now();
+                  hasMoved = false;
+                  
                   // Add visual feedback on touch
                   e.currentTarget.style.opacity = '0.8';
                 }}
+                onTouchMove={(e) => {
+                  // Check if user is scrolling
+                  const currentY = e.touches[0].clientY;
+                  const deltaY = Math.abs(currentY - touchStartY);
+                  
+                  if (deltaY > 10) { // 10px threshold for scroll detection
+                    hasMoved = true;
+                    // Reset visual feedback if scrolling
+                    e.currentTarget.style.opacity = '1';
+                  }
+                }}
                 onTouchEnd={(e) => {
-                  // Reset visual feedback and trigger navigation
+                  // Reset visual feedback
                   e.currentTarget.style.opacity = '1';
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleNavigation();
+                  
+                  // Only navigate if it was a quick tap without scrolling
+                  const touchDuration = Date.now() - touchStartTime;
+                  
+                  if (!hasMoved && touchDuration < 300) { // Quick tap under 300ms
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleNavigation();
+                  }
                 }}
                 onTouchCancel={(e) => {
                   // Reset visual feedback if touch is cancelled
                   e.currentTarget.style.opacity = '1';
                 }}
                 style={{ 
-                  touchAction: 'manipulation',
+                  touchAction: 'pan-y', // Allow vertical scrolling
                   WebkitTapHighlightColor: 'rgba(0,0,0,0)',
                   WebkitUserSelect: 'none',
                   userSelect: 'none'
