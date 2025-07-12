@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
+import ErrorTooltip from './ui/error-tooltip';
+import { useErrorTooltip } from '@/hooks/useErrorTooltip';
 
 interface PhotoCarouselProps {
   photos: Array<{ id: number; filename: string; description?: string | null }>;
@@ -9,6 +11,9 @@ interface PhotoCarouselProps {
 }
 
 export default function PhotoCarousel({ photos, initialIndex, onClose, onDelete }: PhotoCarouselProps) {
+  // Error tooltip system
+  const { errorState, showDeleteError, hideError } = useErrorTooltip();
+  
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState(0);
@@ -166,13 +171,19 @@ export default function PhotoCarousel({ photos, initialIndex, onClose, onDelete 
           onClick={() => {
             const currentPhoto = photos[currentIndex];
             if (currentPhoto) {
-              onDelete(currentPhoto.id);
-              // If this was the last photo or only photo, close carousel
-              if (photos.length === 1) {
-                onClose();
-              } else if (currentIndex === photos.length - 1) {
-                // If deleting last photo, go to previous
-                setCurrentIndex(currentIndex - 1);
+              try {
+                onDelete(currentPhoto.id);
+                // If this was the last photo or only photo, close carousel
+                if (photos.length === 1) {
+                  onClose();
+                } else if (currentIndex === photos.length - 1) {
+                  // If deleting last photo, go to previous
+                  setCurrentIndex(currentIndex - 1);
+                }
+              } catch (error) {
+                showDeleteError('photo', error as Error, () => {
+                  onDelete(currentPhoto.id);
+                });
               }
             }
           }}
@@ -266,6 +277,13 @@ export default function PhotoCarousel({ photos, initialIndex, onClose, onDelete 
           />
         ))}
       </div>
+
+      {/* Error Tooltip for PhotoCarousel */}
+      <ErrorTooltip
+        isVisible={errorState.isVisible}
+        context={errorState.context}
+        onClose={hideError}
+      />
     </div>
   );
 }

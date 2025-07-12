@@ -13,6 +13,9 @@ import type { Project, Photo, Receipt, ToolsChecklist, DailyHours } from '@share
 import InvoiceGenerator from './InvoiceGenerator';
 import EstimateGenerator from './EstimateGenerator';
 import PhotoCarousel from './PhotoCarousel';
+import ErrorTooltip from './ui/error-tooltip';
+import SuccessTooltip from './ui/success-tooltip';
+import { useErrorTooltip } from '@/hooks/useErrorTooltip';
 import { ReactSortable } from 'react-sortablejs';
 
 // Calendar function for A-Frame calendar integration
@@ -251,6 +254,12 @@ interface StreamlinedClientPageProps {
 }
 
 export default function StreamlinedClientPage({ projectId, onBack }: StreamlinedClientPageProps) {
+  // Error tooltip system
+  const { errorState, showUploadError, showDeleteError, showSaveError, showLoadError, hideError } = useErrorTooltip();
+  
+  // Success message state
+  const [successMessage, setSuccessMessage] = useState({ isVisible: false, message: '' });
+
   // File input refs
   const photoInputRef = useRef<HTMLInputElement>(null);
   const receiptInputRef = useRef<HTMLInputElement>(null);
@@ -364,6 +373,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     },
     onError: (error) => {
       console.error('Edit project failed:', error);
+      showSaveError('project', error, () => {
+        editProjectMutation.mutate(editForm);
+      });
     },
   });
 
@@ -428,6 +440,11 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     },
     onError: (error) => {
       console.error('Add hours failed:', error);
+      showSaveError('hours', error, () => {
+        if (selectedDate && hoursInput) {
+          handleAddHours();
+        }
+      });
     },
   });
 
@@ -459,6 +476,11 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     },
     onError: (error) => {
       console.error('Bulk delete failed:', error);
+      showDeleteError('photo', error, () => {
+        if (selectedPhotos.size > 0) {
+          deleteSelectedPhotosMutation.mutate(Array.from(selectedPhotos));
+        }
+      });
     },
   });
 
@@ -677,6 +699,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       if (photoInputRef.current) {
         photoInputRef.current.value = '';
       }
+      // Show success message
+      setSuccessMessage({ isVisible: true, message: 'Photos uploaded successfully!' });
     },
     onError: (error) => {
       console.error('Photo upload failed:', error);
@@ -686,6 +710,13 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         totalFiles: 0,
         originalSize: 0,
         compressedSize: 0,
+      });
+      
+      // Show user-friendly error tooltip
+      showUploadError('photo', error, () => {
+        if (photoInputRef.current?.files) {
+          uploadPhotosMutation.mutate(photoInputRef.current.files);
+        }
       });
     },
   });
@@ -716,6 +747,13 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     },
     onError: (error) => {
       console.error('Receipt upload failed:', error);
+      
+      // Show user-friendly error tooltip
+      showUploadError('receipt', error, () => {
+        if (receiptInputRef.current?.files) {
+          uploadReceiptsMutation.mutate(receiptInputRef.current.files);
+        }
+      });
     },
   });
 
@@ -1685,6 +1723,20 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Error Tooltip System */}
+      <ErrorTooltip
+        isVisible={errorState.isVisible}
+        context={errorState.context}
+        onClose={hideError}
+      />
+
+      {/* Success Tooltip System */}
+      <SuccessTooltip
+        isVisible={successMessage.isVisible}
+        message={successMessage.message}
+        onClose={() => setSuccessMessage({ isVisible: false, message: '' })}
+      />
     </div>
   );
 }
