@@ -47,7 +47,7 @@ function AppContent() {
       <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3">
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-4">
-            <img src="/aframe-logo.png" alt="A-Frame Painting" className="h-8 w-auto" />
+            <img src="/paint-brain-logo.png" alt="Paint Brain" className="h-8 w-auto" />
             <div className="flex items-center space-x-2">
               <span className="text-sm font-medium">{user.firstName} {user.lastName}</span>
               <span className={`text-xs px-2 py-1 rounded ${
