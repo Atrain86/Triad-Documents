@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { apiRequest } from '@/lib/queryClient';
+
 import { generateMapsLink, generateDirectionsLink } from '@/lib/maps';
 import { compressMultipleImages, formatFileSize } from '@/lib/imageCompression';
 import type { Project, Photo, Receipt, ToolsChecklist, DailyHours } from '@shared/schema';
@@ -583,12 +583,16 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         formData.append('receipts', file);
       });
 
-      const response = await apiRequest(`/api/projects/${projectId}/receipts`, {
+      const response = await fetch(`/api/projects/${projectId}/receipts`, {
         method: 'POST',
         body: formData,
       });
-
-      return response;
+      
+      if (!response.ok) {
+        throw new Error(`Receipt upload failed: ${response.status} ${response.statusText}`);
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/receipts`] });

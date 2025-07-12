@@ -8,11 +8,14 @@ async function throwIfResNotOk(res: Response) {
 }
 
 export async function apiRequest(
-  method: string,
   url: string,
-  data?: unknown | undefined,
+  options: {
+    method: string;
+    body?: unknown | undefined;
+  },
 ): Promise<Response> {
-  const isFormData = data instanceof FormData;
+  const { method, body } = options;
+  const isFormData = body instanceof FormData;
   const token = localStorage.getItem('authToken');
   
   const headers: Record<string, string> = {};
@@ -21,14 +24,14 @@ export async function apiRequest(
     headers['Authorization'] = `Bearer ${token}`;
   }
   
-  if (!isFormData && data) {
+  if (!isFormData && body) {
     headers['Content-Type'] = 'application/json';
   }
   
   const res = await fetch(url, {
     method,
     headers,
-    body: isFormData ? data : data ? JSON.stringify(data) : undefined,
+    body: isFormData ? body : body ? JSON.stringify(body) : undefined,
     credentials: "include",
   });
 
