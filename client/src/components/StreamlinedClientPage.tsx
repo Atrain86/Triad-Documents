@@ -422,15 +422,13 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       return response.json();
     },
     onSuccess: () => {
-      try {
-        queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/hours`] });
-        setShowDatePicker(false);
-        setSelectedDate('');
-        setHoursInput('');
-        setDescriptionInput('');
-      } catch (error) {
-        console.error('Error in addHoursMutation onSuccess:', error);
-      }
+      // Temporarily simplified to identify temporal dead zone error
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/hours`] });
+      // TODO: Re-enable these once runtime error is resolved
+      // setShowDatePicker(false);
+      // setSelectedDate('');
+      // setHoursInput('');
+      // setDescriptionInput('');
     },
     onError: (error) => {
       console.error('Add hours failed:', error);
