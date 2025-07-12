@@ -433,6 +433,12 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     },
   });
 
+  // Helper functions
+  const clearSelection = () => {
+    setSelectedPhotos(new Set());
+    setIsSelecting(false);
+  };
+
   const deleteSelectedPhotosMutation = useMutation({
     mutationFn: async (photoIds: number[]) => {
       const deletePromises = photoIds.map(id => 
@@ -458,7 +464,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     },
   });
 
-  // Helper functions
   const formatDateForInput = (date: Date) => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -544,11 +549,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       
       return newSet;
     });
-  };
-
-  const clearSelection = () => {
-    setSelectedPhotos(new Set());
-    setIsSelecting(false);
   };
 
   const deleteSelectedPhotos = () => {
