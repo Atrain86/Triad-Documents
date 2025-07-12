@@ -54,18 +54,18 @@ const LoginForm: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
-        {/* A-Frame Painting Logo */}
+        {/* Paint Brain Logo */}
         <div className="text-center">
           <img 
-            src="/aframe-logo.png" 
-            alt="A-Frame Painting" 
-            className="h-24 mx-auto mb-4"
+            src="/paint-brain-logo.png" 
+            alt="Paint Brain" 
+            className="h-32 mx-auto mb-6"
           />
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            A-Frame Painting
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            Paint Brain
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Project Management System
+            Smart Project Management for Painting Professionals
           </p>
         </div>
 
@@ -126,7 +126,7 @@ const LoginForm: React.FC = () => {
                 <CardHeader>
                   <CardTitle>Create Account</CardTitle>
                   <CardDescription>
-                    Register to get started with A-Frame Painting
+                    Register to get started with Paint Brain
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
