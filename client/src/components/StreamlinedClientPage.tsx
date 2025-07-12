@@ -342,6 +342,58 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     queryKey: [`/api/projects/${projectId}/hours`],
   });
 
+  // Critical mutations that need to be declared early
+  const editProjectMutation = useMutation({
+    mutationFn: async (projectData: any) => {
+      const response = await fetch(`/api/projects/${projectId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(projectData),
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to edit project: ${response.status} - ${errorText}`);
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}`] });
+      setShowEditClient(false);
+    },
+    onError: (error) => {
+      console.error('Edit project failed:', error);
+    },
+  });
+
+  const updateProjectMutation = useMutation({
+    mutationFn: async (updates: any) => {
+      const response = await fetch(`/api/projects/${projectId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updates),
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to update project: ${response.status} - ${errorText}`);
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}`] });
+    },
+    onError: (error) => {
+      console.error('Update project failed:', error);
+    },
+  });
+
   // Helper functions
   const formatDateForInput = (date: Date) => {
     const year = date.getFullYear();
@@ -757,56 +809,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     },
   });
 
-  const updateProjectMutation = useMutation({
-    mutationFn: async (updates: any) => {
-      const response = await fetch(`/api/projects/${projectId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updates),
-      });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to update project: ${response.status} - ${errorText}`);
-      }
-      
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}`] });
-    },
-    onError: (error) => {
-      console.error('Update project failed:', error);
-    },
-  });
 
-  const editProjectMutation = useMutation({
-    mutationFn: async (projectData: any) => {
-      const response = await fetch(`/api/projects/${projectId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(projectData),
-      });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to edit project: ${response.status} - ${errorText}`);
-      }
-      
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}`] });
-      setShowEditClient(false);
-    },
-    onError: (error) => {
-      console.error('Edit project failed:', error);
-    },
-  });
 
   // File upload handlers
   const handlePhotoUpload = (event: any) => {
