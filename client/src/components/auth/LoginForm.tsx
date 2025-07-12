@@ -56,10 +56,15 @@ const LoginForm: React.FC = () => {
       <div className="w-full max-w-md space-y-8">
         {/* Paint Brain Logo */}
         <div className="text-center">
-          <img 
-            src="/paint-brain-logo.png" 
-            alt="Paint Brain" 
-            className="h-96 mx-auto mb-8"
+          <div 
+            className="h-96 mx-auto mb-8 bg-black"
+            style={{
+              backgroundImage: "url('/paint-brain-logo.png')",
+              backgroundSize: "contain",
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "center",
+              mixBlendMode: "lighten"
+            }}
           />
         </div>
 
