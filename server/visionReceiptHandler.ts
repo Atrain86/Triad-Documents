@@ -70,31 +70,27 @@ export async function extractReceiptWithVision(imageBuffer: Buffer, originalName
     const mimeType = 'image/jpeg'; // Always JPEG after compression
 
     const prompt = `
-You are a receipt data extraction assistant. Extract ONLY the essential information from this receipt image.
+You are a receipt parser. Extract ONLY the vendor name and total amount from this receipt.
 
-Extract exactly these 4 pieces of information:
-1. Vendor/store name (clean business name only)
-2. Total amount paid (number only, no currency symbols)
-3. Items purchased (main items only, clean names)
-4. Date (YYYY-MM-DD format ONLY - ignore ALL extra text, times, transaction codes, reference numbers)
+STRICT RULES:
+- Vendor: Business name ONLY, remove location numbers, addresses, or extra identifiers
+- Amount: Total paid ONLY, no currency symbols
+- Do NOT include fuel types, item descriptions, reference numbers, or any extra text
 
-Return ONLY clean, essential data as JSON:
+Examples:
+- "Shell Canada #1234" → "Shell"
+- "McDonald's Restaurant #5678" → "McDonald's"  
+- "Petro-Canada - Regular Gas" → "Petro-Canada"
+- "Starbucks Coffee Canada #4987" → "Starbucks"
+
+Return ONLY this JSON format:
 {
-  "vendor": "Business Name",
+  "vendor": "clean business name only",
   "amount": 12.50,
-  "items": ["Item 1", "Item 2"],
-  "date": "2025-07-02",
+  "items": [],
+  "date": "YYYY-MM-DD",
   "confidence": 0.9
 }
-
-CRITICAL RULES:
-- DATE: Return ONLY clean date in YYYY-MM-DD format. NO extra text, times, codes, or reference numbers.
-- VENDOR: Business name only. Remove addresses, phone numbers, website URLs.
-- ITEMS: Full readable product names. Expand ALL abbreviations (Gr→Grande, Ds→Double Smoked, Carml→Caramel).
-- AMOUNT: Final total only. No tax details, subtotals, or extra charges.
-
-FORBIDDEN: Do not include transaction IDs, reference numbers, times, codes, or any text after the date.
-REQUIRED: Clean, simple data only.
 
 If unable to read clearly:
 {
