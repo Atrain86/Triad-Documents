@@ -218,7 +218,7 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
                 {receipt.description && (
                   <p className="text-xs text-gray-400 mt-1">{receipt.description}</p>
                 )}
-                <p className="text-xs text-gray-500">{receipt.date}</p>
+                <p className="text-xs text-gray-500">{formatDate(receipt.date)}</p>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -467,6 +467,16 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  };
+
+  // Format ISO date string into "DD–MM–YYYY" with em-dash
+  const formatDate = (isoDate: string | null) => {
+    if (!isoDate) return '';
+    const date = new Date(isoDate);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}–${month}–${year}`;
   };
 
   const handleAddHours = () => {

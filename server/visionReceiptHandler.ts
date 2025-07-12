@@ -90,8 +90,11 @@ Return ONLY clean, essential data as JSON:
 IMPORTANT RULES:
 - For dates: Extract ONLY the date portion (ignore times like "TOO:00", transaction IDs, etc.)
 - For vendor: Use clean business name only (no addresses, phone numbers, etc.)
-- For items: Use simple product names only (no SKUs, codes, descriptions)
+- For items: Use FULL, READABLE product names (expand abbreviations like "Gr" = "Grande", "Ds" = "Double Smoked", "Carml" = "Caramel")
 - For amount: Extract the final total only (no tax breakdowns, subtotals, etc.)
+
+EXPAND ABBREVIATIONS: If you see abbreviated product names, expand them to full readable names.
+Examples: "Gr Carml Macchiato" should be "Grande Caramel Macchiato", "Ds Bacon Sandwich" should be "Double Smoked Bacon Sandwich"
 
 If unable to read clearly:
 {
@@ -227,16 +230,53 @@ If unable to read clearly:
       cleanVendor = cleanVendor.replace(/\b(STORE|SHOP|INC|LLC|LTD|CORP)\b/gi, '').trim();
       cleanVendor = cleanVendor.replace(/[\n\r\t]+/g, ' ').replace(/\s+/g, ' ').trim();
 
-      // Clean items (remove codes, SKUs, extra descriptions)
+      // Clean items (remove codes, SKUs, extra descriptions, expand abbreviations)
       let cleanItems = [];
       if (Array.isArray(parsedData.items)) {
         cleanItems = parsedData.items.map(item => {
           let cleanItem = String(item).trim();
+          
           // Remove common patterns like SKUs, codes
           cleanItem = cleanItem.replace(/\b[A-Z0-9]{6,}\b/g, ''); // Remove long codes
           cleanItem = cleanItem.replace(/\$[\d.]+/g, ''); // Remove prices
           cleanItem = cleanItem.replace(/\bQTY\s*\d+\b/gi, ''); // Remove quantities
+          
+          // Expand common abbreviations to make items more readable
+          cleanItem = cleanItem.replace(/\bGr\b/gi, 'Grande');
+          cleanItem = cleanItem.replace(/\bVt\b/gi, 'Venti');
+          cleanItem = cleanItem.replace(/\bTl\b/gi, 'Tall');
+          cleanItem = cleanItem.replace(/\bCarml\b/gi, 'Caramel');
+          cleanItem = cleanItem.replace(/\bMacchiato\b/gi, 'Macchiato');
+          cleanItem = cleanItem.replace(/\bDs\b/gi, 'Double Smoked');
+          cleanItem = cleanItem.replace(/\bSndwch\b/gi, 'Sandwich');
+          cleanItem = cleanItem.replace(/\bSandwich\b/gi, 'Sandwich');
+          cleanItem = cleanItem.replace(/\bBcn\b/gi, 'Bacon');
+          cleanItem = cleanItem.replace(/\bEgg\b/gi, 'Egg');
+          cleanItem = cleanItem.replace(/\bChs\b/gi, 'Cheese');
+          cleanItem = cleanItem.replace(/\bCoff\b/gi, 'Coffee');
+          cleanItem = cleanItem.replace(/\bLte\b/gi, 'Latte');
+          cleanItem = cleanItem.replace(/\bCapp\b/gi, 'Cappuccino');
+          cleanItem = cleanItem.replace(/\bFrap\b/gi, 'Frappuccino');
+          cleanItem = cleanItem.replace(/\bMocha\b/gi, 'Mocha');
+          cleanItem = cleanItem.replace(/\bVanilla\b/gi, 'Vanilla');
+          cleanItem = cleanItem.replace(/\bChoc\b/gi, 'Chocolate');
+          cleanItem = cleanItem.replace(/\bWip\b/gi, 'Whipped Cream');
+          cleanItem = cleanItem.replace(/\bXtra\b/gi, 'Extra');
+          cleanItem = cleanItem.replace(/\bReg\b/gi, 'Regular');
+          cleanItem = cleanItem.replace(/\bDecaf\b/gi, 'Decaf');
+          cleanItem = cleanItem.replace(/\bSkinny\b/gi, 'Skinny');
+          cleanItem = cleanItem.replace(/\bNonfat\b/gi, 'Non-fat');
+          cleanItem = cleanItem.replace(/\bSoy\b/gi, 'Soy');
+          cleanItem = cleanItem.replace(/\bAlmond\b/gi, 'Almond');
+          cleanItem = cleanItem.replace(/\bOat\b/gi, 'Oat');
+          cleanItem = cleanItem.replace(/\bCoconut\b/gi, 'Coconut');
+          
+          // Clean up spacing and formatting
           cleanItem = cleanItem.replace(/[\n\r\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+          
+          // Capitalize first letter of each word for better presentation
+          cleanItem = cleanItem.replace(/\b\w/g, l => l.toUpperCase());
+          
           return cleanItem;
         }).filter(item => item.length > 2); // Keep only meaningful items
       }
