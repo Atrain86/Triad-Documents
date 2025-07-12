@@ -469,14 +469,33 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     return `${year}-${month}-${day}`;
   };
 
-  // Format ISO date string into "DD–MM–YYYY" with em-dash
+  // Format ISO date string into "DD–MM–YYYY" with em-dash - CLEAN DATE ONLY
   const formatDate = (isoDate: string | null) => {
     if (!isoDate) return '';
-    const date = new Date(isoDate);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}–${month}–${year}`;
+    
+    // Extract only the date part (YYYY-MM-DD) from ISO string
+    let cleanDateString = '';
+    if (isoDate.includes('T')) {
+      // If it's a full ISO string like "2025-06-22T00:00:00.000Z"
+      cleanDateString = isoDate.split('T')[0];
+    } else if (isoDate.includes(' ')) {
+      // If it's a string with space separator
+      cleanDateString = isoDate.split(' ')[0];
+    } else {
+      // If it's already just a date string
+      cleanDateString = isoDate;
+    }
+    
+    // Parse the clean date string (YYYY-MM-DD format)
+    const parts = cleanDateString.split('-');
+    if (parts.length === 3) {
+      const year = parts[0];
+      const month = parts[1];
+      const day = parts[2];
+      return `${day}–${month}–${year}`;
+    }
+    
+    return '';
   };
 
   const handleAddHours = () => {
