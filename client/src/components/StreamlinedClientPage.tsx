@@ -353,10 +353,16 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const handleAddHours = () => {
     if (!selectedDate || !hoursInput) return;
     
+    const parsedHours = parseFloat(hoursInput);
+    if (isNaN(parsedHours) || parsedHours <= 0) {
+      console.error('Invalid hours input:', hoursInput);
+      return;
+    }
+    
     addHoursMutation.mutate({
       projectId,
       date: selectedDate,
-      hours: parseFloat(hoursInput),
+      hours: parsedHours,
       description: descriptionInput.trim() || 'Painting',
     });
   };
@@ -853,22 +859,15 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         </div>
       </div>
 
-      {/* Upload Buttons */}
-      <div className="grid grid-cols-2 gap-4">
+      {/* Photos Upload Button - Centered */}
+      <div className="flex justify-center">
         <Button
           onClick={() => photoInputRef.current?.click()}
-          className="py-6 text-lg font-semibold text-white flex items-center justify-center"
+          className="py-6 px-12 text-lg font-semibold text-white flex items-center justify-center"
           style={{ backgroundColor: '#EA580C' }}
         >
           <Camera size={24} className="mr-3" />
           Photos
-        </Button>
-        <Button
-          onClick={() => receiptInputRef.current?.click()}
-          className="py-6 text-lg font-semibold bg-blue-700 hover:bg-blue-800 text-white flex items-center justify-center"
-        >
-          <FileText size={24} className="mr-3" />
-          Receipts
         </Button>
       </div>
 
@@ -877,7 +876,17 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         ref={photoInputRef}
         type="file"
         accept="image/*,.heic,.heif"
+        capture="environment"
         onChange={handlePhotoUpload}
+        multiple
+        className="hidden"
+      />
+      <input
+        ref={receiptInputRef}
+        type="file"
+        accept="image/*,.heic,.heif"
+        capture="environment"
+        onChange={handleReceiptUpload}
         multiple
         className="hidden"
       />
@@ -942,14 +951,13 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                   onClick={() => toggleSection(section.id)}
                 >
                   <div className="flex items-center gap-3">
-                    {/* Drag Handle */}
-                    <div className="drag-handle cursor-move p-1 text-gray-400 hover:text-gray-200">
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
-                        <circle cx="3" cy="3" r="1"/>
-                        <circle cx="9" cy="3" r="1"/>
-                        <circle cx="3" cy="9" r="1"/>
-                        <circle cx="9" cy="9" r="1"/>
-                        <circle cx="6" cy="6" r="1"/>
+                    {/* Mac-style Reorder Icon - Left Side */}
+                    <div className="drag-handle cursor-move p-1 text-gray-400 hover:text-gray-200" onClick={(e) => e.stopPropagation()}>
+                      <svg width="16" height="16" viewBox="0 0 16 16" className="text-gray-400">
+                        <rect y="2" width="16" height="1.5" rx="0.75"/>
+                        <rect y="5.5" width="16" height="1.5" rx="0.75"/>
+                        <rect y="9" width="16" height="1.5" rx="0.75"/>
+                        <rect y="12.5" width="16" height="1.5" rx="0.75"/>
                       </svg>
                     </div>
                     
@@ -964,12 +972,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                     )}
                   </div>
                   
-                  {/* Mac-style Expand/Collapse Icon */}
+                  {/* Simple Expand Indicator */}
                   <div className={`transform transition-transform ${isExpanded ? 'rotate-90' : ''}`}>
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" className="text-gray-400">
-                      <rect y="4" width="16" height="1.5" rx="0.75"/>
-                      <rect y="7.25" width="16" height="1.5" rx="0.75"/>
-                      <rect y="10.5" width="16" height="1.5" rx="0.75"/>
+                      <path d="M6 4l4 4-4 4V4z"/>
                     </svg>
                   </div>
                 </div>
@@ -1310,6 +1316,17 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
                     {section.id === 'receipts' && (
                       <div>
+                        {/* Receipt Upload Button */}
+                        <div className="mb-4">
+                          <Button
+                            onClick={() => receiptInputRef.current?.click()}
+                            className="w-full py-3 text-sm font-semibold bg-blue-700 hover:bg-blue-800 text-white flex items-center justify-center"
+                          >
+                            <Camera size={18} className="mr-2" />
+                            Add Receipt Photo
+                          </Button>
+                        </div>
+                        
                         {/* Quick Receipt Entry Form */}
                         <div className="mb-4">
                           <form 
