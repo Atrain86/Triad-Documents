@@ -460,7 +460,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const deleteSelectedPhotosMutation = useMutation({
     mutationFn: async (photoIds: number[]) => {
       const deletePromises = photoIds.map(id => 
-        fetch(`/api/photos/${id}`, { method: 'DELETE' })
+        fetch(`/api/projects/${projectId}/photos/${id}`, { method: 'DELETE' })
       );
       
       const responses = await Promise.all(deletePromises);
@@ -763,7 +763,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const deletePhotoMutation = useMutation({
     mutationFn: async (photoId: number) => {
       console.log('Attempting to delete photo ID:', photoId);
-      const response = await fetch(`/api/photos/${photoId}`, {
+      const response = await fetch(`/api/projects/${projectId}/photos/${photoId}`, {
         method: 'DELETE',
       });
       
@@ -776,7 +776,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     },
     onSuccess: (deletedPhotoId) => {
       console.log('Photo delete mutation success, invalidating queries for deleted photo:', deletedPhotoId);
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
+      
+      // Force refetch instead of just invalidate to ensure fresh data
+      queryClient.refetchQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
       
       // Close carousel if we're viewing the deleted photo
       if (showPhotoCarousel) {
