@@ -1,12 +1,11 @@
 import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Camera, FileText, ArrowLeft, Edit3, Download, X, Image as ImageIcon, DollarSign, Calendar, Wrench, Plus, Trash2, Calculator, Receipt as ReceiptIcon, MapPin, Navigation, ExternalLink, ChevronDown, ChevronRight } from 'lucide-react';
+import { Camera, FileText, ArrowLeft, Edit3, Download, X, Image as ImageIcon, DollarSign, Calendar, Wrench, Plus, Trash2, Calculator, Receipt as ReceiptIcon, MapPin, Navigation, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import * as Collapsible from '@radix-ui/react-collapsible';
 import { apiRequest } from '@/lib/queryClient';
 import { generateMapsLink, generateDirectionsLink } from '@/lib/maps';
 import { compressMultipleImages, formatFileSize } from '@/lib/imageCompression';
@@ -14,8 +13,6 @@ import type { Project, Photo, Receipt, ToolsChecklist, DailyHours } from '@share
 import InvoiceGenerator from './InvoiceGenerator';
 import EstimateGenerator from './EstimateGenerator';
 import PhotoCarousel from './PhotoCarousel';
-import ReceiptUpload from './ReceiptUpload';
-import CleanPhotoGrid from './clean-photo-grid';
 
 // Calendar function for A-Frame calendar integration
 const openWorkCalendar = (clientProject: Project | null = null) => {
@@ -39,7 +36,6 @@ const openWorkCalendar = (clientProject: Project | null = null) => {
 function SimpleFilesList({ projectId }: { projectId: number }) {
   const queryClient = useQueryClient();
   const [editingReceipt, setEditingReceipt] = useState<Receipt | null>(null);
-  const [viewingReceipt, setViewingReceipt] = useState<Receipt | null>(null);
   const [editVendor, setEditVendor] = useState('');
   const [editAmount, setEditAmount] = useState('');
   const [editDescription, setEditDescription] = useState('');
@@ -190,13 +186,15 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
                   <div>
                     <div className="text-sm font-medium text-gray-900 dark:text-white">
                       {receipt.filename ? (
-                        <button
-                          onClick={() => setViewingReceipt(receipt)}
-                          className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline cursor-pointer text-left"
-                          title="Click to view receipt"
+                        <a
+                          href={`/uploads/${receipt.filename}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline cursor-pointer"
+                          title="Click to open file"
                         >
                           {receipt.vendor} - ${receipt.amount}
-                        </button>
+                        </a>
                       ) : (
                         <span>{receipt.vendor} - ${receipt.amount}</span>
                       )}
@@ -230,37 +228,6 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
           </div>
         ))}
       </div>
-
-      {/* Receipt Viewer Modal */}
-      {viewingReceipt && (
-        <Dialog open={!!viewingReceipt} onOpenChange={() => setViewingReceipt(null)}>
-          <DialogContent className="max-w-4xl max-h-[90vh] p-0">
-            <DialogHeader className="p-6 pb-4">
-              <DialogTitle className="flex items-center gap-2">
-                <ReceiptIcon className="h-5 w-5" />
-                {viewingReceipt.vendor} - ${viewingReceipt.amount}
-              </DialogTitle>
-            </DialogHeader>
-            <div className="px-6 pb-6">
-              <div className="bg-black rounded-lg overflow-hidden">
-                <img
-                  src={`/uploads/${viewingReceipt.filename}`}
-                  alt={`Receipt from ${viewingReceipt.vendor}`}
-                  className="w-full h-auto max-h-[60vh] object-contain"
-                />
-              </div>
-              <div className="mt-4 flex justify-end">
-                <Button
-                  onClick={() => setViewingReceipt(null)}
-                  variant="outline"
-                >
-                  Close
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
     </div>
   );
 }
@@ -308,24 +275,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     originalSize: 0,
     compressedSize: 0
   });
-
-  // Collapsible section states - reorganized layout order
-  const [expandedSections, setExpandedSections] = useState({
-    photos: false,
-    tools: true,
-    dailyHours: false,
-    notes: false,
-    receipts: false,
-  });
-
-  const toggleSection = (section: keyof typeof expandedSections) => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [section]: !prev[section]
-    }));
-  };
   
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const receiptInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
   const { data: project } = useQuery<Project>({
@@ -357,12 +309,79 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const photoUploadMutation = useMutation({
     mutationFn: async (files: FileList) => {
       const filesArray = Array.from(files);
-      console.log('Starting photo upload for', filesArray.length, 'files');
+      console.log('Starting upload for', filesArray.length, 'files');
       
-      // Simple direct upload without compression for now
+      // Start compression
+      setCompressionProgress({
+        isCompressing: true,
+        currentFile: 0,
+        totalFiles: filesArray.length,
+        originalSize: 0,
+        compressedSize: 0
+      });
+
+      let totalOriginalSize = 0;
+      let totalCompressedSize = 0;
+      const compressedFiles: File[] = [];
+
+      // Compress each file
+      for (let i = 0; i < filesArray.length; i++) {
+        const file = filesArray[i];
+        
+        setCompressionProgress(prev => ({
+          ...prev,
+          currentFile: i + 1
+        }));
+
+        if (file.type.startsWith('image/')) {
+          try {
+            const compressionResult = await compressMultipleImages([file], {
+              maxWidth: 1920,
+              maxHeight: 1080,
+              quality: 0.8,
+              format: 'jpeg'
+            });
+            
+            if (compressionResult.length > 0) {
+              const result = compressionResult[0];
+              compressedFiles.push(result.file);
+              totalOriginalSize += result.originalSize;
+              totalCompressedSize += result.compressedSize;
+              
+              console.log(`Compressed ${file.name}: ${formatFileSize(result.originalSize)} → ${formatFileSize(result.compressedSize)} (${result.compressionRatio.toFixed(1)}% reduction)`);
+            } else {
+              compressedFiles.push(file);
+              totalOriginalSize += file.size;
+              totalCompressedSize += file.size;
+            }
+          } catch (error) {
+            console.warn(`Failed to compress ${file.name}, using original:`, error);
+            compressedFiles.push(file);
+            totalOriginalSize += file.size;
+            totalCompressedSize += file.size;
+          }
+        } else {
+          // Non-image files go through unchanged
+          compressedFiles.push(file);
+          totalOriginalSize += file.size;
+          totalCompressedSize += file.size;
+        }
+      }
+
+      // Update final compression stats
+      setCompressionProgress(prev => ({
+        ...prev,
+        originalSize: totalOriginalSize,
+        compressedSize: totalCompressedSize,
+        isCompressing: false
+      }));
+
+      console.log(`Total compression: ${formatFileSize(totalOriginalSize)} → ${formatFileSize(totalCompressedSize)} (${((totalOriginalSize - totalCompressedSize) / totalOriginalSize * 100).toFixed(1)}% reduction)`);
+
+      // Upload compressed files
       const formData = new FormData();
-      filesArray.forEach((file, index) => {
-        console.log(`Adding photo file ${index}:`, file.name, file.size, 'bytes');
+      compressedFiles.forEach((file, index) => {
+        console.log(`Adding compressed file ${index}:`, file.name, file.size, 'bytes');
         formData.append('photos', file);
       });
       
@@ -447,9 +466,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   });
 
   const receiptUploadMutation = useMutation({
-    mutationFn: async ({ files, ocrData }: { files: FileList, ocrData?: { vendor: string; amount: string; items: string[]; total: string; method?: string; confidence?: number } }) => {
+    mutationFn: async (files: FileList) => {
       console.log('Upload mutation started with', files.length, 'files');
-      console.log('OCR data available:', ocrData);
       
       if (!files || files.length === 0) {
         throw new Error('No files to upload');
@@ -463,25 +481,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         
         const formData = new FormData();
         formData.append('receipt', file);
-        
-        // Use OCR data if available, otherwise use defaults
-        if (ocrData) {
-          formData.append('vendor', ocrData.vendor);
-          formData.append('amount', ocrData.amount);
-          formData.append('description', ocrData.items.length > 0 ? ocrData.items.join(', ') : `OCR scan: ${file.name}`);
-          formData.append('items', JSON.stringify(ocrData.items));
-          formData.append('ocrMethod', ocrData.method || 'openai-vision');
-          formData.append('confidence', (ocrData.confidence || 0.8).toString());
-          console.log('Using OCR data - Vendor:', ocrData.vendor, 'Amount:', ocrData.amount, 'Items:', ocrData.items);
-        } else {
-          formData.append('vendor', file.name);
-          formData.append('amount', '0');
-          formData.append('description', `File upload: ${file.name}`);
-          formData.append('items', JSON.stringify(['Manual entry required']));
-          formData.append('ocrMethod', 'manual');
-          formData.append('confidence', '0.1');
-        }
-        
+        formData.append('vendor', file.name);
+        formData.append('amount', '0');
+        formData.append('description', `File upload: ${file.name}`);
         formData.append('date', new Date().toISOString().split('T')[0]);
         
         console.log('FormData prepared, making request to:', `/api/projects/${projectId}/receipts`);
@@ -694,7 +696,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
 
 
-
+  const handleReceiptClick = () => {
+    receiptInputRef.current?.click();
+  };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     console.log('File input changed:', e.target.files?.length, 'files');
@@ -721,7 +725,30 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     }
   };
 
-
+  const handleReceiptUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('Receipt upload triggered:', e.target.files?.length, 'files');
+    if (e.target.files && e.target.files.length > 0) {
+      // Convert FileList to File array immediately to prevent it from becoming empty
+      const filesArray = Array.from(e.target.files);
+      console.log('Files selected for receipt upload:', filesArray.map(f => `${f.name} (${f.type})`));
+      console.log('Files captured:', filesArray.length, 'files');
+      
+      // Create a new FileList-like object that won't become empty
+      const fileListObj = {
+        ...filesArray,
+        length: filesArray.length,
+        item: (index: number) => filesArray[index] || null,
+        [Symbol.iterator]: function* () {
+          for (const file of filesArray) {
+            yield file;
+          }
+        }
+      } as FileList;
+      
+      receiptUploadMutation.mutate(fileListObj);
+      e.target.value = '';
+    }
+  };
 
   const handleNotesBlur = () => {
     if (notes !== project?.notes) {
@@ -729,21 +756,54 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     }
   };
 
-  const handlePhotoSelect = (photoId: number) => {
-    if (isSelecting) {
-      setSelectedPhotos(prev => {
-        const newSet = new Set(prev);
-        if (newSet.has(photoId)) {
-          newSet.delete(photoId);
-        } else {
-          newSet.add(photoId);
-        }
-        return newSet;
-      });
+  const handlePhotoTouchStart = (photoId: number, e: React.TouchEvent | React.MouseEvent) => {
+    // Clear any existing timer
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
     }
+    
+    setTouchStarted(true);
+    
+    // Set a timer for long press detection (500ms)
+    const timer = setTimeout(() => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsSelecting(true);
+      setSelectedPhotos(new Set([photoId]));
+    }, 500);
+    
+    setLongPressTimer(timer);
   };
 
-  // Simplified photo interaction for enhanced carousel
+  const handlePhotoTouchMove = (photoId: number, e: React.TouchEvent | React.MouseEvent) => {
+    if (!isSelecting || !touchStarted) return;
+    
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Add photo to selection if not already selected
+    setSelectedPhotos(prev => {
+      const newSet = new Set(prev);
+      newSet.add(photoId);
+      return newSet;
+    });
+  };
+
+  const handlePhotoTouchEnd = (e: React.TouchEvent | React.MouseEvent) => {
+    // Clear the long press timer
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    }
+    
+    setTouchStarted(false);
+    
+    // If we weren't in selection mode, this was just a tap
+    if (!isSelecting) {
+      // Let the click event handle opening carousel
+      return;
+    }
+  };
 
   const togglePhotoSelection = (photoId: number) => {
     setSelectedPhotos(prev => {
@@ -760,6 +820,11 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const clearSelection = () => {
     setSelectedPhotos(new Set());
     setIsSelecting(false);
+    setTouchStarted(false);
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    }
   };
 
   const deleteSelectedPhotos = () => {
@@ -775,7 +840,19 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
 
 
-  // Enhanced PhotoCarousel handles all keyboard navigation internally
+  // Keyboard navigation
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!showPhotoCarousel) return;
+      
+      if (e.key === 'ArrowLeft') goToPrevious();
+      if (e.key === 'ArrowRight') goToNext();
+      if (e.key === 'Escape') setShowPhotoCarousel(false);
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showPhotoCarousel, carouselIndex]);
 
   React.useEffect(() => {
     if (project?.notes) {
@@ -1000,71 +1077,44 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         {/* Horizontal divider line */}
         <div className="border-b border-gray-200 dark:border-gray-700 mb-6"></div>
 
-        {/* Photos Section (First) */}
-        <div className="mb-8">
-          <Collapsible.Root 
-            open={expandedSections.photos} 
-            onOpenChange={() => toggleSection('photos')}
-          >
-            <Collapsible.Trigger asChild>
-              <button className="flex items-center gap-2 mb-4 text-muted-foreground hover:text-foreground transition-colors w-full text-left">
-                {expandedSections.photos ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                <Camera size={16} />
-                <span className="font-medium">Photos</span>
-                {photos.length > 0 && (
-                  <span className="ml-auto text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
-                    {photos.length}
-                  </span>
-                )}
-              </button>
-            </Collapsible.Trigger>
-            
-            <Collapsible.Content className="data-[state=open]:animate-slideDown data-[state=closed]:animate-slideUp">
-              {/* Photo Upload Button */}
-              <div className="mb-4 flex justify-center">
-                <Button
-                  onClick={() => document.getElementById('photo-upload-input')?.click()}
-                  className="h-12 w-48 bg-orange-600 hover:bg-orange-700 text-white transition-colors"
-                >
-                  <Camera className="mr-2 h-5 w-5" />
-                  Add Photos
-                </Button>
-                <input
-                  id="photo-upload-input"
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const files = e.target.files;
-                    if (files && files.length > 0) {
-                      console.log('Direct photo upload:', files.length, 'files');
-                      console.log('Files before mutation:', Array.from(files).map(f => f.name));
-                      
-                      // Convert to array first to prevent FileList issues
-                      const filesArray = Array.from(files);
-                      console.log('Files array:', filesArray.length, 'files');
-                      
-                      // Create a new FileList-like object
-                      const fileListObj = {
-                        ...filesArray,
-                        length: filesArray.length,
-                        item: (index: number) => filesArray[index] || null,
-                        [Symbol.iterator]: function* () {
-                          for (const file of filesArray) {
-                            yield file;
-                          }
-                        }
-                      } as FileList;
-                      
-                      photoUploadMutation.mutate(fileListObj);
-                    }
-                    e.target.value = ''; // Reset input
-                  }}
-                />
-              </div>
+        {/* Upload Controls */}
+        <div className="flex gap-5 mb-8 justify-center">
+          <div className="flex flex-col items-center">
+            <label
+              className={`w-16 h-16 rounded-full border-none cursor-pointer flex items-center justify-center transition-transform shadow-lg ${
+                compressionProgress.isCompressing || photoUploadMutation.isPending 
+                  ? 'opacity-50 cursor-not-allowed' 
+                  : 'hover:scale-105'
+              }`}
+              style={{ backgroundColor: '#EA580C' }}
+              title="Photos"
+            >
+              <Camera size={28} color="white" />
+              <input
+                type="file"
+                accept=".jpg,.jpeg,.png,.gif,.webp,.heic,.heif"
+                disabled={compressionProgress.isCompressing || photoUploadMutation.isPending}
+                onChange={handlePhotoUpload}
+                multiple
+                className="hidden"
+              />
+            </label>
+            <span className="text-xs text-center mt-2 text-muted-foreground">Photos</span>
+          </div>
 
-
+          <div className="flex flex-col items-center">
+            <button
+              onClick={handleReceiptClick}
+              disabled={receiptUploadMutation.isPending}
+              className="w-16 h-16 rounded-full border-none cursor-pointer flex items-center justify-center transition-transform hover:scale-105 shadow-lg"
+              style={{ backgroundColor: '#1E40AF' }}
+              title="Files"
+            >
+              <FileText size={28} color="white" />
+            </button>
+            <span className="text-xs text-center mt-2 text-muted-foreground">Files</span>
+          </div>
+        </div>
 
         {/* Compression Progress Indicator */}
         {(compressionProgress.isCompressing || compressionProgress.totalFiles > 0) && (
@@ -1103,95 +1153,66 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
         {/* Tools Checklist Section */}
         <div className="mb-8">
-          <Collapsible.Root 
-            open={expandedSections.tools} 
-            onOpenChange={() => toggleSection('tools')}
-          >
-            <Collapsible.Trigger asChild>
-              <button className="flex items-center gap-2 mb-4 text-muted-foreground hover:text-foreground transition-colors w-full text-left">
-                {expandedSections.tools ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                <Wrench size={16} />
-                <span className="font-medium">Tools Checklist</span>
-                {tools.length > 0 && (
-                  <span className="ml-auto text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
-                    {tools.length}
-                  </span>
-                )}
-              </button>
-            </Collapsible.Trigger>
-            
-            <Collapsible.Content className="data-[state=open]:animate-slideDown data-[state=closed]:animate-slideUp">
-              {/* Add Tool Input */}
-              <div className="flex gap-2 mb-4">
-                <input
-                  type="text"
-                  value={newTool}
-                  onChange={(e) => setNewTool(e.target.value)}
-                  placeholder="Paint brushes, Drop cloths, Ladder, Rollers..."
-                  className="flex-1 px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-background"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && newTool.trim()) {
-                      addToolMutation.mutate(newTool.trim());
-                    }
-                  }}
-                />
-                <Button
-                  onClick={() => newTool.trim() && addToolMutation.mutate(newTool.trim())}
-                  disabled={!newTool.trim() || addToolMutation.isPending}
-                  size="sm"
-                  className="px-3"
-                >
-                  <Plus size={16} />
-                </Button>
-              </div>
+          <div className="flex items-center gap-2 mb-4 text-muted-foreground">
+            <Wrench size={16} />
+            <span className="font-medium">Tools Checklist</span>
+          </div>
+          
+          {/* Add Tool Input */}
+          <div className="flex gap-2 mb-4">
+            <input
+              type="text"
+              value={newTool}
+              onChange={(e) => setNewTool(e.target.value)}
+              placeholder="Paint brushes, Drop cloths, Ladder, Rollers..."
+              className="flex-1 px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-background"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && newTool.trim()) {
+                  addToolMutation.mutate(newTool.trim());
+                }
+              }}
+            />
+            <Button
+              onClick={() => newTool.trim() && addToolMutation.mutate(newTool.trim())}
+              disabled={!newTool.trim() || addToolMutation.isPending}
+              size="sm"
+              className="px-3"
+            >
+              <Plus size={16} />
+            </Button>
+          </div>
 
-              {/* Tools List */}
-              <div className="h-48 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg p-3 space-y-2">
-                {tools.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">
-                    No tools added yet. Add tools you need to bring to this job.
-                  </p>
-                ) : (
-                  tools.map((tool) => (
-                    <div key={tool.id} className="flex items-center gap-3 group">
-                      <button
-                        onClick={() => toggleToolMutation.mutate(tool.id)}
-                        className="w-5 h-5 rounded border-2 flex items-center justify-center transition-colors border-gray-300 dark:border-gray-600 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20"
-                        title="Click to mark as complete and remove from list"
-                      >
-                        {/* Empty checkbox - clicking it will delete the tool */}
-                      </button>
-                      <span className="flex-1 text-sm text-foreground">
-                        {tool.toolName}
-                      </span>
-                    </div>
-                  ))
-                )}
-              </div>
-            </Collapsible.Content>
-          </Collapsible.Root>
+          {/* Tools List */}
+          <div className="h-48 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg p-3 space-y-2">
+            {tools.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                No tools added yet. Add tools you need to bring to this job.
+              </p>
+            ) : (
+              tools.map((tool) => (
+                <div key={tool.id} className="flex items-center gap-3 group">
+                  <button
+                    onClick={() => toggleToolMutation.mutate(tool.id)}
+                    className="w-5 h-5 rounded border-2 flex items-center justify-center transition-colors border-gray-300 dark:border-gray-600 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20"
+                    title="Click to mark as complete and remove from list"
+                  >
+                    {/* Empty checkbox - clicking it will delete the tool */}
+                  </button>
+                  <span className="flex-1 text-sm text-foreground">
+                    {tool.toolName}
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
         </div>
 
         {/* Daily Hours Section */}
         <div className="mb-8">
-          <Collapsible.Root 
-            open={expandedSections.dailyHours} 
-            onOpenChange={() => toggleSection('dailyHours')}
-          >
-            <Collapsible.Trigger asChild>
-              <button className="flex items-center gap-2 mb-4 text-muted-foreground hover:text-foreground transition-colors w-full text-left">
-                {expandedSections.dailyHours ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                <Calendar size={16} />
-                <span className="font-medium">Daily Hours</span>
-                {dailyHours.length > 0 && (
-                  <span className="ml-auto text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
-                    {dailyHours.reduce((sum, h) => sum + h.hours, 0).toFixed(1)}h
-                  </span>
-                )}
-              </button>
-            </Collapsible.Trigger>
-            
-            <Collapsible.Content className="data-[state=open]:animate-slideDown data-[state=closed]:animate-slideUp">
+          <div className="flex items-center gap-2 mb-4 text-muted-foreground">
+            <Calendar size={16} />
+            <span className="font-medium">Daily Hours</span>
+          </div>
           
           {/* Add Hours Button */}
           {!showDatePicker && (
@@ -1250,7 +1271,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                       handleAddHours();
                     }
                   }}
-                  placeholder=""
+                  placeholder="0"
                   className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-background"
                 />
               </div>
@@ -1356,39 +1377,21 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
               </div>
             )}
           </div>
-            </Collapsible.Content>
-          </Collapsible.Root>
         </div>
 
         {/* Notes Section */}
         <div className="mb-8">
-          <Collapsible.Root 
-            open={expandedSections.notes} 
-            onOpenChange={() => toggleSection('notes')}
-          >
-            <Collapsible.Trigger asChild>
-              <button className="flex items-center gap-2 mb-4 text-muted-foreground hover:text-foreground transition-colors w-full text-left">
-                {expandedSections.notes ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                <Edit3 size={16} />
-                <span className="font-medium">Project Notes</span>
-                {notes.trim() && (
-                  <span className="ml-auto text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
-                    {notes.length > 20 ? notes.substring(0, 20) + '...' : notes}
-                  </span>
-                )}
-              </button>
-            </Collapsible.Trigger>
-            
-            <Collapsible.Content className="data-[state=open]:animate-slideDown data-[state=closed]:animate-slideUp">
-              <Textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                onBlur={handleNotesBlur}
-                placeholder=""
-                className="w-full min-h-48 resize-none rounded-lg border border-gray-200 dark:border-gray-700 p-3 text-sm"
-              />
-            </Collapsible.Content>
-          </Collapsible.Root>
+          <div className="flex items-center gap-2 mb-4 text-muted-foreground">
+            <Edit3 size={16} />
+            <span className="font-medium">Project Notes</span>
+          </div>
+          <Textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            onBlur={handleNotesBlur}
+            placeholder=""
+            className="w-full min-h-48 resize-none rounded-lg border border-gray-200 dark:border-gray-700 p-3 text-sm"
+          />
         </div>
 
 
@@ -1422,33 +1425,25 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         {/* Photo Thumbnails Grid */}
         {photos.length > 0 && (
           <div className="mb-7">
-            <Collapsible.Root 
-              open={expandedSections.photos} 
-              onOpenChange={() => toggleSection('photos')}
+            <div className="flex items-center gap-2 mb-4 text-muted-foreground">
+              <Camera size={16} />
+              <span className="font-medium">Photos ({photos.length})</span>
+              {selectedPhotos.size === 0 && !isSelecting && (
+                <span className="text-xs text-muted-foreground ml-2">
+                  Long press and drag to select multiple
+                </span>
+              )}
+              {isSelecting && selectedPhotos.size === 0 && (
+                <span className="text-xs text-blue-600 dark:text-blue-400 ml-2">
+                  Selection mode active - tap photos to select
+                </span>
+              )}
+            </div>
+            <div 
+              className="grid grid-cols-3 gap-3"
+              onTouchEnd={(e) => handlePhotoTouchEnd(e)}
+              onMouseUp={(e) => handlePhotoTouchEnd(e)}
             >
-              <Collapsible.Trigger asChild>
-                <button className="flex items-center gap-2 mb-4 text-muted-foreground hover:text-foreground transition-colors w-full text-left">
-                  {expandedSections.photos ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                  <Camera size={16} />
-                  <span className="font-medium">Photos</span>
-                  <span className="ml-auto text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
-                    {photos.length}
-                  </span>
-                </button>
-              </Collapsible.Trigger>
-              
-              <Collapsible.Content className="data-[state=open]:animate-slideDown data-[state=closed]:animate-slideUp">
-                {selectedPhotos.size === 0 && !isSelecting && (
-                  <div className="text-xs text-muted-foreground mb-2">
-                    Long press and drag to select multiple
-                  </div>
-                )}
-                {isSelecting && selectedPhotos.size === 0 && (
-                  <div className="text-xs text-blue-600 dark:text-blue-400 mb-2">
-                    Selection mode active - tap photos to select
-                  </div>
-                )}
-            <div className="grid grid-cols-3 gap-3">
               {photos.map((photo, index) => (
                 <div
                   key={photo.id}
@@ -1457,7 +1452,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                       ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
                       : 'border-transparent hover:border-blue-500'
                   }`}
-
+                  onTouchStart={(e) => handlePhotoTouchStart(photo.id, e)}
+                  onMouseDown={(e) => handlePhotoTouchStart(photo.id, e)}
+                  onTouchMove={(e) => handlePhotoTouchMove(photo.id, e)}
+                  onMouseEnter={(e) => touchStarted && handlePhotoTouchMove(photo.id, e)}
                   onClick={(e) => {
                     if (isSelecting) {
                       e.preventDefault();
@@ -1501,271 +1499,92 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                 </div>
               ))}
             </div>
+          </div>
+        )}
 
-            {/* Selection Toolbar */}
-              {selectedPhotos.size > 0 && (
-                <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-between">
-                  <span className="text-sm font-medium">
-                    {selectedPhotos.size} photo{selectedPhotos.size !== 1 ? 's' : ''} selected
-                  </span>
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={clearSelection}
-                      variant="outline"
-                      size="sm"
-                    >
-                      Clear
-                    </Button>
-                    <Button
-                      onClick={deleteSelectedPhotos}
-                      disabled={deleteSelectedPhotosMutation.isPending}
-                      variant="destructive"
-                      size="sm"
-                    >
-                      {deleteSelectedPhotosMutation.isPending ? 'Deleting...' : 'Delete Selected'}
-                    </Button>
-                  </div>
-                </div>
-              )}
+        {/* Show if no photos */}
+        {photos.length === 0 && (
+          <div className="mb-7 p-4 text-center text-muted-foreground">
+            <Camera size={24} className="mx-auto mb-2" />
+            <p>No photos yet. Use the camera button to add some!</p>
+          </div>
+        )}
 
-              {/* Photo Grid */}
-              {photos.length > 0 ? (
-                <div>
-                  {selectedPhotos.size === 0 && !isSelecting && (
-                    <div className="text-xs text-muted-foreground mb-2">
-                      Long press and drag to select multiple
-                    </div>
-                  )}
-                  {isSelecting && selectedPhotos.size === 0 && (
-                    <div className="text-xs text-blue-600 dark:text-blue-400 mb-2">
-                      Selection mode active - tap photos to select
-                    </div>
-                  )}
-                  <div className="grid grid-cols-3 gap-3">
-                    {photos.map((photo, index) => (
-                      <div
-                        key={photo.id}
-                        className={`aspect-square rounded-lg overflow-hidden cursor-pointer border-2 transition-all relative group ${
-                          selectedPhotos.has(photo.id) 
-                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
-                            : 'border-transparent hover:border-blue-500'
-                        }`}
-                        onClick={(e) => {
-                          if (isSelecting) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            togglePhotoSelection(photo.id);
-                          } else {
-                            openPhotoCarousel(index);
-                          }
-                        }}
-                      >
-                        <img
-                          src={`/uploads/${photo.filename}`}
-                          alt={photo.description || photo.originalName}
-                          className={`w-full h-full object-cover ${selectedPhotos.has(photo.id) ? 'opacity-80' : ''}`}
-                          draggable={false}
-                          onError={(e) => console.error('Image failed to load:', photo.filename)}
-                          onLoad={() => console.log('Image loaded successfully:', photo.filename)}
-                        />
-                        
-                        {/* Selection Indicator */}
-                        {selectedPhotos.has(photo.id) && (
-                          <div className="absolute top-2 left-2 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
-                            ✓
-                          </div>
-                        )}
-                        
-                        {/* Individual Delete Button (hidden during selection) */}
-                        {!isSelecting && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              deletePhotoMutation.mutate(photo.id);
-                            }}
-                            disabled={deletePhotoMutation.isPending}
-                            className="absolute top-2 right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                            title="Delete photo"
-                          >
-                            <X size={14} />
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="p-4 text-center text-muted-foreground">
-                  <Camera size={24} className="mx-auto mb-2" />
-                  <p>No photos yet. Use the button above to add some!</p>
-                </div>
-              )}
-            </Collapsible.Content>
-          </Collapsible.Root>
-        </div>
 
-        {/* Tools Section - already in correct position after Photos */}
 
-        {/* Project Notes Section */}
+        {/* Receipts Section */}
         <div className="mb-8">
-          <Collapsible.Root 
-            open={expandedSections.notes} 
-            onOpenChange={() => toggleSection('notes')}
-          >
-            <Collapsible.Trigger asChild>
-              <button className="flex items-center gap-2 mb-4 text-muted-foreground hover:text-foreground transition-colors w-full text-left">
-                {expandedSections.notes ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                <FileText size={16} />
-                <span className="font-medium">Project Notes</span>
-              </button>
-            </Collapsible.Trigger>
-            
-            <Collapsible.Content className="data-[state=open]:animate-slideDown data-[state=closed]:animate-slideUp">
-              <textarea
-                value={project.description || ''}
-                onChange={(e) => {
-                  const newDescription = e.target.value;
-                  console.log('Project description changed:', newDescription);
-                  updateProjectMutation.mutate({ description: newDescription });
-                }}
-                placeholder=""
-                className="w-full min-h-96 p-3 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-background resize-none"
-              />
-            </Collapsible.Content>
-          </Collapsible.Root>
-        </div>
+          <div className="flex items-center gap-2 mb-4 text-muted-foreground">
+            <ReceiptIcon size={16} />
+            <span className="font-medium">Receipts & Expenses</span>
+          </div>
+          
+          {/* Quick Receipt Entry Form */}
+          <div className="mb-4">
 
-        {/* Receipts Section (Last) */}
-        <div className="mb-8">
-          <Collapsible.Root 
-            open={expandedSections.receipts} 
-            onOpenChange={() => toggleSection('receipts')}
-          >
-            <Collapsible.Trigger asChild>
-              <button className="flex items-center gap-2 mb-4 text-muted-foreground hover:text-foreground transition-colors w-full text-left">
-                {expandedSections.receipts ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                <ReceiptIcon size={16} />
-                <span className="font-medium">Receipts</span>
-                {receipts.length > 0 && (
-                  <span className="ml-auto text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
-                    {receipts.length}
-                  </span>
-                )}
-              </button>
-            </Collapsible.Trigger>
-            
-            <Collapsible.Content className="data-[state=open]:animate-slideDown data-[state=closed]:animate-slideUp">
-              {/* Receipt Upload Button */}
-              <div className="mb-4 flex justify-center">
-                <Button
-                  onClick={() => document.getElementById('receipt-upload-input')?.click()}
-                  className="h-12 w-48 bg-green-600 hover:bg-green-700 text-white transition-colors"
-                >
-                  <FileText className="mr-2 h-5 w-5" />
-                  Add Receipts
-                </Button>
-                <input
-                  id="receipt-upload-input"
-                  type="file"
-                  multiple
-                  accept="image/*,.pdf,.doc,.docx,.txt"
-                  className="hidden"
-                  onChange={async (e) => {
-                    const files = e.target.files;
-                    if (files && files.length > 0) {
-                      console.log('Receipt upload triggered:', files.length, 'files');
-                      
-                      // Convert to proper FileList object
-                      const filesArray = Array.from(files);
-                      const fileListObj = {
-                        ...filesArray,
-                        length: filesArray.length,
-                        item: (index: number) => filesArray[index] || null,
-                        [Symbol.iterator]: function* () {
-                          for (const file of filesArray) {
-                            yield file;
-                          }
-                        }
-                      } as FileList;
-                      
-                      // Direct upload - Vision API processing now handled by server
-                      receiptUploadMutation.mutate({ files: fileListObj, ocrData: undefined });
-                    }
-                    e.target.value = ''; // Reset input
-                  }}
-                />
-              </div>
-
-              {/* Quick Receipt Entry Form */}
-              <div className="mb-4">
-                <form 
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const formData = new FormData(e.target as HTMLFormElement);
-                  const item = formData.get('item') as string;
-                  const price = formData.get('price') as string;
-                  
-                  if (!item.trim() || !price.trim()) return;
-                  
-                  const receiptData = {
-                    vendor: item,
-                    amount: price,
-                    description: `Manual entry: ${item}`,
-                    date: new Date().toISOString().split('T')[0],
-                    filename: null
-                  };
-                  
-                  fetch(`/api/projects/${project.id}/receipts`, {
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(receiptData),
-                  }).then(async (response) => {
-                    if (response.ok) {
-                      queryClient.invalidateQueries({ queryKey: [`/api/projects/${project.id}/receipts`] });
-                      (e.target as HTMLFormElement).reset();
-                    } else {
-                      const errorData = await response.text();
-                      console.error('Receipt creation failed:', errorData);
-                      alert('Failed to add receipt. Please try again.');
-                    }
-                  }).catch((error) => {
-                    console.error('Network error:', error);
-                    alert('Network error. Please check your connection and try again.');
-                  });
-                }}
-                className="flex gap-2"
-              >
-                <Input
-                  name="item"
-                  placeholder=""
-                  className="flex-1 h-9"
-                />
-                <Input
-                  name="price"
-                  type="number"
-                  step="0.01"
-                  placeholder="$0.00"
-                  className="w-24 h-9"
-                />
-                <Button 
-                  type="submit" 
-                  size="sm"
-                  className="h-9 px-3 text-xs text-white"
-                  style={{ backgroundColor: '#D97706' }}
-                >
-                  Add Item
-                </Button>
-              </form>
-              </div>
+            <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target as HTMLFormElement);
+              const item = formData.get('item') as string;
+              const price = formData.get('price') as string;
               
-              {/* Receipts List */}
-              <div className="mt-6">
-                <SimpleFilesList projectId={project.id} />
-              </div>
-            </Collapsible.Content>
-          </Collapsible.Root>
+              if (!item.trim() || !price.trim()) return;
+              
+              const receiptData = {
+                vendor: item,
+                amount: price,
+                description: `Manual entry: ${item}`,
+                date: new Date().toISOString().split('T')[0],
+                filename: null
+              };
+              
+              fetch(`/api/projects/${project.id}/receipts`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(receiptData),
+              }).then(async (response) => {
+                if (response.ok) {
+                  queryClient.invalidateQueries({ queryKey: [`/api/projects/${project.id}/receipts`] });
+                  (e.target as HTMLFormElement).reset();
+                } else {
+                  const errorData = await response.text();
+                  console.error('Receipt creation failed:', errorData);
+                  alert('Failed to add receipt. Please try again.');
+                }
+              }).catch((error) => {
+                console.error('Network error:', error);
+                alert('Network error. Please check your connection and try again.');
+              });
+            }}
+            className="flex gap-2"
+          >
+            <Input
+              name="item"
+              placeholder=""
+              className="flex-1 h-9"
+            />
+            <Input
+              name="price"
+              type="number"
+              step="0.01"
+              placeholder="$0.00"
+              className="w-24 h-9"
+            />
+            <Button 
+              type="submit" 
+              size="sm"
+              className="h-9 px-3 text-xs text-white"
+              style={{ backgroundColor: '#D97706' }}
+            >
+              Add Item
+            </Button>
+          </form>
+          </div>
+          
+          <SimpleFilesList projectId={project.id} />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -1787,7 +1606,15 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       </div>
 
 
-
+      
+      <input
+        ref={receiptInputRef}
+        type="file"
+        accept=".pdf,.doc,.docx,.txt"
+        onChange={handleReceiptUpload}
+        multiple
+        className="hidden"
+      />
 
       {/* Enhanced Photo Carousel */}
       {showPhotoCarousel && photos.length > 0 && (
