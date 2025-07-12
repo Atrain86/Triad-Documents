@@ -251,8 +251,6 @@ interface StreamlinedClientPageProps {
 }
 
 export default function StreamlinedClientPage({ projectId, onBack }: StreamlinedClientPageProps) {
-  const queryClient = useQueryClient();
-  
   // File input refs
   const photoInputRef = useRef<HTMLInputElement>(null);
   const receiptInputRef = useRef<HTMLInputElement>(null);
@@ -422,13 +420,11 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       return response.json();
     },
     onSuccess: () => {
-      // Temporarily simplified to identify temporal dead zone error
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/hours`] });
-      // TODO: Re-enable these once runtime error is resolved
-      // setShowDatePicker(false);
-      // setSelectedDate('');
-      // setHoursInput('');
-      // setDescriptionInput('');
+      setShowDatePicker(false);
+      setSelectedDate('');
+      setHoursInput('');
+      setDescriptionInput('');
     },
     onError: (error) => {
       console.error('Add hours failed:', error);
