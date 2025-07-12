@@ -502,9 +502,11 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       });
 
       try {
+        console.log('Starting compression for files:', fileArray.map(f => f.name));
         const { compressedFiles, totalCompressedSizeBytes } = await compressMultipleImages(
           fileArray,
           (progress) => {
+            console.log('Compression progress:', progress);
             setCompressionProgress(prev => ({
               ...prev,
               currentFile: progress.currentFile,
@@ -516,6 +518,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
         totalCompressedSize = totalCompressedSizeBytes;
         console.log('Compression complete. Compressed files:', compressedFiles.length);
+        console.log('Compressed file details:', compressedFiles.map(f => ({ name: f.name, size: f.size, type: f.type })));
 
         const formData = new FormData();
         compressedFiles.forEach((file, index) => {
@@ -540,6 +543,11 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         return response;
       } catch (error) {
         console.error('Error during compression or upload:', error);
+        console.error('Error details:', {
+          message: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : 'No stack trace',
+          errorObject: error
+        });
         throw error;
       }
     },

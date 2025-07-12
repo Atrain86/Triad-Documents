@@ -99,11 +99,34 @@ export function formatFileSize(bytes: number): string {
 
 export async function compressMultipleImages(
   files: File[],
-  options?: CompressionOptions
-): Promise<CompressionResult[]> {
+  progressCallback?: (progress: { currentFile: number; totalFiles: number }) => void
+): Promise<{ compressedFiles: File[]; totalCompressedSizeBytes: number }> {
   const imageFiles = files.filter(file => file.type.startsWith('image/'));
+  const compressedResults: File[] = [];
+  let totalCompressedSize = 0;
   
-  const compressionPromises = imageFiles.map(file => compressImage(file, options));
+  for (let i = 0; i < imageFiles.length; i++) {
+    const file = imageFiles[i];
+    
+    // Report progress
+    if (progressCallback) {
+      progressCallback({ currentFile: i + 1, totalFiles: imageFiles.length });
+    }
+    
+    try {
+      const result = await compressImage(file);
+      compressedResults.push(result.file);
+      totalCompressedSize += result.compressedSize;
+    } catch (error) {
+      console.error(`Failed to compress ${file.name}:`, error);
+      // If compression fails, use original file
+      compressedResults.push(file);
+      totalCompressedSize += file.size;
+    }
+  }
   
-  return Promise.all(compressionPromises);
+  return {
+    compressedFiles: compressedResults,
+    totalCompressedSizeBytes: totalCompressedSize
+  };
 }
