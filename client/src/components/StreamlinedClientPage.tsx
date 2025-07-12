@@ -1238,10 +1238,20 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
         {/* Daily Hours Section */}
         <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4 text-muted-foreground">
-            <Calendar size={16} />
-            <span className="font-medium">Daily Hours</span>
-          </div>
+          <Collapsible.Root open={expandedSections.dailyHours} onOpenChange={() => toggleSection('dailyHours')}>
+            <Collapsible.Trigger className="w-full">
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Calendar size={16} />
+                  <span className="font-medium">Daily Hours</span>
+                  <span className="text-xs px-2 py-1 rounded-full bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300">
+                    {dailyHours.length} days logged
+                  </span>
+                </div>
+                {expandedSections.dailyHours ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+              </div>
+            </Collapsible.Trigger>
+            <Collapsible.Content className="mt-4">
           
           {/* Add Hours Button */}
           {!showDatePicker && (
@@ -1406,21 +1416,35 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
               </div>
             )}
           </div>
+            </Collapsible.Content>
+          </Collapsible.Root>
         </div>
 
         {/* Notes Section */}
         <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4 text-muted-foreground">
-            <Edit3 size={16} />
-            <span className="font-medium">Project Notes</span>
-          </div>
-          <Textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            onBlur={handleNotesBlur}
-            placeholder=""
-            className="w-full min-h-48 resize-none rounded-lg border border-gray-200 dark:border-gray-700 p-3 text-sm"
-          />
+          <Collapsible.Root open={expandedSections.notes} onOpenChange={() => toggleSection('notes')}>
+            <Collapsible.Trigger className="w-full">
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Edit3 size={16} />
+                  <span className="font-medium">Project Notes</span>
+                  <span className="text-xs px-2 py-1 rounded-full bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300">
+                    notes
+                  </span>
+                </div>
+                {expandedSections.notes ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+              </div>
+            </Collapsible.Trigger>
+            <Collapsible.Content className="mt-4">
+              <Textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                onBlur={handleNotesBlur}
+                placeholder=""
+                className="w-full min-h-48 resize-none rounded-lg border border-gray-200 dark:border-gray-700 p-3 text-sm"
+              />
+            </Collapsible.Content>
+          </Collapsible.Root>
         </div>
 
 
@@ -1451,14 +1475,29 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           </div>
         )}
 
+        {/* Photos Section */}
+        <div className="mb-8">
+          <Collapsible.Root open={expandedSections.photos} onOpenChange={() => toggleSection('photos')}>
+            <Collapsible.Trigger className="w-full">
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Camera size={16} />
+                  <span className="font-medium">Photos</span>
+                  <span className="text-xs px-2 py-1 rounded-full bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300">
+                    {photos.length} photos
+                  </span>
+                </div>
+                {expandedSections.photos ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+              </div>
+            </Collapsible.Trigger>
+            <Collapsible.Content className="mt-4">
+
         {/* Photo Thumbnails Grid */}
         {photos.length > 0 && (
           <div className="mb-7">
             <div className="flex items-center gap-2 mb-4 text-muted-foreground">
-              <Camera size={16} />
-              <span className="font-medium">Photos ({photos.length})</span>
               {selectedPhotos.size === 0 && !isSelecting && (
-                <span className="text-xs text-muted-foreground ml-2">
+                <span className="text-xs text-muted-foreground">
                   Long press and drag to select multiple
                 </span>
               )}
@@ -1538,15 +1577,26 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             <p>No photos yet. Use the camera button to add some!</p>
           </div>
         )}
-
-
+            </Collapsible.Content>
+          </Collapsible.Root>
+        </div>
 
         {/* Receipts Section */}
         <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4 text-muted-foreground">
-            <ReceiptIcon size={16} />
-            <span className="font-medium">Receipts & Expenses</span>
-          </div>
+          <Collapsible.Root open={expandedSections.receipts} onOpenChange={() => toggleSection('receipts')}>
+            <Collapsible.Trigger className="w-full">
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <ReceiptIcon size={16} />
+                  <span className="font-medium">Receipts & Expenses</span>
+                  <span className="text-xs px-2 py-1 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300">
+                    {receipts.length} receipts
+                  </span>
+                </div>
+                {expandedSections.receipts ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+              </div>
+            </Collapsible.Trigger>
+            <Collapsible.Content className="mt-4">
           
           {/* Quick Receipt Entry Form */}
           <div className="mb-4">
@@ -1614,6 +1664,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           </div>
           
           <SimpleFilesList projectId={project.id} />
+            </Collapsible.Content>
+          </Collapsible.Root>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
