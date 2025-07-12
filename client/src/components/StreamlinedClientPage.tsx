@@ -650,7 +650,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
               ...prev,
               currentFile: progress.currentFile,
               originalSize: totalOriginalSize,
-              compressedSize: totalCompressedSizeBytes,
+              compressedSize: progress.compressedSize || 0,
             }));
           }
         );
