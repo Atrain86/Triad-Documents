@@ -1066,10 +1066,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                     {/* Mac-style Reorder Icon - Left Side */}
                     <div className="drag-handle cursor-move p-1 text-white hover:text-gray-200" onClick={(e) => e.stopPropagation()}>
                       <svg width="16" height="16" viewBox="0 0 16 16" className="text-white">
-                        <rect y="2" width="16" height="1.5" rx="0.75"/>
-                        <rect y="5.5" width="16" height="1.5" rx="0.75"/>
-                        <rect y="9" width="16" height="1.5" rx="0.75"/>
-                        <rect y="12.5" width="16" height="1.5" rx="0.75"/>
+                        <rect y="2" width="16" height="1.5" rx="0.75" fill="currentColor"/>
+                        <rect y="5.5" width="16" height="1.5" rx="0.75" fill="currentColor"/>
+                        <rect y="9" width="16" height="1.5" rx="0.75" fill="currentColor"/>
+                        <rect y="12.5" width="16" height="1.5" rx="0.75" fill="currentColor"/>
                       </svg>
                     </div>
                     
