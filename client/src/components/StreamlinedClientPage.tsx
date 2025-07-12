@@ -254,6 +254,9 @@ interface StreamlinedClientPageProps {
 }
 
 export default function StreamlinedClientPage({ projectId, onBack }: StreamlinedClientPageProps) {
+  // Query client MUST be declared first
+  const queryClient = useQueryClient();
+  
   // Error tooltip system
   const { errorState, showUploadError, showDeleteError, showSaveError, showLoadError, hideError } = useErrorTooltip();
   
