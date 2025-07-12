@@ -1,11 +1,12 @@
 import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Camera, FileText, ArrowLeft, Edit3, Download, X, Image as ImageIcon, DollarSign, Calendar, Wrench, Plus, Trash2, Calculator, Receipt as ReceiptIcon, MapPin, Navigation, ExternalLink } from 'lucide-react';
+import { Camera, FileText, ArrowLeft, Edit3, Download, X, Image as ImageIcon, DollarSign, Calendar, Wrench, Plus, Trash2, Calculator, Receipt as ReceiptIcon, MapPin, Navigation, ExternalLink, ChevronDown, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import * as Collapsible from '@radix-ui/react-collapsible';
 import { apiRequest } from '@/lib/queryClient';
 import { generateMapsLink, generateDirectionsLink } from '@/lib/maps';
 import { compressMultipleImages, formatFileSize } from '@/lib/imageCompression';
@@ -307,6 +308,22 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     originalSize: 0,
     compressedSize: 0
   });
+
+  // Collapsible section states - start with tools expanded by default
+  const [expandedSections, setExpandedSections] = useState({
+    tools: true,
+    dailyHours: false,
+    notes: false,
+    photos: false,
+    receipts: false,
+  });
+
+  const toggleSection = (section: keyof typeof expandedSections) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
   
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
@@ -1068,66 +1085,95 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
         {/* Tools Checklist Section */}
         <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4 text-muted-foreground">
-            <Wrench size={16} />
-            <span className="font-medium">Tools Checklist</span>
-          </div>
-          
-          {/* Add Tool Input */}
-          <div className="flex gap-2 mb-4">
-            <input
-              type="text"
-              value={newTool}
-              onChange={(e) => setNewTool(e.target.value)}
-              placeholder="Paint brushes, Drop cloths, Ladder, Rollers..."
-              className="flex-1 px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-background"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && newTool.trim()) {
-                  addToolMutation.mutate(newTool.trim());
-                }
-              }}
-            />
-            <Button
-              onClick={() => newTool.trim() && addToolMutation.mutate(newTool.trim())}
-              disabled={!newTool.trim() || addToolMutation.isPending}
-              size="sm"
-              className="px-3"
-            >
-              <Plus size={16} />
-            </Button>
-          </div>
-
-          {/* Tools List */}
-          <div className="h-48 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg p-3 space-y-2">
-            {tools.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-8">
-                No tools added yet. Add tools you need to bring to this job.
-              </p>
-            ) : (
-              tools.map((tool) => (
-                <div key={tool.id} className="flex items-center gap-3 group">
-                  <button
-                    onClick={() => toggleToolMutation.mutate(tool.id)}
-                    className="w-5 h-5 rounded border-2 flex items-center justify-center transition-colors border-gray-300 dark:border-gray-600 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20"
-                    title="Click to mark as complete and remove from list"
-                  >
-                    {/* Empty checkbox - clicking it will delete the tool */}
-                  </button>
-                  <span className="flex-1 text-sm text-foreground">
-                    {tool.toolName}
+          <Collapsible.Root 
+            open={expandedSections.tools} 
+            onOpenChange={() => toggleSection('tools')}
+          >
+            <Collapsible.Trigger asChild>
+              <button className="flex items-center gap-2 mb-4 text-muted-foreground hover:text-foreground transition-colors w-full text-left">
+                {expandedSections.tools ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                <Wrench size={16} />
+                <span className="font-medium">Tools Checklist</span>
+                {tools.length > 0 && (
+                  <span className="ml-auto text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
+                    {tools.length}
                   </span>
-                </div>
-              ))
-            )}
-          </div>
+                )}
+              </button>
+            </Collapsible.Trigger>
+            
+            <Collapsible.Content className="data-[state=open]:animate-slideDown data-[state=closed]:animate-slideUp">
+              {/* Add Tool Input */}
+              <div className="flex gap-2 mb-4">
+                <input
+                  type="text"
+                  value={newTool}
+                  onChange={(e) => setNewTool(e.target.value)}
+                  placeholder="Paint brushes, Drop cloths, Ladder, Rollers..."
+                  className="flex-1 px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-background"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && newTool.trim()) {
+                      addToolMutation.mutate(newTool.trim());
+                    }
+                  }}
+                />
+                <Button
+                  onClick={() => newTool.trim() && addToolMutation.mutate(newTool.trim())}
+                  disabled={!newTool.trim() || addToolMutation.isPending}
+                  size="sm"
+                  className="px-3"
+                >
+                  <Plus size={16} />
+                </Button>
+              </div>
+
+              {/* Tools List */}
+              <div className="h-48 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg p-3 space-y-2">
+                {tools.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-8">
+                    No tools added yet. Add tools you need to bring to this job.
+                  </p>
+                ) : (
+                  tools.map((tool) => (
+                    <div key={tool.id} className="flex items-center gap-3 group">
+                      <button
+                        onClick={() => toggleToolMutation.mutate(tool.id)}
+                        className="w-5 h-5 rounded border-2 flex items-center justify-center transition-colors border-gray-300 dark:border-gray-600 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20"
+                        title="Click to mark as complete and remove from list"
+                      >
+                        {/* Empty checkbox - clicking it will delete the tool */}
+                      </button>
+                      <span className="flex-1 text-sm text-foreground">
+                        {tool.toolName}
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </Collapsible.Content>
+          </Collapsible.Root>
         </div>
 
         {/* Daily Hours Section */}
         <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4 text-muted-foreground">
-            <Calendar size={16} />
-            <span className="font-medium">Daily Hours</span>
-          </div>
+          <Collapsible.Root 
+            open={expandedSections.dailyHours} 
+            onOpenChange={() => toggleSection('dailyHours')}
+          >
+            <Collapsible.Trigger asChild>
+              <button className="flex items-center gap-2 mb-4 text-muted-foreground hover:text-foreground transition-colors w-full text-left">
+                {expandedSections.dailyHours ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                <Calendar size={16} />
+                <span className="font-medium">Daily Hours</span>
+                {dailyHours.length > 0 && (
+                  <span className="ml-auto text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
+                    {dailyHours.reduce((sum, h) => sum + h.hours, 0).toFixed(1)}h
+                  </span>
+                )}
+              </button>
+            </Collapsible.Trigger>
+            
+            <Collapsible.Content className="data-[state=open]:animate-slideDown data-[state=closed]:animate-slideUp">
           
           {/* Add Hours Button */}
           {!showDatePicker && (
@@ -1292,21 +1338,39 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
               </div>
             )}
           </div>
+            </Collapsible.Content>
+          </Collapsible.Root>
         </div>
 
         {/* Notes Section */}
         <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4 text-muted-foreground">
-            <Edit3 size={16} />
-            <span className="font-medium">Project Notes</span>
-          </div>
-          <Textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            onBlur={handleNotesBlur}
-            placeholder=""
-            className="w-full min-h-48 resize-none rounded-lg border border-gray-200 dark:border-gray-700 p-3 text-sm"
-          />
+          <Collapsible.Root 
+            open={expandedSections.notes} 
+            onOpenChange={() => toggleSection('notes')}
+          >
+            <Collapsible.Trigger asChild>
+              <button className="flex items-center gap-2 mb-4 text-muted-foreground hover:text-foreground transition-colors w-full text-left">
+                {expandedSections.notes ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                <Edit3 size={16} />
+                <span className="font-medium">Project Notes</span>
+                {notes.trim() && (
+                  <span className="ml-auto text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
+                    {notes.length > 20 ? notes.substring(0, 20) + '...' : notes}
+                  </span>
+                )}
+              </button>
+            </Collapsible.Trigger>
+            
+            <Collapsible.Content className="data-[state=open]:animate-slideDown data-[state=closed]:animate-slideUp">
+              <Textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                onBlur={handleNotesBlur}
+                placeholder=""
+                className="w-full min-h-48 resize-none rounded-lg border border-gray-200 dark:border-gray-700 p-3 text-sm"
+              />
+            </Collapsible.Content>
+          </Collapsible.Root>
         </div>
 
 
@@ -1340,20 +1404,32 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         {/* Photo Thumbnails Grid */}
         {photos.length > 0 && (
           <div className="mb-7">
-            <div className="flex items-center gap-2 mb-4 text-muted-foreground">
-              <Camera size={16} />
-              <span className="font-medium">Photos ({photos.length})</span>
-              {selectedPhotos.size === 0 && !isSelecting && (
-                <span className="text-xs text-muted-foreground ml-2">
-                  Long press and drag to select multiple
-                </span>
-              )}
-              {isSelecting && selectedPhotos.size === 0 && (
-                <span className="text-xs text-blue-600 dark:text-blue-400 ml-2">
-                  Selection mode active - tap photos to select
-                </span>
-              )}
-            </div>
+            <Collapsible.Root 
+              open={expandedSections.photos} 
+              onOpenChange={() => toggleSection('photos')}
+            >
+              <Collapsible.Trigger asChild>
+                <button className="flex items-center gap-2 mb-4 text-muted-foreground hover:text-foreground transition-colors w-full text-left">
+                  {expandedSections.photos ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                  <Camera size={16} />
+                  <span className="font-medium">Photos</span>
+                  <span className="ml-auto text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
+                    {photos.length}
+                  </span>
+                </button>
+              </Collapsible.Trigger>
+              
+              <Collapsible.Content className="data-[state=open]:animate-slideDown data-[state=closed]:animate-slideUp">
+                {selectedPhotos.size === 0 && !isSelecting && (
+                  <div className="text-xs text-muted-foreground mb-2">
+                    Long press and drag to select multiple
+                  </div>
+                )}
+                {isSelecting && selectedPhotos.size === 0 && (
+                  <div className="text-xs text-blue-600 dark:text-blue-400 mb-2">
+                    Selection mode active - tap photos to select
+                  </div>
+                )}
             <div className="grid grid-cols-3 gap-3">
               {photos.map((photo, index) => (
                 <div
@@ -1407,6 +1483,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                 </div>
               ))}
             </div>
+              </Collapsible.Content>
+            </Collapsible.Root>
           </div>
         )}
 
@@ -1463,84 +1541,98 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             />
           </div>
 
-          <div className="flex items-center gap-2 mb-4 text-muted-foreground">
-            <ReceiptIcon size={16} />
-            <span className="font-medium">Receipts & Expenses</span>
-          </div>
-          
-          {/* Quick Receipt Entry Form */}
-          <div className="mb-4">
-
-            <form 
-            onSubmit={(e) => {
-              e.preventDefault();
-              const formData = new FormData(e.target as HTMLFormElement);
-              const item = formData.get('item') as string;
-              const price = formData.get('price') as string;
-              
-              if (!item.trim() || !price.trim()) return;
-              
-              const receiptData = {
-                vendor: item,
-                amount: price,
-                description: `Manual entry: ${item}`,
-                date: new Date().toISOString().split('T')[0],
-                filename: null
-              };
-              
-              fetch(`/api/projects/${project.id}/receipts`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(receiptData),
-              }).then(async (response) => {
-                if (response.ok) {
-                  queryClient.invalidateQueries({ queryKey: [`/api/projects/${project.id}/receipts`] });
-                  (e.target as HTMLFormElement).reset();
-                } else {
-                  const errorData = await response.text();
-                  console.error('Receipt creation failed:', errorData);
-                  alert('Failed to add receipt. Please try again.');
-                }
-              }).catch((error) => {
-                console.error('Network error:', error);
-                alert('Network error. Please check your connection and try again.');
-              });
-            }}
-            className="flex gap-2"
+          <Collapsible.Root 
+            open={expandedSections.receipts} 
+            onOpenChange={() => toggleSection('receipts')}
           >
-            <Input
-              name="item"
-              placeholder=""
-              className="flex-1 h-9"
-            />
-            <Input
-              name="price"
-              type="number"
-              step="0.01"
-              placeholder="$0.00"
-              className="w-24 h-9"
-            />
-            <Button 
-              type="submit" 
-              size="sm"
-              className="h-9 px-3 text-xs text-white"
-              style={{ backgroundColor: '#D97706' }}
-            >
-              Add Item
-            </Button>
-          </form>
-          </div>
-          
-          {/* Receipts Section */}
-          <div className="mt-6">
-            <div className="flex items-center gap-2 mb-4 text-muted-foreground">
-              <FileText size={16} />
-              <span className="font-medium">Receipts & Supplies</span>
-            </div>
-            <SimpleFilesList projectId={project.id} />
-          </div>
+            <Collapsible.Trigger asChild>
+              <button className="flex items-center gap-2 mb-4 text-muted-foreground hover:text-foreground transition-colors w-full text-left">
+                {expandedSections.receipts ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                <ReceiptIcon size={16} />
+                <span className="font-medium">Receipts & Expenses</span>
+                {receipts.length > 0 && (
+                  <span className="ml-auto text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
+                    {receipts.length}
+                  </span>
+                )}
+              </button>
+            </Collapsible.Trigger>
+            
+            <Collapsible.Content className="data-[state=open]:animate-slideDown data-[state=closed]:animate-slideUp">
+              {/* Quick Receipt Entry Form */}
+              <div className="mb-4">
+                <form 
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.target as HTMLFormElement);
+                  const item = formData.get('item') as string;
+                  const price = formData.get('price') as string;
+                  
+                  if (!item.trim() || !price.trim()) return;
+                  
+                  const receiptData = {
+                    vendor: item,
+                    amount: price,
+                    description: `Manual entry: ${item}`,
+                    date: new Date().toISOString().split('T')[0],
+                    filename: null
+                  };
+                  
+                  fetch(`/api/projects/${project.id}/receipts`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(receiptData),
+                  }).then(async (response) => {
+                    if (response.ok) {
+                      queryClient.invalidateQueries({ queryKey: [`/api/projects/${project.id}/receipts`] });
+                      (e.target as HTMLFormElement).reset();
+                    } else {
+                      const errorData = await response.text();
+                      console.error('Receipt creation failed:', errorData);
+                      alert('Failed to add receipt. Please try again.');
+                    }
+                  }).catch((error) => {
+                    console.error('Network error:', error);
+                    alert('Network error. Please check your connection and try again.');
+                  });
+                }}
+                className="flex gap-2"
+              >
+                <Input
+                  name="item"
+                  placeholder=""
+                  className="flex-1 h-9"
+                />
+                <Input
+                  name="price"
+                  type="number"
+                  step="0.01"
+                  placeholder="$0.00"
+                  className="w-24 h-9"
+                />
+                <Button 
+                  type="submit" 
+                  size="sm"
+                  className="h-9 px-3 text-xs text-white"
+                  style={{ backgroundColor: '#D97706' }}
+                >
+                  Add Item
+                </Button>
+              </form>
+              </div>
+              
+              {/* Receipts Section */}
+              <div className="mt-6">
+                <div className="flex items-center gap-2 mb-4 text-muted-foreground">
+                  <FileText size={16} />
+                  <span className="font-medium">Receipts & Supplies</span>
+                </div>
+                <SimpleFilesList projectId={project.id} />
+              </div>
+            </Collapsible.Content>
+          </Collapsible.Root>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
