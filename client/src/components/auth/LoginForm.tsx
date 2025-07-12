@@ -52,19 +52,16 @@ const LoginForm: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-6">
+    <div className="min-h-screen bg-black flex items-center justify-center p-4">
+      <div className="w-full max-w-md space-y-8">
         {/* Paint Brain Logo */}
         <div className="text-center">
           <img 
             src="/paint-brain-logo.png" 
             alt="Paint Brain" 
-            className="h-32 mx-auto mb-6"
+            className="h-48 mx-auto mb-8"
           />
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Paint Brain
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
+          <p className="text-gray-300 text-lg">
             Smart Project Management for Painting Professionals
           </p>
         </div>
