@@ -481,6 +481,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   // Mutations
   const uploadPhotosMutation = useMutation({
     mutationFn: async (files: FileList) => {
+      console.log('Starting photo upload with files:', files.length);
+      
       setCompressionProgress({
         isCompressing: true,
         currentFile: 0,
@@ -496,42 +498,53 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       // Calculate total original size
       fileArray.forEach(file => {
         totalOriginalSize += file.size;
+        console.log('File:', file.name, 'Size:', file.size, 'Type:', file.type);
       });
 
-      const { compressedFiles, totalCompressedSizeBytes } = await compressMultipleImages(
-        fileArray,
-        (progress) => {
-          setCompressionProgress(prev => ({
-            ...prev,
-            currentFile: progress.currentFile,
-            originalSize: totalOriginalSize,
-            compressedSize: totalCompressedSizeBytes,
-          }));
-        }
-      );
+      try {
+        const { compressedFiles, totalCompressedSizeBytes } = await compressMultipleImages(
+          fileArray,
+          (progress) => {
+            setCompressionProgress(prev => ({
+              ...prev,
+              currentFile: progress.currentFile,
+              originalSize: totalOriginalSize,
+              compressedSize: totalCompressedSizeBytes,
+            }));
+          }
+        );
 
-      totalCompressedSize = totalCompressedSizeBytes;
+        totalCompressedSize = totalCompressedSizeBytes;
+        console.log('Compression complete. Compressed files:', compressedFiles.length);
 
-      const formData = new FormData();
-      compressedFiles.forEach((file, index) => {
-        formData.append('photos', file);
-      });
+        const formData = new FormData();
+        compressedFiles.forEach((file, index) => {
+          formData.append('photos', file);
+          console.log('Added compressed file to FormData:', file.name, file.size);
+        });
 
-      const response = await apiRequest(`/api/projects/${projectId}/photos`, {
-        method: 'POST',
-        body: formData,
-      });
+        console.log('Sending FormData to server...');
+        const response = await apiRequest(`/api/projects/${projectId}/photos`, {
+          method: 'POST',
+          body: formData,
+        });
 
-      setCompressionProgress(prev => ({
-        ...prev,
-        isCompressing: false,
-        originalSize: totalOriginalSize,
-        compressedSize: totalCompressedSize,
-      }));
+        setCompressionProgress(prev => ({
+          ...prev,
+          isCompressing: false,
+          originalSize: totalOriginalSize,
+          compressedSize: totalCompressedSize,
+        }));
 
-      return response;
+        console.log('Photo upload successful:', response);
+        return response;
+      } catch (error) {
+        console.error('Error during compression or upload:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
+      console.log('Photo upload mutation success, invalidating queries');
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
       if (photoInputRef.current) {
         photoInputRef.current.value = '';
@@ -779,16 +792,26 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   // File upload handlers
   const handlePhotoUpload = (event: any) => {
+    console.log('Photo upload handler triggered');
     const files = event.target.files;
+    console.log('Selected files:', files);
     if (files && files.length > 0) {
+      console.log('Files detected, starting upload:', Array.from(files).map(f => f.name));
       uploadPhotosMutation.mutate(files);
+    } else {
+      console.log('No files selected');
     }
   };
 
   const handleReceiptUpload = (event: any) => {
+    console.log('Receipt upload handler triggered');
     const files = event.target.files;
+    console.log('Selected receipt files:', files);
     if (files && files.length > 0) {
+      console.log('Receipt files detected, starting upload:', Array.from(files).map(f => f.name));
       uploadReceiptsMutation.mutate(files);
+    } else {
+      console.log('No receipt files selected');
     }
   };
 
@@ -981,7 +1004,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                         <div className="mb-4 grid grid-cols-2 gap-2">
                           <Button
                             onClick={() => {
-                              // Create input for camera
+                              // Create input for direct camera access
                               const input = document.createElement('input');
                               input.type = 'file';
                               input.accept = 'image/*,.heic,.heif';
@@ -998,18 +1021,19 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                           </Button>
                           <Button
                             onClick={() => {
-                              // Create input for library
+                              // Create input for photo library access only (no camera)
                               const input = document.createElement('input');
                               input.type = 'file';
                               input.accept = 'image/*,.heic,.heif';
                               input.multiple = true;
+                              // No capture attribute - this forces library selection
                               input.onchange = handlePhotoUpload;
                               input.click();
                             }}
                             className="py-3 text-sm font-semibold text-white flex items-center justify-center bg-orange-600 hover:bg-orange-700"
                           >
                             <Upload size={16} className="mr-2" />
-                            Library
+                            Upload
                           </Button>
                         </div>
                         
@@ -1348,7 +1372,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                         <div className="mb-4 grid grid-cols-2 gap-2">
                           <Button
                             onClick={() => {
-                              // Create input for camera
+                              // Create input for direct camera access
                               const input = document.createElement('input');
                               input.type = 'file';
                               input.accept = 'image/*,.heic,.heif';
@@ -1364,18 +1388,19 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                           </Button>
                           <Button
                             onClick={() => {
-                              // Create input for library
+                              // Create input for photo library access only (no camera)
                               const input = document.createElement('input');
                               input.type = 'file';
                               input.accept = 'image/*,.heic,.heif';
                               input.multiple = true;
+                              // No capture attribute - this forces library selection
                               input.onchange = handleReceiptUpload;
                               input.click();
                             }}
                             className="py-3 text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center"
                           >
                             <Upload size={16} className="mr-2" />
-                            Library
+                            Upload
                           </Button>
                         </div>
                         
