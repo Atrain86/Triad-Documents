@@ -422,11 +422,15 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/hours`] });
-      setShowDatePicker(false);
-      setSelectedDate('');
-      setHoursInput('');
-      setDescriptionInput('');
+      try {
+        queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/hours`] });
+        setShowDatePicker(false);
+        setSelectedDate('');
+        setHoursInput('');
+        setDescriptionInput('');
+      } catch (error) {
+        console.error('Error in addHoursMutation onSuccess:', error);
+      }
     },
     onError: (error) => {
       console.error('Add hours failed:', error);
@@ -1539,6 +1543,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           photos={photos}
           initialIndex={carouselIndex}
           onClose={() => setShowPhotoCarousel(false)}
+          onDelete={(photoId) => deletePhotoMutation.mutate(photoId)}
         />
       )}
 

@@ -5,9 +5,10 @@ interface PhotoCarouselProps {
   photos: Array<{ id: number; filename: string; description?: string | null }>;
   initialIndex: number;
   onClose: () => void;
+  onDelete?: (photoId: number) => void;
 }
 
-export default function PhotoCarousel({ photos, initialIndex, onClose }: PhotoCarouselProps) {
+export default function PhotoCarousel({ photos, initialIndex, onClose, onDelete }: PhotoCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState(0);
@@ -158,6 +159,31 @@ export default function PhotoCarousel({ photos, initialIndex, onClose }: PhotoCa
       >
         <X className="w-8 h-8" />
       </button>
+
+      {/* Delete Button */}
+      {onDelete && (
+        <button
+          onClick={() => {
+            const currentPhoto = photos[currentIndex];
+            if (currentPhoto) {
+              onDelete(currentPhoto.id);
+              // If this was the last photo or only photo, close carousel
+              if (photos.length === 1) {
+                onClose();
+              } else if (currentIndex === photos.length - 1) {
+                // If deleting last photo, go to previous
+                setCurrentIndex(currentIndex - 1);
+              }
+            }
+          }}
+          className="absolute top-4 right-20 z-[60] p-3 rounded-full bg-red-600 bg-opacity-80 text-white hover:bg-red-700 hover:bg-opacity-90 transition-all duration-200 backdrop-blur-sm"
+          type="button"
+          title="Delete Photo"
+          style={{ zIndex: 9999 }}
+        >
+          <X className="w-6 h-6" />
+        </button>
+      )}
 
       {/* Photo Counter */}
       <div className="absolute top-4 left-4 z-60 text-white text-sm bg-black bg-opacity-50 px-3 py-1 rounded-full">
