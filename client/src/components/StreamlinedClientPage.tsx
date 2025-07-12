@@ -1,7 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Camera, FileText, ArrowLeft, Edit3, Download, X, Image as ImageIcon, DollarSign, Calendar, Wrench, Plus, Trash2, Calculator, Receipt as ReceiptIcon, MapPin, Navigation, ExternalLink, ChevronDown, ChevronRight, GripVertical } from 'lucide-react';
-import * as Collapsible from '@radix-ui/react-collapsible';
+import { Camera, FileText, ArrowLeft, Edit3, Download, X, Image as ImageIcon, DollarSign, Calendar, Wrench, Plus, Trash2, Calculator, Receipt as ReceiptIcon, MapPin, Navigation, ExternalLink, GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -263,6 +262,19 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [hoursInput, setHoursInput] = useState('');
   const [descriptionInput, setDescriptionInput] = useState('');
+  const [compressionProgress, setCompressionProgress] = useState<{
+    isCompressing: boolean;
+    currentFile: number;
+    totalFiles: number;
+    originalSize: number;
+    compressedSize: number;
+  }>({
+    isCompressing: false,
+    currentFile: 0,
+    totalFiles: 0,
+    originalSize: 0,
+    compressedSize: 0
+  });
   
   // Collapsible menu state - all collapsed by default
   const [expandedSections, setExpandedSections] = useState({
@@ -280,7 +292,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     }));
   };
 
-  // Menu sections configuration with drag-and-drop state
+  // Menu sections configuration with drag-and-drop
   const [menuSections, setMenuSections] = useState([
     { id: 'photos', name: 'Photos', icon: Camera, bgColor: 'bg-orange-100 dark:bg-orange-900', textColor: 'text-orange-700 dark:text-orange-300' },
     { id: 'tools', name: 'Tools Checklist', icon: Wrench, bgColor: 'bg-blue-100 dark:bg-blue-900', textColor: 'text-blue-700 dark:text-blue-300' },
@@ -288,6 +300,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     { id: 'notes', name: 'Project Notes', icon: FileText, bgColor: 'bg-yellow-100 dark:bg-yellow-900', textColor: 'text-yellow-700 dark:text-yellow-300' },
     { id: 'receipts', name: 'Receipts & Expenses', icon: ReceiptIcon, bgColor: 'bg-purple-100 dark:bg-purple-900', textColor: 'text-purple-700 dark:text-purple-300' }
   ]);
+  
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
   const [draggedOver, setDraggedOver] = useState<string | null>(null);
 
@@ -322,7 +335,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     const targetIndex = newSections.findIndex(section => section.id === targetSectionId);
 
     if (draggedIndex !== -1 && targetIndex !== -1) {
-      // Remove dragged item and insert at target position
       const [draggedSection] = newSections.splice(draggedIndex, 1);
       newSections.splice(targetIndex, 0, draggedSection);
       setMenuSections(newSections);
@@ -331,19 +343,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     setDraggedItem(null);
     setDraggedOver(null);
   };
-  const [compressionProgress, setCompressionProgress] = useState<{
-    isCompressing: boolean;
-    currentFile: number;
-    totalFiles: number;
-    originalSize: number;
-    compressedSize: number;
-  }>({
-    isCompressing: false,
-    currentFile: 0,
-    totalFiles: 0,
-    originalSize: 0,
-    compressedSize: 0
-  });
   
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const receiptInputRef = useRef<HTMLInputElement>(null);
@@ -1220,348 +1219,477 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           </div>
         )}
 
-        {/* Dynamic Reorderable Menu Sections */}
-        {menuSections.map((section) => {
-          const IconComponent = section.icon;
-          const sectionId = section.id as keyof typeof expandedSections;
+        {/* Tools Checklist Section */}
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4 text-muted-foreground">
+            <Wrench size={16} />
+            <span className="font-medium">Tools Checklist</span>
+          </div>
           
-          // Get section-specific data
-          let itemCount = 0;
-          let countLabel = '';
-          switch (section.id) {
-            case 'photos':
-              itemCount = photos.length;
-              countLabel = `${itemCount} photos`;
-              break;
-            case 'tools':
-              itemCount = tools.length;
-              countLabel = `${itemCount} items`;
-              break;
-            case 'dailyHours':
-              itemCount = dailyHours.length;
-              countLabel = `${itemCount} days logged`;
-              break;
-            case 'receipts':
-              itemCount = receipts.length;
-              countLabel = `${itemCount} receipts`;
-              break;
-            case 'notes':
-              countLabel = 'notes';
-              break;
-          }
-          
-          return (
-            <div
-              key={section.id}
-              draggable
-              onDragStart={(e) => handleDragStart(e, section.id)}
-              onDragOver={(e) => handleDragOver(e, section.id)}
-              onDragLeave={handleDragLeave}
-              onDrop={(e) => handleDrop(e, section.id)}
-              className={`mb-8 transition-all duration-200 ${
-                draggedOver === section.id ? 'scale-105 shadow-lg ring-2 ring-blue-400' : ''
-              } ${draggedItem === section.id ? 'opacity-50' : ''}`}
+          {/* Add Tool Input */}
+          <div className="flex gap-2 mb-4">
+            <input
+              type="text"
+              value={newTool}
+              onChange={(e) => setNewTool(e.target.value)}
+              placeholder="Paint brushes, Drop cloths, Ladder, Rollers..."
+              className="flex-1 px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-background"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && newTool.trim()) {
+                  addToolMutation.mutate(newTool.trim());
+                }
+              }}
+            />
+            <Button
+              onClick={() => newTool.trim() && addToolMutation.mutate(newTool.trim())}
+              disabled={!newTool.trim() || addToolMutation.isPending}
+              size="sm"
+              className="px-3"
             >
-              <Collapsible.Root open={expandedSections[sectionId]} onOpenChange={() => toggleSection(sectionId)}>
-                <Collapsible.Trigger className="w-full">
-                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer">
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <GripVertical size={16} className="text-gray-400 dark:text-gray-500 cursor-grab active:cursor-grabbing" />
-                      <IconComponent size={16} />
-                      <span className="font-medium">{section.name}</span>
-                      <span className={`text-xs px-2 py-1 rounded-full ${section.bgColor} ${section.textColor}`}>
-                        {countLabel}
-                      </span>
-                    </div>
-                    {expandedSections[sectionId] ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                  </div>
-                </Collapsible.Trigger>
-                <Collapsible.Content className="mt-4">
-                  {section.id === 'tools' && (
-                    <div>
-                      {/* Add Tool Input */}
-                      <div className="flex gap-2 mb-4">
-                        <input
-                          type="text"
-                          value={newTool}
-                          onChange={(e) => setNewTool(e.target.value)}
-                          placeholder="Paint brushes, Drop cloths, Ladder, Rollers..."
-                          className="flex-1 px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-background"
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' && newTool.trim()) {
-                              addToolMutation.mutate(newTool.trim());
-                            }
-                          }}
-                        />
-                        <Button
-                          onClick={() => newTool.trim() && addToolMutation.mutate(newTool.trim())}
-                          disabled={!newTool.trim() || addToolMutation.isPending}
-                          size="sm"
-                          className="px-3"
-                        >
-                          <Plus size={16} />
-                        </Button>
-                      </div>
+              <Plus size={16} />
+            </Button>
+          </div>
 
-                      {/* Tools List */}
-                      <div className="h-48 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg p-3 space-y-2">
-                        {tools.length === 0 ? (
-                          <p className="text-sm text-muted-foreground text-center py-8">
-                            No tools added yet. Add tools you need to bring to this job.
-                          </p>
-                        ) : (
-                          tools.map((tool) => (
-                            <div key={tool.id} className="flex items-center gap-3 group">
-                              <button
-                                onClick={() => toggleToolMutation.mutate(tool.id)}
-                                className="w-5 h-5 rounded border-2 flex items-center justify-center transition-colors border-gray-300 dark:border-gray-600 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20"
-                                title="Click to mark as complete and remove from list"
-                              >
-                                {/* Empty checkbox - clicking it will delete the tool */}
-                              </button>
-                              <span className="flex-1 text-sm text-foreground">
-                                {tool.toolName}
-                              </span>
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    </div>
-                  )}
+          {/* Tools List */}
+          <div className="h-48 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg p-3 space-y-2">
+            {tools.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                No tools added yet. Add tools you need to bring to this job.
+              </p>
+            ) : (
+              tools.map((tool) => (
+                <div key={tool.id} className="flex items-center gap-3 group">
+                  <button
+                    onClick={() => toggleToolMutation.mutate(tool.id)}
+                    className="w-5 h-5 rounded border-2 flex items-center justify-center transition-colors border-gray-300 dark:border-gray-600 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20"
+                    title="Click to mark as complete and remove from list"
+                  >
+                    {/* Empty checkbox - clicking it will delete the tool */}
+                  </button>
+                  <span className="flex-1 text-sm text-foreground">
+                    {tool.toolName}
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
 
-                  {section.id === 'photos' && (
-                    <div>
-                      {photos.length > 0 ? (
-                        <div className="grid grid-cols-3 gap-3">
-                          {photos.map((photo, index) => (
-                            <div key={photo.id} className="relative group cursor-pointer">
-                              <img
-                                src={`/uploads/${photo.filename}`}
-                                alt={photo.description || 'Project photo'}
-                                className="w-full h-20 object-cover rounded-lg border border-gray-200 dark:border-gray-700 transition-transform group-hover:scale-105"
-                                onClick={() => setSelectedPhotoIndex(index)}
-                              />
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-sm text-muted-foreground text-center py-8">
-                          No photos uploaded yet.
-                        </p>
-                      )}
-                    </div>
-                  )}
+        {/* Daily Hours Section */}
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4 text-muted-foreground">
+            <Calendar size={16} />
+            <span className="font-medium">Daily Hours</span>
+          </div>
+          
+          {/* Add Hours Button */}
+          {!showDatePicker && (
+            <Button
+              onClick={() => setShowDatePicker(true)}
+              className="w-full mb-4 py-2 text-sm"
+              variant="outline"
+            >
+              <Plus size={16} className="mr-2" />
+              Log Hours for a Day
+            </Button>
+          )}
 
-                  {section.id === 'dailyHours' && (
-                    <div>
-                      {/* Add Hours Button */}
-                      {!showDatePicker && (
-                        <Button
-                          onClick={() => setShowDatePicker(true)}
-                          className="w-full mb-4 py-2 text-sm"
-                          variant="outline"
-                        >
-                          <Plus size={16} className="mr-2" />
-                          Log Hours for a Day
-                        </Button>
-                      )}
-
-                      {/* Date Picker Interface */}
-                      {showDatePicker && (
-                        <div className="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900">
-                          <div className="space-y-3">
-                            <div className="flex gap-2">
-                              <input
-                                type="date"
-                                value={selectedDate}
-                                onChange={(e) => setSelectedDate(e.target.value)}
-                                max={new Date().toISOString().split('T')[0]}
-                                className="flex-1 px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-background"
-                              />
-                              <input
-                                ref={hoursInputRef}
-                                type="number"
-                                step="0.5"
-                                min="0"
-                                max="24"
-                                value={selectedHours}
-                                onChange={(e) => setSelectedHours(e.target.value)}
-                                placeholder="Hours"
-                                className="w-20 px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-background"
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter' && selectedDate && selectedHours) {
-                                    addHoursMutation.mutate({
-                                      date: selectedDate,
-                                      hours: parseFloat(selectedHours),
-                                      description: hoursDescription || 'Painting'
-                                    });
-                                  }
-                                }}
-                              />
-                            </div>
-                            <textarea
-                              value={hoursDescription}
-                              onChange={(e) => setHoursDescription(e.target.value)}
-                              placeholder=""
-                              className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-background resize-none"
-                              rows={2}
-                            />
-                            <div className="flex gap-2">
-                              <Button
-                                onClick={() => {
-                                  if (selectedDate && selectedHours) {
-                                    addHoursMutation.mutate({
-                                      date: selectedDate,
-                                      hours: parseFloat(selectedHours),
-                                      description: hoursDescription || 'Painting'
-                                    });
-                                  }
-                                }}
-                                disabled={!selectedDate || !selectedHours || addHoursMutation.isPending}
-                                size="sm"
-                              >
-                                Add Hours
-                              </Button>
-                              <Button
-                                onClick={() => {
-                                  setShowDatePicker(false);
-                                  setSelectedDate('');
-                                  setSelectedHours('');
-                                  setHoursDescription('');
-                                }}
-                                variant="outline"
-                                size="sm"
-                              >
-                                Cancel
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Hours List */}
-                      <div className="space-y-2 mb-4">
-                        {dailyHours.length === 0 ? (
-                          <p className="text-sm text-muted-foreground text-center py-8">
-                            No hours logged yet. Click the button above to start tracking your time.
-                          </p>
-                        ) : (
-                          dailyHours.map((entry) => (
-                            <div key={entry.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                              <div className="flex-1">
-                                <div className="text-sm font-medium">
-                                  {new Date(entry.date + 'T00:00:00').toLocaleDateString('en-US', { 
-                                    weekday: 'short', 
-                                    month: 'short', 
-                                    day: 'numeric' 
-                                  })} - {entry.hours}hr
-                                </div>
-                                {entry.description && (
-                                  <div className="text-xs text-muted-foreground">{entry.description}</div>
-                                )}
-                                <div className="text-xs text-green-600 dark:text-green-400">${(entry.hours * 60).toFixed(2)}</div>
-                              </div>
-                              <button
-                                onClick={() => deleteHoursMutation.mutate(entry.id)}
-                                disabled={deleteHoursMutation.isPending}
-                                className="p-0.5 text-red-500 hover:text-red-700 transition-colors opacity-60 hover:opacity-100"
-                                title="Delete"
-                              >
-                                <Trash2 size={10} />
-                              </button>
-                            </div>
-                          ))
-                        )}
-                      </div>
-
-                      {/* Hours Summary at Bottom */}
-                      {dailyHours.length > 0 && (
-                        <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                          <div className="text-2xl font-bold text-green-700 dark:text-green-300 mb-2">
-                            ${60}/hr
-                          </div>
-                          <div className="pt-2 border-t border-green-200 dark:border-green-700">
-                            <div className="font-semibold text-green-700 dark:text-green-300">
-                              Total Hours: {dailyHours.reduce((sum, h) => sum + h.hours, 0).toFixed(1)}
-                            </div>
-                            <div className="text-sm text-green-600 dark:text-green-400">
-                              Total Earned: ${(dailyHours.reduce((sum, h) => sum + (h.hours * 60), 0)).toFixed(2)}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {section.id === 'notes' && (
-                    <div>
-                      <Textarea
-                        value={notes}
-                        onChange={(e) => setNotes(e.target.value)}
-                        onBlur={handleNotesBlur}
-                        placeholder=""
-                        className="w-full min-h-48 resize-none rounded-lg border border-gray-200 dark:border-gray-700 p-3 text-sm"
-                      />
-                    </div>
-                  )}
-
-                  {section.id === 'receipts' && (
-                    <div>
-                      <SimpleFilesList projectId={projectId} />
-                    </div>
-                  )}
-                </Collapsible.Content>
-              </Collapsible.Root>
+          {/* Date Picker and Hours Input */}
+          {showDatePicker && (
+            <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg space-y-3">
+              <div>
+                <label className="text-sm font-medium mb-2 block">
+                  Select Date
+                  <span className="ml-2 text-xs px-2 py-1 bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-300 rounded">
+                    Today: {formatDateForInput(new Date())}
+                  </span>
+                </label>
+                <input
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => {
+                    setSelectedDate(e.target.value);
+                    // Auto-focus hours input when date is selected
+                    if (e.target.value) {
+                      setTimeout(() => {
+                        const hoursInput = document.querySelector('input[placeholder="0"]') as HTMLInputElement;
+                        if (hoursInput) hoursInput.focus();
+                      }, 100);
+                    }
+                  }}
+                  className="w-full px-3 py-2 text-sm border-2 border-blue-300 dark:border-blue-600 rounded-lg bg-blue-50 dark:bg-blue-900/20 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800"
+                  max={formatDateForInput(new Date())}
+                  style={{
+                    colorScheme: 'light'
+                  }}
+                />
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium mb-2 block">Hours Worked</label>
+                <input
+                  type="number"
+                  step="0.5"
+                  min="0"
+                  max="24"
+                  value={hoursInput}
+                  onChange={(e) => setHoursInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && hoursInput) {
+                      handleAddHours();
+                    }
+                  }}
+                  placeholder="0"
+                  className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-background"
+                />
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium mb-2 block">Description</label>
+                <input
+                  type="text"
+                  value={descriptionInput}
+                  onChange={(e) => setDescriptionInput(e.target.value)}
+                  placeholder=""
+                  className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-background"
+                />
+              </div>
+              
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleAddHours}
+                  disabled={!hoursInput || addHoursMutation.isPending}
+                  className="flex-1"
+                >
+                  {addHoursMutation.isPending ? 'Adding...' : 'Add Hours'}
+                </Button>
+                <Button
+                  onClick={() => {
+                    setShowDatePicker(false);
+                    setSelectedDate('');
+                    setHoursInput('');
+                    setDescriptionInput('');
+                  }}
+                  variant="outline"
+                >
+                  Cancel
+                </Button>
+              </div>
             </div>
-          );
-        })}
+          )}
 
-        {/* Generate Invoice Button */}
-        <Button 
-          onClick={() => setShowInvoiceGenerator(true)}
-          className="w-full py-6 text-lg font-medium mb-8"
-          style={{ backgroundColor: '#059669' }}
-        >
-          Generate Invoice
-        </Button>
+          {/* Hours Dashboard */}
+          <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+            {/* Compact Hours List */}
+            <div className="h-48 overflow-y-auto mb-4">
+              {dailyHours.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-8">
+                  No hours logged yet. Click "Log Hours for a Day" to start tracking.
+                </p>
+              ) : (
+                dailyHours.map((hours) => (
+                  <div key={hours.id} className="flex items-center justify-between py-0.5 px-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded text-sm">
+                    <div className="flex-1">
+                      <span className="font-medium">
+                        {(() => {
+                          // Parse date string directly to avoid timezone conversion
+                          const dateStr = hours.date.toString();
+                          const datePart = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr.split(' ')[0];
+                          const [year, month, day] = datePart.split('-').map(Number);
+                          const localDate = new Date(year, month - 1, day);
+                          return localDate.toLocaleDateString('en-US', { 
+                            weekday: 'short', 
+                            month: 'short', 
+                            day: 'numeric' 
+                          });
+                        })()} - {hours.hours}hr
+                      </span>
+                      {hours.description && hours.description !== 'Work performed' && (
+                        <span className="text-xs text-muted-foreground ml-2">
+                          ({hours.description})
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-green-600 dark:text-green-400 font-medium">
+                        ${(hours.hours * 60).toFixed(0)}
+                      </span>
+                      <button
+                        onClick={() => deleteHoursMutation.mutate(hours.id)}
+                        disabled={deleteHoursMutation.isPending}
+                        className="p-0.5 text-red-500 hover:text-red-700 transition-colors opacity-60 hover:opacity-100"
+                        title="Delete"
+                      >
+                        <Trash2 size={10} />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
 
-        {/* Estimate Button */}
-        <Button 
-          onClick={() => setShowEstimateGenerator(true)}
-          className="w-full py-6 text-lg font-medium mb-8"
-          style={{ backgroundColor: '#1E40AF' }}
-        >
-          Create Estimate
-        </Button>
+            {/* Hours Summary at Bottom */}
+            {dailyHours.length > 0 && (
+              <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <div className="text-2xl font-bold text-green-700 dark:text-green-300 mb-2">
+                  ${60}/hr
+                </div>
+                <div className="pt-2 border-t border-green-200 dark:border-green-700">
+                  <div className="font-semibold text-green-700 dark:text-green-300">
+                    Total Hours: {dailyHours.reduce((sum, h) => sum + h.hours, 0).toFixed(1)}
+                  </div>
+                  <div className="text-sm text-green-600 dark:text-green-400">
+                    Total Earned: ${(dailyHours.reduce((sum, h) => sum + (h.hours * 60), 0)).toFixed(2)}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
 
+        {/* Notes Section */}
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4 text-muted-foreground">
+            <Edit3 size={16} />
+            <span className="font-medium">Project Notes</span>
+          </div>
+          <Textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            onBlur={handleNotesBlur}
+            placeholder=""
+            className="w-full min-h-48 resize-none rounded-lg border border-gray-200 dark:border-gray-700 p-3 text-sm"
+          />
+        </div>
+
+
+
+        {/* Selection Toolbar */}
+        {selectedPhotos.size > 0 && (
+          <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-between">
+            <span className="text-sm font-medium">
+              {selectedPhotos.size} photo{selectedPhotos.size !== 1 ? 's' : ''} selected
+            </span>
+            <div className="flex gap-2">
+              <Button
+                onClick={clearSelection}
+                variant="outline"
+                size="sm"
+              >
+                Clear
+              </Button>
+              <Button
+                onClick={deleteSelectedPhotos}
+                disabled={deleteSelectedPhotosMutation.isPending}
+                variant="destructive"
+                size="sm"
+              >
+                {deleteSelectedPhotosMutation.isPending ? 'Deleting...' : 'Delete Selected'}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Photo Thumbnails Grid */}
+        {photos.length > 0 && (
+          <div className="mb-7">
+            <div className="flex items-center gap-2 mb-4 text-muted-foreground">
+              <Camera size={16} />
+              <span className="font-medium">Photos ({photos.length})</span>
+              {selectedPhotos.size === 0 && !isSelecting && (
+                <span className="text-xs text-muted-foreground ml-2">
+                  Long press and drag to select multiple
+                </span>
+              )}
+              {isSelecting && selectedPhotos.size === 0 && (
+                <span className="text-xs text-blue-600 dark:text-blue-400 ml-2">
+                  Selection mode active - tap photos to select
+                </span>
+              )}
+            </div>
+            <div 
+              className="grid grid-cols-3 gap-3"
+              onTouchEnd={(e) => handlePhotoTouchEnd(e)}
+              onMouseUp={(e) => handlePhotoTouchEnd(e)}
+            >
+              {photos.map((photo, index) => (
+                <div
+                  key={photo.id}
+                  className={`aspect-square rounded-lg overflow-hidden cursor-pointer border-2 transition-all relative group ${
+                    selectedPhotos.has(photo.id) 
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
+                      : 'border-transparent hover:border-blue-500'
+                  }`}
+                  onTouchStart={(e) => handlePhotoTouchStart(photo.id, e)}
+                  onMouseDown={(e) => handlePhotoTouchStart(photo.id, e)}
+                  onTouchMove={(e) => handlePhotoTouchMove(photo.id, e)}
+                  onMouseEnter={(e) => touchStarted && handlePhotoTouchMove(photo.id, e)}
+                  onClick={(e) => {
+                    if (isSelecting) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      togglePhotoSelection(photo.id);
+                    } else {
+                      openPhotoCarousel(index);
+                    }
+                  }}
+                >
+                  <img
+                    src={`/uploads/${photo.filename}`}
+                    alt={photo.description || photo.originalName}
+                    className={`w-full h-full object-cover ${selectedPhotos.has(photo.id) ? 'opacity-80' : ''}`}
+                    draggable={false}
+                    onError={(e) => console.error('Image failed to load:', photo.filename)}
+                    onLoad={() => console.log('Image loaded successfully:', photo.filename)}
+                  />
+                  
+                  {/* Selection Indicator */}
+                  {selectedPhotos.has(photo.id) && (
+                    <div className="absolute top-2 left-2 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                      ✓
+                    </div>
+                  )}
+                  
+                  {/* Individual Delete Button (hidden during selection) */}
+                  {!isSelecting && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deletePhotoMutation.mutate(photo.id);
+                      }}
+                      disabled={deletePhotoMutation.isPending}
+                      className="absolute top-2 right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                      title="Delete photo"
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Show if no photos */}
+        {photos.length === 0 && (
+          <div className="mb-7 p-4 text-center text-muted-foreground">
+            <Camera size={24} className="mx-auto mb-2" />
+            <p>No photos yet. Use the camera button to add some!</p>
+          </div>
+        )}
+
+
+
+        {/* Receipts Section */}
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4 text-muted-foreground">
+            <ReceiptIcon size={16} />
+            <span className="font-medium">Receipts & Expenses</span>
+          </div>
+          
+          {/* Quick Receipt Entry Form */}
+          <div className="mb-4">
+
+            <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target as HTMLFormElement);
+              const item = formData.get('item') as string;
+              const price = formData.get('price') as string;
+              
+              if (!item.trim() || !price.trim()) return;
+              
+              const receiptData = {
+                vendor: item,
+                amount: price,
+                description: `Manual entry: ${item}`,
+                date: new Date().toISOString().split('T')[0],
+                filename: null
+              };
+              
+              fetch(`/api/projects/${project.id}/receipts`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(receiptData),
+              }).then(async (response) => {
+                if (response.ok) {
+                  queryClient.invalidateQueries({ queryKey: [`/api/projects/${project.id}/receipts`] });
+                  (e.target as HTMLFormElement).reset();
+                } else {
+                  const errorData = await response.text();
+                  console.error('Receipt creation failed:', errorData);
+                  alert('Failed to add receipt. Please try again.');
+                }
+              }).catch((error) => {
+                console.error('Network error:', error);
+                alert('Network error. Please check your connection and try again.');
+              });
+            }}
+            className="flex gap-2"
+          >
+            <Input
+              name="item"
+              placeholder=""
+              className="flex-1 h-9"
+            />
+            <Input
+              name="price"
+              type="number"
+              step="0.01"
+              placeholder="$0.00"
+              className="w-24 h-9"
+            />
+            <Button 
+              type="submit" 
+              size="sm"
+              className="h-9 px-3 text-xs text-white"
+              style={{ backgroundColor: '#D97706' }}
+            >
+              Add Item
+            </Button>
+          </form>
+          </div>
+          
+          <SimpleFilesList projectId={project.id} />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <Button
+            onClick={() => setShowEstimateGenerator(true)}
+            className="py-3 text-sm font-semibold bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center"
+          >
+            <Calculator size={18} className="mr-2" />
+            Generate Estimate
+          </Button>
+          <Button
+            onClick={() => setShowInvoiceGenerator(true)}
+            className="py-3 text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            <FileText size={18} className="mr-2" />
+            Generate Invoice
+          </Button>
+        </div>
       </div>
 
-      {/* Hidden file inputs */}
-      <input
-        ref={photoInputRef}
-        type="file"
-        accept="image/*,.heic,.heif"
-        onChange={handlePhotoUpload}
-        multiple
-        capture="environment"
-        className="hidden"
-      />
+
       
       <input
         ref={receiptInputRef}
         type="file"
-        accept=".pdf,.doc,.docx,.txt,image/*,.heic,.heif"
+        accept=".pdf,.doc,.docx,.txt"
         onChange={handleReceiptUpload}
         multiple
         className="hidden"
       />
 
       {/* Enhanced Photo Carousel */}
-      {selectedPhotoIndex !== null && photos.length > 0 && (
+      {showPhotoCarousel && photos.length > 0 && (
         <PhotoCarousel
           photos={photos}
-          initialIndex={selectedPhotoIndex}
-          onClose={() => setSelectedPhotoIndex(null)}
+          initialIndex={carouselIndex}
+          onClose={() => setShowPhotoCarousel(false)}
         />
       )}
 
@@ -1708,17 +1836,141 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                 Cancel
               </Button>
               <Button 
-                onClick={handleEditSave}
-                disabled={editMutation.isPending}
-                className="flex-1"
-                style={{ backgroundColor: '#6366F1' }}
+                onClick={handleSaveClient}
+                className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
+                disabled={updateClientMutation.isPending}
               >
-                {editMutation.isPending ? 'Saving...' : 'Save Changes'}
+                {updateClientMutation.isPending ? 'Saving...' : 'Save Changes'}
               </Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* NEW: Dynamic Collapsible Menu Section with Drag-and-Drop */}
+      <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg border-2 border-blue-200 dark:border-blue-700">
+        <h3 className="text-lg font-semibold mb-4 text-blue-800 dark:text-blue-200">
+          Customizable Menu (Drag to Reorder)
+        </h3>
+        
+        <div className="space-y-3">
+          {menuSections.map((section) => {
+            const IconComponent = section.icon;
+            const isExpanded = expandedSections[section.id as keyof typeof expandedSections];
+            const isDragging = draggedItem === section.id;
+            const isDraggedOver = draggedOver === section.id;
+            
+            // Get section data count for badges
+            let itemCount = 0;
+            switch(section.id) {
+              case 'photos': itemCount = photos.length; break;
+              case 'tools': itemCount = tools.length; break;
+              case 'dailyHours': itemCount = dailyHours.length; break;
+              case 'receipts': itemCount = receipts.length; break;
+              default: itemCount = 0;
+            }
+
+            return (
+              <div
+                key={section.id}
+                draggable
+                onDragStart={(e) => handleDragStart(e, section.id)}
+                onDragOver={(e) => handleDragOver(e, section.id)}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, section.id)}
+                className={`border rounded-lg transition-all duration-200 bg-white dark:bg-gray-800 ${
+                  isDragging ? 'opacity-50 scale-95 ring-2 ring-blue-400' : ''
+                } ${
+                  isDraggedOver ? 'ring-2 ring-blue-400 bg-blue-50 dark:bg-blue-900/20' : ''
+                } border-gray-200 dark:border-gray-700`}
+              >
+                {/* Section Header */}
+                <div
+                  className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900/20 transition-colors"
+                  onClick={() => toggleSection(section.id as keyof typeof expandedSections)}
+                >
+                  <div className="flex items-center gap-3">
+                    {/* Drag Handle */}
+                    <div 
+                      className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
+                      title="Drag to reorder"
+                    >
+                      <GripVertical size={16} className="text-gray-400" />
+                    </div>
+                    
+                    <IconComponent size={18} className="text-gray-600 dark:text-gray-400" />
+                    <span className="font-medium text-gray-900 dark:text-white">
+                      {section.name}
+                    </span>
+                    
+                    {/* Count Badge */}
+                    {itemCount > 0 && (
+                      <span className={`px-2 py-1 text-xs rounded-full ${section.bgColor} ${section.textColor}`}>
+                        {itemCount}
+                      </span>
+                    )}
+                  </div>
+                  
+                  <div className="text-gray-400 text-sm">
+                    {isExpanded ? '▼' : '▶'}
+                  </div>
+                </div>
+
+                {/* Section Content */}
+                {isExpanded && (
+                  <div className="border-t border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-900/50">
+                    {section.id === 'photos' && (
+                      <div className="text-center text-gray-600 dark:text-gray-400">
+                        <Camera size={24} className="mx-auto mb-2" />
+                        <p className="text-sm">Photo management will be moved here</p>
+                        <p className="text-xs">({photos.length} photos currently in original section)</p>
+                      </div>
+                    )}
+
+                    {section.id === 'tools' && (
+                      <div className="text-center text-gray-600 dark:text-gray-400">
+                        <Wrench size={24} className="mx-auto mb-2" />
+                        <p className="text-sm">Tools checklist will be moved here</p>
+                        <p className="text-xs">({tools.length} tools currently in original section)</p>
+                      </div>
+                    )}
+
+                    {section.id === 'dailyHours' && (
+                      <div className="text-center text-gray-600 dark:text-gray-400">
+                        <Calendar size={24} className="mx-auto mb-2" />
+                        <p className="text-sm">Daily hours tracking will be moved here</p>
+                        <p className="text-xs">({dailyHours.length} entries currently in original section)</p>
+                      </div>
+                    )}
+
+                    {section.id === 'notes' && (
+                      <div className="text-center text-gray-600 dark:text-gray-400">
+                        <FileText size={24} className="mx-auto mb-2" />
+                        <p className="text-sm">Project notes will be moved here</p>
+                        <p className="text-xs">(Currently in original section)</p>
+                      </div>
+                    )}
+
+                    {section.id === 'receipts' && (
+                      <div className="text-center text-gray-600 dark:text-gray-400">
+                        <ReceiptIcon size={24} className="mx-auto mb-2" />
+                        <p className="text-sm">Receipts & expenses will be moved here</p>
+                        <p className="text-xs">({receipts.length} receipts currently in original section)</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="mt-4 p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+          <p className="text-sm text-blue-800 dark:text-blue-200">
+            <strong>How to use:</strong> Click section headers to expand/collapse. Drag the grip handles to reorder sections to match your workflow preference.
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
