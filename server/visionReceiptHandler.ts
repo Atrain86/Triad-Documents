@@ -70,24 +70,30 @@ export async function extractReceiptWithVision(imageBuffer: Buffer, originalName
     const mimeType = 'image/jpeg'; // Always JPEG after compression
 
     const prompt = `
-You are a helpful assistant. Extract receipt information from this image.
+You are a receipt data extraction assistant. Extract ONLY the essential information from this receipt image.
 
-Please extract:
-1. The vendor/store name
-2. The total amount paid (in dollars)
-3. Any items purchased (up to 5 main items)
-4. The date if visible
+Extract exactly these 4 pieces of information:
+1. Vendor/store name (clean business name only)
+2. Total amount paid (number only, no currency symbols)
+3. Items purchased (main items only, clean names)
+4. Date (format as YYYY-MM-DD, extract only the date, ignore times/extra text)
 
-Return the result as a JSON object like this:
+Return ONLY clean, essential data as JSON:
 {
-  "vendor": "Store Name",
-  "amount": 12.00,
+  "vendor": "Business Name",
+  "amount": 12.50,
   "items": ["Item 1", "Item 2"],
   "date": "2025-07-02",
   "confidence": 0.9
 }
 
-If the receipt is not clear or readable, return:
+IMPORTANT RULES:
+- For dates: Extract ONLY the date portion (ignore times like "TOO:00", transaction IDs, etc.)
+- For vendor: Use clean business name only (no addresses, phone numbers, etc.)
+- For items: Use simple product names only (no SKUs, codes, descriptions)
+- For amount: Extract the final total only (no tax breakdowns, subtotals, etc.)
+
+If unable to read clearly:
 {
   "vendor": "Unable to read",
   "amount": 0,
@@ -95,8 +101,6 @@ If the receipt is not clear or readable, return:
   "date": null,
   "confidence": 0.1
 }
-
-Focus on accuracy. If you're unsure about the total amount, look for keywords like "Total", "Amount Due", "Balance", or similar.
 `;
 
     const payload = {
@@ -190,12 +194,58 @@ Focus on accuracy. If you're unsure about the total amount, look for keywords li
       console.log('Cleaned content for parsing:', cleanContent);
       const parsedData = JSON.parse(cleanContent);
       
-      // Validate required fields
+      // Clean and validate extracted data
+      let cleanDate = null;
+      if (parsedData.date) {
+        // Clean date: remove extra text after date, normalize format
+        const dateStr = String(parsedData.date).trim();
+        const dateMatch = dateStr.match(/(\d{4}-\d{2}-\d{2})|(\d{2}-\d{2}-\d{2})|(\d{1,2}\/\d{1,2}\/\d{2,4})/);
+        if (dateMatch) {
+          let cleanDateStr = dateMatch[0];
+          // Convert YY-MM-DD to YYYY-MM-DD if needed
+          if (cleanDateStr.match(/^\d{2}-\d{2}-\d{2}$/)) {
+            const parts = cleanDateStr.split('-');
+            const year = parseInt(parts[0]) > 50 ? `19${parts[0]}` : `20${parts[0]}`;
+            cleanDateStr = `${year}-${parts[1]}-${parts[2]}`;
+          }
+          // Convert MM/DD/YY or MM/DD/YYYY to YYYY-MM-DD
+          if (cleanDateStr.includes('/')) {
+            const parts = cleanDateStr.split('/');
+            let year = parts[2];
+            if (year.length === 2) {
+              year = parseInt(year) > 50 ? `19${year}` : `20${year}`;
+            }
+            cleanDateStr = `${year}-${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}`;
+          }
+          cleanDate = cleanDateStr;
+        }
+      }
+
+      // Clean vendor name (remove extra info)
+      let cleanVendor = String(parsedData.vendor || 'Unknown Vendor').trim();
+      // Remove common extra text patterns
+      cleanVendor = cleanVendor.replace(/\b(STORE|SHOP|INC|LLC|LTD|CORP)\b/gi, '').trim();
+      cleanVendor = cleanVendor.replace(/[\n\r\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+
+      // Clean items (remove codes, SKUs, extra descriptions)
+      let cleanItems = [];
+      if (Array.isArray(parsedData.items)) {
+        cleanItems = parsedData.items.map(item => {
+          let cleanItem = String(item).trim();
+          // Remove common patterns like SKUs, codes
+          cleanItem = cleanItem.replace(/\b[A-Z0-9]{6,}\b/g, ''); // Remove long codes
+          cleanItem = cleanItem.replace(/\$[\d.]+/g, ''); // Remove prices
+          cleanItem = cleanItem.replace(/\bQTY\s*\d+\b/gi, ''); // Remove quantities
+          cleanItem = cleanItem.replace(/[\n\r\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+          return cleanItem;
+        }).filter(item => item.length > 2); // Keep only meaningful items
+      }
+
       return {
-        vendor: parsedData.vendor || 'Unknown Vendor',
+        vendor: cleanVendor,
         amount: parseFloat(parsedData.amount) || 0,
-        items: Array.isArray(parsedData.items) ? parsedData.items : [],
-        date: parsedData.date || null,
+        items: cleanItems,
+        date: cleanDate,
         confidence: parsedData.confidence || 0.8,
         method: 'openai-vision'
       };
