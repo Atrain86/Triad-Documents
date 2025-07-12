@@ -59,11 +59,8 @@ const LoginForm: React.FC = () => {
           <img 
             src="/paint-brain-logo.png" 
             alt="Paint Brain" 
-            className="h-48 mx-auto mb-8"
+            className="h-96 mx-auto mb-8"
           />
-          <p className="text-gray-300 text-lg">
-            Smart Project Management for Painting Professionals
-          </p>
         </div>
 
         <Card className="border-0 shadow-xl">
