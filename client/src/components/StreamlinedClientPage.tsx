@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Camera, FileText, ArrowLeft, Edit3, Download, X, Image as ImageIcon, DollarSign, Calendar, Wrench, Plus, Trash2, Calculator, Receipt as ReceiptIcon, MapPin, Navigation, ExternalLink, GripVertical } from 'lucide-react';
+import { Camera, FileText, ArrowLeft, Edit3, Download, X, Image as ImageIcon, DollarSign, Calendar, Wrench, Plus, Trash2, Calculator, Receipt as ReceiptIcon, MapPin, Navigation, ExternalLink } from 'lucide-react';
+import { ReactSortable } from "react-sortablejs";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -292,7 +293,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     }));
   };
 
-  // Menu sections configuration with drag-and-drop
+  // Menu sections configuration with ReactSortable
   const [menuSections, setMenuSections] = useState([
     { id: 'photos', name: 'Photos', icon: Camera, bgColor: 'bg-orange-100 dark:bg-orange-900', textColor: 'text-orange-700 dark:text-orange-300' },
     { id: 'tools', name: 'Tools Checklist', icon: Wrench, bgColor: 'bg-blue-100 dark:bg-blue-900', textColor: 'text-blue-700 dark:text-blue-300' },
@@ -300,49 +301,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     { id: 'notes', name: 'Project Notes', icon: FileText, bgColor: 'bg-yellow-100 dark:bg-yellow-900', textColor: 'text-yellow-700 dark:text-yellow-300' },
     { id: 'receipts', name: 'Receipts & Expenses', icon: ReceiptIcon, bgColor: 'bg-purple-100 dark:bg-purple-900', textColor: 'text-purple-700 dark:text-purple-300' }
   ]);
-  
-  const [draggedItem, setDraggedItem] = useState<string | null>(null);
-  const [draggedOver, setDraggedOver] = useState<string | null>(null);
-
-  // Drag and Drop Handlers
-  const handleDragStart = (e: React.DragEvent, sectionId: string) => {
-    setDraggedItem(sectionId);
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/html', sectionId);
-  };
-
-  const handleDragOver = (e: React.DragEvent, sectionId: string) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    setDraggedOver(sectionId);
-  };
-
-  const handleDragLeave = () => {
-    setDraggedOver(null);
-  };
-
-  const handleDrop = (e: React.DragEvent, targetSectionId: string) => {
-    e.preventDefault();
-    
-    if (!draggedItem || draggedItem === targetSectionId) {
-      setDraggedItem(null);
-      setDraggedOver(null);
-      return;
-    }
-
-    const newSections = [...menuSections];
-    const draggedIndex = newSections.findIndex(section => section.id === draggedItem);
-    const targetIndex = newSections.findIndex(section => section.id === targetSectionId);
-
-    if (draggedIndex !== -1 && targetIndex !== -1) {
-      const [draggedSection] = newSections.splice(draggedIndex, 1);
-      newSections.splice(targetIndex, 0, draggedSection);
-      setMenuSections(newSections);
-    }
-
-    setDraggedItem(null);
-    setDraggedOver(null);
-  };
   
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const receiptInputRef = useRef<HTMLInputElement>(null);
@@ -1847,18 +1805,22 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         </DialogContent>
       </Dialog>
 
-      {/* NEW: Dynamic Collapsible Menu Section with Drag-and-Drop */}
-      <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg border-2 border-blue-200 dark:border-blue-700">
-        <h3 className="text-lg font-semibold mb-4 text-blue-800 dark:text-blue-200">
+      {/* NEW: Mac-Style Collapsible Menu with ReactSortable */}
+      <div className="mt-8 p-6 bg-gradient-to-r from-gray-900 to-black rounded-lg border border-gray-700">
+        <h3 className="text-lg font-semibold mb-4 text-white">
           Customizable Menu (Drag to Reorder)
         </h3>
         
-        <div className="space-y-3">
+        <ReactSortable 
+          list={menuSections} 
+          setList={setMenuSections}
+          animation={150}
+          handle=".drag-handle"
+          className="space-y-2"
+        >
           {menuSections.map((section) => {
             const IconComponent = section.icon;
             const isExpanded = expandedSections[section.id as keyof typeof expandedSections];
-            const isDragging = draggedItem === section.id;
-            const isDraggedOver = draggedOver === section.id;
             
             // Get section data count for badges
             let itemCount = 0;
@@ -1873,33 +1835,25 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             return (
               <div
                 key={section.id}
-                draggable
-                onDragStart={(e) => handleDragStart(e, section.id)}
-                onDragOver={(e) => handleDragOver(e, section.id)}
-                onDragLeave={handleDragLeave}
-                onDrop={(e) => handleDrop(e, section.id)}
-                className={`border rounded-lg transition-all duration-200 bg-white dark:bg-gray-800 ${
-                  isDragging ? 'opacity-50 scale-95 ring-2 ring-blue-400' : ''
-                } ${
-                  isDraggedOver ? 'ring-2 ring-blue-400 bg-blue-50 dark:bg-blue-900/20' : ''
-                } border-gray-200 dark:border-gray-700`}
+                className="bg-gray-800 rounded-lg border border-gray-600 overflow-hidden"
               >
                 {/* Section Header */}
                 <div
-                  className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900/20 transition-colors"
+                  className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-700 transition-colors"
                   onClick={() => toggleSection(section.id as keyof typeof expandedSections)}
                 >
                   <div className="flex items-center gap-3">
-                    {/* Drag Handle */}
-                    <div 
-                      className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
-                      title="Drag to reorder"
-                    >
-                      <GripVertical size={16} className="text-gray-400" />
+                    {/* Mac-style Drag Handle */}
+                    <div className="drag-handle cursor-grab active:cursor-grabbing p-1 hover:bg-gray-600 rounded transition-colors">
+                      <img 
+                        src="/reorder-icon.svg" 
+                        alt="Drag to reorder" 
+                        className="w-4 h-4 opacity-60"
+                      />
                     </div>
                     
-                    <IconComponent size={18} className="text-gray-600 dark:text-gray-400" />
-                    <span className="font-medium text-gray-900 dark:text-white">
+                    <IconComponent size={18} className="text-gray-300" />
+                    <span className="font-medium text-white">
                       {section.name}
                     </span>
                     
@@ -1918,9 +1872,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
                 {/* Section Content */}
                 {isExpanded && (
-                  <div className="border-t border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-900/50">
+                  <div className="border-t border-gray-600 p-4 bg-gray-900">
                     {section.id === 'photos' && (
-                      <div className="text-center text-gray-600 dark:text-gray-400">
+                      <div className="text-center text-gray-400">
                         <Camera size={24} className="mx-auto mb-2" />
                         <p className="text-sm">Photo management will be moved here</p>
                         <p className="text-xs">({photos.length} photos currently in original section)</p>
@@ -1928,7 +1882,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                     )}
 
                     {section.id === 'tools' && (
-                      <div className="text-center text-gray-600 dark:text-gray-400">
+                      <div className="text-center text-gray-400">
                         <Wrench size={24} className="mx-auto mb-2" />
                         <p className="text-sm">Tools checklist will be moved here</p>
                         <p className="text-xs">({tools.length} tools currently in original section)</p>
@@ -1936,7 +1890,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                     )}
 
                     {section.id === 'dailyHours' && (
-                      <div className="text-center text-gray-600 dark:text-gray-400">
+                      <div className="text-center text-gray-400">
                         <Calendar size={24} className="mx-auto mb-2" />
                         <p className="text-sm">Daily hours tracking will be moved here</p>
                         <p className="text-xs">({dailyHours.length} entries currently in original section)</p>
@@ -1944,7 +1898,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                     )}
 
                     {section.id === 'notes' && (
-                      <div className="text-center text-gray-600 dark:text-gray-400">
+                      <div className="text-center text-gray-400">
                         <FileText size={24} className="mx-auto mb-2" />
                         <p className="text-sm">Project notes will be moved here</p>
                         <p className="text-xs">(Currently in original section)</p>
@@ -1952,7 +1906,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                     )}
 
                     {section.id === 'receipts' && (
-                      <div className="text-center text-gray-600 dark:text-gray-400">
+                      <div className="text-center text-gray-400">
                         <ReceiptIcon size={24} className="mx-auto mb-2" />
                         <p className="text-sm">Receipts & expenses will be moved here</p>
                         <p className="text-xs">({receipts.length} receipts currently in original section)</p>
@@ -1963,10 +1917,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
               </div>
             );
           })}
-        </div>
+        </ReactSortable>
 
-        <div className="mt-4 p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-          <p className="text-sm text-blue-800 dark:text-blue-200">
+        <div className="mt-4 p-3 bg-gray-800 rounded-lg border border-gray-600">
+          <p className="text-sm text-gray-300">
             <strong>How to use:</strong> Click section headers to expand/collapse. Drag the grip handles to reorder sections to match your workflow preference.
           </p>
         </div>
