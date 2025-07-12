@@ -71,6 +71,7 @@ export interface IStorage {
   getUserCount(): Promise<number>;
   createUser(user: InsertUser): Promise<User>;
   updateUserLastLogin(id: number): Promise<void>;
+  upsertUser(user: InsertUser): Promise<User>;
   
   // Token usage tracking
   logTokenUsage(usage: InsertTokenUsage): Promise<TokenUsage>;
@@ -312,6 +313,33 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error('Error updating user last login:', error);
       throw new Error('Failed to update user last login');
+    }
+  }
+
+  async upsertUser(insertUser: InsertUser): Promise<User> {
+    try {
+      // Try to find existing user by email first
+      const existingUser = await this.getUserByEmail(insertUser.email);
+      
+      if (existingUser) {
+        // Update existing user
+        const [updatedUser] = await db.update(users)
+          .set({
+            firstName: insertUser.firstName,
+            lastName: insertUser.lastName,
+            profileImageUrl: insertUser.profileImageUrl,
+            lastLoginAt: new Date()
+          })
+          .where(eq(users.id, existingUser.id))
+          .returning();
+        return updatedUser;
+      } else {
+        // Create new user
+        return await this.createUser(insertUser);
+      }
+    } catch (error) {
+      console.error('Error upserting user:', error);
+      throw new Error('Failed to upsert user');
     }
   }
 
