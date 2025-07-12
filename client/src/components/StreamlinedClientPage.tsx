@@ -1064,8 +1064,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                 >
                   <div className="flex items-center gap-3">
                     {/* Mac-style Reorder Icon - Left Side */}
-                    <div className="drag-handle cursor-move p-1 text-gray-400 hover:text-gray-200" onClick={(e) => e.stopPropagation()}>
-                      <svg width="16" height="16" viewBox="0 0 16 16" className="text-gray-400">
+                    <div className="drag-handle cursor-move p-1 text-white hover:text-gray-200" onClick={(e) => e.stopPropagation()}>
+                      <svg width="16" height="16" viewBox="0 0 16 16" className="text-white">
                         <rect y="2" width="16" height="1.5" rx="0.75"/>
                         <rect y="5.5" width="16" height="1.5" rx="0.75"/>
                         <rect y="9" width="16" height="1.5" rx="0.75"/>
