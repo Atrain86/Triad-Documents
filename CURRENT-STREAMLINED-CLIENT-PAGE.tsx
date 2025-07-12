@@ -218,10 +218,7 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
                 {receipt.description && (
                   <p className="text-xs text-gray-400 mt-1">{receipt.description}</p>
                 )}
-                <p className="text-xs text-gray-500">
-                  Date: {formatDate(receipt.date)}
-                  {/* Debug: Raw date = {JSON.stringify(receipt.date)} */}
-                </p>
+                <p className="text-xs text-gray-500">{formatDate(receipt.date)}</p>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -473,31 +470,35 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   };
 
   // Format ISO date string into "DD–MM–YYYY" with em-dash - CLEAN DATE ONLY
-  const formatDate = (isoDate: string | null) => {
+  const formatDate = (isoDate: string | null | undefined) => {
     if (!isoDate) return '';
+    
+    // Convert to string in case it's not already
+    const dateStr = String(isoDate);
     
     // Extract only the date part (YYYY-MM-DD) from ISO string
     let cleanDateString = '';
-    if (isoDate.includes('T')) {
+    if (dateStr.includes('T')) {
       // If it's a full ISO string like "2025-06-22T00:00:00.000Z"
-      cleanDateString = isoDate.split('T')[0];
-    } else if (isoDate.includes(' ')) {
+      cleanDateString = dateStr.split('T')[0];
+    } else if (dateStr.includes(' ')) {
       // If it's a string with space separator
-      cleanDateString = isoDate.split(' ')[0];
+      cleanDateString = dateStr.split(' ')[0];
     } else {
       // If it's already just a date string
-      cleanDateString = isoDate;
+      cleanDateString = dateStr;
     }
     
     // Parse the clean date string (YYYY-MM-DD format)
     const parts = cleanDateString.split('-');
-    if (parts.length === 3) {
+    if (parts.length === 3 && parts[0].length === 4) {
       const year = parts[0];
       const month = parts[1];
       const day = parts[2];
       return `${day}–${month}–${year}`;
     }
     
+    // If parsing fails, return empty string instead of the raw date
     return '';
   };
 
