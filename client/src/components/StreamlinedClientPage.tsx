@@ -394,6 +394,45 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     },
   });
 
+  const addHoursMutation = useMutation({
+    mutationFn: async (hoursData: {
+      projectId: number;
+      date: string;
+      hours: number;
+      description: string;
+    }) => {
+      const response = await fetch(`/api/projects/${projectId}/hours`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          date: hoursData.date,
+          hours: hoursData.hours,
+          description: hoursData.description,
+          hourlyRate: project?.hourlyRate || 60, // Include hourlyRate from project
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to add hours: ${response.status} - ${errorText}`);
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/hours`] });
+      setShowDatePicker(false);
+      setSelectedDate('');
+      setHoursInput('');
+      setDescriptionInput('');
+    },
+    onError: (error) => {
+      console.error('Add hours failed:', error);
+    },
+  });
+
   // Helper functions
   const formatDateForInput = (date: Date) => {
     const year = date.getFullYear();
@@ -747,45 +786,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     },
     onError: (error) => {
       console.error('Toggle tool failed:', error);
-    },
-  });
-
-  const addHoursMutation = useMutation({
-    mutationFn: async (hoursData: {
-      projectId: number;
-      date: string;
-      hours: number;
-      description: string;
-    }) => {
-      const response = await fetch(`/api/projects/${projectId}/hours`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          date: hoursData.date,
-          hours: hoursData.hours,
-          description: hoursData.description,
-          hourlyRate: project?.hourlyRate || 60, // Include hourlyRate from project
-        }),
-      });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to add hours: ${response.status} - ${errorText}`);
-      }
-      
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/hours`] });
-      setShowDatePicker(false);
-      setSelectedDate('');
-      setHoursInput('');
-      setDescriptionInput('');
-    },
-    onError: (error) => {
-      console.error('Add hours failed:', error);
     },
   });
 
