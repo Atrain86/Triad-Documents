@@ -527,10 +527,16 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         });
 
         console.log('Sending FormData to server...');
-        const response = await apiRequest(`/api/projects/${projectId}/photos`, {
+        const response = await fetch(`/api/projects/${projectId}/photos`, {
           method: 'POST',
           body: formData,
         });
+        
+        if (!response.ok) {
+          throw new Error(`Upload failed: ${response.status} ${response.statusText}`);
+        }
+        
+        const result = await response.json();
 
         setCompressionProgress(prev => ({
           ...prev,
@@ -539,8 +545,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           compressedSize: totalCompressedSize,
         }));
 
-        console.log('Photo upload successful:', response);
-        return response;
+        console.log('Photo upload successful:', result);
+        return result;
       } catch (error) {
         console.error('Error during compression or upload:', error);
         console.error('Error details:', {
