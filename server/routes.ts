@@ -586,21 +586,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log('Using Vision API data:', receiptData);
           
         } catch (visionError) {
-          console.error('Vision API failed, using manual entry:', visionError);
+          console.error('Vision API failed:', visionError);
+          console.error('Vision API error message:', visionError.message);
+          console.error('Using filename fallback for:', req.file.originalname);
           
-          // Fallback to manual entry format
+          // Fallback to basic filename parsing
+          const fallbackResult = extractReceiptFallback(req.file.originalname || 'receipt');
+          console.log('Fallback result:', fallbackResult);
+          
           receiptData = {
             projectId,
-            vendor: req.body.vendor || req.file.originalname,
-            amount: req.body.amount || '0',
-            description: req.body.description || `File upload: ${req.file.originalname}`,
-            date: new Date(req.body.date || new Date().toISOString().split('T')[0]),
+            vendor: fallbackResult.vendor,
+            amount: fallbackResult.amount.toString(),
+            description: fallbackResult.items.length > 0 ? fallbackResult.items.join(', ') : `File upload: ${req.file.originalname}`,
+            date: new Date(),
             filename: req.file.filename,
             originalName: req.file.originalname,
-            items: ['Manual entry required'],
-            ocrMethod: 'manual',
-            confidence: 0.1,
+            items: fallbackResult.items,
+            ocrMethod: fallbackResult.method,
+            confidence: fallbackResult.confidence,
           };
+          console.log('Fallback receipt data:', receiptData);
         }
       } else {
         // Non-image file or manual entry
