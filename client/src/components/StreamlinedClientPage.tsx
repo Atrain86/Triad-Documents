@@ -433,6 +433,31 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     },
   });
 
+  const deleteSelectedPhotosMutation = useMutation({
+    mutationFn: async (photoIds: number[]) => {
+      const deletePromises = photoIds.map(id => 
+        fetch(`/api/photos/${id}`, { method: 'DELETE' })
+      );
+      
+      const responses = await Promise.all(deletePromises);
+      
+      responses.forEach((response, index) => {
+        if (!response.ok) {
+          throw new Error(`Failed to delete photo ${photoIds[index]}: ${response.status}`);
+        }
+      });
+      
+      return photoIds;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
+      clearSelection();
+    },
+    onError: (error) => {
+      console.error('Bulk delete failed:', error);
+    },
+  });
+
   // Helper functions
   const formatDateForInput = (date: Date) => {
     const year = date.getFullYear();
@@ -713,31 +738,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     },
     onError: (error) => {
       console.error('Delete failed:', error);
-    },
-  });
-
-  const deleteSelectedPhotosMutation = useMutation({
-    mutationFn: async (photoIds: number[]) => {
-      const deletePromises = photoIds.map(id => 
-        fetch(`/api/photos/${id}`, { method: 'DELETE' })
-      );
-      
-      const responses = await Promise.all(deletePromises);
-      
-      responses.forEach((response, index) => {
-        if (!response.ok) {
-          throw new Error(`Failed to delete photo ${photoIds[index]}: ${response.status}`);
-        }
-      });
-      
-      return photoIds;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
-      clearSelection();
-    },
-    onError: (error) => {
-      console.error('Bulk delete failed:', error);
     },
   });
 
