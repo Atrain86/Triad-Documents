@@ -44,6 +44,13 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
       text: options.text,
       html: options.html,
       attachments: options.attachments || [],
+      // Add headers to improve deliverability
+      headers: {
+        'X-Mailer': 'A-Frame Painting System',
+        'X-Priority': '3',
+        'X-MSMail-Priority': 'Normal',
+        'Importance': 'Normal'
+      }
     };
 
     console.log("Sending email with options:", {
