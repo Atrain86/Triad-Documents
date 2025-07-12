@@ -215,10 +215,12 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
                     </span>
                   )}
                 </div>
-                {receipt.description && (
+                {receipt.description && receipt.description.trim() && (
                   <p className="text-xs text-gray-400 mt-1">{receipt.description}</p>
                 )}
-                <p className="text-xs text-gray-500">{formatDate(receipt.date)}</p>
+                {receipt.date && (
+                  <p className="text-xs text-gray-500">{formatDate(receipt.date)}</p>
+                )}
               </div>
               <div className="flex items-center gap-2">
                 <button
