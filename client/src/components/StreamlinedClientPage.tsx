@@ -207,11 +207,11 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
                       onClick={() => window.open(`/uploads/${receipt.filename}`, '_blank')}
                       className="text-blue-400 hover:text-blue-300 underline text-sm"
                     >
-                      {receipt.vendor} - ${receipt.amount.toFixed(2)}
+                      {receipt.vendor} - ${typeof receipt.amount === 'number' ? receipt.amount.toFixed(2) : parseFloat(receipt.amount || '0').toFixed(2)}
                     </button>
                   ) : (
                     <span className="text-gray-200 text-sm">
-                      {receipt.vendor} - ${receipt.amount.toFixed(2)}
+                      {receipt.vendor} - ${typeof receipt.amount === 'number' ? receipt.amount.toFixed(2) : parseFloat(receipt.amount || '0').toFixed(2)}
                     </span>
                   )}
                 </div>
@@ -615,18 +615,22 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const addToolMutation = useMutation({
     mutationFn: async (toolName: string) => {
-      const response = await apiRequest(`/api/projects/${projectId}/tools`, {
+      const response = await fetch(`/api/projects/${projectId}/tools`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          projectId,
           toolName,
-          isCompleted: 0,
         }),
       });
-      return response;
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to add tool: ${response.status} - ${errorText}`);
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/tools`] });
@@ -664,14 +668,24 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       hours: number;
       description: string;
     }) => {
-      const response = await apiRequest(`/api/projects/${projectId}/hours`, {
+      const response = await fetch(`/api/projects/${projectId}/hours`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(hoursData),
+        body: JSON.stringify({
+          date: hoursData.date,
+          hours: hoursData.hours,
+          description: hoursData.description,
+        }),
       });
-      return response;
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to add hours: ${response.status} - ${errorText}`);
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/hours`] });
@@ -707,14 +721,20 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const updateProjectMutation = useMutation({
     mutationFn: async (updates: any) => {
-      const response = await apiRequest(`/api/projects/${projectId}`, {
+      const response = await fetch(`/api/projects/${projectId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(updates),
       });
-      return response;
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to update project: ${response.status} - ${errorText}`);
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}`] });
@@ -726,14 +746,20 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const editProjectMutation = useMutation({
     mutationFn: async (projectData: any) => {
-      const response = await apiRequest(`/api/projects/${projectId}`, {
+      const response = await fetch(`/api/projects/${projectId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(projectData),
       });
-      return response;
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to edit project: ${response.status} - ${errorText}`);
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}`] });
@@ -938,10 +964,12 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                     )}
                   </div>
                   
-                  {/* Expand/Collapse Icon */}
-                  <div className={`transform transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
+                  {/* Mac-style Expand/Collapse Icon */}
+                  <div className={`transform transition-transform ${isExpanded ? 'rotate-90' : ''}`}>
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" className="text-gray-400">
-                      <path d="M4 6l4 4 4-4z"/>
+                      <rect y="4" width="16" height="1.5" rx="0.75"/>
+                      <rect y="7.25" width="16" height="1.5" rx="0.75"/>
+                      <rect y="10.5" width="16" height="1.5" rx="0.75"/>
                     </svg>
                   </div>
                 </div>
