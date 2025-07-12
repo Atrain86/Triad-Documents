@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Camera, FileText, ArrowLeft, Edit3, Download, X, Image as ImageIcon, DollarSign, Calendar, Wrench, Plus, Trash2, Calculator, Receipt as ReceiptIcon, MapPin, Navigation, ExternalLink } from 'lucide-react';
+import { Camera, FileText, ArrowLeft, Edit3, Download, X, Image as ImageIcon, DollarSign, Calendar, Wrench, Plus, Trash2, Calculator, Receipt as ReceiptIcon, MapPin, Navigation, ExternalLink, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -683,6 +683,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           date: hoursData.date,
           hours: hoursData.hours,
           description: hoursData.description,
+          hourlyRate: project?.hourlyRate || 60, // Include hourlyRate from project
         }),
       });
       
@@ -777,14 +778,14 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   });
 
   // File upload handlers
-  const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload = (event: any) => {
     const files = event.target.files;
     if (files && files.length > 0) {
       uploadPhotosMutation.mutate(files);
     }
   };
 
-  const handleReceiptUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleReceiptUpload = (event: any) => {
     const files = event.target.files;
     if (files && files.length > 0) {
       uploadReceiptsMutation.mutate(files);
@@ -859,24 +860,13 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         </div>
       </div>
 
-      {/* Photos Upload Button - Centered */}
-      <div className="flex justify-center">
-        <Button
-          onClick={() => photoInputRef.current?.click()}
-          className="py-6 px-12 text-lg font-semibold text-white flex items-center justify-center"
-          style={{ backgroundColor: '#EA580C' }}
-        >
-          <Camera size={24} className="mr-3" />
-          Photos
-        </Button>
-      </div>
+
 
       {/* Hidden file inputs */}
       <input
         ref={photoInputRef}
         type="file"
         accept="image/*,.heic,.heif"
-        capture="environment"
         onChange={handlePhotoUpload}
         multiple
         className="hidden"
@@ -885,7 +875,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         ref={receiptInputRef}
         type="file"
         accept="image/*,.heic,.heif"
-        capture="environment"
         onChange={handleReceiptUpload}
         multiple
         className="hidden"
@@ -939,6 +928,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
               case 'receipts': itemCount = receipts.length; break;
               default: itemCount = 0;
             }
+            
+            // Update section name for photos
+            const sectionName = section.id === 'photos' ? 'Photo Gallery' : section.name;
 
             return (
               <div
@@ -962,7 +954,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                     </div>
                     
                     <IconComponent size={20} className="text-gray-300" />
-                    <span className="text-gray-100 font-medium">{section.name}</span>
+                    <span className="text-gray-100 font-medium">{sectionName}</span>
                     
                     {/* Data Count Badge */}
                     {itemCount > 0 && (
@@ -985,6 +977,42 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                   <div className="border-t border-gray-600 p-4 bg-gray-900">
                     {section.id === 'photos' && (
                       <div>
+                        {/* Photo Upload Options */}
+                        <div className="mb-4 grid grid-cols-2 gap-2">
+                          <Button
+                            onClick={() => {
+                              // Create input for camera
+                              const input = document.createElement('input');
+                              input.type = 'file';
+                              input.accept = 'image/*,.heic,.heif';
+                              input.capture = 'environment';
+                              input.multiple = true;
+                              input.onchange = handlePhotoUpload;
+                              input.click();
+                            }}
+                            className="py-3 text-sm font-semibold text-white flex items-center justify-center"
+                            style={{ backgroundColor: '#EA580C' }}
+                          >
+                            <Camera size={16} className="mr-2" />
+                            Camera
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              // Create input for library
+                              const input = document.createElement('input');
+                              input.type = 'file';
+                              input.accept = 'image/*,.heic,.heif';
+                              input.multiple = true;
+                              input.onchange = handlePhotoUpload;
+                              input.click();
+                            }}
+                            className="py-3 text-sm font-semibold text-white flex items-center justify-center bg-orange-600 hover:bg-orange-700"
+                          >
+                            <Upload size={16} className="mr-2" />
+                            Library
+                          </Button>
+                        </div>
+                        
                         {/* Selection Toolbar */}
                         {selectedPhotos.size > 0 && (
                           <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-between">
@@ -1316,14 +1344,38 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
                     {section.id === 'receipts' && (
                       <div>
-                        {/* Receipt Upload Button */}
-                        <div className="mb-4">
+                        {/* Receipt Upload Options */}
+                        <div className="mb-4 grid grid-cols-2 gap-2">
                           <Button
-                            onClick={() => receiptInputRef.current?.click()}
-                            className="w-full py-3 text-sm font-semibold bg-blue-700 hover:bg-blue-800 text-white flex items-center justify-center"
+                            onClick={() => {
+                              // Create input for camera
+                              const input = document.createElement('input');
+                              input.type = 'file';
+                              input.accept = 'image/*,.heic,.heif';
+                              input.capture = 'environment';
+                              input.multiple = true;
+                              input.onchange = handleReceiptUpload;
+                              input.click();
+                            }}
+                            className="py-3 text-sm font-semibold bg-blue-700 hover:bg-blue-800 text-white flex items-center justify-center"
                           >
-                            <Camera size={18} className="mr-2" />
-                            Add Receipt Photo
+                            <Camera size={16} className="mr-2" />
+                            Camera
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              // Create input for library
+                              const input = document.createElement('input');
+                              input.type = 'file';
+                              input.accept = 'image/*,.heic,.heif';
+                              input.multiple = true;
+                              input.onchange = handleReceiptUpload;
+                              input.click();
+                            }}
+                            className="py-3 text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center"
+                          >
+                            <Upload size={16} className="mr-2" />
+                            Library
                           </Button>
                         </div>
                         
