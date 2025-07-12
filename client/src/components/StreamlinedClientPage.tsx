@@ -1039,14 +1039,51 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             const IconComponent = section.icon;
             const isExpanded = expandedSections[section.id as keyof typeof expandedSections];
             
-            // Get section data count for badges
-            let itemCount = 0;
+            // Get section data and status for enhanced badges
+            let badgeContent = null;
+            let badgeColor = 'bg-blue-600';
+            
             switch(section.id) {
-              case 'photos': itemCount = photos.length; break;
-              case 'tools': itemCount = tools.length; break;
-              case 'dailyHours': itemCount = dailyHours.length; break;
-              case 'receipts': itemCount = receipts.length; break;
-              default: itemCount = 0;
+              case 'photos':
+                if (photos.length > 0) {
+                  badgeContent = `${photos.length} photos`;
+                  badgeColor = 'bg-orange-600';
+                }
+                break;
+                
+              case 'tools':
+                if (tools.length > 0) {
+                  badgeContent = `${tools.length} tools`;
+                  badgeColor = 'bg-yellow-600';
+                }
+                break;
+                
+              case 'dailyHours':
+                if (dailyHours.length > 0) {
+                  const totalEarned = dailyHours.reduce((sum, h) => sum + (h.hours * 60), 0);
+                  badgeContent = `${dailyHours.length} days • $${totalEarned}`;
+                  badgeColor = 'bg-green-600';
+                }
+                break;
+                
+              case 'receipts':
+                if (receipts.length > 0) {
+                  const totalSpent = receipts.reduce((sum, r) => sum + parseFloat(r.amount || '0'), 0);
+                  badgeContent = `${receipts.length} receipts • $${totalSpent.toFixed(0)}`;
+                  badgeColor = 'bg-purple-600';
+                }
+                break;
+                
+              case 'notes':
+                if (notes && notes.trim().length > 0) {
+                  const wordCount = notes.trim().split(/\s+/).length;
+                  badgeContent = `${wordCount} words`;
+                  badgeColor = 'bg-blue-600';
+                }
+                break;
+                
+              default:
+                badgeContent = null;
             }
             
             // Update section name for photos
@@ -1076,10 +1113,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                     <IconComponent size={20} className="text-gray-300" />
                     <span className="text-gray-100 font-medium">{sectionName}</span>
                     
-                    {/* Data Count Badge */}
-                    {itemCount > 0 && (
-                      <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
-                        {itemCount}
+                    {/* Enhanced Status Badge */}
+                    {badgeContent && (
+                      <span className={`${badgeColor} text-white text-xs px-2 py-1 rounded-full font-medium`}>
+                        {badgeContent}
                       </span>
                     )}
                   </div>
