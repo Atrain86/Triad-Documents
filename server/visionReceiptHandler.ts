@@ -76,7 +76,7 @@ Extract exactly these 4 pieces of information:
 1. Vendor/store name (clean business name only)
 2. Total amount paid (number only, no currency symbols)
 3. Items purchased (main items only, clean names)
-4. Date (format as YYYY-MM-DD, extract only the date, ignore times/extra text)
+4. Date (YYYY-MM-DD format ONLY - ignore ALL extra text, times, transaction codes, reference numbers)
 
 Return ONLY clean, essential data as JSON:
 {
@@ -87,14 +87,14 @@ Return ONLY clean, essential data as JSON:
   "confidence": 0.9
 }
 
-IMPORTANT RULES:
-- For dates: Extract ONLY the date portion (ignore times like "TOO:00", transaction IDs, etc.)
-- For vendor: Use clean business name only (no addresses, phone numbers, etc.)
-- For items: Use FULL, READABLE product names (expand abbreviations like "Gr" = "Grande", "Ds" = "Double Smoked", "Carml" = "Caramel")
-- For amount: Extract the final total only (no tax breakdowns, subtotals, etc.)
+CRITICAL RULES:
+- DATE: Return ONLY clean date in YYYY-MM-DD format. NO extra text, times, codes, or reference numbers.
+- VENDOR: Business name only. Remove addresses, phone numbers, website URLs.
+- ITEMS: Full readable product names. Expand ALL abbreviations (Gr→Grande, Ds→Double Smoked, Carml→Caramel).
+- AMOUNT: Final total only. No tax details, subtotals, or extra charges.
 
-EXPAND ABBREVIATIONS: If you see abbreviated product names, expand them to full readable names.
-Examples: "Gr Carml Macchiato" should be "Grande Caramel Macchiato", "Ds Bacon Sandwich" should be "Double Smoked Bacon Sandwich"
+FORBIDDEN: Do not include transaction IDs, reference numbers, times, codes, or any text after the date.
+REQUIRED: Clean, simple data only.
 
 If unable to read clearly:
 {
@@ -200,9 +200,19 @@ If unable to read clearly:
       // Clean and validate extracted data
       let cleanDate = null;
       if (parsedData.date) {
-        // Clean date: remove extra text after date, normalize format
-        const dateStr = String(parsedData.date).trim();
-        const dateMatch = dateStr.match(/(\d{4}-\d{2}-\d{2})|(\d{2}-\d{2}-\d{2})|(\d{1,2}\/\d{1,2}\/\d{2,4})/);
+        // Clean date: AGGRESSIVELY remove ALL extra text, keep ONLY the date
+        let dateStr = String(parsedData.date).trim();
+        
+        // Remove everything after the first space, comma, or common separators
+        dateStr = dateStr.split(/[\s,;:|]+/)[0];
+        
+        // Remove common receipt suffixes that might be attached
+        dateStr = dateStr.replace(/[A-Z]{2,}.*$/, ''); // Remove capital letter sequences
+        dateStr = dateStr.replace(/\d{2}:\d{2}.*$/, ''); // Remove time patterns
+        dateStr = dateStr.replace(/[#@$%^&*()]+.*$/, ''); // Remove special characters
+        
+        // Match ONLY valid date patterns (no extra characters allowed)
+        const dateMatch = dateStr.match(/^(\d{4}-\d{2}-\d{2})$|^(\d{2}-\d{2}-\d{2})$|^(\d{1,2}\/\d{1,2}\/\d{2,4})$/);
         if (dateMatch) {
           let cleanDateStr = dateMatch[0];
           // Convert YY-MM-DD to YYYY-MM-DD if needed
