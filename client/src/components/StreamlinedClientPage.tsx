@@ -726,27 +726,44 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const uploadReceiptsMutation = useMutation({
     mutationFn: async (files: FileList) => {
-      const formData = new FormData();
-      Array.from(files).forEach((file) => {
-        formData.append('receipts', file);
-      });
-
-      const response = await fetch(`/api/projects/${projectId}/receipts`, {
-        method: 'POST',
-        body: formData,
-      });
+      console.log('Starting receipt upload with files:', files.length);
+      const results = [];
       
-      if (!response.ok) {
-        throw new Error(`Receipt upload failed: ${response.status} ${response.statusText}`);
+      // Process files one by one since server expects single file
+      for (const file of Array.from(files)) {
+        console.log('Processing receipt file:', file.name, 'Size:', file.size);
+        
+        const formData = new FormData();
+        formData.append('receipt', file); // Use 'receipt' (singular) to match server
+
+        const response = await fetch(`/api/projects/${projectId}/receipts`, {
+          method: 'POST',
+          body: formData,
+        });
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Receipt upload failed for ${file.name}: ${response.status} ${response.statusText} - ${errorText}`);
+        }
+        
+        const result = await response.json();
+        console.log('Receipt upload successful for:', file.name, result);
+        results.push(result);
       }
       
-      return response.json();
+      return results;
     },
-    onSuccess: () => {
+    onSuccess: (results) => {
+      console.log('All receipts uploaded successfully:', results);
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/receipts`] });
       if (receiptInputRef.current) {
         receiptInputRef.current.value = '';
       }
+      // Show success message
+      setSuccessMessage({ 
+        isVisible: true, 
+        message: `${results.length} receipt${results.length > 1 ? 's' : ''} uploaded and processed!` 
+      });
     },
     onError: (error) => {
       console.error('Receipt upload failed:', error);
