@@ -1611,11 +1611,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           })}
         </ReactSortable>
 
-        <div className="mt-4 p-3 bg-gray-800 rounded-lg border border-gray-600">
-          <p className="text-sm text-gray-300">
-            <strong>How to use:</strong> Click section headers to expand/collapse. Drag the grip handles to reorder sections to match your workflow preference.
-          </p>
-        </div>
+
       </div>
 
       {/* Generate Buttons */}
