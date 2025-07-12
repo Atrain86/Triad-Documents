@@ -53,11 +53,11 @@ const LoginForm: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-8">
+      <div className="w-full max-w-md space-y-4">
         {/* Paint Brain Logo */}
         <div className="text-center">
           <div 
-            className="h-96 mx-auto mb-8 bg-black"
+            className="h-96 mx-auto mb-4 bg-black"
             style={{
               backgroundImage: "url('/paint-brain-logo.png')",
               backgroundSize: "contain",
@@ -77,13 +77,7 @@ const LoginForm: React.FC = () => {
             
             <TabsContent value="login">
               <form onSubmit={handleLogin}>
-                <CardHeader>
-                  <CardTitle>Welcome Back</CardTitle>
-                  <CardDescription>
-                    Sign in to access your projects
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3 pt-4">
                   <div className="space-y-2">
                     <Label htmlFor="login-email">Email</Label>
                     <Input
@@ -122,13 +116,7 @@ const LoginForm: React.FC = () => {
             
             <TabsContent value="register">
               <form onSubmit={handleRegister}>
-                <CardHeader>
-                  <CardTitle>Create Account</CardTitle>
-                  <CardDescription>
-                    Register to get started with Paint Brain
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3 pt-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="first-name">First Name</Label>
