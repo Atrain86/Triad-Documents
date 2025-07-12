@@ -762,6 +762,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const deletePhotoMutation = useMutation({
     mutationFn: async (photoId: number) => {
+      console.log('Attempting to delete photo ID:', photoId);
       const response = await fetch(`/api/photos/${photoId}`, {
         method: 'DELETE',
       });
@@ -770,13 +771,30 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         throw new Error(`Failed to delete photo: ${response.status}`);
       }
       
+      console.log('Photo delete successful:', photoId);
       return photoId;
     },
-    onSuccess: () => {
+    onSuccess: (deletedPhotoId) => {
+      console.log('Photo delete mutation success, invalidating queries for deleted photo:', deletedPhotoId);
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
+      
+      // Close carousel if we're viewing the deleted photo
+      if (showPhotoCarousel) {
+        const photoIndex = photos.findIndex(p => p.id === deletedPhotoId);
+        if (photoIndex === carouselIndex) {
+          if (photos.length === 1) {
+            setShowPhotoCarousel(false);
+          } else if (carouselIndex === photos.length - 1) {
+            setCarouselIndex(carouselIndex - 1);
+          }
+        }
+      }
     },
     onError: (error) => {
       console.error('Delete failed:', error);
+      showDeleteError('photo', error, () => {
+        // No automatic retry for delete - too dangerous
+      });
     },
   });
 
