@@ -277,10 +277,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     compressedSize: 0
   });
 
-  // Collapsible section states - reorganized layout order
+  // Collapsible section states - all collapsed by default
   const [expandedSections, setExpandedSections] = useState({
     photos: false,
-    tools: true,
+    tools: false,
     dailyHours: false,
     notes: false,
     receipts: false,
@@ -1094,44 +1094,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         {/* Horizontal divider line */}
         <div className="border-b border-gray-200 dark:border-gray-700 mb-6"></div>
 
-        {/* Upload Controls */}
-        <div className="flex gap-5 mb-8 justify-center">
-          <div className="flex flex-col items-center">
-            <label
-              className={`w-16 h-16 rounded-full border-none cursor-pointer flex items-center justify-center transition-transform shadow-lg ${
-                compressionProgress.isCompressing || photoUploadMutation.isPending 
-                  ? 'opacity-50 cursor-not-allowed' 
-                  : 'hover:scale-105'
-              }`}
-              style={{ backgroundColor: '#EA580C' }}
-              title="Photos"
-            >
-              <Camera size={28} color="white" />
-              <input
-                type="file"
-                accept=".jpg,.jpeg,.png,.gif,.webp,.heic,.heif"
-                disabled={compressionProgress.isCompressing || photoUploadMutation.isPending}
-                onChange={handlePhotoUpload}
-                multiple
-                className="hidden"
-              />
-            </label>
-            <span className="text-xs text-center mt-2 text-muted-foreground">Photos</span>
-          </div>
 
-          <div className="flex flex-col items-center">
-            <button
-              onClick={handleReceiptClick}
-              disabled={receiptUploadMutation.isPending}
-              className="w-16 h-16 rounded-full border-none cursor-pointer flex items-center justify-center transition-transform hover:scale-105 shadow-lg"
-              style={{ backgroundColor: '#1E40AF' }}
-              title="Files"
-            >
-              <FileText size={28} color="white" />
-            </button>
-            <span className="text-xs text-center mt-2 text-muted-foreground">Files</span>
-          </div>
-        </div>
 
         {/* Compression Progress Indicator */}
         {(compressionProgress.isCompressing || compressionProgress.totalFiles > 0) && (
@@ -1168,7 +1131,138 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           </div>
         )}
 
-        {/* 1. Tools Checklist Section - Collapsible */}
+        {/* 1. Photos Section - Collapsible */}
+        <Collapsible.Root open={expandedSections.photos} onOpenChange={() => toggleSection('photos')}>
+          <Collapsible.Trigger className="w-full mb-8">
+            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Camera size={16} />
+                <span className="font-medium">Photos</span>
+                <span className="text-xs bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 px-2 py-1 rounded-full">
+                  {photos.length} photos
+                </span>
+              </div>
+              {expandedSections.photos ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+            </div>
+          </Collapsible.Trigger>
+          <Collapsible.Content className="mb-8">
+            
+            {/* Photo Upload Button */}
+            <div className="mb-4">
+              <label
+                className={`w-full flex items-center justify-center gap-2 p-3 border-2 border-dashed border-orange-300 dark:border-orange-700 rounded-lg cursor-pointer transition-all ${
+                  compressionProgress.isCompressing || photoUploadMutation.isPending 
+                    ? 'opacity-50 cursor-not-allowed bg-gray-50 dark:bg-gray-900' 
+                    : 'hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:border-orange-400'
+                }`}
+                style={{ backgroundColor: compressionProgress.isCompressing || photoUploadMutation.isPending ? undefined : '#FEF3E2' }}
+              >
+                <Camera size={20} style={{ color: '#EA580C' }} />
+                <span className="font-medium text-orange-700 dark:text-orange-300">
+                  {photoUploadMutation.isPending ? 'Uploading...' : 'Add Photos'}
+                </span>
+                <input
+                  type="file"
+                  accept=".jpg,.jpeg,.png,.gif,.webp,.heic,.heif"
+                  disabled={compressionProgress.isCompressing || photoUploadMutation.isPending}
+                  onChange={handlePhotoUpload}
+                  multiple
+                  className="hidden"
+                />
+              </label>
+            </div>
+
+            {/* Selection Toolbar */}
+            {selectedPhotos.size > 0 && (
+              <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-between">
+                <span className="text-sm font-medium">
+                  {selectedPhotos.size} photo{selectedPhotos.size !== 1 ? 's' : ''} selected
+                </span>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={clearSelection}
+                    variant="outline"
+                    size="sm"
+                  >
+                    Clear
+                  </Button>
+                  <Button
+                    onClick={deleteSelectedPhotos}
+                    disabled={deleteSelectedPhotosMutation.isPending}
+                    variant="destructive"
+                    size="sm"
+                  >
+                    {deleteSelectedPhotosMutation.isPending ? 'Deleting...' : 'Delete Selected'}
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Photo Thumbnails Grid */}
+            {photos.length > 0 && (
+              <div className="mb-7">
+                <div className="grid grid-cols-3 gap-3">
+                  {photos.map((photo, index) => (
+                    <div key={photo.id} className="relative group">
+                      <div
+                        onClick={(e) => {
+                          if (isSelecting) {
+                            e.preventDefault();
+                            togglePhotoSelection(photo.id);
+                          } else {
+                            setCarouselIndex(index);
+                            setShowPhotoCarousel(true);
+                          }
+                        }}
+                        className={`aspect-square rounded-lg overflow-hidden cursor-pointer transition-all ${
+                          selectedPhotos.has(photo.id) 
+                            ? 'ring-2 ring-blue-500 ring-offset-2' 
+                            : 'hover:scale-105'
+                        }`}
+                      >
+                        <img
+                          src={`/uploads/${photo.filename}`}
+                          alt={photo.description || 'Project photo'}
+                          className="w-full h-full object-cover"
+                          onLoad={() => {
+                            console.log('Image loaded successfully:', photo.filename);
+                          }}
+                          onError={(e) => {
+                            console.error('Image failed to load:', photo.filename, e);
+                          }}
+                        />
+                      </div>
+
+                      {!isSelecting && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deletePhotoMutation.mutate(photo.id);
+                          }}
+                          disabled={deletePhotoMutation.isPending}
+                          className="absolute top-2 right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                          title="Delete photo"
+                        >
+                          <X size={14} />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Show if no photos */}
+            {photos.length === 0 && (
+              <div className="mb-7 p-4 text-center text-muted-foreground">
+                <Camera size={24} className="mx-auto mb-2" />
+                <p>No photos yet. Use the upload button above to add some!</p>
+              </div>
+            )}
+          </Collapsible.Content>
+        </Collapsible.Root>
+
+        {/* 2. Tools Checklist Section - Collapsible */}
         <Collapsible.Root open={expandedSections.tools} onOpenChange={() => toggleSection('tools')}>
           <Collapsible.Trigger className="w-full mb-8">
             <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
@@ -1234,7 +1328,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           </Collapsible.Content>
         </Collapsible.Root>
 
-        {/* 2. Daily Hours Section - Collapsible */}
+        {/* 3. Daily Hours Section - Collapsible */}
         <Collapsible.Root open={expandedSections.dailyHours} onOpenChange={() => toggleSection('dailyHours')}>
           <Collapsible.Trigger className="w-full mb-8">
             <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
@@ -1587,6 +1681,21 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           </Collapsible.Trigger>
           <Collapsible.Content className="mb-8">
           
+          {/* Receipt Upload Button */}
+          <div className="mb-4">
+            <button
+              onClick={handleReceiptClick}
+              disabled={receiptUploadMutation.isPending}
+              className="w-full flex items-center justify-center gap-2 p-3 border-2 border-dashed border-blue-300 dark:border-blue-700 rounded-lg cursor-pointer transition-all hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-400"
+              style={{ backgroundColor: '#EFF6FF' }}
+            >
+              <FileText size={20} style={{ color: '#1E40AF' }} />
+              <span className="font-medium text-blue-700 dark:text-blue-300">
+                {receiptUploadMutation.isPending ? 'Processing...' : 'Upload Receipt Files'}
+              </span>
+            </button>
+          </div>
+
           {/* Quick Receipt Entry Form */}
           <div className="mb-4">
 
