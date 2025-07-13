@@ -1,45 +1,48 @@
 .calendar-container {
   color: white;
-  max-width: 450px;
+  max-width: 350px;
   margin: 0 auto;
-  padding: 0.75rem;
-  overflow: visible;
+  padding: 0.5rem;
+  background-color: #000;
 }
 
-.scroll-container {
+.calendar-header {
   display: flex;
-  overflow-x: scroll;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-}
-
-.month {
-  flex: 0 0 100%;
-  scroll-snap-align: center;
-  padding: 0.25rem;
-  display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.nav-button {
+  background: none;
+  border: 1px solid #FFD700;
+  color: #FFD700;
+  font-size: 1.2rem;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.nav-button:hover {
+  background-color: #FFD700;
+  color: #000;
 }
 
 .month-name {
   text-align: center;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: bold;
-  margin-bottom: 0.25rem;
   color: #0099CC;
-  width: 100%;
+  margin: 0;
 }
 
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  border: 1px solid #FFD700 !important;
-  aspect-ratio: 1.4 / 1;
-  font-size: 0.875rem;
+  border: 1px solid #FFD700;
+  gap: 0;
   width: 100%;
-  margin: 0 auto;
-  background-color: transparent;
+  background-color: #000;
 }
 
 .day-name,
@@ -49,41 +52,42 @@
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  min-height: 28px;
-  font-size: 0.75rem;
-  cursor: pointer;
+  min-height: 35px;
+  font-size: 0.8rem;
   background: transparent;
-  border-right: 1px solid #FFD700 !important;
-  border-bottom: 1px solid #FFD700 !important;
+  border-right: 1px solid #FFD700;
+  border-bottom: 1px solid #FFD700;
+}
+
+.calendar-cell {
+  cursor: pointer;
+}
+
+.calendar-cell:hover {
+  background-color: #333;
 }
 
 /* Remove right border from last column (every 7th cell) */
 .day-name:nth-child(7n),
 .calendar-cell:nth-child(7n) {
-  border-right: none !important;
-}
-
-/* Remove bottom border from last row of calendar cells */
-.calendar-cell:nth-last-child(-n+7) {
-  border-bottom: none !important;
+  border-right: none;
 }
 
 .day-name {
   font-weight: bold;
   background-color: transparent;
-  color: #FFD700 !important;
-  border-top: none !important;
-  border-left: none !important;
+  color: #FFD700;
+  border-top: none;
+  border-left: none;
 }
 
 .calendar-cell.today {
   background-color: #E03E3E;
   color: white;
   font-weight: bold;
-  font-size: 0.875rem;
 }
 
 .calendar-cell.selected {
   background-color: #444;
-  border: 2px solid #FFD700 !important;
+  border: 2px solid #FFD700;
 }
