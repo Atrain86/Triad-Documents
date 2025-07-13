@@ -1437,7 +1437,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                             </div>
                             
                             {/* Full-width calendar container */}
-                            <div className="w-screen -mx-8 flex justify-center">
+                            <div className="w-full flex justify-center">
                               <PaintBrainCalendar
                                 selectedDate={selectedDate}
                                 onDateSelect={(date) => {
