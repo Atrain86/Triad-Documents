@@ -1,5 +1,4 @@
 .calendar-container {
-  background-color: #000;
   color: white;
   width: 100%;
   overflow: hidden;
@@ -15,16 +14,16 @@
 .month {
   flex: 0 0 100%;
   scroll-snap-align: center;
-  padding: 1.2rem;
+  padding: 1.5rem;
   box-sizing: border-box;
-  max-width: 720px;
+  max-width: 900px;
   margin: auto;
 }
 
 .month-name {
   text-align: center;
-  font-size: 1.8rem;
-  margin-bottom: 1.2rem;
+  font-size: 2.2rem;
+  margin-bottom: 1.5rem;
   color: #0099CC;
 }
 
@@ -49,7 +48,7 @@
 
 .day-name {
   font-weight: bold;
-  background-color: #000;
+  background-color: transparent;
   color: #FFD700;
 }
 
