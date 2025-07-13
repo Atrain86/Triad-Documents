@@ -61,11 +61,17 @@ const CalendarComponent = ({
     const daysInMonth = endOfMonth.date();
 
     const daysArray = [];
+    // Add empty cells for days before month starts
     for (let i = 0; i < startDay; i++) {
       daysArray.push(null);
     }
+    // Add actual days of the month
     for (let day = 1; day <= daysInMonth; day++) {
       daysArray.push(day);
+    }
+    // Add empty cells to complete the grid (ensure 6 weeks = 42 cells total)
+    while (daysArray.length < 42) {
+      daysArray.push(null);
     }
 
     const isToday = (day) =>

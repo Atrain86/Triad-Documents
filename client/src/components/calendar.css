@@ -58,24 +58,13 @@
   font-size: 1rem;
   cursor: pointer;
   background: transparent;
-}
-
-.day-name {
   border-right: 1px solid #FFD700 !important;
   border-bottom: 1px solid #FFD700 !important;
 }
 
-.calendar-cell {
-  border-right: 1px solid #FFD700 !important;
-  border-bottom: 1px solid #FFD700 !important;
-}
-
-.calendar-cell:nth-child(7n) {
+.day-name:nth-child(7n),
+.calendar-cell:nth-child(7n+7) {
   border-right: none !important;
-}
-
-.calendar-grid .calendar-cell:nth-last-child(-n+7) {
-  border-bottom: none !important;
 }
 
 .day-name {
