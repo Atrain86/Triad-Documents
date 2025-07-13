@@ -1398,7 +1398,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                               </Button>
                             </div>
                             
-                            <div className="flex justify-center">
+                            <div className="w-full overflow-hidden">
                               <PaintBrainCalendar
                                 selectedDate={selectedDate}
                                 onDateSelect={(date) => {
@@ -1409,6 +1409,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                   }, 100);
                                 }}
                                 maxDate={formatDateForInput(new Date())}
+                                className="w-full"
                               />
                             </div>
                             

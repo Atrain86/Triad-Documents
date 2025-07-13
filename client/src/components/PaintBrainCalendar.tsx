@@ -1,13 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useState } from 'react';
 
-// Paint Brain Brand Colors
-const PAINT_RED = '#E03E3E';
-const PAINT_YELLOW = '#F7C11F';
-const PAINT_BLUE = '#0099CC';
-const PAINT_TEAL = '#00B4A6';
+// PaintBrain brand colors
+const RED = '#E03E3E';
+const YELLOW = '#F7C11F';
 const CREAM = '#FAF4E5';
-const DARK_BG = '#0D0D0D';
+const DARK = '#000000';
 
 interface PaintBrainCalendarProps {
   selectedDate?: string;
@@ -16,9 +13,9 @@ interface PaintBrainCalendarProps {
   className?: string;
 }
 
-// Generate calendar grid
+// Generate a grid for a given month and year
 function getMonthGrid(year: number, month: number) {
-  const firstDay = new Date(year, month, 1).getDay(); // 0 = Sunday
+  const firstDay = new Date(year, month, 1).getDay(); // Sunday = 0
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const weeks = [];
   let day = 1;
@@ -26,52 +23,45 @@ function getMonthGrid(year: number, month: number) {
   for (let i = 0; i < 6; i++) {
     const week = [];
     for (let j = 0; j < 7; j++) {
-      const cellIndex = i * 7 + j;
-      if (cellIndex < firstDay || day > daysInMonth) {
+      if ((i === 0 && j < firstDay) || day > daysInMonth) {
         week.push(null);
       } else {
         week.push(day++);
       }
     }
     weeks.push(week);
-    // Stop if we've placed all days
-    if (day > daysInMonth) break;
   }
   return weeks;
 }
 
-export default function PaintBrainCalendar({ 
+// Render one month of the calendar
+function MonthView({ 
+  year, 
+  month, 
+  today, 
   selectedDate, 
   onDateSelect, 
-  maxDate,
-  className = '' 
-}: PaintBrainCalendarProps) {
-  const [now] = useState(new Date());
-  const [year, setYear] = useState(now.getFullYear());
-  const [month, setMonth] = useState(now.getMonth());
-  const [weeks, setWeeks] = useState<(number | null)[][]>([]);
-
-  // Parse selected date if provided
+  maxDate 
+}: {
+  year: number;
+  month: number;
+  today: Date;
+  selectedDate?: string;
+  onDateSelect: (date: string) => void;
+  maxDate?: string;
+}) {
+  const weeks = getMonthGrid(year, month);
   const selectedDateObj = selectedDate ? new Date(selectedDate + 'T00:00:00') : null;
-  const selectedDay = selectedDateObj ? selectedDateObj.getDate() : null;
-
-  // Parse max date if provided
   const maxDateObj = maxDate ? new Date(maxDate + 'T00:00:00') : null;
-
-  useEffect(() => {
-    setWeeks(getMonthGrid(year, month));
-  }, [month, year]);
-
-  const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
   
   const isToday = (day: number | null) =>
-    day === now.getDate() &&
-    month === now.getMonth() &&
-    year === now.getFullYear();
+    day === today.getDate() &&
+    month === today.getMonth() &&
+    year === today.getFullYear();
 
   const isSelected = (day: number | null) =>
-    day === selectedDay &&
-    selectedDateObj &&
+    day && selectedDateObj &&
+    day === selectedDateObj.getDate() &&
     month === selectedDateObj.getMonth() &&
     year === selectedDateObj.getFullYear();
 
@@ -79,12 +69,6 @@ export default function PaintBrainCalendar({
     if (!day || !maxDateObj) return false;
     const dayDate = new Date(year, month, day);
     return dayDate > maxDateObj;
-  };
-
-  const changeMonth = (offset: number) => {
-    const newDate = new Date(year, month + offset);
-    setMonth(newDate.getMonth());
-    setYear(newDate.getFullYear());
   };
 
   const handleDayClick = (day: number | null) => {
@@ -95,73 +79,88 @@ export default function PaintBrainCalendar({
     onDateSelect(dateString);
   };
 
-  const monthName = new Date(year, month).toLocaleString('en-US', { month: 'long' });
-
   return (
-    <div className={`bg-gray-900 text-cream p-4 rounded-xl w-80 font-sans shadow-2xl ${className}`}>
-      {/* Header with month/year */}
-      <div 
-        className="text-center font-bold text-lg py-3 px-4 rounded-lg text-black mb-3"
-        style={{ backgroundColor: PAINT_RED }}
+    <div
+      style={{
+        minWidth: '100%',
+        scrollSnapAlign: 'start',
+        padding: '16px',
+        boxSizing: 'border-box',
+      }}
+    >
+      <div
+        style={{
+          textAlign: 'center',
+          fontWeight: 'bold',
+          color: CREAM,
+          fontSize: 18,
+          marginBottom: 10,
+        }}
       >
-        {monthName.toUpperCase()} {year}
+        {new Date(year, month).toLocaleString('en-US', {
+          month: 'long',
+        }).toUpperCase()}{' '}
+        {year}
       </div>
 
-      {/* Navigation buttons */}
-      <div className="flex justify-between mb-3">
-        <button
-          onClick={() => changeMonth(-1)}
-          className="flex items-center px-3 py-2 rounded-lg font-bold text-black hover:opacity-80 transition-opacity"
-          style={{ backgroundColor: PAINT_BLUE }}
-        >
-          <ChevronLeft size={16} className="mr-1" />
-          Back
-        </button>
-        <button
-          onClick={() => changeMonth(1)}
-          className="flex items-center px-3 py-2 rounded-lg font-bold text-black hover:opacity-80 transition-opacity"
-          style={{ backgroundColor: PAINT_YELLOW }}
-        >
-          Next
-          <ChevronRight size={16} className="ml-1" />
-        </button>
-      </div>
-
-      {/* Day headers */}
-      <div 
-        className="grid grid-cols-7 py-2 rounded-lg font-bold text-black text-center text-sm mb-2"
-        style={{ backgroundColor: PAINT_YELLOW }}
+      {/* Day labels */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(7, 1fr)',
+          backgroundColor: 'transparent',
+          borderTop: `1px solid ${YELLOW}`,
+          borderBottom: `1px solid ${YELLOW}`,
+        }}
       >
-        {days.map((d, i) => (
-          <div key={i} className="py-1">{d}</div>
+        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
+          <div
+            key={i}
+            style={{
+              textAlign: 'center',
+              fontWeight: 'bold',
+              padding: '6px',
+              borderRight: i < 6 ? `1px solid ${YELLOW}` : 'none',
+              color: CREAM,
+            }}
+          >
+            {d}
+          </div>
         ))}
       </div>
 
-      {/* Calendar grid */}
-      <div className="grid grid-cols-7 gap-1">
+      {/* Grid of days */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(7, 1fr)',
+          gap: 0,
+        }}
+      >
         {weeks.map((week, i) =>
           week.map((day, j) => {
             const todayCell = isToday(day);
             const selectedCell = isSelected(day);
             const disabledCell = isDisabled(day);
-            
+
             return (
               <div
                 key={`${i}-${j}`}
                 onClick={() => handleDayClick(day)}
-                className={`
-                  rounded-lg py-3 text-center cursor-pointer transition-all duration-200
-                  ${day ? 'hover:opacity-80' : 'cursor-default'}
-                  ${selectedCell ? 'ring-2 ring-yellow-400 font-bold' : ''}
-                  ${disabledCell ? 'opacity-50 cursor-not-allowed' : ''}
-                `}
                 style={{
-                  backgroundColor: todayCell 
-                    ? PAINT_RED 
-                    : day && !disabledCell 
-                      ? PAINT_BLUE 
-                      : 'transparent',
-                  color: day ? CREAM : 'transparent'
+                  aspectRatio: '1 / 1',
+                  borderBottom: `1px solid ${YELLOW}`,
+                  borderRight: j < 6 ? `1px solid ${YELLOW}` : 'none',
+                  backgroundColor: selectedCell ? `${YELLOW}60` : todayCell ? `${RED}80` : 'transparent',
+                  color: day ? CREAM : 'transparent',
+                  textAlign: 'center',
+                  padding: '6px 0',
+                  fontWeight: todayCell || selectedCell ? 'bold' : 'normal',
+                  cursor: day && !disabledCell ? 'pointer' : 'default',
+                  opacity: disabledCell ? 0.5 : 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
               >
                 {day || ''}
@@ -170,13 +169,53 @@ export default function PaintBrainCalendar({
           })
         )}
       </div>
+    </div>
+  );
+}
 
-      {/* Footer info */}
-      <div className="mt-3 text-xs text-center text-gray-400">
-        <span style={{ color: PAINT_RED }}>●</span> Today  
-        <span className="mx-3">|</span>
-        <span style={{ color: PAINT_BLUE }}>●</span> Available
-      </div>
+// Main scrollable calendar component
+export default function PaintBrainCalendar({ 
+  selectedDate, 
+  onDateSelect, 
+  maxDate,
+  className = '' 
+}: PaintBrainCalendarProps) {
+  const [today] = useState(new Date());
+  const [monthsToRender] = useState(12); // current month + 11 ahead
+  const startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+
+  const months = Array.from({ length: monthsToRender }, (_, i) => {
+    const newDate = new Date(startDate.getFullYear(), startDate.getMonth() + i, 1);
+    return { year: newDate.getFullYear(), month: newDate.getMonth() };
+  });
+
+  return (
+    <div
+      className={className}
+      style={{
+        backgroundColor: DARK,
+        padding: 0,
+        overflowX: 'auto',
+        display: 'flex',
+        scrollSnapType: 'x mandatory',
+        border: `1px solid ${YELLOW}`,
+        borderRadius: '8px',
+        scrollBehavior: 'smooth',
+        maxWidth: '100%',
+        height: 'auto',
+      }}
+    >
+      {months.map(({ year, month }) => (
+        <MonthView 
+          key={`${year}-${month}`} 
+          year={year} 
+          month={month} 
+          today={today}
+          selectedDate={selectedDate}
+          onDateSelect={onDateSelect}
+          maxDate={maxDate}
+        />
+      ))}
     </div>
   );
 }
