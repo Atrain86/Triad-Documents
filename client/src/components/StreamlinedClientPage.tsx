@@ -1437,9 +1437,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                             </div>
                             
                             {/* Full-width calendar container */}
-                            <div className="w-full flex justify-center px-4">
-                              <div className="w-full max-w-4xl flex justify-center">
-                                <PaintBrainCalendar
+                            <div className="w-full">
+                              <PaintBrainCalendar
                                 selectedDate={selectedDate}
                                 onDateSelect={(date) => {
                                   setSelectedDate(date);
@@ -1448,7 +1447,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                 maxDate={formatDateForInput(new Date())}
                                 className="w-full"
                               />
-                              </div>
                             </div>
                             
                             <div className="px-4">
