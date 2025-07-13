@@ -327,7 +327,6 @@ export class DatabaseStorage implements IStorage {
           .set({
             firstName: insertUser.firstName,
             lastName: insertUser.lastName,
-            profileImageUrl: insertUser.profileImageUrl,
             lastLoginAt: new Date()
           })
           .where(eq(users.id, existingUser.id))
