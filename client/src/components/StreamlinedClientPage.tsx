@@ -1386,22 +1386,32 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                   Today: {formatDateForInput(new Date())}
                                 </span>
                               </label>
-                              <input
-                                type="date"
-                                value={selectedDate}
-                                onChange={(e) => {
-                                  setSelectedDate(e.target.value);
-                                  if (e.target.value) {
-                                    setTimeout(() => {
-                                      const hoursInput = document.querySelector('input[placeholder="0"]') as HTMLInputElement;
-                                      if (hoursInput) hoursInput.focus();
-                                    }, 100);
-                                  }
-                                }}
-                                className="w-full px-3 py-2 text-sm border-2 border-green-600 rounded-lg bg-green-900/20 text-gray-200 focus:border-green-500"
-                                max={formatDateForInput(new Date())}
-                                style={{ colorScheme: 'dark' }}
-                              />
+                              <div className="relative">
+                                <input
+                                  type="date"
+                                  value={selectedDate}
+                                  onChange={(e) => {
+                                    setSelectedDate(e.target.value);
+                                    if (e.target.value) {
+                                      setTimeout(() => {
+                                        const hoursInput = document.querySelector('input[placeholder="0"]') as HTMLInputElement;
+                                        if (hoursInput) hoursInput.focus();
+                                      }, 100);
+                                    }
+                                  }}
+                                  className="w-full px-3 py-2 text-sm border-2 rounded-lg bg-gray-800 text-gray-200 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
+                                  max={formatDateForInput(new Date())}
+                                  style={{ 
+                                    colorScheme: 'dark',
+                                    borderColor: '#fbbf24', // Paint Brain yellow
+                                    backgroundColor: '#1f2937',
+                                  }}
+                                />
+                                {/* Today's Date Indicator */}
+                                <div className="absolute top-1 right-10 text-xs font-bold text-red-500 pointer-events-none">
+                                  Today: {new Date().getDate()}
+                                </div>
+                              </div>
                             </div>
                             
                             <div>

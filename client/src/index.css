@@ -73,6 +73,91 @@ input[type="date"] {
   color-scheme: dark;
 }
 
+/* Paint Brain Calendar Styling */
+.paint-brain-calendar {
+  /* Base calendar styling */
+  background: #1f2937 !important;
+  border: 2px solid #16a34a !important;
+  color: #f3f4f6 !important;
+}
+
+.paint-brain-calendar::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.8;
+}
+
+/* Style the calendar popup when it opens */
+.paint-brain-calendar::-webkit-datetime-edit {
+  color: #f3f4f6;
+}
+
+/* Calendar grid styling with Paint Brain yellow */
+.paint-brain-calendar::-webkit-inner-spin-button,
+.paint-brain-calendar::-webkit-clear-button {
+  display: none;
+}
+
+/* Target the calendar when it's opened */
+input[type="date"]:focus::-webkit-datetime-edit,
+input[type="date"]:focus::-webkit-datetime-edit-fields-wrapper,
+input[type="date"]:focus::-webkit-datetime-edit-text,
+input[type="date"]:focus::-webkit-datetime-edit-month-field,
+input[type="date"]:focus::-webkit-datetime-edit-day-field,
+input[type="date"]:focus::-webkit-datetime-edit-year-field {
+  color: #f3f4f6;
+}
+
+/* Enhanced calendar popup styling for Paint Brain theme */
+.paint-brain-calendar::-webkit-calendar-picker-indicator {
+  background: none;
+  color: #fbbf24; /* Paint Brain yellow */
+  filter: none;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.paint-brain-calendar::-webkit-calendar-picker-indicator:hover {
+  background-color: rgba(251, 191, 36, 0.1); /* Yellow hover */
+  border-radius: 4px;
+}
+
+/* Advanced calendar grid styling */
+/* Note: These styles target the calendar popup when it appears */
+::-webkit-calendar-picker-indicator {
+  color: #fbbf24 !important; /* Paint Brain yellow */
+}
+
+/* Try to style the calendar popup background */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  background-image: none;
+  color: #fbbf24;
+  opacity: 1;
+}
+
+/* Style for today's date highlighting (when calendar is open) */
+.paint-brain-calendar:focus {
+  outline: 2px solid #fbbf24;
+  outline-offset: 2px;
+}
+
+/* Enhanced date input with today indicator */
+.paint-brain-calendar {
+  position: relative;
+}
+
+.paint-brain-calendar::before {
+  content: attr(data-today);
+  position: absolute;
+  right: 40px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #ef4444; /* Red for today */
+  font-size: 10px;
+  font-weight: bold;
+  pointer-events: none;
+  z-index: 10;
+}
+
 /* Collapsible animations */
 @keyframes slideDown {
   from {
