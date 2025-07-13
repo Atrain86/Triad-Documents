@@ -17,7 +17,7 @@ const CalendarComponent = ({
 }: PaintBrainCalendarProps) => {
   const today = dayjs();
   const containerRef = useRef(null);
-  const [internalSelectedDate, setInternalSelectedDate] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(null);
   const [months, setMonths] = useState([
     today.subtract(1, 'month'),
     today,
@@ -72,23 +72,24 @@ const CalendarComponent = ({
             <div key={`${date.format('YYYY-MM')}-${d}-${i}`} className="day-name">{d}</div>
           ))}
           {daysArray.map((day, idx) => {
-            const currentDate = day ? date.date(day) : null;
-            const isSelected = propSelectedDate && currentDate && 
-              dayjs(propSelectedDate).format('YYYY-MM-DD') === currentDate.format('YYYY-MM-DD');
-            const isDisabled = maxDate && currentDate && currentDate.isAfter(dayjs(maxDate));
+            const isSelected =
+              selectedDate &&
+              day &&
+              selectedDate.date() === day &&
+              selectedDate.month() === date.month() &&
+              selectedDate.year() === date.year();
 
             return (
               <div
                 key={`${date.format('YYYY-MM')}-${idx}`}
                 className={`calendar-cell ${isToday(day) ? 'today' : ''} ${isSelected ? 'selected' : ''}`}
-                style={{
-                  opacity: isDisabled ? 0.5 : 1,
-                  cursor: day && !isDisabled ? 'pointer' : 'default'
-                }}
                 onClick={() => {
-                  if (day && !isDisabled && onDateSelect) {
-                    const dateString = date.date(day).format('YYYY-MM-DD');
-                    onDateSelect(dateString);
+                  if (day) {
+                    const newDate = date.date(day);
+                    setSelectedDate(newDate);
+                    if (onDateSelect) {
+                      onDateSelect(newDate.format('YYYY-MM-DD'));
+                    }
                   }
                 }}
               >
