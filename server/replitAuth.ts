@@ -58,11 +58,11 @@ async function upsertUser(
   claims: any,
 ) {
   await storage.upsertUser({
-    id: claims["sub"],
     email: claims["email"],
-    firstName: claims["first_name"],
-    lastName: claims["last_name"],
-    profileImageUrl: claims["profile_image_url"],
+    password: "", // Not used for OAuth users
+    firstName: claims["first_name"] || "",
+    lastName: claims["last_name"] || "",
+    role: "client"
   });
 }
 
