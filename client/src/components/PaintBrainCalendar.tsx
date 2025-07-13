@@ -2,10 +2,22 @@ import React, { useState, useEffect, useRef } from 'react';
 import dayjs from 'dayjs';
 import './calendar.css';
 
-const CalendarComponent = () => {
+interface PaintBrainCalendarProps {
+  selectedDate?: string;
+  onDateSelect: (date: string) => void;
+  maxDate?: string;
+  className?: string;
+}
+
+const CalendarComponent = ({ 
+  selectedDate: propSelectedDate, 
+  onDateSelect, 
+  maxDate,
+  className = '' 
+}: PaintBrainCalendarProps) => {
   const today = dayjs();
   const containerRef = useRef(null);
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [internalSelectedDate, setInternalSelectedDate] = useState(null);
   const [months, setMonths] = useState([
     today.subtract(1, 'month'),
     today,
@@ -56,22 +68,29 @@ const CalendarComponent = () => {
       <div className="month" key={date.format('YYYY-MM')}>
         <h2 className="month-name">{date.format('MMMM YYYY')}</h2>
         <div className="calendar-grid">
-          {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d) => (
-            <div key={d} className="day-name">{d}</div>
+          {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
+            <div key={`${date.format('YYYY-MM')}-${d}-${i}`} className="day-name">{d}</div>
           ))}
           {daysArray.map((day, idx) => {
-            const isSelected =
-              selectedDate &&
-              day &&
-              selectedDate.date() === day &&
-              selectedDate.month() === date.month() &&
-              selectedDate.year() === date.year();
+            const currentDate = day ? date.date(day) : null;
+            const isSelected = propSelectedDate && currentDate && 
+              dayjs(propSelectedDate).format('YYYY-MM-DD') === currentDate.format('YYYY-MM-DD');
+            const isDisabled = maxDate && currentDate && currentDate.isAfter(dayjs(maxDate));
 
             return (
               <div
-                key={idx}
+                key={`${date.format('YYYY-MM')}-${idx}`}
                 className={`calendar-cell ${isToday(day) ? 'today' : ''} ${isSelected ? 'selected' : ''}`}
-                onClick={() => day && setSelectedDate(date.date(day))}
+                style={{
+                  opacity: isDisabled ? 0.5 : 1,
+                  cursor: day && !isDisabled ? 'pointer' : 'default'
+                }}
+                onClick={() => {
+                  if (day && !isDisabled && onDateSelect) {
+                    const dateString = date.date(day).format('YYYY-MM-DD');
+                    onDateSelect(dateString);
+                  }
+                }}
               >
                 {day}
               </div>
@@ -83,7 +102,7 @@ const CalendarComponent = () => {
   };
 
   return (
-    <div className="calendar-container">
+    <div className={`calendar-container ${className}`}>
       <div className="scroll-container" ref={containerRef} onScroll={handleScroll}>
         {months.map((m) => renderMonth(m))}
       </div>
