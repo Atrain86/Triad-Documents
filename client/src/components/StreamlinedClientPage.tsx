@@ -1402,6 +1402,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                         onClick={(e) => e.stopPropagation()}
                         onMouseDown={(e) => e.stopPropagation()}
                         onTouchStart={(e) => e.stopPropagation()}
+                        className="overflow-visible"
                       >
                         {/* Add Hours Button */}
                         {!showDatePicker && (
@@ -1418,7 +1419,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
                         {/* Paint Brain Calendar and Hours Input */}
                         {showDatePicker && (
-                          <div className="mb-2 space-y-2">
+                          <div className="mb-2 space-y-2 overflow-visible">
                             {/* Close button */}
                             <div className="flex justify-end px-4">
                               <Button
@@ -1436,8 +1437,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                               </Button>
                             </div>
                             
-                            {/* Full-width calendar container */}
-                            <div className="w-full">
+                            {/* Full-width calendar container - allow overflow for larger calendar */}
+                            <div className="w-full overflow-visible">
                               <PaintBrainCalendar
                                 selectedDate={selectedDate}
                                 onDateSelect={(date) => {
@@ -1445,7 +1446,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                   // Remove auto-focus to prevent calendar sliding
                                 }}
                                 maxDate={formatDateForInput(new Date())}
-                                className="w-full"
+                                className="w-full overflow-visible"
                               />
                             </div>
                             
