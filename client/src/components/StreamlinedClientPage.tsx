@@ -315,14 +315,47 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
   const [touchStarted, setTouchStarted] = useState(false);
 
-  // Menu customization states
-  const [menuSections, setMenuSections] = useState([
-    { id: 'photos', name: 'Photos', icon: Camera },
-    { id: 'tools', name: 'Tools', icon: Wrench },
-    { id: 'dailyHours', name: 'Daily Hours', icon: Calendar },
-    { id: 'notes', name: 'Project Notes', icon: FileText },
-    { id: 'receipts', name: 'Receipts & Expenses', icon: ReceiptIcon },
-  ]);
+  // Menu customization states with localStorage persistence
+  const [menuSections, setMenuSections] = useState(() => {
+    const defaultSections = [
+      { id: 'photos', name: 'Photos', icon: Camera },
+      { id: 'tools', name: 'Tools', icon: Wrench },
+      { id: 'dailyHours', name: 'Daily Hours', icon: Calendar },
+      { id: 'notes', name: 'Project Notes', icon: FileText },
+      { id: 'receipts', name: 'Receipts & Expenses', icon: ReceiptIcon },
+    ];
+    
+    try {
+      const saved = localStorage.getItem('paintbrain-section-order');
+      if (saved) {
+        const savedOrder = JSON.parse(saved);
+        // Merge saved order with default sections to handle new sections
+        const orderedSections = savedOrder.map((savedSection: any) => 
+          defaultSections.find(section => section.id === savedSection.id)
+        ).filter(Boolean);
+        
+        // Add any new sections that weren't in saved order
+        const missingIds = defaultSections.filter(section => 
+          !savedOrder.some((saved: any) => saved.id === section.id)
+        );
+        
+        return [...orderedSections, ...missingIds];
+      }
+    } catch (error) {
+      console.log('Failed to load section order from localStorage');
+    }
+    
+    return defaultSections;
+  });
+
+  // Save section order to localStorage whenever it changes
+  React.useEffect(() => {
+    try {
+      localStorage.setItem('paintbrain-section-order', JSON.stringify(menuSections));
+    } catch (error) {
+      console.log('Failed to save section order to localStorage');
+    }
+  }, [menuSections]);
 
   // Collapsible menu state - all collapsed by default
   const [expandedSections, setExpandedSections] = useState({
