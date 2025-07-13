@@ -1480,11 +1480,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                   <div className="flex-1">
                                     <div className="flex items-center gap-2 text-sm">
                                       <span className="font-medium text-gray-100">
-                                        {new Date(hours.date + 'T00:00:00').toLocaleDateString('en-US', { 
-                                          weekday: 'short', 
-                                          month: 'short', 
-                                          day: 'numeric' 
-                                        })}
+                                        {dayjs(hours.date).format('ddd, MMM D')}
                                       </span>
                                       <span className="text-gray-400">•</span>
                                       <span className="font-semibold text-blue-400">
