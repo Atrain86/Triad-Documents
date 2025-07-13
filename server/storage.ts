@@ -3,34 +3,22 @@ import {
   photos, 
   receipts, 
   dailyHours,
-  toolsChecklist,
-  estimates,
-  users,
-  tokenUsage,
   type Project, 
   type Photo, 
   type Receipt, 
   type DailyHours,
-  type ToolsChecklist,
-  type Estimate,
-  type User,
-  type TokenUsage,
   type InsertProject, 
   type InsertPhoto, 
   type InsertReceipt, 
-  type InsertDailyHours,
-  type InsertToolsChecklist,
-  type InsertEstimate,
-  type InsertUser,
-  type InsertTokenUsage
+  type InsertDailyHours 
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, like, not, isNotNull, desc, sum, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   // Projects
-  getProjects(userId?: number): Promise<Project[]>;
-  getProject(id: number, userId?: number): Promise<Project | undefined>;
+  getProjects(): Promise<Project[]>;
+  getProject(id: number): Promise<Project | undefined>;
   createProject(project: InsertProject): Promise<Project>;
   updateProject(id: number, project: Partial<InsertProject>): Promise<Project | undefined>;
   deleteProject(id: number): Promise<boolean>;
@@ -51,66 +39,23 @@ export interface IStorage {
   createDailyHours(hours: InsertDailyHours): Promise<DailyHours>;
   updateDailyHours(id: number, hours: Partial<InsertDailyHours>): Promise<DailyHours | undefined>;
   deleteDailyHours(id: number): Promise<boolean>;
-
-  // Tools Checklist
-  getProjectTools(projectId: number): Promise<ToolsChecklist[]>;
-  createTool(tool: InsertToolsChecklist): Promise<ToolsChecklist>;
-  updateTool(id: number, tool: Partial<InsertToolsChecklist>): Promise<ToolsChecklist | undefined>;
-  deleteTool(id: number): Promise<boolean>;
-
-  // Estimates
-  getProjectEstimates(projectId: number): Promise<Estimate[]>;
-  getEstimate(id: number): Promise<Estimate | undefined>;
-  createEstimate(estimate: InsertEstimate): Promise<Estimate>;
-  updateEstimate(id: number, estimate: Partial<InsertEstimate>): Promise<Estimate | undefined>;
-  deleteEstimate(id: number): Promise<boolean>;
-
-  // User management
-  getUserById(id: number): Promise<User | undefined>;
-  getUserByEmail(email: string): Promise<User | undefined>;
-  getUserCount(): Promise<number>;
-  createUser(user: InsertUser): Promise<User>;
-  updateUserLastLogin(id: number): Promise<void>;
-  upsertUser(user: InsertUser): Promise<User>;
-  
-  // Token usage tracking
-  logTokenUsage(usage: InsertTokenUsage): Promise<TokenUsage>;
-  getUserTokenUsage(userId: number, limit?: number): Promise<TokenUsage[]>;
-  getTotalTokenUsage(): Promise<{ totalTokens: number; totalCost: number; }>;
-  getTokenUsageByUser(): Promise<{ userId: number; email: string; totalTokens: number; totalCost: number; }[]>;
 }
 
 export class DatabaseStorage implements IStorage {
-  async getProjects(userId?: number): Promise<Project[]> {
+  async getProjects(): Promise<Project[]> {
     try {
-      if (userId) {
-        // Return projects for specific user
-        const result = await db.select().from(projects).where(eq(projects.userId, userId));
-        return result;
-      } else {
-        // Admin access - return all projects
-        const result = await db.select().from(projects);
-        return result;
-      }
+      const result = await db.select().from(projects);
+      return result;
     } catch (error) {
       console.error('Error fetching projects:', error);
       throw new Error('Failed to fetch projects');
     }
   }
 
-  async getProject(id: number, userId?: number): Promise<Project | undefined> {
+  async getProject(id: number): Promise<Project | undefined> {
     try {
-      if (userId) {
-        // User-specific access - ensure user owns the project
-        const [project] = await db.select()
-          .from(projects)
-          .where(and(eq(projects.id, id), eq(projects.userId, userId)));
-        return project || undefined;
-      } else {
-        // Admin access - return any project
-        const [project] = await db.select().from(projects).where(eq(projects.id, id));
-        return project || undefined;
-      }
+      const [project] = await db.select().from(projects).where(eq(projects.id, id));
+      return project || undefined;
     } catch (error) {
       console.error('Error fetching project:', error);
       throw new Error('Failed to fetch project');
@@ -217,212 +162,6 @@ export class DatabaseStorage implements IStorage {
   async deleteDailyHours(id: number): Promise<boolean> {
     const result = await db.delete(dailyHours).where(eq(dailyHours.id, id));
     return (result.rowCount || 0) > 0;
-  }
-
-  async getProjectTools(projectId: number): Promise<ToolsChecklist[]> {
-    const result = await db.select().from(toolsChecklist).where(eq(toolsChecklist.projectId, projectId));
-    return result;
-  }
-
-  async createTool(insertTool: InsertToolsChecklist): Promise<ToolsChecklist> {
-    const result = await db.insert(toolsChecklist).values(insertTool).returning();
-    return result[0];
-  }
-
-  async updateTool(id: number, updates: Partial<InsertToolsChecklist>): Promise<ToolsChecklist | undefined> {
-    const result = await db.update(toolsChecklist).set(updates).where(eq(toolsChecklist.id, id)).returning();
-    return result[0];
-  }
-
-  async deleteTool(id: number): Promise<boolean> {
-    const result = await db.delete(toolsChecklist).where(eq(toolsChecklist.id, id));
-    return (result.rowCount || 0) > 0;
-  }
-
-  async getProjectEstimates(projectId: number): Promise<Estimate[]> {
-    const result = await db.select().from(estimates).where(eq(estimates.projectId, projectId));
-    return result;
-  }
-
-  async getEstimate(id: number): Promise<Estimate | undefined> {
-    const result = await db.select().from(estimates).where(eq(estimates.id, id));
-    return result[0];
-  }
-
-  async createEstimate(insertEstimate: InsertEstimate): Promise<Estimate> {
-    const result = await db.insert(estimates).values(insertEstimate).returning();
-    return result[0];
-  }
-
-  async updateEstimate(id: number, updates: Partial<InsertEstimate>): Promise<Estimate | undefined> {
-    const result = await db.update(estimates).set(updates).where(eq(estimates.id, id)).returning();
-    return result[0];
-  }
-
-  async deleteEstimate(id: number): Promise<boolean> {
-    const result = await db.delete(estimates).where(eq(estimates.id, id));
-    return (result.rowCount || 0) > 0;
-  }
-
-  // User management methods
-  async getUserById(id: number): Promise<User | undefined> {
-    try {
-      const [user] = await db.select().from(users).where(eq(users.id, id));
-      return user;
-    } catch (error) {
-      console.error('Error fetching user by id:', error);
-      throw new Error('Failed to fetch user');
-    }
-  }
-
-  async getUserByEmail(email: string): Promise<User | undefined> {
-    try {
-      const [user] = await db.select().from(users).where(eq(users.email, email));
-      return user;
-    } catch (error) {
-      console.error('Error fetching user by email:', error);
-      throw new Error('Failed to fetch user');
-    }
-  }
-
-  async getUserCount(): Promise<number> {
-    try {
-      const allUsers = await db.select().from(users);
-      return allUsers.length;
-    } catch (error) {
-      console.error('Error counting users:', error);
-      throw new Error('Failed to count users');
-    }
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    try {
-      const [user] = await db.insert(users).values(insertUser).returning();
-      return user;
-    } catch (error) {
-      console.error('Error creating user:', error);
-      throw new Error('Failed to create user');
-    }
-  }
-
-  async updateUserLastLogin(id: number): Promise<void> {
-    try {
-      await db.update(users)
-        .set({ lastLoginAt: new Date() })
-        .where(eq(users.id, id));
-    } catch (error) {
-      console.error('Error updating user last login:', error);
-      throw new Error('Failed to update user last login');
-    }
-  }
-
-  async upsertUser(insertUser: InsertUser): Promise<User> {
-    try {
-      // Try to find existing user by email first
-      const existingUser = await this.getUserByEmail(insertUser.email);
-      
-      if (existingUser) {
-        // Update existing user
-        const [updatedUser] = await db.update(users)
-          .set({
-            firstName: insertUser.firstName,
-            lastName: insertUser.lastName,
-            lastLoginAt: new Date()
-          })
-          .where(eq(users.id, existingUser.id))
-          .returning();
-        return updatedUser;
-      } else {
-        // Create new user
-        return await this.createUser(insertUser);
-      }
-    } catch (error) {
-      console.error('Error upserting user:', error);
-      throw new Error('Failed to upsert user');
-    }
-  }
-
-  // Token usage tracking methods
-  async logTokenUsage(usage: InsertTokenUsage): Promise<TokenUsage> {
-    try {
-      const [tokenUsageRecord] = await db.insert(tokenUsage).values(usage).returning();
-      return tokenUsageRecord;
-    } catch (error) {
-      console.error('Error logging token usage:', error);
-      throw new Error('Failed to log token usage');
-    }
-  }
-
-  async getUserTokenUsage(userId: number, limit = 50): Promise<TokenUsage[]> {
-    try {
-      return await db.select()
-        .from(tokenUsage)
-        .where(eq(tokenUsage.userId, userId))
-        .orderBy(desc(tokenUsage.createdAt))
-        .limit(limit);
-    } catch (error) {
-      console.error('Error fetching user token usage:', error);
-      throw new Error('Failed to fetch user token usage');
-    }
-  }
-
-  async getTotalTokenUsage(): Promise<{ totalTokens: number; totalCost: number; }> {
-    try {
-      const result = await db
-        .select({
-          totalTokens: tokenUsage.tokensUsed,
-          totalCost: tokenUsage.cost
-        })
-        .from(tokenUsage);
-      
-      const totals = result.reduce(
-        (acc, row) => ({
-          totalTokens: acc.totalTokens + (row.totalTokens || 0),
-          totalCost: acc.totalCost + (row.totalCost || 0)
-        }),
-        { totalTokens: 0, totalCost: 0 }
-      );
-      
-      return totals;
-    } catch (error) {
-      console.error('Error calculating total token usage:', error);
-      throw new Error('Failed to calculate total token usage');
-    }
-  }
-
-  async getTokenUsageByUser(): Promise<{ userId: number; email: string; totalTokens: number; totalCost: number; }[]> {
-    try {
-      const result = await db
-        .select({
-          userId: users.id,
-          email: users.email,
-          tokensUsed: tokenUsage.tokensUsed,
-          cost: tokenUsage.cost
-        })
-        .from(tokenUsage)
-        .innerJoin(users, eq(tokenUsage.userId, users.id));
-      
-      // Group by user and sum tokens/cost
-      const userTotals = result.reduce((acc, row) => {
-        const key = `${row.userId}-${row.email}`;
-        if (!acc[key]) {
-          acc[key] = {
-            userId: row.userId,
-            email: row.email,
-            totalTokens: 0,
-            totalCost: 0
-          };
-        }
-        acc[key].totalTokens += row.tokensUsed || 0;
-        acc[key].totalCost += row.cost || 0;
-        return acc;
-      }, {} as Record<string, { userId: number; email: string; totalTokens: number; totalCost: number; }>);
-      
-      return Object.values(userTotals);
-    } catch (error) {
-      console.error('Error fetching token usage by user:', error);
-      throw new Error('Failed to fetch token usage by user');
-    }
   }
 }
 

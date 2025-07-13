@@ -3,8 +3,8 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
-app.use(express.json({ limit: '50mb' })); // Increase limit for PDF attachments
-app.use(express.urlencoded({ extended: false, limit: '50mb' }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -49,9 +49,10 @@ app.use((req, res, next) => {
       res.status(status).json({ message });
     });
 
-    // Serve static files from public directory in development
+    // importantly only setup vite in development and after
+    // setting up all the other routes so the catch-all route
+    // doesn't interfere with the other routes
     if (app.get("env") === "development") {
-      app.use(express.static("public"));
       await setupVite(app, server);
     } else {
       serveStatic(app);
