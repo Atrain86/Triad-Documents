@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 
 // PaintBrain brand colors
-const RED = '#E03E3E';
-const YELLOW = '#F7C11F';
-const CREAM = '#FAF4E5';
-const DARK = '#000000';
+const COLORS = {
+  red: '#E03E3E',
+  yellow: '#F7C11F',
+  blue: '#0099CC',
+  cream: '#FAF4E5',
+  black: '#000000',
+  white: '#FFFFFF'
+};
 
 interface PaintBrainCalendarProps {
   selectedDate?: string;
@@ -13,7 +17,6 @@ interface PaintBrainCalendarProps {
   className?: string;
 }
 
-// Generate a grid for a given month and year
 function getMonthGrid(year: number, month: number) {
   const firstDay = new Date(year, month, 1).getDay(); // Sunday = 0
   const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -34,7 +37,6 @@ function getMonthGrid(year: number, month: number) {
   return weeks;
 }
 
-// Render one month of the calendar
 function MonthView({ 
   year, 
   month, 
@@ -86,19 +88,20 @@ function MonthView({
         scrollSnapAlign: 'start',
         padding: '16px',
         boxSizing: 'border-box',
+        backgroundColor: COLORS.black
       }}
     >
       <div
         style={{
           textAlign: 'center',
           fontWeight: 'bold',
-          color: CREAM,
+          color: COLORS.blue,
           fontSize: 18,
-          marginBottom: 10,
+          marginBottom: 10
         }}
       >
         {new Date(year, month).toLocaleString('en-US', {
-          month: 'long',
+          month: 'long'
         }).toUpperCase()}{' '}
         {year}
       </div>
@@ -108,9 +111,8 @@ function MonthView({
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(7, 1fr)',
-          backgroundColor: 'transparent',
-          borderTop: `1px solid ${YELLOW}`,
-          borderBottom: `1px solid ${YELLOW}`,
+          borderTop: `1px solid ${COLORS.yellow}`,
+          borderBottom: `1px solid ${COLORS.yellow}`
         }}
       >
         {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
@@ -120,8 +122,8 @@ function MonthView({
               textAlign: 'center',
               fontWeight: 'bold',
               padding: '6px',
-              borderRight: i < 6 ? `1px solid ${YELLOW}` : 'none',
-              color: CREAM,
+              borderRight: i < 6 ? `1px solid ${COLORS.yellow}` : 'none',
+              color: COLORS.white
             }}
           >
             {d}
@@ -134,7 +136,7 @@ function MonthView({
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(7, 1fr)',
-          gap: 0,
+          borderLeft: `1px solid ${COLORS.yellow}`
         }}
       >
         {weeks.map((week, i) =>
@@ -149,10 +151,10 @@ function MonthView({
                 onClick={() => handleDayClick(day)}
                 style={{
                   aspectRatio: '1 / 1',
-                  borderBottom: `1px solid ${YELLOW}`,
-                  borderRight: j < 6 ? `1px solid ${YELLOW}` : 'none',
-                  backgroundColor: selectedCell ? `${YELLOW}60` : todayCell ? `${RED}80` : 'transparent',
-                  color: day ? CREAM : 'transparent',
+                  borderBottom: `1px solid ${COLORS.yellow}`,
+                  borderRight: `1px solid ${COLORS.yellow}`,
+                  backgroundColor: selectedCell ? `${COLORS.yellow}60` : todayCell ? `${COLORS.red}80` : 'transparent',
+                  color: day ? COLORS.white : 'transparent',
                   textAlign: 'center',
                   padding: '6px 0',
                   fontWeight: todayCell || selectedCell ? 'bold' : 'normal',
@@ -173,7 +175,6 @@ function MonthView({
   );
 }
 
-// Main scrollable calendar component
 export default function PaintBrainCalendar({ 
   selectedDate, 
   onDateSelect, 
@@ -181,7 +182,7 @@ export default function PaintBrainCalendar({
   className = '' 
 }: PaintBrainCalendarProps) {
   const [today] = useState(new Date());
-  const [monthsToRender] = useState(12); // current month + 11 ahead
+  const monthsToRender = 12;
   const startDate = new Date(today.getFullYear(), today.getMonth(), 1);
 
   const months = Array.from({ length: monthsToRender }, (_, i) => {
@@ -193,16 +194,14 @@ export default function PaintBrainCalendar({
     <div
       className={className}
       style={{
-        backgroundColor: DARK,
+        backgroundColor: COLORS.black,
         padding: 0,
         overflowX: 'auto',
         display: 'flex',
         scrollSnapType: 'x mandatory',
-        border: `1px solid ${YELLOW}`,
+        border: `1px solid ${COLORS.yellow}`,
         borderRadius: '8px',
-        scrollBehavior: 'smooth',
-        maxWidth: '100%',
-        height: 'auto',
+        scrollBehavior: 'smooth'
       }}
     >
       {months.map(({ year, month }) => (
