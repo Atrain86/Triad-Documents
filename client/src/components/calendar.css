@@ -14,9 +14,9 @@
 .month {
   flex: 0 0 100%;
   scroll-snap-align: center;
-  padding: 1rem;
+  padding: 0.5rem;
   box-sizing: border-box;
-  max-width: 600px;
+  max-width: 95vw;
   margin: auto;
 }
 
@@ -30,11 +30,12 @@
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  border-top: 2px solid #FFD700;
-  border-left: 2px solid #FFD700;
-  aspect-ratio: 1.3 / 1;
-  font-size: 1rem;
+  border-top: 3px solid #FFD700;
+  border-left: 3px solid #FFD700;
+  aspect-ratio: 1.2 / 1;
+  font-size: 1.2rem;
   width: 100%;
+  max-width: none;
 }
 
 .day-name,
@@ -43,11 +44,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-right: 2px solid #FFD700;
-  border-bottom: 2px solid #FFD700;
-  font-weight: 500;
-  min-height: 45px;
-  font-size: 1rem;
+  border-right: 3px solid #FFD700;
+  border-bottom: 3px solid #FFD700;
+  font-weight: 600;
+  min-height: 50px;
+  font-size: 1.2rem;
   cursor: pointer;
 }
 
@@ -66,5 +67,5 @@
 
 .calendar-cell.selected {
   background-color: #444;
-  border: 3px solid #FFD700;
+  border: 4px solid #FFD700;
 }
