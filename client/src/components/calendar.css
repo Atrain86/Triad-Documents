@@ -30,9 +30,10 @@
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  border-top: 2px solid #FFD700;
-  border-left: 2px solid #FFD700;
-  aspect-ratio: 1.2 / 1;
+  border-top: 3px solid #FFD700;
+  border-left: 3px solid #FFD700;
+  aspect-ratio: 1.1 / 1;
+  font-size: 1.4rem;
 }
 
 .day-name,
@@ -41,9 +42,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-right: 2px solid #FFD700;
-  border-bottom: 2px solid #FFD700;
-  font-weight: 500;
+  border-right: 3px solid #FFD700;
+  border-bottom: 3px solid #FFD700;
+  font-weight: 600;
+  min-height: 60px;
+  font-size: 1.4rem;
 }
 
 .day-name {
@@ -56,9 +59,10 @@
   background-color: #E03E3E;
   color: white;
   font-weight: bold;
+  font-size: 1.4rem;
 }
 
 .calendar-cell.selected {
   background-color: #444;
-  border: 2px solid #FFD700;
+  border: 3px solid #FFD700;
 }
