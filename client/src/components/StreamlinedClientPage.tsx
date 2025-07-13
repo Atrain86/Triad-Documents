@@ -1354,15 +1354,20 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                     )}
 
                     {section.id === 'dailyHours' && (
-                      <div>
+                      <div 
+                        onClick={(e) => e.stopPropagation()}
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onTouchStart={(e) => e.stopPropagation()}
+                      >
                         {/* Add Hours Button */}
                         {!showDatePicker && (
                           <Button
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              setTimeout(() => setShowDatePicker(true), 50);
+                              setShowDatePicker(true);
                             }}
+                            onMouseDown={(e) => e.stopPropagation()}
                             className="w-full mb-4 py-2 text-sm bg-green-600 hover:bg-green-700"
                             variant="outline"
                           >
