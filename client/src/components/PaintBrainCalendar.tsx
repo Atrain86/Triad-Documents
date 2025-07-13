@@ -82,11 +82,9 @@ const CalendarComponent = ({
           ))}
           {daysArray.map((day, idx) => {
             const isSelected =
-              selectedDate &&
+              propSelectedDate &&
               day &&
-              selectedDate.date() === day &&
-              selectedDate.month() === date.month() &&
-              selectedDate.year() === date.year();
+              propSelectedDate === date.date(day).format('YYYY-MM-DD');
 
             return (
               <div
