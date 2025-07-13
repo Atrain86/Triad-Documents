@@ -82,8 +82,8 @@ export default function PaintBrainCalendar({
       </div>
 
       <div className="calendar-grid">
-        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d) => (
-          <div key={d} className="calendar-day-name">
+        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
+          <div key={`day-${i}`} className="calendar-day-name">
             {d}
           </div>
         ))}
