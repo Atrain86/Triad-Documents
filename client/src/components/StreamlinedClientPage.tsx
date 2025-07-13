@@ -994,61 +994,63 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <Button
-          onClick={onBack}
-          variant="outline"
-          className="flex items-center gap-2"
-        >
-          <ArrowLeft size={16} />
-          Back to Projects
-        </Button>
-        
-        <div className="flex items-center gap-3">
+    <div className="min-h-screen">
+      {/* Header - Constrained */}
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="flex items-center justify-between mb-6">
           <Button
-            onClick={() => openWorkCalendar(project)}
+            onClick={onBack}
             variant="outline"
-            size="sm"
             className="flex items-center gap-2"
-            title="Add to calendar"
           >
-            <Calendar size={16} />
+            <ArrowLeft size={16} />
+            Back to Projects
           </Button>
-          <button
-            onClick={() => window.open(generateMapsLink(project.address, project.clientCity, project.clientPostal), '_blank')}
-            className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
-            title="View on maps"
-          >
-            <MapPin size={16} />
-          </button>
-        </div>
-      </div>
-
-      {/* Client Info Header */}
-      <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              {project.clientName}
-            </h1>
-            <p className="text-gray-600 dark:text-gray-300 mt-1">
-              {project.address}, {project.clientCity} {project.clientPostal}
-            </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              {project.projectType} • {project.roomCount} rooms • Difficulty: {project.difficulty}/5
-            </p>
+          
+          <div className="flex items-center gap-3">
+            <Button
+              onClick={() => openWorkCalendar(project)}
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
+              title="Add to calendar"
+            >
+              <Calendar size={16} />
+            </Button>
+            <button
+              onClick={() => window.open(generateMapsLink(project.address, project.clientCity, project.clientPostal), '_blank')}
+              className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
+              title="View on maps"
+            >
+              <MapPin size={16} />
+            </button>
           </div>
-          <Button
-            onClick={() => setShowEditClient(true)}
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-2"
-          >
-            <Edit3 size={16} />
-            Edit
-          </Button>
+        </div>
+
+        {/* Client Info Header - Constrained */}
+        <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                {project.clientName}
+              </h1>
+              <p className="text-gray-600 dark:text-gray-300 mt-1">
+                {project.address}, {project.clientCity} {project.clientPostal}
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                {project.projectType} • {project.roomCount} rooms • Difficulty: {project.difficulty}/5
+              </p>
+            </div>
+            <Button
+              onClick={() => setShowEditClient(true)}
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
+            >
+              <Edit3 size={16} />
+              Edit
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -1094,11 +1096,13 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         </div>
       )}
 
-      {/* NEW: Mac-Style Collapsible Menu with ReactSortable */}
-      <div className="mt-8 p-6 bg-gradient-to-r from-gray-900 to-black rounded-lg border border-gray-700">
-        <h3 className="text-lg font-semibold mb-4 text-white">
-          Customizable Menu (Drag to Reorder)
-        </h3>
+      {/* NEW: Mac-Style Collapsible Menu with ReactSortable - Full Width */}
+      <div className="w-full px-4 py-6">
+        <div className="max-w-4xl mx-auto mb-4">
+          <h3 className="text-lg font-semibold text-white">
+            Customizable Menu (Drag to Reorder)
+          </h3>
+        </div>
         
         <ReactSortable 
           list={menuSections} 
@@ -1201,9 +1205,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                   </div>
                 </div>
 
-                {/* Section Content */}
+                {/* Section Content - Full Width */}
                 {isExpanded && (
-                  <div className="border-t border-gray-600 p-4 bg-gray-900">
+                  <div className="border-t border-gray-600 px-8 py-6 bg-gray-800 w-full">
                     {section.id === 'photos' && (
                       <div>
                         {/* Photo Upload Options */}
@@ -1694,22 +1698,24 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
       </div>
 
-      {/* Generate Buttons */}
-      <div className="grid grid-cols-2 gap-4">
-        <Button
-          onClick={() => setShowEstimateGenerator(true)}
-          className="py-3 text-sm font-semibold bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center"
-        >
-          <Calculator size={18} className="mr-2" />
-          Generate Estimate
-        </Button>
-        <Button
-          onClick={() => setShowInvoiceGenerator(true)}
-          className="py-3 text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white"
-        >
-          <FileText size={18} className="mr-2" />
-          Generate Invoice
-        </Button>
+      {/* Generate Buttons - Constrained */}
+      <div className="max-w-4xl mx-auto px-6 pb-6">
+        <div className="grid grid-cols-2 gap-4">
+          <Button
+            onClick={() => setShowEstimateGenerator(true)}
+            className="py-3 text-sm font-semibold bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center"
+          >
+            <Calculator size={18} className="mr-2" />
+            Generate Estimate
+          </Button>
+          <Button
+            onClick={() => setShowInvoiceGenerator(true)}
+            className="py-3 text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            <FileText size={18} className="mr-2" />
+            Generate Invoice
+          </Button>
+        </div>
       </div>
 
       {/* Hidden File Inputs */}
