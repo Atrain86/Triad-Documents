@@ -1418,9 +1418,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
                         {/* Paint Brain Calendar and Hours Input */}
                         {showDatePicker && (
-                          <div className="mb-4 p-4 bg-gray-800 rounded-lg space-y-4 border border-gray-600">
+                          <div className="mb-4 space-y-4">
                             {/* Close button */}
-                            <div className="flex justify-end">
+                            <div className="flex justify-end px-4">
                               <Button
                                 onClick={() => {
                                   setShowDatePicker(false);
@@ -1436,7 +1436,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                               </Button>
                             </div>
                             
-                            <div className="w-full overflow-hidden" style={{ maxWidth: '100vw' }}>
+                            {/* Full-width calendar container */}
+                            <div className="w-full -mx-8 px-4">
                               <PaintBrainCalendar
                                 selectedDate={selectedDate}
                                 onDateSelect={(date) => {
