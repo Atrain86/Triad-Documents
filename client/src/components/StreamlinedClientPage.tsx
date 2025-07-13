@@ -17,6 +17,7 @@ import ErrorTooltip from './ui/error-tooltip';
 import SuccessTooltip from './ui/success-tooltip';
 import { useErrorTooltip } from '@/hooks/useErrorTooltip';
 import { ReactSortable } from 'react-sortablejs';
+import PaintBrainCalendar from './PaintBrainCalendar';
 
 // Calendar function for A-Frame calendar integration
 const openWorkCalendar = (clientProject: Project | null = null) => {
@@ -340,12 +341,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const [hoursInput, setHoursInput] = useState('');
   const [descriptionInput, setDescriptionInput] = useState('');
 
-  // Handle date picker opening
-  const handleOpenDatePicker = React.useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    e.nativeEvent.stopImmediatePropagation();
-    console.log('Opening date picker with callback');
+  // Handle date picker opening - simplified since we removed the problematic native input
+  const handleOpenDatePicker = React.useCallback(() => {
     setShowDatePicker(true);
   }, []);
 
@@ -1372,14 +1369,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                         {!showDatePicker && (
                           <Button
                             onClick={handleOpenDatePicker}
-                            onMouseDown={(e) => {
-                              e.stopPropagation();
-                              e.nativeEvent.stopImmediatePropagation();
-                            }}
-                            onTouchStart={(e) => {
-                              e.stopPropagation();
-                              e.nativeEvent.stopImmediatePropagation();
-                            }}
                             className="w-full mb-4 py-2 text-sm bg-green-600 hover:bg-green-700"
                             variant="outline"
                             type="button"
@@ -1389,42 +1378,38 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                           </Button>
                         )}
 
-                        {/* Date Picker and Hours Input */}
+                        {/* Paint Brain Calendar and Hours Input */}
                         {showDatePicker && (
-                          <div className="mb-4 p-4 bg-gray-800 rounded-lg space-y-3 border border-gray-600">
-                            <div>
-                              <label className="text-sm font-medium mb-2 block text-gray-200">
-                                Select Date
-                                <span className="ml-2 text-xs px-2 py-1 bg-green-900/30 text-green-300 rounded">
-                                  Today: {formatDateForInput(new Date())}
-                                </span>
-                              </label>
-                              <div className="relative">
-                                <input
-                                  type="date"
-                                  value={selectedDate}
-                                  onChange={(e) => {
-                                    setSelectedDate(e.target.value);
-                                    if (e.target.value) {
-                                      setTimeout(() => {
-                                        const hoursInput = document.querySelector('input[placeholder="0"]') as HTMLInputElement;
-                                        if (hoursInput) hoursInput.focus();
-                                      }, 100);
-                                    }
-                                  }}
-                                  className="w-full px-3 py-2 text-sm border-2 rounded-lg bg-gray-800 text-gray-200 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
-                                  max={formatDateForInput(new Date())}
-                                  style={{ 
-                                    colorScheme: 'dark',
-                                    borderColor: '#fbbf24', // Paint Brain yellow
-                                    backgroundColor: '#1f2937',
-                                  }}
-                                />
-                                {/* Today's Date Indicator */}
-                                <div className="absolute top-1 right-10 text-xs font-bold text-red-500 pointer-events-none">
-                                  Today: {new Date().getDate()}
-                                </div>
-                              </div>
+                          <div className="mb-4 p-4 bg-gray-800 rounded-lg space-y-4 border border-gray-600">
+                            {/* Close button */}
+                            <div className="flex justify-end">
+                              <Button
+                                onClick={() => {
+                                  setShowDatePicker(false);
+                                  setSelectedDate('');
+                                  setHoursInput('');
+                                  setDescriptionInput('');
+                                }}
+                                variant="ghost"
+                                size="sm"
+                                className="text-gray-400 hover:text-white p-2"
+                              >
+                                <X size={16} />
+                              </Button>
+                            </div>
+                            
+                            <div className="flex justify-center">
+                              <PaintBrainCalendar
+                                selectedDate={selectedDate}
+                                onDateSelect={(date) => {
+                                  setSelectedDate(date);
+                                  setTimeout(() => {
+                                    const hoursInput = document.querySelector('input[placeholder="0"]') as HTMLInputElement;
+                                    if (hoursInput) hoursInput.focus();
+                                  }, 100);
+                                }}
+                                maxDate={formatDateForInput(new Date())}
+                              />
                             </div>
                             
                             <div>
