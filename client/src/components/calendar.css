@@ -17,7 +17,7 @@
 .month {
   flex: 0 0 100vw;
   scroll-snap-align: center;
-  padding: 1rem;
+  padding: 0.25rem;
   box-sizing: border-box;
   width: 100vw;
   min-width: 100vw;
@@ -29,8 +29,8 @@
 
 .month-name {
   text-align: center;
-  font-size: 1.3rem;
-  margin-bottom: 0.75rem;
+  font-size: 1.2rem;
+  margin-bottom: 0.25rem;
   color: #0099CC;
   width: 100%;
 }
@@ -40,9 +40,9 @@
   grid-template-columns: repeat(7, 1fr);
   border: 2px solid #FFD700 !important;
   aspect-ratio: 1.2 / 1;
-  font-size: 1rem;
-  width: calc(100vw - 6rem);
-  max-width: 75vw;
+  font-size: 1.1rem;
+  width: calc(100vw - 1rem);
+  max-width: 95vw;
   margin: 0 auto;
   background-color: transparent;
 }
@@ -56,8 +56,8 @@
   border-right: 1px solid #FFD700 !important;
   border-bottom: 1px solid #FFD700 !important;
   font-weight: 600;
-  min-height: 40px;
-  font-size: 1rem;
+  min-height: 45px;
+  font-size: 1.1rem;
   cursor: pointer;
   background: transparent;
 }
