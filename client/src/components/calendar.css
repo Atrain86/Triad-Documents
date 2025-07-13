@@ -42,11 +42,9 @@
   border: 2px solid #FFD700 !important;
   aspect-ratio: 1.4 / 1;
   font-size: 1rem;
-  width: 78vw;
+  width: 75vw;
   margin: 0 auto;
   background-color: transparent;
-  position: relative;
-  left: -20px;
 }
 
 .day-name,
