@@ -45,8 +45,7 @@
   width: 70vw;
   margin: 0 auto;
   background-color: transparent;
-  margin-left: auto;
-  margin-right: auto;
+  transform: translateX(-30px);
 }
 
 .day-name,
