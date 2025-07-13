@@ -1,8 +1,8 @@
 .calendar-container {
   color: white;
-  max-width: 825px;
+  max-width: 450px;
   margin: 0 auto;
-  padding: 1.375rem;
+  padding: 0.75rem;
   overflow: visible;
 }
 
@@ -16,7 +16,7 @@
 .month {
   flex: 0 0 100%;
   scroll-snap-align: center;
-  padding: 0.55rem;
+  padding: 0.25rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -24,9 +24,9 @@
 
 .month-name {
   text-align: center;
-  font-size: 2.0625rem;
+  font-size: 1.2rem;
   font-weight: bold;
-  margin-bottom: 0.55rem;
+  margin-bottom: 0.25rem;
   color: #0099CC;
   width: 100%;
 }
@@ -34,9 +34,9 @@
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  border: 2px solid #FFD700 !important;
+  border: 1px solid #FFD700 !important;
   aspect-ratio: 1.4 / 1;
-  font-size: 1.875rem;
+  font-size: 0.875rem;
   width: 100%;
   margin: 0 auto;
   background-color: transparent;
@@ -49,8 +49,8 @@
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  min-height: 44px;
-  font-size: 1.1rem;
+  min-height: 28px;
+  font-size: 0.75rem;
   cursor: pointer;
   background: transparent;
   border-right: 1px solid #FFD700 !important;
@@ -80,10 +80,10 @@
   background-color: #E03E3E;
   color: white;
   font-weight: bold;
-  font-size: 1.54rem;
+  font-size: 0.875rem;
 }
 
 .calendar-cell.selected {
   background-color: #444;
-  border: 5px solid #FFD700 !important;
+  border: 2px solid #FFD700 !important;
 }
