@@ -1,14 +1,6 @@
 import React, { useState } from 'react';
-
-// PaintBrain brand colors
-const COLORS = {
-  red: '#E03E3E',
-  yellow: '#F7C11F',
-  blue: '#0099CC',
-  cream: '#FAF4E5',
-  black: '#000000',
-  white: '#FFFFFF'
-};
+import dayjs from 'dayjs';
+import './calendar.css';
 
 interface PaintBrainCalendarProps {
   selectedDate?: string;
@@ -17,204 +9,115 @@ interface PaintBrainCalendarProps {
   className?: string;
 }
 
-function getMonthGrid(year: number, month: number) {
-  const firstDay = new Date(year, month, 1).getDay(); // Sunday = 0
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const weeks = [];
-  let day = 1;
-
-  for (let i = 0; i < 6; i++) {
-    const week = [];
-    for (let j = 0; j < 7; j++) {
-      if ((i === 0 && j < firstDay) || day > daysInMonth) {
-        week.push(null);
-      } else {
-        week.push(day++);
-      }
-    }
-    weeks.push(week);
-  }
-  return weeks;
-}
-
-function MonthView({ 
-  year, 
-  month, 
-  today, 
-  selectedDate, 
-  onDateSelect, 
-  maxDate 
-}: {
-  year: number;
-  month: number;
-  today: Date;
-  selectedDate?: string;
-  onDateSelect: (date: string) => void;
-  maxDate?: string;
-}) {
-  const weeks = getMonthGrid(year, month);
-  const selectedDateObj = selectedDate ? new Date(selectedDate + 'T00:00:00') : null;
-  const maxDateObj = maxDate ? new Date(maxDate + 'T00:00:00') : null;
-  
-  const isToday = (day: number | null) =>
-    day === today.getDate() &&
-    month === today.getMonth() &&
-    year === today.getFullYear();
-
-  const isSelected = (day: number | null) =>
-    day && selectedDateObj &&
-    day === selectedDateObj.getDate() &&
-    month === selectedDateObj.getMonth() &&
-    year === selectedDateObj.getFullYear();
-
-  const isDisabled = (day: number | null) => {
-    if (!day || !maxDateObj) return false;
-    const dayDate = new Date(year, month, day);
-    return dayDate > maxDateObj;
-  };
-
-  const handleDayClick = (day: number | null) => {
-    if (!day || isDisabled(day)) return;
-    
-    const date = new Date(year, month, day);
-    const dateString = date.toISOString().split('T')[0];
-    onDateSelect(dateString);
-  };
-
-  return (
-    <div
-      style={{
-        minWidth: '100%',
-        scrollSnapAlign: 'start',
-        padding: '16px',
-        boxSizing: 'border-box',
-        backgroundColor: COLORS.black
-      }}
-    >
-      <div
-        style={{
-          textAlign: 'center',
-          fontWeight: 'bold',
-          color: COLORS.blue,
-          fontSize: 18,
-          marginBottom: 10
-        }}
-      >
-        {new Date(year, month).toLocaleString('en-US', {
-          month: 'long'
-        }).toUpperCase()}{' '}
-        {year}
-      </div>
-
-      {/* Day labels */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(7, 1fr)',
-          borderTop: `1px solid ${COLORS.yellow}`,
-          borderBottom: `1px solid ${COLORS.yellow}`
-        }}
-      >
-        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
-          <div
-            key={i}
-            style={{
-              textAlign: 'center',
-              fontWeight: 'bold',
-              padding: '6px',
-              borderRight: i < 6 ? `1px solid ${COLORS.yellow}` : 'none',
-              color: COLORS.white
-            }}
-          >
-            {d}
-          </div>
-        ))}
-      </div>
-
-      {/* Grid of days */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(7, 1fr)',
-          borderLeft: `1px solid ${COLORS.yellow}`
-        }}
-      >
-        {weeks.map((week, i) =>
-          week.map((day, j) => {
-            const todayCell = isToday(day);
-            const selectedCell = isSelected(day);
-            const disabledCell = isDisabled(day);
-
-            return (
-              <div
-                key={`${i}-${j}`}
-                onClick={() => handleDayClick(day)}
-                style={{
-                  aspectRatio: '1 / 1',
-                  borderBottom: `1px solid ${COLORS.yellow}`,
-                  borderRight: `1px solid ${COLORS.yellow}`,
-                  backgroundColor: selectedCell ? `${COLORS.yellow}60` : todayCell ? `${COLORS.red}80` : 'transparent',
-                  color: day ? COLORS.white : 'transparent',
-                  textAlign: 'center',
-                  padding: '6px 0',
-                  fontWeight: todayCell || selectedCell ? 'bold' : 'normal',
-                  cursor: day && !disabledCell ? 'pointer' : 'default',
-                  opacity: disabledCell ? 0.5 : 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                {day || ''}
-              </div>
-            );
-          })
-        )}
-      </div>
-    </div>
-  );
-}
-
 export default function PaintBrainCalendar({ 
   selectedDate, 
   onDateSelect, 
   maxDate,
   className = '' 
 }: PaintBrainCalendarProps) {
-  const [today] = useState(new Date());
-  const monthsToRender = 12;
-  const startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+  const today = dayjs();
+  const [currentDate, setCurrentDate] = useState(today);
 
-  const months = Array.from({ length: monthsToRender }, (_, i) => {
-    const newDate = new Date(startDate.getFullYear(), startDate.getMonth() + i, 1);
-    return { year: newDate.getFullYear(), month: newDate.getMonth() };
-  });
+  const startOfMonth = currentDate.startOf('month');
+  const endOfMonth = currentDate.endOf('month');
+  const startDay = startOfMonth.day(); // Sunday = 0
+  const daysInMonth = endOfMonth.date();
+
+  const daysArray = [];
+
+  // Add empty cells for days before month starts
+  for (let i = 0; i < startDay; i++) {
+    daysArray.push(null);
+  }
+
+  // Add all days of the month
+  for (let day = 1; day <= daysInMonth; day++) {
+    daysArray.push(day);
+  }
+
+  const prevMonth = () => {
+    setCurrentDate(currentDate.subtract(1, 'month'));
+  };
+
+  const nextMonth = () => {
+    setCurrentDate(currentDate.add(1, 'month'));
+  };
+
+  const isToday = (day: number | null) =>
+    day === today.date() &&
+    currentDate.month() === today.month() &&
+    currentDate.year() === today.year();
+
+  const isSelected = (day: number | null) => {
+    if (!day || !selectedDate) return false;
+    const selected = dayjs(selectedDate);
+    return day === selected.date() &&
+           currentDate.month() === selected.month() &&
+           currentDate.year() === selected.year();
+  };
+
+  const isDisabled = (day: number | null) => {
+    if (!day || !maxDate) return false;
+    const dayDate = currentDate.date(day);
+    const max = dayjs(maxDate);
+    return dayDate.isAfter(max);
+  };
+
+  const handleDayClick = (day: number | null) => {
+    if (!day || isDisabled(day)) return;
+    
+    const date = currentDate.date(day);
+    const dateString = date.format('YYYY-MM-DD');
+    onDateSelect(dateString);
+  };
 
   return (
-    <div
-      className={className}
-      style={{
-        backgroundColor: COLORS.black,
-        padding: 0,
-        overflowX: 'auto',
-        display: 'flex',
-        scrollSnapType: 'x mandatory',
-        border: `1px solid ${COLORS.yellow}`,
-        borderRadius: '8px',
-        scrollBehavior: 'smooth'
-      }}
-    >
-      {months.map(({ year, month }) => (
-        <MonthView 
-          key={`${year}-${month}`} 
-          year={year} 
-          month={month} 
-          today={today}
-          selectedDate={selectedDate}
-          onDateSelect={onDateSelect}
-          maxDate={maxDate}
-        />
-      ))}
+    <div className={`calendar-container ${className}`}>
+      <div className="calendar-header">
+        <button onClick={prevMonth}>{'<'}</button>
+        <h2 style={{ color: '#0099CC' }}>
+          {currentDate.format('MMMM YYYY').toUpperCase()}
+        </h2>
+        <button onClick={nextMonth}>{'>'}</button>
+      </div>
+
+      <div className="calendar-grid">
+        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d) => (
+          <div key={d} className="calendar-day-name">
+            {d}
+          </div>
+        ))}
+        {daysArray.map((day, idx) => {
+          const todayCell = isToday(day);
+          const selectedCell = isSelected(day);
+          const disabledCell = isDisabled(day);
+          
+          let cellClass = 'calendar-cell ';
+          if (!day) {
+            cellClass += 'empty';
+          } else if (selectedCell) {
+            cellClass += 'selected';
+          } else if (todayCell) {
+            cellClass += 'today';
+          } else {
+            cellClass += 'day';
+          }
+
+          return (
+            <div
+              key={idx}
+              className={cellClass}
+              onClick={() => handleDayClick(day)}
+              style={{
+                opacity: disabledCell ? 0.5 : 1,
+                cursor: day && !disabledCell ? 'pointer' : 'default'
+              }}
+            >
+              {day}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
