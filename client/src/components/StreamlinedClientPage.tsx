@@ -1098,19 +1098,20 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
       {/* NEW: Mac-Style Collapsible Menu with ReactSortable - Full Width */}
       <div className="w-full px-4 py-6">
-        <div className="max-w-4xl mx-auto mb-4">
+        <div className="max-w-5xl mx-auto mb-4">
           <h3 className="text-lg font-semibold text-white">
             Customizable Menu (Drag to Reorder)
           </h3>
         </div>
         
-        <ReactSortable 
-          list={menuSections} 
-          setList={setMenuSections}
-          animation={150}
-          handle=".drag-handle"
-          className="space-y-2"
-        >
+        <div className="max-w-5xl mx-auto">
+          <ReactSortable 
+            list={menuSections} 
+            setList={setMenuSections}
+            animation={150}
+            handle=".drag-handle"
+            className="space-y-2"
+          >
           {menuSections.map((section) => {
             const IconComponent = section.icon;
             const isExpanded = expandedSections[section.id as keyof typeof expandedSections];
@@ -1168,7 +1169,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             return (
               <div
                 key={section.id}
-                className="bg-gray-800 rounded-lg border border-gray-600 overflow-hidden"
+                className="bg-gray-800 rounded-lg border border-gray-600 overflow-visible"
               >
                 {/* Section Header */}
                 <div 
@@ -1692,7 +1693,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
               </div>
             );
           })}
-        </ReactSortable>
+          </ReactSortable>
+        </div>
 
 
       </div>
