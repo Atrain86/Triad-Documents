@@ -340,6 +340,15 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const [hoursInput, setHoursInput] = useState('');
   const [descriptionInput, setDescriptionInput] = useState('');
 
+  // Handle date picker opening
+  const handleOpenDatePicker = React.useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.nativeEvent.stopImmediatePropagation();
+    console.log('Opening date picker with callback');
+    setShowDatePicker(true);
+  }, []);
+
   // Edit form state
   const [editForm, setEditForm] = useState({
     clientName: '',
@@ -1362,14 +1371,18 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                         {/* Add Hours Button */}
                         {!showDatePicker && (
                           <Button
-                            onClick={(e) => {
-                              e.preventDefault();
+                            onClick={handleOpenDatePicker}
+                            onMouseDown={(e) => {
                               e.stopPropagation();
-                              setShowDatePicker(true);
+                              e.nativeEvent.stopImmediatePropagation();
                             }}
-                            onMouseDown={(e) => e.stopPropagation()}
+                            onTouchStart={(e) => {
+                              e.stopPropagation();
+                              e.nativeEvent.stopImmediatePropagation();
+                            }}
                             className="w-full mb-4 py-2 text-sm bg-green-600 hover:bg-green-700"
                             variant="outline"
+                            type="button"
                           >
                             <Plus size={16} className="mr-2" />
                             Log Hours for a Day
