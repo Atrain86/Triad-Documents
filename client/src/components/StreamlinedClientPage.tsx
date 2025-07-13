@@ -1418,7 +1418,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
                         {/* Paint Brain Calendar and Hours Input */}
                         {showDatePicker && (
-                          <div className="mb-4 space-y-4">
+                          <div className="mb-2 space-y-2">
                             {/* Close button */}
                             <div className="flex justify-end px-4">
                               <Button
@@ -1442,18 +1442,15 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                 selectedDate={selectedDate}
                                 onDateSelect={(date) => {
                                   setSelectedDate(date);
-                                  setTimeout(() => {
-                                    const hoursInput = document.querySelector('input[placeholder="0"]') as HTMLInputElement;
-                                    if (hoursInput) hoursInput.focus();
-                                  }, 100);
+                                  // Remove auto-focus to prevent calendar sliding
                                 }}
                                 maxDate={formatDateForInput(new Date())}
                                 className="w-full"
                               />
                             </div>
                             
-                            <div>
-                              <label className="text-sm font-medium mb-2 block text-gray-200">Hours Worked</label>
+                            <div className="px-4">
+                              <label className="text-sm font-medium mb-1 block text-gray-200">Hours Worked</label>
                               <input
                                 type="number"
                                 step="0.5"
@@ -1471,8 +1468,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                               />
                             </div>
                             
-                            <div>
-                              <label className="text-sm font-medium mb-2 block text-gray-200">Description</label>
+                            <div className="px-4">
+                              <label className="text-sm font-medium mb-1 block text-gray-200">Description</label>
                               <input
                                 type="text"
                                 value={descriptionInput}
@@ -1482,7 +1479,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                               />
                             </div>
                             
-                            <div className="flex gap-2">
+                            <div className="flex gap-2 px-4">
                               <Button
                                 onClick={handleAddHours}
                                 disabled={!hoursInput || addHoursMutation.isPending}
