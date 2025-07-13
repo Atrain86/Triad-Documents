@@ -1358,7 +1358,11 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                         {/* Add Hours Button */}
                         {!showDatePicker && (
                           <Button
-                            onClick={() => setShowDatePicker(true)}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setTimeout(() => setShowDatePicker(true), 50);
+                            }}
                             className="w-full mb-4 py-2 text-sm bg-green-600 hover:bg-green-700"
                             variant="outline"
                           >
