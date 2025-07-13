@@ -19,13 +19,22 @@ const CalendarComponent = ({
   const containerRef = useRef(null);
   const [selectedDate, setSelectedDate] = useState(null);
   const [months, setMonths] = useState([
+    today.subtract(6, 'month'),
+    today.subtract(5, 'month'),
+    today.subtract(4, 'month'),
+    today.subtract(3, 'month'),
+    today.subtract(2, 'month'),
     today.subtract(1, 'month'),
     today,
     today.add(1, 'month'),
     today.add(2, 'month'),
+    today.add(3, 'month'),
+    today.add(4, 'month'),
+    today.add(5, 'month'),
+    today.add(6, 'month'),
   ]);
 
-  const [currentIndex, setCurrentIndex] = useState(1); // Index of today
+  const [currentIndex, setCurrentIndex] = useState(6); // Index of today (now at position 6)
 
   useEffect(() => {
     const scrollToCurrent = () => {

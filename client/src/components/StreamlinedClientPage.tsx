@@ -1436,7 +1436,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                               </Button>
                             </div>
                             
-                            <div className="w-full overflow-hidden">
+                            <div className="w-full overflow-hidden" style={{ maxWidth: '100vw' }}>
                               <PaintBrainCalendar
                                 selectedDate={selectedDate}
                                 onDateSelect={(date) => {
