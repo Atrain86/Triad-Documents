@@ -2,7 +2,7 @@ import type { Express } from "express";
 import express from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertProjectSchema, insertPhotoSchema, insertReceiptSchema, insertDailyHoursSchema } from "@shared/schema";
+import { insertProjectSchema, insertPhotoSchema, insertReceiptSchema, insertDailyHoursSchema, insertToolsChecklistSchema } from "@shared/schema";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -378,6 +378,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: 'Failed to delete hours entry' });
+    }
+  });
+
+  // Tools Checklist
+  app.get('/api/projects/:id/tools', async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const tools = await storage.getProjectTools(projectId);
+      res.json(tools);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch tools' });
+    }
+  });
+
+  app.post('/api/projects/:id/tools', async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const toolData = {
+        projectId,
+        toolName: req.body.toolName,
+        isCompleted: 0,
+      };
+
+      const validatedData = insertToolsChecklistSchema.parse(toolData);
+      const tool = await storage.createTool(validatedData);
+      res.status(201).json(tool);
+    } catch (error) {
+      console.error('Error creating tool:', error);
+      res.status(400).json({ error: 'Failed to create tool' });
+    }
+  });
+
+  app.delete('/api/tools/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteTool(id);
+      if (!deleted) {
+        return res.status(404).json({ error: 'Tool not found' });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to delete tool' });
     }
   });
 

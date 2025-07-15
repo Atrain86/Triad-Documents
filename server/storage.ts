@@ -3,14 +3,17 @@ import {
   photos, 
   receipts, 
   dailyHours,
+  toolsChecklist,
   type Project, 
   type Photo, 
   type Receipt, 
   type DailyHours,
+  type ToolsChecklist,
   type InsertProject, 
   type InsertPhoto, 
   type InsertReceipt, 
-  type InsertDailyHours 
+  type InsertDailyHours,
+  type InsertToolsChecklist 
 } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
@@ -39,6 +42,11 @@ export interface IStorage {
   createDailyHours(hours: InsertDailyHours): Promise<DailyHours>;
   updateDailyHours(id: number, hours: Partial<InsertDailyHours>): Promise<DailyHours | undefined>;
   deleteDailyHours(id: number): Promise<boolean>;
+
+  // Tools Checklist
+  getProjectTools(projectId: number): Promise<ToolsChecklist[]>;
+  createTool(tool: InsertToolsChecklist): Promise<ToolsChecklist>;
+  deleteTool(id: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -161,6 +169,25 @@ export class DatabaseStorage implements IStorage {
 
   async deleteDailyHours(id: number): Promise<boolean> {
     const result = await db.delete(dailyHours).where(eq(dailyHours.id, id));
+    return (result.rowCount || 0) > 0;
+  }
+
+  // Tools Checklist
+  async getProjectTools(projectId: number): Promise<ToolsChecklist[]> {
+    const result = await db.select().from(toolsChecklist).where(eq(toolsChecklist.projectId, projectId));
+    return result;
+  }
+
+  async createTool(insertTool: InsertToolsChecklist): Promise<ToolsChecklist> {
+    const [tool] = await db
+      .insert(toolsChecklist)
+      .values(insertTool)
+      .returning();
+    return tool;
+  }
+
+  async deleteTool(id: number): Promise<boolean> {
+    const result = await db.delete(toolsChecklist).where(eq(toolsChecklist.id, id));
     return (result.rowCount || 0) > 0;
   }
 }
