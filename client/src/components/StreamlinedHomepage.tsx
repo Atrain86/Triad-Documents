@@ -15,8 +15,10 @@ import {
   Edit3, 
   Archive, 
   RotateCcw, 
-  Trash2 
+  Trash2,
+  GripVertical 
 } from "lucide-react";
+import { ReactSortable } from 'react-sortablejs';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -156,6 +158,8 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
   const [showArchived, setShowArchived] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [editForm, setEditForm] = useState<Partial<InsertProject>>({});
+  const [isManualMode, setIsManualMode] = useState(false);
+  const [manualProjects, setManualProjects] = useState<Project[]>([]);
   const [newProject, setNewProject] = useState<NewProject>({
     clientName: '',
     address: '',
@@ -175,8 +179,24 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
     queryKey: ['/api/projects'],
   });
 
-  // Filter and sort projects
-  const filteredProjects = projects.filter(project => {
+  // Smart sorting function - prioritize by status
+  const sortProjectsByPriority = (projectList: Project[]) => {
+    return [...projectList].sort((a, b) => {
+      const statusA = statusConfig[a.status as keyof typeof statusConfig] || { priority: 99 };
+      const statusB = statusConfig[b.status as keyof typeof statusConfig] || { priority: 99 };
+      
+      // First sort by status priority
+      if (statusA.priority !== statusB.priority) {
+        return statusA.priority - statusB.priority;
+      }
+      
+      // Then sort alphabetically by client name
+      return a.clientName.localeCompare(b.clientName);
+    });
+  };
+
+  // Filter projects first
+  const baseFilteredProjects = projects.filter(project => {
     const isArchived = project.status === 'archived';
     if (showArchived !== isArchived) return false;
     
@@ -188,6 +208,18 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
       project.projectType?.toLowerCase().includes(searchTerm.toLowerCase())
     );
   });
+
+  // Apply sorting or manual order
+  const filteredProjects = isManualMode 
+    ? manualProjects.filter(project => baseFilteredProjects.some(p => p.id === project.id))
+    : sortProjectsByPriority(baseFilteredProjects);
+
+  // Update manual projects when switching to manual mode
+  React.useEffect(() => {
+    if (isManualMode && manualProjects.length === 0) {
+      setManualProjects(sortProjectsByPriority(baseFilteredProjects));
+    }
+  }, [isManualMode, baseFilteredProjects]);
 
   const createProjectMutation = useMutation({
     mutationFn: async (projectData: NewProject) => {
@@ -318,6 +350,18 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
             />
           </div>
           <Button
+            variant={isManualMode ? "default" : "outline"}
+            onClick={() => {
+              setIsManualMode(!isManualMode);
+              if (!isManualMode) {
+                setManualProjects(sortProjectsByPriority(baseFilteredProjects));
+              }
+            }}
+            className={`px-3 py-3 text-sm ${isManualMode ? 'bg-purple-600 hover:bg-purple-700' : ''}`}
+          >
+            {isManualMode ? 'Smart' : 'Manual'}
+          </Button>
+          <Button
             variant={showArchived ? "default" : "outline"}
             onClick={() => setShowArchived(!showArchived)}
             className={`px-4 py-3 ${showArchived ? 'bg-gray-600 hover:bg-gray-700' : ''}`}
@@ -336,168 +380,326 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
           </div>
         )}
 
-        <div className="space-y-4">
-          {filteredProjects.map(project => {
-            const handleNavigation = () => {
-              console.log('Navigating to project:', project.id);
-              onSelectProject(project.id);
-            };
+        {isManualMode ? (
+          <ReactSortable 
+            list={filteredProjects} 
+            setList={(newList) => setManualProjects(newList)}
+            animation={150}
+            handle=".drag-handle"
+            className="space-y-4"
+          >
+            {filteredProjects.map(project => {
+              const handleNavigation = () => {
+                console.log('Navigating to project:', project.id);
+                onSelectProject(project.id);
+              };
 
-            let touchStartY = 0;
-            let touchStartTime = 0;
-            let hasMoved = false;
+              let touchStartY = 0;
+              let touchStartTime = 0;
+              let hasMoved = false;
 
-            return (
-              <Card
-                key={project.id}
-                className="p-5 transition-all hover:shadow-md hover:border-primary/50 bg-card relative group cursor-pointer"
-                onClick={handleNavigation}
-                onTouchStart={(e) => {
-                  // Record initial touch position and time
-                  touchStartY = e.touches[0].clientY;
-                  touchStartTime = Date.now();
-                  hasMoved = false;
-                  
-                  // Add visual feedback on touch
-                  e.currentTarget.style.opacity = '0.8';
-                }}
-                onTouchMove={(e) => {
-                  // Check if user is scrolling
-                  const currentY = e.touches[0].clientY;
-                  const deltaY = Math.abs(currentY - touchStartY);
-                  
-                  if (deltaY > 10) { // 10px threshold for scroll detection
-                    hasMoved = true;
-                    // Reset visual feedback if scrolling
+              return (
+                <Card
+                  key={project.id}
+                  className="p-5 transition-all hover:shadow-md hover:border-primary/50 bg-card relative group cursor-pointer"
+                  onClick={handleNavigation}
+                  onTouchStart={(e) => {
+                    touchStartY = e.touches[0].clientY;
+                    touchStartTime = Date.now();
+                    hasMoved = false;
+                    e.currentTarget.style.opacity = '0.8';
+                  }}
+                  onTouchMove={(e) => {
+                    const currentY = e.touches[0].clientY;
+                    const deltaY = Math.abs(currentY - touchStartY);
+                    if (deltaY > 10) {
+                      hasMoved = true;
+                      e.currentTarget.style.opacity = '1';
+                    }
+                  }}
+                  onTouchEnd={(e) => {
                     e.currentTarget.style.opacity = '1';
-                  }
-                }}
-                onTouchEnd={(e) => {
-                  // Reset visual feedback
-                  e.currentTarget.style.opacity = '1';
-                  
-                  // Only navigate if it was a quick tap without scrolling
-                  const touchDuration = Date.now() - touchStartTime;
-                  
-                  if (!hasMoved && touchDuration < 300) { // Quick tap under 300ms
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleNavigation();
-                  }
-                }}
-                onTouchCancel={(e) => {
-                  // Reset visual feedback if touch is cancelled
-                  e.currentTarget.style.opacity = '1';
-                }}
-                style={{ 
-                  touchAction: 'pan-y', // Allow vertical scrolling
-                  WebkitTapHighlightColor: 'rgba(0,0,0,0)',
-                  WebkitUserSelect: 'none',
-                  userSelect: 'none'
-                }}
-              >
-                <div className="flex justify-between items-start mb-3">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <User size={16} className="text-muted-foreground" />
-                      <h3 className="font-semibold text-lg text-blue-600 dark:text-blue-400">
-                        {project.clientName || 'Unnamed Client'}
-                      </h3>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm mb-2">
-                      <MapPin size={14} className="text-muted-foreground" />
-                      <p className="text-green-600 dark:text-green-400">{project.address || 'No address'}</p>
+                    const touchDuration = Date.now() - touchStartTime;
+                    if (!hasMoved && touchDuration < 300) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleNavigation();
+                    }
+                  }}
+                  onTouchCancel={(e) => {
+                    e.currentTarget.style.opacity = '1';
+                  }}
+                  style={{ 
+                    touchAction: 'pan-y',
+                    WebkitTapHighlightColor: 'rgba(0,0,0,0)',
+                    WebkitUserSelect: 'none',
+                    userSelect: 'none'
+                  }}
+                >
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex items-center gap-3 flex-1">
+                      <div className="drag-handle cursor-move text-gray-400 hover:text-gray-600 transition-colors">
+                        <GripVertical size={16} />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <User size={16} className="text-muted-foreground" />
+                          <h3 className="font-semibold text-lg text-blue-600 dark:text-blue-400">
+                            {project.clientName || 'Unnamed Client'}
+                          </h3>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm mb-2">
+                          <MapPin size={14} className="text-muted-foreground" />
+                          <p className="text-green-600 dark:text-green-400">{project.address || 'No address'}</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-                
-                <div className="flex items-center justify-between pt-3 border-t border-border">
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <span className="capitalize">{project.projectType}</span>
-                    {project.projectType === 'interior' && (
-                      <>
-                        <span>•</span>
-                        <span>{project.roomCount} room{project.roomCount !== 1 ? 's' : ''}</span>
-                      </>
-                    )}
+                  
+                  <div className="flex items-center justify-between pt-3 border-t border-border">
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <span className="capitalize">{project.projectType}</span>
+                      {project.projectType === 'interior' && (
+                        <>
+                          <span>•</span>
+                          <span>{project.roomCount} room{project.roomCount !== 1 ? 's' : ''}</span>
+                        </>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <select
+                        value={project.status}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          updateStatusMutation.mutate({ 
+                            projectId: project.id, 
+                            status: e.target.value 
+                          });
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        className={`text-xs font-medium border-none bg-transparent cursor-pointer focus:outline-none ${statusConfig[project.status as keyof typeof statusConfig]?.text || 'text-gray-600 dark:text-gray-400'}`}
+                      >
+                        <option value="in-progress">🟢 In Progress</option>
+                        <option value="scheduled">🔵 Scheduled</option>
+                        <option value="estimate-sent">📝 Estimate Sent</option>
+                        <option value="awaiting-confirmation">⏳ Awaiting Confirmation</option>
+                        <option value="site-visit-needed">📍 Site Visit Needed</option>
+                        <option value="initial-contact">📞 Initial Contact</option>
+                        <option value="follow-up-needed">🔄 Follow-up Needed</option>
+                        <option value="on-hold">⏸️ On Hold</option>
+                        <option value="pending">🟡 Pending</option>
+                        <option value="completed">✅ Completed</option>
+                        <option value="cancelled">❌ Cancelled</option>
+                        <option value="archived">📦 Archived</option>
+                      </select>
+                      <div 
+                        className={`w-3 h-3 rounded-full ${statusConfig[project.status as keyof typeof statusConfig]?.dot || 'bg-gray-500'}`}
+                      />
+                    </div>
                   </div>
                   
-                  <div className="flex items-center gap-2">
-                    <select
-                      value={project.status}
-                      onChange={(e) => {
+                  {/* Action Buttons */}
+                  <div className="absolute top-5 right-5 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={(e) => {
                         e.stopPropagation();
-                        updateStatusMutation.mutate({ 
-                          projectId: project.id, 
-                          status: e.target.value 
-                        });
+                        handleEditProject(project);
                       }}
-                      onClick={(e) => e.stopPropagation()}
-                      className={`text-xs font-medium border-none bg-transparent cursor-pointer focus:outline-none ${statusConfig[project.status as keyof typeof statusConfig]?.text || 'text-gray-600 dark:text-gray-400'}`}
+                      className="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
+                      title="Edit client"
                     >
-                      <option value="in-progress">🟢 In Progress</option>
-                      <option value="scheduled">🔵 Scheduled</option>
-                      <option value="estimate-sent">📝 Estimate Sent</option>
-                      <option value="awaiting-confirmation">⏳ Awaiting Confirmation</option>
-                      <option value="site-visit-needed">📍 Site Visit Needed</option>
-                      <option value="initial-contact">📞 Initial Contact</option>
-                      <option value="follow-up-needed">🔄 Follow-up Needed</option>
-                      <option value="on-hold">⏸️ On Hold</option>
-                      <option value="pending">🟡 Pending</option>
-                      <option value="completed">✅ Completed</option>
-                      <option value="cancelled">❌ Cancelled</option>
-                      <option value="archived">📦 Archived</option>
-                    </select>
-                    <div 
-                      className={`w-3 h-3 rounded-full ${statusConfig[project.status as keyof typeof statusConfig]?.dot || 'bg-gray-500'}`}
-                    />
+                      <Edit3 size={16} />
+                    </button>
+                    
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const newStatus = project.status === 'archived' ? 'completed' : 'archived';
+                        const action = project.status === 'archived' ? 'restore' : 'archive';
+                        if (confirm(`Are you sure you want to ${action} ${project.clientName || 'this client'}?`)) {
+                          updateStatusMutation.mutate({ projectId: project.id, status: newStatus });
+                        }
+                      }}
+                      className="p-2 text-gray-500 hover:text-orange-600 dark:text-gray-400 dark:hover:text-orange-400 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
+                      title={project.status === 'archived' ? "Restore client" : "Archive client"}
+                    >
+                      {project.status === 'archived' ? <RotateCcw size={16} /> : <Archive size={16} />}
+                    </button>
+                    
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (confirm(`Are you sure you want to permanently delete ${project.clientName || 'this client'}? This cannot be undone.`)) {
+                          deleteProjectMutation.mutate(project.id);
+                        }
+                      }}
+                      className="p-2 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
+                      title="Delete client"
+                    >
+                      <Trash2 size={16} />
+                    </button>
                   </div>
-                </div>
-                {/* Action Buttons */}
-                <div className="absolute top-5 right-5 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleEditProject(project);
+                </Card>
+              );
+            })}
+          </ReactSortable>
+        ) : (
+          <div className="space-y-4">
+            {filteredProjects.map(project => {
+              const handleNavigation = () => {
+                console.log('Navigating to project:', project.id);
+                onSelectProject(project.id);
+              };
+
+              let touchStartY = 0;
+              let touchStartTime = 0;
+              let hasMoved = false;
+
+              return (
+                <Card
+                  key={project.id}
+                  className="p-5 transition-all hover:shadow-md hover:border-primary/50 bg-card relative group cursor-pointer"
+                  onClick={handleNavigation}
+                  onTouchStart={(e) => {
+                    touchStartY = e.touches[0].clientY;
+                    touchStartTime = Date.now();
+                    hasMoved = false;
+                    e.currentTarget.style.opacity = '0.8';
                   }}
-                  className="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
-                  title="Edit client"
-                >
-                  <Edit3 size={16} />
-                </button>
-                
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const newStatus = project.status === 'archived' ? 'completed' : 'archived';
-                    const action = project.status === 'archived' ? 'restore' : 'archive';
-                    if (confirm(`Are you sure you want to ${action} ${project.clientName || 'this client'}?`)) {
-                      updateStatusMutation.mutate({ projectId: project.id, status: newStatus });
+                  onTouchMove={(e) => {
+                    const currentY = e.touches[0].clientY;
+                    const deltaY = Math.abs(currentY - touchStartY);
+                    if (deltaY > 10) {
+                      hasMoved = true;
+                      e.currentTarget.style.opacity = '1';
                     }
                   }}
-                  className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
-                  title={project.status === 'archived' ? 'Restore client' : 'Archive client'}
-                >
-                  {project.status === 'archived' ? <RotateCcw size={16} /> : <Archive size={16} />}
-                </button>
-                
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (confirm(`Are you sure you want to delete ${project.clientName || 'this client'}?`)) {
-                      deleteProjectMutation.mutate(project.id);
+                  onTouchEnd={(e) => {
+                    e.currentTarget.style.opacity = '1';
+                    const touchDuration = Date.now() - touchStartTime;
+                    if (!hasMoved && touchDuration < 300) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleNavigation();
                     }
                   }}
-                  className="p-2 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
-                  title="Delete client"
+                  onTouchCancel={(e) => {
+                    e.currentTarget.style.opacity = '1';
+                  }}
+                  style={{ 
+                    touchAction: 'pan-y',
+                    WebkitTapHighlightColor: 'rgba(0,0,0,0)',
+                    WebkitUserSelect: 'none',
+                    userSelect: 'none'
+                  }}
                 >
-                  <Trash2 size={16} />
-                </button>
-                </div>
-              </Card>
-            );
-          })}
-        </div>
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex items-center gap-3 flex-1">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <User size={16} className="text-muted-foreground" />
+                          <h3 className="font-semibold text-lg text-blue-600 dark:text-blue-400">
+                            {project.clientName || 'Unnamed Client'}
+                          </h3>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm mb-2">
+                          <MapPin size={14} className="text-muted-foreground" />
+                          <p className="text-green-600 dark:text-green-400">{project.address || 'No address'}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between pt-3 border-t border-border">
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <span className="capitalize">{project.projectType}</span>
+                      {project.projectType === 'interior' && (
+                        <>
+                          <span>•</span>
+                          <span>{project.roomCount} room{project.roomCount !== 1 ? 's' : ''}</span>
+                        </>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <select
+                        value={project.status}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          updateStatusMutation.mutate({ 
+                            projectId: project.id, 
+                            status: e.target.value 
+                          });
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        className={`text-xs font-medium border-none bg-transparent cursor-pointer focus:outline-none ${statusConfig[project.status as keyof typeof statusConfig]?.text || 'text-gray-600 dark:text-gray-400'}`}
+                      >
+                        <option value="in-progress">🟢 In Progress</option>
+                        <option value="scheduled">🔵 Scheduled</option>
+                        <option value="estimate-sent">📝 Estimate Sent</option>
+                        <option value="awaiting-confirmation">⏳ Awaiting Confirmation</option>
+                        <option value="site-visit-needed">📍 Site Visit Needed</option>
+                        <option value="initial-contact">📞 Initial Contact</option>
+                        <option value="follow-up-needed">🔄 Follow-up Needed</option>
+                        <option value="on-hold">⏸️ On Hold</option>
+                        <option value="pending">🟡 Pending</option>
+                        <option value="completed">✅ Completed</option>
+                        <option value="cancelled">❌ Cancelled</option>
+                        <option value="archived">📦 Archived</option>
+                      </select>
+                      <div 
+                        className={`w-3 h-3 rounded-full ${statusConfig[project.status as keyof typeof statusConfig]?.dot || 'bg-gray-500'}`}
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Action Buttons */}
+                  <div className="absolute top-5 right-5 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditProject(project);
+                      }}
+                      className="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
+                      title="Edit client"
+                    >
+                      <Edit3 size={16} />
+                    </button>
+                    
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const newStatus = project.status === 'archived' ? 'completed' : 'archived';
+                        const action = project.status === 'archived' ? 'restore' : 'archive';
+                        if (confirm(`Are you sure you want to ${action} ${project.clientName || 'this client'}?`)) {
+                          updateStatusMutation.mutate({ projectId: project.id, status: newStatus });
+                        }
+                      }}
+                      className="p-2 text-gray-500 hover:text-orange-600 dark:text-gray-400 dark:hover:text-orange-400 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
+                      title={project.status === 'archived' ? "Restore client" : "Archive client"}
+                    >
+                      {project.status === 'archived' ? <RotateCcw size={16} /> : <Archive size={16} />}
+                    </button>
+                    
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (confirm(`Are you sure you want to permanently delete ${project.clientName || 'this client'}? This cannot be undone.`)) {
+                          deleteProjectMutation.mutate(project.id);
+                        }
+                      }}
+                      className="p-2 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
+                      title="Delete client"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        )}
 
         {projects.length === 0 && !isLoading && (
           <div className="text-center py-12">

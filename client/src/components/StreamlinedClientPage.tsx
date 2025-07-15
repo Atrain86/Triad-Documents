@@ -1040,6 +1040,37 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                 {project.projectType} • {project.roomCount} rooms • Difficulty: {project.difficulty}/5
               </p>
+              
+              {/* Status Dropdown */}
+              <div className="mt-3 flex items-center gap-2">
+                <span className="text-sm text-gray-500 dark:text-gray-400">Status:</span>
+                <select
+                  value={project.status}
+                  onChange={(e) => {
+                    updateProjectMutation.mutate({ status: e.target.value });
+                  }}
+                  className={`text-sm font-medium border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    project.status === 'in-progress' ? 'text-green-600' :
+                    project.status === 'pending' ? 'text-yellow-600' :
+                    project.status === 'completed' ? 'text-orange-600' :
+                    project.status === 'archived' ? 'text-gray-600' :
+                    'text-blue-600'
+                  }`}
+                >
+                  <option value="in-progress">🟢 In Progress</option>
+                  <option value="scheduled">🔵 Scheduled</option>
+                  <option value="estimate-sent">📝 Estimate Sent</option>
+                  <option value="awaiting-confirmation">⏳ Awaiting Confirmation</option>
+                  <option value="site-visit-needed">📍 Site Visit Needed</option>
+                  <option value="initial-contact">📞 Initial Contact</option>
+                  <option value="follow-up-needed">🔄 Follow-up Needed</option>
+                  <option value="on-hold">⏸️ On Hold</option>
+                  <option value="pending">🟡 Pending</option>
+                  <option value="completed">✅ Completed</option>
+                  <option value="cancelled">❌ Cancelled</option>
+                  <option value="archived">📦 Archived</option>
+                </select>
+              </div>
             </div>
             <Button
               onClick={() => setShowEditClient(true)}
