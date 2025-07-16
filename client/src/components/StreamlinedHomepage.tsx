@@ -297,25 +297,23 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
 }
 
 function NewClientForm({ onSubmit, onCancel, isLoading }: { onSubmit: (data: any) => void; onCancel: () => void; isLoading: boolean }) {
-  const [formData, setFormData] = useState({
-    clientName: '',
-    address: '',
-    projectType: 'interior',
-    roomCount: 1,
-    difficulty: 3,
-    hourlyRate: 60
-  });
+  const [clientName, setClientName] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.clientName.trim() || !formData.address.trim()) {
-      alert('Please fill in client name and address');
+    if (!clientName.trim()) {
+      alert('Please enter a client name');
       return;
     }
+    
+    // Submit with smart defaults
     onSubmit({
-      ...formData,
-      difficulty: formData.difficulty.toString(),
-      // roomCount stays as integer, hourlyRate stays as number per schema
+      clientName: clientName.trim(),
+      address: '', // Empty address is fine
+      projectType: 'interior',
+      roomCount: 1,
+      difficulty: '3', // String as per schema
+      hourlyRate: 60,
       status: 'initial-contact'
     });
   };
@@ -323,64 +321,14 @@ function NewClientForm({ onSubmit, onCancel, isLoading }: { onSubmit: (data: any
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <Label htmlFor="clientName">Client Name *</Label>
+        <Label htmlFor="clientName">Client Name</Label>
         <Input
           id="clientName"
-          value={formData.clientName}
-          onChange={(e) => setFormData(prev => ({ ...prev, clientName: e.target.value }))}
+          value={clientName}
+          onChange={(e) => setClientName(e.target.value)}
           placeholder="Enter client name"
-          required
+          autoFocus
         />
-      </div>
-      
-      <div>
-        <Label htmlFor="address">Address *</Label>
-        <Input
-          id="address"
-          value={formData.address}
-          onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
-          placeholder="Enter project address"
-          required
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="projectType">Project Type</Label>
-        <select
-          id="projectType"
-          value={formData.projectType}
-          onChange={(e) => setFormData(prev => ({ ...prev, projectType: e.target.value }))}
-          className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800"
-        >
-          <option value="interior">Interior</option>
-          <option value="exterior">Exterior</option>
-          <option value="both">Interior & Exterior</option>
-        </select>
-      </div>
-
-      <div className="flex gap-4">
-        <div className="flex-1">
-          <Label htmlFor="roomCount">Room Count</Label>
-          <Input
-            id="roomCount"
-            type="number"
-            min="1"
-            value={formData.roomCount}
-            onChange={(e) => setFormData(prev => ({ ...prev, roomCount: parseInt(e.target.value) || 1 }))}
-          />
-        </div>
-        
-        <div className="flex-1">
-          <Label htmlFor="difficulty">Difficulty (1-5)</Label>
-          <Input
-            id="difficulty"
-            type="number"
-            min="1"
-            max="5"
-            value={formData.difficulty}
-            onChange={(e) => setFormData(prev => ({ ...prev, difficulty: parseInt(e.target.value) || 3 }))}
-          />
-        </div>
       </div>
 
       <div className="flex gap-3 pt-4">
