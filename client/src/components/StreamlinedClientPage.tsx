@@ -781,7 +781,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const deletePhotoMutation = useMutation({
     mutationFn: async (photoId: number) => {
-      const response = await fetch(`/api/photos/${photoId}`, {
+      const response = await apiRequest(`/api/projects/${projectId}/photos/${photoId}`, {
         method: 'DELETE',
       });
       
@@ -1636,7 +1636,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                 body: JSON.stringify(receiptData),
                               }).then(async (response) => {
                                 if (response.ok) {
-                                  queryClient.invalidateQueries({ queryKey: [`/api/projects/${project.id}/receipts`] });
+                                  await refetchReceipts();
                                   (e.target as HTMLFormElement).reset();
                                 } else {
                                   const errorData = await response.text();
