@@ -419,10 +419,21 @@ function NewClientForm({ onSubmit, onCancel, isLoading }: { onSubmit: (data: any
 }
 
 function ProjectCard({ project, onSelectProject, updateStatusMutation, deleteProjectMutation, showDragHandle }: any) {
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Only trigger navigation if the click is on the main card area
+    // and not on any interactive elements
+    const target = e.target as HTMLElement;
+    if (target.tagName === 'SELECT' || target.tagName === 'OPTION' || target.tagName === 'BUTTON' || target.closest('select') || target.closest('button')) {
+      return;
+    }
+    onSelectProject(project.id);
+  };
+
   return (
     <div 
       className="bg-card rounded-lg p-5 shadow-sm border border-border hover:border-primary/50 transition-colors cursor-pointer group relative"
-      onClick={() => onSelectProject(project.id)}
+      onClick={handleCardClick}
+      onTouchEnd={handleCardClick}
     >
       <div className="flex items-start gap-3">
         {showDragHandle && (
@@ -466,7 +477,8 @@ function ProjectCard({ project, onSelectProject, updateStatusMutation, deletePro
               });
             }}
             onClick={(e) => e.stopPropagation()}
-            className="text-xs font-medium border-none bg-transparent cursor-pointer focus:outline-none"
+            onTouchEnd={(e) => e.stopPropagation()}
+            className="text-xs font-medium border-none bg-transparent cursor-pointer focus:outline-none relative z-10"
             style={{ color: statusConfig[project.status as keyof typeof statusConfig]?.color || paintBrainColors.gray }}
           >
             <option value="in-progress">🟢 In Progress</option>
@@ -486,12 +498,13 @@ function ProjectCard({ project, onSelectProject, updateStatusMutation, deletePro
       </div>
       
       {/* Action Buttons */}
-      <div className="absolute top-5 right-5 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="absolute top-5 right-5 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
         <button
           onClick={(e) => {
             e.stopPropagation();
             // Handle edit
           }}
+          onTouchEnd={(e) => e.stopPropagation()}
           className="p-2 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
           style={{ color: paintBrainColors.blue }}
           title="Edit client"
@@ -508,6 +521,7 @@ function ProjectCard({ project, onSelectProject, updateStatusMutation, deletePro
               updateStatusMutation.mutate({ projectId: project.id, status: newStatus });
             }
           }}
+          onTouchEnd={(e) => e.stopPropagation()}
           className="p-2 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
           style={{ color: paintBrainColors.orange }}
           title={project.status === 'archived' ? "Restore client" : "Archive client"}
@@ -522,6 +536,10 @@ function ProjectCard({ project, onSelectProject, updateStatusMutation, deletePro
             if (confirm(`Are you sure you want to permanently delete ${project.clientName || 'this client'}? This cannot be undone.`)) {
               deleteProjectMutation.mutate(project.id);
             }
+          }}
+          onTouchEnd={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
           }}
           className="p-2 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
           style={{ color: paintBrainColors.red }}
