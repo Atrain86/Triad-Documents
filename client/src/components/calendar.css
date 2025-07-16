@@ -1,93 +1,89 @@
+/* Paint Brain Dark Mode Calendar */
 .calendar-container {
-  color: white;
-  max-width: 350px;
+  max-width: 450px;
   margin: 0 auto;
-  padding: 0.5rem;
-  background-color: #000;
+  background-color: #000000;
+  color: #ffffff;
+  border-radius: 8px;
+  padding: 16px;
+  border: 2px solid #D4A574;
 }
 
 .calendar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.5rem;
+  margin-bottom: 16px;
 }
 
 .nav-button {
   background: none;
-  border: 1px solid #FFD700;
-  color: #FFD700;
-  font-size: 1.2rem;
-  padding: 0.25rem 0.5rem;
+  border: none;
+  color: #8B5FBF;
+  font-size: 1.5rem;
   cursor: pointer;
+  padding: 8px 12px;
   border-radius: 4px;
+  transition: background-color 0.2s;
 }
 
 .nav-button:hover {
-  background-color: #FFD700;
-  color: #000;
+  background-color: rgba(139, 95, 191, 0.2);
 }
 
 .month-name {
-  text-align: center;
-  font-size: 1.1rem;
-  font-weight: bold;
-  color: #0099CC;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #569CD6;
   margin: 0;
 }
 
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  border: 1px solid #FFD700;
-  gap: 0;
-  width: 100%;
-  background-color: #000;
-}
-
-.day-name,
-.calendar-cell {
-  aspect-ratio: 1 / 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  min-height: 35px;
-  font-size: 0.8rem;
-  background: transparent;
-  border-right: 1px solid #FFD700;
-  border-bottom: 1px solid #FFD700;
-}
-
-.calendar-cell {
-  cursor: pointer;
-}
-
-.calendar-cell:hover {
-  background-color: #333;
-}
-
-/* Remove right border from last column (every 7th cell) */
-.day-name:nth-child(7n),
-.calendar-cell:nth-child(7n) {
-  border-right: none;
+  gap: 2px;
 }
 
 .day-name {
-  font-weight: bold;
-  background-color: transparent;
-  color: #FFD700;
-  border-top: none;
-  border-left: none;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #6B7280;
+  padding: 8px 0;
+}
+
+.calendar-cell {
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  color: #ffffff;
+}
+
+.calendar-cell:hover {
+  background-color: rgba(139, 95, 191, 0.2);
 }
 
 .calendar-cell.today {
-  background-color: #E03E3E;
-  color: white;
-  font-weight: bold;
+  background-color: #F44747;
+  color: #ffffff;
+  font-weight: 600;
 }
 
 .calendar-cell.selected {
-  background-color: #444;
-  border: 2px solid #FFD700;
+  background-color: #6A9955;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.calendar-cell:empty {
+  cursor: default;
+}
+
+.calendar-cell:empty:hover {
+  background-color: transparent;
 }

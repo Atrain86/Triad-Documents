@@ -358,7 +358,7 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
 
         <div className="flex gap-3 mb-6">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2" style={{ color: '#D4A574' }} size={18} />
             <Input
               placeholder="Search clients"
               value={searchTerm}
@@ -383,7 +383,7 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
             variant={showArchived ? "default" : "outline"}
             onClick={() => setShowArchived(!showArchived)}
             className={`px-4 py-3`}
-            style={showArchived ? { backgroundColor: paintBrainColors.gray } : {}}
+            style={showArchived ? { backgroundColor: paintBrainColors.orange } : {}}
           >
             {showArchived ? 'Active' : 'Archive'}
           </Button>
@@ -713,18 +713,20 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        if (confirm(`Are you sure you want to permanently delete ${project.clientName || 'this client'}? This cannot be undone.`)) {
+                        console.log('Delete button clicked for project:', project.id);
+                        
+                        const result = window.confirm(`Are you sure you want to permanently delete ${project.clientName || 'this client'}? This cannot be undone.`);
+                        console.log('Confirmation result:', result);
+                        
+                        if (result) {
+                          console.log('Calling deleteProjectMutation for project:', project.id);
                           deleteProjectMutation.mutate(project.id);
                         }
                       }}
-                      onTouchStart={(e) => {
-                        e.stopPropagation();
-                      }}
-                      onTouchEnd={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                      }}
-                      className="p-2 text-gray-500 hover:text-[#F44747] dark:text-gray-400 dark:hover:text-[#F44747] hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
+                      className="p-2 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
+                      style={{ color: 'rgb(107 114 128)' }}
+                      onMouseEnter={(e) => e.currentTarget.style.color = paintBrainColors.red}
+                      onMouseLeave={(e) => e.currentTarget.style.color = 'rgb(107 114 128)'}
                       title="Delete client"
                     >
                       <Trash2 size={16} />
