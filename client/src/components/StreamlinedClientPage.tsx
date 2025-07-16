@@ -1,18 +1,19 @@
 import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Camera, FileText, ArrowLeft, Edit3, Download, X, Image as ImageIcon, DollarSign, Calendar, Wrench, Plus, Trash2, Calculator, Receipt as ReceiptIcon, MapPin, Navigation, ExternalLink } from 'lucide-react';
+import { Camera, FileText, ArrowLeft, Edit3, Download, X, Image as ImageIcon, DollarSign, Calendar, Wrench, Plus, Trash2, Calculator, Receipt as ReceiptIcon, MapPin, Navigation, ExternalLink, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { apiRequest } from '@/lib/queryClient';
+
 import { generateMapsLink, generateDirectionsLink } from '@/lib/maps';
 import { compressMultipleImages, formatFileSize } from '@/lib/imageCompression';
 import type { Project, Photo, Receipt, ToolsChecklist, DailyHours } from '@shared/schema';
 import InvoiceGenerator from './InvoiceGenerator';
 import EstimateGenerator from './EstimateGenerator';
 import PhotoCarousel from './PhotoCarousel';
+import { ReactSortable } from 'react-sortablejs';
 
 // Calendar function for A-Frame calendar integration
 const openWorkCalendar = (clientProject: Project | null = null) => {
@@ -32,7 +33,8 @@ const openWorkCalendar = (clientProject: Project | null = null) => {
     window.open(workCalendarDirectUrl, '_blank');
   }
 };
-// Improved file list component inspired by the PDF uploader
+
+// Improved file list component
 function SimpleFilesList({ projectId }: { projectId: number }) {
   const queryClient = useQueryClient();
   const [editingReceipt, setEditingReceipt] = useState<Receipt | null>(null);
@@ -54,7 +56,7 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
         throw new Error(`Failed to delete file: ${response.status}`);
       }
       
-      return receiptId; // Return the ID for optimistic updates
+      return receiptId;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/receipts`] });
@@ -83,151 +85,164 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/receipts`] });
       setEditingReceipt(null);
+      setEditVendor('');
+      setEditAmount('');
+      setEditDescription('');
     },
     onError: (error) => {
       console.error('Update failed:', error);
-      alert('Failed to update receipt. Please try again.');
     },
   });
 
   const startEditing = (receipt: Receipt) => {
     setEditingReceipt(receipt);
     setEditVendor(receipt.vendor);
-    setEditAmount(receipt.amount);
+    setEditAmount(receipt.amount.toString());
     setEditDescription(receipt.description || '');
   };
 
-  const saveEdit = () => {
-    if (!editingReceipt || !editVendor.trim() || !editAmount.trim()) return;
-    
-    updateReceiptMutation.mutate({
-      id: editingReceipt.id,
-      vendor: editVendor,
-      amount: editAmount,
-      description: editDescription,
-    });
+  const handleSave = () => {
+    if (editingReceipt) {
+      updateReceiptMutation.mutate({
+        id: editingReceipt.id,
+        vendor: editVendor,
+        amount: editAmount,
+        description: editDescription
+      });
+    }
+  };
+
+  const handleCancel = () => {
+    setEditingReceipt(null);
+    setEditVendor('');
+    setEditAmount('');
+    setEditDescription('');
   };
 
   if (isLoading) {
-    return <div className="mb-8 text-center text-gray-500">Loading files...</div>;
+    return (
+      <div className="p-4 text-center text-gray-500">
+        <div className="animate-spin w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-2"></div>
+        Loading files...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 text-center text-red-500">
+        Failed to load files. Please try again.
+      </div>
+    );
   }
 
   if (receipts.length === 0) {
-    return null; // Hide section if no files
+    return (
+      <div className="p-4 text-center text-gray-400">
+        <ReceiptIcon size={24} className="mx-auto mb-2" />
+        <p>No receipts uploaded yet.</p>
+      </div>
+    );
   }
 
   return (
-    <div className="mb-8">
-      <div className="flex items-center gap-2 mb-4 text-muted-foreground">
-        <FileText size={16} />
-        <span className="font-medium">Files ({receipts.length})</span>
-      </div>
-      <div className="space-y-2">
-        {receipts.map((receipt) => (
-          <div key={receipt.id} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-            {editingReceipt?.id === receipt.id ? (
-              /* Edit Mode */
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-xs text-gray-600 dark:text-gray-400 block mb-1">Item/Vendor</label>
-                    <Input
-                      value={editVendor}
-                      onChange={(e) => setEditVendor(e.target.value)}
-                      placeholder="Item name or vendor"
-                      className="h-8 text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs text-gray-600 dark:text-gray-400 block mb-1">Amount</label>
-                    <Input
-                      value={editAmount}
-                      onChange={(e) => setEditAmount(e.target.value)}
-                      placeholder="0.00"
-                      type="number"
-                      step="0.01"
-                      className="h-8 text-sm"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="text-xs text-gray-600 dark:text-gray-400 block mb-1">Description</label>
-                  <Input
-                    value={editDescription}
-                    onChange={(e) => setEditDescription(e.target.value)}
-                    placeholder="Optional description"
-                    className="h-8 text-sm"
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    onClick={saveEdit}
-                    disabled={updateReceiptMutation.isPending}
-                    size="sm"
-                    className="h-8 px-3 text-xs"
-                  >
-                    {updateReceiptMutation.isPending ? 'Saving...' : 'Save'}
-                  </Button>
-                  <Button
-                    onClick={() => setEditingReceipt(null)}
-                    variant="outline"
-                    size="sm"
-                    className="h-8 px-3 text-xs"
-                  >
-                    Cancel
-                  </Button>
-                </div>
+    <div className="space-y-3">
+      {receipts.map((receipt) => (
+        <div key={receipt.id} className="p-3 bg-gray-800 rounded-lg border border-gray-600">
+          {editingReceipt?.id === receipt.id ? (
+            // Edit mode
+            <div className="space-y-3">
+              <div>
+                <label className="text-sm font-medium mb-1 block text-gray-200">Vendor</label>
+                <Input
+                  value={editVendor}
+                  onChange={(e) => setEditVendor(e.target.value)}
+                  className="w-full bg-gray-700 border-gray-600 text-gray-200"
+                />
               </div>
-            ) : (
-              /* Display Mode */
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <FileText size={16} className="text-blue-600" />
-                  <div>
-                    <div className="text-sm font-medium text-gray-900 dark:text-white">
-                      {receipt.filename ? (
-                        <a
-                          href={`/uploads/${receipt.filename}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline cursor-pointer"
-                          title="Click to open file"
-                        >
-                          {receipt.vendor} - ${receipt.amount}
-                        </a>
-                      ) : (
-                        <span>{receipt.vendor} - ${receipt.amount}</span>
-                      )}
-                    </div>
-                    {receipt.description && receipt.description !== `Manual entry: ${receipt.vendor}` && (
-                      <div className="text-xs text-gray-500">
-                        {receipt.description}
-                      </div>
-                    )}
-                  </div>
-                </div>
+              <div>
+                <label className="text-sm font-medium mb-1 block text-gray-200">Amount</label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={editAmount}
+                  onChange={(e) => setEditAmount(e.target.value)}
+                  className="w-full bg-gray-700 border-gray-600 text-gray-200"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1 block text-gray-200">Description</label>
+                <Input
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  className="w-full bg-gray-700 border-gray-600 text-gray-200"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleSave}
+                  disabled={updateReceiptMutation.isPending}
+                  size="sm"
+                  className="flex-1 bg-green-600 hover:bg-green-700"
+                >
+                  {updateReceiptMutation.isPending ? 'Saving...' : 'Save'}
+                </Button>
+                <Button
+                  onClick={handleCancel}
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 border-gray-600 text-gray-300"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          ) : (
+            // View mode
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => startEditing(receipt)}
-                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
-                    title="Edit receipt"
-                  >
-                    <Edit3 size={16} />
-                  </button>
-                  <button
-                    onClick={() => deleteReceiptMutation.mutate(receipt.id)}
-                    disabled={deleteReceiptMutation.isPending}
-                    className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50"
-                    title="Delete file"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                  {receipt.filename ? (
+                    <button
+                      onClick={() => window.open(`/uploads/${receipt.filename}`, '_blank')}
+                      className="text-blue-400 hover:text-blue-300 underline text-sm"
+                    >
+                      {receipt.vendor} - ${typeof receipt.amount === 'number' ? receipt.amount.toFixed(2) : parseFloat(receipt.amount || '0').toFixed(2)}
+                    </button>
+                  ) : (
+                    <span className="text-gray-200 text-sm">
+                      {receipt.vendor} - ${typeof receipt.amount === 'number' ? receipt.amount.toFixed(2) : parseFloat(receipt.amount || '0').toFixed(2)}
+                    </span>
+                  )}
                 </div>
+                {receipt.description && receipt.description.trim() && (
+                  <p className="text-xs text-gray-400 mt-1">{receipt.description}</p>
+                )}
+                {receipt.date && (
+                  <p className="text-xs text-gray-500">{formatDate(receipt.date)}</p>
+                )}
               </div>
-            )}
-          </div>
-        ))}
-      </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => startEditing(receipt)}
+                  className="p-1 text-gray-400 hover:text-blue-400 transition-colors"
+                  title="Edit"
+                >
+                  <Edit3 size={14} />
+                </button>
+                <button
+                  onClick={() => deleteReceiptMutation.mutate(receipt.id)}
+                  disabled={deleteReceiptMutation.isPending}
+                  className="p-1 text-gray-400 hover:text-red-400 transition-colors"
+                  title="Delete"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
     </div>
   );
 }
@@ -237,49 +252,76 @@ interface StreamlinedClientPageProps {
   onBack: () => void;
 }
 
-const aframeTheme = {
-  gradients: {
-    rainbow: 'linear-gradient(90deg, hsl(0, 100%, 60%), hsl(30, 100%, 60%), hsl(60, 100%, 60%), hsl(120, 100%, 50%), hsl(210, 100%, 60%))',
-    primary: 'linear-gradient(45deg, hsl(210, 100%, 60%), hsl(120, 100%, 50%))',
-    accent: 'linear-gradient(45deg, hsl(30, 100%, 60%), hsl(60, 100%, 60%))',
-    destructive: 'linear-gradient(45deg, hsl(0, 100%, 60%), hsl(30, 100%, 60%))'
-  }
-};
-
 export default function StreamlinedClientPage({ projectId, onBack }: StreamlinedClientPageProps) {
-  const [notes, setNotes] = useState('');
-  const [newTool, setNewTool] = useState('');
-  const [showStatusSelect, setShowStatusSelect] = useState(false);
+  // File input refs
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const receiptInputRef = useRef<HTMLInputElement>(null);
+
+  // State management
   const [showPhotoCarousel, setShowPhotoCarousel] = useState(false);
   const [carouselIndex, setCarouselIndex] = useState(0);
-  const [selectedPhotos, setSelectedPhotos] = useState<Set<number>>(new Set());
-  const [isSelecting, setIsSelecting] = useState(false);
   const [showInvoiceGenerator, setShowInvoiceGenerator] = useState(false);
   const [showEstimateGenerator, setShowEstimateGenerator] = useState(false);
   const [showEditClient, setShowEditClient] = useState(false);
-  const [editForm, setEditForm] = useState<Partial<Project>>({});
+  const [notes, setNotes] = useState('');
+  
+  // Photo selection states
+  const [selectedPhotos, setSelectedPhotos] = useState<Set<number>>(new Set());
+  const [isSelecting, setIsSelecting] = useState(false);
+  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
+  const [touchStarted, setTouchStarted] = useState(false);
+
+  // Menu customization states
+  const [menuSections, setMenuSections] = useState([
+    { id: 'photos', name: 'Photos', icon: Camera },
+    { id: 'tools', name: 'Tools', icon: Wrench },
+    { id: 'dailyHours', name: 'Daily Hours', icon: Calendar },
+    { id: 'notes', name: 'Project Notes', icon: FileText },
+    { id: 'receipts', name: 'Receipts & Expenses', icon: ReceiptIcon },
+  ]);
+
+  // Collapsible menu state - all collapsed by default
+  const [expandedSections, setExpandedSections] = useState({
+    photos: false,
+    tools: false,
+    dailyHours: false,
+    notes: false,
+    receipts: false,
+  });
+
+  // Tools state
+  const [newTool, setNewTool] = useState('');
+
+  // Hours tracking state
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<string>('');
+  const [selectedDate, setSelectedDate] = useState('');
   const [hoursInput, setHoursInput] = useState('');
   const [descriptionInput, setDescriptionInput] = useState('');
-  const [compressionProgress, setCompressionProgress] = useState<{
-    isCompressing: boolean;
-    currentFile: number;
-    totalFiles: number;
-    originalSize: number;
-    compressedSize: number;
-  }>({
+
+  // Edit form state
+  const [editForm, setEditForm] = useState({
+    clientName: '',
+    address: '',
+    clientCity: '',
+    clientPostal: '',
+    clientEmail: '',
+    clientPhone: '',
+    projectType: '',
+    roomCount: 0,
+    difficulty: 1,
+    hourlyRate: 0,
+  });
+
+  // File upload state
+  const [compressionProgress, setCompressionProgress] = useState({
     isCompressing: false,
     currentFile: 0,
     totalFiles: 0,
     originalSize: 0,
-    compressedSize: 0
+    compressedSize: 0,
   });
-  
-  const cameraInputRef = useRef<HTMLInputElement>(null);
-  const receiptInputRef = useRef<HTMLInputElement>(null);
-  const queryClient = useQueryClient();
 
+  // API queries
   const { data: project } = useQuery<Project>({
     queryKey: [`/api/projects/${projectId}`],
   });
@@ -287,10 +329,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const { data: photos = [] } = useQuery<Photo[]>({
     queryKey: [`/api/projects/${projectId}/photos`],
   });
-
-  // Debug logging
-  console.log('Photos data:', photos);
-  console.log('Photos length:', photos.length);
 
   const { data: receipts = [] } = useQuery<Receipt[]>({
     queryKey: [`/api/projects/${projectId}/receipts`],
@@ -304,532 +342,275 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     queryKey: [`/api/projects/${projectId}/hours`],
   });
 
-
-
-  const photoUploadMutation = useMutation({
-    mutationFn: async (files: FileList) => {
-      const filesArray = Array.from(files);
-      console.log('Starting upload for', filesArray.length, 'files');
-      
-      // Start compression
-      setCompressionProgress({
-        isCompressing: true,
-        currentFile: 0,
-        totalFiles: filesArray.length,
-        originalSize: 0,
-        compressedSize: 0
-      });
-
-      let totalOriginalSize = 0;
-      let totalCompressedSize = 0;
-      const compressedFiles: File[] = [];
-
-      // Compress each file
-      for (let i = 0; i < filesArray.length; i++) {
-        const file = filesArray[i];
-        
-        setCompressionProgress(prev => ({
-          ...prev,
-          currentFile: i + 1
-        }));
-
-        if (file.type.startsWith('image/')) {
-          try {
-            const compressionResult = await compressMultipleImages([file], {
-              maxWidth: 1920,
-              maxHeight: 1080,
-              quality: 0.8,
-              format: 'jpeg'
-            });
-            
-            if (compressionResult.length > 0) {
-              const result = compressionResult[0];
-              compressedFiles.push(result.file);
-              totalOriginalSize += result.originalSize;
-              totalCompressedSize += result.compressedSize;
-              
-              console.log(`Compressed ${file.name}: ${formatFileSize(result.originalSize)} → ${formatFileSize(result.compressedSize)} (${result.compressionRatio.toFixed(1)}% reduction)`);
-            } else {
-              compressedFiles.push(file);
-              totalOriginalSize += file.size;
-              totalCompressedSize += file.size;
-            }
-          } catch (error) {
-            console.warn(`Failed to compress ${file.name}, using original:`, error);
-            compressedFiles.push(file);
-            totalOriginalSize += file.size;
-            totalCompressedSize += file.size;
-          }
-        } else {
-          // Non-image files go through unchanged
-          compressedFiles.push(file);
-          totalOriginalSize += file.size;
-          totalCompressedSize += file.size;
-        }
-      }
-
-      // Update final compression stats
-      setCompressionProgress(prev => ({
-        ...prev,
-        originalSize: totalOriginalSize,
-        compressedSize: totalCompressedSize,
-        isCompressing: false
-      }));
-
-      console.log(`Total compression: ${formatFileSize(totalOriginalSize)} → ${formatFileSize(totalCompressedSize)} (${((totalOriginalSize - totalCompressedSize) / totalOriginalSize * 100).toFixed(1)}% reduction)`);
-
-      // Upload compressed files
-      const formData = new FormData();
-      compressedFiles.forEach((file, index) => {
-        console.log(`Adding compressed file ${index}:`, file.name, file.size, 'bytes');
-        formData.append('photos', file);
+  // Critical mutations that need to be declared early
+  const editProjectMutation = useMutation({
+    mutationFn: async (projectData: any) => {
+      const response = await fetch(`/api/projects/${projectId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(projectData),
       });
       
-      console.log('FormData prepared, making request...');
-      const response = await fetch(`/api/projects/${projectId}/photos`, {
-        method: 'POST',
-        body: formData,
-        credentials: 'include'
-      });
-      
-      console.log('Response status:', response.status);
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Upload failed with status:', response.status, 'text:', errorText);
-        throw new Error(`Upload failed: ${response.status} - ${errorText}`);
+        throw new Error(`Failed to edit project: ${response.status} - ${errorText}`);
       }
       
-      const result = await response.json();
-      console.log('Upload successful:', result);
-      return result;
-    },
-    onSuccess: (data) => {
-      console.log('Photo upload successful:', data);
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
-      queryClient.refetchQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
-      
-      // Reset compression progress after a delay
-      setTimeout(() => {
-        setCompressionProgress({
-          isCompressing: false,
-          currentFile: 0,
-          totalFiles: 0,
-          originalSize: 0,
-          compressedSize: 0
-        });
-      }, 3000);
-    },
-    onError: (error) => {
-      console.error('Photo upload failed:', error);
-      setCompressionProgress({
-        isCompressing: false,
-        currentFile: 0,
-        totalFiles: 0,
-        originalSize: 0,
-        compressedSize: 0
-      });
-    }
-  });
-
-  const deletePhotoMutation = useMutation({
-    mutationFn: async (photoId: number) => {
-      const response = await apiRequest('DELETE', `/api/projects/${projectId}/photos/${photoId}`);
-      if (!response.ok) throw new Error('Failed to delete photo');
-      return response;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
-    },
-    onError: (error) => {
-      console.error('Photo deletion failed:', error);
-    }
-  });
-
-  const deleteSelectedPhotosMutation = useMutation({
-    mutationFn: async (photoIds: number[]) => {
-      const results = await Promise.allSettled(
-        photoIds.map(id => 
-          apiRequest('DELETE', `/api/projects/${projectId}/photos/${id}`)
-        )
-      );
-      return results;
-    },
-    onSuccess: () => {
-      // Clear selection state completely
-      setSelectedPhotos(new Set());
-      setIsSelecting(false);
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
-    },
-    onError: (error) => {
-      console.error('Bulk photo deletion failed:', error);
-    }
-  });
-
-  const receiptUploadMutation = useMutation({
-    mutationFn: async (files: FileList) => {
-      console.log('Upload mutation started with', files.length, 'files');
-      
-      if (!files || files.length === 0) {
-        throw new Error('No files to upload');
-      }
-      
-      const results = [];
-      
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        console.log(`Starting upload for ${file.name} (${file.type})`);
-        
-        const formData = new FormData();
-        formData.append('receipt', file);
-        formData.append('vendor', file.name);
-        formData.append('amount', '0');
-        formData.append('description', `File upload: ${file.name}`);
-        formData.append('date', new Date().toISOString().split('T')[0]);
-        
-        console.log('FormData prepared, making request to:', `/api/projects/${projectId}/receipts`);
-        
-        const response = await fetch(`/api/projects/${projectId}/receipts`, {
-          method: 'POST',
-          body: formData
-        });
-        
-        console.log(`Upload response for ${file.name}:`, response.status, response.statusText);
-        const responseText = await response.text();
-        console.log('Response body:', responseText);
-        
-        if (!response.ok) {
-          throw new Error(`Failed to upload ${file.name}: ${response.status} ${responseText}`);
-        }
-        
-        const result = JSON.parse(responseText);
-        results.push(result);
-        console.log('File uploaded successfully:', result);
-      }
-      
-      return results;
-    },
-    onSuccess: (results) => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/receipts`] });
-    },
-    onError: (error) => {
-      console.error('Receipt upload failed:', error);
-    }
-  });
-
-  const updateNotesMutation = useMutation({
-    mutationFn: async (newNotes: string) => {
-      const response = await apiRequest('PATCH', `/api/projects/${projectId}`, { notes: newNotes });
       return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}`] });
-    }
-  });
-
-  const generateInvoiceMutation = useMutation({
-    mutationFn: async () => {
-      const response = await fetch(`/api/projects/${projectId}/invoice`, {
-        method: 'POST'
-      });
-      
-      if (!response.ok) throw new Error('Failed to generate invoice');
-      return response.blob();
-    },
-    onSuccess: (blob) => {
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `invoice-${project?.clientName}-${new Date().toISOString().split('T')[0]}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    }
-  });
-
-  const addToolMutation = useMutation({
-    mutationFn: async (toolName: string) => {
-      const response = await apiRequest('POST', `/api/projects/${projectId}/tools`, { toolName });
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/tools`] });
-      setNewTool('');
-    }
-  });
-
-  const toggleToolMutation = useMutation({
-    mutationFn: async (toolId: number) => {
-      // Instead of toggling, we delete the tool when checked
-      const response = await apiRequest('DELETE', `/api/tools/${toolId}`);
-      return response;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/tools`] });
-    }
-  });
-
-  const addHoursMutation = useMutation({
-    mutationFn: async (hoursData: { date: string; hours: number; description: string; hourlyRate: number }) => {
-      const response = await apiRequest('POST', `/api/projects/${projectId}/hours`, {
-        ...hoursData,
-        projectId: Number(projectId)
-      });
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/hours`] });
-      setSelectedDate('');
-      setHoursInput('');
-      setDescriptionInput('');
-      setShowDatePicker(false);
-    }
-  });
-
-  const deleteHoursMutation = useMutation({
-    mutationFn: async (hoursId: number) => {
-      const response = await apiRequest('DELETE', `/api/hours/${hoursId}`);
-      return response;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/hours`] });
-    }
-  });
-
-  // Helper functions for date handling
-  const formatDate = (date: Date | string) => {
-    let dateObj: Date;
-    if (typeof date === 'string') {
-      // Parse UTC date string as local date to avoid timezone conversion
-      if (date.includes('T')) {
-        // If it's an ISO string like "2025-06-21T00:00:00.000Z"
-        const datePart = date.split('T')[0];
-        const [year, month, day] = datePart.split('-').map(Number);
-        dateObj = new Date(year, month - 1, day);
-        console.log('Parsing ISO date:', date, '-> datePart:', datePart, '-> final date:', dateObj.toLocaleDateString());
-      } else {
-        // If it's just a date string like "2025-06-21"
-        const [year, month, day] = date.split('-').map(Number);
-        dateObj = new Date(year, month - 1, day);
-        console.log('Parsing simple date:', date, '-> final date:', dateObj.toLocaleDateString());
-      }
-    } else {
-      dateObj = date;
-      console.log('Using Date object:', dateObj.toLocaleDateString());
-    }
-    
-    const formatted = dateObj.toLocaleDateString('en-US', { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
-    console.log('Final formatted date:', formatted);
-    return formatted;
-  };
-
-  const formatDateForInput = (date: Date) => {
-    // Use local date to avoid timezone offset issues
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-
-  const handleAddHours = () => {
-    if (selectedDate && hoursInput && !isNaN(parseFloat(hoursInput))) {
-      // Ensure the date is sent as YYYY-MM-DD format without timezone conversion
-      const formattedDate = selectedDate;
-      console.log('Adding hours for date:', formattedDate, 'hours:', hoursInput);
-      
-      addHoursMutation.mutate({
-        date: formattedDate,
-        hours: parseFloat(hoursInput),
-        description: descriptionInput || 'Painting',
-        hourlyRate: project?.hourlyRate || 60 // Default to $60/hour
-      });
-    }
-  };
-
-
-
-  const updateStatusMutation = useMutation({
-    mutationFn: async (status: string) => {
-      console.log('Sending status update:', status, 'for project:', projectId);
-      const response = await apiRequest('PUT', `/api/projects/${projectId}`, { status });
-      const result = await response.json();
-      console.log('Status update response:', result);
-      return result;
-    },
-    onSuccess: () => {
-      console.log('Status update successful');
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}`] });
-      setShowStatusSelect(false);
-    },
-    onError: (error) => {
-      console.error('Status update failed:', error);
-    }
-  });
-
-  const updateClientMutation = useMutation({
-    mutationFn: async (updates: Partial<Project>) => {
-      const response = await apiRequest('PUT', `/api/projects/${projectId}`, updates);
-      const result = await response.json();
-      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}`] });
       setShowEditClient(false);
     },
     onError: (error) => {
-      console.error('Client update failed:', error);
-    }
+      console.error('Edit project failed:', error);
+    },
   });
 
-  const handleEditInputChange = (field: string, value: any) => {
-    setEditForm(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleSaveClient = () => {
-    updateClientMutation.mutate(editForm);
-  };
-
-
-
-  const handleReceiptClick = () => {
-    receiptInputRef.current?.click();
-  };
-
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('File input changed:', e.target.files?.length, 'files');
-    if (e.target.files && e.target.files.length > 0) {
-      // Convert FileList to File array immediately to prevent it from becoming empty
-      const filesArray = Array.from(e.target.files);
-      console.log('Files captured:', filesArray.length, 'files');
-      console.log('Starting photo upload...');
+  const updateProjectMutation = useMutation({
+    mutationFn: async (updates: any) => {
+      const response = await fetch(`/api/projects/${projectId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updates),
+      });
       
-      // Create a new FileList-like object that won't become empty
-      const fileListObj = {
-        ...filesArray,
-        length: filesArray.length,
-        item: (index: number) => filesArray[index] || null,
-        [Symbol.iterator]: function* () {
-          for (const file of filesArray) {
-            yield file;
-          }
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to update project: ${response.status} - ${errorText}`);
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}`] });
+    },
+    onError: (error) => {
+      console.error('Update project failed:', error);
+    },
+  });
+
+  const addHoursMutation = useMutation({
+    mutationFn: async (hoursData: {
+      projectId: number;
+      date: string;
+      hours: number;
+      description: string;
+    }) => {
+      const response = await fetch(`/api/projects/${projectId}/hours`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          date: hoursData.date,
+          hours: hoursData.hours,
+          description: hoursData.description,
+          hourlyRate: project?.hourlyRate || 60, // Include hourlyRate from project
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to add hours: ${response.status} - ${errorText}`);
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/hours`] });
+      setShowDatePicker(false);
+      setSelectedDate('');
+      setHoursInput('');
+      setDescriptionInput('');
+    },
+    onError: (error) => {
+      console.error('Add hours failed:', error);
+    },
+  });
+
+  // Helper functions
+  const clearSelection = () => {
+    setSelectedPhotos(new Set());
+    setIsSelecting(false);
+  };
+
+  const deleteSelectedPhotosMutation = useMutation({
+    mutationFn: async (photoIds: number[]) => {
+      const deletePromises = photoIds.map(id => 
+        fetch(`/api/photos/${id}`, { method: 'DELETE' })
+      );
+      
+      const responses = await Promise.all(deletePromises);
+      
+      responses.forEach((response, index) => {
+        if (!response.ok) {
+          throw new Error(`Failed to delete photo ${photoIds[index]}: ${response.status}`);
         }
-      } as FileList;
+      });
       
-      photoUploadMutation.mutate(fileListObj);
-      e.target.value = ''; // Reset input to allow re-uploading same files
-    }
+      return photoIds;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
+      clearSelection();
+    },
+    onError: (error) => {
+      console.error('Bulk delete failed:', error);
+    },
+  });
+
+  const formatDateForInput = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
-  const handleReceiptUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('Receipt upload triggered:', e.target.files?.length, 'files');
-    if (e.target.files && e.target.files.length > 0) {
-      // Convert FileList to File array immediately to prevent it from becoming empty
-      const filesArray = Array.from(e.target.files);
-      console.log('Files selected for receipt upload:', filesArray.map(f => `${f.name} (${f.type})`));
-      console.log('Files captured:', filesArray.length, 'files');
-      
-      // Create a new FileList-like object that won't become empty
-      const fileListObj = {
-        ...filesArray,
-        length: filesArray.length,
-        item: (index: number) => filesArray[index] || null,
-        [Symbol.iterator]: function* () {
-          for (const file of filesArray) {
-            yield file;
-          }
-        }
-      } as FileList;
-      
-      receiptUploadMutation.mutate(fileListObj);
-      e.target.value = '';
+  // Format ISO date string into "DD–MM–YYYY" with em-dash - CLEAN DATE ONLY
+  const formatDate = (isoDate: string | null | undefined) => {
+    if (!isoDate) return '';
+    
+    // Convert to string in case it's not already
+    const dateStr = String(isoDate);
+    
+    // Extract only the date part (YYYY-MM-DD) from ISO string
+    let cleanDateString = '';
+    if (dateStr.includes('T')) {
+      // If it's a full ISO string like "2025-06-22T00:00:00.000Z"
+      cleanDateString = dateStr.split('T')[0];
+    } else if (dateStr.includes(' ')) {
+      // If it's a string with space separator
+      cleanDateString = dateStr.split(' ')[0];
+    } else {
+      // If it's already just a date string
+      cleanDateString = dateStr;
     }
+    
+    // Parse the clean date string (YYYY-MM-DD format)
+    const parts = cleanDateString.split('-');
+    if (parts.length === 3 && parts[0].length === 4) {
+      const year = parts[0];
+      const month = parts[1];
+      const day = parts[2];
+      return `${day}–${month}–${year}`;
+    }
+    
+    // If parsing fails, return empty string instead of the raw date
+    return '';
+  };
+
+  const handleAddHours = () => {
+    if (!selectedDate || !hoursInput) return;
+    
+    const parsedHours = parseFloat(hoursInput);
+    if (isNaN(parsedHours) || parsedHours <= 0) {
+      console.error('Invalid hours input:', hoursInput);
+      return;
+    }
+    
+    addHoursMutation.mutate({
+      projectId,
+      date: selectedDate,
+      hours: parsedHours,
+      description: descriptionInput.trim() || 'Painting',
+    });
   };
 
   const handleNotesBlur = () => {
-    if (notes !== project?.notes) {
-      updateNotesMutation.mutate(notes);
+    if (project && notes !== project.notes) {
+      updateProjectMutation.mutate({
+        id: project.id,
+        notes: notes,
+      });
     }
   };
 
-  const handlePhotoTouchStart = (photoId: number, e: React.TouchEvent | React.MouseEvent) => {
-    // Clear any existing timer
-    if (longPressTimer) {
-      clearTimeout(longPressTimer);
+  // Set initial notes when project loads
+  React.useEffect(() => {
+    if (project && notes !== project.notes) {
+      setNotes(project.notes || '');
     }
-    
-    setTouchStarted(true);
-    
-    // Set a timer for long press detection (500ms)
-    const timer = setTimeout(() => {
-      e.preventDefault();
-      e.stopPropagation();
-      setIsSelecting(true);
-      setSelectedPhotos(new Set([photoId]));
-    }, 500);
-    
-    setLongPressTimer(timer);
+  }, [project]);
+
+  // Set initial edit form values
+  React.useEffect(() => {
+    if (project) {
+      setEditForm({
+        clientName: project.clientName || '',
+        address: project.address || '',
+        clientCity: project.clientCity || '',
+        clientPostal: project.clientPostal || '',
+        clientEmail: project.clientEmail || '',
+        clientPhone: project.clientPhone || '',
+        projectType: project.projectType || '',
+        roomCount: project.roomCount || 0,
+        difficulty: project.difficulty || 1,
+        hourlyRate: project.hourlyRate || 0,
+      });
+    }
+  }, [project]);
+
+  const handleEditInputChange = (field: string, value: any) => {
+    setEditForm(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
-  const handlePhotoTouchMove = (photoId: number, e: React.TouchEvent | React.MouseEvent) => {
-    if (!isSelecting || !touchStarted) return;
-    
-    e.preventDefault();
-    e.stopPropagation();
-    
-    // Add photo to selection if not already selected
+  const handleSaveEdit = () => {
+    editProjectMutation.mutate(editForm);
+  };
+
+  // Photo selection functions
+  const togglePhotoSelection = (photoId: number) => {
     setSelectedPhotos(prev => {
       const newSet = new Set(prev);
-      newSet.add(photoId);
+      if (newSet.has(photoId)) {
+        newSet.delete(photoId);
+      } else {
+        newSet.add(photoId);
+      }
+      
+      if (newSet.size === 0) {
+        setIsSelecting(false);
+      }
+      
       return newSet;
     });
   };
 
-  const handlePhotoTouchEnd = (e: React.TouchEvent | React.MouseEvent) => {
-    // Clear the long press timer
-    if (longPressTimer) {
-      clearTimeout(longPressTimer);
-      setLongPressTimer(null);
-    }
-    
-    setTouchStarted(false);
-    
-    // If we weren't in selection mode, this was just a tap
-    if (!isSelecting) {
-      // Let the click event handle opening carousel
-      return;
-    }
-  };
-
-  const togglePhotoSelection = (photoId: number) => {
-    setSelectedPhotos(prev => {
-      const newSelection = new Set(prev);
-      if (newSelection.has(photoId)) {
-        newSelection.delete(photoId);
-      } else {
-        newSelection.add(photoId);
-      }
-      return newSelection;
-    });
-  };
-
-  const clearSelection = () => {
-    setSelectedPhotos(new Set());
-    setIsSelecting(false);
-    setTouchStarted(false);
-    if (longPressTimer) {
-      clearTimeout(longPressTimer);
-      setLongPressTimer(null);
-    }
-  };
-
   const deleteSelectedPhotos = () => {
-    if (selectedPhotos.size > 0) {
-      deleteSelectedPhotosMutation.mutate(Array.from(selectedPhotos));
+    deleteSelectedPhotosMutation.mutate(Array.from(selectedPhotos));
+  };
+
+  const handlePhotoTouchStart = (photoId: number, e: React.TouchEvent | React.MouseEvent) => {
+    if (isSelecting) return;
+    
+    setTouchStarted(true);
+    const timer = setTimeout(() => {
+      setIsSelecting(true);
+      togglePhotoSelection(photoId);
+    }, 500);
+    setLongPressTimer(timer);
+  };
+
+  const handlePhotoTouchMove = (photoId: number, e: React.TouchEvent | React.MouseEvent) => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    }
+  };
+
+  const handlePhotoTouchEnd = (e: React.TouchEvent | React.MouseEvent) => {
+    setTouchStarted(false);
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
     }
   };
 
@@ -838,775 +619,944 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     setShowPhotoCarousel(true);
   };
 
+  // Collapsible menu functions
+  const toggleSection = (sectionId: string) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [sectionId]: !prev[sectionId as keyof typeof prev],
+    }));
+  };
 
-
-  // Keyboard navigation
-  React.useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!showPhotoCarousel) return;
+  // Mutations
+  const uploadPhotosMutation = useMutation({
+    mutationFn: async (files: FileList) => {
+      console.log('Starting photo upload with files:', files.length);
       
-      if (e.key === 'ArrowLeft') goToPrevious();
-      if (e.key === 'ArrowRight') goToNext();
-      if (e.key === 'Escape') setShowPhotoCarousel(false);
-    };
+      setCompressionProgress({
+        isCompressing: true,
+        currentFile: 0,
+        totalFiles: files.length,
+        originalSize: 0,
+        compressedSize: 0,
+      });
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showPhotoCarousel, carouselIndex]);
+      const fileArray = Array.from(files);
+      let totalOriginalSize = 0;
+      let totalCompressedSize = 0;
 
-  React.useEffect(() => {
-    if (project?.notes) {
-      setNotes(project.notes);
-    }
-  }, [project?.notes]);
+      // Calculate total original size
+      fileArray.forEach(file => {
+        totalOriginalSize += file.size;
+        console.log('File:', file.name, 'Size:', file.size, 'Type:', file.type);
+      });
 
-  // Close status dropdown when clicking outside
-  React.useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Element;
-      if (showStatusSelect && !target.closest('.status-dropdown')) {
-        setShowStatusSelect(false);
+      try {
+        console.log('Starting compression for files:', fileArray.map(f => f.name));
+        const { compressedFiles, totalCompressedSizeBytes } = await compressMultipleImages(
+          fileArray,
+          (progress) => {
+            console.log('Compression progress:', progress);
+            setCompressionProgress(prev => ({
+              ...prev,
+              currentFile: progress.currentFile,
+              originalSize: totalOriginalSize,
+              compressedSize: totalCompressedSizeBytes,
+            }));
+          }
+        );
+
+        totalCompressedSize = totalCompressedSizeBytes;
+        console.log('Compression complete. Compressed files:', compressedFiles.length);
+        console.log('Compressed file details:', compressedFiles.map(f => ({ name: f.name, size: f.size, type: f.type })));
+
+        const formData = new FormData();
+        compressedFiles.forEach((file, index) => {
+          formData.append('photos', file);
+          console.log('Added compressed file to FormData:', file.name, file.size);
+        });
+
+        console.log('Sending FormData to server...');
+        const response = await fetch(`/api/projects/${projectId}/photos`, {
+          method: 'POST',
+          body: formData,
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Upload failed: ${response.status} ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+
+        setCompressionProgress(prev => ({
+          ...prev,
+          isCompressing: false,
+          originalSize: totalOriginalSize,
+          compressedSize: totalCompressedSize,
+        }));
+
+        console.log('Photo upload successful:', result);
+        return result;
+      } catch (error) {
+        console.error('Error during compression or upload:', error);
+        console.error('Error details:', {
+          message: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : 'No stack trace',
+          errorObject: error
+        });
+        throw error;
       }
-    };
+    },
+    onSuccess: () => {
+      console.log('Photo upload mutation success, invalidating queries');
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
+      if (photoInputRef.current) {
+        photoInputRef.current.value = '';
+      }
+    },
+    onError: (error) => {
+      console.error('Photo upload failed:', error);
+      setCompressionProgress({
+        isCompressing: false,
+        currentFile: 0,
+        totalFiles: 0,
+        originalSize: 0,
+        compressedSize: 0,
+      });
+    },
+  });
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showStatusSelect]);
+  const uploadReceiptsMutation = useMutation({
+    mutationFn: async (files: FileList) => {
+      const formData = new FormData();
+      Array.from(files).forEach((file) => {
+        formData.append('receipts', file);
+      });
+
+      const response = await fetch(`/api/projects/${projectId}/receipts`, {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Receipt upload failed: ${response.status} ${response.statusText}`);
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/receipts`] });
+      if (receiptInputRef.current) {
+        receiptInputRef.current.value = '';
+      }
+    },
+    onError: (error) => {
+      console.error('Receipt upload failed:', error);
+    },
+  });
+
+  const deletePhotoMutation = useMutation({
+    mutationFn: async (photoId: number) => {
+      const response = await fetch(`/api/photos/${photoId}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to delete photo: ${response.status}`);
+      }
+      
+      return photoId;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
+    },
+    onError: (error) => {
+      console.error('Delete failed:', error);
+    },
+  });
+
+  const addToolMutation = useMutation({
+    mutationFn: async (toolName: string) => {
+      const response = await fetch(`/api/projects/${projectId}/tools`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          toolName,
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to add tool: ${response.status} - ${errorText}`);
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/tools`] });
+      setNewTool('');
+    },
+    onError: (error) => {
+      console.error('Add tool failed:', error);
+    },
+  });
+
+  const toggleToolMutation = useMutation({
+    mutationFn: async (toolId: number) => {
+      const response = await fetch(`/api/tools/${toolId}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to complete tool: ${response.status}`);
+      }
+      
+      return toolId;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/tools`] });
+    },
+    onError: (error) => {
+      console.error('Toggle tool failed:', error);
+    },
+  });
+
+  const deleteHoursMutation = useMutation({
+    mutationFn: async (hoursId: number) => {
+      const response = await fetch(`/api/hours/${hoursId}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to delete hours: ${response.status}`);
+      }
+      
+      return hoursId;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/hours`] });
+    },
+    onError: (error) => {
+      console.error('Delete hours failed:', error);
+    },
+  });
+
+
+
+  // File upload handlers
+  const handlePhotoUpload = (event: any) => {
+    console.log('Photo upload handler triggered');
+    const files = event.target.files;
+    console.log('Selected files:', files);
+    if (files && files.length > 0) {
+      console.log('Files detected, starting upload:', Array.from(files).map(f => f.name));
+      uploadPhotosMutation.mutate(files);
+    } else {
+      console.log('No files selected');
+    }
+  };
+
+  const handleReceiptUpload = (event: any) => {
+    console.log('Receipt upload handler triggered');
+    const files = event.target.files;
+    console.log('Selected receipt files:', files);
+    if (files && files.length > 0) {
+      console.log('Receipt files detected, starting upload:', Array.from(files).map(f => f.name));
+      uploadReceiptsMutation.mutate(files);
+    } else {
+      console.log('No receipt files selected');
+    }
+  };
 
   if (!project) {
-    return <div className="p-6">Loading...</div>;
+    return (
+      <div className="p-8 text-center">
+        <div className="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+        Loading project...
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div 
-        className="h-1"
-        style={{ background: aframeTheme.gradients.rainbow }}
-      />
-      
-      <div className="p-6">
-        <div className="flex items-center mb-4 pb-2">
+    <div className="max-w-4xl mx-auto p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <Button
+          onClick={onBack}
+          variant="outline"
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft size={16} />
+          Back to Projects
+        </Button>
+        
+        <div className="flex items-center gap-3">
           <Button
-            variant="ghost"
+            onClick={() => openWorkCalendar(project)}
+            variant="outline"
             size="sm"
-            onClick={onBack}
-            className="mr-4 p-2"
+            className="flex items-center gap-2"
+            title="Add to calendar"
           >
-            <ArrowLeft size={20} />
-          </Button>
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-semibold mb-1 text-blue-600 dark:text-blue-400">{project.clientName || project.address || 'New Project'}</h1>
-              
-              {/* Maps Buttons */}
-              {project.address && (
-                <div className="flex gap-1 ml-2">
-                  <button
-                    onClick={() => {
-                      const mapsUrl = generateMapsLink(project.address, project.clientCity || undefined, 'BC', project.clientPostal || undefined);
-                      window.open(mapsUrl, '_blank');
-                    }}
-                    className="p-2 text-gray-500 hover:text-green-600 dark:text-gray-400 dark:hover:text-green-400 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
-                    title="View on Maps"
-                  >
-                    <MapPin size={18} />
-                  </button>
-                  <button
-                    onClick={() => {
-                      const directionsUrl = generateDirectionsLink(project.address, project.clientCity || undefined, 'BC', project.clientPostal || undefined);
-                      window.open(directionsUrl, '_blank');
-                    }}
-                    className="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
-                    title="Get Directions"
-                  >
-                    <Navigation size={18} />
-                  </button>
-                </div>
-              )}
-              
-              <button
-                onClick={() => openWorkCalendar(project)}
-                className="p-1 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded transition-colors"
-                title="Schedule work"
-              >
-                <Calendar size={16} />
-              </button>
-              
-              <button
-                onClick={() => {
-                  setEditForm({
-                    clientName: project.clientName,
-                    address: project.address,
-                    clientCity: project.clientCity,
-                    clientPostal: project.clientPostal,
-                    clientEmail: project.clientEmail,
-                    clientPhone: project.clientPhone,
-                    projectType: project.projectType,
-                    roomCount: project.roomCount,
-                    difficulty: project.difficulty,
-                    hourlyRate: project.hourlyRate
-                  });
-                  setShowEditClient(true);
-                }}
-                className="p-1 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded transition-colors"
-                title="Edit client information"
-              >
-                <Edit3 size={16} />
-              </button>
-            </div>
-            {/* Enhanced Address Display */}
-            <div className="text-sm space-y-1">
-              <div className="text-green-600 dark:text-green-400 flex items-center gap-2">
-                <div>
-                  <span className="font-medium">{project.address}</span>
-                  {(project.clientCity || project.clientPostal) && (
-                    <span className="ml-2 text-gray-600 dark:text-gray-400">
-                      {project.clientCity && `${project.clientCity}, BC`}
-                      {project.clientPostal && ` ${project.clientPostal}`}
-                    </span>
-                  )}
-                </div>
-                {project.address && (
-                  <button
-                    onClick={() => {
-                      const mapsUrl = generateMapsLink(project.address, project.clientCity || undefined, 'BC', project.clientPostal || undefined);
-                      window.open(mapsUrl, '_blank');
-                    }}
-                    className="p-1 text-gray-500 hover:text-green-600 dark:text-gray-400 dark:hover:text-green-400 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded transition-colors"
-                    title="View location on Google Maps"
-                  >
-                    <MapPin size={16} />
-                  </button>
-                )}
-              </div>
-              {(project.clientEmail || project.clientPhone) && (
-                <div className="text-gray-600 dark:text-gray-400 space-x-4">
-                  {project.clientEmail && (
-                    <span>📧 {project.clientEmail}</span>
-                  )}
-                  {project.clientPhone && (
-                    <span>📞 {project.clientPhone}</span>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Status Selector - positioned right above the horizontal line */}
-        <div className="flex justify-end mb-2">
-          <div className="relative status-dropdown">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowStatusSelect(!showStatusSelect);
-              }}
-              className={`text-sm px-3 py-1 rounded-md transition-colors ${
-                project.status === 'in-progress' ? 'text-green-600 bg-green-50 dark:bg-green-900/20' :
-                project.status === 'pending' ? 'text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20' :
-                project.status === 'completed' ? 'text-orange-600 bg-orange-50 dark:bg-orange-900/20' :
-                project.status === 'archived' ? 'text-gray-600 bg-gray-50 dark:bg-gray-900/20' :
-                'text-gray-600 bg-gray-50 dark:bg-gray-900/20'
-              } hover:opacity-80`}
-            >
-              {project.status === 'in-progress' ? 'In Progress' :
-               project.status === 'pending' ? 'Pending' :
-               project.status === 'completed' ? 'Completed' :
-               project.status === 'archived' ? 'Archived' :
-               'Status'} ▼
-            </button>
-
-            {/* Status Dropdown */}
-            {showStatusSelect && (
-              <div className="absolute top-full right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-50 min-w-[120px]">
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('Updating status to: in-progress');
-                    updateStatusMutation.mutate('in-progress');
-                  }}
-                  disabled={updateStatusMutation.isPending}
-                  className="w-full text-left px-3 py-2 text-sm text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors border-b border-gray-100 dark:border-gray-600"
-                >
-                  🟢 In Progress
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('Updating status to: pending');
-                    updateStatusMutation.mutate('pending');
-                  }}
-                  disabled={updateStatusMutation.isPending}
-                  className="w-full text-left px-3 py-2 text-sm text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition-colors border-b border-gray-100 dark:border-gray-600"
-                >
-                  🟡 Pending
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('Updating status to: completed');
-                    updateStatusMutation.mutate('completed');
-                  }}
-                  disabled={updateStatusMutation.isPending}
-                  className="w-full text-left px-3 py-2 text-sm text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors border-b border-gray-100 dark:border-gray-600"
-                >
-                  🧡 Completed
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('Updating status to: archived');
-                    updateStatusMutation.mutate('archived');
-                  }}
-                  disabled={updateStatusMutation.isPending}
-                  className="w-full text-left px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-900/20 transition-colors"
-                >
-                  📁 Archived
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Horizontal divider line */}
-        <div className="border-b border-gray-200 dark:border-gray-700 mb-6"></div>
-
-        {/* Upload Controls */}
-        <div className="flex gap-5 mb-8 justify-center">
-          <div className="flex flex-col items-center">
-            <label
-              className={`w-16 h-16 rounded-full border-none cursor-pointer flex items-center justify-center transition-transform shadow-lg ${
-                compressionProgress.isCompressing || photoUploadMutation.isPending 
-                  ? 'opacity-50 cursor-not-allowed' 
-                  : 'hover:scale-105'
-              }`}
-              style={{ backgroundColor: '#EA580C' }}
-              title="Photos"
-            >
-              <Camera size={28} color="white" />
-              <input
-                type="file"
-                accept=".jpg,.jpeg,.png,.gif,.webp,.heic,.heif"
-                disabled={compressionProgress.isCompressing || photoUploadMutation.isPending}
-                onChange={handlePhotoUpload}
-                multiple
-                className="hidden"
-              />
-            </label>
-            <span className="text-xs text-center mt-2 text-muted-foreground">Photos</span>
-          </div>
-
-          <div className="flex flex-col items-center">
-            <button
-              onClick={handleReceiptClick}
-              disabled={receiptUploadMutation.isPending}
-              className="w-16 h-16 rounded-full border-none cursor-pointer flex items-center justify-center transition-transform hover:scale-105 shadow-lg"
-              style={{ backgroundColor: '#1E40AF' }}
-              title="Files"
-            >
-              <FileText size={28} color="white" />
-            </button>
-            <span className="text-xs text-center mt-2 text-muted-foreground">Files</span>
-          </div>
-        </div>
-
-        {/* Compression Progress Indicator */}
-        {(compressionProgress.isCompressing || compressionProgress.totalFiles > 0) && (
-          <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-            {compressionProgress.isCompressing ? (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-blue-700 dark:text-blue-300">
-                    Compressing images...
-                  </span>
-                  <span className="text-blue-600 dark:text-blue-400">
-                    {compressionProgress.currentFile} / {compressionProgress.totalFiles}
-                  </span>
-                </div>
-                <div className="w-full bg-blue-200 dark:bg-blue-800 rounded-full h-2">
-                  <div 
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                    style={{ 
-                      width: `${(compressionProgress.currentFile / compressionProgress.totalFiles) * 100}%` 
-                    }}
-                  />
-                </div>
-              </div>
-            ) : (
-              compressionProgress.originalSize > 0 && (
-                <div className="text-sm text-green-700 dark:text-green-300">
-                  ✅ Compressed {compressionProgress.totalFiles} files: {formatFileSize(compressionProgress.originalSize)} → {formatFileSize(compressionProgress.compressedSize)} 
-                  <span className="font-medium">
-                    ({((compressionProgress.originalSize - compressionProgress.compressedSize) / compressionProgress.originalSize * 100).toFixed(1)}% smaller)
-                  </span>
-                </div>
-              )
-            )}
-          </div>
-        )}
-
-        {/* Tools Checklist Section */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4 text-muted-foreground">
-            <Wrench size={16} />
-            <span className="font-medium">Tools Checklist</span>
-          </div>
-          
-          {/* Add Tool Input */}
-          <div className="flex gap-2 mb-4">
-            <input
-              type="text"
-              value={newTool}
-              onChange={(e) => setNewTool(e.target.value)}
-              placeholder="Paint brushes, Drop cloths, Ladder, Rollers..."
-              className="flex-1 px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-background"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && newTool.trim()) {
-                  addToolMutation.mutate(newTool.trim());
-                }
-              }}
-            />
-            <Button
-              onClick={() => newTool.trim() && addToolMutation.mutate(newTool.trim())}
-              disabled={!newTool.trim() || addToolMutation.isPending}
-              size="sm"
-              className="px-3"
-            >
-              <Plus size={16} />
-            </Button>
-          </div>
-
-          {/* Tools List */}
-          <div className="h-48 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg p-3 space-y-2">
-            {tools.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-8">
-                No tools added yet. Add tools you need to bring to this job.
-              </p>
-            ) : (
-              tools.map((tool) => (
-                <div key={tool.id} className="flex items-center gap-3 group">
-                  <button
-                    onClick={() => toggleToolMutation.mutate(tool.id)}
-                    className="w-5 h-5 rounded border-2 flex items-center justify-center transition-colors border-gray-300 dark:border-gray-600 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20"
-                    title="Click to mark as complete and remove from list"
-                  >
-                    {/* Empty checkbox - clicking it will delete the tool */}
-                  </button>
-                  <span className="flex-1 text-sm text-foreground">
-                    {tool.toolName}
-                  </span>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        {/* Daily Hours Section */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4 text-muted-foreground">
             <Calendar size={16} />
-            <span className="font-medium">Daily Hours</span>
-          </div>
-          
-          {/* Add Hours Button */}
-          {!showDatePicker && (
-            <Button
-              onClick={() => setShowDatePicker(true)}
-              className="w-full mb-4 py-2 text-sm"
-              variant="outline"
-            >
-              <Plus size={16} className="mr-2" />
-              Log Hours for a Day
-            </Button>
-          )}
-
-          {/* Date Picker and Hours Input */}
-          {showDatePicker && (
-            <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg space-y-3">
-              <div>
-                <label className="text-sm font-medium mb-2 block">
-                  Select Date
-                  <span className="ml-2 text-xs px-2 py-1 bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-300 rounded">
-                    Today: {formatDateForInput(new Date())}
-                  </span>
-                </label>
-                <input
-                  type="date"
-                  value={selectedDate}
-                  onChange={(e) => {
-                    setSelectedDate(e.target.value);
-                    // Auto-focus hours input when date is selected
-                    if (e.target.value) {
-                      setTimeout(() => {
-                        const hoursInput = document.querySelector('input[placeholder="0"]') as HTMLInputElement;
-                        if (hoursInput) hoursInput.focus();
-                      }, 100);
-                    }
-                  }}
-                  className="w-full px-3 py-2 text-sm border-2 border-blue-300 dark:border-blue-600 rounded-lg bg-blue-50 dark:bg-blue-900/20 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800"
-                  max={formatDateForInput(new Date())}
-                  style={{
-                    colorScheme: 'light'
-                  }}
-                />
-              </div>
-              
-              <div>
-                <label className="text-sm font-medium mb-2 block">Hours Worked</label>
-                <input
-                  type="number"
-                  step="0.5"
-                  min="0"
-                  max="24"
-                  value={hoursInput}
-                  onChange={(e) => setHoursInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && hoursInput) {
-                      handleAddHours();
-                    }
-                  }}
-                  placeholder="0"
-                  className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-background"
-                />
-              </div>
-              
-              <div>
-                <label className="text-sm font-medium mb-2 block">Description</label>
-                <input
-                  type="text"
-                  value={descriptionInput}
-                  onChange={(e) => setDescriptionInput(e.target.value)}
-                  placeholder=""
-                  className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-background"
-                />
-              </div>
-              
-              <div className="flex gap-2">
-                <Button
-                  onClick={handleAddHours}
-                  disabled={!hoursInput || addHoursMutation.isPending}
-                  className="flex-1"
-                >
-                  {addHoursMutation.isPending ? 'Adding...' : 'Add Hours'}
-                </Button>
-                <Button
-                  onClick={() => {
-                    setShowDatePicker(false);
-                    setSelectedDate('');
-                    setHoursInput('');
-                    setDescriptionInput('');
-                  }}
-                  variant="outline"
-                >
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Hours Dashboard */}
-          <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-            {/* Compact Hours List */}
-            <div className="h-48 overflow-y-auto mb-4">
-              {dailyHours.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-8">
-                  No hours logged yet. Click "Log Hours for a Day" to start tracking.
-                </p>
-              ) : (
-                dailyHours.map((hours) => (
-                  <div key={hours.id} className="flex items-center justify-between py-0.5 px-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded text-sm">
-                    <div className="flex-1">
-                      <span className="font-medium">
-                        {(() => {
-                          // Parse date string directly to avoid timezone conversion
-                          const dateStr = hours.date.toString();
-                          const datePart = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr.split(' ')[0];
-                          const [year, month, day] = datePart.split('-').map(Number);
-                          const localDate = new Date(year, month - 1, day);
-                          return localDate.toLocaleDateString('en-US', { 
-                            weekday: 'short', 
-                            month: 'short', 
-                            day: 'numeric' 
-                          });
-                        })()} - {hours.hours}hr
-                      </span>
-                      {hours.description && hours.description !== 'Work performed' && (
-                        <span className="text-xs text-muted-foreground ml-2">
-                          ({hours.description})
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-green-600 dark:text-green-400 font-medium">
-                        ${(hours.hours * 60).toFixed(0)}
-                      </span>
-                      <button
-                        onClick={() => deleteHoursMutation.mutate(hours.id)}
-                        disabled={deleteHoursMutation.isPending}
-                        className="p-0.5 text-red-500 hover:text-red-700 transition-colors opacity-60 hover:opacity-100"
-                        title="Delete"
-                      >
-                        <Trash2 size={10} />
-                      </button>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            {/* Hours Summary at Bottom */}
-            {dailyHours.length > 0 && (
-              <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                <div className="text-2xl font-bold text-green-700 dark:text-green-300 mb-2">
-                  ${60}/hr
-                </div>
-                <div className="pt-2 border-t border-green-200 dark:border-green-700">
-                  <div className="font-semibold text-green-700 dark:text-green-300">
-                    Total Hours: {dailyHours.reduce((sum, h) => sum + h.hours, 0).toFixed(1)}
-                  </div>
-                  <div className="text-sm text-green-600 dark:text-green-400">
-                    Total Earned: ${(dailyHours.reduce((sum, h) => sum + (h.hours * 60), 0)).toFixed(2)}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Notes Section */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4 text-muted-foreground">
-            <Edit3 size={16} />
-            <span className="font-medium">Project Notes</span>
-          </div>
-          <Textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            onBlur={handleNotesBlur}
-            placeholder=""
-            className="w-full min-h-48 resize-none rounded-lg border border-gray-200 dark:border-gray-700 p-3 text-sm"
-          />
-        </div>
-
-
-
-        {/* Selection Toolbar */}
-        {selectedPhotos.size > 0 && (
-          <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-between">
-            <span className="text-sm font-medium">
-              {selectedPhotos.size} photo{selectedPhotos.size !== 1 ? 's' : ''} selected
-            </span>
-            <div className="flex gap-2">
-              <Button
-                onClick={clearSelection}
-                variant="outline"
-                size="sm"
-              >
-                Clear
-              </Button>
-              <Button
-                onClick={deleteSelectedPhotos}
-                disabled={deleteSelectedPhotosMutation.isPending}
-                variant="destructive"
-                size="sm"
-              >
-                {deleteSelectedPhotosMutation.isPending ? 'Deleting...' : 'Delete Selected'}
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* Photo Thumbnails Grid */}
-        {photos.length > 0 && (
-          <div className="mb-7">
-            <div className="flex items-center gap-2 mb-4 text-muted-foreground">
-              <Camera size={16} />
-              <span className="font-medium">Photos ({photos.length})</span>
-              {selectedPhotos.size === 0 && !isSelecting && (
-                <span className="text-xs text-muted-foreground ml-2">
-                  Long press and drag to select multiple
-                </span>
-              )}
-              {isSelecting && selectedPhotos.size === 0 && (
-                <span className="text-xs text-blue-600 dark:text-blue-400 ml-2">
-                  Selection mode active - tap photos to select
-                </span>
-              )}
-            </div>
-            <div 
-              className="grid grid-cols-3 gap-3"
-              onTouchEnd={(e) => handlePhotoTouchEnd(e)}
-              onMouseUp={(e) => handlePhotoTouchEnd(e)}
-            >
-              {photos.map((photo, index) => (
-                <div
-                  key={photo.id}
-                  className={`aspect-square rounded-lg overflow-hidden cursor-pointer border-2 transition-all relative group ${
-                    selectedPhotos.has(photo.id) 
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
-                      : 'border-transparent hover:border-blue-500'
-                  }`}
-                  onTouchStart={(e) => handlePhotoTouchStart(photo.id, e)}
-                  onMouseDown={(e) => handlePhotoTouchStart(photo.id, e)}
-                  onTouchMove={(e) => handlePhotoTouchMove(photo.id, e)}
-                  onMouseEnter={(e) => touchStarted && handlePhotoTouchMove(photo.id, e)}
-                  onClick={(e) => {
-                    if (isSelecting) {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      togglePhotoSelection(photo.id);
-                    } else {
-                      openPhotoCarousel(index);
-                    }
-                  }}
-                >
-                  <img
-                    src={`/uploads/${photo.filename}`}
-                    alt={photo.description || photo.originalName}
-                    className={`w-full h-full object-cover ${selectedPhotos.has(photo.id) ? 'opacity-80' : ''}`}
-                    draggable={false}
-                    onError={(e) => console.error('Image failed to load:', photo.filename)}
-                    onLoad={() => console.log('Image loaded successfully:', photo.filename)}
-                  />
-                  
-                  {/* Selection Indicator */}
-                  {selectedPhotos.has(photo.id) && (
-                    <div className="absolute top-2 left-2 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
-                      ✓
-                    </div>
-                  )}
-                  
-                  {/* Individual Delete Button (hidden during selection) */}
-                  {!isSelecting && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deletePhotoMutation.mutate(photo.id);
-                      }}
-                      disabled={deletePhotoMutation.isPending}
-                      className="absolute top-2 right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                      title="Delete photo"
-                    >
-                      <X size={14} />
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Show if no photos */}
-        {photos.length === 0 && (
-          <div className="mb-7 p-4 text-center text-muted-foreground">
-            <Camera size={24} className="mx-auto mb-2" />
-            <p>No photos yet. Use the camera button to add some!</p>
-          </div>
-        )}
-
-
-
-        {/* Receipts Section */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4 text-muted-foreground">
-            <ReceiptIcon size={16} />
-            <span className="font-medium">Receipts & Expenses</span>
-          </div>
-          
-          {/* Quick Receipt Entry Form */}
-          <div className="mb-4">
-
-            <form 
-            onSubmit={(e) => {
-              e.preventDefault();
-              const formData = new FormData(e.target as HTMLFormElement);
-              const item = formData.get('item') as string;
-              const price = formData.get('price') as string;
-              
-              if (!item.trim() || !price.trim()) return;
-              
-              const receiptData = {
-                vendor: item,
-                amount: price,
-                description: `Manual entry: ${item}`,
-                date: new Date().toISOString().split('T')[0],
-                filename: null
-              };
-              
-              fetch(`/api/projects/${project.id}/receipts`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(receiptData),
-              }).then(async (response) => {
-                if (response.ok) {
-                  queryClient.invalidateQueries({ queryKey: [`/api/projects/${project.id}/receipts`] });
-                  (e.target as HTMLFormElement).reset();
-                } else {
-                  const errorData = await response.text();
-                  console.error('Receipt creation failed:', errorData);
-                  alert('Failed to add receipt. Please try again.');
-                }
-              }).catch((error) => {
-                console.error('Network error:', error);
-                alert('Network error. Please check your connection and try again.');
-              });
-            }}
-            className="flex gap-2"
-          >
-            <Input
-              name="item"
-              placeholder=""
-              className="flex-1 h-9"
-            />
-            <Input
-              name="price"
-              type="number"
-              step="0.01"
-              placeholder="$0.00"
-              className="w-24 h-9"
-            />
-            <Button 
-              type="submit" 
-              size="sm"
-              className="h-9 px-3 text-xs text-white"
-              style={{ backgroundColor: '#D97706' }}
-            >
-              Add Item
-            </Button>
-          </form>
-          </div>
-          
-          <SimpleFilesList projectId={project.id} />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <Button
-            onClick={() => setShowEstimateGenerator(true)}
-            className="py-3 text-sm font-semibold bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center"
-          >
-            <Calculator size={18} className="mr-2" />
-            Generate Estimate
           </Button>
-          <Button
-            onClick={() => setShowInvoiceGenerator(true)}
-            className="py-3 text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white"
+          <button
+            onClick={() => window.open(generateMapsLink(project.address, project.clientCity, project.clientPostal), '_blank')}
+            className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
+            title="View on maps"
           >
-            <FileText size={18} className="mr-2" />
-            Generate Invoice
+            <MapPin size={16} />
+          </button>
+        </div>
+      </div>
+
+      {/* Client Info Header */}
+      <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+              {project.clientName}
+            </h1>
+            <p className="text-gray-600 dark:text-gray-300 mt-1">
+              {project.address}, {project.clientCity} {project.clientPostal}
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              {project.projectType} • {project.roomCount} rooms • Difficulty: {project.difficulty}/5
+            </p>
+          </div>
+          <Button
+            onClick={() => setShowEditClient(true)}
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <Edit3 size={16} />
+            Edit
           </Button>
         </div>
       </div>
 
 
-      
+
+      {/* Hidden file inputs */}
+      <input
+        ref={photoInputRef}
+        type="file"
+        accept="image/*,.heic,.heif"
+        onChange={handlePhotoUpload}
+        multiple
+        className="hidden"
+      />
+      <input
+        ref={receiptInputRef}
+        type="file"
+        accept="image/*,.heic,.heif"
+        onChange={handleReceiptUpload}
+        multiple
+        className="hidden"
+      />
+
+      {/* Compression Progress */}
+      {compressionProgress.isCompressing && (
+        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+              Compressing photos...
+            </span>
+            <span className="text-blue-600 dark:text-blue-400">
+              {compressionProgress.currentFile} / {compressionProgress.totalFiles}
+            </span>
+          </div>
+          <div className="w-full bg-blue-200 dark:bg-blue-800 rounded-full h-2">
+            <div 
+              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+              style={{ 
+                width: `${(compressionProgress.currentFile / compressionProgress.totalFiles) * 100}%` 
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* NEW: Mac-Style Collapsible Menu with ReactSortable */}
+      <div className="mt-8 p-6 bg-gradient-to-r from-gray-900 to-black rounded-lg border border-gray-700">
+        <h3 className="text-lg font-semibold mb-4 text-white">
+          Customizable Menu (Drag to Reorder)
+        </h3>
+        
+        <ReactSortable 
+          list={menuSections} 
+          setList={setMenuSections}
+          animation={150}
+          handle=".drag-handle"
+          className="space-y-2"
+        >
+          {menuSections.map((section) => {
+            const IconComponent = section.icon;
+            const isExpanded = expandedSections[section.id as keyof typeof expandedSections];
+            
+            // Get section data count for badges
+            let itemCount = 0;
+            switch(section.id) {
+              case 'photos': itemCount = photos.length; break;
+              case 'tools': itemCount = tools.length; break;
+              case 'dailyHours': itemCount = dailyHours.length; break;
+              case 'receipts': itemCount = receipts.length; break;
+              default: itemCount = 0;
+            }
+            
+            // Update section name for photos
+            const sectionName = section.id === 'photos' ? 'Photo Gallery' : section.name;
+
+            return (
+              <div
+                key={section.id}
+                className="bg-gray-800 rounded-lg border border-gray-600 overflow-hidden"
+              >
+                {/* Section Header */}
+                <div 
+                  className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-750 transition-colors"
+                  onClick={() => toggleSection(section.id)}
+                >
+                  <div className="flex items-center gap-3">
+                    {/* Mac-style Reorder Icon - Left Side */}
+                    <div className="drag-handle cursor-move p-1 text-gray-400 hover:text-gray-200" onClick={(e) => e.stopPropagation()}>
+                      <svg width="16" height="16" viewBox="0 0 16 16" className="text-gray-400">
+                        <rect y="2" width="16" height="1.5" rx="0.75"/>
+                        <rect y="5.5" width="16" height="1.5" rx="0.75"/>
+                        <rect y="9" width="16" height="1.5" rx="0.75"/>
+                        <rect y="12.5" width="16" height="1.5" rx="0.75"/>
+                      </svg>
+                    </div>
+                    
+                    <IconComponent size={20} className="text-gray-300" />
+                    <span className="text-gray-100 font-medium">{sectionName}</span>
+                    
+                    {/* Data Count Badge */}
+                    {itemCount > 0 && (
+                      <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
+                        {itemCount}
+                      </span>
+                    )}
+                  </div>
+                  
+                  {/* Simple Expand Indicator */}
+                  <div className={`transform transition-transform ${isExpanded ? 'rotate-90' : ''}`}>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" className="text-gray-400">
+                      <path d="M6 4l4 4-4 4V4z"/>
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Section Content */}
+                {isExpanded && (
+                  <div className="border-t border-gray-600 p-4 bg-gray-900">
+                    {section.id === 'photos' && (
+                      <div>
+                        {/* Photo Upload Options */}
+                        <div className="mb-4 grid grid-cols-2 gap-2">
+                          <Button
+                            onClick={() => {
+                              // Create input for direct camera access
+                              const input = document.createElement('input');
+                              input.type = 'file';
+                              input.accept = 'image/*,.heic,.heif';
+                              input.capture = 'environment';
+                              input.multiple = true;
+                              input.onchange = handlePhotoUpload;
+                              input.click();
+                            }}
+                            className="py-3 text-sm font-semibold text-white flex items-center justify-center"
+                            style={{ backgroundColor: '#EA580C' }}
+                          >
+                            <Camera size={16} className="mr-2" />
+                            Camera
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              // Create input for photo library access only (no camera)
+                              const input = document.createElement('input');
+                              input.type = 'file';
+                              input.accept = 'image/*,.heic,.heif';
+                              input.multiple = true;
+                              // No capture attribute - this forces library selection
+                              input.onchange = handlePhotoUpload;
+                              input.click();
+                            }}
+                            className="py-3 text-sm font-semibold text-white flex items-center justify-center bg-orange-600 hover:bg-orange-700"
+                          >
+                            <Upload size={16} className="mr-2" />
+                            Upload
+                          </Button>
+                        </div>
+                        
+                        {/* Selection Toolbar */}
+                        {selectedPhotos.size > 0 && (
+                          <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-between">
+                            <span className="text-sm font-medium text-gray-100">
+                              {selectedPhotos.size} photo{selectedPhotos.size !== 1 ? 's' : ''} selected
+                            </span>
+                            <div className="flex gap-2">
+                              <Button
+                                onClick={clearSelection}
+                                variant="outline"
+                                size="sm"
+                                className="text-gray-200 border-gray-600"
+                              >
+                                Clear
+                              </Button>
+                              <Button
+                                onClick={deleteSelectedPhotos}
+                                disabled={deleteSelectedPhotosMutation.isPending}
+                                variant="destructive"
+                                size="sm"
+                              >
+                                {deleteSelectedPhotosMutation.isPending ? 'Deleting...' : 'Delete Selected'}
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Photo Thumbnails Grid */}
+                        {photos.length > 0 ? (
+                          <div 
+                            className="grid grid-cols-3 gap-3"
+                            onTouchEnd={(e) => handlePhotoTouchEnd(e)}
+                            onMouseUp={(e) => handlePhotoTouchEnd(e)}
+                          >
+                            {photos.map((photo, index) => (
+                              <div
+                                key={photo.id}
+                                className={`aspect-square rounded-lg overflow-hidden cursor-pointer border-2 transition-all relative group ${
+                                  selectedPhotos.has(photo.id) 
+                                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
+                                    : 'border-transparent hover:border-blue-500'
+                                }`}
+                                onTouchStart={(e) => handlePhotoTouchStart(photo.id, e)}
+                                onMouseDown={(e) => handlePhotoTouchStart(photo.id, e)}
+                                onTouchMove={(e) => handlePhotoTouchMove(photo.id, e)}
+                                onMouseEnter={(e) => touchStarted && handlePhotoTouchMove(photo.id, e)}
+                                onClick={(e) => {
+                                  if (isSelecting) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    togglePhotoSelection(photo.id);
+                                  } else {
+                                    openPhotoCarousel(index);
+                                  }
+                                }}
+                              >
+                                <img
+                                  src={`/uploads/${photo.filename}`}
+                                  alt={photo.description || photo.originalName}
+                                  className={`w-full h-full object-cover ${selectedPhotos.has(photo.id) ? 'opacity-80' : ''}`}
+                                  draggable={false}
+                                  onError={(e) => console.error('Image failed to load:', photo.filename)}
+                                  onLoad={() => console.log('Image loaded successfully:', photo.filename)}
+                                />
+                                
+                                {/* Selection Indicator */}
+                                {selectedPhotos.has(photo.id) && (
+                                  <div className="absolute top-2 left-2 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                                    ✓
+                                  </div>
+                                )}
+                                
+                                {/* Individual Delete Button */}
+                                {!isSelecting && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      deletePhotoMutation.mutate(photo.id);
+                                    }}
+                                    disabled={deletePhotoMutation.isPending}
+                                    className="absolute top-2 right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                                    title="Delete photo"
+                                  >
+                                    <X size={14} />
+                                  </button>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="p-4 text-center text-gray-400">
+                            <Camera size={24} className="mx-auto mb-2" />
+                            <p>No photos yet. Use the camera button above to add some!</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {section.id === 'tools' && (
+                      <div>
+                        {/* Add Tool Input */}
+                        <div className="flex gap-2 mb-4">
+                          <input
+                            type="text"
+                            value={newTool}
+                            onChange={(e) => setNewTool(e.target.value)}
+                            placeholder="Paint brushes, Drop cloths, Ladder, Rollers..."
+                            className="flex-1 px-3 py-2 text-sm border border-gray-600 rounded-lg bg-gray-800 text-gray-200 placeholder-gray-400"
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && newTool.trim()) {
+                                addToolMutation.mutate(newTool.trim());
+                              }
+                            }}
+                          />
+                          <Button
+                            onClick={() => newTool.trim() && addToolMutation.mutate(newTool.trim())}
+                            disabled={!newTool.trim() || addToolMutation.isPending}
+                            size="sm"
+                            className="px-3 bg-blue-600 hover:bg-blue-700"
+                          >
+                            <Plus size={16} />
+                          </Button>
+                        </div>
+
+                        {/* Tools List */}
+                        <div className="h-48 overflow-y-auto border border-gray-600 rounded-lg p-3 space-y-2 bg-gray-800">
+                          {tools.length === 0 ? (
+                            <p className="text-sm text-gray-400 text-center py-8">
+                              No tools added yet. Add tools you need to bring to this job.
+                            </p>
+                          ) : (
+                            tools.map((tool) => (
+                              <div key={tool.id} className="flex items-center gap-3 group">
+                                <button
+                                  onClick={() => toggleToolMutation.mutate(tool.id)}
+                                  className="w-5 h-5 rounded border-2 flex items-center justify-center transition-colors border-gray-500 hover:border-green-500 hover:bg-green-900/20"
+                                  title="Click to mark as complete and remove from list"
+                                >
+                                  {/* Empty checkbox - clicking it will delete the tool */}
+                                </button>
+                                <span className="flex-1 text-sm text-gray-200">
+                                  {tool.toolName}
+                                </span>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {section.id === 'dailyHours' && (
+                      <div>
+                        {/* Add Hours Button */}
+                        {!showDatePicker && (
+                          <Button
+                            onClick={() => setShowDatePicker(true)}
+                            className="w-full mb-4 py-2 text-sm bg-green-600 hover:bg-green-700"
+                            variant="outline"
+                          >
+                            <Plus size={16} className="mr-2" />
+                            Log Hours for a Day
+                          </Button>
+                        )}
+
+                        {/* Date Picker and Hours Input */}
+                        {showDatePicker && (
+                          <div className="mb-4 p-4 bg-gray-800 rounded-lg space-y-3 border border-gray-600">
+                            <div>
+                              <label className="text-sm font-medium mb-2 block text-gray-200">
+                                Select Date
+                                <span className="ml-2 text-xs px-2 py-1 bg-green-900/30 text-green-300 rounded">
+                                  Today: {formatDateForInput(new Date())}
+                                </span>
+                              </label>
+                              <input
+                                type="date"
+                                value={selectedDate}
+                                onChange={(e) => {
+                                  setSelectedDate(e.target.value);
+                                  if (e.target.value) {
+                                    setTimeout(() => {
+                                      const hoursInput = document.querySelector('input[placeholder="0"]') as HTMLInputElement;
+                                      if (hoursInput) hoursInput.focus();
+                                    }, 100);
+                                  }
+                                }}
+                                className="w-full px-3 py-2 text-sm border-2 border-green-600 rounded-lg bg-green-900/20 text-gray-200 focus:border-green-500"
+                                max={formatDateForInput(new Date())}
+                                style={{ colorScheme: 'dark' }}
+                              />
+                            </div>
+                            
+                            <div>
+                              <label className="text-sm font-medium mb-2 block text-gray-200">Hours Worked</label>
+                              <input
+                                type="number"
+                                step="0.5"
+                                min="0"
+                                max="24"
+                                value={hoursInput}
+                                onChange={(e) => setHoursInput(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter' && hoursInput) {
+                                    handleAddHours();
+                                  }
+                                }}
+                                placeholder="0"
+                                className="w-full px-3 py-2 text-sm border border-gray-600 rounded-lg bg-gray-800 text-gray-200"
+                              />
+                            </div>
+                            
+                            <div>
+                              <label className="text-sm font-medium mb-2 block text-gray-200">Description</label>
+                              <input
+                                type="text"
+                                value={descriptionInput}
+                                onChange={(e) => setDescriptionInput(e.target.value)}
+                                placeholder=""
+                                className="w-full px-3 py-2 text-sm border border-gray-600 rounded-lg bg-gray-800 text-gray-200"
+                              />
+                            </div>
+                            
+                            <div className="flex gap-2">
+                              <Button
+                                onClick={handleAddHours}
+                                disabled={!hoursInput || addHoursMutation.isPending}
+                                className="flex-1 bg-green-600 hover:bg-green-700"
+                              >
+                                {addHoursMutation.isPending ? 'Adding...' : 'Add Hours'}
+                              </Button>
+                              <Button
+                                onClick={() => {
+                                  setShowDatePicker(false);
+                                  setSelectedDate('');
+                                  setHoursInput('');
+                                  setDescriptionInput('');
+                                }}
+                                variant="outline"
+                                className="flex-1 border-gray-600 text-gray-300"
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Hours List */}
+                        <div className="space-y-3 max-h-64 overflow-y-auto">
+                          {dailyHours.length === 0 ? (
+                            <p className="text-sm text-gray-400 text-center py-8">
+                              No hours logged yet. Start tracking your work time!
+                            </p>
+                          ) : (
+                            dailyHours.map((hours) => (
+                              <div key={hours.id} className="p-3 bg-gray-800 rounded-lg border border-gray-600">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 text-sm">
+                                      <span className="font-medium text-gray-100">
+                                        {new Date(hours.date + 'T00:00:00').toLocaleDateString('en-US', { 
+                                          weekday: 'short', 
+                                          month: 'short', 
+                                          day: 'numeric' 
+                                        })}
+                                      </span>
+                                      <span className="text-gray-400">•</span>
+                                      <span className="font-semibold text-blue-400">
+                                        {hours.hours}hr
+                                      </span>
+                                      {hours.description && (
+                                        <>
+                                          <span className="text-gray-400">•</span>
+                                          <span className="text-gray-400">
+                                            {hours.description}
+                                          </span>
+                                        </>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs text-green-400 font-medium">
+                                      ${(hours.hours * 60).toFixed(0)}
+                                    </span>
+                                    <button
+                                      onClick={() => deleteHoursMutation.mutate(hours.id)}
+                                      disabled={deleteHoursMutation.isPending}
+                                      className="p-0.5 text-red-400 hover:text-red-300 transition-colors opacity-60 hover:opacity-100"
+                                      title="Delete"
+                                    >
+                                      <Trash2 size={10} />
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            ))
+                          )}
+                        </div>
+
+                        {/* Hours Summary at Bottom */}
+                        {dailyHours.length > 0 && (
+                          <div className="mt-4 p-3 bg-green-900/20 rounded-lg border border-green-700">
+                            <div className="text-2xl font-bold text-green-300 mb-2">
+                              $60/hr
+                            </div>
+                            <div className="pt-2 border-t border-green-700">
+                              <div className="font-semibold text-green-300">
+                                Total Hours: {dailyHours.reduce((sum, h) => sum + h.hours, 0).toFixed(1)}
+                              </div>
+                              <div className="text-sm text-green-400">
+                                Total Earned: ${(dailyHours.reduce((sum, h) => sum + (h.hours * 60), 0)).toFixed(2)}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {section.id === 'notes' && (
+                      <div>
+                        <Textarea
+                          value={notes}
+                          onChange={(e) => setNotes(e.target.value)}
+                          onBlur={handleNotesBlur}
+                          placeholder=""
+                          className="w-full min-h-48 resize-none rounded-lg border border-gray-600 p-3 text-sm bg-gray-800 text-gray-200 placeholder-gray-400"
+                        />
+                      </div>
+                    )}
+
+                    {section.id === 'receipts' && (
+                      <div>
+                        {/* Receipt Upload Options */}
+                        <div className="mb-4 grid grid-cols-2 gap-2">
+                          <Button
+                            onClick={() => {
+                              // Create input for direct camera access
+                              const input = document.createElement('input');
+                              input.type = 'file';
+                              input.accept = 'image/*,.heic,.heif';
+                              input.capture = 'environment';
+                              input.multiple = true;
+                              input.onchange = handleReceiptUpload;
+                              input.click();
+                            }}
+                            className="py-3 text-sm font-semibold bg-blue-700 hover:bg-blue-800 text-white flex items-center justify-center"
+                          >
+                            <Camera size={16} className="mr-2" />
+                            Camera
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              // Create input for photo library access only (no camera)
+                              const input = document.createElement('input');
+                              input.type = 'file';
+                              input.accept = 'image/*,.heic,.heif';
+                              input.multiple = true;
+                              // No capture attribute - this forces library selection
+                              input.onchange = handleReceiptUpload;
+                              input.click();
+                            }}
+                            className="py-3 text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center"
+                          >
+                            <Upload size={16} className="mr-2" />
+                            Upload
+                          </Button>
+                        </div>
+                        
+                        {/* Quick Receipt Entry Form */}
+                        <div className="mb-4">
+                          <form 
+                            onSubmit={(e) => {
+                              e.preventDefault();
+                              const formData = new FormData(e.target as HTMLFormElement);
+                              const item = formData.get('item') as string;
+                              const price = formData.get('price') as string;
+                              
+                              if (!item.trim() || !price.trim()) return;
+                              
+                              const receiptData = {
+                                vendor: item,
+                                amount: price,
+                                description: `Manual entry: ${item}`,
+                                date: new Date().toISOString().split('T')[0],
+                                filename: null
+                              };
+                              
+                              fetch(`/api/projects/${project.id}/receipts`, {
+                                method: 'POST',
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify(receiptData),
+                              }).then(async (response) => {
+                                if (response.ok) {
+                                  queryClient.invalidateQueries({ queryKey: [`/api/projects/${project.id}/receipts`] });
+                                  (e.target as HTMLFormElement).reset();
+                                } else {
+                                  const errorData = await response.text();
+                                  console.error('Receipt creation failed:', errorData);
+                                  alert('Failed to add receipt. Please try again.');
+                                }
+                              }).catch((error) => {
+                                console.error('Network error:', error);
+                                alert('Network error. Please check your connection and try again.');
+                              });
+                            }}
+                            className="flex gap-2"
+                          >
+                            <Input
+                              name="item"
+                              placeholder=""
+                              className="flex-1 h-9 bg-gray-800 border-gray-600 text-gray-200"
+                            />
+                            <Input
+                              name="price"
+                              type="number"
+                              step="0.01"
+                              placeholder="$0.00"
+                              className="w-24 h-9 bg-gray-800 border-gray-600 text-gray-200"
+                            />
+                            <Button 
+                              type="submit" 
+                              size="sm"
+                              className="h-9 px-3 text-xs text-white bg-orange-600 hover:bg-orange-700"
+                            >
+                              Add Item
+                            </Button>
+                          </form>
+                        </div>
+                        
+                        <SimpleFilesList projectId={project.id} />
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </ReactSortable>
+
+        <div className="mt-4 p-3 bg-gray-800 rounded-lg border border-gray-600">
+          <p className="text-sm text-gray-300">
+            <strong>How to use:</strong> Click section headers to expand/collapse. Drag the grip handles to reorder sections to match your workflow preference.
+          </p>
+        </div>
+      </div>
+
+      {/* Generate Buttons */}
+      <div className="grid grid-cols-2 gap-4">
+        <Button
+          onClick={() => setShowEstimateGenerator(true)}
+          className="py-3 text-sm font-semibold bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center"
+        >
+          <Calculator size={18} className="mr-2" />
+          Generate Estimate
+        </Button>
+        <Button
+          onClick={() => setShowInvoiceGenerator(true)}
+          className="py-3 text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white"
+        >
+          <FileText size={18} className="mr-2" />
+          Generate Invoice
+        </Button>
+      </div>
+
+      {/* Hidden File Inputs */}
       <input
         ref={receiptInputRef}
         type="file"
@@ -1622,6 +1572,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           photos={photos}
           initialIndex={carouselIndex}
           onClose={() => setShowPhotoCarousel(false)}
+          onDelete={(photoId) => deletePhotoMutation.mutate(photoId)}
         />
       )}
 
@@ -1692,89 +1643,80 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-sm font-medium mb-2 block">Email Address</label>
+                <label className="text-sm font-medium mb-2 block">Email</label>
                 <Input
-                  type="email"
                   value={editForm.clientEmail || ''}
                   onChange={(e) => handleEditInputChange('clientEmail', e.target.value)}
-                  placeholder="Enter email address"
+                  placeholder="Enter email"
                 />
               </div>
               <div>
-                <label className="text-sm font-medium mb-2 block">Phone Number</label>
+                <label className="text-sm font-medium mb-2 block">Phone</label>
                 <Input
-                  type="tel"
                   value={editForm.clientPhone || ''}
                   onChange={(e) => handleEditInputChange('clientPhone', e.target.value)}
-                  placeholder="Enter phone number"
+                  placeholder="Enter phone"
                 />
               </div>
             </div>
             
             <div>
               <label className="text-sm font-medium mb-2 block">Project Type</label>
-              <select
-                value={editForm.projectType || 'exterior'}
+              <Input
+                value={editForm.projectType || ''}
                 onChange={(e) => handleEditInputChange('projectType', e.target.value)}
-                className="w-full p-2 border border-input rounded-md bg-background"
-              >
-                <option value="exterior">Exterior</option>
-                <option value="interior">Interior</option>
-                <option value="both">Both</option>
-              </select>
+                placeholder="Enter project type"
+              />
             </div>
             
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               <div>
                 <label className="text-sm font-medium mb-2 block">Room Count</label>
                 <Input
                   type="number"
-                  value={editForm.roomCount || 1}
-                  onChange={(e) => handleEditInputChange('roomCount', parseInt(e.target.value))}
-                  min="1"
+                  value={editForm.roomCount || ''}
+                  onChange={(e) => handleEditInputChange('roomCount', parseInt(e.target.value) || 0)}
+                  placeholder="0"
                 />
               </div>
-              
+              <div>
+                <label className="text-sm font-medium mb-2 block">Difficulty</label>
+                <Input
+                  type="number"
+                  min="1"
+                  max="5"
+                  value={editForm.difficulty || ''}
+                  onChange={(e) => handleEditInputChange('difficulty', parseInt(e.target.value) || 1)}
+                  placeholder="1-5"
+                />
+              </div>
               <div>
                 <label className="text-sm font-medium mb-2 block">Hourly Rate</label>
                 <Input
                   type="number"
-                  value={editForm.hourlyRate || 60}
-                  onChange={(e) => handleEditInputChange('hourlyRate', parseInt(e.target.value))}
-                  min="1"
+                  value={editForm.hourlyRate || ''}
+                  onChange={(e) => handleEditInputChange('hourlyRate', parseFloat(e.target.value) || 0)}
+                  placeholder="$0"
                 />
               </div>
             </div>
-            
-            <div>
-              <label className="text-sm font-medium mb-2 block">Difficulty</label>
-              <select
-                value={editForm.difficulty || 'medium'}
-                onChange={(e) => handleEditInputChange('difficulty', e.target.value)}
-                className="w-full p-2 border border-input rounded-md bg-background"
-              >
-                <option value="easy">Easy</option>
-                <option value="medium">Medium</option>
-                <option value="hard">Hard</option>
-              </select>
-            </div>
-            
-            <div className="flex gap-3 pt-4">
-              <Button 
-                variant="outline" 
-                onClick={() => setShowEditClient(false)}
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-              <Button 
-                onClick={handleSaveClient}
-                className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
-                disabled={updateClientMutation.isPending}
-              >
-                {updateClientMutation.isPending ? 'Saving...' : 'Save Changes'}
-              </Button>
-            </div>
+          </div>
+          
+          <div className="flex gap-2 pt-4">
+            <Button 
+              onClick={handleSaveEdit}
+              disabled={editProjectMutation.isPending}
+              className="flex-1"
+            >
+              {editProjectMutation.isPending ? 'Saving...' : 'Save Changes'}
+            </Button>
+            <Button 
+              onClick={() => setShowEditClient(false)}
+              variant="outline"
+              className="flex-1"
+            >
+              Cancel
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
