@@ -384,6 +384,9 @@ function NewClientForm({ onSubmit, onCancel, isLoading }: { onSubmit: (data: any
 }
 
 function ProjectCard({ project, onSelectProject, updateStatusMutation, deleteProjectMutation, showDragHandle }: any) {
+  const [touchStartPos, setTouchStartPos] = useState<{ x: number; y: number } | null>(null);
+  const [touchStartTime, setTouchStartTime] = useState<number | null>(null);
+
   const handleCardClick = (e: React.MouseEvent) => {
     // Only trigger navigation if the click is on the main card area
     // and not on any interactive elements
@@ -394,11 +397,47 @@ function ProjectCard({ project, onSelectProject, updateStatusMutation, deletePro
     onSelectProject(project.id);
   };
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    setTouchStartPos({ x: touch.clientX, y: touch.clientY });
+    setTouchStartTime(Date.now());
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.tagName === 'SELECT' || target.tagName === 'OPTION' || target.tagName === 'BUTTON' || target.closest('select') || target.closest('button')) {
+      return;
+    }
+
+    if (!touchStartPos || !touchStartTime) return;
+
+    const touch = e.changedTouches[0];
+    const touchEndPos = { x: touch.clientX, y: touch.clientY };
+    const touchDuration = Date.now() - touchStartTime;
+    
+    // Calculate distance moved
+    const distanceMoved = Math.sqrt(
+      Math.pow(touchEndPos.x - touchStartPos.x, 2) + 
+      Math.pow(touchEndPos.y - touchStartPos.y, 2)
+    );
+
+    // Only trigger if:
+    // 1. Touch duration is less than 300ms (quick tap)
+    // 2. Distance moved is less than 10px (not a scroll/swipe)
+    if (touchDuration < 300 && distanceMoved < 10) {
+      onSelectProject(project.id);
+    }
+
+    setTouchStartPos(null);
+    setTouchStartTime(null);
+  };
+
   return (
     <div 
       className="bg-card rounded-lg p-5 shadow-sm border border-border hover:border-primary/50 transition-colors cursor-pointer group relative"
       onClick={handleCardClick}
-      onTouchEnd={handleCardClick}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     >
       <div className="flex items-start gap-3">
         {showDragHandle && (
