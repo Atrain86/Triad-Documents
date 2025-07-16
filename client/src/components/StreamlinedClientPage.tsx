@@ -1077,8 +1077,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                               input.onchange = handlePhotoUpload;
                               input.click();
                             }}
-                            className="py-3 text-sm font-semibold text-white flex items-center justify-center"
-                            style={{ backgroundColor: '#EA580C' }}
+                            className="py-3 text-sm font-semibold text-white flex items-center justify-center hover:opacity-90"
+                            style={{ backgroundColor: paintBrainColors.purple }}
                           >
                             <Camera size={16} className="mr-2" />
                             Camera
@@ -1094,7 +1094,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                               input.onchange = handlePhotoUpload;
                               input.click();
                             }}
-                            className="py-3 text-sm font-semibold text-white flex items-center justify-center bg-orange-600 hover:bg-orange-700"
+                            className="py-3 text-sm font-semibold text-white flex items-center justify-center hover:opacity-90"
+                            style={{ backgroundColor: paintBrainColors.green }}
                           >
                             <Upload size={16} className="mr-2" />
                             Upload
@@ -1464,7 +1465,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                               input.click();
                             }}
                             className="py-3 text-sm font-semibold text-white flex items-center justify-center hover:opacity-90"
-                            style={{ backgroundColor: paintBrainColors.orange }}
+                            style={{ backgroundColor: paintBrainColors.green }}
                           >
                             <Upload size={16} className="mr-2" />
                             Upload
@@ -1556,7 +1557,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         <Button
           onClick={() => setShowInvoiceGenerator(true)}
           className="py-3 text-sm font-semibold text-white hover:opacity-90"
-          style={{ backgroundColor: paintBrainColors.blue }}
+          style={{ backgroundColor: paintBrainColors.green }}
         >
           <FileText size={18} className="mr-2" />
           Generate Invoice
@@ -1713,7 +1714,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             <Button 
               onClick={handleSaveEdit}
               disabled={editProjectMutation.isPending}
-              className="flex-1"
+              className="flex-1 text-white hover:opacity-90"
+              style={{ backgroundColor: paintBrainColors.purple }}
             >
               {editProjectMutation.isPending ? 'Saving...' : 'Save Changes'}
             </Button>
