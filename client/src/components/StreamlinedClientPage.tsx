@@ -184,8 +184,8 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
                   onClick={handleSave}
                   disabled={updateReceiptMutation.isPending}
                   size="sm"
-                  className="flex-1 text-white hover:opacity-90"
-                  style={{ backgroundColor: paintBrainColors.green }}
+                  className="flex-1 text-white border-0"
+                  style={{ backgroundColor: paintBrainColors.green, border: 'none' }}
                 >
                   {updateReceiptMutation.isPending ? 'Saving...' : 'Save'}
                 </Button>
@@ -1221,8 +1221,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                             onClick={() => newTool.trim() && addToolMutation.mutate(newTool.trim())}
                             disabled={!newTool.trim() || addToolMutation.isPending}
                             size="sm"
-                            className="px-3 text-white hover:opacity-90"
-                            style={{ backgroundColor: paintBrainColors.purple }}
+                            className="px-3 text-white border-0"
+                            style={{ backgroundColor: paintBrainColors.purple, border: 'none' }}
                           >
                             <Plus size={16} />
                           </Button>
@@ -1260,8 +1260,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                         {!showDatePicker && (
                           <Button
                             onClick={() => setShowDatePicker(true)}
-                            className="w-full mb-4 py-2 text-sm text-white hover:opacity-90"
-                            style={{ backgroundColor: paintBrainColors.green }}
+                            className="w-full mb-4 py-2 text-sm text-white border-0"
+                            style={{ backgroundColor: paintBrainColors.green, border: 'none' }}
                           >
                             <Plus size={16} className="mr-2" />
                             Log Hours for a Day
@@ -1330,8 +1330,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                               <Button
                                 onClick={handleAddHours}
                                 disabled={!hoursInput || addHoursMutation.isPending}
-                                className="flex-1 text-white hover:opacity-90"
-                                style={{ backgroundColor: paintBrainColors.green }}
+                                className="flex-1 text-white border-0"
+                                style={{ backgroundColor: paintBrainColors.green, border: 'none' }}
                               >
                                 {addHoursMutation.isPending ? 'Adding...' : 'Add Hours'}
                               </Button>
