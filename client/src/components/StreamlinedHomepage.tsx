@@ -117,12 +117,11 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
       <div className="p-6">
         <div className="flex justify-center mb-6">
           <img 
-            src="/paint-brain-logo-pure-black.png" 
-            alt="Paint Brain" 
+            src="/aframe-logo.png" 
+            alt="A-Frame Painting" 
             className="h-32 w-auto object-contain"
             onError={(e) => {
-              console.log('Paint Brain logo failed, trying A-frame fallback');
-              e.currentTarget.src = "/aframe-logo.png";
+              console.log('Logo failed to load');
             }}
           />
         </div>
@@ -134,7 +133,7 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
 
         <div className="flex justify-center gap-4 mb-6">
           <Button
-            onClick={() => {/* Handle new client */}}
+            onClick={() => window.location.reload()}
             style={{ backgroundColor: paintBrainColors.red, color: 'white' }}
             className="px-4 py-2 text-sm font-semibold hover:opacity-90"
           >
