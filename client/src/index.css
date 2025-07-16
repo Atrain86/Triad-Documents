@@ -145,6 +145,17 @@ input[type="date"]:focus::-webkit-datetime-edit-year-field {
   opacity: 0.9;
 }
 
+/* Ensure button colors are applied with highest specificity */
+button.paint-brain-purple-btn, .paint-brain-purple-btn {
+  background-color: #8B5FBF !important;
+  border-color: #8B5FBF !important;
+}
+
+button.paint-brain-green-btn, .paint-brain-green-btn {
+  background-color: #6A9955 !important;
+  border-color: #6A9955 !important;
+}
+
 .paint-brain-calendar::-webkit-calendar-picker-indicator:hover {
   background-color: rgba(251, 191, 36, 0.1); /* Yellow hover */
   border-radius: 4px;
