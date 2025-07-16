@@ -16,6 +16,17 @@ import EstimateGenerator from './EstimateGenerator';
 import PhotoCarousel from './PhotoCarousel';
 import { ReactSortable } from 'react-sortablejs';
 
+// Paint Brain Color Palette
+const paintBrainColors = {
+  purple: '#8B5FBF',
+  orange: '#D4A574',  
+  green: '#6A9955',
+  red: '#F44747',
+  blue: '#569CD6',
+  yellow: '#DCDCAA',
+  gray: '#6B7280'
+};
+
 // Calendar function for A-Frame calendar integration
 const openWorkCalendar = (clientProject: Project | null = null) => {
   const aframeCalendarOnlyUrl = 'https://calendar.google.com/calendar/embed?src=6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981%40group.calendar.google.com&ctz=America%2FVancouver&mode=WEEK&showTitle=1&showNav=1&showDate=1&showPrint=0&showTabs=1&showCalendars=0&showTz=0&bgcolor=%23000000&color=%23ffffff';
@@ -973,8 +984,18 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
               default: itemCount = 0;
             }
             
-            // Update section name for photos
+            // Update section name for photos and get appropriate color
             const sectionName = section.id === 'photos' ? 'Photo Gallery' : section.name;
+            const getSectionColor = (sectionId: string) => {
+              switch (sectionId) {
+                case 'photos': return paintBrainColors.orange;
+                case 'tools': return paintBrainColors.yellow;
+                case 'dailyHours': return paintBrainColors.green;
+                case 'notes': return paintBrainColors.blue;
+                case 'receipts': return paintBrainColors.purple;
+                default: return paintBrainColors.gray;
+              }
+            };
 
             return (
               <div
@@ -988,8 +1009,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                 >
                   <div className="flex items-center gap-3">
                     {/* Mac-style Reorder Icon - Left Side */}
-                    <div className="drag-handle cursor-move p-1 text-gray-400 hover:text-gray-200" onClick={(e) => e.stopPropagation()}>
-                      <svg width="16" height="16" viewBox="0 0 16 16" className="text-gray-400">
+                    <div className="drag-handle cursor-move p-1 text-white hover:text-gray-200" onClick={(e) => e.stopPropagation()}>
+                      <svg width="16" height="16" viewBox="0 0 16 16" className="text-white">
                         <rect y="2" width="16" height="1.5" rx="0.75"/>
                         <rect y="5.5" width="16" height="1.5" rx="0.75"/>
                         <rect y="9" width="16" height="1.5" rx="0.75"/>
@@ -998,7 +1019,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                     </div>
                     
                     <IconComponent size={20} className="text-gray-300" />
-                    <span className="text-gray-100 font-medium">{sectionName}</span>
+                    <span className="font-medium" style={{ color: getSectionColor(section.id) }}>{sectionName}</span>
                     
                     {/* Data Count Badge */}
                     {itemCount > 0 && (
