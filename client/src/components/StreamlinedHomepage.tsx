@@ -1,87 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Search, User, MapPin, Edit3, Archive, RotateCcw, Trash2, GripVertical, Navigation } from 'lucide-react';
+import { Search, User, MapPin, Edit3, Archive, RotateCcw, Trash2, GripVertical } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { ReactSortable } from 'react-sortablejs';
 
 // Paint Brain Color Palette
 const paintBrainColors = {
-  purple: '#8B5FBF',    // Purple from code syntax
-  orange: '#D4A574',    // Orange from code syntax  
-  green: '#6A9955',     // Green from comments
-  red: '#F44747',       // Red from HTML tags
-  blue: '#569CD6',      // Blue from keywords
-  gray: '#6B7280'       // Neutral gray
-};
-
-const aframeTheme = {
-  gradients: {
-    rainbow: "linear-gradient(to right, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3, #54a0ff)"
-  }
+  purple: '#8B5FBF',
+  orange: '#D4A574',  
+  green: '#6A9955',
+  red: '#F44747',
+  blue: '#569CD6',
+  gray: '#6B7280'
 };
 
 const statusConfig = {
-  'in-progress': { 
-    label: 'In Progress', 
-    color: paintBrainColors.green,
-    priority: 1 
-  },
-  'scheduled': { 
-    label: 'Scheduled', 
-    color: paintBrainColors.blue,
-    priority: 2 
-  },
-  'estimate-sent': { 
-    label: 'Estimate Sent', 
-    color: paintBrainColors.purple,
-    priority: 3 
-  },
-  'awaiting-confirmation': { 
-    label: 'Awaiting Confirmation', 
-    color: paintBrainColors.orange,
-    priority: 4 
-  },
-  'site-visit-needed': { 
-    label: 'Site Visit Needed', 
-    color: paintBrainColors.purple,
-    priority: 5 
-  },
-  'initial-contact': { 
-    label: 'Initial Contact', 
-    color: paintBrainColors.blue,
-    priority: 6 
-  },
-  'follow-up-needed': { 
-    label: 'Follow-up Needed', 
-    color: paintBrainColors.orange,
-    priority: 7 
-  },
-  'on-hold': { 
-    label: 'On Hold', 
-    color: paintBrainColors.gray,
-    priority: 8 
-  },
-  'pending': { 
-    label: 'Pending', 
-    color: '#D4A574',
-    priority: 9 
-  },
-  'completed': { 
-    label: 'Completed', 
-    color: paintBrainColors.green,
-    priority: 10 
-  },
-  'cancelled': { 
-    label: 'Cancelled', 
-    color: paintBrainColors.red,
-    priority: 11 
-  },
-  'archived': { 
-    label: 'Archived', 
-    color: paintBrainColors.gray,
-    priority: 12 
-  }
+  'in-progress': { label: 'In Progress', color: paintBrainColors.green, priority: 1 },
+  'scheduled': { label: 'Scheduled', color: paintBrainColors.blue, priority: 2 },
+  'estimate-sent': { label: 'Estimate Sent', color: paintBrainColors.purple, priority: 3 },
+  'awaiting-confirmation': { label: 'Awaiting Confirmation', color: paintBrainColors.orange, priority: 4 },
+  'site-visit-needed': { label: 'Site Visit Needed', color: paintBrainColors.purple, priority: 5 },
+  'initial-contact': { label: 'Initial Contact', color: paintBrainColors.blue, priority: 6 },
+  'follow-up-needed': { label: 'Follow-up Needed', color: paintBrainColors.orange, priority: 7 },
+  'on-hold': { label: 'On Hold', color: paintBrainColors.gray, priority: 8 },
+  'pending': { label: 'Pending', color: paintBrainColors.orange, priority: 9 },
+  'completed': { label: 'Completed', color: paintBrainColors.green, priority: 10 },
+  'cancelled': { label: 'Cancelled', color: paintBrainColors.red, priority: 11 },
+  'archived': { label: 'Archived', color: paintBrainColors.gray, priority: 12 }
 };
 
 export default function StreamlinedHomepage({ onSelectProject }: { onSelectProject: (projectId: number) => void }) {
@@ -89,9 +35,6 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
   const [showArchived, setShowArchived] = useState(false);
   const [isManualMode, setIsManualMode] = useState(false);
   const [manualProjects, setManualProjects] = useState<any[]>([]);
-  const [showAddClient, setShowAddClient] = useState(false);
-  const [editingProject, setEditingProject] = useState<any>(null);
-  const [editForm, setEditForm] = useState<any>({});
   
   const queryClient = useQueryClient();
 
@@ -102,12 +45,8 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
 
   const deleteProjectMutation = useMutation({
     mutationFn: async (projectId: number) => {
-      const response = await fetch(`/api/projects/${projectId}`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) {
-        throw new Error('Failed to delete project');
-      }
+      const response = await fetch(`/api/projects/${projectId}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error('Failed to delete project');
       return response.json();
     },
     onSuccess: () => {
@@ -151,10 +90,7 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
     return matchesSearch && matchesArchive;
   });
 
-  const baseFilteredProjects = isManualMode ? 
-    sortProjectsByPriority(filteredProjects) : 
-    sortProjectsByPriority(filteredProjects);
-
+  const baseFilteredProjects = sortProjectsByPriority(filteredProjects);
   const displayProjects = isManualMode ? manualProjects : baseFilteredProjects;
 
   useEffect(() => {
@@ -193,22 +129,22 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
 
         <div 
           className="h-1 w-full mb-8"
-          style={{ background: aframeTheme.gradients.rainbow }}
+          style={{ background: "linear-gradient(to right, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3, #54a0ff)" }}
         />
 
         <div className="flex justify-center gap-4 mb-6">
           <Button
-            onClick={() => setShowAddClient(true)}
-            className="px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
-            style={{ backgroundColor: paintBrainColors.red }}
+            onClick={() => {/* Handle new client */}}
+            style={{ backgroundColor: paintBrainColors.red, color: 'white' }}
+            className="px-4 py-2 text-sm font-semibold hover:opacity-90"
           >
             New Client
           </Button>
           
           <Button
             onClick={() => openWorkCalendar()}
-            className="flex items-center px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
-            style={{ backgroundColor: paintBrainColors.green }}
+            style={{ backgroundColor: paintBrainColors.green, color: 'white' }}
+            className="flex items-center px-4 py-2 text-sm font-semibold hover:opacity-90"
           >
             Schedule
           </Button>
@@ -216,7 +152,7 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
 
         <div className="flex gap-3 mb-6">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2" style={{ color: '#D4A574' }} size={18} />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2" style={{ color: paintBrainColors.orange }} size={18} />
             <Input
               placeholder="Search clients"
               value={searchTerm}
@@ -234,8 +170,8 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
             }}
             className="px-3 py-3 text-sm"
             style={isManualMode ? 
-              { backgroundColor: '#D4A574', color: 'white' } : 
-              { backgroundColor: 'transparent', color: '#D4A574', borderColor: '#D4A574' }
+              { backgroundColor: paintBrainColors.orange, color: 'white' } : 
+              { backgroundColor: 'transparent', color: paintBrainColors.orange, borderColor: paintBrainColors.orange }
             }
           >
             {isManualMode ? 'Smart' : 'Manual'}
@@ -245,8 +181,8 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
             onClick={() => setShowArchived(!showArchived)}
             className="px-4 py-3"
             style={showArchived ? 
-              { backgroundColor: '#D4A574', color: 'white' } : 
-              { backgroundColor: 'transparent', color: '#D4A574', borderColor: '#D4A574' }
+              { backgroundColor: paintBrainColors.orange, color: 'white' } : 
+              { backgroundColor: 'transparent', color: paintBrainColors.orange, borderColor: paintBrainColors.orange }
             }
           >
             {showArchived ? 'Active' : 'Archive'}
@@ -263,50 +199,41 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
           </div>
         )}
 
-        {displayProjects.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">🎨</div>
-            <h2 className="text-xl font-semibold mb-2">
-              {searchTerm ? 'No matching projects found' : 
-               showArchived ? 'No archived projects' : 'No active projects yet'}
-            </h2>
-            <p className="text-muted-foreground mb-6">
-              {searchTerm ? `Try adjusting your search for "${searchTerm}"` :
-               showArchived ? 'Archived projects will appear here when you archive them' :
-               'Create your first client project to get started'}
-            </p>
-            {!searchTerm && !showArchived && (
-              <Button
-                onClick={() => setShowAddClient(true)}
-                className="px-6 py-3"
-                style={{ backgroundColor: paintBrainColors.purple, color: 'white' }}
-              >
-                Create First Project
-              </Button>
-            )}
-          </div>
-        ) : (
-          isManualMode ? (
-            <ReactSortable 
-              list={displayProjects} 
-              setList={(newList) => setManualProjects(newList)}
-              className="space-y-4"
-              handle=".drag-handle"
-            >
-              {displayProjects.map((project: any) => (
-                <ProjectCard 
-                  key={project.id} 
-                  project={project} 
-                  onSelectProject={onSelectProject}
-                  updateStatusMutation={updateStatusMutation}
-                  deleteProjectMutation={deleteProjectMutation}
-                  showDragHandle={true}
-                />
-              ))}
-            </ReactSortable>
+        <div className="space-y-4 max-h-[70vh] overflow-y-auto">
+          {displayProjects.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">🎨</div>
+              <h2 className="text-xl font-semibold mb-2">
+                {searchTerm ? 'No matching projects found' : 
+                 showArchived ? 'No archived projects' : 'No active projects yet'}
+              </h2>
+              <p className="text-muted-foreground mb-6">
+                {searchTerm ? `Try adjusting your search for "${searchTerm}"` :
+                 showArchived ? 'Archived projects will appear here when you archive them' :
+                 'Create your first client project to get started'}
+              </p>
+            </div>
           ) : (
-            <div className="space-y-4">
-              {displayProjects.map((project: any) => (
+            isManualMode ? (
+              <ReactSortable 
+                list={displayProjects} 
+                setList={(newList) => setManualProjects(newList)}
+                className="space-y-4"
+                handle=".drag-handle"
+              >
+                {displayProjects.map((project: any) => (
+                  <ProjectCard 
+                    key={project.id} 
+                    project={project} 
+                    onSelectProject={onSelectProject}
+                    updateStatusMutation={updateStatusMutation}
+                    deleteProjectMutation={deleteProjectMutation}
+                    showDragHandle={true}
+                  />
+                ))}
+              </ReactSortable>
+            ) : (
+              displayProjects.map((project: any) => (
                 <ProjectCard 
                   key={project.id} 
                   project={project} 
@@ -315,10 +242,10 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
                   deleteProjectMutation={deleteProjectMutation}
                   showDragHandle={false}
                 />
-              ))}
-            </div>
-          )
-        )}
+              ))
+            )
+          )}
+        </div>
       </div>
     </div>
   );
@@ -388,10 +315,6 @@ function ProjectCard({ project, onSelectProject, updateStatusMutation, deletePro
             <option value="cancelled">❌ Cancelled</option>
             <option value="archived">📦 Archived</option>
           </select>
-          <div 
-            className="w-3 h-3 rounded-full"
-            style={{ backgroundColor: statusConfig[project.status as keyof typeof statusConfig]?.color || paintBrainColors.gray }}
-          />
         </div>
       </div>
       
@@ -400,7 +323,7 @@ function ProjectCard({ project, onSelectProject, updateStatusMutation, deletePro
         <button
           onClick={(e) => {
             e.stopPropagation();
-            // Handle edit project
+            // Handle edit
           }}
           className="p-2 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
           style={{ color: paintBrainColors.blue }}

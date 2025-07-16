@@ -1,6 +1,5 @@
 import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import dayjs from 'dayjs';
 import { Camera, FileText, ArrowLeft, Edit3, Download, X, Image as ImageIcon, DollarSign, Calendar, Wrench, Plus, Trash2, Calculator, Receipt as ReceiptIcon, MapPin, Navigation, ExternalLink, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,84 +13,7 @@ import type { Project, Photo, Receipt, ToolsChecklist, DailyHours } from '@share
 import InvoiceGenerator from './InvoiceGenerator';
 import EstimateGenerator from './EstimateGenerator';
 import PhotoCarousel from './PhotoCarousel';
-import ErrorTooltip from './ui/error-tooltip';
-import SuccessTooltip from './ui/success-tooltip';
-import { useErrorTooltip } from '@/hooks/useErrorTooltip';
 import { ReactSortable } from 'react-sortablejs';
-import PaintBrainCalendar from './PaintBrainCalendar';
-
-// Paint Brain Color Palette
-const paintBrainColors = {
-  purple: '#8B5FBF',    // Purple from code syntax
-  orange: '#D4A574',    // Orange from code syntax  
-  green: '#6A9955',     // Green from comments
-  red: '#F44747',       // Red from HTML tags
-  blue: '#569CD6',      // Blue from keywords
-  gray: '#6B7280'       // Neutral gray
-};
-
-const statusConfig = {
-  'in-progress': { 
-    label: 'In Progress', 
-    color: paintBrainColors.green,
-    priority: 1 
-  },
-  'scheduled': { 
-    label: 'Scheduled', 
-    color: paintBrainColors.blue,
-    priority: 2 
-  },
-  'estimate-sent': { 
-    label: 'Estimate Sent', 
-    color: paintBrainColors.purple,
-    priority: 3 
-  },
-  'awaiting-confirmation': { 
-    label: 'Awaiting Confirmation', 
-    color: paintBrainColors.orange,
-    priority: 4 
-  },
-  'site-visit-needed': { 
-    label: 'Site Visit Needed', 
-    color: paintBrainColors.purple,
-    priority: 5 
-  },
-  'initial-contact': { 
-    label: 'Initial Contact', 
-    color: paintBrainColors.blue,
-    priority: 6 
-  },
-  'follow-up-needed': { 
-    label: 'Follow-up Needed', 
-    color: paintBrainColors.orange,
-    priority: 7 
-  },
-  'on-hold': { 
-    label: 'On Hold', 
-    color: paintBrainColors.gray,
-    priority: 8 
-  },
-  'pending': { 
-    label: 'Pending', 
-    color: '#D4A574',
-    priority: 9 
-  },
-  'completed': { 
-    label: 'Completed', 
-    color: paintBrainColors.green,
-    priority: 10 
-  },
-  'cancelled': { 
-    label: 'Cancelled', 
-    color: paintBrainColors.red,
-    priority: 11 
-  },
-  'archived': { 
-    label: 'Archived', 
-    color: paintBrainColors.gray,
-    priority: 12 
-  }
-};
 
 // Calendar function for A-Frame calendar integration
 const openWorkCalendar = (clientProject: Project | null = null) => {
@@ -119,38 +41,6 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
   const [editVendor, setEditVendor] = useState('');
   const [editAmount, setEditAmount] = useState('');
   const [editDescription, setEditDescription] = useState('');
-
-  const formatDate = (isoDate: string | null | undefined) => {
-    if (!isoDate) return '';
-    
-    // Convert to string in case it's not already
-    const dateStr = String(isoDate);
-    
-    // Extract only the date part (YYYY-MM-DD) from ISO string
-    let cleanDateString = '';
-    if (dateStr.includes('T')) {
-      // If it's a full ISO string like "2025-06-22T00:00:00.000Z"
-      cleanDateString = dateStr.split('T')[0];
-    } else if (dateStr.includes(' ')) {
-      // If it's a string with space separator
-      cleanDateString = dateStr.split(' ')[0];
-    } else {
-      // If it's already just a date string
-      cleanDateString = dateStr;
-    }
-    
-    // Parse the clean date string (YYYY-MM-DD format)
-    const parts = cleanDateString.split('-');
-    if (parts.length === 3 && parts[0].length === 4) {
-      const year = parts[0];
-      const month = parts[1];
-      const day = parts[2];
-      return `${day}–${month}–${year}`;
-    }
-    
-    // If parsing fails, return empty string instead of the raw date
-    return '';
-  };
 
   const { data: receipts = [], isLoading, error } = useQuery<Receipt[]>({
     queryKey: [`/api/projects/${projectId}/receipts`],
@@ -325,10 +215,12 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
                     </span>
                   )}
                 </div>
-                {receipt.description && (
+                {receipt.description && receipt.description.trim() && (
                   <p className="text-xs text-gray-400 mt-1">{receipt.description}</p>
                 )}
-                <p className="text-xs text-gray-500">{formatDate(receipt.date)}</p>
+                {receipt.date && (
+                  <p className="text-xs text-gray-500">{formatDate(receipt.date)}</p>
+                )}
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -361,15 +253,6 @@ interface StreamlinedClientPageProps {
 }
 
 export default function StreamlinedClientPage({ projectId, onBack }: StreamlinedClientPageProps) {
-  // Query client MUST be declared first
-  const queryClient = useQueryClient();
-  
-  // Error tooltip system
-  const { errorState, showUploadError, showDeleteError, showSaveError, showLoadError, hideError } = useErrorTooltip();
-  
-  // Success message state
-  const [successMessage, setSuccessMessage] = useState({ isVisible: false, message: '' });
-
   // File input refs
   const photoInputRef = useRef<HTMLInputElement>(null);
   const receiptInputRef = useRef<HTMLInputElement>(null);
@@ -388,47 +271,14 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
   const [touchStarted, setTouchStarted] = useState(false);
 
-  // Menu customization states with localStorage persistence
-  const [menuSections, setMenuSections] = useState(() => {
-    const defaultSections = [
-      { id: 'photos', name: 'Photos', icon: Camera },
-      { id: 'tools', name: 'Tools', icon: Wrench },
-      { id: 'dailyHours', name: 'Daily Hours', icon: Calendar },
-      { id: 'notes', name: 'Project Notes', icon: FileText },
-      { id: 'receipts', name: 'Receipts & Expenses', icon: ReceiptIcon },
-    ];
-    
-    try {
-      const saved = localStorage.getItem('paintbrain-section-order');
-      if (saved) {
-        const savedOrder = JSON.parse(saved);
-        // Merge saved order with default sections to handle new sections
-        const orderedSections = savedOrder.map((savedSection: any) => 
-          defaultSections.find(section => section.id === savedSection.id)
-        ).filter(Boolean);
-        
-        // Add any new sections that weren't in saved order
-        const missingIds = defaultSections.filter(section => 
-          !savedOrder.some((saved: any) => saved.id === section.id)
-        );
-        
-        return [...orderedSections, ...missingIds];
-      }
-    } catch (error) {
-      console.log('Failed to load section order from localStorage');
-    }
-    
-    return defaultSections;
-  });
-
-  // Save section order to localStorage whenever it changes
-  React.useEffect(() => {
-    try {
-      localStorage.setItem('paintbrain-section-order', JSON.stringify(menuSections));
-    } catch (error) {
-      console.log('Failed to save section order to localStorage');
-    }
-  }, [menuSections]);
+  // Menu customization states
+  const [menuSections, setMenuSections] = useState([
+    { id: 'photos', name: 'Photos', icon: Camera },
+    { id: 'tools', name: 'Tools', icon: Wrench },
+    { id: 'dailyHours', name: 'Daily Hours', icon: Calendar },
+    { id: 'notes', name: 'Project Notes', icon: FileText },
+    { id: 'receipts', name: 'Receipts & Expenses', icon: ReceiptIcon },
+  ]);
 
   // Collapsible menu state - all collapsed by default
   const [expandedSections, setExpandedSections] = useState({
@@ -447,11 +297,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const [selectedDate, setSelectedDate] = useState('');
   const [hoursInput, setHoursInput] = useState('');
   const [descriptionInput, setDescriptionInput] = useState('');
-
-  // Handle date picker opening - simplified since we removed the problematic native input
-  const handleOpenDatePicker = React.useCallback(() => {
-    setShowDatePicker(true);
-  }, []);
 
   // Edit form state
   const [editForm, setEditForm] = useState({
@@ -521,9 +366,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     },
     onError: (error) => {
       console.error('Edit project failed:', error);
-      showSaveError('project', error, () => {
-        editProjectMutation.mutate(editForm);
-      });
     },
   });
 
@@ -588,11 +430,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     },
     onError: (error) => {
       console.error('Add hours failed:', error);
-      showSaveError('hours', error, () => {
-        if (selectedDate && hoursInput) {
-          handleAddHours();
-        }
-      });
     },
   });
 
@@ -605,7 +442,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const deleteSelectedPhotosMutation = useMutation({
     mutationFn: async (photoIds: number[]) => {
       const deletePromises = photoIds.map(id => 
-        fetch(`/api/projects/${projectId}/photos/${id}`, { method: 'DELETE' })
+        fetch(`/api/photos/${id}`, { method: 'DELETE' })
       );
       
       const responses = await Promise.all(deletePromises);
@@ -624,11 +461,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     },
     onError: (error) => {
       console.error('Bulk delete failed:', error);
-      showDeleteError('photo', error, () => {
-        if (selectedPhotos.size > 0) {
-          deleteSelectedPhotosMutation.mutate(Array.from(selectedPhotos));
-        }
-      });
     },
   });
 
@@ -637,6 +469,39 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  };
+
+  // Format ISO date string into "DD–MM–YYYY" with em-dash - CLEAN DATE ONLY
+  const formatDate = (isoDate: string | null | undefined) => {
+    if (!isoDate) return '';
+    
+    // Convert to string in case it's not already
+    const dateStr = String(isoDate);
+    
+    // Extract only the date part (YYYY-MM-DD) from ISO string
+    let cleanDateString = '';
+    if (dateStr.includes('T')) {
+      // If it's a full ISO string like "2025-06-22T00:00:00.000Z"
+      cleanDateString = dateStr.split('T')[0];
+    } else if (dateStr.includes(' ')) {
+      // If it's a string with space separator
+      cleanDateString = dateStr.split(' ')[0];
+    } else {
+      // If it's already just a date string
+      cleanDateString = dateStr;
+    }
+    
+    // Parse the clean date string (YYYY-MM-DD format)
+    const parts = cleanDateString.split('-');
+    if (parts.length === 3 && parts[0].length === 4) {
+      const year = parts[0];
+      const month = parts[1];
+      const day = parts[2];
+      return `${day}–${month}–${year}`;
+    }
+    
+    // If parsing fails, return empty string instead of the raw date
+    return '';
   };
 
   const handleAddHours = () => {
@@ -795,7 +660,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
               ...prev,
               currentFile: progress.currentFile,
               originalSize: totalOriginalSize,
-              compressedSize: progress.compressedSize || 0,
+              compressedSize: totalCompressedSizeBytes,
             }));
           }
         );
@@ -847,8 +712,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       if (photoInputRef.current) {
         photoInputRef.current.value = '';
       }
-      // Show success message
-      setSuccessMessage({ isVisible: true, message: 'Photos uploaded successfully!' });
     },
     onError: (error) => {
       console.error('Photo upload failed:', error);
@@ -859,73 +722,41 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         originalSize: 0,
         compressedSize: 0,
       });
-      
-      // Show user-friendly error tooltip
-      showUploadError('photo', error, () => {
-        if (photoInputRef.current?.files) {
-          uploadPhotosMutation.mutate(photoInputRef.current.files);
-        }
-      });
     },
   });
 
   const uploadReceiptsMutation = useMutation({
     mutationFn: async (files: FileList) => {
-      console.log('Starting receipt upload with files:', files.length);
-      const results = [];
-      
-      // Process files one by one since server expects single file
-      for (const file of Array.from(files)) {
-        console.log('Processing receipt file:', file.name, 'Size:', file.size);
-        
-        const formData = new FormData();
-        formData.append('receipt', file); // Use 'receipt' (singular) to match server
+      const formData = new FormData();
+      Array.from(files).forEach((file) => {
+        formData.append('receipts', file);
+      });
 
-        const response = await fetch(`/api/projects/${projectId}/receipts`, {
-          method: 'POST',
-          body: formData,
-        });
-        
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`Receipt upload failed for ${file.name}: ${response.status} ${response.statusText} - ${errorText}`);
-        }
-        
-        const result = await response.json();
-        console.log('Receipt upload successful for:', file.name, result);
-        results.push(result);
+      const response = await fetch(`/api/projects/${projectId}/receipts`, {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Receipt upload failed: ${response.status} ${response.statusText}`);
       }
       
-      return results;
+      return response.json();
     },
-    onSuccess: (results) => {
-      console.log('All receipts uploaded successfully:', results);
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/receipts`] });
       if (receiptInputRef.current) {
         receiptInputRef.current.value = '';
       }
-      // Show success message
-      setSuccessMessage({ 
-        isVisible: true, 
-        message: `${results.length} receipt${results.length > 1 ? 's' : ''} uploaded and processed!` 
-      });
     },
     onError: (error) => {
       console.error('Receipt upload failed:', error);
-      
-      // Show user-friendly error tooltip
-      showUploadError('receipt', error, () => {
-        if (receiptInputRef.current?.files) {
-          uploadReceiptsMutation.mutate(receiptInputRef.current.files);
-        }
-      });
     },
   });
 
   const deletePhotoMutation = useMutation({
     mutationFn: async (photoId: number) => {
-      console.log('Attempting to delete photo ID:', photoId);
-      const response = await fetch(`/api/projects/${projectId}/photos/${photoId}`, {
+      const response = await fetch(`/api/photos/${photoId}`, {
         method: 'DELETE',
       });
       
@@ -933,32 +764,13 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         throw new Error(`Failed to delete photo: ${response.status}`);
       }
       
-      console.log('Photo delete successful:', photoId);
       return photoId;
     },
-    onSuccess: (deletedPhotoId) => {
-      console.log('Photo delete mutation success, invalidating queries for deleted photo:', deletedPhotoId);
-      
-      // Force refetch instead of just invalidate to ensure fresh data
-      queryClient.refetchQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
-      
-      // Close carousel if we're viewing the deleted photo
-      if (showPhotoCarousel) {
-        const photoIndex = photos.findIndex(p => p.id === deletedPhotoId);
-        if (photoIndex === carouselIndex) {
-          if (photos.length === 1) {
-            setShowPhotoCarousel(false);
-          } else if (carouselIndex === photos.length - 1) {
-            setCarouselIndex(carouselIndex - 1);
-          }
-        }
-      }
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
     },
     onError: (error) => {
       console.error('Delete failed:', error);
-      showDeleteError('photo', error, () => {
-        // No automatic retry for delete - too dangerous
-      });
     },
   });
 
@@ -1067,94 +879,61 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   }
 
   return (
-    <div className="min-h-screen">
-      {/* Header - Constrained */}
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="flex items-center justify-between mb-6">
+    <div className="max-w-4xl mx-auto p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <Button
+          onClick={onBack}
+          variant="outline"
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft size={16} />
+          Back to Projects
+        </Button>
+        
+        <div className="flex items-center gap-3">
           <Button
-            onClick={onBack}
+            onClick={() => openWorkCalendar(project)}
             variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+            title="Add to calendar"
+          >
+            <Calendar size={16} />
+          </Button>
+          <button
+            onClick={() => window.open(generateMapsLink(project.address, project.clientCity, project.clientPostal), '_blank')}
+            className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
+            title="View on maps"
+          >
+            <MapPin size={16} />
+          </button>
+        </div>
+      </div>
+
+      {/* Client Info Header */}
+      <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+              {project.clientName}
+            </h1>
+            <p className="text-gray-600 dark:text-gray-300 mt-1">
+              {project.address}, {project.clientCity} {project.clientPostal}
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              {project.projectType} • {project.roomCount} rooms • Difficulty: {project.difficulty}/5
+            </p>
+          </div>
+          <Button
+            onClick={() => setShowEditClient(true)}
+            variant="outline"
+            size="sm"
             className="flex items-center gap-2"
           >
-            <ArrowLeft size={16} />
-            Back to Projects
+            <Edit3 size={16} />
+            Edit
           </Button>
-          
-          <div className="flex items-center gap-3">
-            <Button
-              onClick={() => openWorkCalendar(project)}
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-2"
-              title="Add to calendar"
-            >
-              <Calendar size={16} />
-            </Button>
-            <button
-              onClick={() => window.open(generateMapsLink(project.address, project.clientCity, project.clientPostal), '_blank')}
-              className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
-              title="View on maps"
-            >
-              <MapPin size={16} />
-            </button>
-          </div>
-        </div>
-
-        {/* Client Info Header - Constrained */}
-        <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {project.clientName}
-              </h1>
-              <p className="text-gray-600 dark:text-gray-300 mt-1">
-                {project.address}, {project.clientCity} {project.clientPostal}
-              </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                {project.projectType} • {project.roomCount} rooms • Difficulty: {project.difficulty}/5
-              </p>
-              
-              {/* Status Dropdown */}
-              <div className="mt-3 flex items-center gap-2">
-                <span className="text-sm text-gray-500 dark:text-gray-400">Status:</span>
-                <select
-                  value={project.status}
-                  onChange={(e) => {
-                    updateProjectMutation.mutate({ status: e.target.value });
-                  }}
-                  className={`text-sm font-medium border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    project.status === 'in-progress' ? 'text-green-600' :
-                    project.status === 'pending' ? 'text-yellow-600' :
-                    project.status === 'completed' ? 'text-orange-600' :
-                    project.status === 'archived' ? 'text-gray-600' :
-                    'text-blue-600'
-                  }`}
-                >
-                  <option value="in-progress">🟢 In Progress</option>
-                  <option value="scheduled">🔵 Scheduled</option>
-                  <option value="estimate-sent">📝 Estimate Sent</option>
-                  <option value="awaiting-confirmation">⏳ Awaiting Confirmation</option>
-                  <option value="site-visit-needed">📍 Site Visit Needed</option>
-                  <option value="initial-contact">📞 Initial Contact</option>
-                  <option value="follow-up-needed">🔄 Follow-up Needed</option>
-                  <option value="on-hold">⏸️ On Hold</option>
-                  <option value="pending">🟡 Pending</option>
-                  <option value="completed">✅ Completed</option>
-                  <option value="cancelled">❌ Cancelled</option>
-                  <option value="archived">📦 Archived</option>
-                </select>
-              </div>
-            </div>
-            <Button
-              onClick={() => setShowEditClient(true)}
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-2"
-            >
-              <Edit3 size={16} />
-              Edit
-            </Button>
-          </div>
         </div>
       </div>
 
@@ -1200,71 +979,31 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         </div>
       )}
 
-      {/* NEW: Mac-Style Collapsible Menu with ReactSortable - Full Width */}
-      <div className="w-full px-4 py-6">
-        <div className="max-w-5xl mx-auto mb-4">
-          <h3 className="text-lg font-semibold text-white">
-            Customizable Menu (Drag to Reorder)
-          </h3>
-        </div>
+      {/* NEW: Mac-Style Collapsible Menu with ReactSortable */}
+      <div className="mt-8 p-6 bg-gradient-to-r from-gray-900 to-black rounded-lg border border-gray-700">
+        <h3 className="text-lg font-semibold mb-4 text-white">
+          Customizable Menu (Drag to Reorder)
+        </h3>
         
-        <div className="max-w-5xl mx-auto">
-          <ReactSortable 
-            list={menuSections} 
-            setList={setMenuSections}
-            animation={150}
-            handle=".drag-handle"
-            className="space-y-2"
-          >
+        <ReactSortable 
+          list={menuSections} 
+          setList={setMenuSections}
+          animation={150}
+          handle=".drag-handle"
+          className="space-y-2"
+        >
           {menuSections.map((section) => {
             const IconComponent = section.icon;
             const isExpanded = expandedSections[section.id as keyof typeof expandedSections];
             
-            // Get section data and status for enhanced badges
-            let badgeContent = null;
-            let badgeColor = 'bg-blue-600';
-            
+            // Get section data count for badges
+            let itemCount = 0;
             switch(section.id) {
-              case 'photos':
-                if (photos.length > 0) {
-                  badgeContent = `${photos.length} photos`;
-                  badgeColor = 'bg-orange-600';
-                }
-                break;
-                
-              case 'tools':
-                if (tools.length > 0) {
-                  badgeContent = `${tools.length} tools`;
-                  badgeColor = 'bg-yellow-600';
-                }
-                break;
-                
-              case 'dailyHours':
-                if (dailyHours.length > 0) {
-                  const totalEarned = dailyHours.reduce((sum, h) => sum + (h.hours * 60), 0);
-                  badgeContent = `${dailyHours.length} days • $${totalEarned}`;
-                  badgeColor = 'bg-green-600';
-                }
-                break;
-                
-              case 'receipts':
-                if (receipts.length > 0) {
-                  const totalSpent = receipts.reduce((sum, r) => sum + parseFloat(r.amount || '0'), 0);
-                  badgeContent = `${receipts.length} receipts • $${totalSpent.toFixed(0)}`;
-                  badgeColor = 'bg-purple-600';
-                }
-                break;
-                
-              case 'notes':
-                if (notes && notes.trim().length > 0) {
-                  const wordCount = notes.trim().split(/\s+/).length;
-                  badgeContent = `${wordCount} words`;
-                  badgeColor = 'bg-blue-600';
-                }
-                break;
-                
-              default:
-                badgeContent = null;
+              case 'photos': itemCount = photos.length; break;
+              case 'tools': itemCount = tools.length; break;
+              case 'dailyHours': itemCount = dailyHours.length; break;
+              case 'receipts': itemCount = receipts.length; break;
+              default: itemCount = 0;
             }
             
             // Update section name for photos
@@ -1273,7 +1012,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             return (
               <div
                 key={section.id}
-                className="bg-gray-800 rounded-lg border border-gray-600 overflow-visible"
+                className="bg-gray-800 rounded-lg border border-gray-600 overflow-hidden"
               >
                 {/* Section Header */}
                 <div 
@@ -1282,22 +1021,22 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                 >
                   <div className="flex items-center gap-3">
                     {/* Mac-style Reorder Icon - Left Side */}
-                    <div className="drag-handle cursor-move p-1 text-white hover:text-gray-200" onClick={(e) => e.stopPropagation()}>
-                      <svg width="16" height="16" viewBox="0 0 16 16" className="text-white">
-                        <rect y="2" width="16" height="1.5" rx="0.75" fill="currentColor"/>
-                        <rect y="5.5" width="16" height="1.5" rx="0.75" fill="currentColor"/>
-                        <rect y="9" width="16" height="1.5" rx="0.75" fill="currentColor"/>
-                        <rect y="12.5" width="16" height="1.5" rx="0.75" fill="currentColor"/>
+                    <div className="drag-handle cursor-move p-1 text-gray-400 hover:text-gray-200" onClick={(e) => e.stopPropagation()}>
+                      <svg width="16" height="16" viewBox="0 0 16 16" className="text-gray-400">
+                        <rect y="2" width="16" height="1.5" rx="0.75"/>
+                        <rect y="5.5" width="16" height="1.5" rx="0.75"/>
+                        <rect y="9" width="16" height="1.5" rx="0.75"/>
+                        <rect y="12.5" width="16" height="1.5" rx="0.75"/>
                       </svg>
                     </div>
                     
                     <IconComponent size={20} className="text-gray-300" />
                     <span className="text-gray-100 font-medium">{sectionName}</span>
                     
-                    {/* Enhanced Status Badge */}
-                    {badgeContent && (
-                      <span className={`${badgeColor} text-white text-xs px-2 py-1 rounded-full font-medium`}>
-                        {badgeContent}
+                    {/* Data Count Badge */}
+                    {itemCount > 0 && (
+                      <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
+                        {itemCount}
                       </span>
                     )}
                   </div>
@@ -1310,9 +1049,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                   </div>
                 </div>
 
-                {/* Section Content - Full Width */}
+                {/* Section Content */}
                 {isExpanded && (
-                  <div className="border-t border-gray-600 px-8 py-6 bg-gray-800 w-full">
+                  <div className="border-t border-gray-600 p-4 bg-gray-900">
                     {section.id === 'photos' && (
                       <div>
                         {/* Photo Upload Options */}
@@ -1503,60 +1242,49 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                     )}
 
                     {section.id === 'dailyHours' && (
-                      <div 
-                        onClick={(e) => e.stopPropagation()}
-                        onMouseDown={(e) => e.stopPropagation()}
-                        onTouchStart={(e) => e.stopPropagation()}
-                        className="overflow-visible"
-                      >
+                      <div>
                         {/* Add Hours Button */}
                         {!showDatePicker && (
                           <Button
-                            onClick={handleOpenDatePicker}
+                            onClick={() => setShowDatePicker(true)}
                             className="w-full mb-4 py-2 text-sm bg-green-600 hover:bg-green-700"
                             variant="outline"
-                            type="button"
                           >
                             <Plus size={16} className="mr-2" />
                             Log Hours for a Day
                           </Button>
                         )}
 
-                        {/* Paint Brain Calendar and Hours Input */}
+                        {/* Date Picker and Hours Input */}
                         {showDatePicker && (
-                          <div className="mb-2 space-y-2 overflow-visible">
-                            {/* Close button */}
-                            <div className="flex justify-end px-4">
-                              <Button
-                                onClick={() => {
-                                  setShowDatePicker(false);
-                                  setSelectedDate('');
-                                  setHoursInput('');
-                                  setDescriptionInput('');
+                          <div className="mb-4 p-4 bg-gray-800 rounded-lg space-y-3 border border-gray-600">
+                            <div>
+                              <label className="text-sm font-medium mb-2 block text-gray-200">
+                                Select Date
+                                <span className="ml-2 text-xs px-2 py-1 bg-green-900/30 text-green-300 rounded">
+                                  Today: {formatDateForInput(new Date())}
+                                </span>
+                              </label>
+                              <input
+                                type="date"
+                                value={selectedDate}
+                                onChange={(e) => {
+                                  setSelectedDate(e.target.value);
+                                  if (e.target.value) {
+                                    setTimeout(() => {
+                                      const hoursInput = document.querySelector('input[placeholder="0"]') as HTMLInputElement;
+                                      if (hoursInput) hoursInput.focus();
+                                    }, 100);
+                                  }
                                 }}
-                                variant="ghost"
-                                size="sm"
-                                className="text-gray-400 hover:text-white p-2"
-                              >
-                                <X size={16} />
-                              </Button>
-                            </div>
-                            
-                            {/* Full-width calendar container - allow overflow for larger calendar */}
-                            <div className="w-full overflow-visible">
-                              <PaintBrainCalendar
-                                selectedDate={selectedDate}
-                                onDateSelect={(date) => {
-                                  setSelectedDate(date);
-                                  // Remove auto-focus to prevent calendar sliding
-                                }}
-                                maxDate={formatDateForInput(new Date())}
-                                className="w-full overflow-visible"
+                                className="w-full px-3 py-2 text-sm border-2 border-green-600 rounded-lg bg-green-900/20 text-gray-200 focus:border-green-500"
+                                max={formatDateForInput(new Date())}
+                                style={{ colorScheme: 'dark' }}
                               />
                             </div>
                             
-                            <div className="px-4">
-                              <label className="text-sm font-medium mb-1 block text-gray-200">Hours Worked</label>
+                            <div>
+                              <label className="text-sm font-medium mb-2 block text-gray-200">Hours Worked</label>
                               <input
                                 type="number"
                                 step="0.5"
@@ -1574,8 +1302,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                               />
                             </div>
                             
-                            <div className="px-4">
-                              <label className="text-sm font-medium mb-1 block text-gray-200">Description</label>
+                            <div>
+                              <label className="text-sm font-medium mb-2 block text-gray-200">Description</label>
                               <input
                                 type="text"
                                 value={descriptionInput}
@@ -1585,7 +1313,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                               />
                             </div>
                             
-                            <div className="flex gap-2 px-4">
+                            <div className="flex gap-2">
                               <Button
                                 onClick={handleAddHours}
                                 disabled={!hoursInput || addHoursMutation.isPending}
@@ -1622,7 +1350,11 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                   <div className="flex-1">
                                     <div className="flex items-center gap-2 text-sm">
                                       <span className="font-medium text-gray-100">
-                                        {dayjs(hours.date).format('ddd, MMM D')}
+                                        {new Date(hours.date + 'T00:00:00').toLocaleDateString('en-US', { 
+                                          weekday: 'short', 
+                                          month: 'short', 
+                                          day: 'numeric' 
+                                        })}
                                       </span>
                                       <span className="text-gray-400">•</span>
                                       <span className="font-semibold text-blue-400">
@@ -1797,30 +1529,31 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
               </div>
             );
           })}
-          </ReactSortable>
+        </ReactSortable>
+
+        <div className="mt-4 p-3 bg-gray-800 rounded-lg border border-gray-600">
+          <p className="text-sm text-gray-300">
+            <strong>How to use:</strong> Click section headers to expand/collapse. Drag the grip handles to reorder sections to match your workflow preference.
+          </p>
         </div>
-
-
       </div>
 
-      {/* Generate Buttons - Constrained */}
-      <div className="max-w-4xl mx-auto px-6 pb-6">
-        <div className="grid grid-cols-2 gap-4">
-          <Button
-            onClick={() => setShowEstimateGenerator(true)}
-            className="py-3 text-sm font-semibold bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center"
-          >
-            <Calculator size={18} className="mr-2" />
-            Generate Estimate
-          </Button>
-          <Button
-            onClick={() => setShowInvoiceGenerator(true)}
-            className="py-3 text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            <FileText size={18} className="mr-2" />
-            Generate Invoice
-          </Button>
-        </div>
+      {/* Generate Buttons */}
+      <div className="grid grid-cols-2 gap-4">
+        <Button
+          onClick={() => setShowEstimateGenerator(true)}
+          className="py-3 text-sm font-semibold bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center"
+        >
+          <Calculator size={18} className="mr-2" />
+          Generate Estimate
+        </Button>
+        <Button
+          onClick={() => setShowInvoiceGenerator(true)}
+          className="py-3 text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white"
+        >
+          <FileText size={18} className="mr-2" />
+          Generate Invoice
+        </Button>
       </div>
 
       {/* Hidden File Inputs */}
@@ -1987,20 +1720,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           </div>
         </DialogContent>
       </Dialog>
-
-      {/* Error Tooltip System */}
-      <ErrorTooltip
-        isVisible={errorState.isVisible}
-        context={errorState.context}
-        onClose={hideError}
-      />
-
-      {/* Success Tooltip System */}
-      <SuccessTooltip
-        isVisible={successMessage.isVisible}
-        message={successMessage.message}
-        onClose={() => setSuccessMessage({ isVisible: false, message: '' })}
-      />
     </div>
   );
 }
