@@ -359,15 +359,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   // Query client - must be declared before mutations
   const queryClient = useQueryClient();
-  
-  // Safe query invalidation helper
-  const invalidatePhotos = () => {
-    queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
-  };
-  
-  const invalidateProject = () => {
-    queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}`] });
-  };
 
   // API queries
   const { data: project } = useQuery<Project>({
@@ -389,6 +380,15 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const { data: dailyHours = [], refetch: refetchHours } = useQuery<DailyHours[]>({
     queryKey: [`/api/projects/${projectId}/hours`],
   });
+
+  // Safe query invalidation helper functions  
+  const invalidatePhotos = () => {
+    queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
+  };
+  
+  const invalidateProject = () => {
+    queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}`] });
+  };
 
   // Critical mutations that need to be declared early
   const editProjectMutation = useMutation({
