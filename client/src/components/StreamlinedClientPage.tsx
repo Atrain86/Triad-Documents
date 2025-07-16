@@ -333,6 +333,13 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     queryKey: [`/api/projects/${projectId}/photos`],
   });
 
+  // Debug logging for photos
+  React.useEffect(() => {
+    console.log('Photos data updated:', photos);
+    console.log('Photos length:', photos.length);
+    console.log('Photos array:', photos.map(p => ({ id: p.id, filename: p.filename })));
+  }, [photos]);
+
   const { data: receipts = [] } = useQuery<Receipt[]>({
     queryKey: [`/api/projects/${projectId}/receipts`],
   });
