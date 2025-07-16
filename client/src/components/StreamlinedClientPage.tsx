@@ -72,22 +72,14 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
 
   const updateReceiptMutation = useMutation({
     mutationFn: async ({ id, vendor, amount, description }: { id: number; vendor: string; amount: string; description: string }) => {
-      const response = await fetch(`/api/receipts/${id}`, {
+      const response = await apiRequest(`/api/receipts/${id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ vendor, amount, description }),
+        body: { vendor, amount, description }
       });
-      
-      if (!response.ok) {
-        throw new Error(`Failed to update receipt: ${response.status}`);
-      }
-      
-      return response.json();
+      return response;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/receipts`] });
+    onSuccess: async () => {
+      await refetchReceipts();
       setEditingReceipt(null);
       setEditVendor('');
       setEditAmount('');
@@ -342,7 +334,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     queryKey: [`/api/projects/${projectId}/photos`],
   });
 
-  const { data: receipts = [] } = useQuery<Receipt[]>({
+  const { data: receipts = [], refetch: refetchReceipts } = useQuery<Receipt[]>({
     queryKey: [`/api/projects/${projectId}/receipts`],
   });
 
@@ -757,24 +749,30 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const uploadReceiptsMutation = useMutation({
     mutationFn: async (files: FileList) => {
-      const formData = new FormData();
-      Array.from(files).forEach((file) => {
-        formData.append('receipts', file);
-      });
-
-      const response = await fetch(`/api/projects/${projectId}/receipts`, {
-        method: 'POST',
-        body: formData,
-      });
+      const results = [];
       
-      if (!response.ok) {
-        throw new Error(`Receipt upload failed: ${response.status} ${response.statusText}`);
+      // Process files sequentially since server expects single file uploads
+      for (const file of Array.from(files)) {
+        const formData = new FormData();
+        formData.append('receipt', file);
+
+        const response = await fetch(`/api/projects/${projectId}/receipts`, {
+          method: 'POST',
+          body: formData,
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Receipt upload failed: ${response.status} ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        results.push(result);
       }
       
-      return response.json();
+      return results;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/receipts`] });
+    onSuccess: async () => {
+      await refetchReceipts();
       if (receiptInputRef.current) {
         receiptInputRef.current.value = '';
       }
@@ -844,23 +842,14 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const updateHoursMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: number; updates: any }) => {
-      const response = await fetch(`/api/hours/${id}`, {
+      const response = await apiRequest(`/api/hours/${id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updates),
+        body: updates
       });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to update hours: ${response.status} - ${errorText}`);
-      }
-      
-      return response.json();
+      return response;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/hours`] });
+    onSuccess: async () => {
+      await refetchHours();
       setEditingHours(null);
     },
     onError: (error) => {
