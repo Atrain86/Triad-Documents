@@ -893,10 +893,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-2xl font-bold" style={{ color: paintBrainColors.purple }}>
               {project.clientName}
             </h1>
-            <p className="text-gray-600 dark:text-gray-300 mt-1">
+            <p className="mt-1" style={{ color: paintBrainColors.green }}>
               {project.address}, {project.clientCity} {project.clientPostal}
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
