@@ -857,7 +857,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
 
   // File upload handlers - moved after mutation declarations to prevent temporal dead zone
-  const handlePhotoUpload = React.useCallback((event: any) => {
+  const handlePhotoUpload = (event: any) => {
     console.log('Photo upload handler triggered');
     const files = event.target.files;
     console.log('Selected files:', files);
@@ -867,9 +867,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     } else {
       console.log('No files selected');
     }
-  }, [uploadPhotosMutation]);
+  };
 
-  const handleReceiptUpload = React.useCallback((event: any) => {
+  const handleReceiptUpload = (event: any) => {
     console.log('Receipt upload handler triggered');
     const files = event.target.files;
     console.log('Selected receipt files:', files);
@@ -879,7 +879,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     } else {
       console.log('No receipt files selected');
     }
-  }, [uploadReceiptsMutation]);
+  };
 
   if (!project) {
     return (
