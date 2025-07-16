@@ -1386,7 +1386,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                 <div className="flex items-center justify-between">
                                   <div className="flex-1">
                                     <div className="flex items-center gap-2 text-sm">
-                                      <span className="font-medium text-gray-100">
+                                      <span className="font-medium text-gray-100 whitespace-nowrap">
                                         {(() => {
                                           try {
                                             // Ensure we have a valid date string
