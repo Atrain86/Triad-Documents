@@ -321,6 +321,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     compressedSize: 0,
   });
 
+  const queryClient = useQueryClient();
+
   // API queries
   const { data: project } = useQuery<Project>({
     queryKey: [`/api/projects/${projectId}`],
