@@ -529,10 +529,18 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
                     
                     <button
                       onClick={(e) => {
+                        e.preventDefault();
                         e.stopPropagation();
                         if (confirm(`Are you sure you want to permanently delete ${project.clientName || 'this client'}? This cannot be undone.`)) {
                           deleteProjectMutation.mutate(project.id);
                         }
+                      }}
+                      onTouchStart={(e) => {
+                        e.stopPropagation();
+                      }}
+                      onTouchEnd={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
                       }}
                       className="p-2 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
                       title="Delete client"
@@ -684,10 +692,18 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
                     
                     <button
                       onClick={(e) => {
+                        e.preventDefault();
                         e.stopPropagation();
                         if (confirm(`Are you sure you want to permanently delete ${project.clientName || 'this client'}? This cannot be undone.`)) {
                           deleteProjectMutation.mutate(project.id);
                         }
+                      }}
+                      onTouchStart={(e) => {
+                        e.stopPropagation();
+                      }}
+                      onTouchEnd={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
                       }}
                       className="p-2 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
                       title="Delete client"
