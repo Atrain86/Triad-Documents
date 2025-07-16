@@ -1021,10 +1021,31 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                     <IconComponent size={20} className="text-gray-300" />
                     <span className="font-medium" style={{ color: getSectionColor(section.id) }}>{sectionName}</span>
                     
-                    {/* Data Count Badge */}
+                    {/* Enhanced Data Status Badge */}
                     {itemCount > 0 && (
-                      <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
-                        {itemCount}
+                      <span 
+                        className="text-white text-xs px-3 py-1 rounded-full font-medium"
+                        style={{ backgroundColor: getSectionColor(section.id) }}
+                      >
+                        {(() => {
+                          switch(section.id) {
+                            case 'photos': 
+                              return `${itemCount} photo${itemCount !== 1 ? 's' : ''}`;
+                            case 'tools': 
+                              return `${itemCount} tool${itemCount !== 1 ? 's' : ''}`;
+                            case 'dailyHours': {
+                              const totalHours = dailyHours.reduce((sum, entry) => sum + entry.hours, 0);
+                              const totalEarnings = totalHours * (project?.hourlyRate || 60);
+                              return `${itemCount} day${itemCount !== 1 ? 's' : ''} • $${totalEarnings.toLocaleString()}`;
+                            }
+                            case 'receipts': {
+                              const totalAmount = receipts.reduce((sum, receipt) => sum + parseFloat(receipt.amount), 0);
+                              return `${itemCount} receipt${itemCount !== 1 ? 's' : ''} • $${totalAmount.toFixed(2)}`;
+                            }
+                            default: 
+                              return itemCount.toString();
+                          }
+                        })()}
                       </span>
                     )}
                   </div>
