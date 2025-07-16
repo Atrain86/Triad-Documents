@@ -1498,11 +1498,15 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                                 return 'Invalid date';
                                               }
                                               
-                                              return date.toLocaleDateString('en-US', { 
-                                                weekday: 'short', 
-                                                month: 'short', 
-                                                day: 'numeric' 
-                                              });
+                                              // Create uniform date format: "Wed, Jun 25"
+                                              const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                                              const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                                              
+                                              const dayName = dayNames[date.getDay()];
+                                              const monthName = monthNames[date.getMonth()];
+                                              const dayNum = date.getDate();
+                                              
+                                              return `${dayName}, ${monthName} ${dayNum}`;
                                             } catch (error) {
                                               console.error('Date formatting error:', error, hours.date);
                                               return 'Invalid date';
