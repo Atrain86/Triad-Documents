@@ -46,12 +46,20 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
   const deleteProjectMutation = useMutation({
     mutationFn: async (projectId: number) => {
       const response = await fetch(`/api/projects/${projectId}`, { method: 'DELETE' });
-      if (!response.ok) throw new Error('Failed to delete project');
-      return response.json();
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Failed to delete project: ${error}`);
+      }
+      return { success: true };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      queryClient.refetchQueries({ queryKey: ['/api/projects'] });
     },
+    onError: (error) => {
+      console.error('Delete failed:', error);
+      alert('Failed to delete project. Please try again.');
+    }
   });
 
   const updateStatusMutation = useMutation({
@@ -117,12 +125,9 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
       <div className="p-6">
         <div className="flex justify-center mb-6">
           <img 
-            src="/paint-brain-logo.png" 
-            alt="Paint Brain" 
+            src="/aframe-logo.png" 
+            alt="A-Frame Painting" 
             className="h-32 w-auto object-contain"
-            onError={(e) => {
-              e.currentTarget.src = "/aframe-logo.png";
-            }}
           />
         </div>
 
