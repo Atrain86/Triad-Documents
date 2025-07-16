@@ -425,9 +425,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       return response.json();
     },
     onSuccess: () => {
-      // Use direct invalidation to avoid temporal dead zone
-      const qc = useQueryClient();
-      qc.invalidateQueries({ queryKey: [`/api/projects/${projectId}/hours`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/hours`] });
       setShowDatePicker(false);
       setSelectedDate('');
       setHoursInput('');
@@ -461,9 +459,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       return photoIds;
     },
     onSuccess: () => {
-      // Use direct invalidation to avoid temporal dead zone
-      const qc = useQueryClient();
-      qc.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
       clearSelection();
     },
     onError: (error) => {
@@ -715,9 +711,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     },
     onSuccess: () => {
       console.log('Photo upload mutation success, invalidating queries');
-      // Use direct invalidation to avoid temporal dead zone
-      const qc = useQueryClient();
-      qc.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
       if (photoInputRef.current) {
         photoInputRef.current.value = '';
       }
