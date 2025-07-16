@@ -422,6 +422,13 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       
       return response.json();
     },
+    onSuccess: () => {
+      setShowDatePicker(false);
+      setSelectedDate('');
+      setHoursInput('');
+      setDescriptionInput('');
+      window.location.reload();
+    },
   });
 
   // Helper functions
@@ -447,8 +454,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       return photoIds;
     },
     onSuccess: () => {
-      clearSelection();
-      window.location.reload();
+      setTimeout(() => {
+        clearSelection();
+        window.location.reload();
+      }, 100);
     },
   });
 
@@ -492,7 +501,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     return '';
   };
 
-  const handleAddHours = async () => {
+  const handleAddHours = () => {
     if (!selectedDate || !hoursInput) return;
     
     const parsedHours = parseFloat(hoursInput);
@@ -501,23 +510,12 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       return;
     }
     
-    try {
-      await addHoursMutation.mutateAsync({
-        projectId,
-        date: selectedDate,
-        hours: parsedHours,
-        description: descriptionInput.trim() || 'Painting',
-      });
-      
-      // Reset form after successful addition
-      setShowDatePicker(false);
-      setSelectedDate('');
-      setHoursInput('');
-      setDescriptionInput('');
-      window.location.reload();
-    } catch (error) {
-      console.error('Failed to add hours:', error);
-    }
+    addHoursMutation.mutate({
+      projectId,
+      date: selectedDate,
+      hours: parsedHours,
+      description: descriptionInput.trim() || 'Painting',
+    });
   };
 
   const handleNotesBlur = () => {
@@ -707,10 +705,12 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     },
     onSuccess: () => {
       console.log('Photo upload mutation success');
-      if (photoInputRef.current) {
-        photoInputRef.current.value = '';
-      }
-      window.location.reload();
+      setTimeout(() => {
+        if (photoInputRef.current) {
+          photoInputRef.current.value = '';
+        }
+        window.location.reload();
+      }, 100);
     },
     onError: (error) => {
       console.error('Photo upload failed:', error);
