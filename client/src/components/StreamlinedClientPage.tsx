@@ -415,10 +415,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           projectId: Number(projectId)
         }
       });
-      return response.json();
+      return response;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/hours`] });
+    onSuccess: async () => {
+      await refetchHours();
       setSelectedDate('');
       setHoursInput('');
       setDescriptionInput('');
