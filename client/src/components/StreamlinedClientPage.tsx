@@ -253,6 +253,9 @@ interface StreamlinedClientPageProps {
 }
 
 export default function StreamlinedClientPage({ projectId, onBack }: StreamlinedClientPageProps) {
+  // Query client MUST be declared first to prevent temporal dead zone
+  const queryClient = useQueryClient();
+  
   // File input refs
   const photoInputRef = useRef<HTMLInputElement>(null);
   const receiptInputRef = useRef<HTMLInputElement>(null);
@@ -320,9 +323,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     originalSize: 0,
     compressedSize: 0,
   });
-
-  // Query client for invalidating queries
-  const queryClient = useQueryClient();
 
   // API queries
   const { data: project } = useQuery<Project>({
