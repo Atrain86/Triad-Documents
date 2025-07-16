@@ -734,11 +734,28 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     },
     onSuccess: (deletedPhotoId) => {
       console.log('Photo deleted successfully:', deletedPhotoId);
+      // Immediately update the cache to remove the deleted photo
+      queryClient.setQueryData([`/api/projects/${projectId}/photos`], (oldData: any) => {
+        if (oldData) {
+          return oldData.filter((photo: any) => photo.id !== deletedPhotoId);
+        }
+        return oldData;
+      });
+      // Also invalidate to ensure fresh data
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
-      queryClient.refetchQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
-      // If carousel is open and we deleted the current photo, close it
-      if (showPhotoCarousel && photos.length <= 1) {
-        setShowPhotoCarousel(false);
+      
+      // If carousel is open and we deleted the current photo, close it or navigate
+      if (showPhotoCarousel) {
+        const currentIndex = photos.findIndex(p => p.id === deletedPhotoId);
+        if (currentIndex !== -1) {
+          if (photos.length <= 1) {
+            setShowPhotoCarousel(false);
+          } else {
+            // Navigate to next photo or previous if we're at the end
+            const nextIndex = currentIndex >= photos.length - 1 ? currentIndex - 1 : currentIndex;
+            setCurrentPhotoIndex(Math.max(0, nextIndex));
+          }
+        }
       }
     },
     onError: (error) => {
