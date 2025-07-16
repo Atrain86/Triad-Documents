@@ -1262,7 +1262,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                     if (hoursInput) hoursInput.focus();
                                   }, 100);
                                 }}
-                                className="w-full px-3 py-2 text-sm border-2 border-green-600 rounded-lg bg-green-900/20 text-gray-200 focus:border-green-500"
+                                className="w-full px-3 py-2 text-sm border-2 border-yellow-500 rounded-lg bg-black text-yellow-400 focus:border-blue-500"
                                 max={formatDateForInput(new Date())}
                                 style={{ colorScheme: 'dark' }}
                               />
