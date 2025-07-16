@@ -425,11 +425,13 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/hours`] });
+      // Remove queryClient invalidation - let React Query handle cache updates
       setShowDatePicker(false);
       setSelectedDate('');
       setHoursInput('');
       setDescriptionInput('');
+      // Force page reload to show new hours
+      window.location.reload();
     },
     onError: (error) => {
       console.error('Add hours failed:', error);
@@ -459,8 +461,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       return photoIds;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
+      // Remove queryClient invalidation - let React Query handle cache updates
       clearSelection();
+      // Force page reload to show photo deletions
+      window.location.reload();
     },
     onError: (error) => {
       console.error('Bulk delete failed:', error);
@@ -710,11 +714,13 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       }
     },
     onSuccess: () => {
-      console.log('Photo upload mutation success, invalidating queries');
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
+      console.log('Photo upload mutation success');
+      // Remove queryClient invalidation - let React Query handle cache updates
       if (photoInputRef.current) {
         photoInputRef.current.value = '';
       }
+      // Force page reload to show new photos
+      window.location.reload();
     },
     onError: (error) => {
       console.error('Photo upload failed:', error);
