@@ -117,11 +117,11 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
       <div className="p-6">
         <div className="flex justify-center mb-6">
           <img 
-            src="/aframe-logo.png" 
-            alt="A-Frame Painting" 
+            src="/paint-brain-logo.png" 
+            alt="Paint Brain" 
             className="h-32 w-auto object-contain"
             onError={(e) => {
-              console.log('Logo failed to load');
+              e.currentTarget.src = "/aframe-logo.png";
             }}
           />
         </div>
