@@ -939,17 +939,18 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       {compressionProgress.isCompressing && (
         <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+            <span className="text-sm font-medium" style={{ color: paintBrainColors.blue }}>
               Compressing photos...
             </span>
-            <span className="text-blue-600 dark:text-blue-400">
+            <span style={{ color: paintBrainColors.green }}>
               {compressionProgress.currentFile} / {compressionProgress.totalFiles}
             </span>
           </div>
-          <div className="w-full bg-blue-200 dark:bg-blue-800 rounded-full h-2">
+          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
             <div 
-              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+              className="h-2 rounded-full transition-all duration-300"
               style={{ 
+                backgroundColor: paintBrainColors.green,
                 width: `${(compressionProgress.currentFile / compressionProgress.totalFiles) * 100}%` 
               }}
             />
@@ -1218,7 +1219,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                             onClick={() => newTool.trim() && addToolMutation.mutate(newTool.trim())}
                             disabled={!newTool.trim() || addToolMutation.isPending}
                             size="sm"
-                            className="px-3 bg-blue-600 hover:bg-blue-700"
+                            className="px-3 text-white hover:opacity-90"
+                            style={{ backgroundColor: paintBrainColors.yellow }}
                           >
                             <Plus size={16} />
                           </Button>
@@ -1444,7 +1446,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                               input.onchange = handleReceiptUpload;
                               input.click();
                             }}
-                            className="py-3 text-sm font-semibold bg-blue-700 hover:bg-blue-800 text-white flex items-center justify-center"
+                            className="py-3 text-sm font-semibold text-white flex items-center justify-center hover:opacity-90"
+                            style={{ backgroundColor: paintBrainColors.purple }}
                           >
                             <Camera size={16} className="mr-2" />
                             Camera
@@ -1460,7 +1463,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                               input.onchange = handleReceiptUpload;
                               input.click();
                             }}
-                            className="py-3 text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center"
+                            className="py-3 text-sm font-semibold text-white flex items-center justify-center hover:opacity-90"
+                            style={{ backgroundColor: paintBrainColors.orange }}
                           >
                             <Upload size={16} className="mr-2" />
                             Upload
@@ -1514,7 +1518,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                             <Button 
                               type="submit" 
                               size="sm"
-                              className="h-9 px-3 text-xs text-white bg-orange-600 hover:bg-orange-700"
+                              className="h-9 px-3 text-xs text-white hover:opacity-90"
+                              style={{ backgroundColor: paintBrainColors.green }}
                             >
                               Add Item
                             </Button>
@@ -1542,14 +1547,16 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       <div className="grid grid-cols-2 gap-4">
         <Button
           onClick={() => setShowEstimateGenerator(true)}
-          className="py-3 text-sm font-semibold bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center"
+          className="py-3 text-sm font-semibold text-white flex items-center justify-center hover:opacity-90"
+          style={{ backgroundColor: paintBrainColors.purple }}
         >
           <Calculator size={18} className="mr-2" />
           Generate Estimate
         </Button>
         <Button
           onClick={() => setShowInvoiceGenerator(true)}
-          className="py-3 text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white"
+          className="py-3 text-sm font-semibold text-white hover:opacity-90"
+          style={{ backgroundColor: paintBrainColors.blue }}
         >
           <FileText size={18} className="mr-2" />
           Generate Invoice
