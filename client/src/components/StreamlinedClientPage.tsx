@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { apiRequest } from '@/lib/queryClient';
 
 import { generateMapsLink, generateDirectionsLink } from '@/lib/maps';
 import { compressMultipleImages, formatFileSize } from '@/lib/imageCompression';
@@ -397,38 +398,22 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   });
 
   const addHoursMutation = useMutation({
-    mutationFn: async (hoursData: {
-      projectId: number;
-      date: string;
-      hours: number;
-      description: string;
-    }) => {
-      const response = await fetch(`/api/projects/${projectId}/hours`, {
+    mutationFn: async (hoursData: { date: string; hours: number; description: string; hourlyRate: number }) => {
+      const response = await apiRequest(`/api/projects/${projectId}/hours`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          date: hoursData.date,
-          hours: hoursData.hours,
-          description: hoursData.description,
-          hourlyRate: project?.hourlyRate || 60, // Include hourlyRate from project
-        }),
+        body: {
+          ...hoursData,
+          projectId: Number(projectId)
+        }
       });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to add hours: ${response.status} - ${errorText}`);
-      }
-      
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/hours`] });
-      setShowDatePicker(false);
       setSelectedDate('');
       setHoursInput('');
       setDescriptionInput('');
+      setShowDatePicker(false);
     },
     onError: (error) => {
       console.error('Add hours failed:', error);
@@ -516,10 +501,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     }
     
     addHoursMutation.mutate({
-      projectId,
       date: selectedDate,
       hours: parsedHours,
       description: descriptionInput.trim() || 'Painting',
+      hourlyRate: project?.hourlyRate || 60,
     });
   };
 
