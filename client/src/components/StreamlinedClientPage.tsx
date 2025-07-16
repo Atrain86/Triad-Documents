@@ -20,6 +20,16 @@ import { useErrorTooltip } from '@/hooks/useErrorTooltip';
 import { ReactSortable } from 'react-sortablejs';
 import PaintBrainCalendar from './PaintBrainCalendar';
 
+// Paint Brain Color Palette
+const paintBrainColors = {
+  purple: '#8B5FBF',    // Purple from code syntax
+  orange: '#D4A574',    // Orange from code syntax  
+  green: '#6A9955',     // Green from comments
+  red: '#F44747',       // Red from HTML tags
+  blue: '#569CD6',      // Blue from keywords
+  gray: '#6B7280'       // Neutral gray
+};
+
 // Calendar function for A-Frame calendar integration
 const openWorkCalendar = (clientProject: Project | null = null) => {
   const aframeCalendarOnlyUrl = 'https://calendar.google.com/calendar/embed?src=6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981%40group.calendar.google.com&ctz=America%2FVancouver&mode=WEEK&showTitle=1&showNav=1&showDate=1&showPrint=0&showTabs=1&showCalendars=0&showTz=0&bgcolor=%23000000&color=%23ffffff';

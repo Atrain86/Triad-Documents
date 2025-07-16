@@ -267,10 +267,17 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
   const deleteProjectMutation = useMutation({
     mutationFn: async (projectId: number) => {
       const response = await apiRequest('DELETE', `/api/projects/${projectId}`);
+      if (!response.ok) {
+        throw new Error('Failed to delete project');
+      }
       return response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+    },
+    onError: (error) => {
+      console.error('Delete error:', error);
+      alert('Failed to delete project. Please try again.');
     }
   });
 
@@ -456,13 +463,13 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <User size={16} className="text-muted-foreground" />
-                          <h3 className="font-semibold text-lg text-blue-600 dark:text-blue-400">
+                          <h3 className="font-semibold text-lg" style={{ color: paintBrainColors.purple }}>
                             {project.clientName || 'Unnamed Client'}
                           </h3>
                         </div>
                         <div className="flex items-center gap-2 text-sm mb-2">
                           <MapPin size={14} className="text-muted-foreground" />
-                          <p className="text-green-600 dark:text-green-400">{project.address || 'No address'}</p>
+                          <p style={{ color: paintBrainColors.green }}>{project.address || 'No address'}</p>
                         </div>
                       </div>
                     </div>
@@ -619,13 +626,13 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <User size={16} className="text-muted-foreground" />
-                          <h3 className="font-semibold text-lg text-blue-600 dark:text-blue-400">
+                          <h3 className="font-semibold text-lg" style={{ color: paintBrainColors.purple }}>
                             {project.clientName || 'Unnamed Client'}
                           </h3>
                         </div>
                         <div className="flex items-center gap-2 text-sm mb-2">
                           <MapPin size={14} className="text-muted-foreground" />
-                          <p className="text-green-600 dark:text-green-400">{project.address || 'No address'}</p>
+                          <p style={{ color: paintBrainColors.green }}>{project.address || 'No address'}</p>
                         </div>
                       </div>
                     </div>
