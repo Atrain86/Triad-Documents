@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Search, User, MapPin, Edit3, Archive, RotateCcw, Trash2, GripVertical } from 'lucide-react';
+import { Search, User, MapPin, Edit3, Archive, RotateCcw, Trash2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { ReactSortable } from 'react-sortablejs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Label } from './ui/label';
 
@@ -35,8 +34,6 @@ const statusConfig = {
 export default function StreamlinedHomepage({ onSelectProject }: { onSelectProject: (projectId: number) => void }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [showArchived, setShowArchived] = useState(false);
-  const [isManualMode, setIsManualMode] = useState(false);
-  const [manualProjects, setManualProjects] = useState<any[]>([]);
   const [showNewClientDialog, setShowNewClientDialog] = useState(false);
   
   const queryClient = useQueryClient();
@@ -125,14 +122,7 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
     return matchesSearch && matchesArchive;
   });
 
-  const baseFilteredProjects = sortProjectsByPriority(filteredProjects);
-  const displayProjects = isManualMode ? manualProjects : baseFilteredProjects;
-
-  useEffect(() => {
-    if (isManualMode && manualProjects.length === 0) {
-      setManualProjects(sortProjectsByPriority(baseFilteredProjects));
-    }
-  }, [isManualMode, baseFilteredProjects]);
+  const displayProjects = sortProjectsByPriority(filteredProjects);
 
   const openWorkCalendar = () => {
     const workCalendarDirectUrl = 'https://calendar.google.com/calendar/embed?src=6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981%40group.calendar.google.com&ctz=America%2FVancouver';
@@ -188,36 +178,32 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
               placeholder="Search clients"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 py-3"
+              className="pl-10 py-3 border-2"
+              style={{ borderColor: paintBrainColors.orange }}
             />
           </div>
-          <Button
-            variant={isManualMode ? "default" : "outline"}
-            onClick={() => {
-              setIsManualMode(!isManualMode);
-              if (!isManualMode) {
-                setManualProjects(sortProjectsByPriority(baseFilteredProjects));
-              }
-            }}
-            className="px-3 py-3 text-sm"
-            style={isManualMode ? 
-              { backgroundColor: paintBrainColors.orange, color: 'white' } : 
-              { backgroundColor: 'transparent', color: paintBrainColors.orange, borderColor: paintBrainColors.orange }
-            }
-          >
-            {isManualMode ? 'Smart' : 'Manual'}
-          </Button>
-          <Button
-            variant={showArchived ? "default" : "outline"}
-            onClick={() => setShowArchived(!showArchived)}
-            className="px-4 py-3"
-            style={showArchived ? 
-              { backgroundColor: paintBrainColors.orange, color: 'white' } : 
-              { backgroundColor: 'transparent', color: paintBrainColors.orange, borderColor: paintBrainColors.orange }
-            }
-          >
-            {showArchived ? 'Active' : 'Archive'}
-          </Button>
+          <div className="flex items-center gap-3 px-4 py-3 bg-white border-2 rounded-md" style={{ borderColor: paintBrainColors.orange }}>
+            <span className="text-sm font-medium" style={{ color: showArchived ? paintBrainColors.gray : paintBrainColors.green }}>
+              Active
+            </span>
+            <button
+              onClick={() => setShowArchived(!showArchived)}
+              className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
+              style={{ 
+                backgroundColor: showArchived ? paintBrainColors.orange : paintBrainColors.green,
+                focusRingColor: paintBrainColors.orange 
+              }}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  showArchived ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+            <span className="text-sm font-medium" style={{ color: showArchived ? paintBrainColors.orange : paintBrainColors.gray }}>
+              Archive
+            </span>
+          </div>
         </div>
 
         {projects.length > 0 && (
@@ -245,36 +231,16 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
               </p>
             </div>
           ) : (
-            isManualMode ? (
-              <ReactSortable 
-                list={displayProjects} 
-                setList={(newList) => setManualProjects(newList)}
-                className="space-y-4"
-                handle=".drag-handle"
-              >
-                {displayProjects.map((project: any) => (
-                  <ProjectCard 
-                    key={project.id} 
-                    project={project} 
-                    onSelectProject={onSelectProject}
-                    updateStatusMutation={updateStatusMutation}
-                    deleteProjectMutation={deleteProjectMutation}
-                    showDragHandle={true}
-                  />
-                ))}
-              </ReactSortable>
-            ) : (
-              displayProjects.map((project: any) => (
-                <ProjectCard 
-                  key={project.id} 
-                  project={project} 
-                  onSelectProject={onSelectProject}
-                  updateStatusMutation={updateStatusMutation}
-                  deleteProjectMutation={deleteProjectMutation}
-                  showDragHandle={false}
-                />
-              ))
-            )
+            displayProjects.map((project: any) => (
+              <ProjectCard 
+                key={project.id} 
+                project={project} 
+                onSelectProject={onSelectProject}
+                updateStatusMutation={updateStatusMutation}
+                deleteProjectMutation={deleteProjectMutation}
+                showDragHandle={false}
+              />
+            ))
           )}
         </div>
 
