@@ -321,6 +321,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     compressedSize: 0,
   });
 
+  // Query client for invalidating queries
+  const queryClient = useQueryClient();
+
   // API queries
   const { data: project } = useQuery<Project>({
     queryKey: [`/api/projects/${projectId}`],
