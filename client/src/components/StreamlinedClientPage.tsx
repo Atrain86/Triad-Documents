@@ -411,7 +411,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           date: hoursData.date,
           hours: hoursData.hours,
           description: hoursData.description,
-          hourlyRate: project?.hourlyRate || 60, // Include hourlyRate from project
+          hourlyRate: project?.hourlyRate || 60,
         }),
       });
       
@@ -421,13 +421,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       }
       
       return response.json();
-    },
-    onSuccess: () => {
-      // Remove all state access - just reload
-      window.location.reload();
-    },
-    onError: (error) => {
-      console.error('Add hours failed:', error);
     },
   });
 
@@ -454,11 +447,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       return photoIds;
     },
     onSuccess: () => {
-      // Remove all function calls - just reload
+      clearSelection();
       window.location.reload();
-    },
-    onError: (error) => {
-      console.error('Bulk delete failed:', error);
     },
   });
 
@@ -502,7 +492,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     return '';
   };
 
-  const handleAddHours = () => {
+  const handleAddHours = async () => {
     if (!selectedDate || !hoursInput) return;
     
     const parsedHours = parseFloat(hoursInput);
@@ -511,12 +501,23 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       return;
     }
     
-    addHoursMutation.mutate({
-      projectId,
-      date: selectedDate,
-      hours: parsedHours,
-      description: descriptionInput.trim() || 'Painting',
-    });
+    try {
+      await addHoursMutation.mutateAsync({
+        projectId,
+        date: selectedDate,
+        hours: parsedHours,
+        description: descriptionInput.trim() || 'Painting',
+      });
+      
+      // Reset form after successful addition
+      setShowDatePicker(false);
+      setSelectedDate('');
+      setHoursInput('');
+      setDescriptionInput('');
+      window.location.reload();
+    } catch (error) {
+      console.error('Failed to add hours:', error);
+    }
   };
 
   const handleNotesBlur = () => {
@@ -706,7 +707,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     },
     onSuccess: () => {
       console.log('Photo upload mutation success');
-      // Remove all ref access - just reload
+      if (photoInputRef.current) {
+        photoInputRef.current.value = '';
+      }
       window.location.reload();
     },
     onError: (error) => {
