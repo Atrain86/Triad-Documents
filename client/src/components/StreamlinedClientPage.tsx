@@ -1387,11 +1387,34 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                   <div className="flex-1">
                                     <div className="flex items-center gap-2 text-sm">
                                       <span className="font-medium text-gray-100">
-                                        {new Date(hours.date + 'T00:00:00').toLocaleDateString('en-US', { 
-                                          weekday: 'short', 
-                                          month: 'short', 
-                                          day: 'numeric' 
-                                        })}
+                                        {(() => {
+                                          try {
+                                            // Ensure we have a valid date string
+                                            const dateStr = hours.date.toString();
+                                            let cleanDate = dateStr;
+                                            
+                                            // Extract just the date part if it's an ISO string
+                                            if (dateStr.includes('T')) {
+                                              cleanDate = dateStr.split('T')[0];
+                                            }
+                                            
+                                            // Create date object and format it
+                                            const date = new Date(cleanDate + 'T12:00:00'); // Use noon to avoid timezone issues
+                                            
+                                            if (isNaN(date.getTime())) {
+                                              return 'Invalid date';
+                                            }
+                                            
+                                            return date.toLocaleDateString('en-US', { 
+                                              weekday: 'short', 
+                                              month: 'short', 
+                                              day: 'numeric' 
+                                            });
+                                          } catch (error) {
+                                            console.error('Date formatting error:', error, hours.date);
+                                            return 'Invalid date';
+                                          }
+                                        })()}
                                       </span>
                                       <span className="text-gray-400">•</span>
                                       <span className="font-semibold text-blue-400">
