@@ -124,15 +124,21 @@ input[type="date"]:focus::-webkit-datetime-edit-year-field {
   cursor: pointer;
 }
 
-/* Force Paint Brain button colors to override shadcn defaults */
-.paint-brain-purple-btn {
+/* Force Paint Brain button colors to override ALL styles */
+* button, .btn, [class*="button"] {
   background-color: #8B5FBF !important;
   border-color: #8B5FBF !important;
+  color: white !important;
 }
 
-.paint-brain-green-btn {
+/* Specific overrides for common button patterns */
+button[class*="bg-"], .bg-primary, .bg-secondary {
+  background-color: #8B5FBF !important;
+}
+
+/* Green variant for specific buttons */
+button[class*="green"], .paint-brain-green-btn {
   background-color: #6A9955 !important;
-  border-color: #6A9955 !important;
 }
 
 .paint-brain-purple-btn:hover {
@@ -283,3 +289,4 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   -o-user-drag: none;
   user-drag: none;
 }
+/* Force refresh timestamp: Wed Jul 16 08:54:22 PM UTC 2025 */
