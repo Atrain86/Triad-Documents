@@ -825,8 +825,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       });
       return response;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/tools`] });
+    onSuccess: async () => {
+      await refetchTools();
     }
   });
 
