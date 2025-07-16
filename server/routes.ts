@@ -220,21 +220,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const projectId = parseInt(req.params.id);
       
+      if (!req.file) {
+        return res.status(400).json({ error: 'No receipt file provided' });
+      }
+
+      // Use OpenAI Vision to extract receipt data from the uploaded image
+      let extractedData;
+      try {
+        const { extractReceiptWithVision } = await import('./visionReceiptHandler');
+        extractedData = await extractReceiptWithVision(req.file.buffer, req.file.originalname);
+        console.log('Vision extraction successful:', extractedData);
+      } catch (visionError) {
+        console.error('Vision extraction failed, using fallback:', visionError);
+        // Fallback to filename-based extraction
+        extractedData = {
+          vendor: req.file.originalname.replace(/\.[^/.]+$/, '').replace(/[_-]/g, ' '),
+          amount: 0,
+          items: [],
+          date: null,
+          confidence: 0.1
+        };
+      }
+      
       const receiptData = {
         projectId,
-        vendor: req.body.vendor,
-        amount: parseFloat(req.body.amount),
-        description: req.body.description || null,
-        date: new Date(req.body.date),
-        filename: req.file?.filename || null,
-        originalName: req.file?.originalname || null,
+        vendor: extractedData.vendor || 'Unknown Vendor',
+        amount: extractedData.amount || 0,
+        description: extractedData.items?.join(', ') || null,
+        date: extractedData.date ? new Date(extractedData.date) : new Date(),
+        filename: req.file.filename,
+        originalName: req.file.originalname,
       };
 
       const validatedData = insertReceiptSchema.parse(receiptData);
       const receipt = await storage.createReceipt(validatedData);
       res.status(201).json(receipt);
     } catch (error) {
-      res.status(400).json({ error: 'Failed to create receipt' });
+      console.error('Receipt creation error:', error);
+      res.status(400).json({ error: 'Failed to create receipt', details: error.message });
     }
   });
 
