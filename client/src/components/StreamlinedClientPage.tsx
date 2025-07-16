@@ -184,7 +184,8 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
                   onClick={handleSave}
                   disabled={updateReceiptMutation.isPending}
                   size="sm"
-                  className="flex-1 bg-green-600 hover:bg-green-700"
+                  className="flex-1 text-white hover:opacity-90"
+                  style={{ backgroundColor: paintBrainColors.green }}
                 >
                   {updateReceiptMutation.isPending ? 'Saving...' : 'Save'}
                 </Button>
@@ -1221,7 +1222,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                             disabled={!newTool.trim() || addToolMutation.isPending}
                             size="sm"
                             className="px-3 text-white hover:opacity-90"
-                            style={{ backgroundColor: paintBrainColors.yellow }}
+                            style={{ backgroundColor: paintBrainColors.purple }}
                           >
                             <Plus size={16} />
                           </Button>
@@ -1259,8 +1260,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                         {!showDatePicker && (
                           <Button
                             onClick={() => setShowDatePicker(true)}
-                            className="w-full mb-4 py-2 text-sm bg-green-600 hover:bg-green-700"
-                            variant="outline"
+                            className="w-full mb-4 py-2 text-sm text-white hover:opacity-90"
+                            style={{ backgroundColor: paintBrainColors.green }}
                           >
                             <Plus size={16} className="mr-2" />
                             Log Hours for a Day
@@ -1329,7 +1330,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                               <Button
                                 onClick={handleAddHours}
                                 disabled={!hoursInput || addHoursMutation.isPending}
-                                className="flex-1 bg-green-600 hover:bg-green-700"
+                                className="flex-1 text-white hover:opacity-90"
+                                style={{ backgroundColor: paintBrainColors.green }}
                               >
                                 {addHoursMutation.isPending ? 'Adding...' : 'Add Hours'}
                               </Button>
