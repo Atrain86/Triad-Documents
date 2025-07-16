@@ -219,16 +219,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/projects/:id/receipts', upload.single('receipt'), async (req, res) => {
     try {
       const projectId = parseInt(req.params.id);
+      console.log('Receipt upload request for project:', projectId);
+      console.log('Request file:', req.file);
       
       if (!req.file) {
+        console.log('No file received in request');
         return res.status(400).json({ error: 'No receipt file provided' });
       }
 
       // Use OpenAI Vision to extract receipt data from the uploaded image
       let extractedData;
       try {
+        // Read file from disk since we're using diskStorage
+        const filePath = path.join(uploadDir, req.file.filename);
+        const imageBuffer = fs.readFileSync(filePath);
+        
         const { extractReceiptWithVision } = await import('./visionReceiptHandler');
-        extractedData = await extractReceiptWithVision(req.file.buffer, req.file.originalname);
+        extractedData = await extractReceiptWithVision(imageBuffer, req.file.originalname);
         console.log('Vision extraction successful:', extractedData);
       } catch (visionError) {
         console.error('Vision extraction failed, using fallback:', visionError);
@@ -245,7 +252,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const receiptData = {
         projectId,
         vendor: extractedData.vendor || 'Unknown Vendor',
-        amount: extractedData.amount || 0,
+        amount: String(extractedData.amount || 0), // Convert to string for schema
         description: extractedData.items?.join(', ') || null,
         date: extractedData.date ? new Date(extractedData.date) : new Date(),
         filename: req.file.filename,
