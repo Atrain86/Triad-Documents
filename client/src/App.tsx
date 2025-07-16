@@ -3,7 +3,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "next-themes";
 import { queryClient } from "./lib/queryClient";
 import StreamlinedHomepage from "./components/StreamlinedHomepage";
-import WorkingClientPage from "./components/WorkingClientPage";
+import StreamlinedClientPage from "./components/StreamlinedClientPage";
 import { Toaster } from "@/components/ui/toaster";
 import "./index.css";
 
@@ -34,7 +34,7 @@ function App() {
             )}
 
             {currentView === "client" && selectedProjectId && (
-              <WorkingClientPage
+              <StreamlinedClientPage
                 projectId={selectedProjectId}
                 onBack={handleBackToHome}
               />

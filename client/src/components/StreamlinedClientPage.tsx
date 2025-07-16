@@ -422,13 +422,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       
       return response.json();
     },
-    onSuccess: () => {
-      setShowDatePicker(false);
-      setSelectedDate('');
-      setHoursInput('');
-      setDescriptionInput('');
-      window.location.reload();
-    },
+    // Remove onSuccess callback to prevent temporal dead zone
   });
 
   // Helper functions
@@ -453,12 +447,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       
       return photoIds;
     },
-    onSuccess: () => {
-      setTimeout(() => {
-        clearSelection();
-        window.location.reload();
-      }, 100);
-    },
+    // Remove onSuccess callback to prevent temporal dead zone
   });
 
   const formatDateForInput = (date: Date) => {
@@ -501,7 +490,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     return '';
   };
 
-  const handleAddHours = () => {
+  const handleAddHours = async () => {
     if (!selectedDate || !hoursInput) return;
     
     const parsedHours = parseFloat(hoursInput);
@@ -510,12 +499,23 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       return;
     }
     
-    addHoursMutation.mutate({
-      projectId,
-      date: selectedDate,
-      hours: parsedHours,
-      description: descriptionInput.trim() || 'Painting',
-    });
+    try {
+      await addHoursMutation.mutateAsync({
+        projectId,
+        date: selectedDate,
+        hours: parsedHours,
+        description: descriptionInput.trim() || 'Painting',
+      });
+      
+      // Reset state after success
+      setShowDatePicker(false);
+      setSelectedDate('');
+      setHoursInput('');
+      setDescriptionInput('');
+      window.location.reload();
+    } catch (error) {
+      console.error('Failed to add hours:', error);
+    }
   };
 
   const handleNotesBlur = () => {
@@ -703,15 +703,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         throw error;
       }
     },
-    onSuccess: () => {
-      console.log('Photo upload mutation success');
-      setTimeout(() => {
-        if (photoInputRef.current) {
-          photoInputRef.current.value = '';
-        }
-        window.location.reload();
-      }, 100);
-    },
+    // Remove onSuccess callback to prevent temporal dead zone
     onError: (error) => {
       console.error('Photo upload failed:', error);
       setCompressionProgress({
