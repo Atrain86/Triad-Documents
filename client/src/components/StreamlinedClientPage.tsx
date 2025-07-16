@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
 import { Camera, FileText, ArrowLeft, Edit3, Download, X, Image as ImageIcon, DollarSign, Calendar, Wrench, Plus, Trash2, Calculator, Receipt as ReceiptIcon, MapPin, Navigation, ExternalLink, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -48,13 +49,9 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
 
   const deleteReceiptMutation = useMutation({
     mutationFn: async (receiptId: number) => {
-      const response = await fetch(`/api/receipts/${receiptId}`, {
+      await apiRequest(`/api/receipts/${receiptId}`, {
         method: 'DELETE',
       });
-      
-      if (!response.ok) {
-        throw new Error(`Failed to delete file: ${response.status}`);
-      }
       
       return receiptId;
     },
@@ -68,17 +65,10 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
 
   const updateReceiptMutation = useMutation({
     mutationFn: async ({ id, vendor, amount, description }: { id: number; vendor: string; amount: string; description: string }) => {
-      const response = await fetch(`/api/receipts/${id}`, {
+      const response = await apiRequest(`/api/receipts/${id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ vendor, amount, description }),
+        body: { vendor, amount, description },
       });
-      
-      if (!response.ok) {
-        throw new Error(`Failed to update receipt: ${response.status}`);
-      }
       
       return response.json();
     },
@@ -256,6 +246,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   // File input refs
   const photoInputRef = useRef<HTMLInputElement>(null);
   const receiptInputRef = useRef<HTMLInputElement>(null);
+  
+  // QueryClient for cache management
+  const queryClient = useQueryClient();
 
   // State management
   const [showPhotoCarousel, setShowPhotoCarousel] = useState(false);
@@ -355,18 +348,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   // Critical mutations that need to be declared early
   const editProjectMutation = useMutation({
     mutationFn: async (projectData: any) => {
-      const response = await fetch(`/api/projects/${projectId}`, {
+      const response = await apiRequest(`/api/projects/${projectId}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(projectData),
+        body: projectData,
       });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to edit project: ${response.status} - ${errorText}`);
-      }
       
       return response.json();
     },
@@ -381,18 +366,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const updateProjectMutation = useMutation({
     mutationFn: async (updates: any) => {
-      const response = await fetch(`/api/projects/${projectId}`, {
+      const response = await apiRequest(`/api/projects/${projectId}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updates),
+        body: updates,
       });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to update project: ${response.status} - ${errorText}`);
-      }
       
       return response.json();
     },
@@ -411,23 +388,15 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       hours: number;
       description: string;
     }) => {
-      const response = await fetch(`/api/projects/${projectId}/hours`, {
+      const response = await apiRequest(`/api/projects/${projectId}/hours`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+        body: {
           date: hoursData.date,
           hours: hoursData.hours,
           description: hoursData.description,
           hourlyRate: project?.hourlyRate || 60, // Include hourlyRate from project
-        }),
+        },
       });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to add hours: ${response.status} - ${errorText}`);
-      }
       
       return response.json();
     },
@@ -452,16 +421,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const deleteSelectedPhotosMutation = useMutation({
     mutationFn: async (photoIds: number[]) => {
       const deletePromises = photoIds.map(id => 
-        fetch(`/api/projects/${projectId}/photos/${id}`, { method: 'DELETE' })
+        apiRequest(`/api/projects/${projectId}/photos/${id}`, { method: 'DELETE' })
       );
       
-      const responses = await Promise.all(deletePromises);
-      
-      responses.forEach((response, index) => {
-        if (!response.ok) {
-          throw new Error(`Failed to delete photo ${photoIds[index]}: ${response.status}`);
-        }
-      });
+      await Promise.all(deletePromises);
       
       return photoIds;
     },
@@ -687,14 +650,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         });
 
         console.log('Sending FormData to server...');
-        const response = await fetch(`/api/projects/${projectId}/photos`, {
+        const response = await apiRequest(`/api/projects/${projectId}/photos`, {
           method: 'POST',
           body: formData,
         });
-        
-        if (!response.ok) {
-          throw new Error(`Upload failed: ${response.status} ${response.statusText}`);
-        }
         
         const result = await response.json();
 
@@ -744,17 +703,13 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     mutationFn: async (files: FileList) => {
       const formData = new FormData();
       Array.from(files).forEach((file) => {
-        formData.append('receipts', file);
+        formData.append('receipt', file); // Changed from 'receipts' to 'receipt'
       });
 
-      const response = await fetch(`/api/projects/${projectId}/receipts`, {
+      const response = await apiRequest(`/api/projects/${projectId}/receipts`, {
         method: 'POST',
         body: formData,
       });
-      
-      if (!response.ok) {
-        throw new Error(`Receipt upload failed: ${response.status} ${response.statusText}`);
-      }
       
       return response.json();
     },
@@ -771,14 +726,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const deletePhotoMutation = useMutation({
     mutationFn: async (photoId: number) => {
-      const response = await fetch(`/api/projects/${projectId}/photos/${photoId}`, {
+      await apiRequest(`/api/projects/${projectId}/photos/${photoId}`, {
         method: 'DELETE',
       });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to delete photo: ${response.status} - ${errorText}`);
-      }
       
       return photoId;
     },
@@ -801,20 +751,12 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const addToolMutation = useMutation({
     mutationFn: async (toolName: string) => {
-      const response = await fetch(`/api/projects/${projectId}/tools`, {
+      const response = await apiRequest(`/api/projects/${projectId}/tools`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+        body: {
           toolName,
-        }),
+        },
       });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to add tool: ${response.status} - ${errorText}`);
-      }
       
       return response.json();
     },
@@ -829,13 +771,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const toggleToolMutation = useMutation({
     mutationFn: async (toolId: number) => {
-      const response = await fetch(`/api/tools/${toolId}`, {
+      await apiRequest(`/api/tools/${toolId}`, {
         method: 'DELETE',
       });
-      
-      if (!response.ok) {
-        throw new Error(`Failed to complete tool: ${response.status}`);
-      }
       
       return toolId;
     },
@@ -849,13 +787,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const deleteHoursMutation = useMutation({
     mutationFn: async (hoursId: number) => {
-      const response = await fetch(`/api/hours/${hoursId}`, {
+      await apiRequest(`/api/hours/${hoursId}`, {
         method: 'DELETE',
       });
-      
-      if (!response.ok) {
-        throw new Error(`Failed to delete hours: ${response.status}`);
-      }
       
       return hoursId;
     },
@@ -1502,24 +1436,15 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                 filename: null
                               };
                               
-                              fetch(`/api/projects/${project.id}/receipts`, {
+                              apiRequest(`/api/projects/${project.id}/receipts`, {
                                 method: 'POST',
-                                headers: {
-                                  'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify(receiptData),
+                                body: receiptData,
                               }).then(async (response) => {
-                                if (response.ok) {
-                                  queryClient.invalidateQueries({ queryKey: [`/api/projects/${project.id}/receipts`] });
-                                  (e.target as HTMLFormElement).reset();
-                                } else {
-                                  const errorData = await response.text();
-                                  console.error('Receipt creation failed:', errorData);
-                                  alert('Failed to add receipt. Please try again.');
-                                }
+                                queryClient.invalidateQueries({ queryKey: [`/api/projects/${project.id}/receipts`] });
+                                (e.target as HTMLFormElement).reset();
                               }).catch((error) => {
-                                console.error('Network error:', error);
-                                alert('Network error. Please check your connection and try again.');
+                                console.error('Receipt creation failed:', error);
+                                alert('Failed to add receipt. Please try again.');
                               });
                             }}
                             className="flex gap-2"
