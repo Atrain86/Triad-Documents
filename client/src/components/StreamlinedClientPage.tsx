@@ -1,12 +1,12 @@
 import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Camera, FileText, ArrowLeft, Edit3, Download, X, Image as ImageIcon, DollarSign, Calendar, Wrench, Plus, Trash2, Calculator, Receipt as ReceiptIcon, MapPin, Navigation, ExternalLink, Upload } from 'lucide-react';
+import { Camera, FileText, ArrowLeft, Edit3, Download, X, Image as ImageIcon, DollarSign, Calendar, Wrench, Plus, Trash2, Calculator, Receipt as ReceiptIcon, MapPin, Navigation, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-
+import { apiRequest } from '@/lib/queryClient';
 import { generateMapsLink, generateDirectionsLink } from '@/lib/maps';
 import { compressMultipleImages, formatFileSize } from '@/lib/imageCompression';
 import type { Project, Photo, Receipt, ToolsChecklist, DailyHours } from '@shared/schema';
@@ -207,20 +207,18 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
                       onClick={() => window.open(`/uploads/${receipt.filename}`, '_blank')}
                       className="text-blue-400 hover:text-blue-300 underline text-sm"
                     >
-                      {receipt.vendor} - ${typeof receipt.amount === 'number' ? receipt.amount.toFixed(2) : parseFloat(receipt.amount || '0').toFixed(2)}
+                      {receipt.vendor} - ${receipt.amount.toFixed(2)}
                     </button>
                   ) : (
                     <span className="text-gray-200 text-sm">
-                      {receipt.vendor} - ${typeof receipt.amount === 'number' ? receipt.amount.toFixed(2) : parseFloat(receipt.amount || '0').toFixed(2)}
+                      {receipt.vendor} - ${receipt.amount.toFixed(2)}
                     </span>
                   )}
                 </div>
-                {receipt.description && receipt.description.trim() && (
+                {receipt.description && (
                   <p className="text-xs text-gray-400 mt-1">{receipt.description}</p>
                 )}
-                {receipt.date && (
-                  <p className="text-xs text-gray-500">{formatDate(receipt.date)}</p>
-                )}
+                <p className="text-xs text-gray-500">{receipt.date}</p>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -253,6 +251,8 @@ interface StreamlinedClientPageProps {
 }
 
 export default function StreamlinedClientPage({ projectId, onBack }: StreamlinedClientPageProps) {
+  const queryClient = useQueryClient();
+  
   // File input refs
   const photoInputRef = useRef<HTMLInputElement>(null);
   const receiptInputRef = useRef<HTMLInputElement>(null);
@@ -321,8 +321,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     compressedSize: 0,
   });
 
-  const queryClient = useQueryClient();
-
   // API queries
   const { data: project } = useQuery<Project>({
     queryKey: [`/api/projects/${projectId}`],
@@ -344,128 +342,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     queryKey: [`/api/projects/${projectId}/hours`],
   });
 
-  // Critical mutations that need to be declared early
-  const editProjectMutation = useMutation({
-    mutationFn: async (projectData: any) => {
-      const response = await fetch(`/api/projects/${projectId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(projectData),
-      });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to edit project: ${response.status} - ${errorText}`);
-      }
-      
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}`] });
-      setShowEditClient(false);
-    },
-    onError: (error) => {
-      console.error('Edit project failed:', error);
-    },
-  });
-
-  const updateProjectMutation = useMutation({
-    mutationFn: async (updates: any) => {
-      const response = await fetch(`/api/projects/${projectId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updates),
-      });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to update project: ${response.status} - ${errorText}`);
-      }
-      
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}`] });
-    },
-    onError: (error) => {
-      console.error('Update project failed:', error);
-    },
-  });
-
-  const addHoursMutation = useMutation({
-    mutationFn: async (hoursData: {
-      projectId: number;
-      date: string;
-      hours: number;
-      description: string;
-    }) => {
-      const response = await fetch(`/api/projects/${projectId}/hours`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          date: hoursData.date,
-          hours: hoursData.hours,
-          description: hoursData.description,
-          hourlyRate: project?.hourlyRate || 60, // Include hourlyRate from project
-        }),
-      });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to add hours: ${response.status} - ${errorText}`);
-      }
-      
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/hours`] });
-      setShowDatePicker(false);
-      setSelectedDate('');
-      setHoursInput('');
-      setDescriptionInput('');
-    },
-    onError: (error) => {
-      console.error('Add hours failed:', error);
-    },
-  });
-
   // Helper functions
-  const clearSelection = () => {
-    setSelectedPhotos(new Set());
-    setIsSelecting(false);
-  };
-
-  const deleteSelectedPhotosMutation = useMutation({
-    mutationFn: async (photoIds: number[]) => {
-      const deletePromises = photoIds.map(id => 
-        fetch(`/api/photos/${id}`, { method: 'DELETE' })
-      );
-      
-      const responses = await Promise.all(deletePromises);
-      
-      responses.forEach((response, index) => {
-        if (!response.ok) {
-          throw new Error(`Failed to delete photo ${photoIds[index]}: ${response.status}`);
-        }
-      });
-      
-      return photoIds;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
-      clearSelection();
-    },
-    onError: (error) => {
-      console.error('Bulk delete failed:', error);
-    },
-  });
-
   const formatDateForInput = (date: Date) => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -473,52 +350,13 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     return `${year}-${month}-${day}`;
   };
 
-  // Format ISO date string into "DD–MM–YYYY" with em-dash - CLEAN DATE ONLY
-  const formatDate = (isoDate: string | null | undefined) => {
-    if (!isoDate) return '';
-    
-    // Convert to string in case it's not already
-    const dateStr = String(isoDate);
-    
-    // Extract only the date part (YYYY-MM-DD) from ISO string
-    let cleanDateString = '';
-    if (dateStr.includes('T')) {
-      // If it's a full ISO string like "2025-06-22T00:00:00.000Z"
-      cleanDateString = dateStr.split('T')[0];
-    } else if (dateStr.includes(' ')) {
-      // If it's a string with space separator
-      cleanDateString = dateStr.split(' ')[0];
-    } else {
-      // If it's already just a date string
-      cleanDateString = dateStr;
-    }
-    
-    // Parse the clean date string (YYYY-MM-DD format)
-    const parts = cleanDateString.split('-');
-    if (parts.length === 3 && parts[0].length === 4) {
-      const year = parts[0];
-      const month = parts[1];
-      const day = parts[2];
-      return `${day}–${month}–${year}`;
-    }
-    
-    // If parsing fails, return empty string instead of the raw date
-    return '';
-  };
-
   const handleAddHours = () => {
     if (!selectedDate || !hoursInput) return;
-    
-    const parsedHours = parseFloat(hoursInput);
-    if (isNaN(parsedHours) || parsedHours <= 0) {
-      console.error('Invalid hours input:', hoursInput);
-      return;
-    }
     
     addHoursMutation.mutate({
       projectId,
       date: selectedDate,
-      hours: parsedHours,
+      hours: parseFloat(hoursInput),
       description: descriptionInput.trim() || 'Painting',
     });
   };
@@ -586,6 +424,11 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     });
   };
 
+  const clearSelection = () => {
+    setSelectedPhotos(new Set());
+    setIsSelecting(false);
+  };
+
   const deleteSelectedPhotos = () => {
     deleteSelectedPhotosMutation.mutate(Array.from(selectedPhotos));
   };
@@ -632,8 +475,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   // Mutations
   const uploadPhotosMutation = useMutation({
     mutationFn: async (files: FileList) => {
-      console.log('Starting photo upload with files:', files.length);
-      
       setCompressionProgress({
         isCompressing: true,
         currentFile: 0,
@@ -649,67 +490,42 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       // Calculate total original size
       fileArray.forEach(file => {
         totalOriginalSize += file.size;
-        console.log('File:', file.name, 'Size:', file.size, 'Type:', file.type);
       });
 
-      try {
-        console.log('Starting compression for files:', fileArray.map(f => f.name));
-        const { compressedFiles, totalCompressedSizeBytes } = await compressMultipleImages(
-          fileArray,
-          (progress) => {
-            console.log('Compression progress:', progress);
-            setCompressionProgress(prev => ({
-              ...prev,
-              currentFile: progress.currentFile,
-              originalSize: totalOriginalSize,
-              compressedSize: totalCompressedSizeBytes,
-            }));
-          }
-        );
-
-        totalCompressedSize = totalCompressedSizeBytes;
-        console.log('Compression complete. Compressed files:', compressedFiles.length);
-        console.log('Compressed file details:', compressedFiles.map(f => ({ name: f.name, size: f.size, type: f.type })));
-
-        const formData = new FormData();
-        compressedFiles.forEach((file, index) => {
-          formData.append('photos', file);
-          console.log('Added compressed file to FormData:', file.name, file.size);
-        });
-
-        console.log('Sending FormData to server...');
-        const response = await fetch(`/api/projects/${projectId}/photos`, {
-          method: 'POST',
-          body: formData,
-        });
-        
-        if (!response.ok) {
-          throw new Error(`Upload failed: ${response.status} ${response.statusText}`);
+      const { compressedFiles, totalCompressedSizeBytes } = await compressMultipleImages(
+        fileArray,
+        (progress) => {
+          setCompressionProgress(prev => ({
+            ...prev,
+            currentFile: progress.currentFile,
+            originalSize: totalOriginalSize,
+            compressedSize: totalCompressedSizeBytes,
+          }));
         }
-        
-        const result = await response.json();
+      );
 
-        setCompressionProgress(prev => ({
-          ...prev,
-          isCompressing: false,
-          originalSize: totalOriginalSize,
-          compressedSize: totalCompressedSize,
-        }));
+      totalCompressedSize = totalCompressedSizeBytes;
 
-        console.log('Photo upload successful:', result);
-        return result;
-      } catch (error) {
-        console.error('Error during compression or upload:', error);
-        console.error('Error details:', {
-          message: error instanceof Error ? error.message : 'Unknown error',
-          stack: error instanceof Error ? error.stack : 'No stack trace',
-          errorObject: error
-        });
-        throw error;
-      }
+      const formData = new FormData();
+      compressedFiles.forEach((file, index) => {
+        formData.append('photos', file);
+      });
+
+      const response = await apiRequest(`/api/projects/${projectId}/photos`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      setCompressionProgress(prev => ({
+        ...prev,
+        isCompressing: false,
+        originalSize: totalOriginalSize,
+        compressedSize: totalCompressedSize,
+      }));
+
+      return response;
     },
     onSuccess: () => {
-      console.log('Photo upload mutation success, invalidating queries');
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
       if (photoInputRef.current) {
         photoInputRef.current.value = '';
@@ -734,16 +550,12 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         formData.append('receipts', file);
       });
 
-      const response = await fetch(`/api/projects/${projectId}/receipts`, {
+      const response = await apiRequest(`/api/projects/${projectId}/receipts`, {
         method: 'POST',
         body: formData,
       });
-      
-      if (!response.ok) {
-        throw new Error(`Receipt upload failed: ${response.status} ${response.statusText}`);
-      }
-      
-      return response.json();
+
+      return response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/receipts`] });
@@ -776,24 +588,45 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     },
   });
 
+  const deleteSelectedPhotosMutation = useMutation({
+    mutationFn: async (photoIds: number[]) => {
+      const deletePromises = photoIds.map(id => 
+        fetch(`/api/photos/${id}`, { method: 'DELETE' })
+      );
+      
+      const responses = await Promise.all(deletePromises);
+      
+      responses.forEach((response, index) => {
+        if (!response.ok) {
+          throw new Error(`Failed to delete photo ${photoIds[index]}: ${response.status}`);
+        }
+      });
+      
+      return photoIds;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
+      clearSelection();
+    },
+    onError: (error) => {
+      console.error('Bulk delete failed:', error);
+    },
+  });
+
   const addToolMutation = useMutation({
     mutationFn: async (toolName: string) => {
-      const response = await fetch(`/api/projects/${projectId}/tools`, {
+      const response = await apiRequest(`/api/projects/${projectId}/tools`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          projectId,
           toolName,
+          isCompleted: 0,
         }),
       });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to add tool: ${response.status} - ${errorText}`);
-      }
-      
-      return response.json();
+      return response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/tools`] });
@@ -824,6 +657,34 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     },
   });
 
+  const addHoursMutation = useMutation({
+    mutationFn: async (hoursData: {
+      projectId: number;
+      date: string;
+      hours: number;
+      description: string;
+    }) => {
+      const response = await apiRequest(`/api/projects/${projectId}/hours`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(hoursData),
+      });
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/hours`] });
+      setShowDatePicker(false);
+      setSelectedDate('');
+      setHoursInput('');
+      setDescriptionInput('');
+    },
+    onError: (error) => {
+      console.error('Add hours failed:', error);
+    },
+  });
+
   const deleteHoursMutation = useMutation({
     mutationFn: async (hoursId: number) => {
       const response = await fetch(`/api/hours/${hoursId}`, {
@@ -844,30 +705,57 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     },
   });
 
+  const updateProjectMutation = useMutation({
+    mutationFn: async (updates: any) => {
+      const response = await apiRequest(`/api/projects/${projectId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updates),
+      });
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}`] });
+    },
+    onError: (error) => {
+      console.error('Update project failed:', error);
+    },
+  });
 
+  const editProjectMutation = useMutation({
+    mutationFn: async (projectData: any) => {
+      const response = await apiRequest(`/api/projects/${projectId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(projectData),
+      });
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}`] });
+      setShowEditClient(false);
+    },
+    onError: (error) => {
+      console.error('Edit project failed:', error);
+    },
+  });
 
   // File upload handlers
-  const handlePhotoUpload = (event: any) => {
-    console.log('Photo upload handler triggered');
+  const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    console.log('Selected files:', files);
     if (files && files.length > 0) {
-      console.log('Files detected, starting upload:', Array.from(files).map(f => f.name));
       uploadPhotosMutation.mutate(files);
-    } else {
-      console.log('No files selected');
     }
   };
 
-  const handleReceiptUpload = (event: any) => {
-    console.log('Receipt upload handler triggered');
+  const handleReceiptUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    console.log('Selected receipt files:', files);
     if (files && files.length > 0) {
-      console.log('Receipt files detected, starting upload:', Array.from(files).map(f => f.name));
       uploadReceiptsMutation.mutate(files);
-    } else {
-      console.log('No receipt files selected');
     }
   };
 
@@ -939,7 +827,24 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         </div>
       </div>
 
-
+      {/* Upload Buttons */}
+      <div className="grid grid-cols-2 gap-4">
+        <Button
+          onClick={() => photoInputRef.current?.click()}
+          className="py-6 text-lg font-semibold text-white flex items-center justify-center"
+          style={{ backgroundColor: '#EA580C' }}
+        >
+          <Camera size={24} className="mr-3" />
+          Photos
+        </Button>
+        <Button
+          onClick={() => receiptInputRef.current?.click()}
+          className="py-6 text-lg font-semibold bg-blue-700 hover:bg-blue-800 text-white flex items-center justify-center"
+        >
+          <FileText size={24} className="mr-3" />
+          Receipts
+        </Button>
+      </div>
 
       {/* Hidden file inputs */}
       <input
@@ -947,14 +852,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         type="file"
         accept="image/*,.heic,.heif"
         onChange={handlePhotoUpload}
-        multiple
-        className="hidden"
-      />
-      <input
-        ref={receiptInputRef}
-        type="file"
-        accept="image/*,.heic,.heif"
-        onChange={handleReceiptUpload}
         multiple
         className="hidden"
       />
@@ -1007,9 +904,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
               case 'receipts': itemCount = receipts.length; break;
               default: itemCount = 0;
             }
-            
-            // Update section name for photos
-            const sectionName = section.id === 'photos' ? 'Photo Gallery' : section.name;
 
             return (
               <div
@@ -1022,18 +916,19 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                   onClick={() => toggleSection(section.id)}
                 >
                   <div className="flex items-center gap-3">
-                    {/* Mac-style Reorder Icon - Left Side */}
-                    <div className="drag-handle cursor-move p-1 text-gray-400 hover:text-gray-200" onClick={(e) => e.stopPropagation()}>
-                      <svg width="16" height="16" viewBox="0 0 16 16" className="text-gray-400">
-                        <rect y="2" width="16" height="1.5" rx="0.75"/>
-                        <rect y="5.5" width="16" height="1.5" rx="0.75"/>
-                        <rect y="9" width="16" height="1.5" rx="0.75"/>
-                        <rect y="12.5" width="16" height="1.5" rx="0.75"/>
+                    {/* Drag Handle */}
+                    <div className="drag-handle cursor-move p-1 text-gray-400 hover:text-gray-200">
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                        <circle cx="3" cy="3" r="1"/>
+                        <circle cx="9" cy="3" r="1"/>
+                        <circle cx="3" cy="9" r="1"/>
+                        <circle cx="9" cy="9" r="1"/>
+                        <circle cx="6" cy="6" r="1"/>
                       </svg>
                     </div>
                     
                     <IconComponent size={20} className="text-gray-300" />
-                    <span className="text-gray-100 font-medium">{sectionName}</span>
+                    <span className="text-gray-100 font-medium">{section.name}</span>
                     
                     {/* Data Count Badge */}
                     {itemCount > 0 && (
@@ -1043,10 +938,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                     )}
                   </div>
                   
-                  {/* Simple Expand Indicator */}
-                  <div className={`transform transition-transform ${isExpanded ? 'rotate-90' : ''}`}>
+                  {/* Expand/Collapse Icon */}
+                  <div className={`transform transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" className="text-gray-400">
-                      <path d="M6 4l4 4-4 4V4z"/>
+                      <path d="M4 6l4 4 4-4z"/>
                     </svg>
                   </div>
                 </div>
@@ -1056,43 +951,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                   <div className="border-t border-gray-600 p-4 bg-gray-900">
                     {section.id === 'photos' && (
                       <div>
-                        {/* Photo Upload Options */}
-                        <div className="mb-4 grid grid-cols-2 gap-2">
-                          <Button
-                            onClick={() => {
-                              // Create input for direct camera access
-                              const input = document.createElement('input');
-                              input.type = 'file';
-                              input.accept = 'image/*,.heic,.heif';
-                              input.capture = 'environment';
-                              input.multiple = true;
-                              input.onchange = handlePhotoUpload;
-                              input.click();
-                            }}
-                            className="py-3 text-sm font-semibold text-white flex items-center justify-center"
-                            style={{ backgroundColor: '#EA580C' }}
-                          >
-                            <Camera size={16} className="mr-2" />
-                            Camera
-                          </Button>
-                          <Button
-                            onClick={() => {
-                              // Create input for photo library access only (no camera)
-                              const input = document.createElement('input');
-                              input.type = 'file';
-                              input.accept = 'image/*,.heic,.heif';
-                              input.multiple = true;
-                              // No capture attribute - this forces library selection
-                              input.onchange = handlePhotoUpload;
-                              input.click();
-                            }}
-                            className="py-3 text-sm font-semibold text-white flex items-center justify-center bg-orange-600 hover:bg-orange-700"
-                          >
-                            <Upload size={16} className="mr-2" />
-                            Upload
-                          </Button>
-                        </div>
-                        
                         {/* Selection Toolbar */}
                         {selectedPhotos.size > 0 && (
                           <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-between">
@@ -1424,42 +1282,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
                     {section.id === 'receipts' && (
                       <div>
-                        {/* Receipt Upload Options */}
-                        <div className="mb-4 grid grid-cols-2 gap-2">
-                          <Button
-                            onClick={() => {
-                              // Create input for direct camera access
-                              const input = document.createElement('input');
-                              input.type = 'file';
-                              input.accept = 'image/*,.heic,.heif';
-                              input.capture = 'environment';
-                              input.multiple = true;
-                              input.onchange = handleReceiptUpload;
-                              input.click();
-                            }}
-                            className="py-3 text-sm font-semibold bg-blue-700 hover:bg-blue-800 text-white flex items-center justify-center"
-                          >
-                            <Camera size={16} className="mr-2" />
-                            Camera
-                          </Button>
-                          <Button
-                            onClick={() => {
-                              // Create input for photo library access only (no camera)
-                              const input = document.createElement('input');
-                              input.type = 'file';
-                              input.accept = 'image/*,.heic,.heif';
-                              input.multiple = true;
-                              // No capture attribute - this forces library selection
-                              input.onchange = handleReceiptUpload;
-                              input.click();
-                            }}
-                            className="py-3 text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center"
-                          >
-                            <Upload size={16} className="mr-2" />
-                            Upload
-                          </Button>
-                        </div>
-                        
                         {/* Quick Receipt Entry Form */}
                         <div className="mb-4">
                           <form 
@@ -1574,7 +1396,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           photos={photos}
           initialIndex={carouselIndex}
           onClose={() => setShowPhotoCarousel(false)}
-          onDelete={(photoId) => deletePhotoMutation.mutate(photoId)}
         />
       )}
 
