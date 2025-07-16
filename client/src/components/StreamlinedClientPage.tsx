@@ -663,7 +663,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
               ...prev,
               currentFile: progress.currentFile,
               originalSize: totalOriginalSize,
-              compressedSize: totalCompressedSizeBytes,
+              compressedSize: prev.compressedSize,
             }));
           }
         );
@@ -759,7 +759,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const deletePhotoMutation = useMutation({
     mutationFn: async (photoId: number) => {
-      const response = await fetch(`/api/photos/${photoId}`, {
+      const response = await fetch(`/api/projects/${projectId}/photos/${photoId}`, {
         method: 'DELETE',
       });
       
