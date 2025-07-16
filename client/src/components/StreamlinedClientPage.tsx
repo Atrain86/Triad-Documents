@@ -1242,30 +1242,80 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                           </Button>
                         )}
 
-                        {/* Date Picker and Hours Input */}
+                        {/* Paint Brain Calendar */}
                         {showDatePicker && (
-                          <div className="mb-4 p-4 bg-gray-800 rounded-lg space-y-3 border border-gray-600">
-                            <div>
-                              <label className="text-sm font-medium mb-2 block text-gray-200">
-                                Select Date
-                                <span className="ml-2 text-xs px-2 py-1 bg-green-900/30 text-green-300 rounded">
-                                  Today: {formatDateForInput(new Date())}
-                                </span>
-                              </label>
-                              <input
-                                type="date"
-                                value={selectedDate}
-                                onChange={(e) => setSelectedDate(e.target.value)}
-                                onClick={() => {
-                                  setTimeout(() => {
-                                    const hoursInput = document.querySelector('input[placeholder="0"]') as HTMLInputElement;
-                                    if (hoursInput) hoursInput.focus();
-                                  }, 100);
-                                }}
-                                className="w-full px-3 py-2 text-sm border-2 border-yellow-500 rounded-lg bg-black text-yellow-400 focus:border-blue-500"
-                                max={formatDateForInput(new Date())}
-                                style={{ colorScheme: 'dark' }}
-                              />
+                          <div className="mb-4 space-y-3">
+                            <div className="calendar-container">
+                              <div className="calendar-header">
+                                <button 
+                                  className="nav-button"
+                                  onClick={() => {
+                                    const currentDate = selectedDate ? new Date(selectedDate) : new Date();
+                                    const prevMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+                                    setSelectedDate(formatDateForInput(prevMonth));
+                                  }}
+                                >
+                                  &#8249;
+                                </button>
+                                <h3 className="month-name">
+                                  {selectedDate ? new Date(selectedDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                                </h3>
+                                <button 
+                                  className="nav-button"
+                                  onClick={() => {
+                                    const currentDate = selectedDate ? new Date(selectedDate) : new Date();
+                                    const nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+                                    setSelectedDate(formatDateForInput(nextMonth));
+                                  }}
+                                >
+                                  &#8250;
+                                </button>
+                              </div>
+                              
+                              <div className="calendar-grid">
+                                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                                  <div key={day} className="day-name">{day}</div>
+                                ))}
+                                {(() => {
+                                  const today = new Date();
+                                  const currentDate = selectedDate ? new Date(selectedDate) : today;
+                                  const year = currentDate.getFullYear();
+                                  const month = currentDate.getMonth();
+                                  const firstDay = new Date(year, month, 1).getDay();
+                                  const daysInMonth = new Date(year, month + 1, 0).getDate();
+                                  const cells = [];
+                                  
+                                  // Empty cells for days before month starts
+                                  for (let i = 0; i < firstDay; i++) {
+                                    cells.push(<div key={`empty-${i}`} className="calendar-cell"></div>);
+                                  }
+                                  
+                                  // Days of the month
+                                  for (let day = 1; day <= daysInMonth; day++) {
+                                    const dateStr = formatDateForInput(new Date(year, month, day));
+                                    const isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === day;
+                                    const isSelected = selectedDate === dateStr;
+                                    
+                                    cells.push(
+                                      <div
+                                        key={day}
+                                        className={`calendar-cell ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''}`}
+                                        onClick={() => {
+                                          setSelectedDate(dateStr);
+                                          setTimeout(() => {
+                                            const hoursInput = document.querySelector('input[placeholder="0"]') as HTMLInputElement;
+                                            if (hoursInput) hoursInput.focus();
+                                          }, 100);
+                                        }}
+                                      >
+                                        {day}
+                                      </div>
+                                    );
+                                  }
+                                  
+                                  return cells;
+                                })()}
+                              </div>
                             </div>
                             
                             <div>
