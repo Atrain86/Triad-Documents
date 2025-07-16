@@ -253,7 +253,6 @@ interface StreamlinedClientPageProps {
 }
 
 export default function StreamlinedClientPage({ projectId, onBack }: StreamlinedClientPageProps) {
-  
   // File input refs
   const photoInputRef = useRef<HTMLInputElement>(null);
   const receiptInputRef = useRef<HTMLInputElement>(null);
@@ -343,7 +342,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     queryKey: [`/api/projects/${projectId}/hours`],
   });
 
-  // ALL MUTATIONS - DECLARED AFTER ALL STATE TO PREVENT TEMPORAL DEAD ZONE
+  // Critical mutations that need to be declared early
   const editProjectMutation = useMutation({
     mutationFn: async (projectData: any) => {
       const response = await fetch(`/api/projects/${projectId}`, {
@@ -411,7 +410,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           date: hoursData.date,
           hours: hoursData.hours,
           description: hoursData.description,
-          hourlyRate: project?.hourlyRate || 60,
+          hourlyRate: project?.hourlyRate || 60, // Include hourlyRate from project
         }),
       });
       
@@ -422,7 +421,16 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       
       return response.json();
     },
-    // Remove onSuccess callback to prevent temporal dead zone
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/hours`] });
+      setShowDatePicker(false);
+      setSelectedDate('');
+      setHoursInput('');
+      setDescriptionInput('');
+    },
+    onError: (error) => {
+      console.error('Add hours failed:', error);
+    },
   });
 
   // Helper functions
@@ -447,7 +455,13 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       
       return photoIds;
     },
-    // Remove onSuccess callback to prevent temporal dead zone
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
+      clearSelection();
+    },
+    onError: (error) => {
+      console.error('Bulk delete failed:', error);
+    },
   });
 
   const formatDateForInput = (date: Date) => {
@@ -490,7 +504,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     return '';
   };
 
-  const handleAddHours = async () => {
+  const handleAddHours = () => {
     if (!selectedDate || !hoursInput) return;
     
     const parsedHours = parseFloat(hoursInput);
@@ -499,23 +513,12 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       return;
     }
     
-    try {
-      await addHoursMutation.mutateAsync({
-        projectId,
-        date: selectedDate,
-        hours: parsedHours,
-        description: descriptionInput.trim() || 'Painting',
-      });
-      
-      // Reset state after success
-      setShowDatePicker(false);
-      setSelectedDate('');
-      setHoursInput('');
-      setDescriptionInput('');
-      window.location.reload();
-    } catch (error) {
-      console.error('Failed to add hours:', error);
-    }
+    addHoursMutation.mutate({
+      projectId,
+      date: selectedDate,
+      hours: parsedHours,
+      description: descriptionInput.trim() || 'Painting',
+    });
   };
 
   const handleNotesBlur = () => {
@@ -703,7 +706,13 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         throw error;
       }
     },
-    // Remove onSuccess callback to prevent temporal dead zone
+    onSuccess: () => {
+      console.log('Photo upload mutation success, invalidating queries');
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
+      if (photoInputRef.current) {
+        photoInputRef.current.value = '';
+      }
+    },
     onError: (error) => {
       console.error('Photo upload failed:', error);
       setCompressionProgress({
