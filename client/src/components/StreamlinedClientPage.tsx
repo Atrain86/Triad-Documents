@@ -73,7 +73,6 @@ const formatDate = (isoDate: string | null | undefined) => {
 
 // Improved file list component
 function SimpleFilesList({ projectId }: { projectId: number }) {
-  const queryClient = useQueryClient();
   const [editingReceipt, setEditingReceipt] = useState<Receipt | null>(null);
   const [editVendor, setEditVendor] = useState('');
   const [editAmount, setEditAmount] = useState('');
@@ -96,7 +95,7 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
       return receiptId;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/receipts`] });
+      // Query invalidation will be handled by parent component
     },
     onError: (error) => {
       console.error('Delete failed:', error);
@@ -466,17 +465,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const deleteSelectedPhotosMutation = useMutation({
     mutationFn: async (photoIds: number[]) => {
       const deletePromises = photoIds.map(id => 
-        fetch(`/api/projects/${projectId}/photos/${id}`, { method: 'DELETE' })
+        apiRequest(`/api/projects/${projectId}/photos/${id}`, { method: 'DELETE' })
       );
       
       const responses = await Promise.all(deletePromises);
-      
-      responses.forEach((response, index) => {
-        if (!response.ok) {
-          throw new Error(`Failed to delete photo ${photoIds[index]}: ${response.status}`);
-        }
-      });
-      
       return photoIds;
     },
     onSuccess: () => {
