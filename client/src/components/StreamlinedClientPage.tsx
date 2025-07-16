@@ -445,7 +445,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const deleteSelectedPhotosMutation = useMutation({
     mutationFn: async (photoIds: number[]) => {
       const deletePromises = photoIds.map(id => 
-        fetch(`/api/photos/${id}`, { method: 'DELETE' })
+        fetch(`/api/projects/${projectId}/photos/${id}`, { method: 'DELETE' })
       );
       
       const responses = await Promise.all(deletePromises);
@@ -460,6 +460,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
+      queryClient.refetchQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
       clearSelection();
     },
     onError: (error) => {
@@ -719,6 +720,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     },
     onError: (error) => {
       console.error('Photo upload failed:', error);
+      console.error('Error type:', typeof error);
+      console.error('Error message:', error?.message);
+      console.error('Error stack:', error?.stack);
       setCompressionProgress({
         isCompressing: false,
         currentFile: 0,
@@ -765,7 +769,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       });
       
       if (!response.ok) {
-        throw new Error(`Failed to delete photo: ${response.status}`);
+        const errorText = await response.text();
+        throw new Error(`Failed to delete photo: ${response.status} - ${errorText}`);
       }
       
       return photoId;
@@ -780,7 +785,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       }
     },
     onError: (error) => {
-      console.error('Delete failed:', error);
+      console.error('Photo delete failed:', error);
+      console.error('Delete error type:', typeof error);
+      console.error('Delete error message:', error?.message);
+      console.error('Delete error stack:', error?.stack);
     },
   });
 
