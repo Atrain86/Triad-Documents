@@ -854,12 +854,13 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const deleteHoursMutation = useMutation({
     mutationFn: async (hoursId: number) => {
-      const response = await apiRequest(`/api/hours/${hoursId}`, {
+      const response = await fetch(`/api/hours/${hoursId}`, {
         method: 'DELETE',
       });
       
       if (!response.ok) {
-        throw new Error(`Failed to delete hours: ${response.status}`);
+        const errorText = await response.text();
+        throw new Error(`Failed to delete hours: ${response.status} - ${errorText}`);
       }
       
       return hoursId;
@@ -874,13 +875,17 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const updateHoursMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: number; updates: any }) => {
-      const response = await apiRequest(`/api/hours/${id}`, {
+      const response = await fetch(`/api/hours/${id}`, {
         method: 'PUT',
-        body: updates,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updates),
       });
       
       if (!response.ok) {
-        throw new Error(`Failed to update hours: ${response.status}`);
+        const errorText = await response.text();
+        throw new Error(`Failed to update hours: ${response.status} - ${errorText}`);
       }
       
       return response.json();
