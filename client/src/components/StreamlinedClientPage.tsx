@@ -1202,11 +1202,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
                     {section.id === 'tools' && (
                       <div>
-                        {/* Color Test */}
-                        <div style={{ backgroundColor: 'red', color: 'white', padding: '10px', marginBottom: '10px' }}>
-                          TEST: If you see this red box, inline styles work
-                        </div>
-                        
+
                         {/* Add Tool Input */}
                         <div className="flex gap-2 mb-4">
                           <input
