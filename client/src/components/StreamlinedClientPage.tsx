@@ -409,7 +409,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       return response.json();
     },
     onSuccess: () => {
-      invalidateProject();
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}`] });
       setShowEditClient(false);
     },
     onError: (error) => {
@@ -435,7 +435,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       return response.json();
     },
     onSuccess: () => {
-      invalidateProject();
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}`] });
     },
     onError: (error) => {
       console.error('Update project failed:', error);
@@ -481,7 +481,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       return photoIds;
     },
     onSuccess: () => {
-      invalidatePhotos();
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
       clearSelection();
     },
     onError: (error) => {
@@ -736,7 +736,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     },
     onSuccess: () => {
       console.log('Photo upload mutation success, invalidating queries');
-      invalidatePhotos();
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
       if (photoInputRef.current) {
         photoInputRef.current.value = '';
       }
@@ -801,7 +801,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       return photoId;
     },
     onSuccess: () => {
-      invalidatePhotos();
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
     },
     onError: (error) => {
       console.error('Delete failed:', error);
