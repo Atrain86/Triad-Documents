@@ -4,6 +4,8 @@ import { Search, User, MapPin, Edit3, Archive, RotateCcw, Trash2, GripVertical }
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { ReactSortable } from 'react-sortablejs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import { Label } from './ui/label';
 
 // Paint Brain Color Palette
 const paintBrainColors = {
@@ -35,6 +37,7 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
   const [showArchived, setShowArchived] = useState(false);
   const [isManualMode, setIsManualMode] = useState(false);
   const [manualProjects, setManualProjects] = useState<any[]>([]);
+  const [showNewClientDialog, setShowNewClientDialog] = useState(false);
   
   const queryClient = useQueryClient();
 
@@ -75,6 +78,30 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
     },
+  });
+
+  const createProjectMutation = useMutation({
+    mutationFn: async (projectData: any) => {
+      const response = await fetch('/api/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(projectData),
+      });
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Failed to create project: ${error}`);
+      }
+      return response.json();
+    },
+    onSuccess: (newProject) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      setShowNewClientDialog(false);
+      onSelectProject(newProject.id);
+    },
+    onError: (error) => {
+      console.error('Create failed:', error);
+      alert('Failed to create project. Please try again.');
+    }
   });
 
   const sortProjectsByPriority = (projectList: any[]) => {
@@ -138,7 +165,7 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
 
         <div className="flex justify-center gap-4 mb-6">
           <Button
-            onClick={() => window.location.reload()}
+            onClick={() => setShowNewClientDialog(true)}
             style={{ backgroundColor: paintBrainColors.red, color: 'white' }}
             className="px-4 py-2 text-sm font-semibold hover:opacity-90"
           >
@@ -250,8 +277,130 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
             )
           )}
         </div>
+
+        {/* New Client Dialog */}
+        <Dialog open={showNewClientDialog} onOpenChange={setShowNewClientDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Create New Client</DialogTitle>
+            </DialogHeader>
+            <NewClientForm 
+              onSubmit={(data) => createProjectMutation.mutate(data)}
+              onCancel={() => setShowNewClientDialog(false)}
+              isLoading={createProjectMutation.isPending}
+            />
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
+  );
+}
+
+function NewClientForm({ onSubmit, onCancel, isLoading }: { onSubmit: (data: any) => void; onCancel: () => void; isLoading: boolean }) {
+  const [formData, setFormData] = useState({
+    clientName: '',
+    address: '',
+    projectType: 'interior',
+    roomCount: 1,
+    difficulty: 3,
+    hourlyRate: 60
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.clientName.trim() || !formData.address.trim()) {
+      alert('Please fill in client name and address');
+      return;
+    }
+    onSubmit({
+      ...formData,
+      status: 'initial-contact'
+    });
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <Label htmlFor="clientName">Client Name *</Label>
+        <Input
+          id="clientName"
+          value={formData.clientName}
+          onChange={(e) => setFormData(prev => ({ ...prev, clientName: e.target.value }))}
+          placeholder="Enter client name"
+          required
+        />
+      </div>
+      
+      <div>
+        <Label htmlFor="address">Address *</Label>
+        <Input
+          id="address"
+          value={formData.address}
+          onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
+          placeholder="Enter project address"
+          required
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="projectType">Project Type</Label>
+        <select
+          id="projectType"
+          value={formData.projectType}
+          onChange={(e) => setFormData(prev => ({ ...prev, projectType: e.target.value }))}
+          className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800"
+        >
+          <option value="interior">Interior</option>
+          <option value="exterior">Exterior</option>
+          <option value="both">Interior & Exterior</option>
+        </select>
+      </div>
+
+      <div className="flex gap-4">
+        <div className="flex-1">
+          <Label htmlFor="roomCount">Room Count</Label>
+          <Input
+            id="roomCount"
+            type="number"
+            min="1"
+            value={formData.roomCount}
+            onChange={(e) => setFormData(prev => ({ ...prev, roomCount: parseInt(e.target.value) || 1 }))}
+          />
+        </div>
+        
+        <div className="flex-1">
+          <Label htmlFor="difficulty">Difficulty (1-5)</Label>
+          <Input
+            id="difficulty"
+            type="number"
+            min="1"
+            max="5"
+            value={formData.difficulty}
+            onChange={(e) => setFormData(prev => ({ ...prev, difficulty: parseInt(e.target.value) || 3 }))}
+          />
+        </div>
+      </div>
+
+      <div className="flex gap-3 pt-4">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          disabled={isLoading}
+          className="flex-1"
+        >
+          Cancel
+        </Button>
+        <Button
+          type="submit"
+          disabled={isLoading}
+          className="flex-1"
+          style={{ backgroundColor: '#F44747', color: 'white' }}
+        >
+          {isLoading ? 'Creating...' : 'Create Client'}
+        </Button>
+      </div>
+    </form>
   );
 }
 
