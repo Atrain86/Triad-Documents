@@ -359,6 +359,15 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   // Query client - must be declared before mutations
   const queryClient = useQueryClient();
+  
+  // Safe query invalidation helper
+  const invalidatePhotos = () => {
+    queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
+  };
+  
+  const invalidateProject = () => {
+    queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}`] });
+  };
 
   // API queries
   const { data: project } = useQuery<Project>({
@@ -400,7 +409,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}`] });
+      invalidateProject();
       setShowEditClient(false);
     },
     onError: (error) => {
@@ -426,7 +435,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}`] });
+      invalidateProject();
     },
     onError: (error) => {
       console.error('Update project failed:', error);
@@ -472,7 +481,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       return photoIds;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
+      invalidatePhotos();
       clearSelection();
     },
     onError: (error) => {
@@ -727,7 +736,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     },
     onSuccess: () => {
       console.log('Photo upload mutation success, invalidating queries');
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
+      invalidatePhotos();
       if (photoInputRef.current) {
         photoInputRef.current.value = '';
       }
@@ -792,7 +801,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       return photoId;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
+      invalidatePhotos();
     },
     onError: (error) => {
       console.error('Delete failed:', error);
