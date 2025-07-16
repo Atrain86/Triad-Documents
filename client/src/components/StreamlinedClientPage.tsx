@@ -345,7 +345,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     queryKey: [`/api/projects/${projectId}/hours`],
   });
 
-  // Critical mutations that need to be declared early
+  // ALL MUTATIONS - DECLARED AFTER ALL STATE TO PREVENT TEMPORAL DEAD ZONE
   const editProjectMutation = useMutation({
     mutationFn: async (projectData: any) => {
       const response = await fetch(`/api/projects/${projectId}`, {
@@ -425,12 +425,11 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       return response.json();
     },
     onSuccess: () => {
-      // Remove queryClient invalidation - let React Query handle cache updates
+      // Simple state updates without queryClient
       setShowDatePicker(false);
       setSelectedDate('');
       setHoursInput('');
       setDescriptionInput('');
-      // Force page reload to show new hours
       window.location.reload();
     },
     onError: (error) => {
@@ -461,9 +460,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       return photoIds;
     },
     onSuccess: () => {
-      // Remove queryClient invalidation - let React Query handle cache updates
+      // Simple state updates without queryClient  
       clearSelection();
-      // Force page reload to show photo deletions
       window.location.reload();
     },
     onError: (error) => {
@@ -715,11 +713,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     },
     onSuccess: () => {
       console.log('Photo upload mutation success');
-      // Remove queryClient invalidation - let React Query handle cache updates
+      // Simple DOM updates without queryClient
       if (photoInputRef.current) {
         photoInputRef.current.value = '';
       }
-      // Force page reload to show new photos
       window.location.reload();
     },
     onError: (error) => {
