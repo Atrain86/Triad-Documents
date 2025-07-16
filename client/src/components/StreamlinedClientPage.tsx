@@ -350,7 +350,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     queryKey: [`/api/projects/${projectId}/tools`],
   });
 
-  const { data: dailyHours = [] } = useQuery<DailyHours[]>({
+  const { data: dailyHours = [], refetch: refetchHours } = useQuery<DailyHours[]>({
     queryKey: [`/api/projects/${projectId}/hours`],
   });
 
@@ -864,10 +864,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       
       return hoursId;
     },
-    onSuccess: () => {
-      // Force a complete refetch instead of just invalidating
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/hours`] });
-      queryClient.refetchQueries({ queryKey: [`/api/projects/${projectId}/hours`] });
+    onSuccess: async () => {
+      // Force immediate refetch of hours data
+      await refetchHours();
     },
   });
 
