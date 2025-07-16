@@ -192,7 +192,7 @@ export default function PhotoCarousel({ photos, initialIndex, onClose, onDelete 
           title="Delete Photo"
           style={{ zIndex: 9999 }}
         >
-          <X className="w-6 h-6" />
+          <Trash2 className="w-6 h-6" />
         </button>
       )}
 

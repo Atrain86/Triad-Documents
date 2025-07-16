@@ -744,18 +744,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       // Also invalidate to ensure fresh data
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
       
-      // If carousel is open and we deleted the current photo, close it or navigate
-      if (showPhotoCarousel) {
-        const currentIndex = photos.findIndex(p => p.id === deletedPhotoId);
-        if (currentIndex !== -1) {
-          if (photos.length <= 1) {
-            setShowPhotoCarousel(false);
-          } else {
-            // Navigate to next photo or previous if we're at the end
-            const nextIndex = currentIndex >= photos.length - 1 ? currentIndex - 1 : currentIndex;
-            setCurrentPhotoIndex(Math.max(0, nextIndex));
-          }
-        }
+      // If carousel is open and we deleted the current photo, close it if it was the last photo
+      if (showPhotoCarousel && photos.length <= 1) {
+        setShowPhotoCarousel(false);
       }
     },
     onError: (error) => {
