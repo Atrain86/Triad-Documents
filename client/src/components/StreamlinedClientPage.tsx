@@ -253,8 +253,6 @@ interface StreamlinedClientPageProps {
 }
 
 export default function StreamlinedClientPage({ projectId, onBack }: StreamlinedClientPageProps) {
-  // Query client MUST be declared first to prevent temporal dead zone
-  const queryClient = useQueryClient();
   
   // File input refs
   const photoInputRef = useRef<HTMLInputElement>(null);
@@ -425,11 +423,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       return response.json();
     },
     onSuccess: () => {
-      // Simple state updates without queryClient
-      setShowDatePicker(false);
-      setSelectedDate('');
-      setHoursInput('');
-      setDescriptionInput('');
+      // Remove all state access - just reload
       window.location.reload();
     },
     onError: (error) => {
@@ -460,8 +454,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       return photoIds;
     },
     onSuccess: () => {
-      // Simple state updates without queryClient  
-      clearSelection();
+      // Remove all function calls - just reload
       window.location.reload();
     },
     onError: (error) => {
@@ -713,10 +706,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     },
     onSuccess: () => {
       console.log('Photo upload mutation success');
-      // Simple DOM updates without queryClient
-      if (photoInputRef.current) {
-        photoInputRef.current.value = '';
-      }
+      // Remove all ref access - just reload
       window.location.reload();
     },
     onError: (error) => {
