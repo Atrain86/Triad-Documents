@@ -314,6 +314,8 @@ function NewClientForm({ onSubmit, onCancel, isLoading }: { onSubmit: (data: any
     }
     onSubmit({
       ...formData,
+      difficulty: formData.difficulty.toString(),
+      // roomCount stays as integer, hourlyRate stays as number per schema
       status: 'initial-contact'
     });
   };
