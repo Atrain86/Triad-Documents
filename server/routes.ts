@@ -276,55 +276,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/projects/:id/hours', async (req, res) => {
-    try {
-      const projectId = parseInt(req.params.id);
-      
-      const hoursData = {
-        projectId,
-        date: new Date(req.body.date),
-        hours: parseFloat(req.body.hours),
-        description: req.body.description,
-        workerName: req.body.workerName,
-        hourlyRate: parseFloat(req.body.hourlyRate),
-      };
-
-      const validatedData = insertDailyHoursSchema.parse(hoursData);
-      const hours = await storage.createDailyHours(validatedData);
-      res.status(201).json(hours);
-    } catch (error) {
-      console.error('Error creating hours:', error);
-      res.status(400).json({ error: 'Failed to create hours entry' });
-    }
-  });
-
-  app.put('/api/hours/:id', async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const updates = insertDailyHoursSchema.partial().parse(req.body);
-      const hours = await storage.updateDailyHours(id, updates);
-      if (!hours) {
-        return res.status(404).json({ error: 'Hours entry not found' });
-      }
-      res.json(hours);
-    } catch (error) {
-      res.status(400).json({ error: 'Invalid hours data' });
-    }
-  });
-
-  app.delete('/api/hours/:id', async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const deleted = await storage.deleteDailyHours(id);
-      if (!deleted) {
-        return res.status(404).json({ error: 'Hours entry not found' });
-      }
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to delete hours entry' });
-    }
-  });
-
   // Daily Hours
   app.get('/api/projects/:id/hours', async (req, res) => {
     try {
