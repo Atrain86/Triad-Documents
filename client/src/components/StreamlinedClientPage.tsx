@@ -346,7 +346,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     queryKey: [`/api/projects/${projectId}/receipts`],
   });
 
-  const { data: tools = [] } = useQuery<ToolsChecklist[]>({
+  const { data: tools = [], refetch: refetchTools } = useQuery<ToolsChecklist[]>({
     queryKey: [`/api/projects/${projectId}/tools`],
   });
 
@@ -838,17 +838,15 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         method: 'DELETE',
       });
       
-      if (!response.ok) {
+      if (!response.ok && response.status !== 404) {
         throw new Error(`Failed to complete tool: ${response.status}`);
       }
       
       return toolId;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/tools`] });
-    },
-    onError: (error) => {
-      console.error('Toggle tool failed:', error);
+    onSuccess: async () => {
+      // Force immediate refetch of tools data
+      await refetchTools();
     },
   });
 
