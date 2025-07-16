@@ -854,23 +854,53 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const deleteHoursMutation = useMutation({
     mutationFn: async (hoursId: number) => {
+      console.log('Deleting hours ID:', hoursId);
+      
       const response = await fetch(`/api/hours/${hoursId}`, {
         method: 'DELETE',
       });
       
-      if (!response.ok) {
+      console.log('Delete response status:', response.status);
+      
+      if (response.status === 204) {
+        // Success - no content returned
+        return hoursId;
+      } else if (response.status === 404) {
+        // Already deleted, treat as success
+        console.log('Hours entry already deleted');
+        return hoursId;
+      } else if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Failed to delete hours: ${response.status} - ${errorText}`);
       }
       
       return hoursId;
     },
-    onSuccess: () => {
+    onMutate: async (hoursId) => {
+      // Cancel outgoing refetches to avoid overwriting optimistic update
+      await queryClient.cancelQueries({ queryKey: [`/api/projects/${projectId}/hours`] });
+      
+      // Snapshot the previous value
+      const previousHours = queryClient.getQueryData([`/api/projects/${projectId}/hours`]);
+      
+      // Optimistically remove the hour entry
+      queryClient.setQueryData([`/api/projects/${projectId}/hours`], (old: any[]) => {
+        return old?.filter(h => h.id !== hoursId) || [];
+      });
+      
+      // Return a context object with the snapshotted value
+      return { previousHours };
+    },
+    onError: (err, hoursId, context) => {
+      // Rollback to the previous value on error
+      queryClient.setQueryData([`/api/projects/${projectId}/hours`], context?.previousHours);
+      console.error('Delete hours failed:', err);
+    },
+    onSettled: () => {
+      // Always refetch after error or success to ensure server state
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/hours`] });
     },
-    onError: (error) => {
-      console.error('Delete hours failed:', error);
-    },
+    retry: false, // Disable retries to prevent multiple calls
   });
 
   const updateHoursMutation = useMutation({
@@ -1566,9 +1596,14 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                         <Edit3 size={10} />
                                       </button>
                                       <button
-                                        onClick={() => deleteHoursMutation.mutate(hours.id)}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          if (!deleteHoursMutation.isPending) {
+                                            deleteHoursMutation.mutate(hours.id);
+                                          }
+                                        }}
                                         disabled={deleteHoursMutation.isPending}
-                                        className="p-0.5 text-red-400 hover:text-red-300 transition-colors opacity-60 hover:opacity-100"
+                                        className="p-0.5 text-red-400 hover:text-red-300 transition-colors opacity-60 hover:opacity-100 disabled:opacity-30"
                                         title="Delete"
                                       >
                                         <Trash2 size={10} />
