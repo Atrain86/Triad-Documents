@@ -502,6 +502,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     }
     
     addHoursMutation.mutate({
+      projectId: Number(projectId),
       date: selectedDate,
       hours: parsedHours,
       description: descriptionInput.trim() || 'Painting',
@@ -812,7 +813,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const deleteHoursMutation = useMutation({
     mutationFn: async (hoursId: number) => {
-      const response = await fetch(`/api/hours/${hoursId}`, {
+      const response = await apiRequest(`/api/hours/${hoursId}`, {
         method: 'DELETE',
       });
       
