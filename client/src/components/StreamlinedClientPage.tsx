@@ -806,65 +806,39 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const addToolMutation = useMutation({
     mutationFn: async (toolName: string) => {
-      const response = await fetch(`/api/projects/${projectId}/tools`, {
+      const response = await apiRequest(`/api/projects/${projectId}/tools`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          toolName,
-        }),
+        body: { toolName }
       });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to add tool: ${response.status} - ${errorText}`);
-      }
-      
-      return response.json();
+      return response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/tools`] });
       setNewTool('');
-    },
-    onError: (error) => {
-      console.error('Add tool failed:', error);
-    },
+    }
   });
 
   const toggleToolMutation = useMutation({
     mutationFn: async (toolId: number) => {
-      const response = await fetch(`/api/tools/${toolId}`, {
-        method: 'DELETE',
+      const response = await apiRequest(`/api/tools/${toolId}`, {
+        method: 'DELETE'
       });
-      
-      if (!response.ok && response.status !== 404) {
-        throw new Error(`Failed to complete tool: ${response.status}`);
-      }
-      
-      return toolId;
+      return response;
     },
-    onSuccess: async () => {
-      // Force immediate refetch of tools data
-      await refetchTools();
-    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/tools`] });
+    }
   });
 
   const deleteHoursMutation = useMutation({
     mutationFn: async (hoursId: number) => {
-      const response = await fetch(`/api/hours/${hoursId}`, {
-        method: 'DELETE',
+      const response = await apiRequest(`/api/hours/${hoursId}`, {
+        method: 'DELETE'
       });
-      
-      if (!response.ok && response.status !== 404) {
-        throw new Error(`Failed to delete: ${response.status}`);
-      }
-      
-      return hoursId;
+      return response;
     },
-    onSuccess: async () => {
-      // Force immediate refetch of hours data
-      await refetchHours();
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/hours`] });
     },
   });
 
