@@ -463,7 +463,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const deleteSelectedPhotosMutation = useMutation({
     mutationFn: async (photoIds: number[]) => {
       const deletePromises = photoIds.map(id => 
-        fetch(`/api/photos/${id}`, { method: 'DELETE' })
+        fetch(`/api/projects/${projectId}/photos/${id}`, { method: 'DELETE' })
       );
       
       const responses = await Promise.all(deletePromises);
@@ -861,8 +861,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
 
 
-  // File upload handlers
-  const handlePhotoUpload = (event: any) => {
+  // File upload handlers - moved after mutation declarations to prevent temporal dead zone
+  const handlePhotoUpload = React.useCallback((event: any) => {
     console.log('Photo upload handler triggered');
     const files = event.target.files;
     console.log('Selected files:', files);
@@ -872,9 +872,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     } else {
       console.log('No files selected');
     }
-  };
+  }, [uploadPhotosMutation]);
 
-  const handleReceiptUpload = (event: any) => {
+  const handleReceiptUpload = React.useCallback((event: any) => {
     console.log('Receipt upload handler triggered');
     const files = event.target.files;
     console.log('Selected receipt files:', files);
@@ -884,7 +884,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     } else {
       console.log('No receipt files selected');
     }
-  };
+  }, [uploadReceiptsMutation]);
 
   if (!project) {
     return (
