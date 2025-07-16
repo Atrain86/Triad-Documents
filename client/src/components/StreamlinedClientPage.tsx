@@ -1218,7 +1218,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                           <button
                             onClick={() => newTool.trim() && addToolMutation.mutate(newTool.trim())}
                             disabled={!newTool.trim() || addToolMutation.isPending}
-                            className="px-3 py-2 text-white border-0 rounded-md text-sm font-medium disabled:opacity-50 paint-brain-purple-btn"
+                            className="px-3 py-2 text-white border-0 rounded-md text-sm font-medium disabled:opacity-50 paint-brain-test-purple"
                           >
                             <Plus size={16} />
                           </button>
@@ -1256,7 +1256,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                         {!showDatePicker && (
                           <button
                             onClick={() => setShowDatePicker(true)}
-                            className="w-full mb-4 py-2 text-sm text-white border-0 rounded-md font-medium paint-brain-green-btn"
+                            className="w-full mb-4 py-2 text-sm text-white border-0 rounded-md font-medium paint-brain-test-green"
                           >
                             <Plus size={16} className="mr-2" />
                             Log Hours for a Day

@@ -156,6 +156,19 @@ button.paint-brain-green-btn, .paint-brain-green-btn {
   border-color: #6A9955 !important;
 }
 
+/* Force a visible test to confirm CSS is loading */
+.paint-brain-test-purple {
+  background: purple !important;
+  color: white !important;
+  border: 2px solid yellow !important;
+}
+
+.paint-brain-test-green {
+  background: lime !important;
+  color: black !important;
+  border: 2px solid red !important;
+}
+
 .paint-brain-calendar::-webkit-calendar-picker-indicator:hover {
   background-color: rgba(251, 191, 36, 0.1); /* Yellow hover */
   border-radius: 4px;
