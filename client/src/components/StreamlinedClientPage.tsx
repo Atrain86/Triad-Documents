@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { apiRequest } from '@/lib/queryClient';
 
 import { generateMapsLink, generateDirectionsLink } from '@/lib/maps';
 import { compressMultipleImages, formatFileSize } from '@/lib/imageCompression';
@@ -15,9 +14,6 @@ import InvoiceGenerator from './InvoiceGenerator';
 import EstimateGenerator from './EstimateGenerator';
 import PhotoCarousel from './PhotoCarousel';
 import { ReactSortable } from 'react-sortablejs';
-import './calendar.css';
-
-
 
 // Calendar function for A-Frame calendar integration
 const openWorkCalendar = (clientProject: Project | null = null) => {
@@ -38,41 +34,9 @@ const openWorkCalendar = (clientProject: Project | null = null) => {
   }
 };
 
-// Utility function for date formatting - moved outside component for scope
-const formatDate = (isoDate: string | null | undefined) => {
-  if (!isoDate) return '';
-  
-  // Convert to string in case it's not already
-  const dateStr = String(isoDate);
-  
-  // Extract only the date part (YYYY-MM-DD) from ISO string
-  let cleanDateString = '';
-  if (dateStr.includes('T')) {
-    // If it's a full ISO string like "2025-06-22T00:00:00.000Z"
-    cleanDateString = dateStr.split('T')[0];
-  } else if (dateStr.includes(' ')) {
-    // If it's a string with space separator
-    cleanDateString = dateStr.split(' ')[0];
-  } else {
-    // If it's already just a date string
-    cleanDateString = dateStr;
-  }
-  
-  // Parse the clean date string (YYYY-MM-DD format)
-  const parts = cleanDateString.split('-');
-  if (parts.length === 3 && parts[0].length === 4) {
-    const year = parts[0];
-    const month = parts[1];
-    const day = parts[2];
-    return `${day}–${month}–${year}`;
-  }
-  
-  // If parsing fails, return empty string instead of the raw date
-  return '';
-};
-
 // Improved file list component
 function SimpleFilesList({ projectId }: { projectId: number }) {
+  const queryClient = useQueryClient();
   const [editingReceipt, setEditingReceipt] = useState<Receipt | null>(null);
   const [editVendor, setEditVendor] = useState('');
   const [editAmount, setEditAmount] = useState('');
@@ -95,7 +59,7 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
       return receiptId;
     },
     onSuccess: () => {
-      // Query invalidation will be handled by parent component
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/receipts`] });
     },
     onError: (error) => {
       console.error('Delete failed:', error);
@@ -104,14 +68,22 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
 
   const updateReceiptMutation = useMutation({
     mutationFn: async ({ id, vendor, amount, description }: { id: number; vendor: string; amount: string; description: string }) => {
-      const response = await apiRequest(`/api/receipts/${id}`, {
+      const response = await fetch(`/api/receipts/${id}`, {
         method: 'PUT',
-        body: { vendor, amount, description }
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ vendor, amount, description }),
       });
-      return response;
+      
+      if (!response.ok) {
+        throw new Error(`Failed to update receipt: ${response.status}`);
+      }
+      
+      return response.json();
     },
-    onSuccess: async () => {
-      await refetchReceipts();
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/receipts`] });
       setEditingReceipt(null);
       setEditVendor('');
       setEditAmount('');
@@ -325,14 +297,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const [selectedDate, setSelectedDate] = useState('');
   const [hoursInput, setHoursInput] = useState('');
   const [descriptionInput, setDescriptionInput] = useState('');
-  
-  // Hours editing state
-  const [editingHours, setEditingHours] = useState<number | null>(null);
-  const [editHoursData, setEditHoursData] = useState({
-    date: '',
-    hours: '',
-    description: '',
-  });
 
   // Edit form state
   const [editForm, setEditForm] = useState({
@@ -357,9 +321,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     compressedSize: 0,
   });
 
-  // Query client - must be declared before mutations
-  const queryClient = useQueryClient();
-
   // API queries
   const { data: project } = useQuery<Project>({
     queryKey: [`/api/projects/${projectId}`],
@@ -369,26 +330,17 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     queryKey: [`/api/projects/${projectId}/photos`],
   });
 
-  const { data: receipts = [], refetch: refetchReceipts } = useQuery<Receipt[]>({
+  const { data: receipts = [] } = useQuery<Receipt[]>({
     queryKey: [`/api/projects/${projectId}/receipts`],
   });
 
-  const { data: tools = [], refetch: refetchTools } = useQuery<ToolsChecklist[]>({
+  const { data: tools = [] } = useQuery<ToolsChecklist[]>({
     queryKey: [`/api/projects/${projectId}/tools`],
   });
 
-  const { data: dailyHours = [], refetch: refetchHours } = useQuery<DailyHours[]>({
+  const { data: dailyHours = [] } = useQuery<DailyHours[]>({
     queryKey: [`/api/projects/${projectId}/hours`],
   });
-
-  // Safe query invalidation helper functions  
-  const invalidatePhotos = () => {
-    queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
-  };
-  
-  const invalidateProject = () => {
-    queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}`] });
-  };
 
   // Critical mutations that need to be declared early
   const editProjectMutation = useMutation({
@@ -443,22 +395,38 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   });
 
   const addHoursMutation = useMutation({
-    mutationFn: async (hoursData: { date: string; hours: number; description: string; hourlyRate: number }) => {
-      const response = await apiRequest(`/api/projects/${projectId}/hours`, {
+    mutationFn: async (hoursData: {
+      projectId: number;
+      date: string;
+      hours: number;
+      description: string;
+    }) => {
+      const response = await fetch(`/api/projects/${projectId}/hours`, {
         method: 'POST',
-        body: {
-          ...hoursData,
-          projectId: Number(projectId)
-        }
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          date: hoursData.date,
+          hours: hoursData.hours,
+          description: hoursData.description,
+          hourlyRate: project?.hourlyRate || 60, // Include hourlyRate from project
+        }),
       });
-      return response;
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to add hours: ${response.status} - ${errorText}`);
+      }
+      
+      return response.json();
     },
-    onSuccess: async () => {
-      await refetchHours();
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/hours`] });
+      setShowDatePicker(false);
       setSelectedDate('');
       setHoursInput('');
       setDescriptionInput('');
-      setShowDatePicker(false);
     },
     onError: (error) => {
       console.error('Add hours failed:', error);
@@ -474,10 +442,17 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const deleteSelectedPhotosMutation = useMutation({
     mutationFn: async (photoIds: number[]) => {
       const deletePromises = photoIds.map(id => 
-        apiRequest(`/api/projects/${projectId}/photos/${id}`, { method: 'DELETE' })
+        fetch(`/api/photos/${id}`, { method: 'DELETE' })
       );
       
       const responses = await Promise.all(deletePromises);
+      
+      responses.forEach((response, index) => {
+        if (!response.ok) {
+          throw new Error(`Failed to delete photo ${photoIds[index]}: ${response.status}`);
+        }
+      });
+      
       return photoIds;
     },
     onSuccess: () => {
@@ -496,7 +471,38 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     return `${year}-${month}-${day}`;
   };
 
-
+  // Format ISO date string into "DD–MM–YYYY" with em-dash - CLEAN DATE ONLY
+  const formatDate = (isoDate: string | null | undefined) => {
+    if (!isoDate) return '';
+    
+    // Convert to string in case it's not already
+    const dateStr = String(isoDate);
+    
+    // Extract only the date part (YYYY-MM-DD) from ISO string
+    let cleanDateString = '';
+    if (dateStr.includes('T')) {
+      // If it's a full ISO string like "2025-06-22T00:00:00.000Z"
+      cleanDateString = dateStr.split('T')[0];
+    } else if (dateStr.includes(' ')) {
+      // If it's a string with space separator
+      cleanDateString = dateStr.split(' ')[0];
+    } else {
+      // If it's already just a date string
+      cleanDateString = dateStr;
+    }
+    
+    // Parse the clean date string (YYYY-MM-DD format)
+    const parts = cleanDateString.split('-');
+    if (parts.length === 3 && parts[0].length === 4) {
+      const year = parts[0];
+      const month = parts[1];
+      const day = parts[2];
+      return `${day}–${month}–${year}`;
+    }
+    
+    // If parsing fails, return empty string instead of the raw date
+    return '';
+  };
 
   const handleAddHours = () => {
     if (!selectedDate || !hoursInput) return;
@@ -508,45 +514,11 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     }
     
     addHoursMutation.mutate({
-      projectId: Number(projectId),
+      projectId,
       date: selectedDate,
       hours: parsedHours,
       description: descriptionInput.trim() || 'Painting',
-      hourlyRate: project?.hourlyRate || 60,
     });
-  };
-
-  const startEditingHours = (hours: DailyHours) => {
-    setEditingHours(hours.id);
-    setEditHoursData({
-      date: hours.date.toString(),
-      hours: hours.hours.toString(),
-      description: hours.description || '',
-    });
-  };
-
-  const handleSaveHours = () => {
-    if (!editingHours) return;
-    
-    const parsedHours = parseFloat(editHoursData.hours);
-    if (isNaN(parsedHours) || parsedHours <= 0) {
-      console.error('Invalid hours input:', editHoursData.hours);
-      return;
-    }
-    
-    updateHoursMutation.mutate({
-      id: editingHours,
-      updates: {
-        date: editHoursData.date,
-        hours: parsedHours,
-        description: editHoursData.description.trim() || 'Painting',
-      },
-    });
-  };
-
-  const handleCancelEditHours = () => {
-    setEditingHours(null);
-    setEditHoursData({ date: '', hours: '', description: '' });
   };
 
   const handleNotesBlur = () => {
@@ -755,30 +727,24 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const uploadReceiptsMutation = useMutation({
     mutationFn: async (files: FileList) => {
-      const results = [];
-      
-      // Process files sequentially since server expects single file uploads
-      for (const file of Array.from(files)) {
-        const formData = new FormData();
-        formData.append('receipt', file);
+      const formData = new FormData();
+      Array.from(files).forEach((file) => {
+        formData.append('receipts', file);
+      });
 
-        const response = await fetch(`/api/projects/${projectId}/receipts`, {
-          method: 'POST',
-          body: formData,
-        });
-        
-        if (!response.ok) {
-          throw new Error(`Receipt upload failed: ${response.status} ${response.statusText}`);
-        }
-        
-        const result = await response.json();
-        results.push(result);
+      const response = await fetch(`/api/projects/${projectId}/receipts`, {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Receipt upload failed: ${response.status} ${response.statusText}`);
       }
       
-      return results;
+      return response.json();
     },
-    onSuccess: async () => {
-      await refetchReceipts();
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/receipts`] });
       if (receiptInputRef.current) {
         receiptInputRef.current.value = '';
       }
@@ -790,7 +756,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const deletePhotoMutation = useMutation({
     mutationFn: async (photoId: number) => {
-      const response = await apiRequest(`/api/projects/${projectId}/photos/${photoId}`, {
+      const response = await fetch(`/api/photos/${photoId}`, {
         method: 'DELETE',
       });
       
@@ -810,62 +776,75 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const addToolMutation = useMutation({
     mutationFn: async (toolName: string) => {
-      const response = await apiRequest(`/api/projects/${projectId}/tools`, {
+      const response = await fetch(`/api/projects/${projectId}/tools`, {
         method: 'POST',
-        body: { toolName }
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          toolName,
+        }),
       });
-      return response;
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to add tool: ${response.status} - ${errorText}`);
+      }
+      
+      return response.json();
     },
-    onSuccess: async () => {
-      await refetchTools();
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/tools`] });
       setNewTool('');
-    }
+    },
+    onError: (error) => {
+      console.error('Add tool failed:', error);
+    },
   });
 
   const toggleToolMutation = useMutation({
     mutationFn: async (toolId: number) => {
-      const response = await apiRequest(`/api/tools/${toolId}`, {
-        method: 'DELETE'
+      const response = await fetch(`/api/tools/${toolId}`, {
+        method: 'DELETE',
       });
-      return response;
+      
+      if (!response.ok) {
+        throw new Error(`Failed to complete tool: ${response.status}`);
+      }
+      
+      return toolId;
     },
-    onSuccess: async () => {
-      await refetchTools();
-    }
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/tools`] });
+    },
+    onError: (error) => {
+      console.error('Toggle tool failed:', error);
+    },
   });
 
   const deleteHoursMutation = useMutation({
     mutationFn: async (hoursId: number) => {
-      const response = await apiRequest(`/api/hours/${hoursId}`, {
-        method: 'DELETE'
+      const response = await fetch(`/api/hours/${hoursId}`, {
+        method: 'DELETE',
       });
-      return response;
+      
+      if (!response.ok) {
+        throw new Error(`Failed to delete hours: ${response.status}`);
+      }
+      
+      return hoursId;
     },
-    onSuccess: async () => {
-      await refetchHours();
-    },
-  });
-
-  const updateHoursMutation = useMutation({
-    mutationFn: async ({ id, updates }: { id: number; updates: any }) => {
-      const response = await apiRequest(`/api/hours/${id}`, {
-        method: 'PUT',
-        body: updates
-      });
-      return response;
-    },
-    onSuccess: async () => {
-      await refetchHours();
-      setEditingHours(null);
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/hours`] });
     },
     onError: (error) => {
-      console.error('Update hours failed:', error);
+      console.error('Delete hours failed:', error);
     },
   });
 
 
 
-  // File upload handlers - moved after mutation declarations to prevent temporal dead zone
+  // File upload handlers
   const handlePhotoUpload = (event: any) => {
     console.log('Photo upload handler triggered');
     const files = event.target.files;
@@ -1276,80 +1255,32 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                           </Button>
                         )}
 
-                        {/* Paint Brain Calendar */}
+                        {/* Date Picker and Hours Input */}
                         {showDatePicker && (
-                          <div className="mb-4 space-y-3">
-                            <div className="calendar-container">
-                              <div className="calendar-header">
-                                <button 
-                                  className="nav-button"
-                                  onClick={() => {
-                                    const currentDate = selectedDate ? new Date(selectedDate) : new Date();
-                                    const prevMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
-                                    setSelectedDate(formatDateForInput(prevMonth));
-                                  }}
-                                >
-                                  &#8249;
-                                </button>
-                                <h3 className="month-name">
-                                  {selectedDate ? new Date(selectedDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                                </h3>
-                                <button 
-                                  className="nav-button"
-                                  onClick={() => {
-                                    const currentDate = selectedDate ? new Date(selectedDate) : new Date();
-                                    const nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
-                                    setSelectedDate(formatDateForInput(nextMonth));
-                                  }}
-                                >
-                                  &#8250;
-                                </button>
-                              </div>
-                              
-                              <div className="calendar-grid">
-                                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                                  <div key={day} className="day-name">{day}</div>
-                                ))}
-                                {(() => {
-                                  const today = new Date();
-                                  const currentDate = selectedDate ? new Date(selectedDate) : today;
-                                  const year = currentDate.getFullYear();
-                                  const month = currentDate.getMonth();
-                                  const firstDay = new Date(year, month, 1).getDay();
-                                  const daysInMonth = new Date(year, month + 1, 0).getDate();
-                                  const cells = [];
-                                  
-                                  // Empty cells for days before month starts
-                                  for (let i = 0; i < firstDay; i++) {
-                                    cells.push(<div key={`empty-${i}`} className="calendar-cell"></div>);
+                          <div className="mb-4 p-4 bg-gray-800 rounded-lg space-y-3 border border-gray-600">
+                            <div>
+                              <label className="text-sm font-medium mb-2 block text-gray-200">
+                                Select Date
+                                <span className="ml-2 text-xs px-2 py-1 bg-green-900/30 text-green-300 rounded">
+                                  Today: {formatDateForInput(new Date())}
+                                </span>
+                              </label>
+                              <input
+                                type="date"
+                                value={selectedDate}
+                                onChange={(e) => {
+                                  setSelectedDate(e.target.value);
+                                  if (e.target.value) {
+                                    setTimeout(() => {
+                                      const hoursInput = document.querySelector('input[placeholder="0"]') as HTMLInputElement;
+                                      if (hoursInput) hoursInput.focus();
+                                    }, 100);
                                   }
-                                  
-                                  // Days of the month
-                                  for (let day = 1; day <= daysInMonth; day++) {
-                                    const dateStr = formatDateForInput(new Date(year, month, day));
-                                    const isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === day;
-                                    const isSelected = selectedDate === dateStr;
-                                    
-                                    cells.push(
-                                      <div
-                                        key={day}
-                                        className={`calendar-cell ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''}`}
-                                        onClick={() => {
-                                          setSelectedDate(dateStr);
-                                          setTimeout(() => {
-                                            const hoursInput = document.querySelector('input[placeholder="0"]') as HTMLInputElement;
-                                            if (hoursInput) hoursInput.focus();
-                                          }, 100);
-                                        }}
-                                      >
-                                        {day}
-                                      </div>
-                                    );
-                                  }
-                                  
-                                  return cells;
-                                })()}
-                              </div>
+                                }}
+                                className="w-full px-3 py-2 text-sm border-2 border-green-600 rounded-lg bg-green-900/20 text-gray-200 focus:border-green-500"
+                                max={formatDateForInput(new Date())}
+                                style={{ colorScheme: 'dark' }}
+                              />
                             </div>
                             
                             <div>
@@ -1415,135 +1346,44 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                           ) : (
                             dailyHours.map((hours) => (
                               <div key={hours.id} className="p-3 bg-gray-800 rounded-lg border border-gray-600">
-                                {editingHours === hours.id ? (
-                                  // Edit mode
-                                  <div className="space-y-3">
-                                    <div className="grid grid-cols-3 gap-2">
-                                      <div>
-                                        <label className="text-xs font-medium text-gray-300 block mb-1">Date</label>
-                                        <input
-                                          type="date"
-                                          value={editHoursData.date}
-                                          onChange={(e) => setEditHoursData(prev => ({ ...prev, date: e.target.value }))}
-                                          className="w-full text-xs bg-gray-700 border-gray-600 text-gray-200 rounded px-2 py-1"
-                                        />
-                                      </div>
-                                      <div>
-                                        <label className="text-xs font-medium text-gray-300 block mb-1">Hours</label>
-                                        <input
-                                          type="number"
-                                          step="0.5"
-                                          min="0.5"
-                                          value={editHoursData.hours}
-                                          onChange={(e) => setEditHoursData(prev => ({ ...prev, hours: e.target.value }))}
-                                          className="w-full text-xs bg-gray-700 border-gray-600 text-gray-200 rounded px-2 py-1"
-                                        />
-                                      </div>
-                                      <div>
-                                        <label className="text-xs font-medium text-gray-300 block mb-1">Description</label>
-                                        <input
-                                          type="text"
-                                          value={editHoursData.description}
-                                          onChange={(e) => setEditHoursData(prev => ({ ...prev, description: e.target.value }))}
-                                          placeholder="Painting"
-                                          className="w-full text-xs bg-gray-700 border-gray-600 text-gray-200 rounded px-2 py-1"
-                                        />
-                                      </div>
-                                    </div>
-                                    <div className="flex gap-2">
-                                      <Button
-                                        onClick={handleSaveHours}
-                                        disabled={updateHoursMutation.isPending}
-                                        size="sm"
-                                        className="flex-1 bg-green-600 hover:bg-green-700 text-xs"
-                                      >
-                                        {updateHoursMutation.isPending ? 'Saving...' : 'Save'}
-                                      </Button>
-                                      <Button
-                                        onClick={handleCancelEditHours}
-                                        variant="outline"
-                                        size="sm"
-                                        className="flex-1 border-gray-600 text-gray-300 text-xs"
-                                      >
-                                        Cancel
-                                      </Button>
-                                    </div>
-                                  </div>
-                                ) : (
-                                  // View mode
-                                  <div className="flex items-center justify-between gap-4">
-                                    <div className="flex items-baseline gap-3 text-sm min-w-0 flex-1">
-                                      <span className="font-medium text-gray-100 whitespace-nowrap">
-                                        {(() => {
-                                          try {
-                                            // Ensure we have a valid date string
-                                            const dateStr = hours.date.toString();
-                                            let cleanDate = dateStr;
-                                            
-                                            // Extract just the date part if it's an ISO string
-                                            if (dateStr.includes('T')) {
-                                              cleanDate = dateStr.split('T')[0];
-                                            }
-                                            
-                                            // Create date object and format it
-                                            const date = new Date(cleanDate + 'T12:00:00'); // Use noon to avoid timezone issues
-                                            
-                                            if (isNaN(date.getTime())) {
-                                              return 'Invalid date';
-                                            }
-                                            
-                                            // Create uniform date format: "Wed, Jun 25"
-                                            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-                                            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                                            
-                                            const dayName = dayNames[date.getDay()];
-                                            const monthName = monthNames[date.getMonth()];
-                                            const dayNum = date.getDate();
-                                            
-                                            return `${dayName}, ${monthName} ${dayNum}`;
-                                          } catch (error) {
-                                            console.error('Date formatting error:', error, hours.date);
-                                            return 'Invalid date';
-                                          }
-                                        })()}
+                                <div className="flex items-center justify-between">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 text-sm">
+                                      <span className="font-medium text-gray-100">
+                                        {new Date(hours.date + 'T00:00:00').toLocaleDateString('en-US', { 
+                                          weekday: 'short', 
+                                          month: 'short', 
+                                          day: 'numeric' 
+                                        })}
                                       </span>
-                                      <span className="font-semibold text-blue-400 whitespace-nowrap">
+                                      <span className="text-gray-400">•</span>
+                                      <span className="font-semibold text-blue-400">
                                         {hours.hours}hr
                                       </span>
                                       {hours.description && (
-                                        <span className="text-gray-400 truncate flex-1">
-                                          {hours.description}
-                                        </span>
+                                        <>
+                                          <span className="text-gray-400">•</span>
+                                          <span className="text-gray-400">
+                                            {hours.description}
+                                          </span>
+                                        </>
                                       )}
                                     </div>
-                                    <div className="flex items-center gap-3 whitespace-nowrap">
-                                      <span className="text-sm text-green-400 font-medium">
-                                        ${(hours.hours * 60).toFixed(0)}
-                                      </span>
-                                      <div className="flex items-center gap-1">
-                                        <button
-                                          onClick={() => startEditingHours(hours)}
-                                          className="p-0.5 text-blue-400 hover:text-blue-300 transition-colors opacity-60 hover:opacity-100"
-                                          title="Edit"
-                                        >
-                                          <Edit3 size={10} />
-                                        </button>
-                                        <button
-                                          onClick={() => {
-                                            if (window.confirm('Delete this hours entry?')) {
-                                              deleteHoursMutation.mutate(hours.id);
-                                            }
-                                          }}
-                                          disabled={deleteHoursMutation.isPending}
-                                          className="p-0.5 text-red-400 hover:text-red-300 transition-colors opacity-60 hover:opacity-100"
-                                          title="Delete"
-                                        >
-                                          <Trash2 size={10} />
-                                        </button>
-                                      </div>
-                                    </div>
                                   </div>
-                                )}
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs text-green-400 font-medium">
+                                      ${(hours.hours * 60).toFixed(0)}
+                                    </span>
+                                    <button
+                                      onClick={() => deleteHoursMutation.mutate(hours.id)}
+                                      disabled={deleteHoursMutation.isPending}
+                                      className="p-0.5 text-red-400 hover:text-red-300 transition-colors opacity-60 hover:opacity-100"
+                                      title="Delete"
+                                    >
+                                      <Trash2 size={10} />
+                                    </button>
+                                  </div>
+                                </div>
                               </div>
                             ))
                           )}
@@ -1645,7 +1485,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                 body: JSON.stringify(receiptData),
                               }).then(async (response) => {
                                 if (response.ok) {
-                                  await refetchReceipts();
+                                  queryClient.invalidateQueries({ queryKey: [`/api/projects/${project.id}/receipts`] });
                                   (e.target as HTMLFormElement).reset();
                                 } else {
                                   const errorData = await response.text();
