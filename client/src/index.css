@@ -124,6 +124,27 @@ input[type="date"]:focus::-webkit-datetime-edit-year-field {
   cursor: pointer;
 }
 
+/* Force Paint Brain button colors to override shadcn defaults */
+.paint-brain-purple-btn {
+  background-color: #8B5FBF !important;
+  border-color: #8B5FBF !important;
+}
+
+.paint-brain-green-btn {
+  background-color: #6A9955 !important;
+  border-color: #6A9955 !important;
+}
+
+.paint-brain-purple-btn:hover {
+  background-color: #7A4FA8 !important;
+  opacity: 0.9;
+}
+
+.paint-brain-green-btn:hover {
+  background-color: #5A8845 !important;
+  opacity: 0.9;
+}
+
 .paint-brain-calendar::-webkit-calendar-picker-indicator:hover {
   background-color: rgba(251, 191, 36, 0.1); /* Yellow hover */
   border-radius: 4px;
