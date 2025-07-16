@@ -73,77 +73,87 @@ const aframeTheme = {
   }
 };
 
+// Paint Brain Color Palette
+const paintBrainColors = {
+  purple: '#8B5FBF',    // Purple from code syntax
+  orange: '#D4A574',    // Orange from code syntax  
+  green: '#6A9955',     // Green from comments
+  red: '#F44747',       // Red from HTML tags
+  blue: '#569CD6',      // Blue from keywords
+  gray: '#6B7280'       // Neutral gray
+};
+
 const statusConfig = {
   'in-progress': { 
     label: 'In Progress', 
-    text: 'text-green-600 dark:text-green-400', 
-    dot: 'bg-green-500',
+    text: `text-[${paintBrainColors.green}]`, 
+    dot: `bg-[${paintBrainColors.green}]`,
     priority: 1 
   },
   'scheduled': { 
     label: 'Scheduled', 
-    text: 'text-blue-600 dark:text-blue-400', 
-    dot: 'bg-blue-500',
+    text: `text-[${paintBrainColors.blue}]`, 
+    dot: `bg-[${paintBrainColors.blue}]`,
     priority: 2 
   },
   'estimate-sent': { 
     label: 'Estimate Sent', 
-    text: 'text-purple-600 dark:text-purple-400', 
-    dot: 'bg-purple-500',
+    text: `text-[${paintBrainColors.purple}]`, 
+    dot: `bg-[${paintBrainColors.purple}]`,
     priority: 3 
   },
   'awaiting-confirmation': { 
     label: 'Awaiting Confirmation', 
-    text: 'text-orange-600 dark:text-orange-400', 
-    dot: 'bg-orange-500',
+    text: `text-[${paintBrainColors.orange}]`, 
+    dot: `bg-[${paintBrainColors.orange}]`,
     priority: 4 
   },
   'site-visit-needed': { 
     label: 'Site Visit Needed', 
-    text: 'text-indigo-600 dark:text-indigo-400', 
-    dot: 'bg-indigo-500',
+    text: `text-[${paintBrainColors.purple}]`, 
+    dot: `bg-[${paintBrainColors.purple}]`,
     priority: 5 
   },
   'initial-contact': { 
     label: 'Initial Contact', 
-    text: 'text-cyan-600 dark:text-cyan-400', 
-    dot: 'bg-cyan-500',
+    text: `text-[${paintBrainColors.blue}]`, 
+    dot: `bg-[${paintBrainColors.blue}]`,
     priority: 6 
   },
   'follow-up-needed': { 
     label: 'Follow-up Needed', 
-    text: 'text-pink-600 dark:text-pink-400', 
-    dot: 'bg-pink-500',
+    text: `text-[${paintBrainColors.orange}]`, 
+    dot: `bg-[${paintBrainColors.orange}]`,
     priority: 7 
   },
   'on-hold': { 
     label: 'On Hold', 
-    text: 'text-gray-600 dark:text-gray-400', 
-    dot: 'bg-gray-500',
+    text: `text-[${paintBrainColors.gray}]`, 
+    dot: `bg-[${paintBrainColors.gray}]`,
     priority: 8 
   },
   'pending': { 
     label: 'Pending', 
-    text: 'text-yellow-600 dark:text-yellow-400', 
-    dot: 'bg-yellow-500',
+    text: `text-[${paintBrainColors.orange}]`, 
+    dot: `bg-[${paintBrainColors.orange}]`,
     priority: 9 
   },
   'completed': { 
     label: 'Completed', 
-    text: 'text-orange-600 dark:text-orange-400', 
-    dot: 'bg-orange-500',
+    text: `text-[${paintBrainColors.green}]`, 
+    dot: `bg-[${paintBrainColors.green}]`,
     priority: 10 
   },
   'cancelled': { 
     label: 'Cancelled', 
-    text: 'text-red-600 dark:text-red-400', 
-    dot: 'bg-red-500',
+    text: `text-[${paintBrainColors.red}]`, 
+    dot: `bg-[${paintBrainColors.red}]`,
     priority: 11 
   },
   'archived': { 
     label: 'Archived', 
-    text: 'text-gray-600 dark:text-gray-400', 
-    dot: 'bg-gray-500',
+    text: `text-[${paintBrainColors.gray}]`, 
+    dot: `bg-[${paintBrainColors.gray}]`,
     priority: 12 
   }
 };
@@ -325,17 +335,17 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
           <Button
             onClick={() => setShowAddClient(true)}
             className="px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
-            style={{ backgroundColor: '#4F46E5' }}
+            style={{ backgroundColor: paintBrainColors.red }}
           >
             New Client
           </Button>
           
           <Button
             onClick={() => openWorkCalendar()}
-            className="flex items-center px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90"
-            style={{ backgroundColor: '#3b82f6' }}
+            className="flex items-center px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
+            style={{ backgroundColor: paintBrainColors.green }}
           >
-            Work Schedule
+            Schedule
           </Button>
         </div>
 
@@ -357,14 +367,16 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
                 setManualProjects(sortProjectsByPriority(baseFilteredProjects));
               }
             }}
-            className={`px-3 py-3 text-sm ${isManualMode ? 'bg-purple-600 hover:bg-purple-700' : ''}`}
+            className={`px-3 py-3 text-sm`}
+            style={isManualMode ? { backgroundColor: paintBrainColors.purple } : {}}
           >
             {isManualMode ? 'Smart' : 'Manual'}
           </Button>
           <Button
             variant={showArchived ? "default" : "outline"}
             onClick={() => setShowArchived(!showArchived)}
-            className={`px-4 py-3 ${showArchived ? 'bg-gray-600 hover:bg-gray-700' : ''}`}
+            className={`px-4 py-3`}
+            style={showArchived ? { backgroundColor: paintBrainColors.gray } : {}}
           >
             {showArchived ? 'Active' : 'Archive'}
           </Button>
@@ -542,7 +554,7 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
                         e.preventDefault();
                         e.stopPropagation();
                       }}
-                      className="p-2 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
+                      className="p-2 text-gray-500 hover:text-[#F44747] dark:text-gray-400 dark:hover:text-[#F44747] hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
                       title="Delete client"
                     >
                       <Trash2 size={16} />
@@ -705,7 +717,7 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
                         e.preventDefault();
                         e.stopPropagation();
                       }}
-                      className="p-2 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
+                      className="p-2 text-gray-500 hover:text-[#F44747] dark:text-gray-400 dark:hover:text-[#F44747] hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
                       title="Delete client"
                     >
                       <Trash2 size={16} />

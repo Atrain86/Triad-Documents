@@ -25,6 +25,14 @@
   --destructive-foreground: hsl(60, 9.1%, 97.8%);
   --ring: hsl(20, 14.3%, 4.1%);
   --radius: 0.5rem;
+  
+  /* Paint Brain Color Palette */
+  --paint-brain-purple: #8B5FBF;
+  --paint-brain-orange: #D4A574;
+  --paint-brain-green: #6A9955;
+  --paint-brain-red: #F44747;
+  --paint-brain-blue: #569CD6;
+  --paint-brain-gray: #6B7280;
 }
 
 .dark {
