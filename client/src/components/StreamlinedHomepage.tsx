@@ -182,16 +182,15 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
               style={{ borderColor: paintBrainColors.orange }}
             />
           </div>
-          <div className="flex items-center gap-3 px-4 py-3 bg-white border-2 rounded-md" style={{ borderColor: paintBrainColors.orange }}>
+          <div className="flex items-center gap-3 px-4 py-3">
             <span className="text-sm font-medium" style={{ color: showArchived ? paintBrainColors.gray : paintBrainColors.green }}>
               Active
             </span>
             <button
               onClick={() => setShowArchived(!showArchived)}
-              className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
+              className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none"
               style={{ 
-                backgroundColor: showArchived ? paintBrainColors.orange : paintBrainColors.green,
-                focusRingColor: paintBrainColors.orange 
+                backgroundColor: showArchived ? paintBrainColors.blue : paintBrainColors.green
               }}
             >
               <span
@@ -200,7 +199,7 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
                 }`}
               />
             </button>
-            <span className="text-sm font-medium" style={{ color: showArchived ? paintBrainColors.orange : paintBrainColors.gray }}>
+            <span className="text-sm font-medium" style={{ color: showArchived ? paintBrainColors.blue : paintBrainColors.gray }}>
               Archive
             </span>
           </div>
