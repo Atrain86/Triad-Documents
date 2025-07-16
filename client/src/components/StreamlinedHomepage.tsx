@@ -1,77 +1,9 @@
-import React, { useState } from "react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle 
-} from "@/components/ui/dialog";
-import { 
-  User, 
-  MapPin, 
-  Search, 
-  Edit3, 
-  Archive, 
-  RotateCcw, 
-  Trash2,
-  GripVertical 
-} from "lucide-react";
+import React, { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Search, User, MapPin, Edit3, Archive, RotateCcw, Trash2, GripVertical, Navigation } from 'lucide-react';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
 import { ReactSortable } from 'react-sortablejs';
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-
-type Project = {
-  id: number;
-  userId: number;
-  clientName: string;
-  address: string;
-  clientCity?: string;
-  clientPostal?: string;
-  clientEmail?: string;
-  clientPhone?: string;
-  projectType: string;
-  roomCount: number;
-  difficulty: string;
-  hourlyRate: number;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-};
-
-type NewProject = {
-  clientName: string;
-  address: string;
-  clientCity?: string;
-  clientPostal?: string;
-  clientEmail?: string;
-  clientPhone?: string;
-  projectType: string;
-  roomCount: number;
-  difficulty: string;
-  hourlyRate: number;
-};
-
-type InsertProject = {
-  clientName?: string;
-  address?: string;
-  clientCity?: string;
-  clientPostal?: string;
-  clientEmail?: string;
-  clientPhone?: string;
-  projectType?: string;
-  roomCount?: number;
-  difficulty?: string;
-  hourlyRate?: number;
-  status?: string;
-};
-
-const aframeTheme = {
-  gradients: {
-    rainbow: "linear-gradient(to right, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3, #54a0ff)"
-  }
-};
 
 // Paint Brain Color Palette
 const paintBrainColors = {
@@ -83,231 +15,153 @@ const paintBrainColors = {
   gray: '#6B7280'       // Neutral gray
 };
 
+const aframeTheme = {
+  gradients: {
+    rainbow: "linear-gradient(to right, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3, #54a0ff)"
+  }
+};
+
 const statusConfig = {
   'in-progress': { 
     label: 'In Progress', 
-    text: `text-[${paintBrainColors.green}]`, 
-    dot: `bg-[${paintBrainColors.green}]`,
+    color: paintBrainColors.green,
     priority: 1 
   },
   'scheduled': { 
     label: 'Scheduled', 
-    text: `text-[${paintBrainColors.blue}]`, 
-    dot: `bg-[${paintBrainColors.blue}]`,
+    color: paintBrainColors.blue,
     priority: 2 
   },
   'estimate-sent': { 
     label: 'Estimate Sent', 
-    text: `text-[${paintBrainColors.purple}]`, 
-    dot: `bg-[${paintBrainColors.purple}]`,
+    color: paintBrainColors.purple,
     priority: 3 
   },
   'awaiting-confirmation': { 
     label: 'Awaiting Confirmation', 
-    text: `text-[${paintBrainColors.orange}]`, 
-    dot: `bg-[${paintBrainColors.orange}]`,
+    color: paintBrainColors.orange,
     priority: 4 
   },
   'site-visit-needed': { 
     label: 'Site Visit Needed', 
-    text: `text-[${paintBrainColors.purple}]`, 
-    dot: `bg-[${paintBrainColors.purple}]`,
+    color: paintBrainColors.purple,
     priority: 5 
   },
   'initial-contact': { 
     label: 'Initial Contact', 
-    text: `text-[${paintBrainColors.blue}]`, 
-    dot: `bg-[${paintBrainColors.blue}]`,
+    color: paintBrainColors.blue,
     priority: 6 
   },
   'follow-up-needed': { 
     label: 'Follow-up Needed', 
-    text: `text-[${paintBrainColors.orange}]`, 
-    dot: `bg-[${paintBrainColors.orange}]`,
+    color: paintBrainColors.orange,
     priority: 7 
   },
   'on-hold': { 
     label: 'On Hold', 
-    text: `text-[${paintBrainColors.gray}]`, 
-    dot: `bg-[${paintBrainColors.gray}]`,
+    color: paintBrainColors.gray,
     priority: 8 
   },
   'pending': { 
     label: 'Pending', 
-    text: `text-[${paintBrainColors.orange}]`, 
-    dot: `bg-[${paintBrainColors.orange}]`,
+    color: '#D4A574',
     priority: 9 
   },
   'completed': { 
     label: 'Completed', 
-    text: `text-[${paintBrainColors.green}]`, 
-    dot: `bg-[${paintBrainColors.green}]`,
+    color: paintBrainColors.green,
     priority: 10 
   },
   'cancelled': { 
     label: 'Cancelled', 
-    text: `text-[${paintBrainColors.red}]`, 
-    dot: `bg-[${paintBrainColors.red}]`,
+    color: paintBrainColors.red,
     priority: 11 
   },
   'archived': { 
     label: 'Archived', 
-    text: `text-[${paintBrainColors.gray}]`, 
-    dot: `bg-[${paintBrainColors.gray}]`,
+    color: paintBrainColors.gray,
     priority: 12 
   }
 };
 
-interface StreamlinedHomepageProps {
-  onSelectProject: (projectId: number) => void;
-}
-
-export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHomepageProps) {
-  const [showAddClient, setShowAddClient] = useState(false);
+export default function StreamlinedHomepage({ onSelectProject }: { onSelectProject: (projectId: number) => void }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [showArchived, setShowArchived] = useState(false);
-  const [editingProject, setEditingProject] = useState<Project | null>(null);
-  const [editForm, setEditForm] = useState<Partial<InsertProject>>({});
   const [isManualMode, setIsManualMode] = useState(false);
-  const [manualProjects, setManualProjects] = useState<Project[]>([]);
-  const [newProject, setNewProject] = useState<NewProject>({
-    clientName: '',
-    address: '',
-    clientCity: '',
-    clientPostal: '',
-    clientEmail: '',
-    clientPhone: '',
-    projectType: 'exterior',
-    roomCount: 1,
-    difficulty: 'medium',
-    hourlyRate: 60
-  });
-
+  const [manualProjects, setManualProjects] = useState<any[]>([]);
+  const [showAddClient, setShowAddClient] = useState(false);
+  const [editingProject, setEditingProject] = useState<any>(null);
+  const [editForm, setEditForm] = useState<any>({});
+  
   const queryClient = useQueryClient();
 
-  const { data: projects = [], isLoading } = useQuery<Project[]>({
+  const { data: projects = [], isLoading } = useQuery({
     queryKey: ['/api/projects'],
-  });
-
-  // Smart sorting function - prioritize by status
-  const sortProjectsByPriority = (projectList: Project[]) => {
-    return [...projectList].sort((a, b) => {
-      const statusA = statusConfig[a.status as keyof typeof statusConfig] || { priority: 99 };
-      const statusB = statusConfig[b.status as keyof typeof statusConfig] || { priority: 99 };
-      
-      // First sort by status priority
-      if (statusA.priority !== statusB.priority) {
-        return statusA.priority - statusB.priority;
-      }
-      
-      // Then sort alphabetically by client name
-      return a.clientName.localeCompare(b.clientName);
-    });
-  };
-
-  // Filter projects first
-  const baseFilteredProjects = projects.filter(project => {
-    const isArchived = project.status === 'archived';
-    if (showArchived !== isArchived) return false;
-    
-    if (!searchTerm) return true;
-    
-    return (
-      project.clientName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      project.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      project.projectType?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  });
-
-  // Apply sorting or manual order
-  const filteredProjects = isManualMode 
-    ? manualProjects.filter(project => baseFilteredProjects.some(p => p.id === project.id))
-    : sortProjectsByPriority(baseFilteredProjects);
-
-  // Update manual projects when switching to manual mode
-  React.useEffect(() => {
-    if (isManualMode && manualProjects.length === 0) {
-      setManualProjects(sortProjectsByPriority(baseFilteredProjects));
-    }
-  }, [isManualMode, baseFilteredProjects]);
-
-  const createProjectMutation = useMutation({
-    mutationFn: async (projectData: NewProject) => {
-      const response = await apiRequest('POST', '/api/projects', projectData);
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
-      setShowAddClient(false);
-      setNewProject({
-        clientName: '',
-        address: '',
-        clientCity: '',
-        clientPostal: '',
-        clientEmail: '',
-        clientPhone: '',
-        projectType: 'exterior',
-        roomCount: 1,
-        difficulty: 'medium',
-        hourlyRate: 60
-      });
-    }
-  });
-
-  const updateStatusMutation = useMutation({
-    mutationFn: async ({ projectId, status }: { projectId: number, status: string }) => {
-      const response = await apiRequest('PUT', `/api/projects/${projectId}`, { status });
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
-    }
+    select: (data: any[]) => data || []
   });
 
   const deleteProjectMutation = useMutation({
     mutationFn: async (projectId: number) => {
-      const response = await apiRequest('DELETE', `/api/projects/${projectId}`);
+      const response = await fetch(`/api/projects/${projectId}`, {
+        method: 'DELETE',
+      });
       if (!response.ok) {
         throw new Error('Failed to delete project');
       }
-      return response;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
-    },
-    onError: (error) => {
-      console.error('Delete error:', error);
-      alert('Failed to delete project. Please try again.');
-    }
-  });
-
-  const updateProjectMutation = useMutation({
-    mutationFn: async ({ id, updates }: { id: number; updates: Partial<InsertProject> }) => {
-      const response = await apiRequest('PUT', `/api/projects/${id}`, updates);
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
-      setEditingProject(null);
-      setEditForm({});
-    }
+    },
   });
 
-  const handleEditProject = (project: Project) => {
-    setEditingProject(project);
-    setEditForm({
-      clientName: project.clientName,
-      address: project.address,
-      clientCity: project.clientCity,
-      clientPostal: project.clientPostal,
-      clientEmail: project.clientEmail,
-      clientPhone: project.clientPhone,
-      projectType: project.projectType,
-      roomCount: project.roomCount,
-      difficulty: project.difficulty,
-      hourlyRate: project.hourlyRate
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ projectId, status }: { projectId: number; status: string }) => {
+      const response = await fetch(`/api/projects/${projectId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      });
+      if (!response.ok) throw new Error('Failed to update status');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+    },
+  });
+
+  const sortProjectsByPriority = (projectList: any[]) => {
+    return [...projectList].sort((a, b) => {
+      const priorityA = statusConfig[a.status as keyof typeof statusConfig]?.priority || 999;
+      const priorityB = statusConfig[b.status as keyof typeof statusConfig]?.priority || 999;
+      return priorityA - priorityB;
     });
   };
+
+  const filteredProjects = projects.filter((project: any) => {
+    const matchesSearch = searchTerm === '' || 
+      project.clientName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      project.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      project.projectType?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesArchive = showArchived ? 
+      project.status === 'archived' : 
+      project.status !== 'archived';
+    
+    return matchesSearch && matchesArchive;
+  });
+
+  const baseFilteredProjects = isManualMode ? 
+    sortProjectsByPriority(filteredProjects) : 
+    sortProjectsByPriority(filteredProjects);
+
+  const displayProjects = isManualMode ? manualProjects : baseFilteredProjects;
+
+  useEffect(() => {
+    if (isManualMode && manualProjects.length === 0) {
+      setManualProjects(sortProjectsByPriority(baseFilteredProjects));
+    }
+  }, [isManualMode, baseFilteredProjects]);
 
   const openWorkCalendar = () => {
     const workCalendarDirectUrl = 'https://calendar.google.com/calendar/embed?src=6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981%40group.calendar.google.com&ctz=America%2FVancouver';
@@ -327,9 +181,13 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
       <div className="p-6">
         <div className="flex justify-center mb-6">
           <img 
-            src="/aframe-logo.png" 
-            alt="A-Frame Painting" 
+            src="/paint-brain-logo-pure-black.png" 
+            alt="Paint Brain" 
             className="h-32 w-auto object-contain"
+            onError={(e) => {
+              console.log('Paint Brain logo failed, trying A-frame fallback');
+              e.currentTarget.src = "/aframe-logo.png";
+            }}
           />
         </div>
 
@@ -374,16 +232,22 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
                 setManualProjects(sortProjectsByPriority(baseFilteredProjects));
               }
             }}
-            className={`px-3 py-3 text-sm`}
-            style={isManualMode ? { backgroundColor: paintBrainColors.purple } : {}}
+            className="px-3 py-3 text-sm"
+            style={isManualMode ? 
+              { backgroundColor: '#D4A574', color: 'white' } : 
+              { backgroundColor: 'transparent', color: '#D4A574', borderColor: '#D4A574' }
+            }
           >
             {isManualMode ? 'Smart' : 'Manual'}
           </Button>
           <Button
             variant={showArchived ? "default" : "outline"}
             onClick={() => setShowArchived(!showArchived)}
-            className={`px-4 py-3`}
-            style={showArchived ? { backgroundColor: paintBrainColors.orange } : {}}
+            className="px-4 py-3"
+            style={showArchived ? 
+              { backgroundColor: '#D4A574', color: 'white' } : 
+              { backgroundColor: 'transparent', color: '#D4A574', borderColor: '#D4A574' }
+            }
           >
             {showArchived ? 'Active' : 'Archive'}
           </Button>
@@ -399,584 +263,183 @@ export default function StreamlinedHomepage({ onSelectProject }: StreamlinedHome
           </div>
         )}
 
-        {isManualMode ? (
-          <ReactSortable 
-            list={filteredProjects} 
-            setList={(newList) => setManualProjects(newList)}
-            animation={150}
-            handle=".drag-handle"
-            className="space-y-4"
-          >
-            {filteredProjects.map(project => {
-              const handleNavigation = () => {
-                console.log('Navigating to project:', project.id);
-                onSelectProject(project.id);
-              };
-
-              let touchStartY = 0;
-              let touchStartTime = 0;
-              let hasMoved = false;
-
-              return (
-                <Card
-                  key={project.id}
-                  className="p-5 transition-all hover:shadow-md hover:border-primary/50 bg-card relative group cursor-pointer"
-                  onClick={handleNavigation}
-                  onTouchStart={(e) => {
-                    touchStartY = e.touches[0].clientY;
-                    touchStartTime = Date.now();
-                    hasMoved = false;
-                    e.currentTarget.style.opacity = '0.8';
-                  }}
-                  onTouchMove={(e) => {
-                    const currentY = e.touches[0].clientY;
-                    const deltaY = Math.abs(currentY - touchStartY);
-                    if (deltaY > 10) {
-                      hasMoved = true;
-                      e.currentTarget.style.opacity = '1';
-                    }
-                  }}
-                  onTouchEnd={(e) => {
-                    e.currentTarget.style.opacity = '1';
-                    const touchDuration = Date.now() - touchStartTime;
-                    if (!hasMoved && touchDuration < 300) {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleNavigation();
-                    }
-                  }}
-                  onTouchCancel={(e) => {
-                    e.currentTarget.style.opacity = '1';
-                  }}
-                  style={{ 
-                    touchAction: 'pan-y',
-                    WebkitTapHighlightColor: 'rgba(0,0,0,0)',
-                    WebkitUserSelect: 'none',
-                    userSelect: 'none'
-                  }}
-                >
-                  <div className="flex justify-between items-start mb-3">
-                    <div className="flex items-center gap-3 flex-1">
-                      <div className="drag-handle cursor-move text-gray-400 hover:text-gray-600 transition-colors">
-                        <GripVertical size={16} />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <User size={16} className="text-muted-foreground" />
-                          <h3 className="font-semibold text-lg" style={{ color: paintBrainColors.purple }}>
-                            {project.clientName || 'Unnamed Client'}
-                          </h3>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm mb-2">
-                          <MapPin size={14} className="text-muted-foreground" />
-                          <p style={{ color: paintBrainColors.green }}>{project.address || 'No address'}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between pt-3 border-t border-border">
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span className="capitalize">{project.projectType}</span>
-                      {project.projectType === 'interior' && (
-                        <>
-                          <span>•</span>
-                          <span>{project.roomCount} room{project.roomCount !== 1 ? 's' : ''}</span>
-                        </>
-                      )}
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <select
-                        value={project.status}
-                        onChange={(e) => {
-                          e.stopPropagation();
-                          updateStatusMutation.mutate({ 
-                            projectId: project.id, 
-                            status: e.target.value 
-                          });
-                        }}
-                        onClick={(e) => e.stopPropagation()}
-                        className={`text-xs font-medium border-none bg-transparent cursor-pointer focus:outline-none ${statusConfig[project.status as keyof typeof statusConfig]?.text || 'text-gray-600 dark:text-gray-400'}`}
-                      >
-                        <option value="in-progress">🟢 In Progress</option>
-                        <option value="scheduled">🔵 Scheduled</option>
-                        <option value="estimate-sent">📝 Estimate Sent</option>
-                        <option value="awaiting-confirmation">⏳ Awaiting Confirmation</option>
-                        <option value="site-visit-needed">📍 Site Visit Needed</option>
-                        <option value="initial-contact">📞 Initial Contact</option>
-                        <option value="follow-up-needed">🔄 Follow-up Needed</option>
-                        <option value="on-hold">⏸️ On Hold</option>
-                        <option value="pending">🟡 Pending</option>
-                        <option value="completed">✅ Completed</option>
-                        <option value="cancelled">❌ Cancelled</option>
-                        <option value="archived">📦 Archived</option>
-                      </select>
-                      <div 
-                        className={`w-3 h-3 rounded-full ${statusConfig[project.status as keyof typeof statusConfig]?.dot || 'bg-gray-500'}`}
-                      />
-                    </div>
-                  </div>
-                  
-                  {/* Action Buttons */}
-                  <div className="absolute top-5 right-5 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEditProject(project);
-                      }}
-                      className="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
-                      title="Edit client"
-                    >
-                      <Edit3 size={16} />
-                    </button>
-                    
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const newStatus = project.status === 'archived' ? 'completed' : 'archived';
-                        const action = project.status === 'archived' ? 'restore' : 'archive';
-                        if (confirm(`Are you sure you want to ${action} ${project.clientName || 'this client'}?`)) {
-                          updateStatusMutation.mutate({ projectId: project.id, status: newStatus });
-                        }
-                      }}
-                      className="p-2 text-gray-500 hover:text-orange-600 dark:text-gray-400 dark:hover:text-orange-400 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
-                      title={project.status === 'archived' ? "Restore client" : "Archive client"}
-                    >
-                      {project.status === 'archived' ? <RotateCcw size={16} /> : <Archive size={16} />}
-                    </button>
-                    
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        if (confirm(`Are you sure you want to permanently delete ${project.clientName || 'this client'}? This cannot be undone.`)) {
-                          deleteProjectMutation.mutate(project.id);
-                        }
-                      }}
-                      onTouchStart={(e) => {
-                        e.stopPropagation();
-                      }}
-                      onTouchEnd={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                      }}
-                      className="p-2 text-gray-500 hover:text-[#F44747] dark:text-gray-400 dark:hover:text-[#F44747] hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
-                      title="Delete client"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                </Card>
-              );
-            })}
-          </ReactSortable>
+        {displayProjects.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="text-6xl mb-4">🎨</div>
+            <h2 className="text-xl font-semibold mb-2">
+              {searchTerm ? 'No matching projects found' : 
+               showArchived ? 'No archived projects' : 'No active projects yet'}
+            </h2>
+            <p className="text-muted-foreground mb-6">
+              {searchTerm ? `Try adjusting your search for "${searchTerm}"` :
+               showArchived ? 'Archived projects will appear here when you archive them' :
+               'Create your first client project to get started'}
+            </p>
+            {!searchTerm && !showArchived && (
+              <Button
+                onClick={() => setShowAddClient(true)}
+                className="px-6 py-3"
+                style={{ backgroundColor: paintBrainColors.purple, color: 'white' }}
+              >
+                Create First Project
+              </Button>
+            )}
+          </div>
         ) : (
-          <div className="space-y-4">
-            {filteredProjects.map(project => {
-              const handleNavigation = () => {
-                console.log('Navigating to project:', project.id);
-                onSelectProject(project.id);
-              };
-
-              let touchStartY = 0;
-              let touchStartTime = 0;
-              let hasMoved = false;
-
-              return (
-                <Card
-                  key={project.id}
-                  className="p-5 transition-all hover:shadow-md hover:border-primary/50 bg-card relative group cursor-pointer"
-                  onClick={handleNavigation}
-                  onTouchStart={(e) => {
-                    touchStartY = e.touches[0].clientY;
-                    touchStartTime = Date.now();
-                    hasMoved = false;
-                    e.currentTarget.style.opacity = '0.8';
-                  }}
-                  onTouchMove={(e) => {
-                    const currentY = e.touches[0].clientY;
-                    const deltaY = Math.abs(currentY - touchStartY);
-                    if (deltaY > 10) {
-                      hasMoved = true;
-                      e.currentTarget.style.opacity = '1';
-                    }
-                  }}
-                  onTouchEnd={(e) => {
-                    e.currentTarget.style.opacity = '1';
-                    const touchDuration = Date.now() - touchStartTime;
-                    if (!hasMoved && touchDuration < 300) {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleNavigation();
-                    }
-                  }}
-                  onTouchCancel={(e) => {
-                    e.currentTarget.style.opacity = '1';
-                  }}
-                  style={{ 
-                    touchAction: 'pan-y',
-                    WebkitTapHighlightColor: 'rgba(0,0,0,0)',
-                    WebkitUserSelect: 'none',
-                    userSelect: 'none'
-                  }}
-                >
-                  <div className="flex justify-between items-start mb-3">
-                    <div className="flex items-center gap-3 flex-1">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <User size={16} className="text-muted-foreground" />
-                          <h3 className="font-semibold text-lg" style={{ color: paintBrainColors.purple }}>
-                            {project.clientName || 'Unnamed Client'}
-                          </h3>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm mb-2">
-                          <MapPin size={14} className="text-muted-foreground" />
-                          <p style={{ color: paintBrainColors.green }}>{project.address || 'No address'}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between pt-3 border-t border-border">
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span className="capitalize">{project.projectType}</span>
-                      {project.projectType === 'interior' && (
-                        <>
-                          <span>•</span>
-                          <span>{project.roomCount} room{project.roomCount !== 1 ? 's' : ''}</span>
-                        </>
-                      )}
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <select
-                        value={project.status}
-                        onChange={(e) => {
-                          e.stopPropagation();
-                          updateStatusMutation.mutate({ 
-                            projectId: project.id, 
-                            status: e.target.value 
-                          });
-                        }}
-                        onClick={(e) => e.stopPropagation()}
-                        className={`text-xs font-medium border-none bg-transparent cursor-pointer focus:outline-none ${statusConfig[project.status as keyof typeof statusConfig]?.text || 'text-gray-600 dark:text-gray-400'}`}
-                      >
-                        <option value="in-progress">🟢 In Progress</option>
-                        <option value="scheduled">🔵 Scheduled</option>
-                        <option value="estimate-sent">📝 Estimate Sent</option>
-                        <option value="awaiting-confirmation">⏳ Awaiting Confirmation</option>
-                        <option value="site-visit-needed">📍 Site Visit Needed</option>
-                        <option value="initial-contact">📞 Initial Contact</option>
-                        <option value="follow-up-needed">🔄 Follow-up Needed</option>
-                        <option value="on-hold">⏸️ On Hold</option>
-                        <option value="pending">🟡 Pending</option>
-                        <option value="completed">✅ Completed</option>
-                        <option value="cancelled">❌ Cancelled</option>
-                        <option value="archived">📦 Archived</option>
-                      </select>
-                      <div 
-                        className={`w-3 h-3 rounded-full ${statusConfig[project.status as keyof typeof statusConfig]?.dot || 'bg-gray-500'}`}
-                      />
-                    </div>
-                  </div>
-                  
-                  {/* Action Buttons */}
-                  <div className="absolute top-5 right-5 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEditProject(project);
-                      }}
-                      className="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
-                      title="Edit client"
-                    >
-                      <Edit3 size={16} />
-                    </button>
-                    
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const newStatus = project.status === 'archived' ? 'completed' : 'archived';
-                        const action = project.status === 'archived' ? 'restore' : 'archive';
-                        if (confirm(`Are you sure you want to ${action} ${project.clientName || 'this client'}?`)) {
-                          updateStatusMutation.mutate({ projectId: project.id, status: newStatus });
-                        }
-                      }}
-                      className="p-2 text-gray-500 hover:text-orange-600 dark:text-gray-400 dark:hover:text-orange-400 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
-                      title={project.status === 'archived' ? "Restore client" : "Archive client"}
-                    >
-                      {project.status === 'archived' ? <RotateCcw size={16} /> : <Archive size={16} />}
-                    </button>
-                    
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        console.log('Delete button clicked for project:', project.id);
-                        
-                        const result = window.confirm(`Are you sure you want to permanently delete ${project.clientName || 'this client'}? This cannot be undone.`);
-                        console.log('Confirmation result:', result);
-                        
-                        if (result) {
-                          console.log('Calling deleteProjectMutation for project:', project.id);
-                          deleteProjectMutation.mutate(project.id);
-                        }
-                      }}
-                      className="p-2 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
-                      style={{ color: 'rgb(107 114 128)' }}
-                      onMouseEnter={(e) => e.currentTarget.style.color = paintBrainColors.red}
-                      onMouseLeave={(e) => e.currentTarget.style.color = 'rgb(107 114 128)'}
-                      title="Delete client"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                </Card>
-              );
-            })}
-          </div>
-        )}
-
-        {projects.length === 0 && !isLoading && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">No projects yet. Add your first client to get started!</p>
-          </div>
-        )}
-
-        {projects.length > 0 && filteredProjects.length === 0 && searchTerm && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">No projects match "{searchTerm}". Try a different search term.</p>
-          </div>
-        )}
-
-        {projects.length > 0 && filteredProjects.length === 0 && !searchTerm && showArchived && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">No archived projects yet. Complete and archive projects to organize your workflow.</p>
-          </div>
+          isManualMode ? (
+            <ReactSortable 
+              list={displayProjects} 
+              setList={(newList) => setManualProjects(newList)}
+              className="space-y-4"
+              handle=".drag-handle"
+            >
+              {displayProjects.map((project: any) => (
+                <ProjectCard 
+                  key={project.id} 
+                  project={project} 
+                  onSelectProject={onSelectProject}
+                  updateStatusMutation={updateStatusMutation}
+                  deleteProjectMutation={deleteProjectMutation}
+                  showDragHandle={true}
+                />
+              ))}
+            </ReactSortable>
+          ) : (
+            <div className="space-y-4">
+              {displayProjects.map((project: any) => (
+                <ProjectCard 
+                  key={project.id} 
+                  project={project} 
+                  onSelectProject={onSelectProject}
+                  updateStatusMutation={updateStatusMutation}
+                  deleteProjectMutation={deleteProjectMutation}
+                  showDragHandle={false}
+                />
+              ))}
+            </div>
+          )
         )}
       </div>
+    </div>
+  );
+}
 
-      <Dialog open={showAddClient} onOpenChange={setShowAddClient}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Add New Client</DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <Input
-              placeholder="Client Name"
-              value={newProject.clientName}
-              onChange={(e) => setNewProject(prev => ({ ...prev, clientName: e.target.value }))}
-            />
-            
-            <Input
-              placeholder="Address"
-              value={newProject.address}
-              onChange={(e) => setNewProject(prev => ({ ...prev, address: e.target.value }))}
-            />
-            
-            <div className="grid grid-cols-2 gap-3">
-              <Input
-                placeholder="City"
-                value={newProject.clientCity || ''}
-                onChange={(e) => setNewProject(prev => ({ ...prev, clientCity: e.target.value }))}
-              />
-              <Input
-                placeholder="Postal Code"
-                value={newProject.clientPostal || ''}
-                onChange={(e) => setNewProject(prev => ({ ...prev, clientPostal: e.target.value }))}
-              />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-3">
-              <Input
-                placeholder="Email"
-                type="email"
-                value={newProject.clientEmail || ''}
-                onChange={(e) => setNewProject(prev => ({ ...prev, clientEmail: e.target.value }))}
-              />
-              <Input
-                placeholder="Phone"
-                value={newProject.clientPhone || ''}
-                onChange={(e) => setNewProject(prev => ({ ...prev, clientPhone: e.target.value }))}
-              />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-3">
-              <select
-                className="px-3 py-2 border rounded-md bg-background text-foreground"
-                value={newProject.projectType}
-                onChange={(e) => setNewProject(prev => ({ ...prev, projectType: e.target.value }))}
-              >
-                <option value="exterior">Exterior</option>
-                <option value="interior">Interior</option>
-                <option value="commercial">Commercial</option>
-              </select>
-              
-              <Input
-                type="number"
-                placeholder="Room Count"
-                value={newProject.roomCount}
-                onChange={(e) => setNewProject(prev => ({ ...prev, roomCount: parseInt(e.target.value) || 1 }))}
-                min="1"
-              />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-3">
-              <select
-                className="px-3 py-2 border rounded-md bg-background text-foreground"
-                value={newProject.difficulty}
-                onChange={(e) => setNewProject(prev => ({ ...prev, difficulty: e.target.value }))}
-              >
-                <option value="easy">Easy</option>
-                <option value="medium">Medium</option>
-                <option value="hard">Hard</option>
-              </select>
-              
-              <Input
-                type="number"
-                placeholder="Hourly Rate"
-                value={newProject.hourlyRate}
-                onChange={(e) => setNewProject(prev => ({ ...prev, hourlyRate: parseInt(e.target.value) || 60 }))}
-                min="1"
-              />
-            </div>
-            
-            <div className="flex gap-3">
-              <Button 
-                variant="outline" 
-                onClick={() => setShowAddClient(false)}
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-              <Button 
-                onClick={() => {
-                  if (newProject.clientName && newProject.address) {
-                    createProjectMutation.mutate(newProject);
-                  }
-                }}
-                className="flex-1"
-                disabled={!newProject.clientName || !newProject.address}
-              >
-                Add Client
-              </Button>
-            </div>
+function ProjectCard({ project, onSelectProject, updateStatusMutation, deleteProjectMutation, showDragHandle }: any) {
+  return (
+    <div 
+      className="bg-card rounded-lg p-5 shadow-sm border border-border hover:border-primary/50 transition-colors cursor-pointer group relative"
+      onClick={() => onSelectProject(project.id)}
+    >
+      <div className="flex items-start gap-3">
+        {showDragHandle && (
+          <div className="drag-handle cursor-move text-muted-foreground hover:text-foreground transition-colors mt-2">
+            <GripVertical size={16} />
           </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Dialog */}
-      <Dialog open={!!editingProject} onOpenChange={() => setEditingProject(null)}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Edit Client</DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <Input
-              placeholder="Client Name"
-              value={editForm.clientName || ''}
-              onChange={(e) => setEditForm(prev => ({ ...prev, clientName: e.target.value }))}
-            />
-            
-            <Input
-              placeholder="Address"
-              value={editForm.address || ''}
-              onChange={(e) => setEditForm(prev => ({ ...prev, address: e.target.value }))}
-            />
-            
-            <div className="grid grid-cols-2 gap-3">
-              <Input
-                placeholder="City"
-                value={editForm.clientCity || ''}
-                onChange={(e) => setEditForm(prev => ({ ...prev, clientCity: e.target.value }))}
-              />
-              <Input
-                placeholder="Postal Code"
-                value={editForm.clientPostal || ''}
-                onChange={(e) => setEditForm(prev => ({ ...prev, clientPostal: e.target.value }))}
-              />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-3">
-              <Input
-                placeholder="Email"
-                type="email"
-                value={editForm.clientEmail || ''}
-                onChange={(e) => setEditForm(prev => ({ ...prev, clientEmail: e.target.value }))}
-              />
-              <Input
-                placeholder="Phone"
-                value={editForm.clientPhone || ''}
-                onChange={(e) => setEditForm(prev => ({ ...prev, clientPhone: e.target.value }))}
-              />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-3">
-              <select
-                className="px-3 py-2 border rounded-md bg-background text-foreground"
-                value={editForm.projectType || 'exterior'}
-                onChange={(e) => setEditForm(prev => ({ ...prev, projectType: e.target.value }))}
-              >
-                <option value="exterior">Exterior</option>
-                <option value="interior">Interior</option>
-                <option value="commercial">Commercial</option>
-              </select>
-              
-              <Input
-                type="number"
-                placeholder="Room Count"
-                value={editForm.roomCount || 1}
-                onChange={(e) => setEditForm(prev => ({ ...prev, roomCount: parseInt(e.target.value) || 1 }))}
-                min="1"
-              />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-3">
-              <select
-                className="px-3 py-2 border rounded-md bg-background text-foreground"
-                value={editForm.difficulty || 'medium'}
-                onChange={(e) => setEditForm(prev => ({ ...prev, difficulty: e.target.value }))}
-              >
-                <option value="easy">Easy</option>
-                <option value="medium">Medium</option>
-                <option value="hard">Hard</option>
-              </select>
-              
-              <Input
-                type="number"
-                placeholder="Hourly Rate"
-                value={editForm.hourlyRate || 60}
-                onChange={(e) => setEditForm(prev => ({ ...prev, hourlyRate: parseInt(e.target.value) || 60 }))}
-                min="1"
-              />
-            </div>
-            
-            <div className="flex gap-3">
-              <Button 
-                variant="outline" 
-                onClick={() => setEditingProject(null)}
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-              <Button 
-                onClick={() => {
-                  if (editingProject && editForm.clientName && editForm.address) {
-                    updateProjectMutation.mutate({ id: editingProject.id, updates: editForm });
-                  }
-                }}
-                className="flex-1"
-                disabled={!editForm.clientName || !editForm.address}
-              >
-                Update Client
-              </Button>
-            </div>
+        )}
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <User size={16} className="text-muted-foreground" />
+            <h3 className="font-semibold text-lg" style={{ color: paintBrainColors.purple }}>
+              {project.clientName || 'Unnamed Client'}
+            </h3>
           </div>
-        </DialogContent>
-      </Dialog>
+          <div className="flex items-center gap-2 text-sm mb-2">
+            <MapPin size={14} className="text-muted-foreground" />
+            <p style={{ color: paintBrainColors.green }}>{project.address || 'No address'}</p>
+          </div>
+        </div>
+      </div>
+      
+      <div className="flex items-center justify-between pt-3 border-t border-border">
+        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <span className="capitalize">{project.projectType}</span>
+          {project.projectType === 'interior' && (
+            <>
+              <span>•</span>
+              <span>{project.roomCount} room{project.roomCount !== 1 ? 's' : ''}</span>
+            </>
+          )}
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <select
+            value={project.status}
+            onChange={(e) => {
+              e.stopPropagation();
+              updateStatusMutation.mutate({ 
+                projectId: project.id, 
+                status: e.target.value 
+              });
+            }}
+            onClick={(e) => e.stopPropagation()}
+            className="text-xs font-medium border-none bg-transparent cursor-pointer focus:outline-none"
+            style={{ color: statusConfig[project.status as keyof typeof statusConfig]?.color || paintBrainColors.gray }}
+          >
+            <option value="in-progress">🟢 In Progress</option>
+            <option value="scheduled">🔵 Scheduled</option>
+            <option value="estimate-sent">📝 Estimate Sent</option>
+            <option value="awaiting-confirmation">⏳ Awaiting Confirmation</option>
+            <option value="site-visit-needed">📍 Site Visit Needed</option>
+            <option value="initial-contact">📞 Initial Contact</option>
+            <option value="follow-up-needed">🔄 Follow-up Needed</option>
+            <option value="on-hold">⏸️ On Hold</option>
+            <option value="pending">🟡 Pending</option>
+            <option value="completed">✅ Completed</option>
+            <option value="cancelled">❌ Cancelled</option>
+            <option value="archived">📦 Archived</option>
+          </select>
+          <div 
+            className="w-3 h-3 rounded-full"
+            style={{ backgroundColor: statusConfig[project.status as keyof typeof statusConfig]?.color || paintBrainColors.gray }}
+          />
+        </div>
+      </div>
+      
+      {/* Action Buttons */}
+      <div className="absolute top-5 right-5 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            // Handle edit project
+          }}
+          className="p-2 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
+          style={{ color: paintBrainColors.blue }}
+          title="Edit client"
+        >
+          <Edit3 size={16} />
+        </button>
+        
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            const newStatus = project.status === 'archived' ? 'completed' : 'archived';
+            const action = project.status === 'archived' ? 'restore' : 'archive';
+            if (confirm(`Are you sure you want to ${action} ${project.clientName || 'this client'}?`)) {
+              updateStatusMutation.mutate({ projectId: project.id, status: newStatus });
+            }
+          }}
+          className="p-2 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
+          style={{ color: paintBrainColors.orange }}
+          title={project.status === 'archived' ? "Restore client" : "Archive client"}
+        >
+          {project.status === 'archived' ? <RotateCcw size={16} /> : <Archive size={16} />}
+        </button>
+        
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (confirm(`Are you sure you want to permanently delete ${project.clientName || 'this client'}? This cannot be undone.`)) {
+              deleteProjectMutation.mutate(project.id);
+            }
+          }}
+          className="p-2 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
+          style={{ color: paintBrainColors.red }}
+          title="Delete client permanently"
+        >
+          <Trash2 size={16} />
+        </button>
+      </div>
     </div>
   );
 }

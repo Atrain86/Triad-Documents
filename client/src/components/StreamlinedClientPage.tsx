@@ -30,6 +30,69 @@ const paintBrainColors = {
   gray: '#6B7280'       // Neutral gray
 };
 
+const statusConfig = {
+  'in-progress': { 
+    label: 'In Progress', 
+    color: paintBrainColors.green,
+    priority: 1 
+  },
+  'scheduled': { 
+    label: 'Scheduled', 
+    color: paintBrainColors.blue,
+    priority: 2 
+  },
+  'estimate-sent': { 
+    label: 'Estimate Sent', 
+    color: paintBrainColors.purple,
+    priority: 3 
+  },
+  'awaiting-confirmation': { 
+    label: 'Awaiting Confirmation', 
+    color: paintBrainColors.orange,
+    priority: 4 
+  },
+  'site-visit-needed': { 
+    label: 'Site Visit Needed', 
+    color: paintBrainColors.purple,
+    priority: 5 
+  },
+  'initial-contact': { 
+    label: 'Initial Contact', 
+    color: paintBrainColors.blue,
+    priority: 6 
+  },
+  'follow-up-needed': { 
+    label: 'Follow-up Needed', 
+    color: paintBrainColors.orange,
+    priority: 7 
+  },
+  'on-hold': { 
+    label: 'On Hold', 
+    color: paintBrainColors.gray,
+    priority: 8 
+  },
+  'pending': { 
+    label: 'Pending', 
+    color: '#D4A574',
+    priority: 9 
+  },
+  'completed': { 
+    label: 'Completed', 
+    color: paintBrainColors.green,
+    priority: 10 
+  },
+  'cancelled': { 
+    label: 'Cancelled', 
+    color: paintBrainColors.red,
+    priority: 11 
+  },
+  'archived': { 
+    label: 'Archived', 
+    color: paintBrainColors.gray,
+    priority: 12 
+  }
+};
+
 // Calendar function for A-Frame calendar integration
 const openWorkCalendar = (clientProject: Project | null = null) => {
   const aframeCalendarOnlyUrl = 'https://calendar.google.com/calendar/embed?src=6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981%40group.calendar.google.com&ctz=America%2FVancouver&mode=WEEK&showTitle=1&showNav=1&showDate=1&showPrint=0&showTabs=1&showCalendars=0&showTz=0&bgcolor=%23000000&color=%23ffffff';
