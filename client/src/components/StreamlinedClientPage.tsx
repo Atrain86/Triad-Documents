@@ -15,6 +15,8 @@ import EstimateGenerator from './EstimateGenerator';
 import PhotoCarousel from './PhotoCarousel';
 import { ReactSortable } from 'react-sortablejs';
 
+
+
 // Calendar function for A-Frame calendar integration
 const openWorkCalendar = (clientProject: Project | null = null) => {
   const aframeCalendarOnlyUrl = 'https://calendar.google.com/calendar/embed?src=6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981%40group.calendar.google.com&ctz=America%2FVancouver&mode=WEEK&showTitle=1&showNav=1&showDate=1&showPrint=0&showTabs=1&showCalendars=0&showTz=0&bgcolor=%23000000&color=%23ffffff';
