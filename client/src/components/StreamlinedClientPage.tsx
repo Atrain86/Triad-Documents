@@ -180,15 +180,14 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
                 />
               </div>
               <div className="flex gap-2">
-                <Button
+                <button
                   onClick={handleSave}
                   disabled={updateReceiptMutation.isPending}
-                  size="sm"
-                  className="flex-1 text-white border-0"
+                  className="flex-1 text-white border-0 px-3 py-2 text-sm rounded-md font-medium disabled:opacity-50"
                   style={{ backgroundColor: paintBrainColors.green, border: 'none' }}
                 >
                   {updateReceiptMutation.isPending ? 'Saving...' : 'Save'}
-                </Button>
+                </button>
                 <Button
                   onClick={handleCancel}
                   variant="outline"
@@ -1217,15 +1216,14 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                               }
                             }}
                           />
-                          <Button
+                          <button
                             onClick={() => newTool.trim() && addToolMutation.mutate(newTool.trim())}
                             disabled={!newTool.trim() || addToolMutation.isPending}
-                            size="sm"
-                            className="px-3 text-white border-0"
+                            className="px-3 py-2 text-white border-0 rounded-md text-sm font-medium disabled:opacity-50"
                             style={{ backgroundColor: paintBrainColors.purple, border: 'none' }}
                           >
                             <Plus size={16} />
-                          </Button>
+                          </button>
                         </div>
 
                         {/* Tools List */}
@@ -1258,14 +1256,14 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                       <div>
                         {/* Add Hours Button */}
                         {!showDatePicker && (
-                          <Button
+                          <button
                             onClick={() => setShowDatePicker(true)}
-                            className="w-full mb-4 py-2 text-sm text-white border-0"
+                            className="w-full mb-4 py-2 text-sm text-white border-0 rounded-md font-medium"
                             style={{ backgroundColor: paintBrainColors.green, border: 'none' }}
                           >
                             <Plus size={16} className="mr-2" />
                             Log Hours for a Day
-                          </Button>
+                          </button>
                         )}
 
                         {/* Date Picker and Hours Input */}
@@ -1327,14 +1325,14 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                             </div>
                             
                             <div className="flex gap-2">
-                              <Button
+                              <button
                                 onClick={handleAddHours}
                                 disabled={!hoursInput || addHoursMutation.isPending}
-                                className="flex-1 text-white border-0"
+                                className="flex-1 text-white border-0 py-2 rounded-md font-medium disabled:opacity-50"
                                 style={{ backgroundColor: paintBrainColors.green, border: 'none' }}
                               >
                                 {addHoursMutation.isPending ? 'Adding...' : 'Add Hours'}
-                              </Button>
+                              </button>
                               <Button
                                 onClick={() => {
                                   setShowDatePicker(false);
