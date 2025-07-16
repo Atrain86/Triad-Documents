@@ -301,6 +301,14 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const [selectedDate, setSelectedDate] = useState('');
   const [hoursInput, setHoursInput] = useState('');
   const [descriptionInput, setDescriptionInput] = useState('');
+  
+  // Hours editing state
+  const [editingHours, setEditingHours] = useState<number | null>(null);
+  const [editHoursData, setEditHoursData] = useState({
+    date: '',
+    hours: '',
+    description: '',
+  });
 
   // Edit form state
   const [editForm, setEditForm] = useState({
@@ -508,6 +516,39 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       description: descriptionInput.trim() || 'Painting',
       hourlyRate: project?.hourlyRate || 60,
     });
+  };
+
+  const startEditingHours = (hours: DailyHours) => {
+    setEditingHours(hours.id);
+    setEditHoursData({
+      date: hours.date.toString(),
+      hours: hours.hours.toString(),
+      description: hours.description || '',
+    });
+  };
+
+  const handleSaveHours = () => {
+    if (!editingHours) return;
+    
+    const parsedHours = parseFloat(editHoursData.hours);
+    if (isNaN(parsedHours) || parsedHours <= 0) {
+      console.error('Invalid hours input:', editHoursData.hours);
+      return;
+    }
+    
+    updateHoursMutation.mutate({
+      id: editingHours,
+      updates: {
+        date: editHoursData.date,
+        hours: parsedHours,
+        description: editHoursData.description.trim() || 'Painting',
+      },
+    });
+  };
+
+  const handleCancelEditHours = () => {
+    setEditingHours(null);
+    setEditHoursData({ date: '', hours: '', description: '' });
   };
 
   const handleNotesBlur = () => {
@@ -828,6 +869,28 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     },
     onError: (error) => {
       console.error('Delete hours failed:', error);
+    },
+  });
+
+  const updateHoursMutation = useMutation({
+    mutationFn: async ({ id, updates }: { id: number; updates: any }) => {
+      const response = await apiRequest(`/api/hours/${id}`, {
+        method: 'PUT',
+        body: updates,
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to update hours: ${response.status}`);
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/hours`] });
+      setEditingHours(null);
+    },
+    onError: (error) => {
+      console.error('Update hours failed:', error);
     },
   });
 
@@ -1383,67 +1446,131 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                           ) : (
                             dailyHours.map((hours) => (
                               <div key={hours.id} className="p-3 bg-gray-800 rounded-lg border border-gray-600">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2 text-sm">
-                                      <span className="font-medium text-gray-100 whitespace-nowrap">
-                                        {(() => {
-                                          try {
-                                            // Ensure we have a valid date string
-                                            const dateStr = hours.date.toString();
-                                            let cleanDate = dateStr;
-                                            
-                                            // Extract just the date part if it's an ISO string
-                                            if (dateStr.includes('T')) {
-                                              cleanDate = dateStr.split('T')[0];
-                                            }
-                                            
-                                            // Create date object and format it
-                                            const date = new Date(cleanDate + 'T12:00:00'); // Use noon to avoid timezone issues
-                                            
-                                            if (isNaN(date.getTime())) {
-                                              return 'Invalid date';
-                                            }
-                                            
-                                            return date.toLocaleDateString('en-US', { 
-                                              weekday: 'short', 
-                                              month: 'short', 
-                                              day: 'numeric' 
-                                            });
-                                          } catch (error) {
-                                            console.error('Date formatting error:', error, hours.date);
-                                            return 'Invalid date';
-                                          }
-                                        })()}
-                                      </span>
-                                      <span className="text-gray-400">•</span>
-                                      <span className="font-semibold text-blue-400">
-                                        {hours.hours}hr
-                                      </span>
-                                      {hours.description && (
-                                        <>
-                                          <span className="text-gray-400">•</span>
-                                          <span className="text-gray-400">
-                                            {hours.description}
-                                          </span>
-                                        </>
-                                      )}
+                                {editingHours === hours.id ? (
+                                  // Edit mode
+                                  <div className="space-y-3">
+                                    <div className="grid grid-cols-3 gap-2">
+                                      <div>
+                                        <label className="text-xs font-medium text-gray-300 block mb-1">Date</label>
+                                        <input
+                                          type="date"
+                                          value={editHoursData.date}
+                                          onChange={(e) => setEditHoursData(prev => ({ ...prev, date: e.target.value }))}
+                                          className="w-full text-xs bg-gray-700 border-gray-600 text-gray-200 rounded px-2 py-1"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="text-xs font-medium text-gray-300 block mb-1">Hours</label>
+                                        <input
+                                          type="number"
+                                          step="0.5"
+                                          min="0.5"
+                                          value={editHoursData.hours}
+                                          onChange={(e) => setEditHoursData(prev => ({ ...prev, hours: e.target.value }))}
+                                          className="w-full text-xs bg-gray-700 border-gray-600 text-gray-200 rounded px-2 py-1"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="text-xs font-medium text-gray-300 block mb-1">Description</label>
+                                        <input
+                                          type="text"
+                                          value={editHoursData.description}
+                                          onChange={(e) => setEditHoursData(prev => ({ ...prev, description: e.target.value }))}
+                                          placeholder="Painting"
+                                          className="w-full text-xs bg-gray-700 border-gray-600 text-gray-200 rounded px-2 py-1"
+                                        />
+                                      </div>
+                                    </div>
+                                    <div className="flex gap-2">
+                                      <Button
+                                        onClick={handleSaveHours}
+                                        disabled={updateHoursMutation.isPending}
+                                        size="sm"
+                                        className="flex-1 bg-green-600 hover:bg-green-700 text-xs"
+                                      >
+                                        {updateHoursMutation.isPending ? 'Saving...' : 'Save'}
+                                      </Button>
+                                      <Button
+                                        onClick={handleCancelEditHours}
+                                        variant="outline"
+                                        size="sm"
+                                        className="flex-1 border-gray-600 text-gray-300 text-xs"
+                                      >
+                                        Cancel
+                                      </Button>
                                     </div>
                                   </div>
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-xs text-green-400 font-medium">
-                                      ${(hours.hours * 60).toFixed(0)}
-                                    </span>
-                                    <button
-                                      onClick={() => deleteHoursMutation.mutate(hours.id)}
-                                      disabled={deleteHoursMutation.isPending}
-                                      className="p-0.5 text-red-400 hover:text-red-300 transition-colors opacity-60 hover:opacity-100"
-                                      title="Delete"
-                                    >
-                                      <Trash2 size={10} />
-                                    </button>
+                                ) : (
+                                  // View mode
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-2 text-sm">
+                                        <span className="font-medium text-gray-100 whitespace-nowrap">
+                                          {(() => {
+                                            try {
+                                              // Ensure we have a valid date string
+                                              const dateStr = hours.date.toString();
+                                              let cleanDate = dateStr;
+                                              
+                                              // Extract just the date part if it's an ISO string
+                                              if (dateStr.includes('T')) {
+                                                cleanDate = dateStr.split('T')[0];
+                                              }
+                                              
+                                              // Create date object and format it
+                                              const date = new Date(cleanDate + 'T12:00:00'); // Use noon to avoid timezone issues
+                                              
+                                              if (isNaN(date.getTime())) {
+                                                return 'Invalid date';
+                                              }
+                                              
+                                              return date.toLocaleDateString('en-US', { 
+                                                weekday: 'short', 
+                                                month: 'short', 
+                                                day: 'numeric' 
+                                              });
+                                            } catch (error) {
+                                              console.error('Date formatting error:', error, hours.date);
+                                              return 'Invalid date';
+                                            }
+                                          })()}
+                                        </span>
+                                        <span className="text-gray-400">•</span>
+                                        <span className="font-semibold text-blue-400">
+                                          {hours.hours}hr
+                                        </span>
+                                        {hours.description && (
+                                          <>
+                                            <span className="text-gray-400">•</span>
+                                            <span className="text-gray-400">
+                                              {hours.description}
+                                            </span>
+                                          </>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-xs text-green-400 font-medium">
+                                        ${(hours.hours * 60).toFixed(0)}
+                                      </span>
+                                      <button
+                                        onClick={() => startEditingHours(hours)}
+                                        className="p-0.5 text-blue-400 hover:text-blue-300 transition-colors opacity-60 hover:opacity-100"
+                                        title="Edit"
+                                      >
+                                        <Edit3 size={10} />
+                                      </button>
+                                      <button
+                                        onClick={() => deleteHoursMutation.mutate(hours.id)}
+                                        disabled={deleteHoursMutation.isPending}
+                                        className="p-0.5 text-red-400 hover:text-red-300 transition-colors opacity-60 hover:opacity-100"
+                                        title="Delete"
+                                      >
+                                        <Trash2 size={10} />
+                                      </button>
+                                    </div>
                                   </div>
-                                </div>
+                                )}
                               </div>
                             ))
                           )}
