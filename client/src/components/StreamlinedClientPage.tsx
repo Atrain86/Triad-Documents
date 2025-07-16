@@ -712,6 +712,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     onSuccess: () => {
       console.log('Photo upload mutation success, invalidating queries');
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
+      queryClient.refetchQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
       if (photoInputRef.current) {
         photoInputRef.current.value = '';
       }
@@ -769,8 +770,14 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       
       return photoId;
     },
-    onSuccess: () => {
+    onSuccess: (deletedPhotoId) => {
+      console.log('Photo deleted successfully:', deletedPhotoId);
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
+      queryClient.refetchQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
+      // If carousel is open and we deleted the current photo, close it
+      if (showPhotoCarousel && photos.length <= 1) {
+        setShowPhotoCarousel(false);
+      }
     },
     onError: (error) => {
       console.error('Delete failed:', error);
