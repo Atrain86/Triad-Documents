@@ -894,7 +894,11 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         <Button
           onClick={onBack}
           variant="outline"
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 text-white hover:opacity-90"
+          style={{ 
+            borderColor: paintBrainColors.blue,
+            color: paintBrainColors.blue
+          }}
         >
           <ArrowLeft size={16} />
           Back to Projects
@@ -921,31 +925,33 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       </div>
 
       {/* Client Info Header */}
-      <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold" style={{ color: paintBrainColors.purple }}>
-              {project.clientName}
-            </h1>
-            <p className="mt-1" style={{ color: paintBrainColors.green }}>
-              {project.address}, {project.clientCity} {project.clientPostal}
-            </p>
-            <p className="text-sm mt-1 flex items-center" style={{ color: paintBrainColors.orange }}>
-              <span className="capitalize">{project.projectType}</span>
-              <span className="px-1">•</span>
-              <span>{project.roomCount} room{project.roomCount !== 1 ? 's' : ''}</span>
-            </p>
-          </div>
-          <Button
-            onClick={() => setShowEditClient(true)}
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-2"
-          >
-            <Edit3 size={16} />
-            Edit
-          </Button>
+      <div className="bg-white dark:bg-gray-900 rounded-lg p-6 relative" style={{ borderWidth: '2px', borderColor: paintBrainColors.purple }}>
+        <div>
+          <h1 className="text-2xl font-bold" style={{ color: paintBrainColors.purple }}>
+            {project.clientName}
+          </h1>
+          <p className="mt-1" style={{ color: paintBrainColors.green }}>
+            {project.address}, {project.clientCity} {project.clientPostal}
+          </p>
+          <p className="text-sm mt-1 flex items-center" style={{ color: paintBrainColors.orange }}>
+            <span className="capitalize">{project.projectType}</span>
+            <span className="px-1">•</span>
+            <span>{project.roomCount} room{project.roomCount !== 1 ? 's' : ''}</span>
+          </p>
         </div>
+        <Button
+          onClick={() => setShowEditClient(true)}
+          variant="outline"
+          size="sm"
+          className="absolute bottom-4 right-4 flex items-center gap-2"
+          style={{ 
+            borderColor: paintBrainColors.red,
+            color: paintBrainColors.red
+          }}
+        >
+          <Edit3 size={16} />
+          Edit
+        </Button>
       </div>
 
 
