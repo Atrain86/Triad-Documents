@@ -183,7 +183,7 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
             />
           </div>
           <div className="flex items-center gap-3 px-4 py-3">
-            <span className="text-sm font-medium" style={{ color: showArchived ? paintBrainColors.gray : paintBrainColors.green }}>
+            <span className="text-sm font-medium" style={{ color: showArchived ? paintBrainColors.gray : paintBrainColors.purple }}>
               Active
             </span>
             <button
