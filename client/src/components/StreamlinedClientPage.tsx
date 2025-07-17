@@ -905,21 +905,26 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         </Button>
         
         <div className="flex items-center gap-3">
-          <Button
+          <button
             onClick={() => openWorkCalendar(project)}
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-2"
+            className="p-2 transition-colors"
+            style={{ color: paintBrainColors.blue }}
             title="Add to calendar"
           >
-            <Calendar size={16} />
-          </Button>
+            <Calendar size={20} />
+          </button>
           <button
             onClick={() => window.open(generateMapsLink(project.address, project.clientCity, project.clientPostal), '_blank')}
-            className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
+            className="p-2 transition-colors relative"
             title="View on maps"
           >
-            <MapPin size={16} />
+            <div className="relative">
+              <MapPin size={20} style={{ color: paintBrainColors.blue }} />
+              <div 
+                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full"
+                style={{ backgroundColor: paintBrainColors.green, marginTop: '-2px' }}
+              />
+            </div>
           </button>
         </div>
       </div>
