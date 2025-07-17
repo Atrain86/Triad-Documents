@@ -1450,11 +1450,13 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                               $60/hr
                             </div>
                             <div className="pt-2 border-t border-green-700">
-                              <div className="font-semibold text-green-300">
-                                Total Hours: {dailyHours.reduce((sum, h) => sum + h.hours, 0).toFixed(1)}
-                              </div>
-                              <div className="text-sm text-green-400">
-                                Total Earned: ${(dailyHours.reduce((sum, h) => sum + (h.hours * 60), 0)).toFixed(2)}
+                              <div className="flex items-center justify-between">
+                                <span className="font-semibold text-green-300">
+                                  Total Hours: {dailyHours.reduce((sum, h) => sum + h.hours, 0).toFixed(1)}
+                                </span>
+                                <span className="text-sm text-green-400 font-medium">
+                                  ${(dailyHours.reduce((sum, h) => sum + (h.hours * 60), 0)).toFixed(2)}
+                                </span>
                               </div>
                             </div>
                           </div>
