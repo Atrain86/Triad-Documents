@@ -1020,10 +1020,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             const sectionName = section.id === 'photos' ? 'Photo Gallery' : section.name;
             const getSectionColor = (sectionId: string) => {
               switch (sectionId) {
-                case 'photos': return paintBrainColors.red;     // Red for photo gallery
-                case 'tools': return paintBrainColors.yellow;   // Yellow for tools
+                case 'photos': return paintBrainColors.orange;   // Orange for photo gallery
+                case 'tools': return paintBrainColors.yellow;    // Yellow for tools
                 case 'dailyHours': return paintBrainColors.green; // Green for daily hours
-                case 'notes': return paintBrainColors.blue;     // Blue for project notes
+                case 'notes': return paintBrainColors.blue;      // Blue for project notes
                 case 'receipts': return paintBrainColors.purple; // Purple for receipts
                 default: return paintBrainColors.gray;
               }
@@ -1032,7 +1032,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             return (
               <div
                 key={section.id}
-                className="bg-gray-800 rounded-lg border border-gray-600 overflow-hidden"
+                className="bg-gray-800 rounded-lg border-2 overflow-hidden"
+                style={{ borderColor: getSectionColor(section.id) }}
               >
                 {/* Section Header */}
                 <div 
@@ -1050,7 +1051,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                       </svg>
                     </div>
                     
-                    <IconComponent size={20} className="text-gray-300" />
+                    <IconComponent size={20} style={{ color: getSectionColor(section.id) }} />
                     <span className="font-medium" style={{ color: getSectionColor(section.id) }}>{sectionName}</span>
                     
                     {/* Enhanced Data Status Badge */}
