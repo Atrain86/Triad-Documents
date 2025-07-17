@@ -383,6 +383,18 @@ function NewClientForm({ onSubmit, onCancel, isLoading }: { onSubmit: (data: any
   );
 }
 
+// Status icon component
+function StatusIcon({ status }: { status: string }) {
+  return (
+    <img 
+      src={`/icons/icons/${status}.svg`} 
+      alt={`${status} status`}
+      className="w-4 h-4 inline-block mr-1"
+      style={{ filter: 'none' }}
+    />
+  );
+}
+
 function ProjectCard({ project, onSelectProject, updateStatusMutation, deleteProjectMutation, showDragHandle }: any) {
   const [touchStartPos, setTouchStartPos] = useState<{ x: number; y: number } | null>(null);
   const [touchStartTime, setTouchStartTime] = useState<number | null>(null);
@@ -471,33 +483,36 @@ function ProjectCard({ project, onSelectProject, updateStatusMutation, deletePro
         </div>
         
         <div className="flex items-center gap-2">
-          <select
-            value={project.status}
-            onChange={(e) => {
-              e.stopPropagation();
-              updateStatusMutation.mutate({ 
-                projectId: project.id, 
-                status: e.target.value 
-              });
-            }}
-            onClick={(e) => e.stopPropagation()}
-            onTouchEnd={(e) => e.stopPropagation()}
-            className="text-xs font-medium border-none bg-transparent cursor-pointer focus:outline-none relative z-10"
-            style={{ color: statusConfig[project.status as keyof typeof statusConfig]?.color || paintBrainColors.gray }}
-          >
-            <option value="in-progress">🟢 In Progress</option>
-            <option value="scheduled">🔵 Scheduled</option>
-            <option value="estimate-sent">📝 Estimate Sent</option>
-            <option value="awaiting-confirmation">⏳ Awaiting Confirmation</option>
-            <option value="site-visit-needed">📍 Site Visit Needed</option>
-            <option value="initial-contact">📞 Initial Contact</option>
-            <option value="follow-up-needed">🔄 Follow-up Needed</option>
-            <option value="on-hold">⏸️ On Hold</option>
-            <option value="pending">🟡 Pending</option>
-            <option value="completed">✅ Completed</option>
-            <option value="cancelled">❌ Cancelled</option>
-            <option value="archived">📦 Archived</option>
-          </select>
+          <div className="flex items-center">
+            <StatusIcon status={project.status} />
+            <select
+              value={project.status}
+              onChange={(e) => {
+                e.stopPropagation();
+                updateStatusMutation.mutate({ 
+                  projectId: project.id, 
+                  status: e.target.value 
+                });
+              }}
+              onClick={(e) => e.stopPropagation()}
+              onTouchEnd={(e) => e.stopPropagation()}
+              className="text-xs font-medium border-none bg-transparent cursor-pointer focus:outline-none relative z-10"
+              style={{ color: statusConfig[project.status as keyof typeof statusConfig]?.color || paintBrainColors.gray }}
+            >
+              <option value="in-progress">In Progress</option>
+              <option value="scheduled">Scheduled</option>
+              <option value="estimate-sent">Estimate Sent</option>
+              <option value="awaiting-confirmation">Awaiting Confirmation</option>
+              <option value="site-visit-needed">Site Visit Needed</option>
+              <option value="initial-contact">Initial Contact</option>
+              <option value="follow-up-needed">Follow-up Needed</option>
+              <option value="on-hold">On Hold</option>
+              <option value="pending">Pending</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+              <option value="archived">Archived</option>
+            </select>
+          </div>
         </div>
       </div>
       

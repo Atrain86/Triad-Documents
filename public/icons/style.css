@@ -1,0 +1,24 @@
+
+body {
+  background-color: #000;
+  color: #EEE;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 2rem;
+}
+.icon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 2rem;
+  max-width: 800px;
+  margin: auto;
+}
+.icon img {
+  width: 48px;
+  height: 48px;
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.2));
+}
+.icon p {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
