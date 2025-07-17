@@ -385,12 +385,36 @@ function NewClientForm({ onSubmit, onCancel, isLoading }: { onSubmit: (data: any
 
 // Status icon component
 function StatusIcon({ status }: { status: string }) {
+  const [iconError, setIconError] = useState(false);
+  
+  // Fallback to emoji if SVG fails to load
+  const fallbackEmojis: { [key: string]: string } = {
+    'in-progress': '🟢',
+    'scheduled': '🔵',
+    'estimate-sent': '📝',
+    'awaiting-confirmation': '⏳',
+    'site-visit-needed': '📍',
+    'initial-contact': '📞',
+    'follow-up-needed': '🔄',
+    'on-hold': '⏸️',
+    'pending': '🟡',
+    'completed': '✅',
+    'cancelled': '❌',
+    'archived': '📦'
+  };
+
+  if (iconError) {
+    return <span className="mr-1 text-sm">{fallbackEmojis[status] || '🔴'}</span>;
+  }
+
   return (
     <img 
       src={`/icons/icons/${status}.svg`} 
       alt={`${status} status`}
       className="w-4 h-4 inline-block mr-1"
       style={{ filter: 'none' }}
+      onError={() => setIconError(true)}
+      onLoad={() => console.log(`Icon loaded: ${status}`)}
     />
   );
 }
