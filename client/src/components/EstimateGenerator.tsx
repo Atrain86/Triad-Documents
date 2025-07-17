@@ -71,6 +71,17 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     { name: '', hours: '', rate: '' }
   ]);
 
+  // Tax configuration state
+  const [taxConfig, setTaxConfig] = useState({
+    country: 'CA',
+    gst: 5,
+    pst: 0,
+    hst: 0,
+    salesTax: 0,
+    vat: 0,
+    otherTax: 0
+  });
+
   // Toggle state for action buttons
   const [actionMode, setActionMode] = useState<'download' | 'email'>('email');
 
@@ -172,8 +183,25 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   const calculateLaborSubtotal = () => workStages.reduce((sum, stage) => sum + calculateStageTotal(stage), 0) + calculateAdditionalLaborTotal();
   const calculateMaterialsSubtotal = () => calculatePrimerCosts() + calculatePaintCosts() + calculateSuppliesTotal();
   const calculateSubtotal = () => calculateLaborSubtotal() + calculateMaterialsSubtotal() + calculateTravelTotal();
-  const calculateGST = () => calculateSubtotal() * 0.05;
-  const calculateTotal = () => calculateSubtotal() + calculateGST();
+  
+  const calculateTaxes = () => {
+    const subtotal = calculateSubtotal();
+    let totalTax = 0;
+    
+    if (taxConfig.country === 'CA') {
+      totalTax += subtotal * ((taxConfig.gst || 0) / 100);
+      totalTax += subtotal * ((taxConfig.pst || taxConfig.hst || 0) / 100);
+    } else if (taxConfig.country === 'US') {
+      totalTax += subtotal * ((taxConfig.salesTax || 0) / 100);
+    } else if (taxConfig.country === 'OTHER') {
+      totalTax += subtotal * ((taxConfig.vat || 0) / 100);
+    }
+    
+    totalTax += subtotal * ((taxConfig.otherTax || 0) / 100);
+    return totalTax;
+  };
+  
+  const calculateTotal = () => calculateSubtotal() + calculateTaxes();
 
   // Email sending functionality
   const sendEmailMutation = useMutation({
@@ -617,6 +645,102 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             </CardContent>
           </Card>
 
+          {/* Tax Configuration */}
+          <Card className="mb-4 border-2 border-[#F44747]">
+            <CardHeader>
+              <CardTitle className="text-lg text-[#F44747]">Tax Configuration</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {/* Country Selector */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">Country</label>
+                  <Select value={taxConfig.country} onValueChange={(value) => setTaxConfig({...taxConfig, country: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Country" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-black border border-gray-600">
+                      <SelectItem value="CA" className="text-white hover:bg-gray-800">Canada</SelectItem>
+                      <SelectItem value="US" className="text-white hover:bg-gray-800">United States</SelectItem>
+                      <SelectItem value="OTHER" className="text-white hover:bg-gray-800">Other / International</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Canadian Tax Fields */}
+                {taxConfig.country === 'CA' && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">GST (%)</label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="5"
+                        value={taxConfig.gst || ''}
+                        onChange={(e) => setTaxConfig({...taxConfig, gst: parseFloat(e.target.value) || 0})}
+                      />
+                      <small className="text-gray-500">Goods and Services Tax</small>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">PST/HST (%)</label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="0"
+                        value={taxConfig.pst || taxConfig.hst || ''}
+                        onChange={(e) => setTaxConfig({...taxConfig, pst: parseFloat(e.target.value) || 0, hst: parseFloat(e.target.value) || 0})}
+                      />
+                      <small className="text-gray-500">Provincial/Harmonized Tax</small>
+                    </div>
+                  </div>
+                )}
+
+                {/* US Tax Fields */}
+                {taxConfig.country === 'US' && (
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Sales Tax (%)</label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      placeholder="0"
+                      value={taxConfig.salesTax || ''}
+                      onChange={(e) => setTaxConfig({...taxConfig, salesTax: parseFloat(e.target.value) || 0})}
+                    />
+                    <small className="text-gray-500">State and local sales taxes</small>
+                  </div>
+                )}
+
+                {/* International Tax Fields */}
+                {taxConfig.country === 'OTHER' && (
+                  <div>
+                    <label className="block text-sm font-medium mb-1">VAT (%)</label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      placeholder="0"
+                      value={taxConfig.vat || ''}
+                      onChange={(e) => setTaxConfig({...taxConfig, vat: parseFloat(e.target.value) || 0})}
+                    />
+                    <small className="text-gray-500">Value Added Tax</small>
+                  </div>
+                )}
+
+                {/* Other Tax Field - Always Show */}
+                <div>
+                  <label className="block text-sm font-medium mb-1">Other Tax/Fees (%)</label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    placeholder="0"
+                    value={taxConfig.otherTax || ''}
+                    onChange={(e) => setTaxConfig({...taxConfig, otherTax: parseFloat(e.target.value) || 0})}
+                  />
+                  <small className="text-gray-500">Any additional taxes or fees</small>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Summary */}
           <Card className="mb-4 border-2 border-[#8B5FBF]">
             <CardHeader>
@@ -642,8 +766,8 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     <span>${calculateSubtotal().toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>GST (5%):</span>
-                    <span>${calculateGST().toFixed(2)}</span>
+                    <span>Taxes:</span>
+                    <span>${calculateTaxes().toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between font-bold text-lg">
                     <span>Total:</span>
