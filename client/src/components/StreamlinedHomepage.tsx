@@ -173,7 +173,7 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
 
         <div className="flex gap-3 mb-6">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2" style={{ color: paintBrainColors.orange }} size={18} />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2" style={{ color: paintBrainColors.orange }} size={20} />
             <Input
               placeholder="Search clients"
               value={searchTerm}
