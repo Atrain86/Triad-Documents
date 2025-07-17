@@ -67,7 +67,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   });
 
   // Toggle state for action buttons
-  const [actionMode, setActionMode] = useState<'download' | 'email'>('download');
+  const [actionMode, setActionMode] = useState<'download' | 'email'>('email');
 
   // Handle input changes for work stages
   const updateWorkStage = (index: number, field: string, value: string | number) => {
@@ -574,24 +574,24 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           <div className="flex justify-center">
             <div className="relative inline-flex items-center">
               <button
-                onClick={() => setActionMode(actionMode === 'download' ? 'email' : 'download')}
+                onClick={() => setActionMode(actionMode === 'email' ? 'download' : 'email')}
                 className={`relative inline-flex h-10 w-20 items-center rounded-full transition-colors duration-200 focus:outline-none ${
-                  actionMode === 'download' ? 'bg-[#6A9955]' : 'bg-[#569CD6]'
+                  actionMode === 'email' ? 'bg-[#569CD6]' : 'bg-[#6A9955]'
                 }`}
               >
                 <span
                   className={`inline-block h-8 w-8 transform rounded-full bg-white transition-transform duration-200 ${
-                    actionMode === 'download' ? 'translate-x-1' : 'translate-x-11'
+                    actionMode === 'email' ? 'translate-x-1' : 'translate-x-11'
                   }`}
                 />
-                <Download 
+                <Mail 
                   className={`absolute left-2 h-4 w-4 transition-opacity duration-200 ${
-                    actionMode === 'download' ? 'text-white opacity-100' : 'text-gray-400 opacity-50'
+                    actionMode === 'email' ? 'text-white opacity-100' : 'text-gray-400 opacity-50'
                   }`} 
                 />
-                <Mail 
+                <Download 
                   className={`absolute right-2 h-4 w-4 transition-opacity duration-200 ${
-                    actionMode === 'email' ? 'text-white opacity-100' : 'text-gray-400 opacity-50'
+                    actionMode === 'download' ? 'text-white opacity-100' : 'text-gray-400 opacity-50'
                   }`} 
                 />
               </button>
@@ -601,12 +601,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           {/* Action Buttons */}
           <div className="flex justify-between gap-2">
             <Button variant="outline" onClick={onClose} className="flex-1">Cancel</Button>
-            {actionMode === 'download' ? (
-              <Button onClick={generatePDF} className="flex-1 bg-[#6A9955] hover:bg-[#5a8245]">
-                <Download className="w-4 h-4 mr-2" />
-                Download PDF
-              </Button>
-            ) : (
+            {actionMode === 'email' ? (
               <Button 
                 onClick={sendEstimateEmail} 
                 className="flex-1 bg-[#569CD6] hover:bg-[#4a8bc2]"
@@ -614,6 +609,11 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
               >
                 <Mail className="w-4 h-4 mr-2" />
                 {sendEmailMutation.isPending ? 'Sending...' : 'Send Email'}
+              </Button>
+            ) : (
+              <Button onClick={generatePDF} className="flex-1 bg-[#6A9955] hover:bg-[#5a8245]">
+                <Download className="w-4 h-4 mr-2" />
+                Download PDF
               </Button>
             )}
           </div>
