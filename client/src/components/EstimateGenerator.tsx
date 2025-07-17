@@ -66,6 +66,11 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     trips: '2'
   });
 
+  // Additional labor state
+  const [additionalLabor, setAdditionalLabor] = useState([
+    { name: '', hours: '', rate: '' }
+  ]);
+
   // Toggle state for action buttons
   const [actionMode, setActionMode] = useState<'download' | 'email'>('email');
 
@@ -89,6 +94,23 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   // Remove supply item
   const removeSupply = (index: number) => {
     setSupplies(supplies.filter((_, i) => i !== index));
+  };
+
+  // Add new labor member
+  const addLaborMember = () => {
+    setAdditionalLabor([...additionalLabor, { name: '', hours: '', rate: '' }]);
+  };
+
+  // Remove labor member
+  const removeLaborMember = (index: number) => {
+    setAdditionalLabor(additionalLabor.filter((_, i) => i !== index));
+  };
+
+  // Update labor member
+  const updateLaborMember = (index: number, field: string, value: string) => {
+    const newLabor = [...additionalLabor];
+    newLabor[index] = { ...newLabor[index], [field]: value };
+    setAdditionalLabor(newLabor);
   };
 
   // Update supply item
@@ -139,7 +161,15 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     return ratePerKm * distance * trips;
   };
 
-  const calculateLaborSubtotal = () => workStages.reduce((sum, stage) => sum + calculateStageTotal(stage), 0);
+  const calculateAdditionalLaborTotal = () => {
+    return additionalLabor.reduce((sum, member) => {
+      const hours = parseFloat(member.hours) || 0;
+      const rate = parseFloat(member.rate) || 0;
+      return sum + (hours * rate);
+    }, 0);
+  };
+
+  const calculateLaborSubtotal = () => workStages.reduce((sum, stage) => sum + calculateStageTotal(stage), 0) + calculateAdditionalLaborTotal();
   const calculateMaterialsSubtotal = () => calculatePrimerCosts() + calculatePaintCosts() + calculateSuppliesTotal();
   const calculateSubtotal = () => calculateLaborSubtotal() + calculateMaterialsSubtotal() + calculateTravelTotal();
   const calculateGST = () => calculateSubtotal() * 0.05;
@@ -364,6 +394,63 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                   </Button>
                 </div>
               ))}
+            </CardContent>
+          </Card>
+
+          {/* Additional Labor */}
+          <Card className="mb-4 border-2 border-[#4ECDC4]">
+            <CardHeader>
+              <CardTitle className="text-lg text-[#4ECDC4]">Additional Labor</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex justify-between items-center mb-2">
+                <h4 className="font-medium">Crew Members</h4>
+                <Button size="sm" onClick={addLaborMember} className="bg-[#4ECDC4] hover:bg-[#45b3b8] text-black">
+                  <Plus className="w-4 h-4 mr-1" />
+                  Add Member
+                </Button>
+              </div>
+              {additionalLabor.map((member, i) => (
+                <div key={i} className="border border-[#4ECDC4] rounded p-3 mb-2 bg-[#4ECDC4]/10">
+                  <div className="grid grid-cols-4 gap-2 mb-2">
+                    <Input
+                      placeholder="Name"
+                      value={member.name}
+                      onChange={(e) => updateLaborMember(i, 'name', e.target.value)}
+                    />
+                    <Input
+                      type="number"
+                      placeholder="Hours"
+                      value={member.hours}
+                      onChange={(e) => updateLaborMember(i, 'hours', e.target.value)}
+                    />
+                    <Input
+                      type="number"
+                      placeholder="Rate/hour"
+                      value={member.rate}
+                      onChange={(e) => updateLaborMember(i, 'rate', e.target.value)}
+                    />
+                    <Input
+                      placeholder="Total"
+                      value={((parseFloat(member.hours) || 0) * (parseFloat(member.rate) || 0)).toFixed(2)}
+                      readOnly
+                      className="bg-gray-100 dark:bg-gray-700"
+                    />
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => removeLaborMember(i)}
+                    className="bg-[#E03E3E] hover:bg-[#c63535]"
+                  >
+                    <Trash2 className="w-4 h-4 mr-1" />
+                    Remove
+                  </Button>
+                </div>
+              ))}
+              <div className="text-right font-medium">
+                Additional Labor Total: ${calculateAdditionalLaborTotal().toFixed(2)}
+              </div>
             </CardContent>
           </Card>
 
