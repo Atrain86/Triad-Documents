@@ -314,7 +314,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     { id: 'tools', name: 'Tools', icon: Wrench },
     { id: 'dailyHours', name: 'Daily Hours', icon: Calendar },
     { id: 'notes', name: 'Project Notes', icon: FileText },
-    { id: 'receipts', name: 'Receipts & Expenses', icon: ReceiptIcon },
+    { id: 'receipts', name: 'Receipts & Expenses', icon: DollarSign },
   ]);
 
   // Collapsible menu state - all collapsed by default
@@ -1027,7 +1027,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             
             // Update section names for better display and get appropriate color
             const sectionName = section.id === 'photos' ? 'Photo Gallery' : 
-                                section.id === 'dailyHours' ? 'Hours' : section.name;
+                                section.id === 'dailyHours' ? 'Hours' :
+                                section.id === 'receipts' ? 'Expenses' : section.name;
             const getSectionColor = (sectionId: string) => {
               switch (sectionId) {
                 case 'photos': return paintBrainColors.orange;   // Orange for photo gallery
