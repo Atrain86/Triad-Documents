@@ -42,12 +42,14 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
   // Paint costs state
   const [primerCosts, setPrimerCosts] = useState({
-    price: '',
+    pricePerGallon: '',
+    gallons: '',
     coats: '1'
   });
 
   const [paintCosts, setPaintCosts] = useState({
-    price: '',
+    pricePerGallon: '',
+    gallons: '',
     coats: '2'
   });
 
@@ -115,15 +117,15 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   };
 
   const calculatePrimerCosts = () => {
-    const price = parseFloat(primerCosts.price) || 0;
-    const coats = parseInt(primerCosts.coats) || 0;
-    return price * coats;
+    const pricePerGallon = parseFloat(primerCosts.pricePerGallon) || 0;
+    const gallons = parseFloat(primerCosts.gallons) || 0;
+    return pricePerGallon * gallons;
   };
 
   const calculatePaintCosts = () => {
-    const price = parseFloat(paintCosts.price) || 0;
-    const coats = parseInt(paintCosts.coats) || 0;
-    return price * coats;
+    const pricePerGallon = parseFloat(paintCosts.pricePerGallon) || 0;
+    const gallons = parseFloat(paintCosts.gallons) || 0;
+    return pricePerGallon * gallons;
   };
 
   const calculateSuppliesTotal = () => {
@@ -374,12 +376,18 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
               {/* Primer Costs */}
               <div className="border border-[#DCDCAA] rounded p-3 bg-[#DCDCAA]/10">
                 <h4 className="font-medium mb-2">Primer</h4>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-3 gap-2">
                   <Input
                     type="number"
-                    placeholder="Price"
-                    value={primerCosts.price}
-                    onChange={(e) => setPrimerCosts({...primerCosts, price: e.target.value})}
+                    placeholder="Price per gallon"
+                    value={primerCosts.pricePerGallon}
+                    onChange={(e) => setPrimerCosts({...primerCosts, pricePerGallon: e.target.value})}
+                  />
+                  <Input
+                    type="number"
+                    placeholder="Gallons"
+                    value={primerCosts.gallons}
+                    onChange={(e) => setPrimerCosts({...primerCosts, gallons: e.target.value})}
                   />
                   <Select value={primerCosts.coats} onValueChange={(value) => setPrimerCosts({...primerCosts, coats: value})}>
                     <SelectTrigger>
@@ -403,12 +411,18 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
               {/* Paint Costs */}
               <div className="border border-[#DCDCAA] rounded p-3 bg-[#DCDCAA]/10">
                 <h4 className="font-medium mb-2">Paint</h4>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-3 gap-2">
                   <Input
                     type="number"
-                    placeholder="Price"
-                    value={paintCosts.price}
-                    onChange={(e) => setPaintCosts({...paintCosts, price: e.target.value})}
+                    placeholder="Price per gallon"
+                    value={paintCosts.pricePerGallon}
+                    onChange={(e) => setPaintCosts({...paintCosts, pricePerGallon: e.target.value})}
+                  />
+                  <Input
+                    type="number"
+                    placeholder="Gallons"
+                    value={paintCosts.gallons}
+                    onChange={(e) => setPaintCosts({...paintCosts, gallons: e.target.value})}
                   />
                   <Select value={paintCosts.coats} onValueChange={(value) => setPaintCosts({...paintCosts, coats: value})}>
                     <SelectTrigger>
@@ -558,28 +572,28 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
         <div className="mt-4 space-y-3">
           {/* Toggle Switch */}
           <div className="flex justify-center">
-            <div className="flex bg-gray-200 dark:bg-gray-700 rounded-lg p-1">
+            <div className="relative inline-flex items-center">
               <button
-                onClick={() => setActionMode('download')}
-                className={`flex items-center px-4 py-2 rounded-md transition-colors ${
-                  actionMode === 'download'
-                    ? 'bg-[#6A9955] text-white'
-                    : 'text-gray-600 dark:text-gray-300'
+                onClick={() => setActionMode(actionMode === 'download' ? 'email' : 'download')}
+                className={`relative inline-flex h-10 w-20 items-center rounded-full transition-colors duration-200 focus:outline-none ${
+                  actionMode === 'download' ? 'bg-[#6A9955]' : 'bg-[#569CD6]'
                 }`}
               >
-                <Download className="w-4 h-4 mr-2" />
-                Download
-              </button>
-              <button
-                onClick={() => setActionMode('email')}
-                className={`flex items-center px-4 py-2 rounded-md transition-colors ${
-                  actionMode === 'email'
-                    ? 'bg-[#569CD6] text-white'
-                    : 'text-gray-600 dark:text-gray-300'
-                }`}
-              >
-                <Mail className="w-4 h-4 mr-2" />
-                Email
+                <span
+                  className={`inline-block h-8 w-8 transform rounded-full bg-white transition-transform duration-200 ${
+                    actionMode === 'download' ? 'translate-x-1' : 'translate-x-11'
+                  }`}
+                />
+                <Download 
+                  className={`absolute left-2 h-4 w-4 transition-opacity duration-200 ${
+                    actionMode === 'download' ? 'text-white opacity-100' : 'text-gray-400 opacity-50'
+                  }`} 
+                />
+                <Mail 
+                  className={`absolute right-2 h-4 w-4 transition-opacity duration-200 ${
+                    actionMode === 'email' ? 'text-white opacity-100' : 'text-gray-400 opacity-50'
+                  }`} 
+                />
               </button>
             </div>
           </div>
