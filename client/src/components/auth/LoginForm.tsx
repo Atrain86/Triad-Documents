@@ -186,7 +186,7 @@ const LoginForm: React.FC = () => {
         <div className="text-center text-sm text-gray-600 dark:text-gray-400">
           <p className="font-semibold mb-2">Demo Credentials:</p>
           <p><strong>Email:</strong> admin@paintbrain.com</p>
-          <p><strong>Password:</strong> paintbrain</p>
+          <p><strong>Password:</strong> brain</p>
           <p className="mt-2 text-xs">Or register as a new client</p>
         </div>
       </div>

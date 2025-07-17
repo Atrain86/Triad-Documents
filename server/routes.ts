@@ -40,7 +40,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { email, password } = req.body;
 
       // For now, use a simple hardcoded admin user for testing
-      if (email === 'admin@paintbrain.com' && password === 'paintbrain') {
+      console.log('Login attempt:', { email, password }); // Debug log
+      if (email === 'admin@paintbrain.com' && password === 'brain') {
         const token = generateToken({
           userId: 1,
           email: 'admin@paintbrain.com',
@@ -57,6 +58,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         res.json({ token, user });
       } else {
+        console.log('Login failed for:', { email, password }); // Debug log
         res.status(401).json({ error: 'Invalid credentials' });
       }
     } catch (error) {
