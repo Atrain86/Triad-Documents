@@ -1066,7 +1066,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                     {/* Enhanced Data Status Badge */}
                     {itemCount > 0 && (
                       <span 
-                        className="text-white text-xs px-3 py-1 rounded-full font-medium"
+                        className="text-white text-xs px-4 py-1 rounded-full font-medium whitespace-nowrap"
                         style={{ backgroundColor: getSectionColor(section.id) }}
                       >
                         {(() => {
@@ -1078,11 +1078,11 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                             case 'dailyHours': {
                               const totalHours = dailyHours.reduce((sum, entry) => sum + entry.hours, 0);
                               const totalEarnings = totalHours * (project?.hourlyRate || 60);
-                              return `${totalHours} hours • $${totalEarnings.toLocaleString()}`;
+                              return `${totalHours}hr • $${totalEarnings.toLocaleString()}`;
                             }
                             case 'receipts': {
                               const totalAmount = receipts.reduce((sum, receipt) => sum + parseFloat(receipt.amount), 0);
-                              return `${itemCount} receipt${itemCount !== 1 ? 's' : ''} • $${totalAmount.toFixed(2)}`;
+                              return `${itemCount} receipt${itemCount !== 1 ? 's' : ''} • $${totalAmount.toLocaleString()}`;
                             }
                             default: 
                               return itemCount.toString();
