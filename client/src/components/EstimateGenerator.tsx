@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -127,7 +127,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   });
 
   const [estimateData, setEstimateData] = useState<EstimateData>({
-    // Client Information from project
+    // Client Information from project - auto-populated
     clientName: project.clientName || '',
     clientAddress: project.address || '',
     clientCity: project.clientCity || '',
@@ -201,6 +201,22 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     // Custom Message
     customMessage: '',
   });
+
+  // Update client information when project changes
+  useEffect(() => {
+    if (project && isOpen) {
+      setEstimateData(prevData => ({
+        ...prevData,
+        clientName: project.clientName || '',
+        clientAddress: project.address || '',
+        clientCity: project.clientCity || '',
+        clientPostal: project.clientPostal || '',
+        clientEmail: project.clientEmail || '',
+        clientPhone: project.clientPhone || '',
+        projectDescription: project.notes || '',
+      }));
+    }
+  }, [project, isOpen]);
 
   // Calculate labor subtotal from actual daily hours
   const calculateLaborFromDailyHours = () => {
@@ -618,10 +634,13 @@ cortespainter@gmail.com`;
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left Column - Form */}
           <div className="space-y-6">
-            {/* Client Information */}
+            {/* Client Information - Auto-populated from Project */}
             <Card>
               <CardHeader>
-                <CardTitle>Client Information</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  Client Information 
+                  <span className="text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded">Auto-populated</span>
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
@@ -629,7 +648,9 @@ cortespainter@gmail.com`;
                     <label className="text-sm font-medium mb-1 block">Client Name</label>
                     <Input
                       value={estimateData.clientName}
-                      onChange={(e) => setEstimateData({...estimateData, clientName: e.target.value})}
+                      readOnly
+                      className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
+                      title="Auto-populated from project data"
                     />
                   </div>
                   <div>
@@ -637,7 +658,9 @@ cortespainter@gmail.com`;
                     <Input
                       type="email"
                       value={estimateData.clientEmail}
-                      onChange={(e) => setEstimateData({...estimateData, clientEmail: e.target.value})}
+                      readOnly
+                      className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
+                      title="Auto-populated from project data"
                     />
                   </div>
                 </div>
@@ -645,7 +668,9 @@ cortespainter@gmail.com`;
                   <label className="text-sm font-medium mb-1 block">Address</label>
                   <Input
                     value={estimateData.clientAddress}
-                    onChange={(e) => setEstimateData({...estimateData, clientAddress: e.target.value})}
+                    readOnly
+                    className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
+                    title="Auto-populated from project data"
                   />
                 </div>
                 <div className="grid grid-cols-3 gap-4">
@@ -653,21 +678,27 @@ cortespainter@gmail.com`;
                     <label className="text-sm font-medium mb-1 block">City</label>
                     <Input
                       value={estimateData.clientCity}
-                      onChange={(e) => setEstimateData({...estimateData, clientCity: e.target.value})}
+                      readOnly
+                      className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
+                      title="Auto-populated from project data"
                     />
                   </div>
                   <div>
                     <label className="text-sm font-medium mb-1 block">Postal Code</label>
                     <Input
                       value={estimateData.clientPostal}
-                      onChange={(e) => setEstimateData({...estimateData, clientPostal: e.target.value})}
+                      readOnly
+                      className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
+                      title="Auto-populated from project data"
                     />
                   </div>
                   <div>
                     <label className="text-sm font-medium mb-1 block">Phone</label>
                     <Input
                       value={estimateData.clientPhone}
-                      onChange={(e) => setEstimateData({...estimateData, clientPhone: e.target.value})}
+                      readOnly
+                      className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
+                      title="Auto-populated from project data"
                     />
                   </div>
                 </div>
