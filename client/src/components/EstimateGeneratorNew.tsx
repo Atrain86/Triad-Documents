@@ -101,7 +101,7 @@ export default function EstimateGenerator({ projectId }: EstimateGeneratorProps)
     try {
       setIsGenerating(true);
       
-      // Create the HTML content using the clean template
+      // Create the HTML content matching the invoice dark theme
       const htmlContent = `
 <!DOCTYPE html>
 <html lang="en">
@@ -120,283 +120,443 @@ export default function EstimateGenerator({ projectId }: EstimateGeneratorProps)
         
         body {
             font-family: 'Inter', sans-serif;
-            background: #1a1a1a;
+            background: #000000;
             color: #ffffff;
-            line-height: 1.3;
-            width: 8.5in;
-            height: auto;
+            line-height: 1.4;
+            width: 794px;
+            min-height: 1122px;
+            padding: 32px;
         }
         
         .estimate-container {
-            max-width: 8.5in;
             width: 100%;
             margin: 0 auto;
-            background: #1a1a1a;
-            padding: 25px;
+            background: #000000;
         }
         
+        /* Header Section with Logo */
         .header {
+            margin-bottom: 32px;
+        }
+        
+        .logo-section {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 32px;
+        }
+        
+        .logo-section img {
+            height: 96px;
+            width: auto;
+        }
+        
+        /* Estimate Title and Info */
+        .title-section {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 25px;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #4b5563;
         }
         
-        .logo-section h1 {
-            font-size: 26px;
+        .title-section h2 {
+            font-size: 48px;
             font-weight: 700;
-            background: linear-gradient(45deg, #ef4444, #f97316, #f59e0b, #10b981, #3b82f6, #8b5cf6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 4px;
+            color: #EA580C;
         }
         
-        .logo-section p {
-            font-size: 13px;
-            color: #ffffff;
-            letter-spacing: 2px;
-            font-weight: 500;
-        }
-        
-        .estimate-title {
-            text-align: right;
-        }
-        
-        .estimate-title h2 {
-            font-size: 28px;
-            font-weight: 700;
-            color: #f97316;
-            margin-bottom: 4px;
+        .title-section p {
+            color: #9ca3af;
+            margin-top: 4px;
         }
         
         .estimate-meta {
-            color: #9ca3af;
-            font-size: 12px;
-            line-height: 1.2;
+            text-align: right;
         }
         
-        .billing-section {
+        .estimate-meta p {
+            color: #d1d5db;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+        
+        .estimate-meta .label {
+            color: #9ca3af;
+        }
+        
+        .estimate-meta .value {
+            font-weight: 600;
+        }
+        
+        /* Client Info Section */
+        .client-section {
+            margin-bottom: 32px;
+        }
+        
+        .client-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 18px;
-            margin-bottom: 25px;
+            gap: 32px;
         }
         
-        .billing-box {
-            background: #374151;
-            border-radius: 6px;
-            padding: 16px;
+        .client-box h3 {
+            font-size: 12px;
+            font-weight: 600;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
         }
         
-        .billing-box h3 {
+        .client-box p {
+            color: #ffffff;
+            font-size: 16px;
+            margin-bottom: 4px;
+            line-height: 1.3;
+        }
+        
+        .client-box p.name {
+            font-weight: 600;
+            font-size: 18px;
+        }
+        
+        .client-box p.normal {
+            color: #d1d5db;
+        }
+        
+        /* Work Breakdown Section */
+        .work-section {
+            margin-bottom: 32px;
+        }
+        
+        .work-section h3 {
+            font-size: 12px;
+            font-weight: 600;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+        
+        .work-table-container {
+            overflow: hidden;
+            border-radius: 8px;
+            border: 1px solid #4b5563;
+        }
+        
+        .work-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .work-table thead {
+            background: #2d3748;
+        }
+        
+        .work-table th {
+            padding: 12px 24px;
+            text-align: left;
             font-size: 12px;
             font-weight: 600;
             color: #d1d5db;
-            margin-bottom: 10px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
         
-        .billing-box p {
-            font-size: 13px;
-            margin-bottom: 3px;
-            color: #ffffff;
-            line-height: 1.2;
+        .work-table th.center { text-align: center; }
+        .work-table th.right { text-align: right; }
+        
+        .work-table tbody tr:nth-child(even) {
+            background: #1f2937;
         }
         
-        .work-breakdown {
-            margin-bottom: 20px;
+        .work-table tbody tr:nth-child(odd) {
+            background: #000000;
         }
         
-        .work-breakdown h3 {
-            font-size: 15px;
-            font-weight: 600;
-            color: #f97316;
-            margin-bottom: 12px;
-        }
-        
-        .work-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #374151;
+        .work-table td {
+            padding: 12px 24px;
             font-size: 14px;
         }
         
-        .work-item:last-child {
-            border-bottom: none;
+        .work-name {
+            display: flex;
+            align-items: center;
+            color: #ffffff;
+            font-weight: 500;
         }
         
-        .work-name {
-            color: #e5e7eb;
-            font-weight: 500;
-            flex: 1;
+        .work-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            margin-right: 12px;
         }
         
         .work-rate {
-            color: #9ca3af;
-            font-size: 12px;
-            margin: 0 15px;
-            min-width: 80px;
+            color: #d1d5db;
+            text-align: center;
         }
         
         .work-total {
             color: #ffffff;
             font-weight: 600;
             text-align: right;
-            min-width: 70px;
         }
         
+        /* Totals Section */
         .totals-section {
-            margin-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 32px;
+        }
+        
+        .totals-box {
+            width: 320px;
+            background: #2d3748;
+            border-radius: 8px;
+            padding: 24px;
         }
         
         .total-line {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 6px 0;
-            font-size: 14px;
-        }
-        
-        .total-line.subtotal {
-            border-top: 1px solid #374151;
-            padding-top: 10px;
-            margin-top: 15px;
-        }
-        
-        .total-label {
+            margin-bottom: 12px;
             color: #d1d5db;
+        }
+        
+        .total-line .label {
             font-weight: 500;
         }
         
-        .total-amount {
-            color: #ffffff;
+        .total-line .amount {
             font-weight: 600;
-            text-align: right;
-            min-width: 90px;
         }
         
         .grand-total {
-            background: #10b981;
-            color: #ffffff;
-            padding: 10px 16px;
-            border-radius: 6px;
-            margin-top: 10px;
-            font-size: 16px;
-            font-weight: 700;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            border-top: 1px solid #4b5563;
+            padding-top: 12px;
+            margin-top: 12px;
         }
         
+        .grand-total-box {
+            background: #059669;
+            border-radius: 8px;
+            padding: 16px 24px;
+            text-align: center;
+        }
+        
+        .grand-total-box .total-text {
+            color: #ffffff;
+            font-size: 20px;
+            font-weight: 700;
+        }
+        
+        /* Payment Method Section */
+        .payment-section {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #4b5563;
+        }
+        
+        .payment-section h3 {
+            font-size: 12px;
+            font-weight: 600;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+        
+        .payment-section p {
+            color: #d1d5db;
+            font-size: 14px;
+            line-height: 1.5;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        /* Disclaimer */
         .disclaimer {
-            margin-top: 20px;
-            padding-top: 15px;
-            border-top: 1px solid #374151;
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid #4b5563;
         }
         
         .disclaimer p {
-            color: #f97316;
+            color: #EA580C;
             font-size: 12px;
             font-weight: 600;
-            line-height: 1.3;
+            line-height: 1.4;
             text-align: center;
         }
     </style>
 </head>
 <body>
     <div class="estimate-container">
+        <!-- Header Section -->
         <div class="header">
+            <!-- Logo Only -->
             <div class="logo-section">
-                <h1>A-FRAME</h1>
-                <p>PAINTING</p>
+                <img src="/aframe-logo.png" alt="A-Frame Painting Logo" />
             </div>
-            <div class="estimate-title">
+        </div>
+
+        <!-- Estimate Title and Info -->
+        <div class="title-section">
+            <div>
                 <h2>Estimate</h2>
-                <div class="estimate-meta">
-                    <p><strong>Estimate #:</strong> ${estimateData.estimateNumber}</p>
-                    <p><strong>Date:</strong> ${estimateData.date}</p>
+                <p>Professional Painting Services</p>
+            </div>
+            <div class="estimate-meta">
+                <p><span class="label">Estimate #:</span> <span class="value">${estimateData.estimateNumber}</span></p>
+                <p><span class="label">Date:</span> <span class="value">${estimateData.date}</span></p>
+            </div>
+        </div>
+
+        <!-- Client Info -->
+        <div class="client-section">
+            <div class="client-grid">
+                <div class="client-box">
+                    <h3>Estimate To</h3>
+                    <p class="name">${project?.clientName || 'Client Name'}</p>
+                    <p class="normal">${project?.address || 'Address'}</p>
+                    <p class="normal">${project?.clientCity && project?.clientPostal ? `${project.clientCity}, ${project.clientPostal}` : 'City, Postal'}</p>
+                    ${project?.clientPhone ? `<p class="normal">${project.clientPhone}</p>` : ''}
+                    ${project?.clientEmail ? `<p class="normal">${project.clientEmail}</p>` : ''}
+                </div>
+                <div class="client-box">
+                    <h3>From</h3>
+                    <p class="name">A-Frame Painting</p>
+                    <p class="normal">884 Hayes Rd</p>
+                    <p class="normal">Manson's Landing, BC V0P1K0</p>
+                    <p class="normal">cortespainter@gmail.com</p>
                 </div>
             </div>
         </div>
 
-        <div class="billing-section">
-            <div class="billing-box">
-                <h3>Estimate From:</h3>
-                <p><strong>A-Frame Painting</strong></p>
-                <p>884 Hayes Rd</p>
-                <p>Manson's Landing, BC V0P1K0</p>
-                <p>cortespainter@gmail.com</p>
-            </div>
-            
-            <div class="billing-box">
-                <h3>Estimate To:</h3>
-                <p><strong>${project?.clientName || 'Client Name'}</strong></p>
-                <p>${project?.address || 'Address'}</p>
-                <p>${project?.clientCity && project?.clientPostal ? `${project.clientCity}, ${project.clientPostal}` : 'City, Postal'}</p>
-                ${project?.clientEmail ? `<p>${project.clientEmail}</p>` : ''}
-                ${project?.clientPhone ? `<p>${project.clientPhone}</p>` : ''}
-            </div>
-        </div>
-
-        <div class="work-breakdown">
+        <!-- Work Breakdown -->
+        <div class="work-section">
             <h3>Work Breakdown</h3>
-            
-            <div class="work-item">
-                <span class="work-name">Prep</span>
-                <span class="work-rate">${estimateData.workStages.prep}h × $60/h</span>
-                <span class="work-total">$${(estimateData.workStages.prep * 60).toFixed(2)}</span>
+            <div class="work-table-container">
+                <table class="work-table">
+                    <thead>
+                        <tr>
+                            <th>Service</th>
+                            <th class="center">Hours</th>
+                            <th class="right">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${estimateData.workStages.prep > 0 ? `
+                        <tr>
+                            <td>
+                                <div class="work-name">
+                                    <div class="work-dot"></div>
+                                    <span>Prep</span>
+                                </div>
+                            </td>
+                            <td class="work-rate">${estimateData.workStages.prep}h × $60/h</td>
+                            <td class="work-total">$${(estimateData.workStages.prep * 60).toFixed(2)}</td>
+                        </tr>
+                        ` : ''}
+                        ${estimateData.workStages.priming > 0 ? `
+                        <tr>
+                            <td>
+                                <div class="work-name">
+                                    <div class="work-dot"></div>
+                                    <span>Priming</span>
+                                </div>
+                            </td>
+                            <td class="work-rate">${estimateData.workStages.priming}h × $60/h</td>
+                            <td class="work-total">$${(estimateData.workStages.priming * 60).toFixed(2)}</td>
+                        </tr>
+                        ` : ''}
+                        ${estimateData.workStages.painting > 0 ? `
+                        <tr>
+                            <td>
+                                <div class="work-name">
+                                    <div class="work-dot"></div>
+                                    <span>Painting</span>
+                                </div>
+                            </td>
+                            <td class="work-rate">${estimateData.workStages.painting}h × $60/h</td>
+                            <td class="work-total">$${(estimateData.workStages.painting * 60).toFixed(2)}</td>
+                        </tr>
+                        ` : ''}
+                        ${estimateData.additionalServices.woodReconditioning > 0 ? `
+                        <tr>
+                            <td>
+                                <div class="work-name">
+                                    <div class="work-dot"></div>
+                                    <span>Wood Reconditioning</span>
+                                </div>
+                            </td>
+                            <td class="work-rate">${estimateData.additionalServices.woodReconditioning}h × $60/h</td>
+                            <td class="work-total">$${(estimateData.additionalServices.woodReconditioning * 60).toFixed(2)}</td>
+                        </tr>
+                        ` : ''}
+                        ${estimateData.additionalServices.drywallRepair > 0 ? `
+                        <tr>
+                            <td>
+                                <div class="work-name">
+                                    <div class="work-dot"></div>
+                                    <span>Drywall Repair</span>
+                                </div>
+                            </td>
+                            <td class="work-rate">${estimateData.additionalServices.drywallRepair}h × $60/h</td>
+                            <td class="work-total">$${(estimateData.additionalServices.drywallRepair * 60).toFixed(2)}</td>
+                        </tr>
+                        ` : ''}
+                        ${paintCosts > 0 ? `
+                        <tr>
+                            <td>
+                                <div class="work-name">
+                                    <div class="work-dot"></div>
+                                    <span>Paint & Materials</span>
+                                </div>
+                            </td>
+                            <td class="work-rate">-</td>
+                            <td class="work-total">$${paintCosts.toFixed(2)}</td>
+                        </tr>
+                        ` : ''}
+                    </tbody>
+                </table>
             </div>
-            
-            <div class="work-item">
-                <span class="work-name">Priming</span>
-                <span class="work-rate">${estimateData.workStages.priming}h × $60/h</span>
-                <span class="work-total">$${(estimateData.workStages.priming * 60).toFixed(2)}</span>
-            </div>
-            
-            <div class="work-item">
-                <span class="work-name">Painting</span>
-                <span class="work-rate">${estimateData.workStages.painting}h × $60/h</span>
-                <span class="work-total">$${(estimateData.workStages.painting * 60).toFixed(2)}</span>
-            </div>
-            
-            ${estimateData.additionalServices.woodReconditioning > 0 ? `
-            <div class="work-item">
-                <span class="work-name">Wood Reconditioning</span>
-                <span class="work-rate">${estimateData.additionalServices.woodReconditioning}h × $60/h</span>
-                <span class="work-total">$${(estimateData.additionalServices.woodReconditioning * 60).toFixed(2)}</span>
-            </div>
-            ` : ''}
-            
-            ${estimateData.additionalServices.drywallRepair > 0 ? `
-            <div class="work-item">
-                <span class="work-name">Drywall Repair</span>
-                <span class="work-rate">${estimateData.additionalServices.drywallRepair}h × $60/h</span>
-                <span class="work-total">$${(estimateData.additionalServices.drywallRepair * 60).toFixed(2)}</span>
-            </div>
-            ` : ''}
         </div>
 
+        <!-- Totals Section -->
         <div class="totals-section">
-            <div class="total-line subtotal">
-                <span class="total-label">Subtotal:</span>
-                <span class="total-amount">$${laborSubtotal.toFixed(2)}</span>
-            </div>
-            
-            <div class="total-line">
-                <span class="total-label">Paint & Materials:</span>
-                <span class="total-amount">$${paintCosts.toFixed(2)}</span>
-            </div>
-            
-            <div class="grand-total">
-                <span>Grand Total:</span>
-                <span>$${grandTotal.toFixed(2)}</span>
+            <div class="totals-box">
+                <div class="total-line">
+                    <span class="label">Subtotal</span>
+                    <span class="amount">$${laborSubtotal.toFixed(2)}</span>
+                </div>
+                ${paintCosts > 0 ? `
+                <div class="total-line">
+                    <span class="label">Paint & Materials</span>
+                    <span class="amount">$${paintCosts.toFixed(2)}</span>
+                </div>
+                ` : ''}
+                
+                <div class="grand-total">
+                    <div class="grand-total-box">
+                        <div class="total-text">Total: $${grandTotal.toFixed(2)}</div>
+                    </div>
+                </div>
             </div>
         </div>
 
+        <!-- Payment Method -->
+        <div class="payment-section">
+            <h3>Payment Method</h3>
+            <p>Please send e-transfer to cortespainter@gmail.com</p>
+        </div>
+
+        <!-- Disclaimer -->
         <div class="disclaimer">
             <p><strong>NOTE:</strong> This is an estimate only. Price excludes structural repairs discovered during work (charged hourly). If total cost may exceed estimate by 20%+, you'll be notified for approval first.</p>
         </div>
