@@ -190,7 +190,7 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
               onClick={() => setShowArchived(!showArchived)}
               className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none"
               style={{ 
-                backgroundColor: showArchived ? paintBrainColors.blue : paintBrainColors.green
+                backgroundColor: showArchived ? paintBrainColors.green : paintBrainColors.gray
               }}
             >
               <span
@@ -199,7 +199,7 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
                 }`}
               />
             </button>
-            <span className="text-sm font-medium" style={{ color: showArchived ? paintBrainColors.blue : paintBrainColors.gray }}>
+            <span className="text-sm font-medium" style={{ color: showArchived ? paintBrainColors.green : paintBrainColors.gray }}>
               Archive
             </span>
           </div>
