@@ -626,15 +626,14 @@ cortespainter@gmail.com`;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-full max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900 p-4 sm:p-6" style={fontStyles}>
-        <DialogHeader>
-          <DialogTitle className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">Generate Estimate</DialogTitle>
+      <DialogContent className="w-[100vw] h-[100vh] sm:w-[95vw] sm:h-[90vh] sm:max-w-4xl max-w-none overflow-y-auto bg-white dark:bg-gray-900 p-3 sm:p-6 m-0 sm:m-4" style={fontStyles}>
+        <DialogHeader className="pb-2">
+          <DialogTitle className="text-lg sm:text-2xl font-bold text-gray-800 dark:text-white">Generate Estimate</DialogTitle>
         </DialogHeader>
 
-        {/* Main Content - Mobile-First Layout */}
-        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 lg:gap-6">
-          {/* Left Column - Form */}
-          <div className="space-y-4">
+        {/* Main Content - Single Column on Mobile */}
+        <div className="flex flex-col space-y-4">
+          {/* Form Content */}
             {/* Client Information - Auto-populated from Project */}
             <Card>
               <CardHeader>
@@ -934,94 +933,92 @@ cortespainter@gmail.com`;
                 ))}
               </CardContent>
             </Card>
-          </div>
 
-          {/* Right Column - Live Preview */}
-          <div className="space-y-4">
-            <div className="sticky top-4">
-              {/* Summary Card */}
-              <Card className="mb-4">
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Calculator className="h-5 w-5 mr-2" />
-                    Estimate Summary
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span>{calculateLaborFromDailyHours() > 0 ? 'Labor (from logged hours):' : 'Labor Subtotal:'}</span>
-                      <span className="font-medium">
-                        ${calculateLaborFromDailyHours() > 0 ? 
-                          calculateLaborFromDailyHours().toFixed(2) : 
-                          (estimateData.workStages.reduce((sum, stage) => sum + stage.total, 0) + 
-                           estimateData.additionalServices.filter(s => s.included).reduce((sum, service) => sum + service.total, 0)).toFixed(2)}
-                      </span>
-                    </div>
-                    {estimateData.paintSuppliedBy === 'contractor' && (
-                      <>
-                        <div className="flex justify-between">
-                          <span>Paint & Materials:</span>
-                          <span className="font-medium">${estimateData.paintCost.toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Delivery:</span>
-                          <span className="font-medium">${estimateData.deliveryCost.toFixed(2)}</span>
-                        </div>
-                      </>
-                    )}
-                    <div className="flex justify-between border-t pt-2">
-                      <span>Subtotal:</span>
-                      <span className="font-medium">${calculateSubtotal().toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>GST (5%):</span>
-                      <span className="font-medium">${calculateGST().toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between text-lg font-bold bg-green-50 dark:bg-green-900/20 p-3 rounded">
-                      <span>Total Estimate:</span>
-                      <span>${calculateTotal().toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
-                      <span>Maximum (w/ 20% buffer):</span>
-                      <span>${(calculateTotal() * 1.2).toFixed(2)}</span>
-                    </div>
+            {/* Estimate Summary - Mobile Optimized */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center text-lg">
+                  <Calculator className="h-5 w-5 mr-2" />
+                  Estimate Summary
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span>{calculateLaborFromDailyHours() > 0 ? 'Labor (from logged hours):' : 'Labor Subtotal:'}</span>
+                    <span className="font-medium">
+                      ${calculateLaborFromDailyHours() > 0 ? 
+                        calculateLaborFromDailyHours().toFixed(2) : 
+                        (estimateData.workStages.reduce((sum, stage) => sum + stage.total, 0) + 
+                         estimateData.additionalServices.filter(s => s.included).reduce((sum, service) => sum + service.total, 0)).toFixed(2)}
+                    </span>
                   </div>
-                </CardContent>
-              </Card>
+                  {estimateData.paintSuppliedBy === 'contractor' && (
+                    <>
+                      <div className="flex justify-between">
+                        <span>Paint & Materials:</span>
+                        <span className="font-medium">${estimateData.paintCost.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Delivery:</span>
+                        <span className="font-medium">${estimateData.deliveryCost.toFixed(2)}</span>
+                      </div>
+                    </>
+                  )}
+                  <div className="flex justify-between border-t pt-2">
+                    <span>Subtotal:</span>
+                    <span className="font-medium">${calculateSubtotal().toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>GST (5%):</span>
+                    <span className="font-medium">${calculateGST().toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-base font-bold bg-green-50 dark:bg-green-900/20 p-3 rounded">
+                    <span>Total Estimate:</span>
+                    <span>${calculateTotal().toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400">
+                    <span>Maximum (w/ 20% buffer):</span>
+                    <span>${(calculateTotal() * 1.2).toFixed(2)}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-              {/* Custom Message */}
-              <div className="mb-4">
-                <label className="text-sm font-medium mb-2 block">Custom Message (optional)</label>
+            {/* Custom Message */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Custom Message (optional)</CardTitle>
+              </CardHeader>
+              <CardContent>
                 <Textarea
                   placeholder="Add a personal note to include with the estimate..."
                   value={estimateData.customMessage}
                   onChange={(e) => setEstimateData({...estimateData, customMessage: e.target.value})}
-                  className="min-h-20"
+                  className="min-h-16 text-sm"
                 />
-              </div>
+              </CardContent>
+            </Card>
 
-              {/* Action Buttons */}
-              <div className="flex flex-wrap gap-3">
-                <Button
-                  onClick={generatePDF}
-                  className="flex items-center bg-blue-600 hover:bg-blue-700"
-                >
-                  <Download className="mr-2 h-4 w-4" />
-                  Generate PDF
-                </Button>
-                <Button
-                  onClick={sendEstimateEmail}
-                  disabled={!estimateData.clientEmail}
-                  className="flex items-center bg-green-600 hover:bg-green-700 disabled:bg-gray-400"
-                  data-send-email-btn
-                >
-                  <Send className="mr-2 h-4 w-4" />
-                  Send Estimate
-                </Button>
-              </div>
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+              <Button
+                onClick={generatePDF}
+                className="flex items-center justify-center bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
+              >
+                <Download className="mr-2 h-4 w-4" />
+                Generate PDF
+              </Button>
+              <Button
+                onClick={sendEstimateEmail}
+                disabled={!estimateData.clientEmail}
+                className="flex items-center justify-center bg-green-600 hover:bg-green-700 disabled:bg-gray-400 w-full sm:w-auto"
+                data-send-email-btn
+              >
+                <Send className="mr-2 h-4 w-4" />
+                Send Estimate
+              </Button>
             </div>
-          </div>
         </div>
 
         {/* Hidden Print Version - Professional Template */}
