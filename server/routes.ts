@@ -41,16 +41,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // For now, use a simple hardcoded admin user for testing
       console.log('Login attempt:', { email, password }); // Debug log
-      if (email === 'admin@paintbrain.com' && password === 'brain') {
+      if ((email === 'admin@paintbrain.com' || email === 'coertespainter@gmail.com' || email === 'cortespainter@gmail.com') && password === 'brain') {
         const token = generateToken({
           userId: 1,
-          email: 'admin@paintbrain.com',
+          email: email,
           role: 'admin'
         });
 
         const user = {
           id: 1,
-          email: 'admin@paintbrain.com',
+          email: email,
           firstName: 'Paint',
           lastName: 'Brain',
           role: 'admin'
