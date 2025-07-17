@@ -215,7 +215,7 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
           </div>
         )}
 
-        <div className="space-y-4 max-h-[70vh] overflow-y-auto">
+        <div className="space-y-4">
           {displayProjects.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-6xl mb-4">🎨</div>
