@@ -919,10 +919,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             title="View on maps"
           >
             <div className="relative">
-              <MapPin size={20} style={{ color: paintBrainColors.blue }} />
+              <MapPin size={20} style={{ color: paintBrainColors.green }} />
               <div 
                 className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full"
-                style={{ backgroundColor: paintBrainColors.green, marginTop: '-2px' }}
+                style={{ backgroundColor: paintBrainColors.red, marginTop: '-2px' }}
               />
             </div>
           </button>
