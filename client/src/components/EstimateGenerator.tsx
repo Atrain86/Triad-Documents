@@ -205,6 +205,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   // Update client information when project changes
   useEffect(() => {
     if (project && isOpen) {
+      console.log('EstimateGenerator project data:', project);
       setEstimateData(prevData => ({
         ...prevData,
         clientName: project.clientName || '',

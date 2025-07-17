@@ -16,6 +16,10 @@ export const projects = pgTable("projects", {
   id: serial("id").primaryKey(),
   clientName: text("client_name").notNull(),
   address: text("address").notNull(),
+  clientCity: text("client_city"),
+  clientPostal: text("client_postal"),
+  clientEmail: text("client_email"),
+  clientPhone: text("client_phone"),
   projectType: text("project_type").notNull().default("exterior"), // interior or exterior
   roomCount: integer("room_count").notNull(),
   difficulty: text("difficulty").default("medium"),
@@ -29,6 +33,7 @@ export const projects = pgTable("projects", {
   scheduledEndDate: timestamp("scheduled_end_date"),
   hourlyRate: real("hourly_rate").default(50), // Default painter rate
   helperRate: real("helper_rate").default(35), // Default helper rate
+  userId: integer("user_id"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
