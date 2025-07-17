@@ -1134,6 +1134,8 @@ cortespainter@gmail.com`;
                 <strong>NOTE:</strong> This is an estimate only. Price excludes structural repairs discovered during work (charged hourly). If total cost may exceed estimate by 20%+, you'll be notified for approval first.
               </p>
             </div>
+          </div>
+        </div>
         </div>
       </DialogContent>
     </Dialog>
