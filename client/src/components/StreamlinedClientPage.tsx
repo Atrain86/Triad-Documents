@@ -1049,26 +1049,27 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                   className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-750 transition-colors"
                   onClick={() => toggleSection(section.id)}
                 >
-                  <div className="flex items-center gap-3">
-                    {/* Mac-style Reorder Icon - Left Side */}
-                    <div className="drag-handle cursor-move p-1 hover:opacity-80" onClick={(e) => e.stopPropagation()}>
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style={{ color: getSectionColor(section.id) }}>
-                        <rect y="2" width="16" height="1.5" rx="0.75"/>
-                        <rect y="5.5" width="16" height="1.5" rx="0.75"/>
-                        <rect y="9" width="16" height="1.5" rx="0.75"/>
-                        <rect y="12.5" width="16" height="1.5" rx="0.75"/>
-                      </svg>
-                    </div>
-                    
-                    <IconComponent size={20} style={{ color: getSectionColor(section.id) }} />
-                    <span className="font-medium" style={{ color: getSectionColor(section.id) }}>{sectionName}</span>
-                    
-                    {/* Enhanced Data Status Badge */}
-                    {itemCount > 0 && (
-                      <span 
-                        className="text-white text-xs px-4 py-1 rounded-full font-medium whitespace-nowrap"
-                        style={{ backgroundColor: getSectionColor(section.id) }}
-                      >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      {/* Mac-style Reorder Icon - Left Side */}
+                      <div className="drag-handle cursor-move p-1 hover:opacity-80" onClick={(e) => e.stopPropagation()}>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style={{ color: getSectionColor(section.id) }}>
+                          <rect y="2" width="16" height="1.5" rx="0.75"/>
+                          <rect y="5.5" width="16" height="1.5" rx="0.75"/>
+                          <rect y="9" width="16" height="1.5" rx="0.75"/>
+                          <rect y="12.5" width="16" height="1.5" rx="0.75"/>
+                        </svg>
+                      </div>
+                      
+                      <IconComponent size={20} style={{ color: getSectionColor(section.id) }} />
+                      <span className="font-medium" style={{ color: getSectionColor(section.id) }}>{sectionName}</span>
+                      
+                      {/* Enhanced Data Status Badge */}
+                      {itemCount > 0 && (
+                        <span 
+                          className="text-white text-xs px-4 py-1 rounded-full font-medium whitespace-nowrap ml-2"
+                          style={{ backgroundColor: getSectionColor(section.id) }}
+                        >
                         {(() => {
                           switch(section.id) {
                             case 'photos': 
@@ -1088,15 +1089,16 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                               return itemCount.toString();
                           }
                         })()}
-                      </span>
-                    )}
-                  </div>
-                  
-                  {/* Simple Expand Indicator */}
-                  <div className={`transform transition-transform ${isExpanded ? 'rotate-90' : ''}`}>
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" className="text-gray-400">
-                      <path d="M6 4l4 4-4 4V4z"/>
-                    </svg>
+                        </span>
+                      )}
+                    </div>
+                    
+                    {/* Simple Expand Indicator */}
+                    <div className={`transform transition-transform ${isExpanded ? 'rotate-90' : ''}`}>
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" className="text-gray-400">
+                        <path d="M6 4l4 4-4 4V4z"/>
+                      </svg>
+                    </div>
                   </div>
                 </div>
 
