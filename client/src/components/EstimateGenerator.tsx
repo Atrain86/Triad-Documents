@@ -626,7 +626,7 @@ cortespainter@gmail.com`;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] bg-white dark:bg-gray-900 p-0" style={fontStyles}>
+      <DialogContent className="max-w-4xl w-[100vw] sm:w-[95vw] max-h-[90vh] bg-white dark:bg-gray-900 p-0 m-0 sm:m-4" style={fontStyles}>
         <div className="p-6 border-b">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold text-gray-800 dark:text-white">Generate Estimate</DialogTitle>
@@ -634,7 +634,7 @@ cortespainter@gmail.com`;
         </div>
 
         {/* Scrollable Content */}
-        <div className="overflow-y-auto max-h-[calc(90vh-120px)] p-6">
+        <div className="overflow-y-auto max-h-[calc(90vh-120px)] p-3 sm:p-6">
           {/* Form Content */}
             {/* Client Information - Auto-populated from Project */}
             <Card>
@@ -645,13 +645,13 @@ cortespainter@gmail.com`;
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-3">
                   <div>
                     <label className="text-sm font-medium mb-1 block">Client Name</label>
                     <Input
                       value={estimateData.clientName}
                       readOnly
-                      className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm"
+                      className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm w-full"
                       title="Auto-populated from project data"
                     />
                   </div>
@@ -661,7 +661,7 @@ cortespainter@gmail.com`;
                       type="email"
                       value={estimateData.clientEmail}
                       readOnly
-                      className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm"
+                      className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm w-full"
                       title="Auto-populated from project data"
                     />
                   </div>
@@ -671,17 +671,17 @@ cortespainter@gmail.com`;
                   <Input
                     value={estimateData.clientAddress}
                     readOnly
-                    className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm"
+                    className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm w-full"
                     title="Auto-populated from project data"
                   />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="space-y-3">
                   <div>
                     <label className="text-sm font-medium mb-1 block">City</label>
                     <Input
                       value={estimateData.clientCity}
                       readOnly
-                      className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm"
+                      className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm w-full"
                       title="Auto-populated from project data"
                     />
                   </div>
@@ -690,7 +690,7 @@ cortespainter@gmail.com`;
                     <Input
                       value={estimateData.clientPostal}
                       readOnly
-                      className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm"
+                      className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm w-full"
                       title="Auto-populated from project data"
                     />
                   </div>
@@ -699,7 +699,7 @@ cortespainter@gmail.com`;
                     <Input
                       value={estimateData.clientPhone}
                       readOnly
-                      className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm"
+                      className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm w-full"
                       title="Auto-populated from project data"
                     />
                   </div>
