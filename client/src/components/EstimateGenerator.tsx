@@ -626,15 +626,15 @@ cortespainter@gmail.com`;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl w-[100vw] sm:w-[95vw] max-h-[90vh] bg-white dark:bg-gray-900 p-0 m-0 sm:m-4" style={fontStyles}>
-        <div className="p-6 border-b">
+      <DialogContent className="w-screen h-screen sm:max-w-4xl sm:w-[95vw] sm:max-h-[90vh] sm:h-auto bg-white dark:bg-gray-900 p-0 fixed inset-0 sm:relative sm:inset-auto" style={fontStyles}>
+        <div className="p-4 sm:p-6 border-b">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold text-gray-800 dark:text-white">Generate Estimate</DialogTitle>
           </DialogHeader>
         </div>
 
         {/* Scrollable Content */}
-        <div className="overflow-y-auto max-h-[calc(90vh-120px)] p-3 sm:p-6">
+        <div className="overflow-y-auto flex-1 h-[calc(100vh-80px)] sm:max-h-[calc(90vh-120px)] p-4 sm:p-6">
           {/* Form Content */}
             {/* Client Information - Auto-populated from Project */}
             <Card>

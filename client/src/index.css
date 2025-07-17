@@ -254,6 +254,16 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   .grid-cols-3 {
     grid-template-columns: 1fr !important;
   }
+  
+  /* Ensure dialogs fit mobile screens */
+  [role="dialog"] {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+  }
 }
 input[type="date"]::-webkit-calendar-picker-indicator {
   opacity: 0.8;
