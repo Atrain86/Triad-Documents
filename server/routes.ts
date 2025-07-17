@@ -40,7 +40,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { email, password } = req.body;
 
       // For now, use a simple hardcoded admin user for testing
-      if (email === 'admin@paintbrain.com' && password === 'paintbrain123') {
+      if (email === 'admin@paintbrain.com' && password === 'paintbrain') {
         const token = generateToken({
           userId: 1,
           email: 'admin@paintbrain.com',
