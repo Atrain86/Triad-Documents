@@ -17,7 +17,6 @@ interface EstimateCalculatorProps {
 export default function EstimateCalculator({ project }: EstimateCalculatorProps) {
   const [formData, setFormData] = useState({
     roomCount: project?.roomCount?.toString() || "1",
-    difficulty: project?.difficulty || "easy",
     roomType: "standard",
     baseRate: "800",
   });
@@ -62,16 +61,6 @@ export default function EstimateCalculator({ project }: EstimateCalculatorProps)
 
     let total = roomCount * baseRate;
 
-    // Apply difficulty multiplier
-    switch (formData.difficulty) {
-      case "medium":
-        total *= 1.1; // 10% increase
-        break;
-      case "hard":
-        total *= 1.3; // 30% increase
-        break;
-    }
-
     // Apply room type multiplier
     switch (formData.roomType) {
       case "kitchen":
@@ -94,20 +83,7 @@ export default function EstimateCalculator({ project }: EstimateCalculatorProps)
     }
   };
 
-  const getDifficultyAdjustment = () => {
-    const baseRate = parseFloat(formData.baseRate) || 0;
-    const roomCount = parseInt(formData.roomCount) || 0;
-    const baseTotal = roomCount * baseRate;
 
-    switch (formData.difficulty) {
-      case "medium":
-        return baseTotal * 0.1;
-      case "hard":
-        return baseTotal * 0.3;
-      default:
-        return 0;
-    }
-  };
 
   const getRoomTypeLabel = (type: string) => {
     switch (type) {
@@ -124,18 +100,7 @@ export default function EstimateCalculator({ project }: EstimateCalculatorProps)
     }
   };
 
-  const getDifficultyLabel = (difficulty: string) => {
-    switch (difficulty) {
-      case "easy":
-        return "Easy";
-      case "medium":
-        return "Medium";
-      case "hard":
-        return "Hard";
-      default:
-        return difficulty;
-    }
-  };
+
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -155,19 +120,7 @@ export default function EstimateCalculator({ project }: EstimateCalculatorProps)
             />
           </div>
 
-          <div>
-            <Label htmlFor="difficulty">Difficulty Level</Label>
-            <Select value={formData.difficulty} onValueChange={(value) => setFormData({ ...formData, difficulty: value })}>
-              <SelectTrigger className="mt-1">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="easy">Easy - Standard walls, good condition</SelectItem>
-                <SelectItem value="medium">Medium - Some repair work needed</SelectItem>
-                <SelectItem value="hard">Hard - Extensive prep, multiple coats</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+
 
           <div>
             <Label htmlFor="roomType">Room Type Multiplier</Label>
@@ -224,16 +177,7 @@ export default function EstimateCalculator({ project }: EstimateCalculatorProps)
                 </span>
               </div>
               
-              {getDifficultyAdjustment() > 0 && (
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-300">
-                    Difficulty Adjustment ({getDifficultyLabel(formData.difficulty)})
-                  </span>
-                  <span className="font-medium text-gray-900 dark:text-white">
-                    +${getDifficultyAdjustment().toLocaleString()}
-                  </span>
-                </div>
-              )}
+
 
               <Separator />
               

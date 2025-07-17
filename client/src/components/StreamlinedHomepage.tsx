@@ -267,7 +267,6 @@ function NewClientForm({ onSubmit, onCancel, isLoading }: { onSubmit: (data: any
     address: '',
     projectType: 'interior',
     roomCount: 1,
-    difficulty: 3,
     hourlyRate: 60
   });
 
@@ -281,7 +280,6 @@ function NewClientForm({ onSubmit, onCancel, isLoading }: { onSubmit: (data: any
     onSubmit({
       ...formData,
       clientName: formData.clientName.trim(),
-      difficulty: formData.difficulty.toString(), // Convert to string for schema
       status: 'initial-contact'
     });
   };
@@ -323,29 +321,15 @@ function NewClientForm({ onSubmit, onCancel, isLoading }: { onSubmit: (data: any
         </select>
       </div>
 
-      <div className="flex gap-4">
-        <div className="flex-1">
-          <Label htmlFor="roomCount">Room Count</Label>
-          <Input
-            id="roomCount"
-            type="number"
-            min="1"
-            value={formData.roomCount}
-            onChange={(e) => setFormData(prev => ({ ...prev, roomCount: parseInt(e.target.value) || 1 }))}
-          />
-        </div>
-        
-        <div className="flex-1">
-          <Label htmlFor="difficulty">Difficulty (1-5)</Label>
-          <Input
-            id="difficulty"
-            type="number"
-            min="1"
-            max="5"
-            value={formData.difficulty}
-            onChange={(e) => setFormData(prev => ({ ...prev, difficulty: parseInt(e.target.value) || 3 }))}
-          />
-        </div>
+      <div>
+        <Label htmlFor="roomCount">Room Count</Label>
+        <Input
+          id="roomCount"
+          type="number"
+          min="1"
+          value={formData.roomCount}
+          onChange={(e) => setFormData(prev => ({ ...prev, roomCount: parseInt(e.target.value) || 1 }))}
+        />
       </div>
 
       <div>

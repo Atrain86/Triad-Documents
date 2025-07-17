@@ -170,7 +170,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/projects', async (req, res) => {
     try {
       console.log('Received project data:', req.body);
-      const validatedData = insertProjectSchema.parse(req.body);
+      // Add default difficulty if not provided (for backward compatibility)
+      const projectData = {
+        ...req.body,
+        difficulty: req.body.difficulty || 'medium'
+      };
+      const validatedData = insertProjectSchema.parse(projectData);
       console.log('Validated project data:', validatedData);
       const project = await storage.createProject(validatedData);
       res.status(201).json(project);

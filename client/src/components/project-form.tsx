@@ -25,7 +25,6 @@ export default function ProjectForm({ onSuccess }: ProjectFormProps) {
       address: "",
       projectType: "exterior",
       roomCount: 1,
-      difficulty: "easy",
       status: "estimating",
       notes: "",
     },
@@ -111,50 +110,25 @@ export default function ProjectForm({ onSuccess }: ProjectFormProps) {
           )}
         />
 
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="roomCount"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Number of Rooms</FormLabel>
-                <FormControl>
-                  <Input 
-                    type="number" 
-                    min="1" 
-                    className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white"
-                    {...field}
-                    onChange={(e) => field.onChange(parseInt(e.target.value))}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="difficulty"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Difficulty Level</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select difficulty" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="easy">Easy - Standard walls, good condition</SelectItem>
-                    <SelectItem value="medium">Medium - Some repair work needed</SelectItem>
-                    <SelectItem value="hard">Hard - Extensive prep, multiple coats</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        <FormField
+          control={form.control}
+          name="roomCount"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Number of Rooms</FormLabel>
+              <FormControl>
+                <Input 
+                  type="number" 
+                  min="1" 
+                  className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white"
+                  {...field}
+                  onChange={(e) => field.onChange(parseInt(e.target.value))}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <FormField
           control={form.control}

@@ -18,7 +18,7 @@ export const projects = pgTable("projects", {
   address: text("address").notNull(),
   projectType: text("project_type").notNull().default("exterior"), // interior or exterior
   roomCount: integer("room_count").notNull(),
-  difficulty: text("difficulty").notNull(),
+  difficulty: text("difficulty").default("medium"),
   status: text("status").notNull().default("estimating"),
   estimate: real("estimate"),
   notes: text("notes"),
