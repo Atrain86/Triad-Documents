@@ -55,17 +55,14 @@ const LoginForm: React.FC = () => {
     <div className="min-h-screen bg-black flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-4">
         {/* Paint Brain Logo */}
-        <div className="text-center">
-          <div 
-            className="h-96 mx-auto mb-4 bg-black"
-            style={{
-              backgroundImage: "url('/paint-brain-logo.png')",
-              backgroundSize: "contain",
-              backgroundRepeat: "no-repeat",
-              backgroundPosition: "center",
-              mixBlendMode: "lighten"
-            }}
+        <div className="text-center mb-8">
+          <img 
+            src="/paint-brain-logo.png" 
+            alt="Paint Brain Logo" 
+            className="h-32 w-32 mx-auto object-contain"
           />
+          <h1 className="text-2xl font-bold text-white mt-4">Paint Brain</h1>
+          <p className="text-gray-400 text-sm">Painting Business Management</p>
         </div>
 
         <Card className="border-0 shadow-xl">
@@ -187,8 +184,10 @@ const LoginForm: React.FC = () => {
         </Card>
         
         <div className="text-center text-sm text-gray-600 dark:text-gray-400">
-          <p>First user automatically becomes admin</p>
-          <p>Subsequent users are clients with project access</p>
+          <p className="font-semibold mb-2">Demo Credentials:</p>
+          <p><strong>Email:</strong> admin@paintbrain.com</p>
+          <p><strong>Password:</strong> paintbrain123</p>
+          <p className="mt-2 text-xs">Or register as a new client</p>
         </div>
       </div>
     </div>

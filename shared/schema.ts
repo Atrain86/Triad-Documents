@@ -2,6 +2,16 @@ import { pgTable, text, serial, integer, real, timestamp, jsonb } from "drizzle-
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  password: text("password").notNull(),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  role: text("role").notNull().default("client"), // admin or client
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const projects = pgTable("projects", {
   id: serial("id").primaryKey(),
   clientName: text("client_name").notNull(),
@@ -87,6 +97,11 @@ export const insertToolsChecklistSchema = createInsertSchema(toolsChecklist).omi
   createdAt: true,
 });
 
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type InsertProject = z.infer<typeof insertProjectSchema>;
 export type Project = typeof projects.$inferSelect;
 export type InsertPhoto = z.infer<typeof insertPhotoSchema>;
@@ -97,3 +112,5 @@ export type InsertDailyHours = z.infer<typeof insertDailyHoursSchema>;
 export type DailyHours = typeof dailyHours.$inferSelect;
 export type InsertToolsChecklist = z.infer<typeof insertToolsChecklistSchema>;
 export type ToolsChecklist = typeof toolsChecklist.$inferSelect;
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type User = typeof users.$inferSelect;

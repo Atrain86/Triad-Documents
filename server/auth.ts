@@ -14,7 +14,7 @@ export interface TokenPayload {
   role: 'admin' | 'client';
 }
 
-const JWT_SECRET = process.env.JWT_SECRET!;
+const JWT_SECRET = process.env.JWT_SECRET || 'paintbrain-jwt-secret-key-2025';
 const SALT_ROUNDS = 12;
 
 export async function hashPassword(password: string): Promise<string> {

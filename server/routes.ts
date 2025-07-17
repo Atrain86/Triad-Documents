@@ -2,7 +2,8 @@ import type { Express } from "express";
 import express from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertProjectSchema, insertPhotoSchema, insertReceiptSchema, insertDailyHoursSchema, insertToolsChecklistSchema } from "@shared/schema";
+import { insertProjectSchema, insertPhotoSchema, insertReceiptSchema, insertDailyHoursSchema, insertToolsChecklistSchema, insertUserSchema } from "@shared/schema";
+import { hashPassword, verifyPassword, generateToken, verifyToken } from "./auth";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -33,6 +34,93 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Authentication routes
+  app.post('/api/auth/login', async (req, res) => {
+    try {
+      const { email, password } = req.body;
+
+      // For now, use a simple hardcoded admin user for testing
+      if (email === 'admin@paintbrain.com' && password === 'paintbrain123') {
+        const token = generateToken({
+          userId: 1,
+          email: 'admin@paintbrain.com',
+          role: 'admin'
+        });
+
+        const user = {
+          id: 1,
+          email: 'admin@paintbrain.com',
+          firstName: 'Paint',
+          lastName: 'Brain',
+          role: 'admin'
+        };
+
+        res.json({ token, user });
+      } else {
+        res.status(401).json({ error: 'Invalid credentials' });
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      res.status(500).json({ error: 'Login failed' });
+    }
+  });
+
+  app.post('/api/auth/register', async (req, res) => {
+    try {
+      const { email, password, firstName, lastName } = req.body;
+
+      // Simple registration - for now just return success with mock user
+      const token = generateToken({
+        userId: 2,
+        email,
+        role: 'client'
+      });
+
+      const user = {
+        id: 2,
+        email,
+        firstName,
+        lastName,
+        role: 'client'
+      };
+
+      res.json({ token, user });
+    } catch (error) {
+      console.error('Registration error:', error);
+      res.status(500).json({ error: 'Registration failed' });
+    }
+  });
+
+  app.get('/api/auth/me', async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'No token provided' });
+      }
+
+      const token = authHeader.substring(7);
+      const payload = verifyToken(token);
+      
+      if (!payload) {
+        return res.status(401).json({ error: 'Invalid token' });
+      }
+
+      // Return user data based on token
+      const user = {
+        id: payload.userId,
+        email: payload.email,
+        firstName: payload.email === 'admin@paintbrain.com' ? 'Paint' : 'Client',
+        lastName: payload.email === 'admin@paintbrain.com' ? 'Brain' : 'User',
+        role: payload.role
+      };
+
+      res.json(user);
+    } catch (error) {
+      console.error('Auth check error:', error);
+      res.status(401).json({ error: 'Authentication failed' });
+    }
+  });
+
   // Serve uploaded files with proper MIME types
   app.use('/uploads', express.static(uploadDir, {
     setHeaders: (res, filePath) => {
