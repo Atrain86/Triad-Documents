@@ -1025,8 +1025,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
               default: itemCount = 0;
             }
             
-            // Update section name for photos and get appropriate color
-            const sectionName = section.id === 'photos' ? 'Photo Gallery' : section.name;
+            // Update section names for better display and get appropriate color
+            const sectionName = section.id === 'photos' ? 'Photo Gallery' : 
+                                section.id === 'dailyHours' ? 'Hours' : section.name;
             const getSectionColor = (sectionId: string) => {
               switch (sectionId) {
                 case 'photos': return paintBrainColors.orange;   // Orange for photo gallery
