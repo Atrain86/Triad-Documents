@@ -626,13 +626,15 @@ cortespainter@gmail.com`;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900" style={fontStyles}>
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-gray-800 dark:text-white">Generate Estimate</DialogTitle>
-        </DialogHeader>
+      <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] bg-white dark:bg-gray-900 p-0" style={fontStyles}>
+        <div className="p-6 border-b">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-gray-800 dark:text-white">Generate Estimate</DialogTitle>
+          </DialogHeader>
+        </div>
 
-        {/* Main Content */}
-        <div className="space-y-6">
+        {/* Scrollable Content */}
+        <div className="overflow-y-auto max-h-[calc(90vh-120px)] p-6">
           {/* Form Content */}
             {/* Client Information - Auto-populated from Project */}
             <Card>
@@ -1132,8 +1134,6 @@ cortespainter@gmail.com`;
                 <strong>NOTE:</strong> This is an estimate only. Price excludes structural repairs discovered during work (charged hourly). If total cost may exceed estimate by 20%+, you'll be notified for approval first.
               </p>
             </div>
-          </div>
-          </div>
         </div>
       </DialogContent>
     </Dialog>
