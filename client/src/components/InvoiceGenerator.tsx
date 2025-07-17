@@ -94,7 +94,7 @@ export default function InvoiceGenerator({
     textSecondary: '#94a3b8',  // Muted text
     border: '#333333',        // Dark borders
     inputBg: '#1a1a1a',       // Dark input background
-    accent: brandColors.accent
+    accent: paintBrainColors.accent
   };
 
   const invoiceRef = useRef<HTMLDivElement>(null);
@@ -824,7 +824,7 @@ ${textBody}`;
                   <span className="font-semibold" style={{ color: darkTheme.text }}>${calculateGST().toFixed(2)}</span>
                 </div>
 
-                <div className="flex justify-between py-2 text-lg font-bold px-4 rounded" style={{ backgroundColor: `${brandColors.primary}20`, color: darkTheme.text }}>
+                <div className="flex justify-between py-2 text-lg font-bold px-4 rounded" style={{ backgroundColor: `${paintBrainColors.primary}20`, color: darkTheme.text }}>
                   <span>Total:</span>
                   <span>${calculateTotal().toFixed(2)}</span>
                 </div>
@@ -895,7 +895,7 @@ ${textBody}`;
             {/* Invoice Title and Info */}
             <div className="flex justify-between items-center mb-8 pb-4 border-b border-gray-600">
               <div>
-                <h2 className="text-4xl font-bold" style={{ color: brandColors.primary }}>Invoice</h2>
+                <h2 className="text-4xl font-bold" style={{ color: paintBrainColors.primary }}>Invoice</h2>
                 <p className="text-gray-400 mt-1">Professional Painting Services</p>
               </div>
               <div className="text-right">
@@ -949,7 +949,7 @@ ${textBody}`;
                       <tr key={index} className={index % 2 === 0 ? '' : 'bg-gray-800'}>
                         <td className="px-6 py-1">
                           <div className="flex items-center">
-                            <div className="w-2 h-2 rounded-full mr-3" style={{ backgroundColor: brandColors.accent }}></div>
+                            <div className="w-2 h-2 rounded-full mr-3" style={{ backgroundColor: paintBrainColors.accent }}></div>
                             <span className="font-medium text-white">
                               {(() => {
                               // Parse date string directly to avoid timezone conversion
@@ -981,7 +981,7 @@ ${textBody}`;
                       <tr>
                         <td className="px-6 py-3">
                           <div className="flex items-center">
-                            <div className="w-2 h-2 rounded-full mr-3" style={{ backgroundColor: brandColors.primary }}></div>
+                            <div className="w-2 h-2 rounded-full mr-3" style={{ backgroundColor: paintBrainColors.primary }}></div>
                             <span className="font-medium text-white">Supplies</span>
                           </div>
                         </td>
@@ -999,7 +999,7 @@ ${textBody}`;
                       <tr>
                         <td className="px-6 py-4">
                           <div className="flex items-center">
-                            <div className="w-2 h-2 rounded-full mr-3" style={{ backgroundColor: brandColors.primary }}></div>
+                            <div className="w-2 h-2 rounded-full mr-3" style={{ backgroundColor: paintBrainColors.primary }}></div>
                             <span className="font-medium text-white">Additional Supplies</span>
                           </div>
                         </td>
