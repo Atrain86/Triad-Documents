@@ -411,8 +411,8 @@ function StatusIcon({ status }: { status: string }) {
     <img 
       src={`/icons/icons/${status}.svg`} 
       alt={`${status} status`}
-      className="w-4 h-4 inline-block mr-1"
-      style={{ filter: 'none' }}
+      className="w-6 h-6 inline-block mr-2"
+      style={{ filter: 'none', minWidth: '24px', minHeight: '24px', border: '1px solid rgba(0,0,0,0.1)', borderRadius: '50%' }}
       onError={() => setIconError(true)}
       onLoad={() => console.log(`Icon loaded: ${status}`)}
     />
