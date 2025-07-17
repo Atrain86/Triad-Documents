@@ -239,14 +239,14 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     if (!printRef.current) return;
 
     try {
-      const canvas = await html2canvas(printRef.current, { scale: 2, backgroundColor: '#fff' });
-      const imgData = canvas.toDataURL('image/png');
+      const canvas = await html2canvas(printRef.current, { scale: 1, backgroundColor: '#fff', useCORS: true });
+      const imgData = canvas.toDataURL('image/jpeg', 0.8);
       const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
       const imgProps = pdf.getImageProperties(imgData);
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
       pdf.save(`Estimate-${estimateNumber || 'unknown'}.pdf`);
 
       toast({
@@ -274,16 +274,46 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     }
 
     try {
-      // Generate PDF as blob
-      const canvas = await html2canvas(printRef.current!, { scale: 2, backgroundColor: '#fff' });
-      const imgData = canvas.toDataURL('image/png');
+      // Generate PDF as blob with optimized settings
+      const canvas = await html2canvas(printRef.current!, { 
+        scale: 1, 
+        backgroundColor: '#fff', 
+        useCORS: true,
+        allowTaint: false,
+        logging: false
+      });
+      
+      // Validate canvas
+      if (canvas.width === 0 || canvas.height === 0) {
+        throw new Error('Failed to generate valid canvas');
+      }
+      
+      const imgData = canvas.toDataURL('image/jpeg', 0.7);
+      
+      // Validate image data
+      if (!imgData || imgData === 'data:,') {
+        throw new Error('Failed to generate image data');
+      }
+      
       const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
       const imgProps = pdf.getImageProperties(imgData);
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      const pdfBase64 = pdf.output('datauristring').split(',')[1];
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+      
+      // Get PDF as base64
+      const pdfOutput = pdf.output('datauristring');
+      if (!pdfOutput) {
+        throw new Error('Failed to generate PDF output');
+      }
+      
+      const pdfBase64 = pdfOutput.split(',')[1];
+      
+      // Validate base64 data size (should be reasonable for email)
+      if (pdfBase64.length > 10000000) { // ~7.5MB base64 limit
+        throw new Error('PDF too large for email. Please reduce content.');
+      }
 
       const emailData = {
         recipientEmail: clientEmail,
@@ -296,10 +326,11 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       };
 
       await sendEmailMutation.mutateAsync(emailData);
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Email preparation failed:', error);
       toast({
         title: "Error",
-        description: "Failed to send estimate email",
+        description: error.message || "Failed to send estimate email",
         variant: "destructive",
       });
     }

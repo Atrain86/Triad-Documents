@@ -520,7 +520,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Convert base64 PDF data to buffer
-      const pdfBuffer = Buffer.from(pdfData, 'base64');
+      let pdfBuffer;
+      try {
+        pdfBuffer = Buffer.from(pdfData, 'base64');
+        console.log('PDF buffer created successfully, size:', pdfBuffer.length, 'bytes');
+        
+        // Validate PDF header
+        if (pdfBuffer.length < 4 || pdfBuffer.toString('ascii', 0, 4) !== '%PDF') {
+          throw new Error('Invalid PDF data - missing PDF header');
+        }
+      } catch (bufferError) {
+        console.error('PDF buffer creation failed:', bufferError);
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Invalid PDF data format' 
+        });
+      }
 
       // Prepare receipt attachments if any
       const receiptAttachments = [];
@@ -587,7 +602,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Convert base64 PDF data to buffer
-      const pdfBuffer = Buffer.from(pdfData, 'base64');
+      let pdfBuffer;
+      try {
+        pdfBuffer = Buffer.from(pdfData, 'base64');
+        console.log('Estimate PDF buffer created successfully, size:', pdfBuffer.length, 'bytes');
+        
+        // Validate PDF header
+        if (pdfBuffer.length < 4 || pdfBuffer.toString('ascii', 0, 4) !== '%PDF') {
+          throw new Error('Invalid PDF data - missing PDF header');
+        }
+      } catch (bufferError) {
+        console.error('Estimate PDF buffer creation failed:', bufferError);
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Invalid PDF data format' 
+        });
+      }
 
       // Send estimate email with proper parameters
       const success = await sendEstimateEmail(
