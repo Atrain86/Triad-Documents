@@ -181,9 +181,9 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           className="overflow-y-auto max-h-[calc(100vh-160px)] pr-2"
         >
           {/* Client Info (read-only) */}
-          <Card className="mb-4">
+          <Card className="mb-4 border-2 border-orange-400">
             <CardHeader>
-              <CardTitle className="text-lg">Client Information</CardTitle>
+              <CardTitle className="text-lg text-orange-600 dark:text-orange-400">Client Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               <Input value={clientName} readOnly placeholder="Client Name" />
@@ -196,9 +196,9 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           </Card>
 
           {/* Estimate Details */}
-          <Card className="mb-4">
+          <Card className="mb-4 border-2 border-blue-400">
             <CardHeader>
-              <CardTitle className="text-lg">Estimate Details</CardTitle>
+              <CardTitle className="text-lg text-blue-600 dark:text-blue-400">Estimate Details</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               <Input
@@ -225,10 +225,10 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           </Card>
 
           {/* Work Stages */}
-          <Card className="mb-4">
+          <Card className="mb-4 border-2 border-green-400">
             <CardHeader className="flex justify-between items-center">
-              <CardTitle className="text-lg">Work Breakdown</CardTitle>
-              <Button size="sm" onClick={addWorkStage}>+ Add Stage</Button>
+              <CardTitle className="text-lg text-green-600 dark:text-green-400">Work Breakdown</CardTitle>
+              <Button size="sm" onClick={addWorkStage} className="bg-green-600 hover:bg-green-700">+ Add Stage</Button>
             </CardHeader>
             <CardContent>
               {workStages.map((stage, i) => (
@@ -277,7 +277,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     size="sm"
                     variant="destructive"
                     onClick={() => removeWorkStage(i)}
-                    className="mt-2"
+                    className="mt-2 bg-red-600 hover:bg-red-700"
                   >
                     Remove
                   </Button>
@@ -287,9 +287,9 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           </Card>
 
           {/* Summary */}
-          <Card className="mb-4">
+          <Card className="mb-4 border-2 border-purple-400">
             <CardHeader>
-              <CardTitle className="text-lg">Summary</CardTitle>
+              <CardTitle className="text-lg text-purple-600 dark:text-purple-400">Summary</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex justify-between mb-1">
