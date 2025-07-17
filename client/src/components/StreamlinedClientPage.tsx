@@ -345,7 +345,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     clientPhone: '',
     projectType: '',
     roomCount: 0,
-    difficulty: 1,
     hourlyRate: 0,
   });
 
@@ -567,7 +566,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         clientPhone: project.clientPhone || '',
         projectType: project.projectType || '',
         roomCount: project.roomCount || 0,
-        difficulty: project.difficulty || 1,
         hourlyRate: project.hourlyRate || 0,
       });
     }
@@ -933,7 +931,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
               {project.address}, {project.clientCity} {project.clientPostal}
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              {project.projectType} • {project.roomCount} rooms • Difficulty: {project.difficulty}/5
+              {project.projectType} • {project.roomCount} rooms
             </p>
           </div>
           <Button
@@ -1711,7 +1709,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
               />
             </div>
             
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-sm font-medium mb-2 block">Room Count</label>
                 <Input
@@ -1719,17 +1717,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                   value={editForm.roomCount || ''}
                   onChange={(e) => handleEditInputChange('roomCount', parseInt(e.target.value) || 0)}
                   placeholder="0"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium mb-2 block">Difficulty</label>
-                <Input
-                  type="number"
-                  min="1"
-                  max="5"
-                  value={editForm.difficulty || ''}
-                  onChange={(e) => handleEditInputChange('difficulty', parseInt(e.target.value) || 1)}
-                  placeholder="1-5"
                 />
               </div>
               <div>
