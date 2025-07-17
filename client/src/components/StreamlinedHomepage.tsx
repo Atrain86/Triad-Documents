@@ -409,12 +409,12 @@ function StatusIcon({ status }: { status: string }) {
 
   return (
     <img 
-      src={`/icons/icons/${status}.svg`} 
+      src={`/icons/icons/${status}.png`} 
       alt={`${status} status`}
       className="w-6 h-6 inline-block mr-2"
-      style={{ filter: 'none', minWidth: '24px', minHeight: '24px', border: '1px solid rgba(0,0,0,0.1)', borderRadius: '50%' }}
+      style={{ filter: 'none', minWidth: '24px', minHeight: '24px' }}
       onError={() => setIconError(true)}
-      onLoad={() => console.log(`Icon loaded: ${status}`)}
+      onLoad={() => console.log(`Paint Brain icon loaded: ${status}`)}
     />
   );
 }
