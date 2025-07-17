@@ -992,7 +992,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       {/* NEW: Mac-Style Collapsible Menu with ReactSortable */}
       <div className="mt-8 p-6 bg-gradient-to-r from-gray-900 to-black rounded-lg border border-gray-700">
         <div className="mb-4 text-white">
-          <span className="text-sm flex items-center gap-1" style={{ color: paintBrainColors.purple }}>
+          <span className="text-sm flex items-center gap-1" style={{ color: paintBrainColors.green }}>
             Drag 
             <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" style={{ color: paintBrainColors.yellow }}>
               <rect y="2" width="16" height="1.5" rx="0.75"/>
