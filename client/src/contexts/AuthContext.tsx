@@ -32,8 +32,15 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // TEMPORARILY DISABLED AUTH - Auto-login with mock user
+  const [user, setUser] = useState<User | null>({
+    id: 1,
+    email: "cortespainter@gmail.com",
+    firstName: "Paint",
+    lastName: "Brain", 
+    role: "admin"
+  });
+  const [isLoading, setIsLoading] = useState(false); // No loading needed
 
   const makeAuthenticatedRequest = async (url: string, options: RequestInit = {}) => {
     const token = localStorage.getItem('authToken');
@@ -126,9 +133,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  useEffect(() => {
-    checkAuthStatus();
-  }, []);
+  // TEMPORARILY DISABLED - Skip auth check during development
+  // useEffect(() => {
+  //   checkAuthStatus();
+  // }, []);
 
   const value = {
     user,
