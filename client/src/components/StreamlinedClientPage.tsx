@@ -991,9 +991,18 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
       {/* NEW: Mac-Style Collapsible Menu with ReactSortable */}
       <div className="mt-8 p-6 bg-gradient-to-r from-gray-900 to-black rounded-lg border border-gray-700">
-        <div className="mb-4 text-white">
+        <div className="mb-4 text-white flex items-center gap-2">
           <h3 className="text-lg font-semibold">Customizable Menu</h3>
-          <p className="text-sm text-gray-300 mt-1">Drag handles to re-order</p>
+          <span className="text-sm text-gray-300 flex items-center gap-1">
+            Drag 
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" className="text-gray-400">
+              <rect y="2" width="16" height="1.5" rx="0.75"/>
+              <rect y="5.5" width="16" height="1.5" rx="0.75"/>
+              <rect y="9" width="16" height="1.5" rx="0.75"/>
+              <rect y="12.5" width="16" height="1.5" rx="0.75"/>
+            </svg>
+            to re-order
+          </span>
         </div>
         
         <ReactSortable 
