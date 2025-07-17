@@ -896,8 +896,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           variant="outline"
           className="flex items-center gap-2 text-white hover:opacity-90"
           style={{ 
-            borderColor: paintBrainColors.blue,
-            color: paintBrainColors.blue
+            borderColor: paintBrainColors.red,
+            color: paintBrainColors.red
           }}
         >
           <ArrowLeft size={16} />
