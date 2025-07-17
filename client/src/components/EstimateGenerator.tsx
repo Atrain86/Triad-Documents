@@ -626,15 +626,15 @@ cortespainter@gmail.com`;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-screen overflow-y-auto bg-white dark:bg-gray-900" style={fontStyles}>
+      <DialogContent className="w-full max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900 p-4 sm:p-6" style={fontStyles}>
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-gray-800 dark:text-white">Generate Estimate</DialogTitle>
+          <DialogTitle className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">Generate Estimate</DialogTitle>
         </DialogHeader>
 
-        {/* Main Content - Split Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Main Content - Mobile-First Layout */}
+        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 lg:gap-6">
           {/* Left Column - Form */}
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* Client Information - Auto-populated from Project */}
             <Card>
               <CardHeader>
@@ -643,14 +643,14 @@ cortespainter@gmail.com`;
                   <span className="text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded">Auto-populated</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+              <CardContent className="space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="text-sm font-medium mb-1 block">Client Name</label>
                     <Input
                       value={estimateData.clientName}
                       readOnly
-                      className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
+                      className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm"
                       title="Auto-populated from project data"
                     />
                   </div>
@@ -660,7 +660,7 @@ cortespainter@gmail.com`;
                       type="email"
                       value={estimateData.clientEmail}
                       readOnly
-                      className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
+                      className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm"
                       title="Auto-populated from project data"
                     />
                   </div>
@@ -670,17 +670,17 @@ cortespainter@gmail.com`;
                   <Input
                     value={estimateData.clientAddress}
                     readOnly
-                    className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
+                    className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm"
                     title="Auto-populated from project data"
                   />
                 </div>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
                     <label className="text-sm font-medium mb-1 block">City</label>
                     <Input
                       value={estimateData.clientCity}
                       readOnly
-                      className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
+                      className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm"
                       title="Auto-populated from project data"
                     />
                   </div>
@@ -689,7 +689,7 @@ cortespainter@gmail.com`;
                     <Input
                       value={estimateData.clientPostal}
                       readOnly
-                      className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
+                      className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm"
                       title="Auto-populated from project data"
                     />
                   </div>
@@ -698,7 +698,7 @@ cortespainter@gmail.com`;
                     <Input
                       value={estimateData.clientPhone}
                       readOnly
-                      className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
+                      className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm"
                       title="Auto-populated from project data"
                     />
                   </div>
@@ -711,14 +711,15 @@ cortespainter@gmail.com`;
               <CardHeader>
                 <CardTitle>Estimate Details</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+              <CardContent className="space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="text-sm font-medium mb-1 block">Project Title</label>
                     <Input
                       value={estimateData.projectTitle}
                       onChange={(e) => setEstimateData({...estimateData, projectTitle: e.target.value})}
                       placeholder=""
+                      className="text-sm"
                     />
                   </div>
                   <div>
@@ -727,6 +728,7 @@ cortespainter@gmail.com`;
                       type="date"
                       value={estimateData.date}
                       onChange={(e) => setEstimateData({...estimateData, date: e.target.value})}
+                      className="text-sm"
                     />
                   </div>
                 </div>
@@ -736,9 +738,9 @@ cortespainter@gmail.com`;
             {/* Work Stages */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  Work Breakdown
-                  <Button size="sm" onClick={addWorkStage} className="bg-blue-600 hover:bg-blue-700">
+                <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <span>Work Breakdown</span>
+                  <Button size="sm" onClick={addWorkStage} className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto">
                     <Plus className="h-4 w-4 mr-1" />
                     Add Stage
                   </Button>
@@ -746,20 +748,22 @@ cortespainter@gmail.com`;
               </CardHeader>
               <CardContent className="space-y-4">
                 {estimateData.workStages.map((stage, index) => (
-                  <div key={index} className="border rounded-lg p-4 space-y-3 bg-gray-50 dark:bg-gray-800">
-                    <div className="flex items-center justify-between">
+                  <div key={index} className="border rounded-lg p-3 space-y-3 bg-gray-50 dark:bg-gray-800">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                       <Input
                         value={stage.name}
                         onChange={(e) => updateWorkStage(index, 'name', e.target.value)}
                         placeholder="Stage name"
-                        className="font-medium"
+                        className="font-medium text-sm flex-grow"
                       />
                       <Button
                         size="sm"
                         variant="destructive"
                         onClick={() => removeWorkStage(index)}
+                        className="w-full sm:w-auto"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Remove
                       </Button>
                     </div>
                     <Textarea
@@ -767,8 +771,9 @@ cortespainter@gmail.com`;
                       onChange={(e) => updateWorkStage(index, 'description', e.target.value)}
                       placeholder="Description of work"
                       rows={2}
+                      className="text-sm"
                     />
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div>
                         <label className="text-xs font-medium mb-1 block">Hours</label>
                         <Input
@@ -778,6 +783,8 @@ cortespainter@gmail.com`;
                           step="0.5"
                           min="0"
                           placeholder="0"
+                          className="text-sm"
+                          inputMode="decimal"
                         />
                       </div>
                       <div>
@@ -787,6 +794,8 @@ cortespainter@gmail.com`;
                           value={stage.rate}
                           onChange={(e) => updateWorkStage(index, 'rate', parseFloat(e.target.value) || 0)}
                           min="0"
+                          className="text-sm"
+                          inputMode="numeric"
                         />
                       </div>
                       <div>
@@ -794,7 +803,7 @@ cortespainter@gmail.com`;
                         <Input
                           value={`$${stage.total.toFixed(2)}`}
                           readOnly
-                          className="bg-gray-100 dark:bg-gray-700"
+                          className="bg-gray-100 dark:bg-gray-700 text-sm"
                         />
                       </div>
                     </div>
