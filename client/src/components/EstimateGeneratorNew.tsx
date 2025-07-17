@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -53,6 +53,7 @@ export default function EstimateGenerator({ projectId }: EstimateGeneratorProps)
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const estimateRef = useRef<HTMLDivElement>(null);
 
   const { data: project } = useQuery<Project>({
     queryKey: [`/api/projects/${projectId}`],
@@ -98,540 +99,71 @@ export default function EstimateGenerator({ projectId }: EstimateGeneratorProps)
   const grandTotal = laborSubtotal + paintCosts;
 
   const generatePDF = async () => {
+    if (!estimateRef.current) {
+      toast({
+        title: "Error",
+        description: "Estimate preview not ready. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       setIsGenerating(true);
       
-      // Create the HTML content matching the invoice dark theme
-      const htmlContent = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A-Frame Painting Estimate</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #000000;
-            color: #ffffff;
-            line-height: 1.4;
-            width: 794px;
-            min-height: 1122px;
-            padding: 32px;
-        }
-        
-        .estimate-container {
-            width: 100%;
-            margin: 0 auto;
-            background: #000000;
-        }
-        
-        /* Header Section with Logo */
-        .header {
-            margin-bottom: 32px;
-        }
-        
-        .logo-section {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 32px;
-        }
-        
-        .logo-section img {
-            height: 96px;
-            width: auto;
-        }
-        
-        /* Estimate Title and Info */
-        .title-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 32px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid #4b5563;
-        }
-        
-        .title-section h2 {
-            font-size: 48px;
-            font-weight: 700;
-            color: #EA580C;
-        }
-        
-        .title-section p {
-            color: #9ca3af;
-            margin-top: 4px;
-        }
-        
-        .estimate-meta {
-            text-align: right;
-        }
-        
-        .estimate-meta p {
-            color: #d1d5db;
-            font-size: 14px;
-            margin-bottom: 4px;
-        }
-        
-        .estimate-meta .label {
-            color: #9ca3af;
-        }
-        
-        .estimate-meta .value {
-            font-weight: 600;
-        }
-        
-        /* Client Info Section */
-        .client-section {
-            margin-bottom: 32px;
-        }
-        
-        .client-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 32px;
-        }
-        
-        .client-box h3 {
-            font-size: 12px;
-            font-weight: 600;
-            color: #9ca3af;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 12px;
-        }
-        
-        .client-box p {
-            color: #ffffff;
-            font-size: 16px;
-            margin-bottom: 4px;
-            line-height: 1.3;
-        }
-        
-        .client-box p.name {
-            font-weight: 600;
-            font-size: 18px;
-        }
-        
-        .client-box p.normal {
-            color: #d1d5db;
-        }
-        
-        /* Work Breakdown Section */
-        .work-section {
-            margin-bottom: 32px;
-        }
-        
-        .work-section h3 {
-            font-size: 12px;
-            font-weight: 600;
-            color: #9ca3af;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 16px;
-        }
-        
-        .work-table-container {
-            overflow: hidden;
-            border-radius: 8px;
-            border: 1px solid #4b5563;
-        }
-        
-        .work-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        .work-table thead {
-            background: #2d3748;
-        }
-        
-        .work-table th {
-            padding: 12px 24px;
-            text-align: left;
-            font-size: 12px;
-            font-weight: 600;
-            color: #d1d5db;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .work-table th.center { text-align: center; }
-        .work-table th.right { text-align: right; }
-        
-        .work-table tbody tr:nth-child(even) {
-            background: #1f2937;
-        }
-        
-        .work-table tbody tr:nth-child(odd) {
-            background: #000000;
-        }
-        
-        .work-table td {
-            padding: 12px 24px;
-            font-size: 14px;
-        }
-        
-        .work-name {
-            display: flex;
-            align-items: center;
-            color: #ffffff;
-            font-weight: 500;
-        }
-        
-        .work-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #10b981;
-            margin-right: 12px;
-        }
-        
-        .work-rate {
-            color: #d1d5db;
-            text-align: center;
-        }
-        
-        .work-total {
-            color: #ffffff;
-            font-weight: 600;
-            text-align: right;
-        }
-        
-        /* Totals Section */
-        .totals-section {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 32px;
-        }
-        
-        .totals-box {
-            width: 320px;
-            background: #2d3748;
-            border-radius: 8px;
-            padding: 24px;
-        }
-        
-        .total-line {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            color: #d1d5db;
-        }
-        
-        .total-line .label {
-            font-weight: 500;
-        }
-        
-        .total-line .amount {
-            font-weight: 600;
-        }
-        
-        .grand-total {
-            border-top: 1px solid #4b5563;
-            padding-top: 12px;
-            margin-top: 12px;
-        }
-        
-        .grand-total-box {
-            background: #059669;
-            border-radius: 8px;
-            padding: 16px 24px;
-            text-align: center;
-        }
-        
-        .grand-total-box .total-text {
-            color: #ffffff;
-            font-size: 20px;
-            font-weight: 700;
-        }
-        
-        /* Payment Method Section */
-        .payment-section {
-            margin-top: 32px;
-            padding-top: 24px;
-            border-top: 1px solid #4b5563;
-        }
-        
-        .payment-section h3 {
-            font-size: 12px;
-            font-weight: 600;
-            color: #9ca3af;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 12px;
-        }
-        
-        .payment-section p {
-            color: #d1d5db;
-            font-size: 14px;
-            line-height: 1.5;
-            text-align: center;
-            font-weight: 600;
-        }
-        
-        /* Disclaimer */
-        .disclaimer {
-            margin-top: 24px;
-            padding-top: 16px;
-            border-top: 1px solid #4b5563;
-        }
-        
-        .disclaimer p {
-            color: #EA580C;
-            font-size: 12px;
-            font-weight: 600;
-            line-height: 1.4;
-            text-align: center;
-        }
-    </style>
-</head>
-<body>
-    <div class="estimate-container">
-        <!-- Header Section -->
-        <div class="header">
-            <!-- Logo Only -->
-            <div class="logo-section">
-                <img src="/aframe-logo.png" alt="A-Frame Painting Logo" />
-            </div>
-        </div>
+      // Temporarily show the estimate preview element for capture
+      const originalDisplay = estimateRef.current.style.display;
+      const originalVisibility = estimateRef.current.style.visibility;
+      
+      estimateRef.current.style.display = 'block';
+      estimateRef.current.style.visibility = 'visible';
+      estimateRef.current.style.position = 'absolute';
+      estimateRef.current.style.top = '-9999px';
+      estimateRef.current.style.left = '-9999px';
+      estimateRef.current.style.width = '794px'; // A4 width in pixels
+      
+      // Wait for rendering
+      await new Promise(resolve => setTimeout(resolve, 500));
 
-        <!-- Estimate Title and Info -->
-        <div class="title-section">
-            <div>
-                <h2>Estimate</h2>
-                <p>Professional Painting Services</p>
-            </div>
-            <div class="estimate-meta">
-                <p><span class="label">Estimate #:</span> <span class="value">${estimateData.estimateNumber}</span></p>
-                <p><span class="label">Date:</span> <span class="value">${estimateData.date}</span></p>
-            </div>
-        </div>
-
-        <!-- Client Info -->
-        <div class="client-section">
-            <div class="client-grid">
-                <div class="client-box">
-                    <h3>Estimate To</h3>
-                    <p class="name">${project?.clientName || 'Client Name'}</p>
-                    <p class="normal">${project?.address || 'Address'}</p>
-                    <p class="normal">${project?.clientCity && project?.clientPostal ? `${project.clientCity}, ${project.clientPostal}` : 'City, Postal'}</p>
-                    ${project?.clientPhone ? `<p class="normal">${project.clientPhone}</p>` : ''}
-                    ${project?.clientEmail ? `<p class="normal">${project.clientEmail}</p>` : ''}
-                </div>
-                <div class="client-box">
-                    <h3>From</h3>
-                    <p class="name">A-Frame Painting</p>
-                    <p class="normal">884 Hayes Rd</p>
-                    <p class="normal">Manson's Landing, BC V0P1K0</p>
-                    <p class="normal">cortespainter@gmail.com</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Work Breakdown -->
-        <div class="work-section">
-            <h3>Work Breakdown</h3>
-            <div class="work-table-container">
-                <table class="work-table">
-                    <thead>
-                        <tr>
-                            <th>Service</th>
-                            <th class="center">Hours</th>
-                            <th class="right">Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${estimateData.workStages.prep > 0 ? `
-                        <tr>
-                            <td>
-                                <div class="work-name">
-                                    <div class="work-dot"></div>
-                                    <span>Prep</span>
-                                </div>
-                            </td>
-                            <td class="work-rate">${estimateData.workStages.prep}h × $60/h</td>
-                            <td class="work-total">$${(estimateData.workStages.prep * 60).toFixed(2)}</td>
-                        </tr>
-                        ` : ''}
-                        ${estimateData.workStages.priming > 0 ? `
-                        <tr>
-                            <td>
-                                <div class="work-name">
-                                    <div class="work-dot"></div>
-                                    <span>Priming</span>
-                                </div>
-                            </td>
-                            <td class="work-rate">${estimateData.workStages.priming}h × $60/h</td>
-                            <td class="work-total">$${(estimateData.workStages.priming * 60).toFixed(2)}</td>
-                        </tr>
-                        ` : ''}
-                        ${estimateData.workStages.painting > 0 ? `
-                        <tr>
-                            <td>
-                                <div class="work-name">
-                                    <div class="work-dot"></div>
-                                    <span>Painting</span>
-                                </div>
-                            </td>
-                            <td class="work-rate">${estimateData.workStages.painting}h × $60/h</td>
-                            <td class="work-total">$${(estimateData.workStages.painting * 60).toFixed(2)}</td>
-                        </tr>
-                        ` : ''}
-                        ${estimateData.additionalServices.woodReconditioning > 0 ? `
-                        <tr>
-                            <td>
-                                <div class="work-name">
-                                    <div class="work-dot"></div>
-                                    <span>Wood Reconditioning</span>
-                                </div>
-                            </td>
-                            <td class="work-rate">${estimateData.additionalServices.woodReconditioning}h × $60/h</td>
-                            <td class="work-total">$${(estimateData.additionalServices.woodReconditioning * 60).toFixed(2)}</td>
-                        </tr>
-                        ` : ''}
-                        ${estimateData.additionalServices.drywallRepair > 0 ? `
-                        <tr>
-                            <td>
-                                <div class="work-name">
-                                    <div class="work-dot"></div>
-                                    <span>Drywall Repair</span>
-                                </div>
-                            </td>
-                            <td class="work-rate">${estimateData.additionalServices.drywallRepair}h × $60/h</td>
-                            <td class="work-total">$${(estimateData.additionalServices.drywallRepair * 60).toFixed(2)}</td>
-                        </tr>
-                        ` : ''}
-                        ${paintCosts > 0 ? `
-                        <tr>
-                            <td>
-                                <div class="work-name">
-                                    <div class="work-dot"></div>
-                                    <span>Paint & Materials</span>
-                                </div>
-                            </td>
-                            <td class="work-rate">-</td>
-                            <td class="work-total">$${paintCosts.toFixed(2)}</td>
-                        </tr>
-                        ` : ''}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Totals Section -->
-        <div class="totals-section">
-            <div class="totals-box">
-                <div class="total-line">
-                    <span class="label">Subtotal</span>
-                    <span class="amount">$${laborSubtotal.toFixed(2)}</span>
-                </div>
-                ${paintCosts > 0 ? `
-                <div class="total-line">
-                    <span class="label">Paint & Materials</span>
-                    <span class="amount">$${paintCosts.toFixed(2)}</span>
-                </div>
-                ` : ''}
-                
-                <div class="grand-total">
-                    <div class="grand-total-box">
-                        <div class="total-text">Total: $${grandTotal.toFixed(2)}</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Payment Method -->
-        <div class="payment-section">
-            <h3>Payment Method</h3>
-            <p>Please send e-transfer to cortespainter@gmail.com</p>
-        </div>
-
-        <!-- Disclaimer -->
-        <div class="disclaimer">
-            <p><strong>NOTE:</strong> This is an estimate only. Price excludes structural repairs discovered during work (charged hourly). If total cost may exceed estimate by 20%+, you'll be notified for approval first.</p>
-        </div>
-    </div>
-</body>
-</html>
-      `;
-
-      // Create a temporary iframe to render the HTML cleanly
-      const iframe = document.createElement('iframe');
-      iframe.style.position = 'absolute';
-      iframe.style.left = '-9999px';
-      iframe.style.width = '8.5in';
-      iframe.style.height = '11in';
-      iframe.style.border = 'none';
-      document.body.appendChild(iframe);
-
-      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-      if (!iframeDoc) throw new Error('Could not access iframe document');
-
-      iframeDoc.open();
-      iframeDoc.write(htmlContent);
-      iframeDoc.close();
-
-      // Wait for fonts and content to load
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Capture the iframe content
-      const canvas = await html2canvas(iframeDoc.body, {
-        scale: 2,
+      // Capture the estimate preview
+      const canvas = await html2canvas(estimateRef.current, {
+        scale: 1,
+        backgroundColor: '#000000',
         useCORS: true,
         allowTaint: true,
-        backgroundColor: '#1a1a1a',
-        width: 816, // 8.5 inches at 96 DPI
-        height: null // Auto height
+        logging: false,
+        width: 794,
+        height: estimateRef.current.scrollHeight
       });
 
-      // Remove iframe
-      document.body.removeChild(iframe);
+      // Restore original styling
+      estimateRef.current.style.display = originalDisplay;
+      estimateRef.current.style.visibility = originalVisibility;
+      estimateRef.current.style.position = '';
+      estimateRef.current.style.top = '';
+      estimateRef.current.style.left = '';
+      estimateRef.current.style.width = '';
 
-      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
       
-      // Create PDF with proper dimensions
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'letter'
-      });
+      // Calculate dimensions to fit page
+      const imgWidth = pdfWidth;
+      const imgHeight = (canvas.height * pdfWidth) / canvas.width;
       
-      // Calculate the image dimensions to fit letter size
-      const pdfWidth = 216; // Letter width in mm
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      // Add main estimate page
+      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
 
-      const filename = `Estimate-${estimateData.estimateNumber}-${estimateData.clientName.replace(/\s+/g, '-')}.pdf`;
-      
-      // Download PDF
-      const pdfBlob = pdf.output('blob');
-      const url = URL.createObjectURL(pdfBlob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      const filename = `Estimate-${estimateData.estimateNumber || 'EST-001'}-${project?.clientName || 'Client'}.pdf`;
+      pdf.save(filename);
       
       toast({
-        title: "PDF Generated Successfully",
-        description: "Estimate PDF downloaded",
+        title: "PDF Generated!",
+        description: `Estimate downloaded as ${filename}`,
       });
-      
     } catch (error) {
-      console.error('PDF generation failed:', error);
+      console.error('Error generating PDF:', error);
       toast({
         title: "Error",
         description: "Failed to generate PDF. Please try again.",
@@ -931,5 +463,474 @@ export default function EstimateGenerator({ projectId }: EstimateGeneratorProps)
         </div>
       </CardContent>
     </Card>
+
+    {/* Hidden PDF Preview Component */}
+    <div 
+      ref={estimateRef}
+      style={{
+        display: 'none',
+        width: '794px',
+        backgroundColor: '#000000',
+        color: '#ffffff',
+        fontFamily: 'Inter, sans-serif',
+        padding: '32px',
+        lineHeight: '1.4'
+      }}
+    >
+      {/* Header with Logo */}
+      <div style={{ marginBottom: '32px', textAlign: 'center' }}>
+        <img 
+          src="/aframe-logo.png" 
+          alt="A-Frame Painting"
+          style={{ height: '96px', width: 'auto' }}
+        />
+      </div>
+
+      {/* Title Section */}
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        marginBottom: '32px',
+        paddingBottom: '16px',
+        borderBottom: '1px solid #4b5563'
+      }}>
+        <div>
+          <h2 style={{ 
+            fontSize: '48px', 
+            fontWeight: '700', 
+            color: '#EA580C',
+            margin: '0 0 4px 0'
+          }}>
+            Estimate
+          </h2>
+          <p style={{ color: '#9ca3af', margin: '0' }}>Professional Painting Services</p>
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <p style={{ color: '#d1d5db', fontSize: '14px', marginBottom: '4px' }}>
+            <span style={{ color: '#9ca3af' }}>Estimate #:</span>{' '}
+            <span style={{ fontWeight: '600' }}>{estimateData.estimateNumber}</span>
+          </p>
+          <p style={{ color: '#d1d5db', fontSize: '14px', marginBottom: '4px' }}>
+            <span style={{ color: '#9ca3af' }}>Date:</span>{' '}
+            <span style={{ fontWeight: '600' }}>{estimateData.date}</span>
+          </p>
+        </div>
+      </div>
+
+      {/* Client Info */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', marginBottom: '32px' }}>
+        <div>
+          <h3 style={{ 
+            fontSize: '12px', 
+            fontWeight: '600', 
+            color: '#9ca3af',
+            textTransform: 'uppercase',
+            letterSpacing: '1px',
+            marginBottom: '12px'
+          }}>
+            Estimate To
+          </h3>
+          <p style={{ fontSize: '18px', fontWeight: '600', marginBottom: '4px' }}>
+            {project?.clientName || 'Client Name'}
+          </p>
+          <p style={{ color: '#d1d5db', fontSize: '16px', marginBottom: '4px' }}>
+            {project?.address || 'Address'}
+          </p>
+          <p style={{ color: '#d1d5db', fontSize: '16px', marginBottom: '4px' }}>
+            {project?.clientCity && project?.clientPostal ? `${project.clientCity}, ${project.clientPostal}` : 'City, Postal'}
+          </p>
+          {project?.clientPhone && (
+            <p style={{ color: '#d1d5db', fontSize: '16px', marginBottom: '4px' }}>
+              {project.clientPhone}
+            </p>
+          )}
+          {project?.clientEmail && (
+            <p style={{ color: '#d1d5db', fontSize: '16px', marginBottom: '4px' }}>
+              {project.clientEmail}
+            </p>
+          )}
+        </div>
+        <div>
+          <h3 style={{ 
+            fontSize: '12px', 
+            fontWeight: '600', 
+            color: '#9ca3af',
+            textTransform: 'uppercase',
+            letterSpacing: '1px',
+            marginBottom: '12px'
+          }}>
+            From
+          </h3>
+          <p style={{ fontSize: '18px', fontWeight: '600', marginBottom: '4px' }}>
+            A-Frame Painting
+          </p>
+          <p style={{ color: '#d1d5db', fontSize: '16px', marginBottom: '4px' }}>
+            884 Hayes Rd
+          </p>
+          <p style={{ color: '#d1d5db', fontSize: '16px', marginBottom: '4px' }}>
+            Manson's Landing, BC V0P1K0
+          </p>
+          <p style={{ color: '#d1d5db', fontSize: '16px', marginBottom: '4px' }}>
+            cortespainter@gmail.com
+          </p>
+        </div>
+      </div>
+
+      {/* Work Breakdown */}
+      <div style={{ marginBottom: '32px' }}>
+        <h3 style={{ 
+          fontSize: '12px', 
+          fontWeight: '600', 
+          color: '#9ca3af',
+          textTransform: 'uppercase',
+          letterSpacing: '1px',
+          marginBottom: '16px'
+        }}>
+          Work Breakdown
+        </h3>
+        <div style={{ 
+          border: '1px solid #4b5563',
+          borderRadius: '8px',
+          overflow: 'hidden'
+        }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead style={{ background: '#2d3748' }}>
+              <tr>
+                <th style={{ 
+                  padding: '12px 24px', 
+                  textAlign: 'left',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  color: '#d1d5db',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}>
+                  Service
+                </th>
+                <th style={{ 
+                  padding: '12px 24px', 
+                  textAlign: 'center',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  color: '#d1d5db',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}>
+                  Hours
+                </th>
+                <th style={{ 
+                  padding: '12px 24px', 
+                  textAlign: 'right',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  color: '#d1d5db',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}>
+                  Amount
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {estimateData.workStages.prep > 0 && (
+                <tr style={{ background: '#000000' }}>
+                  <td style={{ padding: '12px 24px', fontSize: '14px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <div style={{ 
+                        width: '8px', 
+                        height: '8px', 
+                        borderRadius: '50%', 
+                        background: '#10b981',
+                        marginRight: '12px'
+                      }}></div>
+                      <span style={{ color: '#ffffff', fontWeight: '500' }}>Prep</span>
+                    </div>
+                  </td>
+                  <td style={{ 
+                    padding: '12px 24px', 
+                    fontSize: '14px',
+                    color: '#d1d5db',
+                    textAlign: 'center'
+                  }}>
+                    {estimateData.workStages.prep}h × $60/h
+                  </td>
+                  <td style={{ 
+                    padding: '12px 24px', 
+                    fontSize: '14px',
+                    color: '#ffffff',
+                    fontWeight: '600',
+                    textAlign: 'right'
+                  }}>
+                    ${(estimateData.workStages.prep * 60).toFixed(2)}
+                  </td>
+                </tr>
+              )}
+              {estimateData.workStages.priming > 0 && (
+                <tr style={{ background: '#1f2937' }}>
+                  <td style={{ padding: '12px 24px', fontSize: '14px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <div style={{ 
+                        width: '8px', 
+                        height: '8px', 
+                        borderRadius: '50%', 
+                        background: '#10b981',
+                        marginRight: '12px'
+                      }}></div>
+                      <span style={{ color: '#ffffff', fontWeight: '500' }}>Priming</span>
+                    </div>
+                  </td>
+                  <td style={{ 
+                    padding: '12px 24px', 
+                    fontSize: '14px',
+                    color: '#d1d5db',
+                    textAlign: 'center'
+                  }}>
+                    {estimateData.workStages.priming}h × $60/h
+                  </td>
+                  <td style={{ 
+                    padding: '12px 24px', 
+                    fontSize: '14px',
+                    color: '#ffffff',
+                    fontWeight: '600',
+                    textAlign: 'right'
+                  }}>
+                    ${(estimateData.workStages.priming * 60).toFixed(2)}
+                  </td>
+                </tr>
+              )}
+              {estimateData.workStages.painting > 0 && (
+                <tr style={{ background: '#000000' }}>
+                  <td style={{ padding: '12px 24px', fontSize: '14px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <div style={{ 
+                        width: '8px', 
+                        height: '8px', 
+                        borderRadius: '50%', 
+                        background: '#10b981',
+                        marginRight: '12px'
+                      }}></div>
+                      <span style={{ color: '#ffffff', fontWeight: '500' }}>Painting</span>
+                    </div>
+                  </td>
+                  <td style={{ 
+                    padding: '12px 24px', 
+                    fontSize: '14px',
+                    color: '#d1d5db',
+                    textAlign: 'center'
+                  }}>
+                    {estimateData.workStages.painting}h × $60/h
+                  </td>
+                  <td style={{ 
+                    padding: '12px 24px', 
+                    fontSize: '14px',
+                    color: '#ffffff',
+                    fontWeight: '600',
+                    textAlign: 'right'
+                  }}>
+                    ${(estimateData.workStages.painting * 60).toFixed(2)}
+                  </td>
+                </tr>
+              )}
+              {estimateData.additionalServices.woodReconditioning > 0 && (
+                <tr style={{ background: '#1f2937' }}>
+                  <td style={{ padding: '12px 24px', fontSize: '14px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <div style={{ 
+                        width: '8px', 
+                        height: '8px', 
+                        borderRadius: '50%', 
+                        background: '#10b981',
+                        marginRight: '12px'
+                      }}></div>
+                      <span style={{ color: '#ffffff', fontWeight: '500' }}>Wood Reconditioning</span>
+                    </div>
+                  </td>
+                  <td style={{ 
+                    padding: '12px 24px', 
+                    fontSize: '14px',
+                    color: '#d1d5db',
+                    textAlign: 'center'
+                  }}>
+                    {estimateData.additionalServices.woodReconditioning}h × $60/h
+                  </td>
+                  <td style={{ 
+                    padding: '12px 24px', 
+                    fontSize: '14px',
+                    color: '#ffffff',
+                    fontWeight: '600',
+                    textAlign: 'right'
+                  }}>
+                    ${(estimateData.additionalServices.woodReconditioning * 60).toFixed(2)}
+                  </td>
+                </tr>
+              )}
+              {estimateData.additionalServices.drywallRepair > 0 && (
+                <tr style={{ background: '#000000' }}>
+                  <td style={{ padding: '12px 24px', fontSize: '14px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <div style={{ 
+                        width: '8px', 
+                        height: '8px', 
+                        borderRadius: '50%', 
+                        background: '#10b981',
+                        marginRight: '12px'
+                      }}></div>
+                      <span style={{ color: '#ffffff', fontWeight: '500' }}>Drywall Repair</span>
+                    </div>
+                  </td>
+                  <td style={{ 
+                    padding: '12px 24px', 
+                    fontSize: '14px',
+                    color: '#d1d5db',
+                    textAlign: 'center'
+                  }}>
+                    {estimateData.additionalServices.drywallRepair}h × $60/h
+                  </td>
+                  <td style={{ 
+                    padding: '12px 24px', 
+                    fontSize: '14px',
+                    color: '#ffffff',
+                    fontWeight: '600',
+                    textAlign: 'right'
+                  }}>
+                    ${(estimateData.additionalServices.drywallRepair * 60).toFixed(2)}
+                  </td>
+                </tr>
+              )}
+              {paintCosts > 0 && (
+                <tr style={{ background: '#1f2937' }}>
+                  <td style={{ padding: '12px 24px', fontSize: '14px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <div style={{ 
+                        width: '8px', 
+                        height: '8px', 
+                        borderRadius: '50%', 
+                        background: '#10b981',
+                        marginRight: '12px'
+                      }}></div>
+                      <span style={{ color: '#ffffff', fontWeight: '500' }}>Paint & Materials</span>
+                    </div>
+                  </td>
+                  <td style={{ 
+                    padding: '12px 24px', 
+                    fontSize: '14px',
+                    color: '#d1d5db',
+                    textAlign: 'center'
+                  }}>
+                    -
+                  </td>
+                  <td style={{ 
+                    padding: '12px 24px', 
+                    fontSize: '14px',
+                    color: '#ffffff',
+                    fontWeight: '600',
+                    textAlign: 'right'
+                  }}>
+                    ${paintCosts.toFixed(2)}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Totals Section */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '32px' }}>
+        <div style={{ 
+          width: '320px',
+          background: '#2d3748',
+          borderRadius: '8px',
+          padding: '24px'
+        }}>
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between',
+            marginBottom: '12px',
+            color: '#d1d5db'
+          }}>
+            <span style={{ fontWeight: '500' }}>Subtotal</span>
+            <span style={{ fontWeight: '600' }}>${laborSubtotal.toFixed(2)}</span>
+          </div>
+          {paintCosts > 0 && (
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between',
+              marginBottom: '12px',
+              color: '#d1d5db'
+            }}>
+              <span style={{ fontWeight: '500' }}>Paint & Materials</span>
+              <span style={{ fontWeight: '600' }}>${paintCosts.toFixed(2)}</span>
+            </div>
+          )}
+          
+          <div style={{ 
+            borderTop: '1px solid #4b5563',
+            paddingTop: '12px',
+            marginTop: '12px'
+          }}>
+            <div style={{ 
+              background: '#059669',
+              borderRadius: '8px',
+              padding: '16px 24px',
+              textAlign: 'center'
+            }}>
+              <div style={{ 
+                color: '#ffffff',
+                fontSize: '20px',
+                fontWeight: '700'
+              }}>
+                Total: ${grandTotal.toFixed(2)}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Payment Method */}
+      <div style={{ 
+        marginTop: '32px',
+        paddingTop: '24px',
+        borderTop: '1px solid #4b5563'
+      }}>
+        <h3 style={{ 
+          fontSize: '12px', 
+          fontWeight: '600', 
+          color: '#9ca3af',
+          textTransform: 'uppercase',
+          letterSpacing: '1px',
+          marginBottom: '12px'
+        }}>
+          Payment Method
+        </h3>
+        <p style={{ 
+          color: '#d1d5db',
+          fontSize: '14px',
+          lineHeight: '1.5',
+          textAlign: 'center',
+          fontWeight: '600'
+        }}>
+          Please send e-transfer to cortespainter@gmail.com
+        </p>
+      </div>
+
+      {/* Disclaimer */}
+      <div style={{ 
+        marginTop: '24px',
+        paddingTop: '16px',
+        borderTop: '1px solid #4b5563'
+      }}>
+        <p style={{ 
+          color: '#EA580C',
+          fontSize: '12px',
+          fontWeight: '600',
+          lineHeight: '1.4',
+          textAlign: 'center'
+        }}>
+          <strong>NOTE:</strong> This is an estimate only. Price excludes structural repairs discovered during work (charged hourly). If total cost may exceed estimate by 20%+, you'll be notified for approval first.
+        </p>
+      </div>
+    </div>
   );
 }
