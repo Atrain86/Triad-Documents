@@ -181,9 +181,9 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           className="overflow-y-auto max-h-[calc(100vh-160px)] pr-2"
         >
           {/* Client Info (read-only) */}
-          <Card className="mb-4 border-2 border-orange-400">
+          <Card className="mb-4 border-2 border-[#D4A574]">
             <CardHeader>
-              <CardTitle className="text-lg text-orange-600 dark:text-orange-400">Client Information</CardTitle>
+              <CardTitle className="text-lg text-[#D4A574]">Client Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               <Input value={clientName} readOnly placeholder="Client Name" />
@@ -196,9 +196,9 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           </Card>
 
           {/* Estimate Details */}
-          <Card className="mb-4 border-2 border-blue-400">
+          <Card className="mb-4 border-2 border-[#569CD6]">
             <CardHeader>
-              <CardTitle className="text-lg text-blue-600 dark:text-blue-400">Estimate Details</CardTitle>
+              <CardTitle className="text-lg text-[#569CD6]">Estimate Details</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               <Input
@@ -225,16 +225,25 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           </Card>
 
           {/* Work Stages */}
-          <Card className="mb-4 border-2 border-green-400">
+          <Card className="mb-4 border-2 border-[#6A9955]">
             <CardHeader className="flex justify-between items-center">
-              <CardTitle className="text-lg text-green-600 dark:text-green-400">Work Breakdown</CardTitle>
-              <Button size="sm" onClick={addWorkStage} className="bg-green-600 hover:bg-green-700">+ Add Stage</Button>
+              <CardTitle className="text-lg text-[#6A9955]">Work Breakdown</CardTitle>
+              <Button size="sm" onClick={addWorkStage} className="bg-[#6A9955] hover:bg-[#5a8245]">+ Add Stage</Button>
             </CardHeader>
             <CardContent>
-              {workStages.map((stage, i) => (
+              {workStages.map((stage, i) => {
+                // Distinct colors for each painting stage
+                const stageColors = [
+                  { border: 'border-[#FF6B6B]', bg: 'bg-[#FF6B6B]/10' }, // Prep - Red
+                  { border: 'border-[#4ECDC4]', bg: 'bg-[#4ECDC4]/10' }, // Priming - Teal
+                  { border: 'border-[#45B7D1]', bg: 'bg-[#45B7D1]/10' }, // Painting - Blue
+                ];
+                const stageColor = stageColors[i] || { border: 'border-gray-300', bg: 'bg-gray-50' };
+                
+                return (
                 <div
                   key={i}
-                  className="mb-3 border border-gray-300 rounded p-3"
+                  className={`mb-3 border-2 ${stageColor.border} ${stageColor.bg} rounded p-3`}
                 >
                   <Input
                     placeholder="Stage Name"
@@ -277,19 +286,20 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     size="sm"
                     variant="destructive"
                     onClick={() => removeWorkStage(i)}
-                    className="mt-2 bg-red-600 hover:bg-red-700"
+                    className="mt-2 bg-[#E03E3E] hover:bg-[#c63535]"
                   >
                     Remove
                   </Button>
                 </div>
-              ))}
+                );
+              })}
             </CardContent>
           </Card>
 
           {/* Summary */}
-          <Card className="mb-4 border-2 border-purple-400">
+          <Card className="mb-4 border-2 border-[#8B5FBF]">
             <CardHeader>
-              <CardTitle className="text-lg text-purple-600 dark:text-purple-400">Summary</CardTitle>
+              <CardTitle className="text-lg text-[#8B5FBF]">Summary</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex justify-between mb-1">
