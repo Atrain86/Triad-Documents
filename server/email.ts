@@ -132,6 +132,8 @@ cortespainter@gmail.com
       {
         filename: `Invoice-${invoiceNumber}-${clientName.replace(/[^a-zA-Z0-9]/g, '')}.pdf`,
         content: pdfBuffer,
+        contentType: 'application/pdf',
+        contentDisposition: 'attachment'
       }
     ]
   });
@@ -223,6 +225,8 @@ cortespainter@gmail.com
     {
       filename: `Invoice-${invoiceNumber}-${clientName.replace(/[^a-zA-Z0-9]/g, '')}.pdf`,
       content: pdfBuffer,
+      contentType: 'application/pdf',
+      contentDisposition: 'attachment'
     },
     ...receiptAttachments
   ];
@@ -302,6 +306,8 @@ cortespainter@gmail.com
       {
         filename: `Estimate-${estimateNumber}-${clientName.replace(/[^a-zA-Z0-9]/g, '')}.pdf`,
         content: pdfBuffer,
+        contentType: 'application/pdf',
+        contentDisposition: 'attachment'
       }
     ]
   });

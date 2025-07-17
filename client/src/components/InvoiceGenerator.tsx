@@ -367,13 +367,20 @@ export default function InvoiceGenerator({
       const imgHeight = (canvas.height * pdfWidth) / canvas.width;
       
       // Convert canvas to JPEG with quality setting for smaller file size
-      const imageData = canvas.toDataURL('image/jpeg', 0.8);
-      if (!imageData || imageData === 'data:,') {
-        throw new Error('Failed to generate image data from canvas');
+      const imageData = canvas.toDataURL('image/jpeg', 0.7);
+      if (!imageData || imageData === 'data:,' || imageData.length < 100) {
+        throw new Error('Failed to generate valid image data from canvas');
       }
+      
+      console.log('Canvas dimensions:', canvas.width, 'x', canvas.height);
+      console.log('Image data length:', imageData.length);
 
       // Add main invoice page
       pdf.addImage(imageData, 'JPEG', 0, 0, imgWidth, imgHeight);
+      
+      // Log PDF info for debugging
+      console.log('PDF pages:', pdf.getNumberOfPages());
+      console.log('PDF size estimate:', pdf.output('blob').size, 'bytes');
 
       // Receipts are now sent as separate email attachments only (not embedded in PDF)
 
