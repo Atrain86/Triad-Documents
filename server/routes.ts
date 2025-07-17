@@ -4,6 +4,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertProjectSchema, insertPhotoSchema, insertReceiptSchema, insertDailyHoursSchema, insertToolsChecklistSchema, insertUserSchema } from "@shared/schema";
 import { hashPassword, verifyPassword, generateToken, verifyToken } from "./auth";
+import { sendInvoiceEmailWithReceipts, sendEstimateEmail } from "./email";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -496,6 +497,128 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: 'Failed to delete tool' });
+    }
+  });
+
+  // Email sending routes
+  app.post('/api/send-invoice-email', async (req, res) => {
+    try {
+      const { recipientEmail, clientName, invoiceNumber, pdfData, receiptFilenames } = req.body;
+      
+      if (!recipientEmail || !clientName || !invoiceNumber || !pdfData) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Missing required fields: recipientEmail, clientName, invoiceNumber, pdfData' 
+        });
+      }
+
+      console.log('Invoice email request received:', {
+        recipientEmail,
+        clientName,
+        invoiceNumber,
+        receiptFilenames: receiptFilenames?.length || 0
+      });
+
+      // Convert base64 PDF data to buffer
+      const pdfBuffer = Buffer.from(pdfData, 'base64');
+
+      // Prepare receipt attachments if any
+      const receiptAttachments = [];
+      if (receiptFilenames && receiptFilenames.length > 0) {
+        for (const filename of receiptFilenames) {
+          const receiptPath = path.join(process.cwd(), 'uploads', filename);
+          if (fs.existsSync(receiptPath)) {
+            receiptAttachments.push({
+              filename: filename,
+              path: receiptPath
+            });
+          }
+        }
+      }
+
+      // Send email with invoice and receipt attachments
+      const success = await sendInvoiceEmailWithReceipts(
+        recipientEmail,
+        clientName,
+        invoiceNumber,
+        pdfBuffer,
+        receiptAttachments
+      );
+
+      if (success) {
+        console.log('Invoice email sent successfully');
+        res.json({ 
+          success: true, 
+          message: `Invoice sent to ${recipientEmail}` 
+        });
+      } else {
+        console.log('Invoice email failed to send');
+        res.status(500).json({ 
+          success: false, 
+          error: 'Failed to send email. Please check email configuration.' 
+        });
+      }
+    } catch (error) {
+      console.error('Invoice email error:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'Server error while sending email' 
+      });
+    }
+  });
+
+  app.post('/api/send-estimate-email', async (req, res) => {
+    try {
+      const { recipientEmail, clientName, estimateNumber, projectTitle, totalAmount, customMessage, pdfData } = req.body;
+      
+      if (!recipientEmail || !clientName || !pdfData) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Missing required fields: recipientEmail, clientName, pdfData' 
+        });
+      }
+
+      console.log('Estimate email request received:', {
+        recipientEmail,
+        clientName,
+        estimateNumber,
+        projectTitle,
+        totalAmount
+      });
+
+      // Convert base64 PDF data to buffer
+      const pdfBuffer = Buffer.from(pdfData, 'base64');
+
+      // Send estimate email with proper parameters
+      const success = await sendEstimateEmail(
+        recipientEmail,
+        clientName,
+        estimateNumber || 'EST001',
+        projectTitle || 'Painting Project',
+        totalAmount || '0.00',
+        customMessage || '',
+        pdfBuffer
+      );
+
+      if (success) {
+        console.log('Estimate email sent successfully');
+        res.json({ 
+          success: true, 
+          message: `Estimate sent to ${recipientEmail}` 
+        });
+      } else {
+        console.log('Estimate email failed to send');
+        res.status(500).json({ 
+          success: false, 
+          error: 'Failed to send email. Please check email configuration.' 
+        });
+      }
+    } catch (error) {
+      console.error('Estimate email error:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'Server error while sending email' 
+      });
     }
   });
 
