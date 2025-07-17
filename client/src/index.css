@@ -124,6 +124,20 @@ input[type="date"]:focus::-webkit-datetime-edit-year-field {
   cursor: pointer;
 }
 
+/* Fix dropdown transparency issues in dark mode */
+[data-radix-select-content] {
+  background-color: black !important;
+  border: 1px solid rgb(75, 85, 99) !important;
+}
+
+[data-radix-select-item] {
+  color: white !important;
+}
+
+[data-radix-select-item]:hover {
+  background-color: rgb(31, 41, 55) !important;
+}
+
 /* Paint Brain button color overrides (minimal approach) */
 .paint-brain-purple-btn {
   background-color: #8B5FBF !important;

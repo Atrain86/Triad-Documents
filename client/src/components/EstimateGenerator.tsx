@@ -40,12 +40,15 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     { name: 'Painting', description: '', hours: '', rate: 60 },
   ]);
 
-  // Supply costs state
+  // Paint costs state
+  const [primerCosts, setPrimerCosts] = useState({
+    price: '',
+    coats: '1'
+  });
+
   const [paintCosts, setPaintCosts] = useState({
-    pricePerGallon: '',
-    gallonsNeeded: '',
-    primerCoats: '1',
-    paintCoats: '2'
+    price: '',
+    coats: '2'
   });
 
   const [supplies, setSupplies] = useState([
@@ -111,10 +114,16 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     return hours * stage.rate;
   };
 
+  const calculatePrimerCosts = () => {
+    const price = parseFloat(primerCosts.price) || 0;
+    const coats = parseInt(primerCosts.coats) || 0;
+    return price * coats;
+  };
+
   const calculatePaintCosts = () => {
-    const pricePerGallon = parseFloat(paintCosts.pricePerGallon) || 0;
-    const gallonsNeeded = parseFloat(paintCosts.gallonsNeeded) || 0;
-    return pricePerGallon * gallonsNeeded;
+    const price = parseFloat(paintCosts.price) || 0;
+    const coats = parseInt(paintCosts.coats) || 0;
+    return price * coats;
   };
 
   const calculateSuppliesTotal = () => {
@@ -129,7 +138,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   };
 
   const calculateLaborSubtotal = () => workStages.reduce((sum, stage) => sum + calculateStageTotal(stage), 0);
-  const calculateMaterialsSubtotal = () => calculatePaintCosts() + calculateSuppliesTotal();
+  const calculateMaterialsSubtotal = () => calculatePrimerCosts() + calculatePaintCosts() + calculateSuppliesTotal();
   const calculateSubtotal = () => calculateLaborSubtotal() + calculateMaterialsSubtotal() + calculateTravelTotal();
   const calculateGST = () => calculateSubtotal() * 0.05;
   const calculateTotal = () => calculateSubtotal() + calculateGST();
@@ -362,42 +371,55 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
               <CardTitle className="text-lg text-[#DCDCAA]">Supply Costs</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Primer Costs */}
+              <div className="border border-[#DCDCAA] rounded p-3 bg-[#DCDCAA]/10">
+                <h4 className="font-medium mb-2">Primer</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  <Input
+                    type="number"
+                    placeholder="Price"
+                    value={primerCosts.price}
+                    onChange={(e) => setPrimerCosts({...primerCosts, price: e.target.value})}
+                  />
+                  <Select value={primerCosts.coats} onValueChange={(value) => setPrimerCosts({...primerCosts, coats: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Coats" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-black border border-gray-600">
+                      <SelectItem value="0" className="text-white hover:bg-gray-800">0 coats</SelectItem>
+                      <SelectItem value="1" className="text-white hover:bg-gray-800">1 coat</SelectItem>
+                      <SelectItem value="2" className="text-white hover:bg-gray-800">2 coats</SelectItem>
+                      <SelectItem value="3" className="text-white hover:bg-gray-800">3 coats</SelectItem>
+                      <SelectItem value="4" className="text-white hover:bg-gray-800">4 coats</SelectItem>
+                      <SelectItem value="5" className="text-white hover:bg-gray-800">5 coats</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="mt-2 text-right font-medium">
+                  Primer Total: ${calculatePrimerCosts().toFixed(2)}
+                </div>
+              </div>
+
               {/* Paint Costs */}
               <div className="border border-[#DCDCAA] rounded p-3 bg-[#DCDCAA]/10">
                 <h4 className="font-medium mb-2">Paint</h4>
                 <div className="grid grid-cols-2 gap-2">
                   <Input
                     type="number"
-                    placeholder="Price per gallon"
-                    value={paintCosts.pricePerGallon}
-                    onChange={(e) => setPaintCosts({...paintCosts, pricePerGallon: e.target.value})}
+                    placeholder="Price"
+                    value={paintCosts.price}
+                    onChange={(e) => setPaintCosts({...paintCosts, price: e.target.value})}
                   />
-                  <Input
-                    type="number"
-                    placeholder="Gallons needed"
-                    value={paintCosts.gallonsNeeded}
-                    onChange={(e) => setPaintCosts({...paintCosts, gallonsNeeded: e.target.value})}
-                  />
-                  <Select value={paintCosts.primerCoats} onValueChange={(value) => setPaintCosts({...paintCosts, primerCoats: value})}>
+                  <Select value={paintCosts.coats} onValueChange={(value) => setPaintCosts({...paintCosts, coats: value})}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Primer coats" />
+                      <SelectValue placeholder="Coats" />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="0">0 coats</SelectItem>
-                      <SelectItem value="1">1 coat</SelectItem>
-                      <SelectItem value="2">2 coats</SelectItem>
-                      <SelectItem value="3">3 coats</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select value={paintCosts.paintCoats} onValueChange={(value) => setPaintCosts({...paintCosts, paintCoats: value})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Paint coats" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">1 coat</SelectItem>
-                      <SelectItem value="2">2 coats</SelectItem>
-                      <SelectItem value="3">3 coats</SelectItem>
-                      <SelectItem value="4">4 coats</SelectItem>
+                    <SelectContent className="bg-black border border-gray-600">
+                      <SelectItem value="1" className="text-white hover:bg-gray-800">1 coat</SelectItem>
+                      <SelectItem value="2" className="text-white hover:bg-gray-800">2 coats</SelectItem>
+                      <SelectItem value="3" className="text-white hover:bg-gray-800">3 coats</SelectItem>
+                      <SelectItem value="4" className="text-white hover:bg-gray-800">4 coats</SelectItem>
+                      <SelectItem value="5" className="text-white hover:bg-gray-800">5 coats</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -425,7 +447,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                       />
                       <Input
                         type="number"
-                        placeholder="Unit cost"
+                        placeholder="Price"
                         value={supply.unitCost}
                         onChange={(e) => updateSupply(i, 'unitCost', e.target.value)}
                       />
