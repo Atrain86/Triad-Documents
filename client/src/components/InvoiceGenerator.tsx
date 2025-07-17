@@ -73,8 +73,9 @@ export default function InvoiceGenerator({
     selectedReceipts: new Set<number>()
   });
 
-  // Brand colors - A-Frame Painting theme
-  const brandColors = {
+  // Paint Brain colors for invoice generator
+  const paintBrainColors = {
+    green: '#6A9955',         // Paint Brain green for headers and buttons
     primary: '#EA580C',        // Burnt orange (A-Frame brand color)
     secondary: '#DC2626',      // Red accent
     accent: '#10b981',         // Green for success/send buttons
@@ -568,7 +569,7 @@ ${textBody}`;
             {/* Business & Invoice Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
-                <h2 className="text-xl font-semibold flex items-center" style={{ color: darkTheme.text }}>
+                <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.green }}>
                   <User className="mr-2 h-5 w-5" />
                   Business Information
                 </h2>
@@ -595,7 +596,7 @@ ${textBody}`;
               </div>
 
               <div className="space-y-4">
-                <h2 className="text-xl font-semibold flex items-center" style={{ color: darkTheme.text }}>
+                <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.green }}>
                   <Calendar className="mr-2 h-5 w-5" />
                   Invoice Details
                 </h2>
@@ -636,7 +637,7 @@ ${textBody}`;
 
             {/* Client Information */}
             <div className="space-y-4">
-              <h2 className="text-xl font-semibold flex items-center" style={{ color: darkTheme.text }}>
+              <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.green }}>
                 <MapPin className="mr-2 h-5 w-5" />
                 Client Information
               </h2>
@@ -679,7 +680,7 @@ ${textBody}`;
 
             {/* Email Message */}
             <div className="space-y-4">
-              <h2 className="text-xl font-semibold flex items-center" style={{ color: darkTheme.text }}>
+              <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.green }}>
                 <Send className="mr-2 h-5 w-5" />
                 Email Message
               </h2>
@@ -698,22 +699,22 @@ ${textBody}`;
 
             {/* Services & Labor - Daily Hours Layout */}
             <div className="space-y-4">
-              <h2 className="text-xl font-semibold" style={{ color: darkTheme.text }}>Services & Labor</h2>
+              <h2 className="text-xl font-semibold" style={{ color: paintBrainColors.green }}>Services & Labor</h2>
               
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse" style={{ borderColor: darkTheme.border }}>
                   <thead>
                     <tr style={{ backgroundColor: darkTheme.inputBg }}>
-                      <th className="border p-3 text-left" style={{ borderColor: darkTheme.border, color: darkTheme.text }}>Date</th>
-                      <th className="border p-3 text-left" style={{ borderColor: darkTheme.border, color: darkTheme.text }}>Description</th>
-                      <th className="border p-3 text-center" style={{ borderColor: darkTheme.border, color: darkTheme.text }}>Hours</th>
-                      <th className="border p-3 text-right" style={{ borderColor: darkTheme.border, color: darkTheme.text }}>Total</th>
+                      <th className="border p-3 text-left" style={{ borderColor: paintBrainColors.green, color: paintBrainColors.green }}>Date</th>
+                      <th className="border p-3 text-left" style={{ borderColor: paintBrainColors.green, color: paintBrainColors.green }}>Description</th>
+                      <th className="border p-3 text-center" style={{ borderColor: paintBrainColors.green, color: paintBrainColors.green }}>Hours</th>
+                      <th className="border p-3 text-right" style={{ borderColor: paintBrainColors.green, color: paintBrainColors.green }}>Total</th>
                     </tr>
                   </thead>
                   <tbody>
                     {dailyHours.map((hourEntry, index) => (
                       <tr key={index}>
-                        <td className="border p-3" style={{ borderColor: darkTheme.border, color: darkTheme.text }}>
+                        <td className="border p-3" style={{ borderColor: paintBrainColors.green, color: darkTheme.text }}>
                           {(() => {
                             // Parse date string directly to avoid timezone conversion
                             const dateStr = hourEntry.date.toString();
@@ -727,13 +728,13 @@ ${textBody}`;
                             });
                           })()}
                         </td>
-                        <td className="border p-3" style={{ borderColor: darkTheme.border, color: darkTheme.text }}>
+                        <td className="border p-3" style={{ borderColor: paintBrainColors.green, color: darkTheme.text }}>
                           {hourEntry.description || 'Painting'}
                         </td>
-                        <td className="border p-3 text-center" style={{ borderColor: darkTheme.border, color: darkTheme.text }}>
+                        <td className="border p-3 text-center" style={{ borderColor: paintBrainColors.green, color: darkTheme.text }}>
                           {hourEntry.hours}
                         </td>
-                        <td className="border p-3 text-right font-semibold" style={{ borderColor: darkTheme.border, color: darkTheme.text }}>
+                        <td className="border p-3 text-right font-semibold" style={{ borderColor: paintBrainColors.green, color: darkTheme.text }}>
                           ${(hourEntry.hours * (project.hourlyRate || 60)).toFixed(2)}
                         </td>
                       </tr>
@@ -746,7 +747,7 @@ ${textBody}`;
             {/* Receipt Attachment Option */}
             {receipts.length > 0 && (
               <div className="p-4 rounded-lg" style={{ backgroundColor: darkTheme.cardBg }}>
-                <h3 className="text-sm font-medium mb-3" style={{ color: darkTheme.text }}>Receipts & Materials</h3>
+                <h3 className="text-sm font-medium mb-3" style={{ color: paintBrainColors.green }}>Receipts & Materials</h3>
                 
                 {/* Display receipt items with OCR data */}
                 <div className="space-y-3 mb-4">
@@ -849,7 +850,7 @@ ${textBody}`;
               <Button
                 onClick={generatePDF}
                 className="text-white hover:opacity-90"
-                style={{ backgroundColor: brandColors.primary }}
+                style={{ backgroundColor: paintBrainColors.green }}
               >
                 <Download className="mr-2 h-5 w-5" />
                 Download PDF
@@ -858,7 +859,7 @@ ${textBody}`;
                 onClick={sendInvoice}
                 disabled={!invoiceData.clientEmail || isSending}
                 className="text-white hover:opacity-90 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                style={{ backgroundColor: (invoiceData.clientEmail && !isSending) ? '#1E40AF' : '#9ca3af' }}
+                style={{ backgroundColor: (invoiceData.clientEmail && !isSending) ? paintBrainColors.green : '#9ca3af' }}
               >
                 {isSending ? (
                   <>
