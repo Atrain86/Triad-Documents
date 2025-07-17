@@ -253,7 +253,7 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
                   <p className="text-xs text-gray-400 mt-1">{receipt.description}</p>
                 )}
                 {receipt.date && (
-                  <p className="text-xs text-gray-500">{formatDate(receipt.date)}</p>
+                  <p className="text-xs" style={{ color: paintBrainColors.orange }}>{formatDate(receipt.date)}</p>
                 )}
               </div>
               <div className="flex items-center gap-2">
@@ -930,7 +930,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             <p className="mt-1" style={{ color: paintBrainColors.green }}>
               {project.address}, {project.clientCity} {project.clientPostal}
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            <p className="text-sm mt-1" style={{ color: paintBrainColors.orange }}>
               {project.projectType} • {project.roomCount} rooms
             </p>
           </div>
