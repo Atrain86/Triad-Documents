@@ -991,9 +991,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
       {/* NEW: Mac-Style Collapsible Menu with ReactSortable */}
       <div className="mt-8 p-6 bg-gradient-to-r from-gray-900 to-black rounded-lg border border-gray-700">
-        <h3 className="text-lg font-semibold mb-4 text-white">
-          Customizable Menu (Drag to Reorder)
-        </h3>
+        <div className="mb-4 text-white">
+          <h3 className="text-lg font-semibold">Customizable Menu</h3>
+          <p className="text-sm text-gray-300 mt-1">Drag handles to re-order</p>
+        </div>
         
         <ReactSortable 
           list={menuSections} 
@@ -1569,12 +1570,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             );
           })}
         </ReactSortable>
-
-        <div className="mt-4 p-3 bg-gray-800 rounded-lg border border-gray-600">
-          <p className="text-sm text-gray-300">
-            <strong>How to use:</strong> Click section headers to expand/collapse. Drag the grip handles to reorder sections to match your workflow preference.
-          </p>
-        </div>
       </div>
 
       {/* Generate Buttons */}
