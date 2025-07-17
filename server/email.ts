@@ -258,6 +258,8 @@ ${customMessageSection}Total Estimate: $${totalAmount}
 
 This estimate is valid for 30 days. Please let me know if you have any questions.
 
+Note: This is only an estimate, not a quote. Final cost may vary. If and when the job exceeds 20% of initial estimate, we will contact you to discuss options on how to proceed so there will be no surprises.
+
 Best regards,
 A-Frame Painting
 cortespainter@gmail.com
@@ -277,6 +279,10 @@ cortespainter@gmail.com
       <p><strong>Total Estimate: $${totalAmount}</strong></p>
       
       <p>This estimate is valid for 30 days. Please let me know if you have any questions.</p>
+      
+      <div style="background-color: #f5f5f5; padding: 15px; margin: 20px 0; border-left: 4px solid #6B7280; font-size: 14px;">
+        <p style="margin: 0; color: #4B5563;"><strong>Note:</strong> This is only an estimate, not a quote. Final cost may vary. If and when the job exceeds 20% of initial estimate, we will contact you to discuss options on how to proceed so there will be no surprises.</p>
+      </div>
       
       <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
         <p><strong>Best regards,</strong><br>
