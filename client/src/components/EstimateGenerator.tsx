@@ -231,19 +231,10 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
               <Button size="sm" onClick={addWorkStage} className="bg-[#6A9955] hover:bg-[#5a8245]">+ Add Stage</Button>
             </CardHeader>
             <CardContent>
-              {workStages.map((stage, i) => {
-                // Distinct colors for each painting stage
-                const stageColors = [
-                  { border: 'border-[#FF6B6B]', bg: 'bg-[#FF6B6B]/10' }, // Prep - Red
-                  { border: 'border-[#4ECDC4]', bg: 'bg-[#4ECDC4]/10' }, // Priming - Teal
-                  { border: 'border-[#45B7D1]', bg: 'bg-[#45B7D1]/10' }, // Painting - Blue
-                ];
-                const stageColor = stageColors[i] || { border: 'border-gray-300', bg: 'bg-gray-50' };
-                
-                return (
+              {workStages.map((stage, i) => (
                 <div
                   key={i}
-                  className={`mb-3 border-2 ${stageColor.border} ${stageColor.bg} rounded p-3`}
+                  className="mb-3 border-2 border-[#6A9955] bg-[#6A9955]/10 rounded p-3"
                 >
                   <Input
                     placeholder="Stage Name"
@@ -291,8 +282,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     Remove
                   </Button>
                 </div>
-                );
-              })}
+              ))}
             </CardContent>
           </Card>
 
