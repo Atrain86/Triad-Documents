@@ -21,9 +21,9 @@ const paintBrainColors = {
   purple: '#8B5FBF',
   orange: '#D4A574',  
   green: '#6A9955',
-  red: '#F44747',
-  blue: '#569CD6',
-  yellow: '#DCDCAA',
+  red: '#E53E3E',      // Vibrant red for photo gallery
+  blue: '#3182CE',     // Rich blue for project notes
+  yellow: '#ECC94B',   // Bright yellow for tools
   gray: '#6B7280'
 };
 
@@ -989,11 +989,11 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             const sectionName = section.id === 'photos' ? 'Photo Gallery' : section.name;
             const getSectionColor = (sectionId: string) => {
               switch (sectionId) {
-                case 'photos': return paintBrainColors.orange;
-                case 'tools': return paintBrainColors.yellow;
-                case 'dailyHours': return paintBrainColors.green;
-                case 'notes': return paintBrainColors.blue;
-                case 'receipts': return paintBrainColors.purple;
+                case 'photos': return paintBrainColors.red;     // Red for photo gallery
+                case 'tools': return paintBrainColors.yellow;   // Yellow for tools
+                case 'dailyHours': return paintBrainColors.green; // Green for daily hours
+                case 'notes': return paintBrainColors.blue;     // Blue for project notes
+                case 'receipts': return paintBrainColors.purple; // Purple for receipts
                 default: return paintBrainColors.gray;
               }
             };
@@ -1010,8 +1010,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                 >
                   <div className="flex items-center gap-3">
                     {/* Mac-style Reorder Icon - Left Side */}
-                    <div className="drag-handle cursor-move p-1 text-white hover:text-gray-200" onClick={(e) => e.stopPropagation()}>
-                      <svg width="16" height="16" viewBox="0 0 16 16" className="text-white">
+                    <div className="drag-handle cursor-move p-1 hover:opacity-80" onClick={(e) => e.stopPropagation()}>
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style={{ color: getSectionColor(section.id) }}>
                         <rect y="2" width="16" height="1.5" rx="0.75"/>
                         <rect y="5.5" width="16" height="1.5" rx="0.75"/>
                         <rect y="9" width="16" height="1.5" rx="0.75"/>
@@ -1037,7 +1037,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                             case 'dailyHours': {
                               const totalHours = dailyHours.reduce((sum, entry) => sum + entry.hours, 0);
                               const totalEarnings = totalHours * (project?.hourlyRate || 60);
-                              return `${itemCount} day${itemCount !== 1 ? 's' : ''} • $${totalEarnings.toLocaleString()}`;
+                              return `${totalHours} hours • $${totalEarnings.toLocaleString()}`;
                             }
                             case 'receipts': {
                               const totalAmount = receipts.reduce((sum, receipt) => sum + parseFloat(receipt.amount), 0);
