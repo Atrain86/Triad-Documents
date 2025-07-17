@@ -930,8 +930,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             <p className="mt-1" style={{ color: paintBrainColors.green }}>
               {project.address}, {project.clientCity} {project.clientPostal}
             </p>
-            <p className="text-sm mt-1" style={{ color: paintBrainColors.orange }}>
-              {project.projectType} • {project.roomCount} rooms
+            <p className="text-sm mt-1 flex items-center gap-1" style={{ color: paintBrainColors.orange }}>
+              <span className="capitalize">{project.projectType}</span>
+              <span className="mx-1">•</span>
+              <span>{project.roomCount} room{project.roomCount !== 1 ? 's' : ''}</span>
             </p>
           </div>
           <Button

@@ -480,11 +480,11 @@ function ProjectCard({ project, onSelectProject, updateStatusMutation, deletePro
       </div>
       
       <div className="flex items-center justify-between pt-3 border-t border-border">
-        <div className="flex items-center gap-4 text-sm" style={{ color: paintBrainColors.orange }}>
+        <div className="flex items-center gap-1 text-sm justify-start" style={{ color: paintBrainColors.orange }}>
           <span className="capitalize">{project.projectType}</span>
           {project.projectType === 'interior' && (
             <>
-              <span>•</span>
+              <span className="mx-1">•</span>
               <span>{project.roomCount} room{project.roomCount !== 1 ? 's' : ''}</span>
             </>
           )}
