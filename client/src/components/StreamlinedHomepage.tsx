@@ -183,7 +183,7 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
             />
           </div>
           <div className="flex items-center gap-3 px-4 py-3">
-            <span className="text-sm font-medium" style={{ color: showArchived ? paintBrainColors.gray : paintBrainColors.purple }}>
+            <span className="text-sm font-medium" style={{ color: paintBrainColors.purple }}>
               Active
             </span>
             <button
@@ -199,7 +199,7 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
                 }`}
               />
             </button>
-            <span className="text-sm font-medium" style={{ color: showArchived ? paintBrainColors.green : paintBrainColors.gray }}>
+            <span className="text-sm font-medium" style={{ color: paintBrainColors.green }}>
               Archive
             </span>
           </div>
