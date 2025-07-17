@@ -944,19 +944,14 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             <span>{project.roomCount} room{project.roomCount !== 1 ? 's' : ''}</span>
           </p>
         </div>
-        <Button
+        <button
           onClick={() => setShowEditClient(true)}
-          variant="outline"
-          size="sm"
-          className="absolute bottom-4 right-4 flex items-center gap-2"
-          style={{ 
-            borderColor: paintBrainColors.red,
-            color: paintBrainColors.red
-          }}
+          className="absolute bottom-2 right-4 p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
+          style={{ color: paintBrainColors.red }}
+          title="Edit client information"
         >
           <Edit3 size={16} />
-          Edit
-        </Button>
+        </button>
       </div>
 
 
