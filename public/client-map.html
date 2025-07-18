@@ -140,7 +140,7 @@
 
   <script>
     // 🔑 REPLACE WITH YOUR MAPBOX TOKEN
-    mapboxgl.accessToken = 'YOUR_MAPBOX_TOKEN';
+    mapboxgl.accessToken = process.env.MAPBOX_ACCESS_TOKEN || 'YOUR_MAPBOX_TOKEN';
     
     // Client location data
     const clientData = {

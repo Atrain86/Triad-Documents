@@ -16,6 +16,7 @@ import EstimateGenerator from './EstimateGenerator';
 import PhotoCarousel from './PhotoCarousel';
 import PaintBrainCalendar from './PaintBrainCalendar';
 import ClientPhone from './ClientPhone';
+import ClientMap from './ClientMap';
 import { ReactSortable } from 'react-sortablejs';
 
 // Paint Brain Color Palette
@@ -313,6 +314,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   // Menu customization states
   const [menuSections, setMenuSections] = useState([
     { id: 'photos', name: 'Photos', icon: Camera },
+    { id: 'gpsMap', name: 'Location Map', icon: MapPin },
     { id: 'tools', name: 'Tools', icon: Wrench },
     { id: 'dailyHours', name: 'Daily Hours', icon: Calendar },
     { id: 'notes', name: 'Project Notes', icon: FileText },
@@ -322,6 +324,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   // Collapsible menu state - all collapsed by default
   const [expandedSections, setExpandedSections] = useState({
     photos: false,
+    gpsMap: false,
     tools: false,
     dailyHours: false,
     notes: false,
@@ -1059,6 +1062,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             const getSectionColor = (sectionId: string) => {
               switch (sectionId) {
                 case 'photos': return paintBrainColors.orange;   // Orange for photo gallery
+                case 'gpsMap': return paintBrainColors.red;      // Red for GPS map
                 case 'tools': return paintBrainColors.yellow;    // Yellow for tools
                 case 'dailyHours': return paintBrainColors.green; // Green for daily hours
                 case 'notes': return paintBrainColors.blue;      // Blue for project notes
@@ -1269,6 +1273,36 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                             <p>No photos yet. Use the camera button above to add some!</p>
                           </div>
                         )}
+                      </div>
+                    )}
+
+                    {section.id === 'gpsMap' && (
+                      <div>
+                        {/* GPS Map Component */}
+                        {project && project.address && (
+                          <ClientMap
+                            clientName={project.clientName}
+                            address={project.address}
+                            city={project.clientCity}
+                            longitude={-124.972} // Example coordinates - user can modify
+                            latitude={50.032}
+                          />
+                        )}
+                        
+                        {/* Instructions for setting up coordinates */}
+                        <div className="mt-4 p-3 bg-gray-800 rounded-lg border border-gray-600">
+                          <p className="text-sm text-gray-300 mb-2">
+                            <strong>📍 Map Location Setup</strong>
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            This map shows example coordinates (Cortes Island). To set accurate client location:
+                          </p>
+                          <ol className="text-xs text-gray-400 mt-2 ml-4 list-decimal">
+                            <li>Get GPS coordinates from Google Maps or client address</li>
+                            <li>Contact developer to update coordinates for this project</li>
+                            <li>Map will automatically center on client location</li>
+                          </ol>
+                        </div>
                       </div>
                     )}
 

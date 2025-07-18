@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import { X } from 'lucide-react';
 import 'mapbox-gl/dist/mapbox-gl.css';
+// Remove problematic import
 
 // Paint Brain colors
 const paintBrainColors = {
@@ -34,14 +35,37 @@ const ClientMap: React.FC<ClientMapProps> = ({
   const [isFullscreen, setIsFullscreen] = useState(true);
 
   useEffect(() => {
-    // Set Mapbox access token - user will need to replace this
-    mapboxgl.accessToken = 'YOUR_MAPBOX_TOKEN';
+    // Check if token is already available
+    const setToken = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tokenFromUrl = urlParams.get('mapbox_token');
+      const tokenFromEnv = (window as any).MAPBOX_ACCESS_TOKEN;
+      
+      mapboxgl.accessToken = tokenFromUrl || tokenFromEnv || '';
+      
+      if (map.current || !mapContainer.current) return;
+      
+      if (!mapboxgl.accessToken) {
+        console.warn('Mapbox token not found. Map will show placeholder.');
+        return;
+      }
+      
+      initializeMap();
+    };
 
-    if (map.current || !mapContainer.current) return;
+    // If token already available, use it
+    if ((window as any).MAPBOX_ACCESS_TOKEN) {
+      setToken();
+    } else {
+      // Wait a bit for the token to load from the API
+      setTimeout(setToken, 500);
+    }
+  }, []);
 
+  const initializeMap = () => {
     // Initialize map
     map.current = new mapboxgl.Map({
-      container: mapContainer.current,
+      container: mapContainer.current!,
       style: 'mapbox://styles/mapbox/dark-v10',
       center: [longitude, latitude],
       zoom: 12
@@ -77,15 +101,7 @@ const ClientMap: React.FC<ClientMapProps> = ({
     new mapboxgl.Marker(markerElement)
       .setLngLat([longitude, latitude])
       .addTo(map.current);
-
-    // Cleanup function
-    return () => {
-      if (map.current) {
-        map.current.remove();
-        map.current = null;
-      }
-    };
-  }, [longitude, latitude]);
+  };
 
   const handleClose = () => {
     setIsFullscreen(false);
@@ -111,7 +127,9 @@ const ClientMap: React.FC<ClientMapProps> = ({
           borderRadius: '8px',
           cursor: 'pointer',
           zIndex: 1000,
-          backgroundImage: `url(https://api.mapbox.com/styles/v1/mapbox/dark-v10/static/${longitude},${latitude},12/120x120?access_token=YOUR_MAPBOX_TOKEN)`,
+          backgroundImage: mapboxgl.accessToken 
+            ? `url(https://api.mapbox.com/styles/v1/mapbox/dark-v10/static/${longitude},${latitude},12/120x120?access_token=${mapboxgl.accessToken})`
+            : `linear-gradient(45deg, ${paintBrainColors.purple}, ${paintBrainColors.red})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center'
         }}
@@ -134,13 +152,36 @@ const ClientMap: React.FC<ClientMapProps> = ({
         backgroundColor: '#000'
       }}
     >
-      <div 
-        ref={mapContainer} 
-        style={{ 
-          width: '100%', 
-          height: '100%' 
-        }} 
-      />
+      {!mapboxgl.accessToken ? (
+        // Show setup message when no token
+        <div 
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '100%',
+            color: paintBrainColors.yellow,
+            textAlign: 'center',
+            padding: '20px',
+            flexDirection: 'column'
+          }}
+        >
+          <div style={{ fontSize: '24px', marginBottom: '10px' }}>🗺️</div>
+          <h3 style={{ color: paintBrainColors.red, margin: '10px 0' }}>Map Setup Required</h3>
+          <p style={{ fontSize: '14px', lineHeight: '1.4', maxWidth: '300px' }}>
+            Mapbox token not configured. The standalone HTML file in <code>/public/client-map.html</code> 
+            includes setup instructions for adding your free Mapbox API key.
+          </p>
+        </div>
+      ) : (
+        <div 
+          ref={mapContainer} 
+          style={{ 
+            width: '100%', 
+            height: '100%' 
+          }} 
+        />
+      )}
       
       {/* Client info box */}
       <div

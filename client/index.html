@@ -15,6 +15,15 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Set Mapbox token from environment
+      fetch('/api/mapbox-token')
+        .then(res => res.json())
+        .then(data => {
+          window.MAPBOX_ACCESS_TOKEN = data.token;
+        })
+        .catch(err => console.warn('Could not load Mapbox token:', err));
+    </script>
     <script type="module" src="/src/main.tsx"></script>
     <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
     <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>

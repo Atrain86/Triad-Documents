@@ -652,6 +652,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Mapbox token endpoint
+  app.get("/api/mapbox-token", (req, res) => {
+    const token = process.env.MAPBOX_ACCESS_TOKEN || '';
+    res.json({ token });
+  });
+
   // Basic email sending route for direct client communication
   app.post('/api/send-basic-email', async (req, res) => {
     try {
