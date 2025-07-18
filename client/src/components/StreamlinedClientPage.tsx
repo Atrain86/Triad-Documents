@@ -15,6 +15,7 @@ import InvoiceGenerator from './InvoiceGenerator';
 import EstimateGenerator from './EstimateGenerator';
 import PhotoCarousel from './PhotoCarousel';
 import PaintBrainCalendar from './PaintBrainCalendar';
+import ClientPhone from './ClientPhone';
 import { ReactSortable } from 'react-sortablejs';
 
 // Paint Brain Color Palette
@@ -944,6 +945,20 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             <span className="px-1">•</span>
             <span>{project.roomCount} room{project.roomCount !== 1 ? 's' : ''}</span>
           </p>
+          
+          {/* Client Contact Information */}
+          {(project.clientEmail || project.clientPhone) && (
+            <div className="flex items-center gap-4 text-sm mt-2">
+              {project.clientEmail && (
+                <span className="text-gray-600 dark:text-gray-400">
+                  📧 {project.clientEmail}
+                </span>
+              )}
+              {project.clientPhone && (
+                <ClientPhone phoneNumber={project.clientPhone} />
+              )}
+            </div>
+          )}
         </div>
         <button
           onClick={() => setShowEditClient(true)}
