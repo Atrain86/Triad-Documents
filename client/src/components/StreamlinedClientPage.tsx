@@ -16,7 +16,7 @@ import EstimateGenerator from './EstimateGenerator';
 import PhotoCarousel from './PhotoCarousel';
 import PaintBrainCalendar from './PaintBrainCalendar';
 import ClientPhone from './ClientPhone';
-import EmbeddedClientMap from './EmbeddedClientMap';
+import SimpleGPSMap from './SimpleGPSMap';
 import { ReactSortable } from 'react-sortablejs';
 
 // Paint Brain Color Palette
@@ -1285,9 +1285,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                         </div>
                         <p className="text-gray-300 text-sm mb-4">{project?.address}</p>
                         
-                        {/* Embedded Interactive Map */}
+                        {/* Simple GPS Map */}
                         {project && project.address && (
-                          <EmbeddedClientMap
+                          <SimpleGPSMap
                             clientName={project.clientName}
                             clientAddress={project.address}
                             projectId={project.id}

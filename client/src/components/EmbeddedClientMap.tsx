@@ -327,13 +327,15 @@ const EmbeddedClientMap: React.FC<EmbeddedClientMapProps> = ({
           ref={mapContainer}
           style={{ 
             width: '100%', 
-            height: isFullscreen ? '100vh' : '300px',
-            backgroundColor: '#000'
+            height: isFullscreen ? '100vh' : '400px',
+            backgroundColor: '#000',
+            position: 'relative',
+            zIndex: 1
           }}
         />
         
         {!mapReady && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black">
+          <div className="absolute inset-0 flex items-center justify-center bg-black z-20">
             <div className="text-center">
               <div className="text-yellow-400 text-2xl mb-2">🗺️</div>
               <p className="text-yellow-400 text-sm">
@@ -341,23 +343,10 @@ const EmbeddedClientMap: React.FC<EmbeddedClientMapProps> = ({
               </p>
               {locationError && (
                 <button 
-                  onClick={() => {
-                    setLocationError('');
-                    setMapReady(false);
-                    if (map.current) {
-                      map.current.remove();
-                      map.current = null;
-                    }
-                    // Trigger re-initialization
-                    setTimeout(() => {
-                      if (mapContainer.current) {
-                        mapContainer.current.innerHTML = '';
-                      }
-                    }, 100);
-                  }} 
+                  onClick={() => window.location.reload()} 
                   className="mt-3 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded text-sm"
                 >
-                  Retry Map
+                  Refresh Page
                 </button>
               )}
             </div>
@@ -388,8 +377,8 @@ const EmbeddedClientMap: React.FC<EmbeddedClientMapProps> = ({
         )}
         
         {/* Client Info - Only when not navigating */}
-        {!isNavigating && (
-          <div className="absolute bottom-3 left-3 bg-black/80 backdrop-blur-sm rounded px-3 py-2 border-l-4 border-yellow-400">
+        {!isNavigating && mapReady && (
+          <div className="absolute bottom-20 left-3 bg-black/90 backdrop-blur-sm rounded px-3 py-2 border-l-4 border-yellow-400 z-20">
             <div className="text-white font-medium text-sm">{clientName}</div>
             <div className="text-gray-300 text-xs">{clientAddress}</div>
           </div>
@@ -404,20 +393,20 @@ const EmbeddedClientMap: React.FC<EmbeddedClientMapProps> = ({
         </button>
         
         {/* Navigation Controls */}
-        <div className="absolute bottom-3 left-3 right-3 flex gap-2">
+        <div className="absolute bottom-3 left-3 right-3 flex gap-2 z-30">
           {!isNavigating ? (
             <>
               <button
                 onClick={handleStartNavigation}
                 disabled={!userLocation}
-                className="flex-1 bg-blue-600/90 hover:bg-blue-700 disabled:bg-gray-600 text-white px-4 py-3 rounded-lg font-medium transition-colors"
+                className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-4 py-3 rounded-lg font-medium transition-colors shadow-lg"
               >
-                🧭 Start Navigation
+                {userLocation ? '🧭 Start Navigation' : '📍 Finding Location...'}
               </button>
               
               <button
                 onClick={handleCenterMap}
-                className="px-4 py-3 bg-gray-600/90 hover:bg-gray-700 text-white rounded-lg transition-colors"
+                className="px-4 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors shadow-lg"
               >
                 📍
               </button>
@@ -426,14 +415,14 @@ const EmbeddedClientMap: React.FC<EmbeddedClientMapProps> = ({
             <>
               <button
                 onClick={handleCenterMap}
-                className="px-4 py-3 bg-blue-600/90 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                className="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors shadow-lg"
               >
                 📍
               </button>
               
               <button
                 onClick={stopNavigation}
-                className="flex-1 bg-red-600/90 hover:bg-red-700 text-white px-4 py-3 rounded-lg font-medium transition-colors"
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-lg font-medium transition-colors shadow-lg"
               >
                 ✕ End Navigation
               </button>
