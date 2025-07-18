@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
-import { Camera, FileText, ArrowLeft, Edit3, Download, X, Image as ImageIcon, DollarSign, Calendar, Wrench, Plus, Trash2, Calculator, Receipt as ReceiptIcon, MapPin, Navigation, ExternalLink, Upload } from 'lucide-react';
+import { Camera, FileText, ArrowLeft, Edit3, Download, X, Image as ImageIcon, DollarSign, Calendar, Wrench, Plus, Trash2, Calculator, Receipt as ReceiptIcon, MapPin, Navigation, ExternalLink, Upload, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -956,6 +956,19 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
               )}
               {project.clientPhone && (
                 <ClientPhone phoneNumber={project.clientPhone} />
+              )}
+              {project.clientEmail && (
+                <button
+                  onClick={() => {
+                    window.location.href = `mailto:${project.clientEmail}?subject=Follow-up: ${project.projectType} Project&body=Dear ${project.clientName},%0A%0AI hope this message finds you well. I wanted to follow up regarding your ${project.projectType} project.%0A%0APlease let me know if you have any questions or if there's anything I can help you with.%0A%0ABest regards,%0AA-Frame Painting%0Acortespainter@gmail.com%0A884 Hayes Rd, Manson's Landing, BC V0P1K0`;
+                  }}
+                  className="flex items-center text-sm hover:opacity-75 transition-opacity"
+                  style={{ color: paintBrainColors.purple }}
+                  title={`Email ${project.clientEmail}`}
+                >
+                  <Mail size={16} className="mr-1" />
+                  Email Client
+                </button>
               )}
             </div>
           )}

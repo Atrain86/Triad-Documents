@@ -641,18 +641,18 @@ function ProjectCard({ project, onSelectProject, updateStatusMutation, deletePro
       </div>
       
       {/* Action Buttons */}
-      <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+      <div className="absolute top-3 right-3 flex gap-1 z-10">
         <button
           onClick={(e) => {
             e.stopPropagation();
             // Handle edit
           }}
           onTouchEnd={(e) => e.stopPropagation()}
-          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+          className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
           style={{ color: paintBrainColors.blue }}
           title="Edit client"
         >
-          <Edit3 size={18} />
+          <Edit3 size={16} />
         </button>
         
         <button
@@ -661,11 +661,11 @@ function ProjectCard({ project, onSelectProject, updateStatusMutation, deletePro
             handleEmailClient(project);
           }}
           onTouchEnd={(e) => e.stopPropagation()}
-          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+          className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
           style={{ color: paintBrainColors.purple }}
           title="Email client"
         >
-          <Mail size={18} />
+          <Mail size={16} />
         </button>
         
         <button
@@ -678,11 +678,11 @@ function ProjectCard({ project, onSelectProject, updateStatusMutation, deletePro
             }
           }}
           onTouchEnd={(e) => e.stopPropagation()}
-          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+          className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
           style={{ color: paintBrainColors.orange }}
           title={project.status === 'archived' ? "Restore client" : "Archive client"}
         >
-          {project.status === 'archived' ? <RotateCcw size={18} /> : <Archive size={18} />}
+          {project.status === 'archived' ? <RotateCcw size={16} /> : <Archive size={16} />}
         </button>
         
         <button
