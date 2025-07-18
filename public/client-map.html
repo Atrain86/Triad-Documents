@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Client Map - A-Frame Painting</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <style>
+    body {
+      margin: 0;
+      background-color: #000;
+      font-family: 'Arial', sans-serif;
+      color: #F7C11F;
+      padding: 20px;
+    }
+    
+    h1 {
+      color: #F7C11F;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    #map-container {
+      position: relative;
+      width: 100%;
+      max-width: 800px;
+      height: 60vh;
+      min-height: 400px;
+      border: 3px solid #6B4C9A;
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 20px auto;
+      background-color: #000;
+    }
+    
+    #map {
+      width: 100%;
+      height: 100%;
+    }
+    
+    #client-info {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      background-color: rgba(0, 0, 0, 0.8);
+      padding: 8px 12px;
+      border-left: 4px solid #EF6C30;
+      color: #F7C11F;
+      font-size: 14px;
+      border-radius: 4px;
+    }
+    
+    #close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: #E03E3E;
+      color: white;
+      border: none;
+      font-size: 14px;
+      font-weight: bold;
+      padding: 6px 10px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    
+    #close-btn:hover {
+      background-color: #CC2B2B;
+    }
+    
+    #map-thumbnail {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 120px;
+      height: 120px;
+      border: 3px solid #6B4C9A;
+      border-radius: 8px;
+      z-index: 1000;
+      cursor: pointer;
+      display: none;
+      background-size: cover;
+      background-position: center;
+    }
+    
+    #map-thumbnail:hover {
+      border-color: #F7C11F;
+    }
+    
+    .instructions {
+      max-width: 800px;
+      margin: 0 auto 30px auto;
+      padding: 20px;
+      background-color: rgba(107, 76, 154, 0.1);
+      border: 1px solid #6B4C9A;
+      border-radius: 8px;
+      color: #F7C11F;
+    }
+    
+    .instructions h2 {
+      color: #E03E3E;
+      margin-top: 0;
+    }
+    
+    .instructions code {
+      background-color: rgba(0, 0, 0, 0.5);
+      padding: 2px 4px;
+      border-radius: 3px;
+      color: #0099CC;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🗺️ A-Frame Painting Client Map</h1>
+  
+  <div class="instructions">
+    <h2>📌 Setup Instructions</h2>
+    <p><strong>To make this map work, you need a free Mapbox account:</strong></p>
+    <ol>
+      <li>Go to: <a href="https://account.mapbox.com/auth/signup/" target="_blank" style="color: #0099CC;">https://account.mapbox.com/auth/signup/</a></li>
+      <li>Create a free account (thousands of map loads/month included)</li>
+      <li>Copy your <strong>default public token</strong> from your account page</li>
+      <li>Replace <code>YOUR_MAPBOX_TOKEN</code> in the code below with your token</li>
+    </ol>
+  </div>
+
+  <div id="map-container">
+    <div id="map"></div>
+    <div id="client-info">
+      <strong>Jane Doe</strong><br />
+      123 Ocean View Rd<br />
+      Cortes Island, BC
+    </div>
+    <button id="close-btn">✕</button>
+  </div>
+
+  <div id="map-thumbnail"></div>
+
+  <script>
+    // 🔑 REPLACE WITH YOUR MAPBOX TOKEN
+    mapboxgl.accessToken = 'YOUR_MAPBOX_TOKEN';
+    
+    // Client location data
+    const clientData = {
+      name: 'Jane Doe',
+      address: '123 Ocean View Rd',
+      city: 'Cortes Island, BC',
+      longitude: -124.972,
+      latitude: 50.032
+    };
+    
+    // Paint Brain colors
+    const colors = {
+      red: '#E03E3E',
+      yellow: '#F7C11F',
+      blue: '#0099CC', 
+      purple: '#6B4C9A',
+      orange: '#EF6C30'
+    };
+    
+    let map;
+    
+    function initializeMap() {
+      // Initialize map
+      map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/dark-v10',
+        center: [clientData.longitude, clientData.latitude],
+        zoom: 12
+      });
+      
+      // Create custom yellow house marker
+      const markerElement = document.createElement('div');
+      markerElement.style.cssText = `
+        width: 30px;
+        height: 30px;
+        background-color: ${colors.yellow};
+        border: 2px solid ${colors.purple};
+        border-radius: 50% 50% 50% 0;
+        transform: rotate(-45deg);
+        cursor: pointer;
+        position: relative;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      `;
+      
+      // Add house icon inside marker
+      const houseIcon = document.createElement('div');
+      houseIcon.style.cssText = `
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(45deg);
+        font-size: 16px;
+        line-height: 1;
+      `;
+      houseIcon.innerHTML = '🏠';
+      markerElement.appendChild(houseIcon);
+      
+      // Add marker to map
+      new mapboxgl.Marker(markerElement)
+        .setLngLat([clientData.longitude, clientData.latitude])
+        .addTo(map);
+    }
+    
+    function showThumbnail() {
+      const thumbnail = document.getElementById('map-thumbnail');
+      const container = document.getElementById('map-container');
+      
+      // Hide full map
+      container.style.display = 'none';
+      
+      // Show thumbnail with static map image
+      thumbnail.style.display = 'block';
+      thumbnail.style.backgroundImage = `url(https://api.mapbox.com/styles/v1/mapbox/dark-v10/static/${clientData.longitude},${clientData.latitude},12/120x120?access_token=${mapboxgl.accessToken})`;
+    }
+    
+    function showFullMap() {
+      const thumbnail = document.getElementById('map-thumbnail');
+      const container = document.getElementById('map-container');
+      
+      // Hide thumbnail
+      thumbnail.style.display = 'none';
+      
+      // Show full map
+      container.style.display = 'block';
+      
+      // Resize map if needed
+      if (map) {
+        map.resize();
+      }
+    }
+    
+    // Event listeners
+    document.getElementById('close-btn').addEventListener('click', showThumbnail);
+    document.getElementById('map-thumbnail').addEventListener('click', showFullMap);
+    
+    // Initialize map when page loads
+    window.addEventListener('load', function() {
+      try {
+        initializeMap();
+      } catch (error) {
+        console.error('Map initialization failed. Please check your Mapbox token:', error);
+        document.getElementById('map').innerHTML = `
+          <div style="
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: ${colors.red};
+            text-align: center;
+            padding: 20px;
+          ">
+            <div>
+              <h3>⚠️ Map Not Loading</h3>
+              <p>Please add your Mapbox token to make the map work.</p>
+              <p>See instructions above for setup details.</p>
+            </div>
+          </div>
+        `;
+      }
+    });
+    
+    // Customize client info (you can modify this)
+    function updateClientInfo(name, address, city) {
+      const infoBox = document.getElementById('client-info');
+      infoBox.innerHTML = `
+        <strong>${name}</strong><br />
+        ${address}<br />
+        ${city}
+      `;
+    }
+    
+    // Example: updateClientInfo('John Smith', '456 Forest Lane', 'Vancouver, BC');
+  </script>
+
+</body>
+</html>
