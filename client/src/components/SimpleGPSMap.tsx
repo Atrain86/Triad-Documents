@@ -77,16 +77,21 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
     }
 
     console.log('Getting user location...');
+    console.log('Navigator.geolocation available:', !!navigator.geolocation);
+    console.log('Current protocol:', location.protocol);
+    console.log('Current hostname:', location.hostname);
     setIsGettingLocation(true);
     
     // Check if we're on HTTPS or localhost (required for geolocation)
-    if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost' && !location.hostname.includes('replit')) {
       console.error('Geolocation requires HTTPS');
       setError('GPS requires secure connection (HTTPS)');
       setIsGettingLocation(false);
       return;
     }
 
+    console.log('Calling navigator.geolocation.getCurrentPosition...');
+    
     navigator.geolocation.getCurrentPosition(
       (position) => {
         console.log('SUCCESS: Got user location:', position.coords);
@@ -199,9 +204,9 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
         setIsGettingLocation(false);
       },
       { 
-        enableHighAccuracy: true, 
-        timeout: 15000,  // 15 seconds
-        maximumAge: 300000  // 5 minutes
+        enableHighAccuracy: false,  // Try with less accuracy first
+        timeout: 30000,  // 30 seconds - longer timeout
+        maximumAge: 0  // Always get fresh location
       }
     );
   };
