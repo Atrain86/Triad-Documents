@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { ThemeProvider } from "next-themes";
+import { ThemeProvider } from "./components/theme-provider";
 import { queryClient } from "./lib/queryClient";
 import StreamlinedHomepage from "./components/StreamlinedHomepage";
 import StreamlinedClientPage from "./components/StreamlinedClientPage";
@@ -63,7 +63,7 @@ function AppContent() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+      <ThemeProvider defaultTheme="dark" storageKey="a-frame-theme">
         <AuthProvider>
           <AppContent />
         </AuthProvider>

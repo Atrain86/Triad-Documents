@@ -36,24 +36,24 @@
 }
 
 .dark {
-  --background: hsl(222, 84%, 4.9%);
-  --foreground: hsl(210, 40%, 98%);
-  --muted: hsl(217, 32%, 17.5%);
-  --muted-foreground: hsl(215, 20.2%, 65.1%);
-  --popover: hsl(222, 84%, 4.9%);
-  --popover-foreground: hsl(210, 40%, 98%);
-  --card: hsl(222, 84%, 4.9%);
-  --card-foreground: hsl(210, 40%, 98%);
-  --border: hsl(217, 32%, 17.5%);
-  --input: hsl(217, 32%, 17.5%);
+  --background: hsl(220, 20%, 8%);
+  --foreground: hsl(210, 35%, 85%);
+  --muted: hsl(217, 15%, 20%);
+  --muted-foreground: hsl(215, 15%, 55%);
+  --popover: hsl(220, 20%, 12%);
+  --popover-foreground: hsl(210, 35%, 85%);
+  --card: hsl(220, 20%, 12%);
+  --card-foreground: hsl(210, 35%, 85%);
+  --border: hsl(217, 15%, 25%);
+  --input: hsl(217, 15%, 25%);
   --primary: 263 41% 55%; /* Paint Brain Purple #8B5FBF */
   --primary-foreground: hsl(0, 0%, 100%);
   --secondary: 212, 165, 116; /* Paint Brain Orange #D4A574 */
   --secondary-foreground: hsl(0, 0%, 100%);
-  --accent: hsl(217, 32%, 17.5%);
-  --accent-foreground: hsl(210, 40%, 98%);
+  --accent: hsl(217, 15%, 25%);
+  --accent-foreground: hsl(210, 35%, 85%);
   --destructive: 244, 71, 71; /* Paint Brain Red #F44747 */
-  --destructive-foreground: hsl(210, 40%, 98%);
+  --destructive-foreground: hsl(210, 35%, 85%);
   --ring: 86, 156, 214; /* Paint Brain Blue #569CD6 */
   --radius: 0.5rem;
 }
