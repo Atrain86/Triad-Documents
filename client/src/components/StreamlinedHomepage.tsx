@@ -39,7 +39,9 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
   const [showArchived, setShowArchived] = useState(false);
   const [showNewClientDialog, setShowNewClientDialog] = useState(false);
   const [showEmailDialog, setShowEmailDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   const [selectedProject, setSelectedProject] = useState<any>(null);
+  const [editingProject, setEditingProject] = useState<any>(null);
   const [emailForm, setEmailForm] = useState({
     subject: '',
     message: ''
@@ -133,8 +135,8 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
     }
     setSelectedProject(project);
     setEmailForm({
-      subject: `Follow-up: ${project.projectType} Project - ${project.clientName}`,
-      message: `Dear ${project.clientName},\n\nI hope this message finds you well. I wanted to follow up regarding your ${project.projectType} project.\n\nPlease let me know if you have any questions or if there's anything I can help you with.\n\nBest regards,\nA-Frame Painting\ncortespainter@gmail.com\n884 Hayes Rd, Manson's Landing, BC V0P1K0`
+      subject: '',
+      message: ''
     });
     setShowEmailDialog(true);
   };
@@ -567,23 +569,97 @@ function ProjectCard({ project, onSelectProject, updateStatusMutation, deletePro
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      <div className="flex items-start gap-3">
+      {/* Action Buttons - moved to top right */}
+      <div className="absolute top-3 right-3 flex gap-1 z-10">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setEditingProject(project);
+            setShowEditDialog(true);
+          }}
+          onTouchEnd={(e) => e.stopPropagation()}
+          className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+          style={{ color: paintBrainColors.red }}
+          title="Edit client"
+        >
+          <Edit3 size={16} />
+        </button>
+        
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            handleEmailClient(project);
+          }}
+          onTouchEnd={(e) => e.stopPropagation()}
+          className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+          style={{ color: paintBrainColors.purple }}
+          title="Email client"
+        >
+          <Mail size={16} />
+        </button>
+        
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            const newStatus = project.status === 'archived' ? 'completed' : 'archived';
+            const action = project.status === 'archived' ? 'restore' : 'archive';
+            if (confirm(`Are you sure you want to ${action} ${project.clientName || 'this client'}?`)) {
+              updateStatusMutation.mutate({ projectId: project.id, status: newStatus });
+            }
+          }}
+          onTouchEnd={(e) => e.stopPropagation()}
+          className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+          style={{ color: paintBrainColors.orange }}
+          title={project.status === 'archived' ? "Restore client" : "Archive client"}
+        >
+          {project.status === 'archived' ? <RotateCcw size={16} /> : <Archive size={16} />}
+        </button>
+        
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            if (confirm(`Are you sure you want to delete ${project.clientName || 'this client'}?`)) {
+              deleteProjectMutation.mutate(project.id);
+            }
+          }}
+          onTouchEnd={(e) => e.stopPropagation()}
+          className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors text-red-500"
+          title="Delete client"
+        >
+          <Trash2 size={16} />
+        </button>
+      </div>
+
+      <div className="flex items-start gap-3 pr-20">
         {showDragHandle && (
           <div className="drag-handle cursor-move text-muted-foreground hover:text-foreground transition-colors mt-2">
             <GripVertical size={16} />
           </div>
         )}
         <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <User size={16} className="text-muted-foreground" />
-            <h3 className="font-semibold text-lg" style={{ color: paintBrainColors.purple }}>
-              {project.clientName || 'Unnamed Client'}
-            </h3>
-          </div>
-          <div className="flex items-center gap-2 text-sm mb-2">
-            <MapPin size={14} className="text-muted-foreground" />
-            <p style={{ color: paintBrainColors.green }}>{project.address || 'No address'}</p>
-          </div>
+          {/* Client Name - First Line */}
+          <h3 className="font-semibold text-lg mb-1" style={{ color: paintBrainColors.purple }}>
+            {project.clientName || 'Unnamed Client'}
+          </h3>
+          
+          {/* Address - Second Line */}
+          <p className="text-sm mb-1" style={{ color: paintBrainColors.green }}>
+            {project.address || 'No address'}
+          </p>
+          
+          {/* City, Province - Third Line */}
+          {(project.clientCity || project.clientPostal) && (
+            <p className="text-sm mb-1" style={{ color: paintBrainColors.green }}>
+              {[project.clientCity, 'BC'].filter(Boolean).join(', ')}
+            </p>
+          )}
+          
+          {/* ZIP Code - Fourth Line */}
+          {project.clientPostal && (
+            <p className="text-sm mb-2" style={{ color: paintBrainColors.green }}>
+              {project.clientPostal}
+            </p>
+          )}
         </div>
       </div>
       
@@ -632,70 +708,7 @@ function ProjectCard({ project, onSelectProject, updateStatusMutation, deletePro
         </div>
       </div>
       
-      {/* Action Buttons */}
-      <div className="absolute top-3 right-3 flex gap-1 z-10">
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            // Handle edit
-          }}
-          onTouchEnd={(e) => e.stopPropagation()}
-          className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
-          style={{ color: paintBrainColors.blue }}
-          title="Edit client"
-        >
-          <Edit3 size={16} />
-        </button>
-        
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleEmailClient(project);
-          }}
-          onTouchEnd={(e) => e.stopPropagation()}
-          className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
-          style={{ color: paintBrainColors.purple }}
-          title="Email client"
-        >
-          <Mail size={16} />
-        </button>
-        
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            const newStatus = project.status === 'archived' ? 'completed' : 'archived';
-            const action = project.status === 'archived' ? 'restore' : 'archive';
-            if (confirm(`Are you sure you want to ${action} ${project.clientName || 'this client'}?`)) {
-              updateStatusMutation.mutate({ projectId: project.id, status: newStatus });
-            }
-          }}
-          onTouchEnd={(e) => e.stopPropagation()}
-          className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
-          style={{ color: paintBrainColors.orange }}
-          title={project.status === 'archived' ? "Restore client" : "Archive client"}
-        >
-          {project.status === 'archived' ? <RotateCcw size={16} /> : <Archive size={16} />}
-        </button>
-        
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            if (confirm(`Are you sure you want to permanently delete ${project.clientName || 'this client'}? This cannot be undone.`)) {
-              deleteProjectMutation.mutate(project.id);
-            }
-          }}
-          onTouchEnd={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-          }}
-          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
-          style={{ color: paintBrainColors.red }}
-          title="Delete client permanently"
-        >
-          <Trash2 size={18} />
-        </button>
-      </div>
+
     </div>
   );
 }

@@ -960,7 +960,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
               {project.clientEmail && (
                 <button
                   onClick={() => {
-                    window.location.href = `mailto:${project.clientEmail}?subject=Follow-up: ${project.projectType} Project&body=Dear ${project.clientName},%0A%0AI hope this message finds you well. I wanted to follow up regarding your ${project.projectType} project.%0A%0APlease let me know if you have any questions or if there's anything I can help you with.%0A%0ABest regards,%0AA-Frame Painting%0Acortespainter@gmail.com%0A884 Hayes Rd, Manson's Landing, BC V0P1K0`;
+                    window.location.href = `mailto:${project.clientEmail}`;
                   }}
                   className="flex items-center text-sm hover:opacity-75 transition-opacity"
                   style={{ color: paintBrainColors.purple }}
