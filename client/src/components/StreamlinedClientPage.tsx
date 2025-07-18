@@ -16,7 +16,7 @@ import EstimateGenerator from './EstimateGenerator';
 import PhotoCarousel from './PhotoCarousel';
 import PaintBrainCalendar from './PaintBrainCalendar';
 import ClientPhone from './ClientPhone';
-import ClientMap from './ClientMap';
+import SimpleClientMap from './SimpleClientMap';
 import { ReactSortable } from 'react-sortablejs';
 
 // Paint Brain Color Palette
@@ -1280,29 +1280,42 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                       <div>
                         {/* GPS Map Component */}
                         {project && project.address && (
-                          <ClientMap
-                            clientName={project.clientName}
-                            address={project.address}
-                            city={project.clientCity}
-                            longitude={-124.972} // Example coordinates - user can modify
-                            latitude={50.032}
-                          />
+                          <div className="space-y-4">
+                            <div className="p-4 bg-gray-800 rounded-lg border-2 border-red-500">
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                  <MapPin className="h-5 w-5 text-orange-400" />
+                                  <span className="text-orange-400 font-medium">{project.clientName}</span>
+                                </div>
+                              </div>
+                              
+                              <p className="text-gray-300 text-sm mb-4">{project.address}</p>
+                              
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => {
+                                    const startAddress = encodeURIComponent('884 Hayes Rd, Manson\'s Landing, BC V0P1K0');
+                                    const endAddress = encodeURIComponent(project.address);
+                                    window.open(`https://www.google.com/maps/dir/${startAddress}/${endAddress}`, '_blank');
+                                  }}
+                                  className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium flex items-center justify-center gap-2"
+                                >
+                                  🚗 Start Driving
+                                </button>
+                                
+                                <button
+                                  onClick={() => {
+                                    const address = encodeURIComponent(project.address);
+                                    window.open(`https://www.google.com/maps/search/${address}`, '_blank');
+                                  }}
+                                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium flex items-center justify-center gap-2"
+                                >
+                                  📍 View on Maps
+                                </button>
+                              </div>
+                            </div>
+                          </div>
                         )}
-                        
-                        {/* Instructions for setting up coordinates */}
-                        <div className="mt-4 p-3 bg-gray-800 rounded-lg border border-gray-600">
-                          <p className="text-sm text-gray-300 mb-2">
-                            <strong>📍 Map Location Setup</strong>
-                          </p>
-                          <p className="text-xs text-gray-400">
-                            This map shows example coordinates (Cortes Island). To set accurate client location:
-                          </p>
-                          <ol className="text-xs text-gray-400 mt-2 ml-4 list-decimal">
-                            <li>Get GPS coordinates from Google Maps or client address</li>
-                            <li>Contact developer to update coordinates for this project</li>
-                            <li>Map will automatically center on client location</li>
-                          </ol>
-                        </div>
                       </div>
                     )}
 
