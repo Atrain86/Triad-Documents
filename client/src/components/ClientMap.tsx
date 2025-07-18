@@ -49,9 +49,12 @@ const ClientMap: React.FC<ClientMapProps> = ({
       if (token) {
         mapboxgl.accessToken = token;
         setMapReady(true);
-        if (!map.current && mapContainer.current) {
-          initializeMap();
-        }
+        // Small delay to ensure DOM is ready
+        setTimeout(() => {
+          if (!map.current && mapContainer.current) {
+            initializeMap();
+          }
+        }, 100);
       } else if (retryCount < maxRetries) {
         retryCount++;
         setTimeout(checkToken, 200);
