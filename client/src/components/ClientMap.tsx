@@ -106,6 +106,52 @@ const ClientMap: React.FC<ClientMapProps> = ({
     new mapboxgl.Marker(markerElement)
       .setLngLat([longitude, latitude])
       .addTo(map.current);
+
+    // Add popup with client info and navigation buttons
+    const popup = new mapboxgl.Popup({ 
+      offset: 25,
+      closeButton: false,
+      closeOnClick: false
+    })
+      .setLngLat([longitude, latitude])
+      .setHTML(`
+        <div style="color: black; padding: 15px; min-width: 220px; font-family: system-ui;">
+          <h3 style="margin: 0 0 8px 0; color: ${paintBrainColors.orange}; font-weight: bold; font-size: 16px;">${clientName}</h3>
+          <p style="margin: 0 0 15px 0; font-size: 13px; line-height: 1.4; color: #333;">${clientAddress}</p>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <button id="start-driving-btn" 
+                    style="background: ${paintBrainColors.green}; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+              🚗 Start Driving
+            </button>
+            <button id="view-maps-btn" 
+                    style="background: ${paintBrainColors.blue}; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+              📍 View on Google Maps
+            </button>
+          </div>
+        </div>
+      `)
+      .addTo(map.current);
+
+    // Add click handlers for navigation buttons
+    map.current.on('popup.open', () => {
+      const startDrivingBtn = document.getElementById('start-driving-btn');
+      const viewMapsBtn = document.getElementById('view-maps-btn');
+      
+      if (startDrivingBtn) {
+        startDrivingBtn.addEventListener('click', () => {
+          const startAddress = encodeURIComponent('884 Hayes Rd, Manson\'s Landing, BC V0P1K0');
+          const endAddress = encodeURIComponent(clientAddress);
+          window.open(`https://www.google.com/maps/dir/${startAddress}/${endAddress}`, '_blank');
+        });
+      }
+      
+      if (viewMapsBtn) {
+        viewMapsBtn.addEventListener('click', () => {
+          const address = encodeURIComponent(clientAddress);
+          window.open(`https://www.google.com/maps/search/${address}`, '_blank');
+        });
+      }
+    });
   };
 
   const handleClose = () => {
