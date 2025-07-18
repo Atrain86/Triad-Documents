@@ -526,18 +526,18 @@ function ProjectCard({ project, onSelectProject, updateStatusMutation, deletePro
       </div>
       
       {/* Action Buttons */}
-      <div className="absolute top-5 right-5 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+      <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
         <button
           onClick={(e) => {
             e.stopPropagation();
             // Handle edit
           }}
           onTouchEnd={(e) => e.stopPropagation()}
-          className="p-2 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
+          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
           style={{ color: paintBrainColors.blue }}
           title="Edit client"
         >
-          <Edit3 size={16} />
+          <Edit3 size={18} />
         </button>
         
         <button
@@ -550,11 +550,11 @@ function ProjectCard({ project, onSelectProject, updateStatusMutation, deletePro
             }
           }}
           onTouchEnd={(e) => e.stopPropagation()}
-          className="p-2 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
+          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
           style={{ color: paintBrainColors.orange }}
           title={project.status === 'archived' ? "Restore client" : "Archive client"}
         >
-          {project.status === 'archived' ? <RotateCcw size={16} /> : <Archive size={16} />}
+          {project.status === 'archived' ? <RotateCcw size={18} /> : <Archive size={18} />}
         </button>
         
         <button
@@ -569,11 +569,11 @@ function ProjectCard({ project, onSelectProject, updateStatusMutation, deletePro
             e.preventDefault();
             e.stopPropagation();
           }}
-          className="p-2 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded"
+          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
           style={{ color: paintBrainColors.red }}
           title="Delete client permanently"
         >
-          <Trash2 size={16} />
+          <Trash2 size={18} />
         </button>
       </div>
     </div>
