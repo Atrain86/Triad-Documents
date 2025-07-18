@@ -44,14 +44,13 @@ const EmbeddedClientMap: React.FC<EmbeddedClientMapProps> = ({
   const [locationError, setLocationError] = useState<string>('');
 
   useEffect(() => {
-    let retryCount = 0;
-    const maxRetries = 10;
-    
-    const initializeMap = () => {
-      const token = (window as any).MAPBOX_ACCESS_TOKEN;
-      
-      if (token && mapContainer.current && !map.current) {
-        try {
+    const initializeMap = async () => {
+      // Get Mapbox token from server
+      try {
+        const response = await fetch('/api/mapbox-token');
+        const { token } = await response.json();
+        
+        if (token && mapContainer.current && !map.current) {
           mapboxgl.accessToken = token;
           
           map.current = new mapboxgl.Map({
@@ -65,26 +64,32 @@ const EmbeddedClientMap: React.FC<EmbeddedClientMapProps> = ({
             interactive: true
           });
 
-          // Add yellow marker for client location
-          new mapboxgl.Marker({ 
-            color: paintBrainColors.yellow,
-            scale: 1.2
-          })
-            .setLngLat(mapCenter)
-            .addTo(map.current);
+          // Wait for map to load
+          map.current.on('load', () => {
+            // Add yellow marker for client location
+            new mapboxgl.Marker({ 
+              color: paintBrainColors.yellow,
+              scale: 1.2
+            })
+              .setLngLat(mapCenter)
+              .addTo(map.current!);
 
-          // Add navigation controls
-          map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+            // Add navigation controls
+            map.current!.addControl(new mapboxgl.NavigationControl(), 'top-right');
+            
+            setMapReady(true);
+            console.log('Embedded map initialized successfully');
+          });
+
+          map.current.on('error', (e) => {
+            console.error('Map error:', e);
+            setLocationError('Failed to load map. Please refresh the page.');
+          });
           
-          setMapReady(true);
-          console.log('Embedded map initialized successfully');
-          
-        } catch (error) {
-          console.error('Failed to initialize embedded map:', error);
         }
-      } else if (retryCount < maxRetries) {
-        retryCount++;
-        setTimeout(initializeMap, 200);
+      } catch (error) {
+        console.error('Failed to get Mapbox token:', error);
+        setLocationError('Unable to load map. Please check your connection.');
       }
     };
 
@@ -100,12 +105,25 @@ const EmbeddedClientMap: React.FC<EmbeddedClientMapProps> = ({
           ];
           setUserLocation(userCoords);
           setLocationError('');
+          console.log('User location found:', userCoords);
         },
         (error) => {
           console.error('Geolocation error:', error);
-          setLocationError('Unable to access your location. Please enable GPS.');
+          let errorMessage = 'Unable to access your location.';
+          switch(error.code) {
+            case error.PERMISSION_DENIED:
+              errorMessage = 'Location access denied. Please enable location in your browser.';
+              break;
+            case error.POSITION_UNAVAILABLE:
+              errorMessage = 'Location information unavailable.';
+              break;
+            case error.TIMEOUT:
+              errorMessage = 'Location request timed out.';
+              break;
+          }
+          setLocationError(errorMessage);
         },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 600000 }
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 300000 }
       );
     } else {
       setLocationError('Geolocation not supported by this browser.');
@@ -302,8 +320,13 @@ const EmbeddedClientMap: React.FC<EmbeddedClientMapProps> = ({
         
         {/* Location Error */}
         {locationError && (
-          <div className="absolute top-3 left-3 right-3 bg-red-900/90 text-red-100 p-3 rounded-lg text-sm">
+          <div className="absolute top-3 left-3 right-3 bg-red-900/90 text-red-100 p-3 rounded-lg text-sm z-30">
             {locationError}
+            {locationError.includes('Location access denied') && (
+              <div className="mt-2 text-xs">
+                Click the location icon in your address bar to enable GPS access.
+              </div>
+            )}
           </div>
         )}
         
@@ -378,8 +401,10 @@ const EmbeddedClientMap: React.FC<EmbeddedClientMapProps> = ({
         {isNavigating ? 
           'GPS Navigation Active • Double-click for fullscreen' :
           userLocation ? 
-            'Location found • Ready for navigation • Double-click for fullscreen' :
-            'Waiting for location access...'
+            `Location found (${userLocation[1].toFixed(3)}, ${userLocation[0].toFixed(3)}) • Ready for navigation` :
+            locationError ? 
+              'Location access required for navigation' :
+              'Requesting location permission...'
         }
       </div>
     </div>
