@@ -477,22 +477,6 @@ function ProjectCard({ project, onSelectProject, updateStatusMutation, deletePro
             <MapPin size={14} className="text-muted-foreground" />
             <p style={{ color: paintBrainColors.green }}>{project.address || 'No address'}</p>
           </div>
-          
-          {/* Client Contact Information */}
-          {(project.clientEmail || project.clientPhone) && (
-            <div className="flex items-center gap-4 text-sm mb-2">
-              {project.clientEmail && (
-                <span className="text-gray-600 dark:text-gray-400">
-                  📧 {project.clientEmail}
-                </span>
-              )}
-              {project.clientPhone && (
-                <div onClick={(e) => e.stopPropagation()}>
-                  <ClientPhone phoneNumber={project.clientPhone} />
-                </div>
-              )}
-            </div>
-          )}
         </div>
       </div>
       
