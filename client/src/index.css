@@ -170,6 +170,12 @@ button.paint-brain-green-btn, .paint-brain-green-btn {
   border-color: #6A9955 !important;
 }
 
+/* Hide Mapbox logo and attribution controls */
+.mapboxgl-ctrl-logo,
+.mapboxgl-ctrl-attrib {
+  display: none !important;
+}
+
 /* Force a visible test to confirm CSS is loading */
 .paint-brain-test-purple {
   background: purple !important;

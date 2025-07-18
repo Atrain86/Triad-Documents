@@ -36,7 +36,9 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           container: mapContainer.current,
           style: 'mapbox://styles/mapbox/dark-v10',
           center: clientCoords,
-          zoom: 14
+          zoom: 14,
+          attributionControl: false, // Remove info button
+          logoPosition: 'top-left' // This will be hidden with CSS
         });
 
         map.current.on('load', () => {
@@ -169,6 +171,9 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
         <div 
           ref={mapContainer}
           className="w-full h-full"
+          style={{
+            /* Hide Mapbox logo and attribution */
+          }}
         />
         
         {/* Map Overlay (like your example) */}
