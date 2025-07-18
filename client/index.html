@@ -16,13 +16,17 @@
   <body>
     <div id="root"></div>
     <script>
-      // Set Mapbox token from environment
-      fetch('/api/mapbox-token')
-        .then(res => res.json())
-        .then(data => {
+      // Set Mapbox token from environment - fetch immediately
+      (async function() {
+        try {
+          const response = await fetch('/api/mapbox-token');
+          const data = await response.json();
           window.MAPBOX_ACCESS_TOKEN = data.token;
-        })
-        .catch(err => console.warn('Could not load Mapbox token:', err));
+          console.log('Mapbox token loaded successfully');
+        } catch (err) {
+          console.warn('Could not load Mapbox token:', err);
+        }
+      })();
     </script>
     <script type="module" src="/src/main.tsx"></script>
     <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->

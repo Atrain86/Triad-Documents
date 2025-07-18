@@ -33,33 +33,35 @@ const ClientMap: React.FC<ClientMapProps> = ({
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(true);
+  const [mapReady, setMapReady] = useState(false);
 
   useEffect(() => {
-    // Check if token is already available
-    const setToken = () => {
+    let retryCount = 0;
+    const maxRetries = 10;
+    
+    const checkToken = () => {
       const urlParams = new URLSearchParams(window.location.search);
       const tokenFromUrl = urlParams.get('mapbox_token');
       const tokenFromEnv = (window as any).MAPBOX_ACCESS_TOKEN;
       
-      mapboxgl.accessToken = tokenFromUrl || tokenFromEnv || '';
+      const token = tokenFromUrl || tokenFromEnv || '';
       
-      if (map.current || !mapContainer.current) return;
-      
-      if (!mapboxgl.accessToken) {
-        console.warn('Mapbox token not found. Map will show placeholder.');
-        return;
+      if (token) {
+        mapboxgl.accessToken = token;
+        setMapReady(true);
+        if (!map.current && mapContainer.current) {
+          initializeMap();
+        }
+      } else if (retryCount < maxRetries) {
+        retryCount++;
+        setTimeout(checkToken, 200);
+      } else {
+        console.warn('Mapbox token not available after retries');
+        setMapReady(false);
       }
-      
-      initializeMap();
     };
 
-    // If token already available, use it
-    if ((window as any).MAPBOX_ACCESS_TOKEN) {
-      setToken();
-    } else {
-      // Wait a bit for the token to load from the API
-      setTimeout(setToken, 500);
-    }
+    checkToken();
   }, []);
 
   const initializeMap = () => {
@@ -127,7 +129,7 @@ const ClientMap: React.FC<ClientMapProps> = ({
           borderRadius: '8px',
           cursor: 'pointer',
           zIndex: 1000,
-          backgroundImage: mapboxgl.accessToken 
+          backgroundImage: mapReady && mapboxgl.accessToken
             ? `url(https://api.mapbox.com/styles/v1/mapbox/dark-v10/static/${longitude},${latitude},12/120x120?access_token=${mapboxgl.accessToken})`
             : `linear-gradient(45deg, ${paintBrainColors.purple}, ${paintBrainColors.red})`,
           backgroundSize: 'cover',
@@ -152,8 +154,8 @@ const ClientMap: React.FC<ClientMapProps> = ({
         backgroundColor: '#000'
       }}
     >
-      {!mapboxgl.accessToken ? (
-        // Show setup message when no token
+      {!mapReady ? (
+        // Show loading or setup message
         <div 
           style={{
             display: 'flex',
@@ -167,10 +169,9 @@ const ClientMap: React.FC<ClientMapProps> = ({
           }}
         >
           <div style={{ fontSize: '24px', marginBottom: '10px' }}>🗺️</div>
-          <h3 style={{ color: paintBrainColors.red, margin: '10px 0' }}>Map Setup Required</h3>
+          <h3 style={{ color: paintBrainColors.red, margin: '10px 0' }}>Loading Map...</h3>
           <p style={{ fontSize: '14px', lineHeight: '1.4', maxWidth: '300px' }}>
-            Mapbox token not configured. The standalone HTML file in <code>/public/client-map.html</code> 
-            includes setup instructions for adding your free Mapbox API key.
+            Setting up Mapbox integration. If this persists, check token configuration.
           </p>
         </div>
       ) : (
