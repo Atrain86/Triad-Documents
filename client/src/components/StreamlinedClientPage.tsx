@@ -946,28 +946,31 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             <span>{project.roomCount} room{project.roomCount !== 1 ? 's' : ''}</span>
           </p>
           
-          {/* Client Contact Information */}
+          {/* Client Contact Icons */}
           {(project.clientEmail || project.clientPhone) && (
-            <div className="flex items-center gap-4 text-sm mt-2">
-              {project.clientEmail && (
-                <span className="text-gray-600 dark:text-gray-400">
-                  📧 {project.clientEmail}
-                </span>
-              )}
+            <div className="flex items-center gap-3 mt-3">
               {project.clientPhone && (
-                <ClientPhone phoneNumber={project.clientPhone} />
+                <button
+                  onClick={() => {
+                    window.location.href = `tel:${project.clientPhone}`;
+                  }}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+                  style={{ color: paintBrainColors.green }}
+                  title={`Call ${project.clientPhone}`}
+                >
+                  <Phone size={20} />
+                </button>
               )}
               {project.clientEmail && (
                 <button
                   onClick={() => {
                     window.location.href = `mailto:${project.clientEmail}`;
                   }}
-                  className="flex items-center text-sm hover:opacity-75 transition-opacity"
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
                   style={{ color: paintBrainColors.purple }}
                   title={`Email ${project.clientEmail}`}
                 >
-                  <Mail size={16} className="mr-1" />
-                  Email Client
+                  <Mail size={20} />
                 </button>
               )}
             </div>
