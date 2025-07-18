@@ -37,6 +37,7 @@ const EmbeddedClientMap: React.FC<EmbeddedClientMapProps> = ({
   const [routeSteps, setRouteSteps] = useState<RouteStep[]>([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
     let retryCount = 0;
@@ -51,34 +52,16 @@ const EmbeddedClientMap: React.FC<EmbeddedClientMapProps> = ({
           
           map.current = new mapboxgl.Map({
             container: mapContainer.current,
-            style: 'mapbox://styles/mapbox/dark-v10',
+            style: 'mapbox://styles/mapbox/dark-v11',
             center: mapCenter,
             zoom: 14,
+            pitch: 45,
+            bearing: -17.6,
+            antialias: true,
             interactive: true
           });
 
-          // Add yellow marker for client location
-          const marker = new mapboxgl.Marker({ 
-            color: paintBrainColors.yellow,
-            scale: 1.2
-          })
-            .setLngLat(mapCenter)
-            .addTo(map.current);
-
-          // Add popup with client info - show by default
-          const popup = new mapboxgl.Popup({ 
-            offset: 25,
-            closeButton: true,
-            closeOnClick: false
-          })
-            .setLngLat(mapCenter)
-            .setHTML(`
-              <div style="color: black; padding: 12px; font-family: system-ui;">
-                <h3 style="margin: 0 0 5px 0; color: ${paintBrainColors.orange}; font-weight: bold; font-size: 14px;">${clientName}</h3>
-                <p style="margin: 0; font-size: 12px; color: #333; line-height: 1.3;">${clientAddress}</p>
-              </div>
-            `)
-            .addTo(map.current);
+          // Don't add markers initially - they'll be added when route is requested
 
           // Add navigation controls
           map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
@@ -181,13 +164,13 @@ const EmbeddedClientMap: React.FC<EmbeddedClientMapProps> = ({
           'line-cap': 'round'
         },
         paint: {
-          'line-color': paintBrainColors.green,
-          'line-width': 5,
-          'line-opacity': 0.8
+          'line-color': '#0099CC',
+          'line-width': 4,
+          'line-opacity': 0.9
         }
       });
       
-      // Add office marker
+      // Add office marker (blue)
       new mapboxgl.Marker({ 
         color: paintBrainColors.blue,
         scale: 1.0
@@ -195,6 +178,16 @@ const EmbeddedClientMap: React.FC<EmbeddedClientMapProps> = ({
         .setLngLat(officeCoords)
         .setPopup(new mapboxgl.Popup({ offset: 25 })
           .setHTML('<div style="color: black; padding: 10px; font-family: system-ui;"><strong style="color: #569CD6;">A-Frame Painting Office</strong><br><span style="font-size: 12px;">884 Hayes Rd, Manson\'s Landing, BC</span></div>'))
+        .addTo(map.current);
+        
+      // Add client marker (yellow)
+      new mapboxgl.Marker({ 
+        color: paintBrainColors.yellow,
+        scale: 1.2
+      })
+        .setLngLat(mapCenter)
+        .setPopup(new mapboxgl.Popup({ offset: 25 })
+          .setHTML(`<div style="color: black; padding: 10px; font-family: system-ui;"><strong style="color: ${paintBrainColors.orange};">${clientName}</strong><br><span style="font-size: 12px;">${clientAddress}</span></div>`))
         .addTo(map.current);
       
       // Fit map to show entire route
@@ -216,16 +209,51 @@ const EmbeddedClientMap: React.FC<EmbeddedClientMapProps> = ({
     }
   };
 
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+    // Trigger map resize after fullscreen toggle
+    setTimeout(() => {
+      if (map.current) {
+        map.current.resize();
+      }
+    }, 100);
+  };
+
   return (
     <div className="space-y-4">
       {/* Embedded Map Container */}
-      <div className="relative bg-gray-900 rounded-lg border-2 border-red-500 overflow-hidden">
+      <div 
+        className={`relative bg-gray-900 rounded-lg border-2 border-purple-500 overflow-hidden transition-all duration-300 ${
+          isFullscreen ? 'fixed inset-0 z-50 rounded-none border-0' : ''
+        }`}
+        onDoubleClick={toggleFullscreen}
+        style={{ cursor: 'pointer' }}
+      >
+        {/* House Icon */}
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-full text-3xl z-10 pointer-events-none">
+          🏠
+        </div>
+        
+        {/* Client Info Overlay */}
+        <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-sm rounded px-3 py-2 border-l-4 border-yellow-400">
+          <div className="text-white font-medium text-sm">{clientName}</div>
+          <div className="text-gray-300 text-xs">{clientAddress}</div>
+        </div>
+        
+        {/* Fullscreen Toggle Button */}
+        <button
+          onClick={toggleFullscreen}
+          className="absolute top-3 right-3 w-8 h-8 bg-orange-500 hover:bg-orange-600 text-white rounded-full flex items-center justify-center text-lg font-bold transition-colors z-10"
+        >
+          {isFullscreen ? '⨉' : '⤢'}
+        </button>
+        
         <div 
           ref={mapContainer}
           style={{ 
             width: '100%', 
-            height: '300px',
-            backgroundColor: '#1a1a1a'
+            height: isFullscreen ? '100vh' : '250px',
+            backgroundColor: '#000'
           }}
         />
         
@@ -239,7 +267,7 @@ const EmbeddedClientMap: React.FC<EmbeddedClientMapProps> = ({
         )}
         
         {/* Navigation Controls Overlay */}
-        <div className="absolute bottom-4 left-4 right-4 flex gap-2">
+        <div className="absolute bottom-16 left-3 right-3 flex gap-2">
           {!showRoute ? (
             <>
               <button
@@ -279,20 +307,13 @@ const EmbeddedClientMap: React.FC<EmbeddedClientMapProps> = ({
               >
                 ❌ End Route
               </button>
-              
-              <button
-                onClick={handleCenterMap}
-                className="flex-1 bg-blue-600/90 hover:bg-blue-700 text-white px-3 py-2 rounded-lg font-medium text-sm backdrop-blur-sm transition-colors"
-              >
-                📍 Center
-              </button>
             </>
           )}
         </div>
         
         {/* Turn-by-Turn Directions Panel */}
         {showRoute && (
-          <div className="absolute top-4 left-4 right-4 bg-black/90 backdrop-blur-sm rounded-lg p-4 max-h-48 overflow-y-auto">
+          <div className="absolute top-16 left-3 right-3 bg-black/90 backdrop-blur-sm rounded-lg p-4 max-h-48 overflow-y-auto">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-white font-medium text-sm">Navigation to {clientName}</h3>
               <div className="text-green-400 text-xs">
@@ -342,8 +363,8 @@ const EmbeddedClientMap: React.FC<EmbeddedClientMapProps> = ({
       {/* Map Info */}
       <div className="text-xs text-gray-400 text-center">
         {showRoute ? 
-          `Navigation active • ${routeSteps.length} steps • Use Previous/Next to navigate directions` :
-          'Interactive map • Get Directions: plan your route • Center: focus on client location'
+          `Navigation active • ${routeSteps.length} steps • Double-click for fullscreen` :
+          'Interactive map • Get Directions: plan your route • Double-click for fullscreen'
         }
       </div>
     </div>
