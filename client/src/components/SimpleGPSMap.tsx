@@ -64,62 +64,87 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
   }, []);
 
   const startRoute = () => {
+    console.log('Start button clicked!');
+    setError(''); // Clear any existing errors
+    
     if (!navigator.geolocation) {
       setError('Geolocation not supported');
       return;
     }
 
+    console.log('Getting user location...');
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        console.log('Got user location:', position.coords);
         const userCoords: [number, number] = [
           position.coords.longitude,
           position.coords.latitude
         ];
 
-        // Fly to user location
+        // Fly to user location first
         if (map.current) {
+          console.log('Flying to user location:', userCoords);
           map.current.flyTo({ center: userCoords, zoom: 13 });
           
           // Get route and draw it
+          console.log('Getting route from:', userCoords, 'to:', clientCoords);
           fetch(`https://api.mapbox.com/directions/v5/mapbox/driving/${userCoords.join(',')};${clientCoords.join(',')}?steps=true&geometries=geojson&access_token=${mapboxgl.accessToken}`)
-            .then(res => res.json())
+            .then(res => {
+              console.log('Route response status:', res.status);
+              return res.json();
+            })
             .then(data => {
+              console.log('Route data:', data);
               if (data.routes && data.routes[0]) {
                 const route = data.routes[0].geometry;
+                console.log('Drawing route with geometry:', route);
                 
                 if (map.current) {
-                  if (map.current.getSource('route')) {
-                    (map.current.getSource('route') as mapboxgl.GeoJSONSource).setData(route);
-                  } else {
-                    map.current.addLayer({
-                      id: 'route',
-                      type: 'line',
-                      source: {
-                        type: 'geojson',
-                        data: route
-                      },
-                      layout: {
-                        'line-join': 'round',
-                        'line-cap': 'round'
-                      },
-                      paint: {
-                        'line-color': ['interpolate', ['linear'], ['line-progress'], 0, '#00FFFF', 1, '#6B4C9A'],
-                        'line-width': 6
-                      }
-                    });
+                  // Remove existing route if any
+                  if (map.current.getLayer('route')) {
+                    map.current.removeLayer('route');
                   }
+                  if (map.current.getSource('route')) {
+                    map.current.removeSource('route');
+                  }
+
+                  // Add new route
+                  map.current.addSource('route', {
+                    type: 'geojson',
+                    data: route
+                  });
+
+                  map.current.addLayer({
+                    id: 'route',
+                    type: 'line',
+                    source: 'route',
+                    layout: {
+                      'line-join': 'round',
+                      'line-cap': 'round'
+                    },
+                    paint: {
+                      'line-color': ['interpolate', ['linear'], ['line-progress'], 0, '#00FFFF', 1, '#6B4C9A'],
+                      'line-width': 6
+                    }
+                  });
+                  console.log('Route drawn successfully!');
                 }
+              } else {
+                console.log('No routes found in response');
+                setError('No route found');
               }
             })
             .catch(err => {
-              setError('Unable to get directions');
+              console.error('Route fetch error:', err);
+              setError('Unable to get directions: ' + err.message);
             });
         }
       },
       (err) => {
-        setError('Please allow location access');
+        console.error('Geolocation error:', err);
+        setError('Please allow location access: ' + err.message);
       },
-      { enableHighAccuracy: true }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
     );
   };
 
@@ -159,6 +184,7 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
         <button
           onClick={startRoute}
           className="absolute bottom-2 right-2 bg-blue-600 hover:bg-blue-700 text-white border-none px-4 py-2 rounded-lg cursor-pointer font-bold"
+          style={{ backgroundColor: '#0099cc' }}
         >
           Start
         </button>
