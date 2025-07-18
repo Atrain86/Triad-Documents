@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Search, User, MapPin, Edit3, Archive, RotateCcw, Trash2 } from 'lucide-react';
+import { Search, User, MapPin, Edit3, Archive, RotateCcw, Trash2, Mail } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Label } from './ui/label';
+import { Textarea } from './ui/textarea';
+import { useToast } from '@/hooks/use-toast';
 import ClientPhone from './ClientPhone';
 
 // Paint Brain Color Palette
@@ -36,8 +38,15 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
   const [searchTerm, setSearchTerm] = useState('');
   const [showArchived, setShowArchived] = useState(false);
   const [showNewClientDialog, setShowNewClientDialog] = useState(false);
+  const [showEmailDialog, setShowEmailDialog] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<any>(null);
+  const [emailForm, setEmailForm] = useState({
+    subject: '',
+    message: ''
+  });
   
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const { data: projects = [], isLoading } = useQuery({
     queryKey: ['/api/projects'],
@@ -77,6 +86,58 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
       queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
     },
   });
+
+  const sendEmailMutation = useMutation({
+    mutationFn: async ({ recipientEmail, subject, message }: { recipientEmail: string; subject: string; message: string }) => {
+      const response = await fetch('/api/send-basic-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: recipientEmail,
+          subject: subject,
+          text: message,
+          html: message.replace(/\n/g, '<br>')
+        }),
+      });
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Failed to send email: ${error}`);
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Email Sent",
+        description: "Your email has been sent successfully!",
+      });
+      setShowEmailDialog(false);
+      setEmailForm({ subject: '', message: '' });
+    },
+    onError: (error) => {
+      toast({
+        title: "Email Failed",
+        description: error.message || "Failed to send email. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleEmailClient = (project: any) => {
+    if (!project.clientEmail) {
+      toast({
+        title: "No Email Address",
+        description: "This client doesn't have an email address. Please add one in the client details.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setSelectedProject(project);
+    setEmailForm({
+      subject: `Follow-up: ${project.projectType} Project - ${project.clientName}`,
+      message: `Dear ${project.clientName},\n\nI hope this message finds you well. I wanted to follow up regarding your ${project.projectType} project.\n\nPlease let me know if you have any questions or if there's anything I can help you with.\n\nBest regards,\nA-Frame Painting\ncortespainter@gmail.com\n884 Hayes Rd, Manson's Landing, BC V0P1K0`
+    });
+    setShowEmailDialog(true);
+  };
 
   const createProjectMutation = useMutation({
     mutationFn: async (projectData: any) => {
@@ -238,6 +299,7 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
                 onSelectProject={onSelectProject}
                 updateStatusMutation={updateStatusMutation}
                 deleteProjectMutation={deleteProjectMutation}
+                handleEmailClient={handleEmailClient}
                 showDragHandle={false}
               />
             ))
@@ -255,6 +317,59 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
               onCancel={() => setShowNewClientDialog(false)}
               isLoading={createProjectMutation.isPending}
             />
+          </DialogContent>
+        </Dialog>
+
+        {/* Email Client Dialog */}
+        <Dialog open={showEmailDialog} onOpenChange={setShowEmailDialog}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Email {selectedProject?.clientName}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="subject">Subject</Label>
+                <Input
+                  id="subject"
+                  value={emailForm.subject}
+                  onChange={(e) => setEmailForm({ ...emailForm, subject: e.target.value })}
+                  placeholder="Email subject"
+                />
+              </div>
+              <div>
+                <Label htmlFor="message">Message</Label>
+                <Textarea
+                  id="message"
+                  value={emailForm.message}
+                  onChange={(e) => setEmailForm({ ...emailForm, message: e.target.value })}
+                  placeholder="Enter your message..."
+                  rows={8}
+                />
+              </div>
+              <div className="flex gap-2 justify-end">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowEmailDialog(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => {
+                    if (selectedProject?.clientEmail && emailForm.subject && emailForm.message) {
+                      sendEmailMutation.mutate({
+                        recipientEmail: selectedProject.clientEmail,
+                        subject: emailForm.subject,
+                        message: emailForm.message
+                      });
+                    }
+                  }}
+                  disabled={!emailForm.subject || !emailForm.message || sendEmailMutation.isPending}
+                  style={{ backgroundColor: paintBrainColors.purple }}
+                >
+                  {sendEmailMutation.isPending ? 'Sending...' : 'Send Email'}
+                </Button>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       </div>
@@ -404,7 +519,7 @@ function StatusIcon({ status }: { status: string }) {
   );
 }
 
-function ProjectCard({ project, onSelectProject, updateStatusMutation, deleteProjectMutation, showDragHandle }: any) {
+function ProjectCard({ project, onSelectProject, updateStatusMutation, deleteProjectMutation, handleEmailClient, showDragHandle }: any) {
   const [touchStartPos, setTouchStartPos] = useState<{ x: number; y: number } | null>(null);
   const [touchStartTime, setTouchStartTime] = useState<number | null>(null);
 
@@ -538,6 +653,19 @@ function ProjectCard({ project, onSelectProject, updateStatusMutation, deletePro
           title="Edit client"
         >
           <Edit3 size={18} />
+        </button>
+        
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            handleEmailClient(project);
+          }}
+          onTouchEnd={(e) => e.stopPropagation()}
+          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+          style={{ color: paintBrainColors.purple }}
+          title="Email client"
+        >
+          <Mail size={18} />
         </button>
         
         <button

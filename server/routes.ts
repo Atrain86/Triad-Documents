@@ -652,6 +652,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Basic email sending route for direct client communication
+  app.post('/api/send-basic-email', async (req, res) => {
+    try {
+      const { to, subject, text, html } = req.body;
+
+      if (!to || !subject || !text) {
+        return res.status(400).json({ error: 'Missing required fields: to, subject, and text are required' });
+      }
+
+      console.log('Basic email request received:', {
+        to,
+        subject,
+        hasText: !!text,
+        hasHtml: !!html
+      });
+
+      // Use the existing sendEmail function from email.ts
+      const { sendEmail } = await import('./email');
+      const emailSent = await sendEmail({
+        to,
+        subject,
+        text,
+        html: html || text.replace(/\n/g, '<br>')
+      });
+
+      if (emailSent) {
+        console.log('Basic email sent successfully');
+        res.json({ success: true, message: 'Email sent successfully' });
+      } else {
+        console.log('Basic email failed to send');
+        res.status(500).json({ error: 'Failed to send email. Please check email configuration.' });
+      }
+    } catch (error) {
+      console.error('Basic email error:', error);
+      res.status(500).json({ error: 'Server error while sending email' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
