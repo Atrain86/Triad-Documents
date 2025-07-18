@@ -92,8 +92,30 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
 
     console.log('Calling navigator.geolocation.getCurrentPosition...');
     
+    // Check permissions first if available
+    if ('permissions' in navigator) {
+      navigator.permissions.query({name: 'geolocation'}).then((result) => {
+        console.log('Geolocation permission status:', result.state);
+        if (result.state === 'denied') {
+          setError('Location access denied. Please enable location in browser settings.');
+          setIsGettingLocation(false);
+          return;
+        }
+      }).catch((err) => {
+        console.log('Permission query failed:', err);
+      });
+    }
+    
+    // Set up manual timeout
+    const timeoutId = setTimeout(() => {
+      console.log('Manual timeout triggered - geolocation took too long');
+      setError('GPS timeout - please try again or check location settings');
+      setIsGettingLocation(false);
+    }, 10000); // 10 second manual timeout
+    
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        clearTimeout(timeoutId); // Clear manual timeout
         console.log('SUCCESS: Got user location:', position.coords);
         const userCoords: [number, number] = [
           position.coords.longitude,
@@ -182,6 +204,7 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
         }
       },
       (err) => {
+        clearTimeout(timeoutId); // Clear manual timeout
         console.error('Geolocation error code:', err.code);
         console.error('Geolocation error message:', err.message);
         
@@ -205,7 +228,7 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
       },
       { 
         enableHighAccuracy: false,  // Try with less accuracy first
-        timeout: 30000,  // 30 seconds - longer timeout
+        timeout: 8000,  // 8 seconds - shorter timeout for debugging
         maximumAge: 0  // Always get fresh location
       }
     );
@@ -270,12 +293,77 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
       {error && (
         <div className="mt-3 bg-red-900/20 border border-red-500 rounded-lg p-3 text-center">
           <p className="text-red-300 text-sm">{error}</p>
-          <button 
-            onClick={() => setError('')}
-            className="mt-2 text-red-400 hover:text-red-300 text-xs underline"
-          >
-            Dismiss
-          </button>
+          <div className="mt-2 space-x-2">
+            <button 
+              onClick={() => setError('')}
+              className="text-red-400 hover:text-red-300 text-xs underline"
+            >
+              Dismiss
+            </button>
+            {error.includes('timeout') && (
+              <button 
+                onClick={() => {
+                  setError('');
+                  // Use a test location (Vancouver area) for demonstration
+                  const testCoords: [number, number] = [-123.1207, 49.2827];
+                  console.log('Using test location:', testCoords);
+                  if (map.current) {
+                    map.current.flyTo({ center: testCoords, zoom: 13 });
+                    
+                    const routeUrl = `https://api.mapbox.com/directions/v5/mapbox/driving/${testCoords.join(',')};${clientCoords.join(',')}?steps=true&geometries=geojson&access_token=${mapboxgl.accessToken}`;
+                    
+                    fetch(routeUrl)
+                      .then(res => res.json())
+                      .then(data => {
+                        if (data.routes && data.routes[0]) {
+                          const route = data.routes[0].geometry;
+                          
+                          if (map.current) {
+                            try {
+                              if (map.current.getLayer('route')) {
+                                map.current.removeLayer('route');
+                              }
+                            } catch (e) {}
+                            
+                            try {
+                              if (map.current.getSource('route')) {
+                                map.current.removeSource('route');
+                              }
+                            } catch (e) {}
+
+                            map.current.addSource('route', {
+                              type: 'geojson',
+                              data: route
+                            });
+
+                            map.current.addLayer({
+                              id: 'route',
+                              type: 'line',
+                              source: 'route',
+                              layout: {
+                                'line-join': 'round',
+                                'line-cap': 'round'
+                              },
+                              paint: {
+                                'line-color': ['interpolate', ['linear'], ['line-progress'], 0, '#00FFFF', 1, '#6B4C9A'],
+                                'line-width': 6
+                              }
+                            });
+                            setError('Demo route loaded successfully (Vancouver to client)');
+                          }
+                        }
+                      })
+                      .catch(err => {
+                        setError('Route test failed: ' + err.message);
+                      });
+                  }
+                }}
+                className="text-xs bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded"
+              >
+                Try Demo Route
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>
