@@ -68,9 +68,11 @@ const ClientMap: React.FC<ClientMapProps> = ({
   }, []);
 
   const initializeMap = () => {
+    if (!mapContainer.current) return;
+    
     // Initialize map
     map.current = new mapboxgl.Map({
-      container: mapContainer.current!,
+      container: mapContainer.current,
       style: 'mapbox://styles/mapbox/dark-v10',
       center: [longitude, latitude],
       zoom: 12
@@ -132,26 +134,29 @@ const ClientMap: React.FC<ClientMapProps> = ({
       `)
       .addTo(map.current);
 
+    // Store address in closure for button handlers
+    const fullAddress = clientAddress;
+    
     // Add click handlers for navigation buttons
-    map.current.on('popup.open', () => {
+    setTimeout(() => {
       const startDrivingBtn = document.getElementById('start-driving-btn');
       const viewMapsBtn = document.getElementById('view-maps-btn');
       
       if (startDrivingBtn) {
         startDrivingBtn.addEventListener('click', () => {
           const startAddress = encodeURIComponent('884 Hayes Rd, Manson\'s Landing, BC V0P1K0');
-          const endAddress = encodeURIComponent(clientAddress);
+          const endAddress = encodeURIComponent(fullAddress);
           window.open(`https://www.google.com/maps/dir/${startAddress}/${endAddress}`, '_blank');
         });
       }
       
       if (viewMapsBtn) {
         viewMapsBtn.addEventListener('click', () => {
-          const address = encodeURIComponent(clientAddress);
+          const address = encodeURIComponent(fullAddress);
           window.open(`https://www.google.com/maps/search/${address}`, '_blank');
         });
       }
-    });
+    }, 100);
   };
 
   const handleClose = () => {
