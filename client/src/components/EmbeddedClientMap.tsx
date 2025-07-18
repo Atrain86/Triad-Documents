@@ -106,10 +106,85 @@ const EmbeddedClientMap: React.FC<EmbeddedClientMapProps> = ({
     }
   };
 
-  const handleNavigate = () => {
-    const startAddress = encodeURIComponent('884 Hayes Rd, Manson\'s Landing, BC V0P1K0');
-    const endAddress = encodeURIComponent(clientAddress);
-    window.open(`https://www.google.com/maps/dir/${startAddress}/${endAddress}`, '_blank');
+  const handleNavigate = async () => {
+    if (!map.current) return;
+    
+    try {
+      // Office coordinates (884 Hayes Rd, Manson's Landing, BC)
+      const officeCoords: [number, number] = [-124.9831, 50.0326];
+      
+      // Use Mapbox Directions API to get route
+      const query = await fetch(
+        `https://api.mapbox.com/directions/v5/mapbox/driving/${officeCoords[0]},${officeCoords[1]};${mapCenter[0]},${mapCenter[1]}?steps=true&geometries=geojson&access_token=${mapboxgl.accessToken}`
+      );
+      
+      const json = await query.json();
+      const data = json.routes[0];
+      const route = data.geometry.coordinates;
+      
+      // Clear existing route
+      if (map.current.getSource('route')) {
+        map.current.removeLayer('route');
+        map.current.removeSource('route');
+      }
+      
+      // Add route to map
+      map.current.addSource('route', {
+        type: 'geojson',
+        data: {
+          type: 'Feature',
+          properties: {},
+          geometry: {
+            type: 'LineString',
+            coordinates: route
+          }
+        }
+      });
+      
+      map.current.addLayer({
+        id: 'route',
+        type: 'line',
+        source: 'route',
+        layout: {
+          'line-join': 'round',
+          'line-cap': 'round'
+        },
+        paint: {
+          'line-color': paintBrainColors.green,
+          'line-width': 5,
+          'line-opacity': 0.8
+        }
+      });
+      
+      // Add office marker
+      new mapboxgl.Marker({ 
+        color: paintBrainColors.blue,
+        scale: 0.8
+      })
+        .setLngLat(officeCoords)
+        .setPopup(new mapboxgl.Popup({ offset: 25 })
+          .setHTML('<div style="color: black; padding: 8px;"><strong>A-Frame Painting Office</strong><br>884 Hayes Rd, Manson\'s Landing, BC</div>'))
+        .addTo(map.current);
+      
+      // Fit map to show entire route
+      const coordinates = route;
+      const bounds = coordinates.reduce((bounds: any, coord: any) => {
+        return bounds.extend(coord);
+      }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
+      
+      map.current.fitBounds(bounds, {
+        padding: 50
+      });
+      
+      console.log('Navigation route displayed on map');
+      
+    } catch (error) {
+      console.error('Failed to load navigation route:', error);
+      // Fallback to external navigation
+      const startAddress = encodeURIComponent('884 Hayes Rd, Manson\'s Landing, BC V0P1K0');
+      const endAddress = encodeURIComponent(clientAddress);
+      window.open(`https://www.google.com/maps/dir/${startAddress}/${endAddress}`, '_blank');
+    }
   };
 
   return (
@@ -140,7 +215,7 @@ const EmbeddedClientMap: React.FC<EmbeddedClientMapProps> = ({
             onClick={handleNavigate}
             className="flex-1 bg-green-600/90 hover:bg-green-700 text-white px-3 py-2 rounded-lg font-medium text-sm backdrop-blur-sm transition-colors"
           >
-            🚗 Navigate
+            🚗 Show Route
           </button>
           
           <button
@@ -149,12 +224,23 @@ const EmbeddedClientMap: React.FC<EmbeddedClientMapProps> = ({
           >
             📍 Center
           </button>
+          
+          <button
+            onClick={() => {
+              const startAddress = encodeURIComponent('884 Hayes Rd, Manson\'s Landing, BC V0P1K0');
+              const endAddress = encodeURIComponent(clientAddress);
+              window.open(`https://www.google.com/maps/dir/${startAddress}/${endAddress}`, '_blank');
+            }}
+            className="flex-1 bg-purple-600/90 hover:bg-purple-700 text-white px-3 py-2 rounded-lg font-medium text-sm backdrop-blur-sm transition-colors"
+          >
+            🧭 External
+          </button>
         </div>
       </div>
       
       {/* Map Info */}
       <div className="text-xs text-gray-400 text-center">
-        Interactive map • Pan and zoom • Click marker for details
+        Interactive map • Show Route: displays driving directions • Center: focus on client • External: open in Google Maps
       </div>
     </div>
   );
