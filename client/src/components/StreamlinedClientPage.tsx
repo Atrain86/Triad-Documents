@@ -14,6 +14,7 @@ import type { Project, Photo, Receipt, ToolsChecklist, DailyHours } from '@share
 import InvoiceGenerator from './InvoiceGenerator';
 import EstimateGenerator from './EstimateGenerator';
 import PhotoCarousel from './PhotoCarousel';
+import PaintBrainCalendar from './PaintBrainCalendar';
 import { ReactSortable } from 'react-sortablejs';
 
 // Paint Brain Color Palette
@@ -1317,21 +1318,19 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                   Today: {formatDateForInput(new Date())}
                                 </span>
                               </label>
-                              <input
-                                type="date"
-                                value={selectedDate}
-                                onChange={(e) => {
-                                  setSelectedDate(e.target.value);
-                                  if (e.target.value) {
+                              <PaintBrainCalendar
+                                selectedDate={selectedDate}
+                                onDateSelect={(date) => {
+                                  setSelectedDate(date);
+                                  if (date) {
                                     setTimeout(() => {
                                       const hoursInput = document.querySelector('input[placeholder="0"]') as HTMLInputElement;
                                       if (hoursInput) hoursInput.focus();
                                     }, 100);
                                   }
                                 }}
-                                className="w-full px-3 py-2 text-sm border-2 border-green-600 rounded-lg bg-green-900/20 text-gray-200 focus:border-green-500"
-                                max={formatDateForInput(new Date())}
-                                style={{ colorScheme: 'dark' }}
+                                maxDate={formatDateForInput(new Date())}
+                                className="w-full"
                               />
                             </div>
                             
