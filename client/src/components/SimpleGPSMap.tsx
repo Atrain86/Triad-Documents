@@ -18,6 +18,7 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
   const [mapReady, setMapReady] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [error, setError] = useState<string>('');
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
 
   // Client coordinates (Alan Kohl's house from your example)
   const clientCoords: [number, number] = [-124.9625, 50.0431];
@@ -70,18 +71,30 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
     setError(''); // Clear any existing errors
     
     if (!navigator.geolocation) {
-      setError('Geolocation not supported');
+      console.error('Geolocation not supported');
+      setError('Geolocation not supported on this device');
       return;
     }
 
     console.log('Getting user location...');
+    setIsGettingLocation(true);
+    
+    // Check if we're on HTTPS or localhost (required for geolocation)
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+      console.error('Geolocation requires HTTPS');
+      setError('GPS requires secure connection (HTTPS)');
+      setIsGettingLocation(false);
+      return;
+    }
+
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        console.log('Got user location:', position.coords);
+        console.log('SUCCESS: Got user location:', position.coords);
         const userCoords: [number, number] = [
           position.coords.longitude,
           position.coords.latitude
         ];
+        console.log('User coordinates:', userCoords);
 
         // Fly to user location first
         if (map.current) {
@@ -90,24 +103,41 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           
           // Get route and draw it
           console.log('Getting route from:', userCoords, 'to:', clientCoords);
-          fetch(`https://api.mapbox.com/directions/v5/mapbox/driving/${userCoords.join(',')};${clientCoords.join(',')}?steps=true&geometries=geojson&access_token=${mapboxgl.accessToken}`)
+          const routeUrl = `https://api.mapbox.com/directions/v5/mapbox/driving/${userCoords.join(',')};${clientCoords.join(',')}?steps=true&geometries=geojson&access_token=${mapboxgl.accessToken}`;
+          console.log('Route URL:', routeUrl);
+          
+          fetch(routeUrl)
             .then(res => {
               console.log('Route response status:', res.status);
+              if (!res.ok) {
+                throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+              }
               return res.json();
             })
             .then(data => {
-              console.log('Route data:', data);
+              console.log('Route data received:', data);
               if (data.routes && data.routes[0]) {
                 const route = data.routes[0].geometry;
                 console.log('Drawing route with geometry:', route);
                 
                 if (map.current) {
                   // Remove existing route if any
-                  if (map.current.getLayer('route')) {
-                    map.current.removeLayer('route');
+                  try {
+                    if (map.current.getLayer('route')) {
+                      map.current.removeLayer('route');
+                      console.log('Removed existing route layer');
+                    }
+                  } catch (e) {
+                    console.log('No existing route layer to remove');
                   }
-                  if (map.current.getSource('route')) {
-                    map.current.removeSource('route');
+                  
+                  try {
+                    if (map.current.getSource('route')) {
+                      map.current.removeSource('route');
+                      console.log('Removed existing route source');
+                    }
+                  } catch (e) {
+                    console.log('No existing route source to remove');
                   }
 
                   // Add new route
@@ -130,23 +160,49 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
                     }
                   });
                   console.log('Route drawn successfully!');
+                  setError('Route loaded successfully!');
                 }
               } else {
                 console.log('No routes found in response');
-                setError('No route found');
+                setError('No route found between locations');
               }
             })
             .catch(err => {
               console.error('Route fetch error:', err);
-              setError('Unable to get directions: ' + err.message);
+              setError('Route error: ' + err.message);
+            })
+            .finally(() => {
+              setIsGettingLocation(false);
             });
         }
       },
       (err) => {
-        console.error('Geolocation error:', err);
-        setError('Please allow location access: ' + err.message);
+        console.error('Geolocation error code:', err.code);
+        console.error('Geolocation error message:', err.message);
+        
+        let errorMessage = '';
+        switch(err.code) {
+          case err.PERMISSION_DENIED:
+            errorMessage = 'Location access denied. Please allow location access and try again.';
+            break;
+          case err.POSITION_UNAVAILABLE:
+            errorMessage = 'Location unavailable. Check GPS/Wi-Fi and try again.';
+            break;
+          case err.TIMEOUT:
+            errorMessage = 'Location timeout. Try again.';
+            break;
+          default:
+            errorMessage = 'Unknown location error: ' + err.message;
+            break;
+        }
+        setError(errorMessage);
+        setIsGettingLocation(false);
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+      { 
+        enableHighAccuracy: true, 
+        timeout: 15000,  // 15 seconds
+        maximumAge: 300000  // 5 minutes
+      }
     );
   };
 
@@ -188,10 +244,11 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
         {/* Start Button (like your example) */}
         <button
           onClick={startRoute}
-          className="absolute bottom-2 right-2 bg-blue-600 hover:bg-blue-700 text-white border-none px-4 py-2 rounded-lg cursor-pointer font-bold"
-          style={{ backgroundColor: '#0099cc' }}
+          disabled={isGettingLocation}
+          className="absolute bottom-2 right-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white border-none px-4 py-2 rounded-lg cursor-pointer font-bold"
+          style={{ backgroundColor: isGettingLocation ? '#6b9bd2' : '#0099cc' }}
         >
-          Start
+          {isGettingLocation ? 'Getting GPS...' : 'Start'}
         </button>
 
         {/* Fullscreen Button (like your example) */}
