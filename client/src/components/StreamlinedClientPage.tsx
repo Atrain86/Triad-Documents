@@ -16,7 +16,7 @@ import EstimateGenerator from './EstimateGenerator';
 import PhotoCarousel from './PhotoCarousel';
 import PaintBrainCalendar from './PaintBrainCalendar';
 import ClientPhone from './ClientPhone';
-import SimpleClientMap from './SimpleClientMap';
+import EmbeddedClientMap from './EmbeddedClientMap';
 import { ReactSortable } from 'react-sortablejs';
 
 // Paint Brain Color Palette
@@ -1278,43 +1278,20 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
                     {section.id === 'gpsMap' && (
                       <div>
-                        {/* GPS Map Component */}
+                        {/* Client Info Header */}
+                        <div className="flex items-center gap-2 mb-3">
+                          <MapPin className="h-5 w-5 text-orange-400" />
+                          <span className="text-orange-400 font-medium">{project?.clientName}</span>
+                        </div>
+                        <p className="text-gray-300 text-sm mb-4">{project?.address}</p>
+                        
+                        {/* Embedded Interactive Map */}
                         {project && project.address && (
-                          <div className="space-y-4">
-                            <div className="p-4 bg-gray-800 rounded-lg border-2 border-red-500">
-                              <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center gap-2">
-                                  <MapPin className="h-5 w-5 text-orange-400" />
-                                  <span className="text-orange-400 font-medium">{project.clientName}</span>
-                                </div>
-                              </div>
-                              
-                              <p className="text-gray-300 text-sm mb-4">{project.address}</p>
-                              
-                              <div className="flex gap-2">
-                                <button
-                                  onClick={() => {
-                                    const startAddress = encodeURIComponent('884 Hayes Rd, Manson\'s Landing, BC V0P1K0');
-                                    const endAddress = encodeURIComponent(project.address);
-                                    window.open(`https://www.google.com/maps/dir/${startAddress}/${endAddress}`, '_blank');
-                                  }}
-                                  className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium flex items-center justify-center gap-2"
-                                >
-                                  🚗 Start Driving
-                                </button>
-                                
-                                <button
-                                  onClick={() => {
-                                    const address = encodeURIComponent(project.address);
-                                    window.open(`https://www.google.com/maps/search/${address}`, '_blank');
-                                  }}
-                                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium flex items-center justify-center gap-2"
-                                >
-                                  📍 View on Maps
-                                </button>
-                              </div>
-                            </div>
-                          </div>
+                          <EmbeddedClientMap
+                            clientName={project.clientName}
+                            clientAddress={project.address}
+                            projectId={project.id}
+                          />
                         )}
                       </div>
                     )}
