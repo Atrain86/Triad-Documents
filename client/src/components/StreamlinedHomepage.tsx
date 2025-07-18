@@ -483,38 +483,30 @@ function NewClientForm({ onSubmit, onCancel, isLoading }: { onSubmit: (data: any
   );
 }
 
-// Status icon component
+// Status icon component - simple colored circles
 function StatusIcon({ status }: { status: string }) {
-  const [iconError, setIconError] = useState(false);
-  
-  // Fallback to emoji if SVG fails to load
-  const fallbackEmojis: { [key: string]: string } = {
-    'in-progress': '🟢',
-    'scheduled': '🔵',
-    'estimate-sent': '📝',
-    'awaiting-confirmation': '⏳',
-    'site-visit-needed': '📍',
-    'initial-contact': '📞',
-    'follow-up-needed': '🔄',
-    'on-hold': '⏸️',
-    'pending': '🟡',
-    'completed': '✅',
-    'cancelled': '❌',
-    'archived': '📦'
+  const statusColors: { [key: string]: string } = {
+    'in-progress': '#6A9955',        // Green
+    'scheduled': '#569CD6',          // Blue  
+    'estimate-sent': '#D4A574',      // Orange
+    'awaiting-confirmation': '#DCDCAA', // Yellow
+    'site-visit-needed': '#8B5FBF',  // Purple
+    'initial-contact': '#4ECDC4',    // Teal
+    'follow-up-needed': '#FFB347',   // Light orange
+    'on-hold': '#9B9B9B',           // Gray
+    'pending': '#F1C40F',           // Bright yellow
+    'completed': '#2ECC71',         // Bright green
+    'cancelled': '#E74C3C',         // Red
+    'archived': '#7F8C8D'           // Dark gray
   };
 
-  if (iconError) {
-    return <span className="mr-1 text-sm">{fallbackEmojis[status] || '🔴'}</span>;
-  }
+  const color = statusColors[status] || '#6B7280';
 
   return (
-    <img 
-      src={`/icons/icons/${status}.png`} 
-      alt={`${status} status`}
-      className="w-6 h-6 inline-block mr-2"
-      style={{ filter: 'none', minWidth: '24px', minHeight: '24px' }}
-      onError={() => setIconError(true)}
-      onLoad={() => console.log(`Paint Brain icon loaded: ${status}`)}
+    <div 
+      className="w-3 h-3 rounded-full mr-2 flex-shrink-0"
+      style={{ backgroundColor: color }}
+      title={status}
     />
   );
 }
