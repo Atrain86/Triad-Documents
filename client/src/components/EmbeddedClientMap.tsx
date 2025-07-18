@@ -44,58 +44,89 @@ const EmbeddedClientMap: React.FC<EmbeddedClientMapProps> = ({
   const [locationError, setLocationError] = useState<string>('');
 
   useEffect(() => {
+    let mounted = true;
+    
     const initializeMap = async () => {
-      // Get Mapbox token from server
+      if (!mapContainer.current || map.current || !mounted) return;
+      
       try {
-        const response = await fetch('/api/mapbox-token');
-        const { token } = await response.json();
+        console.log('Starting map initialization...');
         
-        if (token && mapContainer.current && !map.current) {
-          mapboxgl.accessToken = token;
-          
-          map.current = new mapboxgl.Map({
-            container: mapContainer.current,
-            style: 'mapbox://styles/mapbox/dark-v11',
-            center: mapCenter,
-            zoom: 14,
-            pitch: 0,
-            bearing: 0,
-            antialias: true,
-            interactive: true
-          });
-
-          // Wait for map to load
-          map.current.on('load', () => {
-            // Add yellow marker for client location
-            new mapboxgl.Marker({ 
-              color: paintBrainColors.yellow,
-              scale: 1.2
-            })
-              .setLngLat(mapCenter)
-              .addTo(map.current!);
-
-            // Add navigation controls
-            map.current!.addControl(new mapboxgl.NavigationControl(), 'top-right');
-            
-            setMapReady(true);
-            console.log('Embedded map initialized successfully');
-          });
-
-          map.current.on('error', (e) => {
-            console.error('Map error:', e);
-            setLocationError('Failed to load map. Please refresh the page.');
-          });
-          
+        // Get token from server
+        const response = await fetch('/api/mapbox-token');
+        const data = await response.json();
+        
+        if (!data.token) {
+          throw new Error('No token received from server');
         }
+        
+        console.log('Token received, initializing map...');
+        mapboxgl.accessToken = data.token;
+        
+        // Clear any existing content in container
+        if (mapContainer.current) {
+          mapContainer.current.innerHTML = '';
+        }
+        
+        map.current = new mapboxgl.Map({
+          container: mapContainer.current,
+          style: 'mapbox://styles/mapbox/dark-v11',
+          center: mapCenter,
+          zoom: 14,
+          interactive: true
+        });
+
+        map.current.on('load', () => {
+          if (!mounted || !map.current) return;
+          
+          console.log('Map loaded, adding markers...');
+          
+          // Add yellow marker for client location
+          new mapboxgl.Marker({ 
+            color: paintBrainColors.yellow,
+            scale: 1.2
+          })
+            .setLngLat(mapCenter)
+            .addTo(map.current);
+
+          // Add navigation controls
+          map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+          
+          setMapReady(true);
+          setLocationError('');
+          console.log('Map initialization complete');
+        });
+
+        map.current.on('error', (e) => {
+          console.error('Map error:', e);
+          if (mounted) {
+            setLocationError('Map failed to load. Click retry below.');
+          }
+        });
+        
       } catch (error) {
-        console.error('Failed to get Mapbox token:', error);
-        setLocationError('Unable to load map. Please check your connection.');
+        console.error('Map initialization failed:', error);
+        if (mounted) {
+          setLocationError('Unable to load map. Click retry below.');
+        }
       }
     };
 
-    initializeMap();
+    // Small delay to ensure DOM is ready
+    setTimeout(initializeMap, 100);
 
-    // Get user's current location
+    return () => {
+      mounted = false;
+      if (map.current) {
+        map.current.remove();
+        map.current = null;
+        setMapReady(false);
+      }
+    };
+  }, [mapCenter]);
+
+  // Get user's current location in separate useEffect
+  useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -128,15 +159,7 @@ const EmbeddedClientMap: React.FC<EmbeddedClientMapProps> = ({
     } else {
       setLocationError('Geolocation not supported by this browser.');
     }
-
-    // Cleanup
-    return () => {
-      if (map.current) {
-        map.current.remove();
-        map.current = null;
-      }
-    };
-  }, [clientName, clientAddress, mapCenter]);
+  }, []);
 
   const handleCenterMap = () => {
     if (map.current) {
@@ -313,7 +336,30 @@ const EmbeddedClientMap: React.FC<EmbeddedClientMapProps> = ({
           <div className="absolute inset-0 flex items-center justify-center bg-black">
             <div className="text-center">
               <div className="text-yellow-400 text-2xl mb-2">🗺️</div>
-              <p className="text-yellow-400 text-sm">Loading map...</p>
+              <p className="text-yellow-400 text-sm">
+                {locationError ? 'Map failed to load' : 'Loading map...'}
+              </p>
+              {locationError && (
+                <button 
+                  onClick={() => {
+                    setLocationError('');
+                    setMapReady(false);
+                    if (map.current) {
+                      map.current.remove();
+                      map.current = null;
+                    }
+                    // Trigger re-initialization
+                    setTimeout(() => {
+                      if (mapContainer.current) {
+                        mapContainer.current.innerHTML = '';
+                      }
+                    }, 100);
+                  }} 
+                  className="mt-3 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded text-sm"
+                >
+                  Retry Map
+                </button>
+              )}
             </div>
           </div>
         )}
