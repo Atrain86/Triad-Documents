@@ -53,7 +53,7 @@ const EmbeddedClientMap: React.FC<EmbeddedClientMapProps> = ({
             container: mapContainer.current,
             style: 'mapbox://styles/mapbox/dark-v10',
             center: mapCenter,
-            zoom: 12,
+            zoom: 14,
             interactive: true
           });
 
@@ -65,7 +65,7 @@ const EmbeddedClientMap: React.FC<EmbeddedClientMapProps> = ({
             .setLngLat(mapCenter)
             .addTo(map.current);
 
-          // Add popup with client info
+          // Add popup with client info - show by default
           const popup = new mapboxgl.Popup({ 
             offset: 25,
             closeButton: true,
@@ -108,11 +108,21 @@ const EmbeddedClientMap: React.FC<EmbeddedClientMapProps> = ({
 
   const handleCenterMap = () => {
     if (map.current) {
-      map.current.flyTo({
-        center: mapCenter,
-        zoom: 14,
-        duration: 1000
-      });
+      if (showRoute) {
+        // If route is showing, fit to show both office and client
+        const officeCoords: [number, number] = [-124.9831, 50.0326];
+        const bounds = new mapboxgl.LngLatBounds();
+        bounds.extend(officeCoords);
+        bounds.extend(mapCenter);
+        map.current.fitBounds(bounds, { padding: 50 });
+      } else {
+        // Just center on client
+        map.current.flyTo({
+          center: mapCenter,
+          zoom: 14,
+          duration: 1000
+        });
+      }
     }
   };
 
@@ -180,11 +190,11 @@ const EmbeddedClientMap: React.FC<EmbeddedClientMapProps> = ({
       // Add office marker
       new mapboxgl.Marker({ 
         color: paintBrainColors.blue,
-        scale: 0.8
+        scale: 1.0
       })
         .setLngLat(officeCoords)
         .setPopup(new mapboxgl.Popup({ offset: 25 })
-          .setHTML('<div style="color: black; padding: 8px;"><strong>A-Frame Painting Office</strong><br>884 Hayes Rd, Manson\'s Landing, BC</div>'))
+          .setHTML('<div style="color: black; padding: 10px; font-family: system-ui;"><strong style="color: #569CD6;">A-Frame Painting Office</strong><br><span style="font-size: 12px;">884 Hayes Rd, Manson\'s Landing, BC</span></div>'))
         .addTo(map.current);
       
       // Fit map to show entire route
@@ -201,10 +211,8 @@ const EmbeddedClientMap: React.FC<EmbeddedClientMapProps> = ({
       
     } catch (error) {
       console.error('Failed to load navigation route:', error);
-      // Fallback to external navigation
-      const startAddress = encodeURIComponent('884 Hayes Rd, Manson\'s Landing, BC V0P1K0');
-      const endAddress = encodeURIComponent(clientAddress);
-      window.open(`https://www.google.com/maps/dir/${startAddress}/${endAddress}`, '_blank');
+      // Show error message instead of external navigation
+      alert('Unable to load route. Please check your internet connection.');
     }
   };
 
