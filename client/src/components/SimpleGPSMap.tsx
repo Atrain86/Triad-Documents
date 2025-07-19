@@ -75,14 +75,18 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
   }, []);
 
   const startRoute = () => {
+    console.log('Start Navigation button clicked');
     setError('');
     setIsGettingLocation(true);
     
     if (!navigator.geolocation) {
+      console.log('Geolocation not supported');
       setError('Geolocation not supported');
       setIsGettingLocation(false);
       return;
     }
+    
+    console.log('Requesting GPS location...');
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -104,9 +108,11 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
   // Get actual driving route from Mapbox
   const getRoute = async (start: [number, number], end: [number, number]) => {
     try {
+      console.log('Getting route from', start, 'to', end);
       const query = await fetch(
         `https://api.mapbox.com/directions/v5/mapbox/driving/${start[0]},${start[1]};${end[0]},${end[1]}?geometries=geojson&access_token=${mapboxgl.accessToken}`
       );
+      console.log('Route API response status:', query.status);
       
       if (!query.ok) {
         throw new Error(`HTTP ${query.status}: Failed to get route`);
@@ -245,12 +251,16 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
         {/* Map Overview Button */}
         <button
           onClick={() => {
+            console.log('View Map button clicked');
             if (map.current) {
+              console.log('Flying to client location:', clientCoords);
               map.current.flyTo({
                 center: clientCoords,
                 zoom: 13,
                 essential: true
               });
+            } else {
+              console.log('Map not ready');
             }
           }}
           className="absolute bottom-16 right-2 bg-emerald-600 hover:bg-emerald-700 text-white border-none px-4 py-2 rounded-lg cursor-pointer font-bold text-sm"
