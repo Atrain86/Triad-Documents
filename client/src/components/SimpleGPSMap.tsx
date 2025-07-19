@@ -332,7 +332,11 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           console.log('Navigation zoom to user location completed');
         }
         
-        // Draw route from your location to client (but don't change zoom)
+        // Start actual navigation
+        setIsNavigating(true);
+        setError('Starting navigation...');
+        
+        // Get route for navigation
         getRoute(userPosition, clientCoords);
       },
       (err) => {
@@ -372,6 +376,9 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
       const duration = Math.round(data.duration / 60); // Convert to minutes
       setRouteDistance(distance);
       setRouteDuration(duration.toString());
+      
+      setError(''); // Clear any error messages
+      setIsGettingLocation(false);
 
       if (map.current) {
         // Always ensure route is visible during navigation
@@ -387,7 +394,7 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           // Ignore errors, continue
         }
 
-        // Add fresh route with cyan-to-purple gradient
+        // Add fresh route with purple color for navigation
         map.current.addSource('route', {
           type: 'geojson',
           data: {
@@ -406,7 +413,7 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
             'line-cap': 'round' 
           },
           paint: { 
-            'line-color': ['interpolate', ['linear'], ['line-progress'], 0, '#00FFFF', 1, '#6B4C9A'], 
+            'line-color': '#6B4C9A', // Purple route line for navigation
             'line-width': 6
           },
         });
