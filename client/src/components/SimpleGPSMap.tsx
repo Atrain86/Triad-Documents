@@ -30,37 +30,8 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
   const watchId = useRef<number | null>(null);
   const compassControl = useRef<any>(null);
 
-  // Client coordinates - will be geocoded from address
-  const [clientCoords, setClientCoords] = useState<[number, number]>([-124.9625, 50.0431]);
-
-  // Geocode client address to get exact coordinates
-  useEffect(() => {
-    const geocodeAddress = async () => {
-      if (!clientAddress) return;
-      
-      try {
-        const response = await fetch('/api/mapbox-token');
-        const { token } = await response.json();
-        
-        // Geocode the client address to get exact coordinates
-        const geocodeUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(clientAddress)}.json?access_token=${token}&limit=1`;
-        const geocodeResponse = await fetch(geocodeUrl);
-        const geocodeData = await geocodeResponse.json();
-        
-        if (geocodeData.features && geocodeData.features[0]) {
-          const [lng, lat] = geocodeData.features[0].center;
-          console.log('Geocoded client address:', clientAddress, 'to coordinates:', [lng, lat]);
-          setClientCoords([lng, lat]);
-        } else {
-          console.log('Could not geocode address, using default coordinates');
-        }
-      } catch (error) {
-        console.error('Geocoding error:', error);
-      }
-    };
-    
-    geocodeAddress();
-  }, [clientAddress]);
+  // Client coordinates (using working coordinates)
+  const clientCoords: [number, number] = [-124.9625, 50.0431];
 
   // Initialize map
   useEffect(() => {
@@ -74,7 +45,7 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
 
         map.current = new mapboxgl.Map({
           container: mapContainer.current,
-          style: 'mapbox://styles/mapbox/streets-v12', // Use streets style with street names
+          style: 'mapbox://styles/mapbox/navigation-night-v1',
           center: clientCoords,
           zoom: 13,
           attributionControl: false, // Remove info button
