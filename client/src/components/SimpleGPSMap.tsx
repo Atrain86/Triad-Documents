@@ -76,7 +76,9 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           container: mapContainer.current,
           style: 'mapbox://styles/mapbox/dark-v11', // Dark style with street names
           center: clientCoords,
-          zoom: 14,
+          zoom: 13,
+          pitch: 45, // Angled 3D overview as default
+          bearing: 0,
           attributionControl: false, // Remove info button
           logoPosition: 'top-left', // This will be hidden with CSS
           // Improve touch handling to fix zoom issues
@@ -110,8 +112,8 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
                 const userPos: [number, number] = [position.coords.longitude, position.coords.latitude];
                 setUserCoords(userPos);
                 
-                // Show route overview automatically
-                getRoutePreview(userPos, clientCoords);
+                // Show route overview automatically with angled view
+                getRoutePreview(userPos, clientCoords, true);
               },
               (err) => {
                 console.log('Could not get location for auto-overview:', err.message);
@@ -120,6 +122,8 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
                   map.current.flyTo({
                     center: clientCoords,
                     zoom: 13,
+                    pitch: 45,
+                    bearing: 0,
                     essential: true
                   });
                 }
@@ -213,20 +217,20 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
   const returnToOverview = () => {
     if (userCoords && map.current) {
       console.log('Returning to overview...');
-      getRoutePreview(userCoords, clientCoords);
+      getRoutePreview(userCoords, clientCoords, true);
     } else if (map.current) {
-      // Fallback to client location if no user coords
+      // Fallback to client location if no user coords with angled view
       map.current.flyTo({
         center: clientCoords,
         zoom: 13,
         bearing: 0,
-        pitch: 0,
+        pitch: 45,
         essential: true
       });
     }
   };
 
-  const getRoutePreview = async (start: [number, number], end: [number, number]) => {
+  const getRoutePreview = async (start: [number, number], end: [number, number], angledView = true) => {
     try {
       console.log('Getting route preview from', start, 'to', end);
       const query = await fetch(
@@ -269,12 +273,12 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
             'line-cap': 'round'
           },
           'paint': {
-            'line-color': '#8a2be2', // Purple route line
-            'line-width': 5
+            'line-color': ['interpolate', ['linear'], ['line-progress'], 0, '#00FFFF', 1, '#6B4C9A'], // Cyan to purple gradient
+            'line-width': 6
           }
         });
         
-        // Fit view to show entire route
+        // Fit view to show entire route with angled perspective
         const bounds = new mapboxgl.LngLatBounds()
           .extend(start)
           .extend(end);
@@ -282,6 +286,8 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
         map.current.fitBounds(bounds, {
           padding: 50,
           speed: 1,
+          pitch: angledView ? 45 : 0, // Apply angled view if requested
+          bearing: 0,
           essential: true
         });
       }
@@ -323,7 +329,7 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           
           map.current.flyTo({
             center: userPosition,
-            zoom: 19, // Very close zoom like Google Maps navigation
+            zoom: 16, // Moderate zoom to keep street names visible
             bearing: initialBearing, // Use actual heading direction
             pitch: 60, // 3D driving perspective
             speed: 1.0, // Fast zoom transition
@@ -376,46 +382,45 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
       setRouteDuration(duration.toString());
 
       if (map.current) {
-        // Remove existing route
+        // Update or add route (preserve existing if possible)
         try {
-          if (map.current.getLayer('route')) map.current.removeLayer('route');
-          if (map.current.getSource('route')) map.current.removeSource('route');
-          // Remove user markers
-          const markers = document.querySelectorAll('.mapboxgl-marker');
-          markers.forEach(marker => {
-            if (marker.querySelector('.mapboxgl-marker')?.style.backgroundColor !== '#ef6c30') {
-              marker.remove();
-            }
-          });
+          if (map.current.getSource('route')) {
+            // Update existing route
+            map.current.getSource('route').setData({
+              type: 'Feature',
+              properties: {},
+              geometry: route,
+            });
+            console.log('Updated existing route data');
+          } else {
+            // Add new route source and layer
+            map.current.addSource('route', {
+              type: 'geojson',
+              data: {
+                type: 'Feature',
+                properties: {},
+                geometry: route,
+              },
+            });
+
+            map.current.addLayer({
+              id: 'route',
+              type: 'line',
+              source: 'route',
+              layout: { 
+                'line-join': 'round', 
+                'line-cap': 'round' 
+              },
+              paint: { 
+                'line-color': ['interpolate', ['linear'], ['line-progress'], 0, '#00FFFF', 1, '#6B4C9A'], 
+                'line-width': 6
+              },
+            });
+            console.log('Added new route layer');
+          }
         } catch (e) {
-          console.log('No existing route to remove');
+          console.log('Route update error:', e);
         }
-
-        // Add new route
-        map.current.addSource('route', {
-          type: 'geojson',
-          data: {
-            type: 'Feature',
-            properties: {},
-            geometry: route,
-          },
-        });
-
-        map.current.addLayer({
-          id: 'route',
-          type: 'line',
-          source: 'route',
-          layout: { 
-            'line-join': 'round', 
-            'line-cap': 'round' 
-          },
-          paint: { 
-            'line-color': ['interpolate', ['linear'], ['line-progress'], 0, '#00FFFF', 1, '#6B4C9A'], 
-            'line-width': 6
-          },
-        });
-        
-        console.log('Purple route line added to map');
 
         // Add user location marker with directional triangle (like Google Maps)
         const el = document.createElement('div');
