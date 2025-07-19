@@ -314,22 +314,22 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           setCurrentHeading(position.coords.heading);
         }
         
-        // Immediately zoom to user location with driver orientation
+        // Immediately zoom to user location with close driver orientation
         if (map.current) {
           const initialBearing = position.coords.heading || 0;
           console.log('Starting navigation zoom with bearing:', initialBearing);
           
           map.current.flyTo({
             center: userPosition,
-            zoom: 16, // Moderate zoom to keep street names visible
+            zoom: 18, // Much closer zoom for navigation takeoff
             bearing: initialBearing, // Use actual heading direction
-            pitch: 60, // 3D driving perspective
-            speed: 1.0, // Fast zoom transition
-            curve: 1,
+            pitch: 65, // Higher 3D angle for immersive driving perspective
+            speed: 1.2, // Slightly faster zoom transition
+            curve: 1.2,
             essential: true
           });
           
-          console.log('Navigation zoom to user location completed');
+          console.log('Navigation zoom to close user location completed');
         }
         
         // Start actual navigation
@@ -496,18 +496,18 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
               // GPS-style tracking: Only update if user isn't interacting with map
               if (map.current && !userInteracting) {
                 const currentZoom = map.current.getZoom();
-                // Only auto-zoom if user hasn't manually zoomed out
-                const targetZoom = currentZoom < 14 ? currentZoom : Math.max(currentZoom, 16);
+                // Maintain close navigation zoom level - prefer 17-18 for street-level navigation
+                const targetZoom = currentZoom < 14 ? 17 : Math.max(currentZoom, 17);
                 
                 // Always use driver orientation (heading direction)
                 const targetBearing = position.coords.heading !== null ? position.coords.heading : 0;
                 
                 map.current.easeTo({
                   center: newPos,
-                  zoom: targetZoom, // Respect user's zoom level if they zoomed out
+                  zoom: targetZoom, // Keep close zoom for navigation
                   bearing: targetBearing, // Driver orientation - follow heading
-                  pitch: 60, // 3D driving perspective
-                  duration: 800 // Smooth updates
+                  pitch: 65, // Higher 3D angle for immersive driving perspective
+                  duration: 600 // Slightly faster updates for responsive navigation
                 });
               } else if (map.current && userInteracting) {
                 // Only update marker position when user is interacting, don't move map
