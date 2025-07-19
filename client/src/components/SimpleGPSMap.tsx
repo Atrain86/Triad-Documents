@@ -235,25 +235,14 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
 
         {/* Start Navigation Button */}
         <button
-          onClick={() => {
-            console.log('Opening navigation in device Maps app');
-            const destination = encodeURIComponent(clientAddress);
-            // Use universal maps URL that works on all devices
-            window.open(`https://maps.google.com/maps?q=${destination}&navigate=yes`, '_blank');
-          }}
-          className="absolute bottom-2 right-2 bg-green-600 hover:bg-green-700 text-white border-none px-4 py-2 rounded-lg cursor-pointer font-bold"
-        >
-          🧭 Start Navigation
-        </button>
-
-        {/* Show Route Navigation */}
-        <button
           onClick={startRoute}
           disabled={isGettingLocation}
-          className="absolute bottom-16 right-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 disabled:cursor-not-allowed text-white border-none px-4 py-2 rounded-lg cursor-pointer font-bold text-sm"
+          className="absolute bottom-2 right-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed text-white border-none px-4 py-2 rounded-lg cursor-pointer font-bold"
         >
-          {isGettingLocation ? 'Getting GPS...' : 'Show Route'}
+          {isGettingLocation ? 'Getting GPS...' : '🧭 Start Navigation'}
         </button>
+
+
 
 
 
