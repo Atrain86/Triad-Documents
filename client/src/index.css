@@ -121,94 +121,109 @@ input[type="date"] {
   color-scheme: dark;
 }
 
-/* Map Container Styling - Force with higher specificity */
+/* Map Container Styling - Dark Blue Theme like your image */
 .map-container {
-  background: linear-gradient(145deg, #1a1a2e, #121212) !important;
+  background: linear-gradient(145deg, #1a237e, #0d1421) !important;
   border-radius: 16px !important;
-  padding: 12px !important;
-  box-shadow: 0 0 12px rgba(0, 0, 0, 0.4) !important;
+  padding: 16px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6) !important;
   margin-top: 10px !important;
   position: relative !important;
   overflow: hidden !important;
-  border: none !important;
+  border: 1px solid #2196f3 !important;
 }
 
 .mapbox-map {
-  height: 250px !important;
+  height: 200px !important;
   width: 100% !important;
   border-radius: 12px !important;
-  border: 2px solid #2e2e2e !important;
+  border: 2px solid #1976d2 !important;
+  background-color: #0a0f1a !important;
 }
 
 .map-client-label {
   display: flex !important;
   align-items: center !important;
   margin-bottom: 8px !important;
-  color: #ff9f1c !important;
-  font-weight: 600 !important;
-  font-size: 16px !important;
+  color: #ffcc02 !important;
+  font-weight: 700 !important;
+  font-size: 18px !important;
 }
 
 .map-client-label .icon {
   margin-right: 8px !important;
-  font-size: 20px !important;
+  font-size: 22px !important;
+  color: #ffcc02 !important;
 }
 
 .map-address {
-  color: #cfcfcf !important;
+  color: #64b5f6 !important;
   font-size: 14px !important;
-  margin-bottom: 6px !important;
+  margin-bottom: 12px !important;
+  font-weight: 500 !important;
 }
 
 .map-buttons {
   display: flex !important;
   justify-content: space-between !important;
-  gap: 10px !important;
-  margin-top: 12px !important;
+  gap: 12px !important;
+  margin-top: 16px !important;
 }
 
 .map-buttons button {
   flex: 1 !important;
-  padding: 10px !important;
-  font-size: 14px !important;
+  padding: 12px 16px !important;
+  font-size: 16px !important;
   border: none !important;
-  border-radius: 10px !important;
-  font-weight: 600 !important;
+  border-radius: 12px !important;
+  font-weight: 700 !important;
   cursor: pointer !important;
   transition: all 0.2s ease !important;
+  text-transform: uppercase !important;
 }
 
 .map-buttons .route-btn {
-  background-color: #3478f6 !important;
+  background-color: #1976d2 !important;
   color: white !important;
+  border: 2px solid #42a5f5 !important;
 }
 
 .map-buttons .nav-btn {
-  background-color: #28a745 !important;
+  background-color: #00c853 !important;
   color: white !important;
+  border: 2px solid #4caf50 !important;
 }
 
 .map-buttons button:hover {
-  opacity: 0.9 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
 }
 
 .map-buttons button:disabled {
-  opacity: 0.6 !important;
+  opacity: 0.5 !important;
   cursor: not-allowed !important;
+  transform: none !important;
 }
 
 .fullscreen-toggle {
   position: absolute !important;
-  top: 8px !important;
-  right: 10px !important;
-  background-color: rgba(0, 0, 0, 0.6) !important;
-  color: white !important;
-  padding: 6px !important;
+  top: 12px !important;
+  right: 12px !important;
+  background-color: rgba(25, 118, 210, 0.8) !important;
+  color: #ffcc02 !important;
+  padding: 8px 12px !important;
   border-radius: 8px !important;
-  font-size: 14px !important;
+  font-size: 16px !important;
   cursor: pointer !important;
-  z-index: 10 !important;
-  border: none !important;
+  z-index: 20 !important;
+  border: 2px solid #42a5f5 !important;
+  font-weight: bold !important;
+  transition: all 0.2s ease !important;
+}
+
+.fullscreen-toggle:hover {
+  background-color: rgba(25, 118, 210, 1) !important;
+  transform: scale(1.05) !important;
 }
 
 /* Mobile fullscreen styling */
