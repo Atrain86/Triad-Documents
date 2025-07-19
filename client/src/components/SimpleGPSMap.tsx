@@ -199,16 +199,18 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           .setLngLat(start)
           .addTo(map.current);
 
-        // GPS-style navigation: Zoom in very close on user location
+        // GPS-style navigation: Immediately zoom in very close on user location
         map.current.flyTo({
           center: start,
           zoom: 18, // Very close zoom like driving GPS
-          bearing: isCompassMode ? currentHeading : 0, // Use compass direction if enabled
-          pitch: 60, // Slight 3D angle for driving perspective
-          speed: 1.5,
+          bearing: 0, // Start with north up
+          pitch: 60, // 3D angle for driving perspective
+          speed: 2, // Faster zoom to close-up view
           curve: 1,
           essential: true
         });
+
+        console.log('Navigation started - zoomed to GPS view at zoom level 18');
 
         console.log('Route drawn successfully');
         setError('');
