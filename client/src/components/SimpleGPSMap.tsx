@@ -282,7 +282,30 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
         console.log('Got your position:', userPosition);
         setUserCoords(userPosition);
         
-        // Draw route from your location to client
+        // Set current heading if available
+        if (position.coords.heading !== null) {
+          setCurrentHeading(position.coords.heading);
+        }
+        
+        // Immediately zoom to user location with driver orientation
+        if (map.current) {
+          const initialBearing = position.coords.heading || 0;
+          console.log('Starting navigation zoom with bearing:', initialBearing);
+          
+          map.current.flyTo({
+            center: userPosition,
+            zoom: 19, // Very close zoom like Google Maps navigation
+            bearing: initialBearing, // Use actual heading direction
+            pitch: 60, // 3D driving perspective
+            speed: 1.0, // Fast zoom transition
+            curve: 1,
+            essential: true
+          });
+          
+          console.log('Navigation zoom to user location completed');
+        }
+        
+        // Draw route from your location to client (but don't change zoom)
         getRoute(userPosition, clientCoords);
       },
       (err) => {
@@ -311,7 +334,6 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
       
       if (!json.routes || !json.routes[0]) {
         setError('No route found between locations');
-        setIsGettingLocation(false);
         return;
       }
       
@@ -406,27 +428,12 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           .setLngLat(start)
           .addTo(map.current);
 
-        // Google Maps style: Immediate close zoom to user location with driver orientation
-        const initialBearing = currentHeading || 0;
-        console.log('Starting navigation with bearing:', initialBearing);
-        
-        map.current.flyTo({
-          center: start,
-          zoom: 19, // Very close zoom like Google Maps navigation
-          bearing: initialBearing, // Start with current heading direction
-          pitch: 60, // 3D driving perspective like Google Maps
-          speed: 1.2, // Fast zoom transition
-          curve: 1,
-          essential: true
-        });
-        
-        console.log('Navigation zoom completed - should be at user location');
-
-        console.log('Navigation started - zoomed to GPS view at zoom level 18');
+        // Navigation zoom is now handled in startRoute function immediately after GPS
 
         console.log('Route drawn successfully');
         setError('');
         setIsNavigating(true);
+        setIsGettingLocation(false); // Navigation setup complete
         
         // Start live location tracking for navigation
         if (navigator.geolocation) {
