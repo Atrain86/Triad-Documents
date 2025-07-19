@@ -98,10 +98,15 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
         getRoute(userPosition, clientCoords);
       },
       (err) => {
-        setError('Failed to get GPS location: ' + err.message);
+        console.log('GPS error:', err.message);
+        setError('GPS location failed. Using demo route instead.');
         setIsGettingLocation(false);
+        
+        // Demo route from Vancouver area to client location
+        const demoStart: [number, number] = [-123.1207, 49.2827];
+        getRoute(demoStart, clientCoords);
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 300000 }
     );
   };
 
@@ -186,11 +191,36 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           essential: true
         });
 
-        setError('Route displayed! Follow the purple line to your destination.');
+        setError('Navigation started! Follow the purple line to your destination.');
+        
+        // Start live location tracking for navigation
+        if (navigator.geolocation) {
+          watchId.current = navigator.geolocation.watchPosition(
+            (position) => {
+              const newPos: [number, number] = [position.coords.longitude, position.coords.latitude];
+              console.log('Live position update:', newPos);
+              
+              // Update user marker position
+              if (userMarker.current) {
+                userMarker.current.setLngLat(newPos);
+              }
+              
+              // Keep map centered on user during navigation
+              if (map.current) {
+                map.current.easeTo({
+                  center: newPos,
+                  duration: 1000
+                });
+              }
+            },
+            (err) => console.log('Live tracking error:', err.message),
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
+          );
+        }
       }
     } catch (err) {
-      console.error('Route error:', err);
-      setError('Route error: ' + err.message);
+      console.log('Route error:', err);
+      setError('Route request failed: ' + (err as Error).message);
     } finally {
       setIsGettingLocation(false);
     }
