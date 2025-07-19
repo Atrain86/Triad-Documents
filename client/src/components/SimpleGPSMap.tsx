@@ -160,34 +160,85 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
       }
     };
     
-    // Try to get real GPS location with better options
-    if (navigator.geolocation) {
-      console.log('Getting your real GPS location for navigation...');
+    // Check permissions and get location
+    console.log('Checking location permissions...');
+    
+    // Check if permissions API is available
+    if ('permissions' in navigator) {
+      navigator.permissions.query({name: 'geolocation'}).then((result) => {
+        console.log('Permission state:', result.state);
+        
+        if (result.state === 'denied') {
+          setError('Location access denied. Please enable location in browser settings: Settings > Privacy > Location');
+          setIsGettingLocation(false);
+          return;
+        }
+        
+        // Try to get location
+        attemptLocationGet();
+      }).catch(() => {
+        console.log('Permissions API failed, trying location anyway');
+        attemptLocationGet();
+      });
+    } else {
+      console.log('No permissions API, trying location directly');
+      attemptLocationGet();
+    }
+    
+    function attemptLocationGet() {
+      if (!navigator.geolocation) {
+        setError('GPS not supported on this device');
+        setIsGettingLocation(false);
+        return;
+      }
+      
+      console.log('Requesting GPS location...');
+      
+      // Set up a manual timeout that WILL fire
+      const manualTimeout = setTimeout(() => {
+        console.log('MANUAL TIMEOUT: GPS request took too long');
+        setError('GPS timeout. For navigation: tap the address above to open in Maps app, or enable precise location in browser settings.');
+        setIsGettingLocation(false);
+      }, 8000);
       
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          console.log('SUCCESS: Got your real location:', position.coords);
+          clearTimeout(manualTimeout);
+          console.log('SUCCESS: Got GPS location:', position.coords);
           const userCoords: [number, number] = [
             position.coords.longitude,
             position.coords.latitude
           ];
-          console.log('Starting navigation from your location:', userCoords);
           drawRoute(userCoords);
         },
         (err) => {
-          console.error('GPS failed:', err);
-          setError(`GPS failed: ${err.message}. Please enable location access in your browser settings and try again.`);
+          clearTimeout(manualTimeout);
+          console.error('GPS error:', err.code, err.message);
+          
+          let errorMsg = 'GPS failed. ';
+          switch(err.code) {
+            case 1: // PERMISSION_DENIED
+              errorMsg += 'Location access denied. Enable location in browser settings.';
+              break;
+            case 2: // POSITION_UNAVAILABLE
+              errorMsg += 'Location unavailable. Check GPS signal.';
+              break;
+            case 3: // TIMEOUT
+              errorMsg += 'Location timeout. Try again.';
+              break;
+            default:
+              errorMsg += err.message;
+          }
+          
+          setError(errorMsg);
           setIsGettingLocation(false);
         },
         { 
-          enableHighAccuracy: true,  // High accuracy for precise navigation
-          timeout: 15000,  // 15 seconds to get accurate location
-          maximumAge: 0  // Always get fresh location for navigation
+          enableHighAccuracy: false,  // Try fast/rough location first
+          timeout: 6000,
+          maximumAge: 60000  // Accept 1-minute old location
         }
       );
-    } else {
-      setError('GPS not supported on this device. Navigation requires location services.');
-      setIsGettingLocation(false);
     }
   };
 
@@ -218,13 +269,20 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           onDoubleClick={toggleFullscreen}
         />
         
-        {/* Map Overlay (like your example) */}
+        {/* Map Overlay - Clickable Address */}
         <div 
-          className="absolute top-2 left-2 bg-black bg-opacity-60 px-3 py-2 rounded-lg text-sm"
+          className="absolute top-2 left-2 bg-black bg-opacity-60 px-3 py-2 rounded-lg text-sm cursor-pointer hover:bg-opacity-80"
           style={{ color: '#ffaf40' }}
+          onClick={() => {
+            console.log('Opening address in device Maps app');
+            const destination = encodeURIComponent(clientAddress);
+            // Open in device's default maps app
+            window.open(`https://maps.apple.com/?q=${destination}`, '_blank');
+          }}
+          title="Tap to open in Maps app"
         >
           🏠 {clientName}<br />
-          {clientAddress}
+          📍 {clientAddress}
         </div>
 
         {/* Start Navigation Button */}
