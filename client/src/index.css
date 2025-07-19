@@ -72,6 +72,24 @@
   }
 }
 
+/* Mobile fullscreen styling */
+.mobile-fullscreen {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9999 !important;
+  border-radius: 0 !important;
+}
+
+/* Hide mobile browser UI when in fullscreen */
+@media (max-width: 768px) {
+  .mobile-fullscreen {
+    height: 100dvh !important; /* Use dynamic viewport height on mobile */
+  }
+}
+
 /* Custom date input styling */
 input[type="date"] {
   color-scheme: light;

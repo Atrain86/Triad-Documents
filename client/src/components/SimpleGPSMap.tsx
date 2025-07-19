@@ -88,18 +88,15 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
     
     if (timeSinceLastTap < 300 && timeSinceLastTap > 0) {
       // Double tap detected - toggle fullscreen
-      if (!isFullscreen) {
-        // Enter fullscreen mode
-        if (document.documentElement.requestFullscreen) {
-          document.documentElement.requestFullscreen();
-        }
-      } else {
-        // Exit fullscreen mode
-        if (document.exitFullscreen) {
-          document.exitFullscreen();
-        }
-      }
+      console.log('Double tap detected - toggling fullscreen');
       setIsFullscreen(!isFullscreen);
+      
+      // Resize map after fullscreen change
+      setTimeout(() => {
+        if (map.current) {
+          map.current.resize();
+        }
+      }, 100);
     }
     
     setLastTap(now);
@@ -293,11 +290,13 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
     <div className="w-full">
       {/* Map Container */}
       <div 
-        className={`w-full rounded-lg overflow-hidden relative ${
-          isFullscreen ? 'fixed inset-0 z-50 rounded-none' : ''
+        className={`w-full overflow-hidden relative ${
+          isFullscreen 
+            ? 'mobile-fullscreen' 
+            : 'rounded-lg'
         }`}
         style={{ 
-          height: isFullscreen ? '100vh' : '300px',
+          height: isFullscreen ? '100dvh' : '300px',
           backgroundColor: '#0c0f1a'
         }}
       >
@@ -367,6 +366,24 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           </>
         ) : (
           <>
+            {/* Fullscreen Exit Button - Only show when in fullscreen */}
+            {isFullscreen && (
+              <button
+                onClick={() => {
+                  console.log('Exiting fullscreen');
+                  setIsFullscreen(false);
+                  setTimeout(() => {
+                    if (map.current) {
+                      map.current.resize();
+                    }
+                  }, 100);
+                }}
+                className="absolute top-4 right-4 bg-black bg-opacity-70 hover:bg-opacity-90 text-white border-none px-3 py-2 rounded-lg cursor-pointer font-bold text-sm z-10"
+              >
+                ✕ Exit Fullscreen
+              </button>
+            )}
+
             {/* GPS Navigation Status Display */}
             <div className="absolute top-2 left-2 bg-black/90 text-white p-3 rounded-lg shadow-lg border border-gray-600">
               <div className="font-bold text-cyan-400 text-lg">🧭 GPS ACTIVE</div>
