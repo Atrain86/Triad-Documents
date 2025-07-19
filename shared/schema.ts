@@ -9,7 +9,9 @@ export const users = pgTable("users", {
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   role: text("role").notNull().default("client"), // admin or client
+  isActive: text("is_active").default("true"), // keeping as text for compatibility
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  lastLoginAt: timestamp("last_login_at"),
 });
 
 export const projects = pgTable("projects", {
@@ -56,6 +58,9 @@ export const receipts = pgTable("receipts", {
   originalName: text("original_name"),
   date: timestamp("date").notNull(),
   uploadedAt: timestamp("uploaded_at").defaultNow().notNull(),
+  items: text("items").array(), // Array field that exists in DB
+  ocrMethod: text("ocr_method"), // Field that exists in DB
+  confidence: real("confidence"), // Field that exists in DB
 });
 
 export const dailyHours = pgTable("daily_hours", {
@@ -74,6 +79,33 @@ export const toolsChecklist = pgTable("tools_checklist", {
   projectId: integer("project_id").notNull(),
   toolName: text("tool_name").notNull(),
   isCompleted: integer("is_completed").default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const tokenUsage = pgTable("token_usage", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id"),
+  operation: text("operation"),
+  tokensUsed: integer("tokens_used"),
+  cost: real("cost"),
+  model: text("model"),
+  imageSize: integer("image_size"),
+  success: text("success"), // Using text instead of boolean for compatibility
+  errorMessage: text("error_message"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const estimates = pgTable("estimates", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").notNull(),
+  content: text("content"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const sessions = pgTable("sessions", {
+  id: text("id").primaryKey(),
+  userId: integer("user_id"),
+  data: text("data"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

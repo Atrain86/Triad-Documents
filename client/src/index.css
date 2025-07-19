@@ -15,15 +15,15 @@
   --card-foreground: hsl(20, 14.3%, 4.1%);
   --border: hsl(20, 5.9%, 90%);
   --input: hsl(20, 5.9%, 90%);
-  --primary: 263 41% 55%; /* Paint Brain Purple #8B5FBF */
+  --primary: hsl(263, 41%, 55%); /* Paint Brain Purple #8B5FBF */
   --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: 212, 165, 116; /* Paint Brain Orange #D4A574 */
+  --secondary: hsl(31, 38%, 66%); /* Paint Brain Orange #D4A574 */
   --secondary-foreground: hsl(0, 0%, 100%);
   --accent: hsl(60, 4.8%, 95.9%);
   --accent-foreground: hsl(24, 9.8%, 10%);
-  --destructive: 244, 71, 71; /* Paint Brain Red #F44747 */
+  --destructive: hsl(0, 63%, 63%); /* Paint Brain Red #F44747 */
   --destructive-foreground: hsl(60, 9.1%, 97.8%);
-  --ring: 86, 156, 214; /* Paint Brain Blue #569CD6 */
+  --ring: hsl(207, 56%, 71%); /* Paint Brain Blue #569CD6 */
   --radius: 0.5rem;
   
   /* Paint Brain Color Palette */
@@ -46,15 +46,15 @@
   --card-foreground: hsl(210, 35%, 85%);
   --border: hsl(217, 15%, 25%);
   --input: hsl(217, 15%, 25%);
-  --primary: 263 41% 55%; /* Paint Brain Purple #8B5FBF */
+  --primary: hsl(263, 41%, 55%); /* Paint Brain Purple #8B5FBF */
   --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: 212, 165, 116; /* Paint Brain Orange #D4A574 */
+  --secondary: hsl(31, 38%, 66%); /* Paint Brain Orange #D4A574 */
   --secondary-foreground: hsl(0, 0%, 100%);
   --accent: hsl(217, 15%, 25%);
   --accent-foreground: hsl(210, 35%, 85%);
-  --destructive: 244, 71, 71; /* Paint Brain Red #F44747 */
+  --destructive: hsl(0, 63%, 63%); /* Paint Brain Red #F44747 */
   --destructive-foreground: hsl(210, 35%, 85%);
-  --ring: 86, 156, 214; /* Paint Brain Blue #569CD6 */
+  --ring: hsl(207, 56%, 71%); /* Paint Brain Blue #569CD6 */
   --radius: 0.5rem;
 }
 
