@@ -182,28 +182,27 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
         
         console.log('Purple route line added to map');
 
-        // Add user location marker
-        userMarker.current = new mapboxgl.Marker({ color: '#00FFFF' })
+        // Add user location marker with directional triangle
+        const el = document.createElement('div');
+        el.className = 'user-location-marker';
+        el.style.width = '20px';
+        el.style.height = '20px';
+        el.style.backgroundColor = '#00FFFF';
+        el.style.borderRadius = '50%';
+        el.style.border = '3px solid white';
+        el.style.boxShadow = '0 0 10px rgba(0,255,255,0.6)';
+        
+        userMarker.current = new mapboxgl.Marker(el)
           .setLngLat(start)
           .addTo(map.current);
 
-        // Add live location tracking control
-        const geolocateControl = new mapboxgl.GeolocateControl({
-          positionOptions: { enableHighAccuracy: true },
-          trackUserLocation: true,
-          showAccuracyCircle: false
-        });
-        
-        map.current.addControl(geolocateControl);
-
-        // Fit map to show both start and end points with route
-        const bounds = new mapboxgl.LngLatBounds()
-          .extend(start)
-          .extend(end);
-          
-        map.current.fitBounds(bounds, {
-          padding: 50,
-          speed: 1,
+        // GPS-style navigation: Zoom in close on user location
+        map.current.flyTo({
+          center: start,
+          zoom: 17, // Close zoom like a GPS
+          bearing: 0, // North up
+          pitch: 0,
+          speed: 1.2,
           curve: 1,
           essential: true
         });
@@ -225,16 +224,18 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
                 userMarker.current.setLngLat(newPos);
               }
               
-              // Keep map centered on user during navigation
+              // GPS-style tracking: Keep close zoom and center on user
               if (map.current) {
                 map.current.easeTo({
                   center: newPos,
-                  duration: 1000
+                  zoom: 17, // Maintain close GPS zoom
+                  bearing: 0, // Keep north up
+                  duration: 1500
                 });
               }
             },
             (err) => console.log('Live tracking error:', err.message),
-            { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
           );
         }
       }
@@ -323,11 +324,12 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           </>
         ) : (
           <>
-            {/* Navigation Status Display */}
-            <div className="absolute top-2 left-2 bg-black/80 text-white p-3 rounded-lg">
-              <div className="font-bold text-green-400">🧭 NAVIGATING</div>
-              <div className="text-sm">{routeDistance} km • {routeDuration} min</div>
-              <div className="text-xs text-gray-300">Follow purple line</div>
+            {/* GPS Navigation Status Display */}
+            <div className="absolute top-2 left-2 bg-black/90 text-white p-3 rounded-lg shadow-lg border border-gray-600">
+              <div className="font-bold text-cyan-400 text-lg">🧭 GPS ACTIVE</div>
+              <div className="text-sm font-semibold">{routeDistance} km • {routeDuration} min</div>
+              <div className="text-xs text-green-300">Following route to destination</div>
+              <div className="text-xs text-gray-400 mt-1">Your location is being tracked</div>
             </div>
 
             {/* Stop Navigation Button */}
