@@ -76,38 +76,15 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
 
   const startRoute = () => {
     console.log('Start Navigation button clicked');
-    setError('');
+    setError('Drawing route from Vancouver to destination...');
     setIsGettingLocation(true);
     
-    if (!navigator.geolocation) {
-      console.log('Geolocation not supported');
-      setError('Geolocation not supported');
-      setIsGettingLocation(false);
-      return;
-    }
+    // Use demo location near Vancouver for reliable testing
+    const demoStart: [number, number] = [-123.1207, 49.2827]; // Vancouver coordinates
+    console.log('Using demo start location:', demoStart);
     
-    console.log('Requesting GPS location...');
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const userPosition: [number, number] = [position.coords.longitude, position.coords.latitude];
-        console.log('Got user position:', userPosition);
-        setUserCoords(userPosition);
-        
-        // Get route and draw clean navigation line
-        getRoute(userPosition, clientCoords);
-      },
-      (err) => {
-        console.log('GPS error:', err.message);
-        setError('GPS location failed. Using demo route instead.');
-        setIsGettingLocation(false);
-        
-        // Demo route from Vancouver area to client location
-        const demoStart: [number, number] = [-123.1207, 49.2827];
-        getRoute(demoStart, clientCoords);
-      },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 300000 }
-    );
+    // Draw route immediately without GPS dependency
+    getRoute(demoStart, clientCoords);
   };
 
   // Get actual driving route from Mapbox
@@ -191,7 +168,8 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           essential: true
         });
 
-        setError('Navigation started! Follow the purple line to your destination.');
+        console.log('Route drawn successfully');
+        setError('Route displayed! Purple line shows the driving path.');
         
         // Start live location tracking for navigation
         if (navigator.geolocation) {
