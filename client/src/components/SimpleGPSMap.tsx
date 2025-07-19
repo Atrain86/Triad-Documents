@@ -68,6 +68,7 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
       if (!mapContainer.current || map.current) return;
 
       try {
+        console.log('Initializing map with client coordinates:', clientCoords);
         const response = await fetch('/api/mapbox-token');
         const { token } = await response.json();
         mapboxgl.accessToken = token;
@@ -100,6 +101,7 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
         });
 
         map.current.on('load', () => {
+          console.log('Map loaded, adding destination marker at:', clientCoords);
           // Add destination marker (orange like the example)
           new mapboxgl.Marker({ color: '#ef6c30' })
             .setLngLat(clientCoords)
@@ -107,18 +109,24 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
 
           // Auto-show route overview on map load
           if (navigator.geolocation) {
+            console.log('Requesting location for auto-preview...');
             navigator.geolocation.getCurrentPosition(
               (position) => {
                 const userPos: [number, number] = [position.coords.longitude, position.coords.latitude];
+                console.log('Got user position for preview:', userPos);
+                console.log('Client coordinates:', clientCoords);
                 setUserCoords(userPos);
                 
                 // Show route overview automatically with angled view
-                getRoutePreview(userPos, clientCoords, true);
+                setTimeout(() => {
+                  getRoutePreview(userPos, clientCoords, true);
+                }, 1000); // Wait for map to fully load
               },
               (err) => {
                 console.log('Could not get location for auto-overview:', err.message);
-                // Fallback to just showing client location
+                // Fallback: Show angled view of client location with test route
                 if (map.current) {
+                  console.log('Showing fallback angled view of client location');
                   map.current.flyTo({
                     center: clientCoords,
                     zoom: 13,
@@ -126,10 +134,28 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
                     bearing: 0,
                     essential: true
                   });
+                  
+                  // Try to show route from a nearby test location
+                  const testStart: [number, number] = [clientCoords[0] - 0.01, clientCoords[1] - 0.01];
+                  setTimeout(() => {
+                    getRoutePreview(testStart, clientCoords, true);
+                  }, 1500);
                 }
               },
-              { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 }
+              { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
             );
+          } else {
+            console.log('Geolocation not available, showing client location only');
+            // No geolocation - just show angled client view
+            if (map.current) {
+              map.current.flyTo({
+                center: clientCoords,
+                zoom: 13,
+                pitch: 45,
+                bearing: 0,
+                essential: true
+              });
+            }
           }
 
           setMapReady(true);
@@ -153,7 +179,7 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
         navigator.geolocation.clearWatch(watchId.current);
       }
     };
-  }, []);
+  }, [clientCoords]); // Re-initialize map when clientCoords change
 
   // Simplified double-tap handling without text selection interference
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -232,18 +258,27 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
 
   const getRoutePreview = async (start: [number, number], end: [number, number], angledView = true) => {
     try {
-      console.log('Getting route preview from', start, 'to', end);
+      console.log('Getting route preview from', start, 'to', end, 'with angled view:', angledView);
       const query = await fetch(
         `https://api.mapbox.com/directions/v5/mapbox/driving/${start[0]},${start[1]};${end[0]},${end[1]}?geometries=geojson&access_token=${mapboxgl.accessToken}`
       );
       
       if (!query.ok) {
+        console.error('Route preview API failed:', query.status, query.statusText);
         throw new Error('Route preview failed');
       }
       
       const json = await query.json();
+      console.log('Route preview response:', json);
+      
+      if (!json.routes || json.routes.length === 0) {
+        console.error('No routes found in response');
+        return;
+      }
+      
       const data = json.routes[0];
       const route = data.geometry.coordinates;
+      console.log('Route has', route.length, 'coordinate points');
       
       // Add purple route line (preview version)
       if (map.current) {
@@ -259,6 +294,8 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
         }
         
         console.log('Adding route preview with', route.length, 'coordinates');
+        console.log('First coordinate:', route[0]);
+        console.log('Last coordinate:', route[route.length - 1]);
         
         map.current.addSource('route', {
           'type': 'geojson',
