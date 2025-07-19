@@ -94,6 +94,11 @@
     -moz-user-select: none !important;
     -ms-user-select: none !important;
     user-select: none !important;
+    /* Prevent zoom and gestures */
+    touch-action: none !important;
+    -webkit-touch-action: none !important;
+    /* Prevent iOS zoom */
+    -webkit-text-size-adjust: none !important;
   }
 }
 

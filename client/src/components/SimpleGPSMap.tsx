@@ -81,29 +81,40 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
     };
   }, []);
 
-  // Handle double-tap for fullscreen
-  const handleTouchStart = (e: React.TouchEvent) => {
+  // Handle touch events for fullscreen
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    // Only handle single finger touches
+    if (e.changedTouches.length !== 1) return;
+    
     const now = Date.now();
     const timeSinceLastTap = now - lastTap;
     
-    if (timeSinceLastTap < 300 && timeSinceLastTap > 0) {
-      // Double tap detected - prevent default and toggle fullscreen
+    if (timeSinceLastTap < 400 && timeSinceLastTap > 50) {
+      // Double tap detected
       e.preventDefault();
+      e.stopPropagation();
       console.log('Double tap detected - toggling fullscreen');
       
-      // Toggle fullscreen state
-      const newFullscreenState = !isFullscreen;
-      setIsFullscreen(newFullscreenState);
+      setIsFullscreen(prev => !prev);
       
       // Resize map after fullscreen change
       setTimeout(() => {
         if (map.current) {
           map.current.resize();
         }
-      }, 150);
+      }, 200);
     }
     
     setLastTap(now);
+  };
+
+  // Prevent zoom gestures in fullscreen mode
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (isFullscreen && e.touches.length > 1) {
+      // Prevent multi-touch zoom in fullscreen
+      e.preventDefault();
+      e.stopPropagation();
+    }
   };
 
   // Handle mouse double-click for desktop
@@ -321,9 +332,10 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           className="w-full h-full cursor-pointer"
           style={{
             /* Hide Mapbox logo and attribution */
-            touchAction: 'manipulation' // Prevent zoom and other touch gestures
+            touchAction: isFullscreen ? 'none' : 'manipulation'
           }}
-          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          onTouchMove={handleTouchMove}
           onDoubleClick={handleDoubleClick}
         />
         
