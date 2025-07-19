@@ -25,8 +25,7 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
   const [routeDistance, setRouteDistance] = useState<string>('');
   const [routeDuration, setRouteDuration] = useState<string>('');
   const [currentHeading, setCurrentHeading] = useState<number>(0);
-  const [isCompassMode, setIsCompassMode] = useState(false);
-  const [lockedBearing, setLockedBearing] = useState<number>(0);
+  const [userInteracting, setUserInteracting] = useState(false);
   const userMarker = useRef<mapboxgl.Marker | null>(null);
   const watchId = useRef<number | null>(null);
   const compassControl = useRef<any>(null);
@@ -57,6 +56,16 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           dragRotate: false,
           keyboard: false,
           doubleClickZoom: false // Disable double-click zoom to prevent conflicts
+        });
+
+        // Track user interactions to prevent auto-centering
+        map.current.on('dragstart', () => setUserInteracting(true));
+        map.current.on('dragend', () => {
+          setTimeout(() => setUserInteracting(false), 3000); // Stop auto-center for 3 seconds after dragging
+        });
+        map.current.on('zoomstart', () => setUserInteracting(true));
+        map.current.on('zoomend', () => {
+          setTimeout(() => setUserInteracting(false), 2000); // Stop auto-center for 2 seconds after zooming
         });
 
         map.current.on('load', () => {
@@ -397,16 +406,21 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           .setLngLat(start)
           .addTo(map.current);
 
-        // Google Maps style: Immediate close zoom to user location
+        // Google Maps style: Immediate close zoom to user location with driver orientation
+        const initialBearing = currentHeading || 0;
+        console.log('Starting navigation with bearing:', initialBearing);
+        
         map.current.flyTo({
           center: start,
           zoom: 19, // Very close zoom like Google Maps navigation
-          bearing: 0, // Start with north up
+          bearing: initialBearing, // Start with current heading direction
           pitch: 60, // 3D driving perspective like Google Maps
-          speed: 1.5, // Smooth zoom transition
+          speed: 1.2, // Fast zoom transition
           curve: 1,
           essential: true
         });
+        
+        console.log('Navigation zoom completed - should be at user location');
 
         console.log('Navigation started - zoomed to GPS view at zoom level 18');
 
@@ -422,15 +436,10 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
               console.log('Live position update:', newPos);
               setUserCoords(newPos);
               
-              // Track heading if available and update locked bearing in compass mode
+              // Track heading for automatic driver orientation
               if (position.coords.heading !== null) {
                 const newHeading = position.coords.heading;
                 setCurrentHeading(newHeading);
-                
-                // If compass mode is active, continuously update the locked bearing
-                if (isCompassMode) {
-                  setLockedBearing(newHeading);
-                }
               }
               
               // Update user marker position and rotation
@@ -447,28 +456,25 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
                 }
               }
               
-              // GPS-style tracking: Center on user but respect manual zoom and bearing
-              if (map.current) {
+              // GPS-style tracking: Only update if user isn't interacting with map
+              if (map.current && !userInteracting) {
                 const currentZoom = map.current.getZoom();
                 // Only auto-zoom if user hasn't manually zoomed out
                 const targetZoom = currentZoom < 14 ? currentZoom : Math.max(currentZoom, 16);
                 
-                // Use appropriate bearing based on compass mode
-                let targetBearing;
-                if (isCompassMode && position.coords.heading !== null) {
-                  // In compass mode, continuously follow heading direction
-                  targetBearing = position.coords.heading;
-                } else {
-                  targetBearing = 0; // North up mode
-                }
+                // Always use driver orientation (heading direction)
+                const targetBearing = position.coords.heading !== null ? position.coords.heading : 0;
                 
                 map.current.easeTo({
                   center: newPos,
                   zoom: targetZoom, // Respect user's zoom level if they zoomed out
-                  bearing: targetBearing, // Maintain locked bearing or north up
+                  bearing: targetBearing, // Driver orientation - follow heading
                   pitch: 60, // 3D driving perspective
                   duration: 800 // Smooth updates
                 });
+              } else if (map.current && userInteracting) {
+                // Only update marker position when user is interacting, don't move map
+                // Map will stay where user positioned it
               }
             },
             (err) => console.log('Live tracking error:', err.message),
@@ -577,41 +583,10 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
               <div className="text-xs text-gray-400 mt-1">Your location is being tracked</div>
             </div>
 
-            {/* Compass/Orientation Button */}
-            <button
-              onClick={() => {
-                const newCompassMode = !isCompassMode;
-                console.log('Toggling compass mode to:', newCompassMode, 'Current heading:', currentHeading);
-                setIsCompassMode(newCompassMode);
-                
-                if (map.current && userCoords) {
-                  let targetBearing = 0;
-                  
-                  if (newCompassMode) {
-                    // Lock to current heading when entering compass mode
-                    targetBearing = currentHeading || 0;
-                    setLockedBearing(targetBearing);
-                    console.log('Locking bearing to:', targetBearing);
-                  } else {
-                    // Return to north up
-                    setLockedBearing(0);
-                    console.log('Returning to north up');
-                  }
-                  
-                  map.current.easeTo({
-                    center: userCoords,
-                    zoom: Math.max(map.current.getZoom(), 16),
-                    bearing: targetBearing,
-                    pitch: 60,
-                    duration: 800,
-                    essential: true
-                  });
-                }
-              }}
-              className={`absolute bottom-16 right-2 ${isCompassMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-600 hover:bg-gray-700'} text-white border-none px-3 py-2 rounded-lg cursor-pointer font-bold text-sm`}
-            >
-              {isCompassMode ? '🧭 Direction' : '⬆️ North Up'}
-            </button>
+            {/* Driver View Info - Always in driver orientation during navigation */}
+            <div className="absolute bottom-16 right-2 bg-blue-600 text-white border-none px-3 py-2 rounded-lg font-bold text-sm pointer-events-none">
+              🧭 Driver View
+            </div>
 
             {/* Stop Navigation Button */}
             <button
