@@ -82,24 +82,40 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
   }, []);
 
   // Handle double-tap for fullscreen
-  const handleDoubleTap = () => {
+  const handleTouchStart = (e: React.TouchEvent) => {
     const now = Date.now();
     const timeSinceLastTap = now - lastTap;
     
     if (timeSinceLastTap < 300 && timeSinceLastTap > 0) {
-      // Double tap detected - toggle fullscreen
+      // Double tap detected - prevent default and toggle fullscreen
+      e.preventDefault();
       console.log('Double tap detected - toggling fullscreen');
-      setIsFullscreen(!isFullscreen);
+      
+      // Toggle fullscreen state
+      const newFullscreenState = !isFullscreen;
+      setIsFullscreen(newFullscreenState);
       
       // Resize map after fullscreen change
       setTimeout(() => {
         if (map.current) {
           map.current.resize();
         }
-      }, 100);
+      }, 150);
     }
     
     setLastTap(now);
+  };
+
+  // Handle mouse double-click for desktop
+  const handleDoubleClick = () => {
+    console.log('Double click detected - toggling fullscreen');
+    setIsFullscreen(!isFullscreen);
+    
+    setTimeout(() => {
+      if (map.current) {
+        map.current.resize();
+      }
+    }, 150);
   };
 
   const startRoute = () => {
@@ -305,9 +321,10 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           className="w-full h-full cursor-pointer"
           style={{
             /* Hide Mapbox logo and attribution */
+            touchAction: 'manipulation' // Prevent zoom and other touch gestures
           }}
-          onTouchStart={handleDoubleTap}
-          onDoubleClick={handleDoubleTap}
+          onTouchStart={handleTouchStart}
+          onDoubleClick={handleDoubleClick}
         />
         
         {/* Map Overlay - Clickable Address */}
