@@ -233,7 +233,16 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           📍 {clientAddress}
         </div>
 
-        {/* Overview Map Button */}
+        {/* Start GPS Navigation Button */}
+        <button
+          onClick={startRoute}
+          disabled={isGettingLocation}
+          className="absolute bottom-2 right-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed text-white border-none px-4 py-2 rounded-lg cursor-pointer font-bold"
+        >
+          {isGettingLocation ? 'Getting GPS...' : '🧭 Start Navigation'}
+        </button>
+
+        {/* Map Overview Button */}
         <button
           onClick={() => {
             if (map.current) {
@@ -244,18 +253,9 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
               });
             }
           }}
-          className="absolute bottom-2 right-2 bg-green-600 hover:bg-green-700 text-white border-none px-4 py-2 rounded-lg cursor-pointer font-bold"
+          className="absolute bottom-16 right-2 bg-emerald-600 hover:bg-emerald-700 text-white border-none px-4 py-2 rounded-lg cursor-pointer font-bold text-sm"
         >
-          🧭 Start Navigation
-        </button>
-
-        {/* GPS Route Drawing Button */}
-        <button
-          onClick={startRoute}
-          disabled={isGettingLocation}
-          className="absolute bottom-16 right-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 disabled:cursor-not-allowed text-white border-none px-4 py-2 rounded-lg cursor-pointer font-bold text-sm"
-        >
-          {isGettingLocation ? 'Getting GPS...' : 'Show Route'}
+          📍 View Map
         </button>
 
 
