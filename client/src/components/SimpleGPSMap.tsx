@@ -30,8 +30,37 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
   const watchId = useRef<number | null>(null);
   const compassControl = useRef<any>(null);
 
-  // Client coordinates (using working coordinates)
-  const clientCoords: [number, number] = [-124.9625, 50.0431];
+  // Get client coordinates from actual address
+  const [clientCoords, setClientCoords] = useState<[number, number]>([-124.9625, 50.0431]);
+  
+  // Geocode the real client address
+  useEffect(() => {
+    const geocodeClientAddress = async () => {
+      if (!clientAddress) return;
+      
+      try {
+        const response = await fetch('/api/mapbox-token');
+        const { token } = await response.json();
+        
+        // Use Mapbox Geocoding to get exact coordinates for client address
+        const geocodeUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(clientAddress)}.json?access_token=${token}&limit=1`;
+        const geocodeResponse = await fetch(geocodeUrl);
+        const geocodeData = await geocodeResponse.json();
+        
+        if (geocodeData.features && geocodeData.features[0]) {
+          const [lng, lat] = geocodeData.features[0].center;
+          console.log(`Geocoded "${clientAddress}" to coordinates:`, [lng, lat]);
+          setClientCoords([lng, lat]);
+        } else {
+          console.log('Geocoding failed, using default coordinates');
+        }
+      } catch (error) {
+        console.error('Geocoding error:', error);
+      }
+    };
+    
+    geocodeClientAddress();
+  }, [clientAddress]);
 
   // Initialize map
   useEffect(() => {
@@ -45,9 +74,9 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
 
         map.current = new mapboxgl.Map({
           container: mapContainer.current,
-          style: 'mapbox://styles/mapbox/navigation-night-v1',
+          style: 'mapbox://styles/mapbox/dark-v11', // Dark style with street names
           center: clientCoords,
-          zoom: 13,
+          zoom: 14,
           attributionControl: false, // Remove info button
           logoPosition: 'top-left', // This will be hidden with CSS
           // Improve touch handling to fix zoom issues
@@ -381,9 +410,8 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
             'line-cap': 'round' 
           },
           paint: { 
-            'line-color': '#8a2be2', 
-            'line-width': 6,
-            'line-opacity': 0.8
+            'line-color': ['interpolate', ['linear'], ['line-progress'], 0, '#00FFFF', 1, '#6B4C9A'], 
+            'line-width': 6
           },
         });
         
@@ -534,7 +562,7 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           onDoubleClick={handleDoubleClick}
         />
         
-        {/* Map Overlay - Clickable Address */}
+        {/* Client Info Overlay - Your custom theme */}
         <div 
           className="absolute top-2 left-2 bg-black bg-opacity-60 px-3 py-2 rounded-lg text-sm cursor-pointer hover:bg-opacity-80"
           style={{ color: '#ffaf40' }}
@@ -546,20 +574,20 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           }}
           title="Tap to open in Maps app"
         >
-          🏠 {clientName}<br />
-          📍 {clientAddress}
+          🏠 {clientName}<br />{clientAddress}
         </div>
 
         {/* Navigation Controls */}
         {!isNavigating ? (
           <>
-            {/* Start GPS Navigation Button */}
+            {/* Start Navigation Button - Your custom theme */}
             <button
               onClick={startRoute}
               disabled={isGettingLocation}
-              className="absolute bottom-2 right-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed text-white border-none px-4 py-2 rounded-lg cursor-pointer font-bold"
+              className="absolute bottom-2 right-2 text-white border-none px-4 py-2 rounded-lg cursor-pointer font-bold"
+              style={{ backgroundColor: '#0099cc' }}
             >
-              {isGettingLocation ? 'Getting GPS...' : '🧭 Start Navigation'}
+              {isGettingLocation ? 'Getting GPS...' : 'Start'}
             </button>
           </>
         ) : (
@@ -590,17 +618,13 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
               <div className="text-xs text-gray-400 mt-1">Your location is being tracked</div>
             </div>
 
-            {/* Driver View Info - Always in driver orientation during navigation */}
-            <div className="absolute bottom-16 right-2 bg-blue-600 text-white border-none px-3 py-2 rounded-lg font-bold text-sm pointer-events-none">
-              🧭 Driver View
-            </div>
+
 
             {/* Stop Navigation Button */}
             <button
               onClick={() => {
                 console.log('Stopping navigation and returning to overview');
                 setIsNavigating(false);
-                setIsCompassMode(false);
                 if (watchId.current) {
                   navigator.geolocation.clearWatch(watchId.current);
                   watchId.current = null;
