@@ -20,6 +20,8 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
   const [error, setError] = useState<string>('');
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [userCoords, setUserCoords] = useState<[number, number] | null>(null);
+  const userMarker = useRef<mapboxgl.Marker | null>(null);
+  const watchId = useRef<number | null>(null);
 
   // Client coordinates (Alan Kohl's house from your example)
   const clientCoords: [number, number] = [-124.9625, 50.0431];
@@ -60,9 +62,14 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
     initMap();
 
     return () => {
+      // Cleanup map
       if (map.current) {
         map.current.remove();
         map.current = null;
+      }
+      // Cleanup location tracking
+      if (watchId.current) {
+        navigator.geolocation.clearWatch(watchId.current);
       }
     };
   }, []);
@@ -149,17 +156,50 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
         });
 
         // Add user location marker
-        new mapboxgl.Marker({ color: '#00FFFF' })
+        userMarker.current = new mapboxgl.Marker({ color: '#00FFFF' })
           .setLngLat(start)
           .addTo(map.current);
 
-        // Fit map to show route
-        const bounds = new mapboxgl.LngLatBounds();
-        bounds.extend(start);
-        bounds.extend(end);
-        map.current.fitBounds(bounds, { padding: 50 });
+        // Fly to user location with smooth animation
+        map.current.flyTo({
+          center: start,
+          zoom: 15,
+          speed: 0.8,
+          curve: 1,
+          essential: true
+        });
 
-        setError('Route displayed! Follow the purple line to your destination.');
+        // Start live position tracking
+        if (watchId.current) {
+          navigator.geolocation.clearWatch(watchId.current);
+        }
+
+        watchId.current = navigator.geolocation.watchPosition(
+          (position) => {
+            const newCoords: [number, number] = [position.coords.longitude, position.coords.latitude];
+            console.log('Live position update:', newCoords);
+            
+            // Update user marker position
+            if (userMarker.current) {
+              userMarker.current.setLngLat(newCoords);
+            }
+            
+            // Keep map centered on user with smooth animation
+            if (map.current) {
+              map.current.easeTo({ center: newCoords, duration: 1000 });
+            }
+          },
+          (err) => {
+            console.error('Live tracking error:', err);
+          },
+          {
+            enableHighAccuracy: true,
+            maximumAge: 0,
+            timeout: 10000
+          }
+        );
+
+        setError('Route displayed! Following your live location...');
       }
     } catch (err) {
       console.error('Route error:', err);
