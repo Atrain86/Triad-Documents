@@ -17,6 +17,7 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
   const map = useRef<mapboxgl.Map | null>(null);
   const [mapReady, setMapReady] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [lastTap, setLastTap] = useState(0);
   const [error, setError] = useState<string>('');
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [userCoords, setUserCoords] = useState<[number, number] | null>(null);
@@ -79,6 +80,30 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
       }
     };
   }, []);
+
+  // Handle double-tap for fullscreen
+  const handleDoubleTap = () => {
+    const now = Date.now();
+    const timeSinceLastTap = now - lastTap;
+    
+    if (timeSinceLastTap < 300 && timeSinceLastTap > 0) {
+      // Double tap detected - toggle fullscreen
+      if (!isFullscreen) {
+        // Enter fullscreen mode
+        if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen();
+        }
+      } else {
+        // Exit fullscreen mode
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+      setIsFullscreen(!isFullscreen);
+    }
+    
+    setLastTap(now);
+  };
 
   const startRoute = () => {
     console.log('Start Navigation button clicked');
@@ -282,7 +307,8 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           style={{
             /* Hide Mapbox logo and attribution */
           }}
-          onDoubleClick={toggleFullscreen}
+          onTouchStart={handleDoubleTap}
+          onDoubleClick={handleDoubleTap}
         />
         
         {/* Map Overlay - Clickable Address */}
@@ -316,28 +342,22 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
             {/* Map Overview Button */}
             <button
               onClick={() => {
-                console.log('View Map button clicked - showing route overview');
-                if (map.current && userCoords) {
-                  // Show overview of entire route
-                  const bounds = new mapboxgl.LngLatBounds()
-                    .extend(userCoords)
-                    .extend(clientCoords);
-                    
-                  map.current.fitBounds(bounds, {
-                    padding: 80,
-                    speed: 1,
+                console.log('View Overview button clicked');
+                if (map.current) {
+                  console.log('Map is ready, showing overview');
+                  // Always show overview centered on client location
+                  map.current.flyTo({
+                    center: clientCoords,
+                    zoom: 12, // Good overview zoom level
+                    bearing: 0, // North up
+                    pitch: 0, // Flat view for overview
+                    speed: 1.5,
                     curve: 1,
                     essential: true
                   });
-                } else if (map.current) {
-                  // Fallback to client location
-                  map.current.flyTo({
-                    center: clientCoords,
-                    zoom: 13,
-                    bearing: 0,
-                    pitch: 0,
-                    essential: true
-                  });
+                } else {
+                  console.log('Map not ready yet');
+                  setError('Map loading... please try again');
                 }
               }}
               className="absolute bottom-16 right-2 bg-emerald-600 hover:bg-emerald-700 text-white border-none px-4 py-2 rounded-lg cursor-pointer font-bold text-sm"
