@@ -69,169 +69,116 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
   const startRoute = () => {
     console.log('Start button clicked!');
     setError(''); // Clear any existing errors
-    
-    if (!navigator.geolocation) {
-      console.error('Geolocation not supported');
-      setError('Geolocation not supported on this device');
-      return;
-    }
-
-    console.log('Getting user location...');
-    console.log('Navigator.geolocation available:', !!navigator.geolocation);
-    console.log('Current protocol:', location.protocol);
-    console.log('Current hostname:', location.hostname);
     setIsGettingLocation(true);
     
-    // Check if we're on HTTPS or localhost (required for geolocation)
-    if (location.protocol !== 'https:' && location.hostname !== 'localhost' && !location.hostname.includes('replit')) {
-      console.error('Geolocation requires HTTPS');
-      setError('GPS requires secure connection (HTTPS)');
-      setIsGettingLocation(false);
-      return;
-    }
-
-    console.log('Calling navigator.geolocation.getCurrentPosition...');
-    
-    // Check permissions first if available
-    if ('permissions' in navigator) {
-      navigator.permissions.query({name: 'geolocation'}).then((result) => {
-        console.log('Geolocation permission status:', result.state);
-        if (result.state === 'denied') {
-          setError('Location access denied. Please enable location in browser settings.');
-          setIsGettingLocation(false);
-          return;
-        }
-      }).catch((err) => {
-        console.log('Permission query failed:', err);
-      });
-    }
-    
-    // Set up manual timeout for GPS route mapping
-    const timeoutId = setTimeout(() => {
-      console.log('GPS timeout - use Start Navigation button for Google Maps');
-      setError('GPS timeout - Use "Start Navigation" button for reliable navigation');
-      setIsGettingLocation(false);
-    }, 10000); // 10 second timeout for GPS route mapping
-    
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        clearTimeout(timeoutId); // Clear manual timeout
-        console.log('SUCCESS: Got user location:', position.coords);
-        const userCoords: [number, number] = [
-          position.coords.longitude,
-          position.coords.latitude
-        ];
-        console.log('User coordinates:', userCoords);
-
-        // Fly to user location first
-        if (map.current) {
-          console.log('Flying to user location:', userCoords);
-          map.current.flyTo({ center: userCoords, zoom: 13 });
-          
-          // Get route and draw it
-          console.log('Getting route from:', userCoords, 'to:', clientCoords);
-          const routeUrl = `https://api.mapbox.com/directions/v5/mapbox/driving/${userCoords.join(',')};${clientCoords.join(',')}?steps=true&geometries=geojson&access_token=${mapboxgl.accessToken}`;
-          console.log('Route URL:', routeUrl);
-          
-          fetch(routeUrl)
-            .then(res => {
-              console.log('Route response status:', res.status);
-              if (!res.ok) {
-                throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-              }
-              return res.json();
-            })
-            .then(data => {
-              console.log('Route data received:', data);
-              if (data.routes && data.routes[0]) {
-                const route = data.routes[0].geometry;
-                console.log('Drawing route with geometry:', route);
-                
-                if (map.current) {
-                  // Remove existing route if any
-                  try {
-                    if (map.current.getLayer('route')) {
-                      map.current.removeLayer('route');
-                      console.log('Removed existing route layer');
-                    }
-                  } catch (e) {
-                    console.log('No existing route layer to remove');
-                  }
-                  
-                  try {
-                    if (map.current.getSource('route')) {
-                      map.current.removeSource('route');
-                      console.log('Removed existing route source');
-                    }
-                  } catch (e) {
-                    console.log('No existing route source to remove');
-                  }
-
-                  // Add new route
-                  map.current.addSource('route', {
-                    type: 'geojson',
-                    data: route
-                  });
-
-                  map.current.addLayer({
-                    id: 'route',
-                    type: 'line',
-                    source: 'route',
-                    layout: {
-                      'line-join': 'round',
-                      'line-cap': 'round'
-                    },
-                    paint: {
-                      'line-color': ['interpolate', ['linear'], ['line-progress'], 0, '#00FFFF', 1, '#6B4C9A'],
-                      'line-width': 6
-                    }
-                  });
-                  console.log('Route drawn successfully!');
-                  setError('Route loaded successfully!');
-                }
-              } else {
-                console.log('No routes found in response');
-                setError('No route found between locations');
-              }
-            })
-            .catch(err => {
-              console.error('Route fetch error:', err);
-              setError('Route error: ' + err.message);
-            })
-            .finally(() => {
-              setIsGettingLocation(false);
-            });
-        }
-      },
-      (err) => {
-        clearTimeout(timeoutId); // Clear manual timeout
-        console.error('Geolocation error code:', err.code);
-        console.error('Geolocation error message:', err.message);
+    // Function to draw route with given coordinates
+    const drawRoute = (userCoords: [number, number]) => {
+      console.log('Drawing route from:', userCoords, 'to:', clientCoords);
+      
+      if (map.current) {
+        map.current.flyTo({ center: userCoords, zoom: 13 });
         
-        let errorMessage = '';
-        switch(err.code) {
-          case err.PERMISSION_DENIED:
-            errorMessage = 'Location access denied. Please allow location access and try again.';
-            break;
-          case err.POSITION_UNAVAILABLE:
-            errorMessage = 'Location unavailable. Check GPS/Wi-Fi and try again.';
-            break;
-          case err.TIMEOUT:
-            errorMessage = 'Location timeout. Try again.';
-            break;
-          default:
-            errorMessage = 'Unknown location error: ' + err.message;
-            break;
-        }
-        setError(errorMessage);
-        setIsGettingLocation(false);
-      },
-      { 
-        enableHighAccuracy: true,  // Try high accuracy since permissions are allowed
-        timeout: 30000,  // 30 seconds - much longer timeout since permissions are working
-        maximumAge: 60000  // Allow cached location up to 1 minute old
+        const routeUrl = `https://api.mapbox.com/directions/v5/mapbox/driving/${userCoords.join(',')};${clientCoords.join(',')}?steps=true&geometries=geojson&access_token=${mapboxgl.accessToken}`;
+        
+        fetch(routeUrl)
+          .then(res => {
+            if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+            return res.json();
+          })
+          .then(data => {
+            if (data.routes && data.routes[0]) {
+              const route = data.routes[0].geometry;
+              
+              // Remove existing route
+              try {
+                if (map.current?.getLayer('route')) map.current.removeLayer('route');
+                if (map.current?.getSource('route')) map.current.removeSource('route');
+              } catch (e) {}
+
+              // Add new route
+              if (map.current) {
+                map.current.addSource('route', {
+                  type: 'geojson',
+                  data: route
+                });
+
+                map.current.addLayer({
+                  id: 'route',
+                  type: 'line',
+                  source: 'route',
+                  layout: {
+                    'line-join': 'round',
+                    'line-cap': 'round'
+                  },
+                  paint: {
+                    'line-color': ['interpolate', ['linear'], ['line-progress'], 0, '#00FFFF', 1, '#6B4C9A'],
+                    'line-width': 6
+                  }
+                });
+                
+                // Add user location marker
+                new mapboxgl.Marker({ color: '#00FFFF' })
+                  .setLngLat(userCoords)
+                  .addTo(map.current);
+                
+                console.log('Route drawn successfully!');
+                setError('Navigation route displayed! Follow the cyan line to your destination.');
+              }
+            } else {
+              setError('No route found between locations');
+            }
+          })
+          .catch(err => {
+            console.error('Route fetch error:', err);
+            setError('Route error: ' + err.message);
+          })
+          .finally(() => {
+            setIsGettingLocation(false);
+          });
       }
-    );
+    };
+    
+    // Try to get GPS location first
+    if (navigator.geolocation) {
+      console.log('Attempting to get GPS location...');
+      
+      const timeoutId = setTimeout(() => {
+        console.log('GPS timeout - using default Vancouver location');
+        const defaultCoords: [number, number] = [-123.1207, 49.2827]; // Vancouver
+        setError('Using Vancouver as starting point (GPS not available)');
+        drawRoute(defaultCoords);
+      }, 8000); // 8 second timeout
+      
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          clearTimeout(timeoutId);
+          console.log('SUCCESS: Got GPS location:', position.coords);
+          const userCoords: [number, number] = [
+            position.coords.longitude,
+            position.coords.latitude
+          ];
+          drawRoute(userCoords);
+        },
+        (err) => {
+          clearTimeout(timeoutId);
+          console.log('GPS failed, using Vancouver location:', err.message);
+          const defaultCoords: [number, number] = [-123.1207, 49.2827]; // Vancouver
+          setError('Using Vancouver as starting point (GPS permission needed)');
+          drawRoute(defaultCoords);
+        },
+        { 
+          enableHighAccuracy: false,  // Start with lower accuracy for speed
+          timeout: 6000,  // 6 seconds before internal timeout
+          maximumAge: 300000  // 5 minute cache is fine
+        }
+      );
+    } else {
+      // No geolocation support - use default location
+      console.log('No geolocation support - using Vancouver location');
+      const defaultCoords: [number, number] = [-123.1207, 49.2827]; // Vancouver
+      setError('Using Vancouver as starting point (GPS not supported)');
+      drawRoute(defaultCoords);
+    }
   };
 
   const toggleFullscreen = () => {
@@ -270,26 +217,14 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           {clientAddress}
         </div>
 
-        {/* Primary Navigation Button - Direct to Google Maps */}
-        <button
-          onClick={() => {
-            console.log('Opening Google Maps navigation directly');
-            const destination = encodeURIComponent(clientAddress);
-            window.open(`https://www.google.com/maps/dir/?api=1&destination=${destination}`, '_blank');
-          }}
-          className="absolute bottom-2 right-2 bg-green-600 hover:bg-green-700 text-white border-none px-4 py-2 rounded-lg cursor-pointer font-bold"
-        >
-          🧭 Start Navigation
-        </button>
-
-        {/* GPS Route Mapping (Secondary) */}
+        {/* Start Navigation Button */}
         <button
           onClick={startRoute}
           disabled={isGettingLocation}
-          className="absolute bottom-16 right-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white border-none px-3 py-2 rounded-lg cursor-pointer font-bold text-sm"
+          className="absolute bottom-2 right-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white border-none px-4 py-2 rounded-lg cursor-pointer font-bold"
           style={{ backgroundColor: isGettingLocation ? '#6b9bd2' : '#0099cc' }}
         >
-          {isGettingLocation ? 'Getting GPS...' : 'GPS Route'}
+          {isGettingLocation ? 'Getting GPS...' : 'Start'}
         </button>
 
         {/* Demo Route Button - Always available */}
@@ -361,10 +296,10 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           Demo Route
         </button>
 
-        {/* GPS Status Notice */}
+        {/* Navigation Status Notice */}
         {isGettingLocation && (
-          <div className="absolute bottom-28 right-2 bg-black bg-opacity-80 text-white p-2 rounded text-xs max-w-48">
-            Mapping GPS route... Use "Start Navigation" button for immediate directions.
+          <div className="absolute bottom-16 right-2 bg-black bg-opacity-80 text-white p-2 rounded text-xs max-w-48">
+            Loading navigation route... Please wait.
           </div>
         )}
 
