@@ -98,6 +98,14 @@ This is a full-stack web application designed for managing painting projects. Th
 - Autoscale deployment target for production
 - Port 5000 exposed externally on port 80
 
+### Deployment Configuration
+- DATABASE_URL environment variable configured for production PostgreSQL
+- Mapbox, OpenAI, and SendGrid API keys configured as secrets
+- Production build script: `npm run build` (creates optimized frontend and backend)
+- Production start script: `npm run start` (runs bundled Node.js server)
+- Static file serving enabled for production builds
+- Express server configured for 0.0.0.0 host binding
+
 ## Changelog
 - June 25, 2025. Initial setup
 - June 25, 2025. Rebranded to "A-Frame Painting" with custom logo and dark mode implementation
@@ -212,3 +220,5 @@ Preferred communication style: Simple, everyday language.
 Brand name: A-Frame Painting
 Theme preference: Dark mode by default
 Logo: Custom A-frame house structure with paint brush accent
+
+- July 19, 2025. Applied deployment fixes for production readiness: Confirmed all required environment variables (DATABASE_URL, MAPBOX_ACCESS_TOKEN, OPENAI_API_KEY, SENDGRID_API_KEY) are properly configured as secrets. Verified production build script works correctly with ESBuild bundling server code and Vite optimizing frontend assets. Updated deployment documentation with comprehensive configuration details. NOTE: .replit file needs manual update to stable-24_11 Nix channel and simplified modules list (remove "web" module, keep only "nodejs-20" and "postgresql-16") to resolve artifact registry errors. Production-ready codebase with proper static file serving and 0.0.0.0 host binding for deployment.
