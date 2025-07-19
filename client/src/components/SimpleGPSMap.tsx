@@ -86,20 +86,35 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
             return res.json();
           })
           .then(data => {
+            console.log('Full route response:', data);
             if (data.routes && data.routes[0]) {
               const route = data.routes[0].geometry;
+              console.log('Route geometry type:', route.type);
+              console.log('Route coordinates count:', route.coordinates?.length);
               
-              // Remove existing route
+              // Remove existing route and markers
               try {
                 if (map.current?.getLayer('route')) map.current.removeLayer('route');
                 if (map.current?.getSource('route')) map.current.removeSource('route');
-              } catch (e) {}
+                // Remove existing markers
+                const markers = document.querySelectorAll('.mapboxgl-marker');
+                markers.forEach(marker => marker.remove());
+              } catch (e) {
+                console.log('Error removing existing route:', e);
+              }
 
               // Add new route
               if (map.current) {
+                console.log('Route geometry:', route);
+                console.log('Route coordinates length:', route.coordinates?.length);
+                
                 map.current.addSource('route', {
                   type: 'geojson',
-                  data: route
+                  data: {
+                    type: 'Feature',
+                    properties: {},
+                    geometry: route
+                  }
                 });
 
                 map.current.addLayer({
@@ -111,8 +126,9 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
                     'line-cap': 'round'
                   },
                   paint: {
-                    'line-color': ['interpolate', ['linear'], ['line-progress'], 0, '#00FFFF', 1, '#6B4C9A'],
-                    'line-width': 6
+                    'line-color': '#00FFFF',  // Solid cyan color instead of gradient
+                    'line-width': 8,  // Thicker line for better visibility
+                    'line-opacity': 0.8
                   }
                 });
                 
@@ -121,7 +137,13 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
                   .setLngLat(userCoords)
                   .addTo(map.current);
                 
-                console.log('Route drawn successfully!');
+                // Fit map to show both points
+                const bounds = new mapboxgl.LngLatBounds();
+                bounds.extend(userCoords);
+                bounds.extend(clientCoords);
+                map.current.fitBounds(bounds, { padding: 50 });
+                
+                console.log('Route drawn successfully! Route should be visible as cyan line.');
                 setError('Navigation route displayed! Follow the cyan line to your destination.');
               }
             } else {
