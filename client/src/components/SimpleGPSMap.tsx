@@ -160,46 +160,34 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
       }
     };
     
-    // Try to get GPS location first
+    // Try to get real GPS location with better options
     if (navigator.geolocation) {
-      console.log('Attempting to get GPS location...');
-      
-      const timeoutId = setTimeout(() => {
-        console.log('GPS timeout - using default Vancouver location');
-        const defaultCoords: [number, number] = [-123.1207, 49.2827]; // Vancouver
-        setError('Using Vancouver as starting point (GPS not available)');
-        drawRoute(defaultCoords);
-      }, 8000); // 8 second timeout
+      console.log('Getting your real GPS location for navigation...');
       
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          clearTimeout(timeoutId);
-          console.log('SUCCESS: Got GPS location:', position.coords);
+          console.log('SUCCESS: Got your real location:', position.coords);
           const userCoords: [number, number] = [
             position.coords.longitude,
             position.coords.latitude
           ];
+          console.log('Starting navigation from your location:', userCoords);
           drawRoute(userCoords);
         },
         (err) => {
-          clearTimeout(timeoutId);
-          console.log('GPS failed, using Vancouver location:', err.message);
-          const defaultCoords: [number, number] = [-123.1207, 49.2827]; // Vancouver
-          setError('Using Vancouver as starting point (GPS permission needed)');
-          drawRoute(defaultCoords);
+          console.error('GPS failed:', err);
+          setError(`GPS failed: ${err.message}. Please enable location access in your browser settings and try again.`);
+          setIsGettingLocation(false);
         },
         { 
-          enableHighAccuracy: false,  // Start with lower accuracy for speed
-          timeout: 6000,  // 6 seconds before internal timeout
-          maximumAge: 300000  // 5 minute cache is fine
+          enableHighAccuracy: true,  // High accuracy for precise navigation
+          timeout: 15000,  // 15 seconds to get accurate location
+          maximumAge: 0  // Always get fresh location for navigation
         }
       );
     } else {
-      // No geolocation support - use default location
-      console.log('No geolocation support - using Vancouver location');
-      const defaultCoords: [number, number] = [-123.1207, 49.2827]; // Vancouver
-      setError('Using Vancouver as starting point (GPS not supported)');
-      drawRoute(defaultCoords);
+      setError('GPS not supported on this device. Navigation requires location services.');
+      setIsGettingLocation(false);
     }
   };
 
@@ -243,10 +231,10 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
         <button
           onClick={startRoute}
           disabled={isGettingLocation}
-          className="absolute bottom-2 right-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white border-none px-4 py-2 rounded-lg cursor-pointer font-bold"
-          style={{ backgroundColor: isGettingLocation ? '#6b9bd2' : '#0099cc' }}
+          className="absolute bottom-2 right-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed text-white border-none px-4 py-2 rounded-lg cursor-pointer font-bold"
+          style={{ backgroundColor: isGettingLocation ? '#9ca3af' : '#16a34a' }}
         >
-          {isGettingLocation ? 'Getting GPS...' : 'Start'}
+          {isGettingLocation ? 'Getting Your Location...' : '🧭 Start Navigation'}
         </button>
 
         {/* Demo Route Button - Always available */}
@@ -321,7 +309,7 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
         {/* Navigation Status Notice */}
         {isGettingLocation && (
           <div className="absolute bottom-16 right-2 bg-black bg-opacity-80 text-white p-2 rounded text-xs max-w-48">
-            Loading navigation route... Please wait.
+            📍 Getting your current location for navigation... Please allow location access if prompted.
           </div>
         )}
 
