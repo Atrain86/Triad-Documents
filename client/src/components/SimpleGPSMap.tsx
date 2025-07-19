@@ -358,40 +358,55 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
         
         console.log('Purple route line added to map');
 
-        // Add user location marker with directional triangle
+        // Add user location marker with directional triangle (like Google Maps)
         const el = document.createElement('div');
         el.className = 'user-location-marker';
-        el.style.width = '20px';
-        el.style.height = '20px';
-        el.style.backgroundColor = '#00FFFF';
-        el.style.borderRadius = '50%';
-        el.style.border = '3px solid white';
-        el.style.boxShadow = '0 0 10px rgba(0,255,255,0.6)';
+        el.innerHTML = `
+          <div style="
+            width: 24px;
+            height: 24px;
+            position: relative;
+            transform: rotate(${currentHeading || 0}deg);
+          ">
+            <div style="
+              width: 0;
+              height: 0;
+              border-left: 8px solid transparent;
+              border-right: 8px solid transparent;
+              border-bottom: 20px solid #1E90FF;
+              position: absolute;
+              top: 2px;
+              left: 4px;
+              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+            "></div>
+            <div style="
+              width: 8px;
+              height: 8px;
+              background: #00BFFF;
+              border-radius: 50%;
+              border: 2px solid white;
+              position: absolute;
+              top: 16px;
+              left: 6px;
+              box-shadow: 0 0 8px rgba(30,144,255,0.6);
+            "></div>
+          </div>
+        `;
         
         userMarker.current = new mapboxgl.Marker(el)
           .setLngLat(start)
           .addTo(map.current);
 
-        // GPS-style navigation: Immediately zoom in very close on user location
+        // Google Maps style: Immediate close zoom to user location
         map.current.flyTo({
           center: start,
-          zoom: 18, // Very close zoom like driving GPS
+          zoom: 19, // Very close zoom like Google Maps navigation
           bearing: 0, // Start with north up
-          pitch: 0, // Start flat, then add 3D perspective
-          speed: 2, // Faster zoom to close-up view
+          pitch: 60, // 3D driving perspective like Google Maps
+          speed: 1.5, // Smooth zoom transition
           curve: 1,
           essential: true
         });
-        
-        // Add 3D perspective after initial zoom
-        setTimeout(() => {
-          if (map.current) {
-            map.current.easeTo({
-              pitch: 60,
-              duration: 800
-            });
-          }
-        }, 1000);
 
         console.log('Navigation started - zoomed to GPS view at zoom level 18');
 
@@ -418,9 +433,18 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
                 }
               }
               
-              // Update user marker position
+              // Update user marker position and rotation
               if (userMarker.current) {
                 userMarker.current.setLngLat(newPos);
+                
+                // Update triangle rotation to match heading
+                if (position.coords.heading !== null) {
+                  const markerEl = userMarker.current.getElement();
+                  const triangleContainer = markerEl.querySelector('div');
+                  if (triangleContainer) {
+                    triangleContainer.style.transform = `rotate(${position.coords.heading}deg)`;
+                  }
+                }
               }
               
               // GPS-style tracking: Center on user but respect manual zoom and bearing
