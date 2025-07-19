@@ -23,8 +23,11 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
   const [isNavigating, setIsNavigating] = useState(false);
   const [routeDistance, setRouteDistance] = useState<string>('');
   const [routeDuration, setRouteDuration] = useState<string>('');
+  const [currentHeading, setCurrentHeading] = useState<number>(0);
+  const [isCompassMode, setIsCompassMode] = useState(false);
   const userMarker = useRef<mapboxgl.Marker | null>(null);
   const watchId = useRef<number | null>(null);
+  const compassControl = useRef<any>(null);
 
   // Client coordinates (Alan Kohl's house from your example)
   const clientCoords: [number, number] = [-124.9625, 50.0431];
@@ -196,13 +199,13 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           .setLngLat(start)
           .addTo(map.current);
 
-        // GPS-style navigation: Zoom in close on user location
+        // GPS-style navigation: Zoom in very close on user location
         map.current.flyTo({
           center: start,
-          zoom: 17, // Close zoom like a GPS
-          bearing: 0, // North up
-          pitch: 0,
-          speed: 1.2,
+          zoom: 18, // Very close zoom like driving GPS
+          bearing: isCompassMode ? currentHeading : 0, // Use compass direction if enabled
+          pitch: 60, // Slight 3D angle for driving perspective
+          speed: 1.5,
           curve: 1,
           essential: true
         });
@@ -219,23 +222,29 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
               console.log('Live position update:', newPos);
               setUserCoords(newPos);
               
+              // Track heading if available
+              if (position.coords.heading !== null) {
+                setCurrentHeading(position.coords.heading);
+              }
+              
               // Update user marker position
               if (userMarker.current) {
                 userMarker.current.setLngLat(newPos);
               }
               
-              // GPS-style tracking: Keep close zoom and center on user
+              // GPS-style tracking: Keep very close zoom and center on user
               if (map.current) {
                 map.current.easeTo({
                   center: newPos,
-                  zoom: 17, // Maintain close GPS zoom
-                  bearing: 0, // Keep north up
-                  duration: 1500
+                  zoom: 18, // Very close GPS zoom for driving
+                  bearing: isCompassMode ? (position.coords.heading || 0) : 0,
+                  pitch: 60, // 3D driving perspective
+                  duration: 1000
                 });
               }
             },
             (err) => console.log('Live tracking error:', err.message),
-            { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 3000 }
           );
         }
       }
@@ -305,21 +314,33 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
             {/* Map Overview Button */}
             <button
               onClick={() => {
-                console.log('View Map button clicked');
-                if (map.current) {
-                  console.log('Flying to client location:', clientCoords);
+                console.log('View Map button clicked - showing route overview');
+                if (map.current && userCoords) {
+                  // Show overview of entire route
+                  const bounds = new mapboxgl.LngLatBounds()
+                    .extend(userCoords)
+                    .extend(clientCoords);
+                    
+                  map.current.fitBounds(bounds, {
+                    padding: 80,
+                    speed: 1,
+                    curve: 1,
+                    essential: true
+                  });
+                } else if (map.current) {
+                  // Fallback to client location
                   map.current.flyTo({
                     center: clientCoords,
                     zoom: 13,
+                    bearing: 0,
+                    pitch: 0,
                     essential: true
                   });
-                } else {
-                  console.log('Map not ready');
                 }
               }}
               className="absolute bottom-16 right-2 bg-emerald-600 hover:bg-emerald-700 text-white border-none px-4 py-2 rounded-lg cursor-pointer font-bold text-sm"
             >
-              📍 View Map
+              📍 View Overview
             </button>
           </>
         ) : (
@@ -332,11 +353,33 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
               <div className="text-xs text-gray-400 mt-1">Your location is being tracked</div>
             </div>
 
+            {/* Compass/Orientation Button */}
+            <button
+              onClick={() => {
+                console.log('Toggling compass mode');
+                setIsCompassMode(!isCompassMode);
+                if (map.current && userCoords) {
+                  map.current.flyTo({
+                    center: userCoords,
+                    zoom: 18,
+                    bearing: !isCompassMode ? currentHeading : 0,
+                    pitch: 60,
+                    speed: 1,
+                    essential: true
+                  });
+                }
+              }}
+              className={`absolute bottom-16 right-2 ${isCompassMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-600 hover:bg-gray-700'} text-white border-none px-3 py-2 rounded-lg cursor-pointer font-bold text-sm`}
+            >
+              {isCompassMode ? '🧭 Compass' : '⬆️ North Up'}
+            </button>
+
             {/* Stop Navigation Button */}
             <button
               onClick={() => {
                 console.log('Stopping navigation');
                 setIsNavigating(false);
+                setIsCompassMode(false);
                 if (watchId.current) {
                   navigator.geolocation.clearWatch(watchId.current);
                   watchId.current = null;
