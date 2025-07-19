@@ -233,13 +233,29 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           📍 {clientAddress}
         </div>
 
-        {/* Primary Navigation - In-App GPS */}
+        {/* Overview Map Button */}
+        <button
+          onClick={() => {
+            if (map.current) {
+              map.current.flyTo({
+                center: clientCoords,
+                zoom: 13,
+                essential: true
+              });
+            }
+          }}
+          className="absolute bottom-2 right-2 bg-green-600 hover:bg-green-700 text-white border-none px-4 py-2 rounded-lg cursor-pointer font-bold"
+        >
+          🧭 Start Navigation
+        </button>
+
+        {/* GPS Route Drawing Button */}
         <button
           onClick={startRoute}
           disabled={isGettingLocation}
-          className="absolute bottom-2 right-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed text-white border-none px-4 py-2 rounded-lg cursor-pointer font-bold"
+          className="absolute bottom-16 right-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 disabled:cursor-not-allowed text-white border-none px-4 py-2 rounded-lg cursor-pointer font-bold text-sm"
         >
-          {isGettingLocation ? 'Getting GPS...' : '🧭 Start Navigation'}
+          {isGettingLocation ? 'Getting GPS...' : 'Show Route'}
         </button>
 
 
