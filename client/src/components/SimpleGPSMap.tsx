@@ -76,15 +76,34 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
 
   const startRoute = () => {
     console.log('Start Navigation button clicked');
-    setError('Drawing route from Vancouver to destination...');
+    setError('Getting your location...');
     setIsGettingLocation(true);
     
-    // Use demo location near Vancouver for reliable testing
-    const demoStart: [number, number] = [-123.1207, 49.2827]; // Vancouver coordinates
-    console.log('Using demo start location:', demoStart);
+    if (!navigator.geolocation) {
+      console.log('Geolocation not supported');
+      setError('GPS not available on this device');
+      setIsGettingLocation(false);
+      return;
+    }
     
-    // Draw route immediately without GPS dependency
-    getRoute(demoStart, clientCoords);
+    console.log('Requesting your GPS location...');
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const userPosition: [number, number] = [position.coords.longitude, position.coords.latitude];
+        console.log('Got your position:', userPosition);
+        setUserCoords(userPosition);
+        
+        // Draw route from your location to client
+        getRoute(userPosition, clientCoords);
+      },
+      (err) => {
+        console.log('GPS error:', err.message);
+        setError('GPS permission denied. Please allow location access and try again.');
+        setIsGettingLocation(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+    );
   };
 
   // Get actual driving route from Mapbox
@@ -141,9 +160,18 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           id: 'route',
           type: 'line',
           source: 'route',
-          layout: { 'line-join': 'round', 'line-cap': 'round' },
-          paint: { 'line-color': '#8a2be2', 'line-width': 4 },
+          layout: { 
+            'line-join': 'round', 
+            'line-cap': 'round' 
+          },
+          paint: { 
+            'line-color': '#8a2be2', 
+            'line-width': 6,
+            'line-opacity': 0.8
+          },
         });
+        
+        console.log('Purple route line added to map');
 
         // Add user location marker
         userMarker.current = new mapboxgl.Marker({ color: '#00FFFF' })
@@ -159,17 +187,20 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
         
         map.current.addControl(geolocateControl);
 
-        // Fly to user location with smooth animation
-        map.current.flyTo({
-          center: start,
-          zoom: 15,
-          speed: 0.8,
+        // Fit map to show both start and end points with route
+        const bounds = new mapboxgl.LngLatBounds()
+          .extend(start)
+          .extend(end);
+          
+        map.current.fitBounds(bounds, {
+          padding: 50,
+          speed: 1,
           curve: 1,
           essential: true
         });
 
         console.log('Route drawn successfully');
-        setError('Route displayed! Purple line shows the driving path.');
+        setError('Navigation active! Purple line shows driving route.');
         
         // Start live location tracking for navigation
         if (navigator.geolocation) {
