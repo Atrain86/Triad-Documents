@@ -58,6 +58,31 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
             .setLngLat(clientCoords)
             .addTo(map.current!);
 
+          // Auto-show route overview on map load
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+              (position) => {
+                const userPos: [number, number] = [position.coords.longitude, position.coords.latitude];
+                setUserCoords(userPos);
+                
+                // Show route overview automatically
+                getRoutePreview(userPos, clientCoords);
+              },
+              (err) => {
+                console.log('Could not get location for auto-overview:', err.message);
+                // Fallback to just showing client location
+                if (map.current) {
+                  map.current.flyTo({
+                    center: clientCoords,
+                    zoom: 13,
+                    essential: true
+                  });
+                }
+              },
+              { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 }
+            );
+          }
+
           setMapReady(true);
         });
 
@@ -81,40 +106,27 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
     };
   }, []);
 
-  // Handle touch events for fullscreen
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    // Only handle single finger touches
-    if (e.changedTouches.length !== 1) return;
+  // Simplified touch handling for fullscreen
+  const handleTouchStart = (e: React.TouchEvent) => {
+    // Prevent text selection and context menus
+    e.preventDefault();
     
     const now = Date.now();
     const timeSinceLastTap = now - lastTap;
     
-    if (timeSinceLastTap < 400 && timeSinceLastTap > 50) {
+    if (timeSinceLastTap < 500 && timeSinceLastTap > 50) {
       // Double tap detected
-      e.preventDefault();
-      e.stopPropagation();
       console.log('Double tap detected - toggling fullscreen');
-      
       setIsFullscreen(prev => !prev);
       
-      // Resize map after fullscreen change
       setTimeout(() => {
         if (map.current) {
           map.current.resize();
         }
-      }, 200);
+      }, 100);
     }
     
     setLastTap(now);
-  };
-
-  // Prevent zoom gestures in fullscreen mode
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (isFullscreen && e.touches.length > 1) {
-      // Prevent multi-touch zoom in fullscreen
-      e.preventDefault();
-      e.stopPropagation();
-    }
   };
 
   // Handle mouse double-click for desktop
@@ -127,6 +139,72 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
         map.current.resize();
       }
     }, 150);
+  };
+
+  // Get route preview for automatic overview
+  const getRoutePreview = async (start: [number, number], end: [number, number]) => {
+    try {
+      console.log('Getting route preview from', start, 'to', end);
+      const query = await fetch(
+        `https://api.mapbox.com/directions/v5/mapbox/driving/${start[0]},${start[1]};${end[0]},${end[1]}?geometries=geojson&access_token=${mapboxgl.accessToken}`
+      );
+      
+      if (!query.ok) {
+        throw new Error('Route preview failed');
+      }
+      
+      const json = await query.json();
+      const data = json.routes[0];
+      const route = data.geometry.coordinates;
+      
+      // Add purple route line
+      if (map.current) {
+        if (map.current.getSource('route')) {
+          map.current.removeLayer('route');
+          map.current.removeSource('route');
+        }
+        
+        map.current.addSource('route', {
+          'type': 'geojson',
+          'data': {
+            'type': 'Feature',
+            'properties': {},
+            'geometry': {
+              'type': 'LineString',
+              'coordinates': route
+            }
+          }
+        });
+        
+        map.current.addLayer({
+          'id': 'route',
+          'type': 'line',
+          'source': 'route',
+          'layout': {
+            'line-join': 'round',
+            'line-cap': 'round'
+          },
+          'paint': {
+            'line-color': '#8a2be2', // Purple route line
+            'line-width': 5
+          }
+        });
+        
+        // Fit view to show entire route
+        const bounds = new mapboxgl.LngLatBounds()
+          .extend(start)
+          .extend(end);
+          
+        map.current.fitBounds(bounds, {
+          padding: 50,
+          speed: 1,
+          essential: true
+        });
+      }
+      
+    } catch (err) {
+      console.log('Route preview error:', err);
+    }
   };
 
   const startRoute = () => {
@@ -332,10 +410,9 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           className="w-full h-full cursor-pointer"
           style={{
             /* Hide Mapbox logo and attribution */
-            touchAction: isFullscreen ? 'none' : 'manipulation'
+            touchAction: 'pan-x pan-y'
           }}
-          onTouchEnd={handleTouchEnd}
-          onTouchMove={handleTouchMove}
+          onTouchStart={handleTouchStart}
           onDoubleClick={handleDoubleClick}
         />
         
@@ -366,32 +443,6 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
             >
               {isGettingLocation ? 'Getting GPS...' : '🧭 Start Navigation'}
             </button>
-
-            {/* Map Overview Button */}
-            <button
-              onClick={() => {
-                console.log('View Overview button clicked');
-                if (map.current) {
-                  console.log('Map is ready, showing overview');
-                  // Always show overview centered on client location
-                  map.current.flyTo({
-                    center: clientCoords,
-                    zoom: 12, // Good overview zoom level
-                    bearing: 0, // North up
-                    pitch: 0, // Flat view for overview
-                    speed: 1.5,
-                    curve: 1,
-                    essential: true
-                  });
-                } else {
-                  console.log('Map not ready yet');
-                  setError('Map loading... please try again');
-                }
-              }}
-              className="absolute bottom-16 right-2 bg-emerald-600 hover:bg-emerald-700 text-white border-none px-4 py-2 rounded-lg cursor-pointer font-bold text-sm"
-            >
-              📍 View Overview
-            </button>
           </>
         ) : (
           <>
@@ -407,9 +458,9 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
                     }
                   }, 100);
                 }}
-                className="absolute top-4 right-4 bg-black bg-opacity-70 hover:bg-opacity-90 text-white border-none px-3 py-2 rounded-lg cursor-pointer font-bold text-sm z-10"
+                className="absolute top-2 left-2 bg-black bg-opacity-70 hover:bg-opacity-90 text-white border-none px-3 py-2 rounded-lg cursor-pointer font-bold text-sm z-[10000]"
               >
-                ✕ Exit Fullscreen
+                ✕ Exit
               </button>
             )}
 

@@ -84,20 +84,25 @@
   overflow: hidden !important;
 }
 
+/* Prevent text selection globally on map */
+.mobile-fullscreen,
+.mobile-fullscreen * {
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  -khtml-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
 /* Hide mobile browser UI when in fullscreen */
 @media (max-width: 768px) {
   .mobile-fullscreen {
     height: 100dvh !important; /* Use dynamic viewport height on mobile */
-    /* Prevent touch callouts and selections */
-    -webkit-touch-callout: none !important;
-    -webkit-user-select: none !important;
-    -moz-user-select: none !important;
-    -ms-user-select: none !important;
-    user-select: none !important;
-    /* Prevent zoom and gestures */
-    touch-action: none !important;
-    -webkit-touch-action: none !important;
-    /* Prevent iOS zoom */
+    /* Allow pinch zoom but prevent text selection */
+    touch-action: pan-x pan-y pinch-zoom !important;
+    /* Prevent iOS zoom on double-tap text */
     -webkit-text-size-adjust: none !important;
   }
 }
