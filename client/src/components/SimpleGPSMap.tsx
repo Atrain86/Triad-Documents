@@ -20,6 +20,9 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
   const [error, setError] = useState<string>('');
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [userCoords, setUserCoords] = useState<[number, number] | null>(null);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [routeDistance, setRouteDistance] = useState<string>('');
+  const [routeDuration, setRouteDuration] = useState<string>('');
   const userMarker = useRef<mapboxgl.Marker | null>(null);
   const watchId = useRef<number | null>(null);
 
@@ -129,6 +132,12 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
       
       const data = json.routes[0];
       const route = data.geometry;
+      
+      // Extract route information
+      const distance = (data.distance / 1000).toFixed(1); // Convert to kilometers
+      const duration = Math.round(data.duration / 60); // Convert to minutes
+      setRouteDistance(distance);
+      setRouteDuration(duration.toString());
 
       if (map.current) {
         // Remove existing route
@@ -200,7 +209,8 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
         });
 
         console.log('Route drawn successfully');
-        setError('Navigation active! Purple line shows driving route.');
+        setError('');
+        setIsNavigating(true);
         
         // Start live location tracking for navigation
         if (navigator.geolocation) {
@@ -208,6 +218,7 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
             (position) => {
               const newPos: [number, number] = [position.coords.longitude, position.coords.latitude];
               console.log('Live position update:', newPos);
+              setUserCoords(newPos);
               
               // Update user marker position
               if (userMarker.current) {
@@ -278,34 +289,64 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           📍 {clientAddress}
         </div>
 
-        {/* Start GPS Navigation Button */}
-        <button
-          onClick={startRoute}
-          disabled={isGettingLocation}
-          className="absolute bottom-2 right-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed text-white border-none px-4 py-2 rounded-lg cursor-pointer font-bold"
-        >
-          {isGettingLocation ? 'Getting GPS...' : '🧭 Start Navigation'}
-        </button>
+        {/* Navigation Controls */}
+        {!isNavigating ? (
+          <>
+            {/* Start GPS Navigation Button */}
+            <button
+              onClick={startRoute}
+              disabled={isGettingLocation}
+              className="absolute bottom-2 right-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed text-white border-none px-4 py-2 rounded-lg cursor-pointer font-bold"
+            >
+              {isGettingLocation ? 'Getting GPS...' : '🧭 Start Navigation'}
+            </button>
 
-        {/* Map Overview Button */}
-        <button
-          onClick={() => {
-            console.log('View Map button clicked');
-            if (map.current) {
-              console.log('Flying to client location:', clientCoords);
-              map.current.flyTo({
-                center: clientCoords,
-                zoom: 13,
-                essential: true
-              });
-            } else {
-              console.log('Map not ready');
-            }
-          }}
-          className="absolute bottom-16 right-2 bg-emerald-600 hover:bg-emerald-700 text-white border-none px-4 py-2 rounded-lg cursor-pointer font-bold text-sm"
-        >
-          📍 View Map
-        </button>
+            {/* Map Overview Button */}
+            <button
+              onClick={() => {
+                console.log('View Map button clicked');
+                if (map.current) {
+                  console.log('Flying to client location:', clientCoords);
+                  map.current.flyTo({
+                    center: clientCoords,
+                    zoom: 13,
+                    essential: true
+                  });
+                } else {
+                  console.log('Map not ready');
+                }
+              }}
+              className="absolute bottom-16 right-2 bg-emerald-600 hover:bg-emerald-700 text-white border-none px-4 py-2 rounded-lg cursor-pointer font-bold text-sm"
+            >
+              📍 View Map
+            </button>
+          </>
+        ) : (
+          <>
+            {/* Navigation Status Display */}
+            <div className="absolute top-2 left-2 bg-black/80 text-white p-3 rounded-lg">
+              <div className="font-bold text-green-400">🧭 NAVIGATING</div>
+              <div className="text-sm">{routeDistance} km • {routeDuration} min</div>
+              <div className="text-xs text-gray-300">Follow purple line</div>
+            </div>
+
+            {/* Stop Navigation Button */}
+            <button
+              onClick={() => {
+                console.log('Stopping navigation');
+                setIsNavigating(false);
+                if (watchId.current) {
+                  navigator.geolocation.clearWatch(watchId.current);
+                  watchId.current = null;
+                }
+                setError('Navigation stopped');
+              }}
+              className="absolute bottom-2 right-2 bg-red-600 hover:bg-red-700 text-white border-none px-4 py-2 rounded-lg cursor-pointer font-bold"
+            >
+              ⏹️ Stop Navigation
+            </button>
+          </>
+        )}
 
 
 
