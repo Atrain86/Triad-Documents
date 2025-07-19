@@ -534,7 +534,7 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
 
 
   return (
-    <div className={`w-full ${isFullscreen ? 'mobile-fullscreen' : ''}`}>
+    <div className={isFullscreen ? 'mobile-fullscreen' : ''}>
       {/* Map Container with new styling */}
       <div className={`map-container ${isFullscreen ? 'mobile-fullscreen' : ''}`}>
         {/* Client Info with new styling */}
