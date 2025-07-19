@@ -75,7 +75,7 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
 
         map.current = new mapboxgl.Map({
           container: mapContainer.current,
-          style: 'mapbox://styles/mapbox/navigation-night-v1', // Dark blue navigation style
+          style: 'mapbox://styles/mapbox/dark-v11', // Dark base style
           center: clientCoords,
           zoom: 13,
           pitch: 45, // Angled 3D overview as default
@@ -103,47 +103,46 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
         map.current.on('load', () => {
           console.log('Map loaded, applying custom dark blue styling...');
           
-          // Apply custom dark blue colors directly to map layers
+          // Apply custom dark mode colors to map layers
           if (map.current) {
             try {
-              // Override background color to dark blue
-              map.current.setPaintProperty('background', 'background-color', '#0c1529');
-              
-              // Override water bodies to darker blue
-              if (map.current.getLayer('water')) {
-                map.current.setPaintProperty('water', 'fill-color', '#1a237e');
-              }
-              
-              // Override land areas to dark blue-gray
-              const landLayers = ['land', 'landuse', 'landcover'];
-              landLayers.forEach(layerId => {
-                if (map.current!.getLayer(layerId)) {
-                  map.current!.setPaintProperty(layerId, 'fill-color', '#1e2a4a');
+              // Wait for style to load completely before applying custom colors
+              setTimeout(() => {
+                if (map.current) {
+                  // Override background to black
+                  if (map.current.getLayer('background')) {
+                    map.current.setPaintProperty('background', 'background-color', '#000000');
+                  }
+                  
+                  // Override water bodies to muted dark blue
+                  if (map.current.getLayer('water')) {
+                    map.current.setPaintProperty('water', 'fill-color', '#1e3a5f');
+                  }
+                  
+                  // Override land areas to black/dark gray
+                  const landLayers = ['land', 'landuse', 'landcover'];
+                  landLayers.forEach(layerId => {
+                    if (map.current!.getLayer(layerId)) {
+                      map.current!.setPaintProperty(layerId, 'fill-color', '#0a0a0a');
+                    }
+                  });
+                  
+                  console.log('Custom dark mode applied to map');
                 }
-              });
-              
-              // Override roads to lighter blue
-              const roadLayers = ['road', 'road-primary', 'road-secondary', 'road-street'];
-              roadLayers.forEach(layerId => {
-                if (map.current!.getLayer(layerId)) {
-                  map.current!.setPaintProperty(layerId, 'line-color', '#2196f3');
-                }
-              });
-              
-              // Override buildings to dark blue
-              if (map.current.getLayer('building')) {
-                map.current.setPaintProperty('building', 'fill-color', '#1a237e');
-              }
-              
-              console.log('Dark blue theme applied to map layers');
+              }, 1000);
             } catch (err) {
-              console.log('Some style layers not available, using base dark style');
+              console.log('Error applying custom map styling:', err);
             }
           }
           
           console.log('Adding destination marker at:', clientCoords);
-          // Add destination marker (orange like the example)
-          new mapboxgl.Marker({ color: '#ef6c30' })
+          // Create custom house icon marker
+          const houseIcon = document.createElement('div');
+          houseIcon.innerHTML = '🏠';
+          houseIcon.style.fontSize = '24px';
+          houseIcon.style.cursor = 'pointer';
+          
+          new mapboxgl.Marker({ element: houseIcon })
             .setLngLat(clientCoords)
             .addTo(map.current!);
 
@@ -655,12 +654,10 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
               </button>
             )}
 
-            {/* GPS Navigation Status Display - Position based on fullscreen mode */}
-            <div className={`absolute ${isFullscreen ? 'top-2 right-2' : 'top-2 left-2'} bg-black/90 text-white p-3 rounded-lg shadow-lg border border-gray-600 z-[9999]`}>
-              <div className="font-bold text-cyan-400 text-lg">🧭 GPS ACTIVE</div>
-              <div className="text-sm font-semibold">{routeDistance} km • {routeDuration} min</div>
-              <div className="text-xs text-green-300">Following route to destination</div>
-              <div className="text-xs text-gray-400 mt-1">Your location is being tracked</div>
+            {/* Simple Distance and Time Display */}
+            <div className={`absolute ${isFullscreen ? 'top-4 right-4' : 'top-4 right-4'} text-white text-lg font-bold z-[9999]`}
+                 style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
+              {routeDistance} km • {routeDuration} min
             </div>
 
 
