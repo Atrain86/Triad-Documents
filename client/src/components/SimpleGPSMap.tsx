@@ -19,6 +19,7 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [error, setError] = useState<string>('');
   const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [userCoords, setUserCoords] = useState<[number, number] | null>(null);
 
   // Client coordinates (Alan Kohl's house from your example)
   const clientCoords: [number, number] = [-124.9625, 50.0431];
@@ -77,63 +78,95 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
     }
 
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const userPosition: [number, number] = [pos.coords.longitude, pos.coords.latitude];
+      (position) => {
+        const userPosition: [number, number] = [position.coords.longitude, position.coords.latitude];
         console.log('Got user position:', userPosition);
-
-        if (map.current) {
-          map.current.flyTo({ center: userPosition, zoom: 14 });
-
-          // Remove existing route if any
-          try {
-            if (map.current.getLayer('route-line')) map.current.removeLayer('route-line');
-            if (map.current.getSource('route')) map.current.removeSource('route');
-          } catch (e) {
-            console.log('No existing route to remove');
-          }
-
-          // Add simple straight line route
-          map.current.addSource('route', {
-            type: 'geojson',
-            data: {
-              type: 'Feature',
-              properties: {},
-              geometry: {
-                type: 'LineString',
-                coordinates: [userPosition, clientCoords],
-              },
-            },
-          });
-
-          map.current.addLayer({
-            id: 'route-line',
-            type: 'line',
-            source: 'route',
-            layout: {
-              'line-join': 'round',
-              'line-cap': 'round',
-            },
-            paint: {
-              'line-color': '#6B4C9A',
-              'line-width': 5,
-            },
-          });
-
-          // Add user marker
-          new mapboxgl.Marker({ color: '#00FFFF' })
-            .setLngLat(userPosition)
-            .addTo(map.current);
-
-          setError('Route displayed! Follow the purple line to your destination.');
-        }
-        setIsGettingLocation(false);
+        setUserCoords(userPosition);
+        getRoute(userPosition, clientCoords);
       },
       (err) => {
-        setError('GPS error: ' + err.message);
+        setError('Failed to get GPS location: ' + err.message);
         setIsGettingLocation(false);
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
     );
+  };
+
+  // Get actual driving route from Mapbox
+  const getRoute = async (start: [number, number], end: [number, number]) => {
+    try {
+      const query = await fetch(
+        `https://api.mapbox.com/directions/v5/mapbox/driving/${start[0]},${start[1]};${end[0]},${end[1]}?geometries=geojson&access_token=${mapboxgl.accessToken}`
+      );
+      
+      if (!query.ok) {
+        throw new Error(`HTTP ${query.status}: Failed to get route`);
+      }
+      
+      const json = await query.json();
+      
+      if (!json.routes || !json.routes[0]) {
+        setError('No route found between locations');
+        setIsGettingLocation(false);
+        return;
+      }
+      
+      const data = json.routes[0];
+      const route = data.geometry;
+
+      if (map.current) {
+        // Remove existing route
+        try {
+          if (map.current.getLayer('route')) map.current.removeLayer('route');
+          if (map.current.getSource('route')) map.current.removeSource('route');
+          // Remove user markers
+          const markers = document.querySelectorAll('.mapboxgl-marker');
+          markers.forEach(marker => {
+            if (marker.querySelector('.mapboxgl-marker')?.style.backgroundColor !== '#ef6c30') {
+              marker.remove();
+            }
+          });
+        } catch (e) {
+          console.log('No existing route to remove');
+        }
+
+        // Add new route
+        map.current.addSource('route', {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            properties: {},
+            geometry: route,
+          },
+        });
+
+        map.current.addLayer({
+          id: 'route',
+          type: 'line',
+          source: 'route',
+          layout: { 'line-join': 'round', 'line-cap': 'round' },
+          paint: { 'line-color': '#8a2be2', 'line-width': 4 },
+        });
+
+        // Add user location marker
+        new mapboxgl.Marker({ color: '#00FFFF' })
+          .setLngLat(start)
+          .addTo(map.current);
+
+        // Fit map to show route
+        const bounds = new mapboxgl.LngLatBounds();
+        bounds.extend(start);
+        bounds.extend(end);
+        map.current.fitBounds(bounds, { padding: 50 });
+
+        setError('Route displayed! Follow the purple line to your destination.');
+      }
+    } catch (err) {
+      console.error('Route error:', err);
+      setError('Route error: ' + err.message);
+    } finally {
+      setIsGettingLocation(false);
+    }
   };
 
   const toggleFullscreen = () => {
