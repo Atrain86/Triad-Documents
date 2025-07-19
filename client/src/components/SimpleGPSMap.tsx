@@ -49,7 +49,13 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           center: clientCoords,
           zoom: 13,
           attributionControl: false, // Remove info button
-          logoPosition: 'top-left' // This will be hidden with CSS
+          logoPosition: 'top-left', // This will be hidden with CSS
+          // Improve touch handling to fix zoom issues
+          touchZoomRotate: true,
+          touchPitch: false,
+          dragRotate: false,
+          keyboard: false,
+          doubleClickZoom: false // Disable double-click zoom to prevent conflicts
         });
 
         map.current.on('load', () => {
@@ -106,30 +112,41 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
     };
   }, []);
 
-  // Enhanced touch handling for fullscreen
+  // Fixed touch handling for fullscreen
   const handleTouchStart = (e: React.TouchEvent) => {
-    // Prevent text selection and context menus
-    e.preventDefault();
-    
+    // Only prevent default for double-tap detection, not normal map interaction
     const now = Date.now();
     const timeSinceLastTap = now - lastTap;
     
-    if (timeSinceLastTap < 500 && timeSinceLastTap > 50) {
-      // Double tap detected
+    if (timeSinceLastTap < 400 && timeSinceLastTap > 100) {
+      // Double tap detected - prevent default to avoid conflicts
+      e.preventDefault();
+      e.stopPropagation();
       console.log('Double tap detected - toggling fullscreen from', isFullscreen ? 'fullscreen' : 'normal');
       
-      const newFullscreenState = !isFullscreen;
-      setIsFullscreen(newFullscreenState);
-      
-      setTimeout(() => {
-        if (map.current) {
-          map.current.resize();
-          console.log('Map resized after fullscreen toggle');
-        }
-      }, 150);
+      setIsFullscreen(prev => {
+        const newState = !prev;
+        console.log('Setting fullscreen to:', newState);
+        
+        // Resize map after state change
+        setTimeout(() => {
+          if (map.current) {
+            map.current.resize();
+            console.log('Map resized after fullscreen toggle');
+          }
+        }, 200);
+        
+        return newState;
+      });
     }
     
     setLastTap(now);
+  };
+
+  // Handle context menu prevention
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    return false;
   };
 
   // Handle mouse double-click for desktop
@@ -381,11 +398,15 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
                 userMarker.current.setLngLat(newPos);
               }
               
-              // GPS-style tracking: Keep very close zoom and center on user
+              // GPS-style tracking: Center on user but respect manual zoom
               if (map.current) {
+                const currentZoom = map.current.getZoom();
+                // Only auto-zoom if user hasn't manually zoomed out
+                const targetZoom = currentZoom < 14 ? currentZoom : Math.max(currentZoom, 16);
+                
                 map.current.easeTo({
                   center: newPos,
-                  zoom: 18, // Very close GPS zoom for driving
+                  zoom: targetZoom, // Respect user's zoom level if they zoomed out
                   bearing: isCompassMode ? (position.coords.heading || 0) : 0,
                   pitch: 60, // 3D driving perspective
                   duration: 1000
@@ -427,12 +448,13 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
       >
         <div 
           ref={mapContainer}
-          className="w-full h-full cursor-pointer"
+          className="w-full h-full cursor-pointer map-no-select"
           style={{
             /* Hide Mapbox logo and attribution */
-            touchAction: 'pan-x pan-y'
+            touchAction: 'auto'
           }}
           onTouchStart={handleTouchStart}
+          onContextMenu={handleContextMenu}
           onDoubleClick={handleDoubleClick}
         />
         
