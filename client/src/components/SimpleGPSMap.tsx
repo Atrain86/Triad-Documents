@@ -106,7 +106,7 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
     };
   }, []);
 
-  // Simplified touch handling for fullscreen
+  // Enhanced touch handling for fullscreen
   const handleTouchStart = (e: React.TouchEvent) => {
     // Prevent text selection and context menus
     e.preventDefault();
@@ -116,14 +116,17 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
     
     if (timeSinceLastTap < 500 && timeSinceLastTap > 50) {
       // Double tap detected
-      console.log('Double tap detected - toggling fullscreen');
-      setIsFullscreen(prev => !prev);
+      console.log('Double tap detected - toggling fullscreen from', isFullscreen ? 'fullscreen' : 'normal');
+      
+      const newFullscreenState = !isFullscreen;
+      setIsFullscreen(newFullscreenState);
       
       setTimeout(() => {
         if (map.current) {
           map.current.resize();
+          console.log('Map resized after fullscreen toggle');
         }
-      }, 100);
+      }, 150);
     }
     
     setLastTap(now);
@@ -142,6 +145,23 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
   };
 
   // Get route preview for automatic overview
+  // Return to overview map
+  const returnToOverview = () => {
+    if (userCoords && map.current) {
+      console.log('Returning to overview...');
+      getRoutePreview(userCoords, clientCoords);
+    } else if (map.current) {
+      // Fallback to client location if no user coords
+      map.current.flyTo({
+        center: clientCoords,
+        zoom: 13,
+        bearing: 0,
+        pitch: 0,
+        essential: true
+      });
+    }
+  };
+
   const getRoutePreview = async (start: [number, number], end: [number, number]) => {
     try {
       console.log('Getting route preview from', start, 'to', end);
@@ -464,8 +484,8 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
               </button>
             )}
 
-            {/* GPS Navigation Status Display */}
-            <div className="absolute top-2 left-2 bg-black/90 text-white p-3 rounded-lg shadow-lg border border-gray-600">
+            {/* GPS Navigation Status Display - Position based on fullscreen mode */}
+            <div className={`absolute ${isFullscreen ? 'top-2 right-2' : 'top-2 left-2'} bg-black/90 text-white p-3 rounded-lg shadow-lg border border-gray-600 z-[9999]`}>
               <div className="font-bold text-cyan-400 text-lg">🧭 GPS ACTIVE</div>
               <div className="text-sm font-semibold">{routeDistance} km • {routeDuration} min</div>
               <div className="text-xs text-green-300">Following route to destination</div>
@@ -496,14 +516,20 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
             {/* Stop Navigation Button */}
             <button
               onClick={() => {
-                console.log('Stopping navigation');
+                console.log('Stopping navigation and returning to overview');
                 setIsNavigating(false);
                 setIsCompassMode(false);
                 if (watchId.current) {
                   navigator.geolocation.clearWatch(watchId.current);
                   watchId.current = null;
                 }
-                setError('Navigation stopped');
+                
+                // Return to overview automatically
+                setTimeout(() => {
+                  returnToOverview();
+                }, 500);
+                
+                setError('Navigation stopped - returning to overview');
               }}
               className="absolute bottom-2 right-2 bg-red-600 hover:bg-red-700 text-white border-none px-4 py-2 rounded-lg cursor-pointer font-bold"
             >
