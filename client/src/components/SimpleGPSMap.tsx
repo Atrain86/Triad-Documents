@@ -254,10 +254,11 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
       >
         <div 
           ref={mapContainer}
-          className="w-full h-full"
+          className="w-full h-full cursor-pointer"
           style={{
             /* Hide Mapbox logo and attribution */
           }}
+          onDoubleClick={toggleFullscreen}
         />
         
         {/* Map Overlay (like your example) */}
@@ -352,6 +353,13 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
         {isGettingLocation && (
           <div className="absolute bottom-16 right-2 bg-black bg-opacity-80 text-white p-2 rounded text-xs max-w-48">
             Allow location access in your browser when prompted, or wait for timeout to try demo route.
+          </div>
+        )}
+
+        {/* Double-click hint for fullscreen */}
+        {!isFullscreen && (
+          <div className="absolute top-12 right-2 bg-black bg-opacity-60 text-white px-2 py-1 rounded text-xs pointer-events-none">
+            Double-click map for fullscreen
           </div>
         )}
 
