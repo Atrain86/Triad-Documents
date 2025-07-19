@@ -245,12 +245,20 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
       const data = json.routes[0];
       const route = data.geometry.coordinates;
       
-      // Add purple route line
+      // Add purple route line (preview version)
       if (map.current) {
-        if (map.current.getSource('route')) {
-          map.current.removeLayer('route');
-          map.current.removeSource('route');
+        try {
+          if (map.current.getLayer('route')) {
+            map.current.removeLayer('route');
+          }
+          if (map.current.getSource('route')) {
+            map.current.removeSource('route');
+          }
+        } catch (e) {
+          // Layer/source doesn't exist, continue
         }
+        
+        console.log('Adding route preview with', route.length, 'coordinates');
         
         map.current.addSource('route', {
           'type': 'geojson',
@@ -277,6 +285,8 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
             'line-width': 6
           }
         });
+        
+        console.log('Route preview layer added successfully');
         
         // Fit view to show entire route with angled perspective
         const bounds = new mapboxgl.LngLatBounds()
@@ -382,45 +392,43 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
       setRouteDuration(duration.toString());
 
       if (map.current) {
-        // Update or add route (preserve existing if possible)
+        // Always ensure route is visible during navigation
         try {
+          // Remove existing route to prevent conflicts
+          if (map.current.getLayer('route')) {
+            map.current.removeLayer('route');
+          }
           if (map.current.getSource('route')) {
-            // Update existing route
-            map.current.getSource('route').setData({
-              type: 'Feature',
-              properties: {},
-              geometry: route,
-            });
-            console.log('Updated existing route data');
-          } else {
-            // Add new route source and layer
-            map.current.addSource('route', {
-              type: 'geojson',
-              data: {
-                type: 'Feature',
-                properties: {},
-                geometry: route,
-              },
-            });
-
-            map.current.addLayer({
-              id: 'route',
-              type: 'line',
-              source: 'route',
-              layout: { 
-                'line-join': 'round', 
-                'line-cap': 'round' 
-              },
-              paint: { 
-                'line-color': ['interpolate', ['linear'], ['line-progress'], 0, '#00FFFF', 1, '#6B4C9A'], 
-                'line-width': 6
-              },
-            });
-            console.log('Added new route layer');
+            map.current.removeSource('route');
           }
         } catch (e) {
-          console.log('Route update error:', e);
+          // Ignore errors, continue
         }
+
+        // Add fresh route with cyan-to-purple gradient
+        map.current.addSource('route', {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            properties: {},
+            geometry: route,
+          },
+        });
+
+        map.current.addLayer({
+          id: 'route',
+          type: 'line',
+          source: 'route',
+          layout: { 
+            'line-join': 'round', 
+            'line-cap': 'round' 
+          },
+          paint: { 
+            'line-color': ['interpolate', ['linear'], ['line-progress'], 0, '#00FFFF', 1, '#6B4C9A'], 
+            'line-width': 6
+          },
+        });
+        console.log('Navigation route with purple gradient added');
 
         // Add user location marker with directional triangle (like Google Maps)
         const el = document.createElement('div');
