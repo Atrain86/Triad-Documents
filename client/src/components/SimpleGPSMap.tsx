@@ -103,37 +103,7 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
         map.current.on('load', () => {
           console.log('Map loaded, applying custom dark blue styling...');
           
-          // Apply custom dark mode colors to map layers
-          if (map.current) {
-            try {
-              // Wait for style to load completely before applying custom colors
-              setTimeout(() => {
-                if (map.current) {
-                  // Override background to black
-                  if (map.current.getLayer('background')) {
-                    map.current.setPaintProperty('background', 'background-color', '#000000');
-                  }
-                  
-                  // Override water bodies to muted dark blue
-                  if (map.current.getLayer('water')) {
-                    map.current.setPaintProperty('water', 'fill-color', '#1e3a5f');
-                  }
-                  
-                  // Override land areas to black/dark gray
-                  const landLayers = ['land', 'landuse', 'landcover'];
-                  landLayers.forEach(layerId => {
-                    if (map.current!.getLayer(layerId)) {
-                      map.current!.setPaintProperty(layerId, 'fill-color', '#0a0a0a');
-                    }
-                  });
-                  
-                  console.log('Custom dark mode applied to map');
-                }
-              }, 1000);
-            } catch (err) {
-              console.log('Error applying custom map styling:', err);
-            }
-          }
+          console.log('Map loaded successfully with dark theme');
           
           console.log('Adding destination marker at:', clientCoords);
           // Create custom house icon marker
