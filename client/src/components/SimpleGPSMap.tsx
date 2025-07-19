@@ -101,7 +101,47 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
         });
 
         map.current.on('load', () => {
-          console.log('Map loaded, adding destination marker at:', clientCoords);
+          console.log('Map loaded, applying custom dark blue styling...');
+          
+          // Apply custom dark blue colors directly to map layers
+          if (map.current) {
+            try {
+              // Override background color to dark blue
+              map.current.setPaintProperty('background', 'background-color', '#0c1529');
+              
+              // Override water bodies to darker blue
+              if (map.current.getLayer('water')) {
+                map.current.setPaintProperty('water', 'fill-color', '#1a237e');
+              }
+              
+              // Override land areas to dark blue-gray
+              const landLayers = ['land', 'landuse', 'landcover'];
+              landLayers.forEach(layerId => {
+                if (map.current!.getLayer(layerId)) {
+                  map.current!.setPaintProperty(layerId, 'fill-color', '#1e2a4a');
+                }
+              });
+              
+              // Override roads to lighter blue
+              const roadLayers = ['road', 'road-primary', 'road-secondary', 'road-street'];
+              roadLayers.forEach(layerId => {
+                if (map.current!.getLayer(layerId)) {
+                  map.current!.setPaintProperty(layerId, 'line-color', '#2196f3');
+                }
+              });
+              
+              // Override buildings to dark blue
+              if (map.current.getLayer('building')) {
+                map.current.setPaintProperty('building', 'fill-color', '#1a237e');
+              }
+              
+              console.log('Dark blue theme applied to map layers');
+            } catch (err) {
+              console.log('Some style layers not available, using base dark style');
+            }
+          }
+          
+          console.log('Adding destination marker at:', clientCoords);
           // Add destination marker (orange like the example)
           new mapboxgl.Marker({ color: '#ef6c30' })
             .setLngLat(clientCoords)
@@ -563,14 +603,9 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           onDoubleClick={handleDoubleClick}
         />
         
-        {/* Client Info Overlay with dark blue styling */}
+        {/* Simple text overlay - no background containers */}
         <div 
-          className="absolute top-2 left-2 px-4 py-2 rounded-lg text-sm cursor-pointer hover:bg-opacity-90"
-          style={{ 
-            backgroundColor: 'rgba(26, 35, 126, 0.9)',
-            color: '#ffcc02',
-            border: '2px solid #2196f3'
-          }}
+          className="absolute top-2 left-2 text-sm cursor-pointer"
           onClick={() => {
             console.log('Opening address in device Maps app');
             const destination = encodeURIComponent(clientAddress);
@@ -578,30 +613,29 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           }}
           title="Tap to open in Maps app"
         >
-          🏠 <span style={{ color: '#ffcc02', fontWeight: 'bold' }}>{clientName}</span><br />
-          <span style={{ color: '#64b5f6' }}>{clientAddress}</span>
+          <div style={{ color: '#ffcc02', fontWeight: 'bold', textShadow: '1px 1px 2px rgba(0,0,0,0.8)' }}>
+            🏠 {clientName}
+          </div>
+          <div style={{ color: '#64b5f6', textShadow: '1px 1px 2px rgba(0,0,0,0.8)' }}>
+            {clientAddress}
+          </div>
         </div>
         
 
 
-        {/* Navigation Controls */}
-        {!isNavigating ? (
-          <>
-            {/* Start Navigation Button */}
-            <button
-              onClick={startRoute}
-              disabled={isGettingLocation}
-              className="absolute bottom-4 right-4 text-white border-none px-6 py-3 rounded-xl cursor-pointer font-bold text-lg"
-              style={{ 
-                backgroundColor: '#00c853',
-                border: '2px solid #4caf50',
-                boxShadow: '0 4px 12px rgba(0, 200, 83, 0.3)'
-              }}
-            >
-              {isGettingLocation ? 'Getting GPS...' : 'Start'}
-            </button>
-          </>
-        ) : (
+        {/* Start Button - Simple styling */}
+        {!isNavigating && (
+          <button
+            onClick={startRoute}
+            disabled={isGettingLocation}
+            className="absolute bottom-4 right-4 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold"
+            style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.8)' }}
+          >
+            {isGettingLocation ? 'Getting GPS...' : 'Start'}
+          </button>
+        )}
+
+        {isNavigating && (
           <>
             {/* Fullscreen Exit Button - Only show when in fullscreen */}
             {isFullscreen && (
