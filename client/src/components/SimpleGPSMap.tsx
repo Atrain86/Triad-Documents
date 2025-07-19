@@ -534,24 +534,21 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
 
 
   return (
-    <div className="w-full">
-      {/* Map Container */}
-      <div 
-        className={`w-full overflow-hidden relative ${
-          isFullscreen 
-            ? 'mobile-fullscreen' 
-            : 'rounded-lg'
-        }`}
-        style={{ 
-          height: isFullscreen ? '100dvh' : '300px',
-          backgroundColor: '#0c0f1a'
-        }}
-      >
+    <div className={`w-full ${isFullscreen ? 'mobile-fullscreen' : ''}`}>
+      {/* Map Container with new styling */}
+      <div className={`map-container ${isFullscreen ? 'mobile-fullscreen' : ''}`}>
+        {/* Client Info with new styling */}
+        <div className="map-client-label">
+          <span className="icon">🏠</span> {clientName}
+        </div>
+        <div className="map-address">{clientAddress}</div>
+        
+        {/* Map */}
         <div 
           ref={mapContainer}
-          className="w-full h-full cursor-pointer map-no-select"
+          className="mapbox-map map-no-select"
           style={{
-            /* Hide Mapbox logo and attribution */
+            height: isFullscreen ? '100vh' : '250px',
             touchAction: 'pan-x pan-y pinch-zoom',
             userSelect: 'none',
             WebkitUserSelect: 'none',
@@ -564,34 +561,53 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           onDoubleClick={handleDoubleClick}
         />
         
-        {/* Client Info Overlay - Your custom theme */}
+        {/* Fullscreen Toggle */}
         <div 
-          className="absolute top-2 left-2 bg-black bg-opacity-60 px-3 py-2 rounded-lg text-sm cursor-pointer hover:bg-opacity-80"
-          style={{ color: '#ffaf40' }}
-          onClick={() => {
-            console.log('Opening address in device Maps app');
-            const destination = encodeURIComponent(clientAddress);
-            // Open in device's default maps app
-            window.open(`https://maps.apple.com/?q=${destination}`, '_blank');
-          }}
-          title="Tap to open in Maps app"
+          className="fullscreen-toggle"
+          onClick={toggleFullscreen}
+          title="Toggle Fullscreen"
         >
-          🏠 {clientName}<br />{clientAddress}
+          ⛶
         </div>
 
-        {/* Navigation Controls */}
+        {/* Map Buttons with new styling */}
         {!isNavigating ? (
-          <>
-            {/* Start Navigation Button - Your custom theme */}
-            <button
+          <div className="map-buttons">
+            <button 
+              className="route-btn"
+              onClick={() => {
+                if (userCoords) {
+                  getRoutePreview(userCoords, clientCoords, true);
+                } else {
+                  setError('Getting your location...');
+                  setIsGettingLocation(true);
+                  navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                      const userPosition: [number, number] = [position.coords.longitude, position.coords.latitude];
+                      setUserCoords(userPosition);
+                      getRoutePreview(userPosition, clientCoords, true);
+                      setIsGettingLocation(false);
+                      setError('');
+                    },
+                    (err) => {
+                      setError('Could not get your location for route preview');
+                      setIsGettingLocation(false);
+                    }
+                  );
+                }
+              }}
+              disabled={isGettingLocation}
+            >
+              {isGettingLocation ? 'Getting Location...' : 'Show Route'}
+            </button>
+            <button 
+              className="nav-btn"
               onClick={startRoute}
               disabled={isGettingLocation}
-              className="absolute bottom-2 right-2 text-white border-none px-4 py-2 rounded-lg cursor-pointer font-bold"
-              style={{ backgroundColor: '#0099cc' }}
             >
-              {isGettingLocation ? 'Getting GPS...' : 'Start'}
+              {isGettingLocation ? 'Getting GPS...' : 'Start Navigation'}
             </button>
-          </>
+          </div>
         ) : (
           <>
             {/* Fullscreen Exit Button - Only show when in fullscreen */}
@@ -665,15 +681,6 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
             Double-click map for fullscreen
           </div>
         )}
-
-        {/* Fullscreen Button (like your example) */}
-        <button
-          onClick={toggleFullscreen}
-          className="absolute top-2 right-2 text-white border-none px-3 py-1 rounded-full cursor-pointer font-bold"
-          style={{ backgroundColor: '#ef6c30' }}
-        >
-          ⛶
-        </button>
       </div>
 
       {/* Error Display */}
