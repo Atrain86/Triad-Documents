@@ -602,23 +602,7 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           onDoubleClick={handleDoubleClick}
         />
         
-        {/* Simple text overlay - no background containers */}
-        <div 
-          className="absolute top-2 left-2 text-sm cursor-pointer"
-          onClick={() => {
-            console.log('Opening address in device Maps app');
-            const destination = encodeURIComponent(clientAddress);
-            window.open(`https://maps.apple.com/?q=${destination}`, '_blank');
-          }}
-          title="Tap to open in Maps app"
-        >
-          <div style={{ color: '#ffcc02', fontWeight: 'bold', textShadow: '1px 1px 2px rgba(0,0,0,0.8)' }}>
-            🏠 {clientName}
-          </div>
-          <div style={{ color: '#64b5f6', textShadow: '1px 1px 2px rgba(0,0,0,0.8)' }}>
-            {clientAddress}
-          </div>
-        </div>
+
         
 
 
