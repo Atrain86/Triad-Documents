@@ -26,6 +26,7 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
   const [routeDuration, setRouteDuration] = useState<string>('');
   const [currentHeading, setCurrentHeading] = useState<number>(0);
   const [isCompassMode, setIsCompassMode] = useState(false);
+  const [lockedBearing, setLockedBearing] = useState<number>(0);
   const userMarker = useRef<mapboxgl.Marker | null>(null);
   const watchId = useRef<number | null>(null);
   const compassControl = useRef<any>(null);
@@ -406,25 +407,26 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
                 userMarker.current.setLngLat(newPos);
               }
               
-              // GPS-style tracking: Center on user but respect manual zoom
+              // GPS-style tracking: Center on user but respect manual zoom and bearing
               if (map.current) {
                 const currentZoom = map.current.getZoom();
                 // Only auto-zoom if user hasn't manually zoomed out
                 const targetZoom = currentZoom < 14 ? currentZoom : Math.max(currentZoom, 16);
                 
-                // Update bearing based on compass mode and available heading
-                let targetBearing = 0;
-                if (isCompassMode && position.coords.heading !== null && position.coords.heading !== undefined) {
-                  targetBearing = position.coords.heading;
-                  console.log('Compass mode: updating bearing to', targetBearing);
+                // Maintain locked bearing in compass mode
+                let targetBearing;
+                if (isCompassMode) {
+                  targetBearing = lockedBearing; // Keep the locked bearing, don't change it
+                } else {
+                  targetBearing = 0; // North up mode
                 }
                 
                 map.current.easeTo({
                   center: newPos,
                   zoom: targetZoom, // Respect user's zoom level if they zoomed out
-                  bearing: targetBearing,
+                  bearing: targetBearing, // Maintain locked bearing or north up
                   pitch: 60, // 3D driving perspective
-                  duration: 500 // Faster updates for better compass tracking
+                  duration: 800 // Smooth updates
                 });
               }
             },
@@ -538,26 +540,36 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
             <button
               onClick={() => {
                 const newCompassMode = !isCompassMode;
-                console.log('Toggling compass mode to:', newCompassMode);
+                console.log('Toggling compass mode to:', newCompassMode, 'Current heading:', currentHeading);
                 setIsCompassMode(newCompassMode);
                 
                 if (map.current && userCoords) {
-                  const targetBearing = newCompassMode ? currentHeading : 0;
-                  console.log('Setting bearing to:', targetBearing);
+                  let targetBearing = 0;
+                  
+                  if (newCompassMode) {
+                    // Lock to current heading when entering compass mode
+                    targetBearing = currentHeading || 0;
+                    setLockedBearing(targetBearing);
+                    console.log('Locking bearing to:', targetBearing);
+                  } else {
+                    // Return to north up
+                    setLockedBearing(0);
+                    console.log('Returning to north up');
+                  }
                   
                   map.current.easeTo({
                     center: userCoords,
                     zoom: Math.max(map.current.getZoom(), 16),
                     bearing: targetBearing,
                     pitch: 60,
-                    duration: 1000,
+                    duration: 800,
                     essential: true
                   });
                 }
               }}
               className={`absolute bottom-16 right-2 ${isCompassMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-600 hover:bg-gray-700'} text-white border-none px-3 py-2 rounded-lg cursor-pointer font-bold text-sm`}
             >
-              {isCompassMode ? '🧭 Direction' : '⬆️ North Up'}
+              {isCompassMode ? '🧭 Locked' : '⬆️ North Up'}
             </button>
 
             {/* Stop Navigation Button */}
