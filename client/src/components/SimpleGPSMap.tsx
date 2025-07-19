@@ -112,30 +112,26 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
     };
   }, []);
 
-  // Fixed touch handling for fullscreen
+  // Simplified double-tap handling without text selection interference
   const handleTouchStart = (e: React.TouchEvent) => {
-    // Only prevent default for double-tap detection, not normal map interaction
     const now = Date.now();
     const timeSinceLastTap = now - lastTap;
     
-    if (timeSinceLastTap < 400 && timeSinceLastTap > 100) {
-      // Double tap detected - prevent default to avoid conflicts
-      e.preventDefault();
+    // Always prevent text selection on map
+    e.preventDefault();
+    
+    if (timeSinceLastTap < 300 && timeSinceLastTap > 50) {
+      // Quick double tap detected
       e.stopPropagation();
-      console.log('Double tap detected - toggling fullscreen from', isFullscreen ? 'fullscreen' : 'normal');
+      console.log('Quick double tap detected - toggling fullscreen');
       
       setIsFullscreen(prev => {
         const newState = !prev;
-        console.log('Setting fullscreen to:', newState);
-        
-        // Resize map after state change
         setTimeout(() => {
           if (map.current) {
             map.current.resize();
-            console.log('Map resized after fullscreen toggle');
           }
-        }, 200);
-        
+        }, 100);
         return newState;
       });
     }
@@ -143,7 +139,19 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
     setLastTap(now);
   };
 
-  // Handle context menu prevention
+  // Prevent all text selection and context menus
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    e.preventDefault();
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    // Allow normal map gestures but prevent text selection
+    if (e.touches.length === 1) {
+      // Single finger - allow map panning
+      return;
+    }
+  };
+
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
     return false;
@@ -404,12 +412,19 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
                 // Only auto-zoom if user hasn't manually zoomed out
                 const targetZoom = currentZoom < 14 ? currentZoom : Math.max(currentZoom, 16);
                 
+                // Update bearing based on compass mode and available heading
+                let targetBearing = 0;
+                if (isCompassMode && position.coords.heading !== null && position.coords.heading !== undefined) {
+                  targetBearing = position.coords.heading;
+                  console.log('Compass mode: updating bearing to', targetBearing);
+                }
+                
                 map.current.easeTo({
                   center: newPos,
                   zoom: targetZoom, // Respect user's zoom level if they zoomed out
-                  bearing: isCompassMode ? (position.coords.heading || 0) : 0,
+                  bearing: targetBearing,
                   pitch: 60, // 3D driving perspective
-                  duration: 1000
+                  duration: 500 // Faster updates for better compass tracking
                 });
               }
             },
@@ -451,9 +466,14 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           className="w-full h-full cursor-pointer map-no-select"
           style={{
             /* Hide Mapbox logo and attribution */
-            touchAction: 'auto'
+            touchAction: 'pan-x pan-y pinch-zoom',
+            userSelect: 'none',
+            WebkitUserSelect: 'none',
+            WebkitTouchCallout: 'none'
           }}
           onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          onTouchMove={handleTouchMove}
           onContextMenu={handleContextMenu}
           onDoubleClick={handleDoubleClick}
         />
@@ -517,22 +537,27 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
             {/* Compass/Orientation Button */}
             <button
               onClick={() => {
-                console.log('Toggling compass mode');
-                setIsCompassMode(!isCompassMode);
+                const newCompassMode = !isCompassMode;
+                console.log('Toggling compass mode to:', newCompassMode);
+                setIsCompassMode(newCompassMode);
+                
                 if (map.current && userCoords) {
-                  map.current.flyTo({
+                  const targetBearing = newCompassMode ? currentHeading : 0;
+                  console.log('Setting bearing to:', targetBearing);
+                  
+                  map.current.easeTo({
                     center: userCoords,
-                    zoom: 18,
-                    bearing: !isCompassMode ? currentHeading : 0,
+                    zoom: Math.max(map.current.getZoom(), 16),
+                    bearing: targetBearing,
                     pitch: 60,
-                    speed: 1,
+                    duration: 1000,
                     essential: true
                   });
                 }
               }}
               className={`absolute bottom-16 right-2 ${isCompassMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-600 hover:bg-gray-700'} text-white border-none px-3 py-2 rounded-lg cursor-pointer font-bold text-sm`}
             >
-              {isCompassMode ? '🧭 Compass' : '⬆️ North Up'}
+              {isCompassMode ? '🧭 Direction' : '⬆️ North Up'}
             </button>
 
             {/* Stop Navigation Button */}
