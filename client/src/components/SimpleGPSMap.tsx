@@ -106,12 +106,16 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
       });
     }
     
-    // Set up manual timeout
+    // Set up manual timeout with immediate fallback
     const timeoutId = setTimeout(() => {
-      console.log('Manual timeout triggered - geolocation took too long');
-      setError('GPS timeout - please try again or check location settings');
+      console.log('Manual timeout triggered - opening Google Maps as fallback');
+      setError('GPS took too long - Opening Google Maps for navigation');
       setIsGettingLocation(false);
-    }, 10000); // 10 second manual timeout
+      
+      // Automatically open Google Maps after GPS timeout
+      const destination = encodeURIComponent(clientAddress);
+      window.open(`https://www.google.com/maps/dir/?api=1&destination=${destination}`, '_blank');
+    }, 8000); // 8 second timeout before auto-opening Google Maps
     
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -227,9 +231,9 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
         setIsGettingLocation(false);
       },
       { 
-        enableHighAccuracy: false,  // Try with less accuracy first
-        timeout: 8000,  // 8 seconds - shorter timeout for debugging
-        maximumAge: 0  // Always get fresh location
+        enableHighAccuracy: true,  // Try high accuracy since permissions are allowed
+        timeout: 30000,  // 30 seconds - much longer timeout since permissions are working
+        maximumAge: 60000  // Allow cached location up to 1 minute old
       }
     );
   };
@@ -277,7 +281,19 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           className="absolute bottom-2 right-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white border-none px-4 py-2 rounded-lg cursor-pointer font-bold"
           style={{ backgroundColor: isGettingLocation ? '#6b9bd2' : '#0099cc' }}
         >
-          {isGettingLocation ? 'Getting GPS...' : 'Start'}
+          {isGettingLocation ? 'Getting GPS...' : 'Start Navigation'}
+        </button>
+
+        {/* Google Maps Navigation Fallback */}
+        <button
+          onClick={() => {
+            console.log('Opening Google Maps navigation');
+            const destination = encodeURIComponent(clientAddress);
+            window.open(`https://www.google.com/maps/dir/?api=1&destination=${destination}`, '_blank');
+          }}
+          className="absolute bottom-16 right-2 bg-green-600 hover:bg-green-700 text-white border-none px-3 py-2 rounded-lg cursor-pointer font-bold text-sm"
+        >
+          🗺️ Google Maps
         </button>
 
         {/* Demo Route Button - Always available */}
@@ -351,8 +367,8 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
 
         {/* GPS Permission Notice */}
         {isGettingLocation && (
-          <div className="absolute bottom-16 right-2 bg-black bg-opacity-80 text-white p-2 rounded text-xs max-w-48">
-            Allow location access in your browser when prompted, or wait for timeout to try demo route.
+          <div className="absolute bottom-28 right-2 bg-black bg-opacity-80 text-white p-2 rounded text-xs max-w-48">
+            Getting your location... If it times out, use the Google Maps button below for navigation.
           </div>
         )}
 
