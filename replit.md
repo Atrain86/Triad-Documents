@@ -106,6 +106,61 @@ This is a full-stack web application designed for managing painting projects. Th
 - Static file serving enabled for production builds
 - Express server configured for 0.0.0.0 host binding
 
+### DEPLOYMENT FIX REQUIREMENTS (July 19, 2025)
+Due to deployment failure with Nix modules manifest issues, the following manual configuration is required:
+
+#### .replit Configuration Updates Needed:
+```toml
+modules = ["nodejs-20", "web", "postgresql-16"]
+run = "npm run dev"
+hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
+
+[nix]
+channel = "stable-24_05"
+packages = ["imagemagick", "unzip"]
+
+[env]
+NODE_ENV = "production"
+DATABASE_URL = "${DATABASE_URL}"
+
+[deployment]
+deploymentTarget = "autoscale"
+build = ["npm", "run", "build"]
+run = ["npm", "run", "start"]
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+```
+
+#### replit.nix File Required:
+```nix
+{ pkgs }: {
+  deps = [
+    pkgs.imagemagick
+    pkgs.unzip
+    pkgs.nodejs-20_x
+    pkgs.postgresql_16
+  ];
+}
+```
+
+#### Deployment Secrets Configuration:
+- Ensure DATABASE_URL is configured as a deployment secret
+- Verify all required API keys are set as deployment secrets:
+  - MAPBOX_ACCESS_TOKEN
+  - OPENAI_API_KEY
+  - SENDGRID_API_KEY
+
+#### Package.json Verification:
+✅ Correct start script already configured: `"start": "NODE_ENV=production node dist/index.js"`
+✅ Correct build script already configured: `"build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist"`
+
+#### Server Configuration:
+✅ Express server properly configured for production with 0.0.0.0 host binding
+✅ Static file serving implemented for production builds
+✅ Environment-based Vite setup (development only)
+
 ## Changelog
 - June 25, 2025. Initial setup
 - June 25, 2025. Rebranded to "A-Frame Painting" with custom logo and dark mode implementation
