@@ -279,6 +279,75 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           {isGettingLocation ? 'Getting GPS...' : 'Start'}
         </button>
 
+        {/* Demo Route Button - Always available */}
+        <button
+          onClick={() => {
+            console.log('Demo route button clicked');
+            setError('');
+            setIsGettingLocation(false);
+            // Use Vancouver coordinates as demo starting point
+            const testCoords: [number, number] = [-123.1207, 49.2827];
+            console.log('Using demo location:', testCoords);
+            
+            if (map.current) {
+              map.current.flyTo({ center: testCoords, zoom: 13 });
+              
+              const routeUrl = `https://api.mapbox.com/directions/v5/mapbox/driving/${testCoords.join(',')};${clientCoords.join(',')}?steps=true&geometries=geojson&access_token=${mapboxgl.accessToken}`;
+              
+              fetch(routeUrl)
+                .then(res => res.json())
+                .then(data => {
+                  if (data.routes && data.routes[0]) {
+                    const route = data.routes[0].geometry;
+                    
+                    try {
+                      if (map.current?.getLayer('route')) {
+                        map.current.removeLayer('route');
+                      }
+                    } catch (e) {}
+                    
+                    try {
+                      if (map.current?.getSource('route')) {
+                        map.current.removeSource('route');
+                      }
+                    } catch (e) {}
+
+                    if (map.current) {
+                      map.current.addSource('route', {
+                        type: 'geojson',
+                        data: route
+                      });
+
+                      map.current.addLayer({
+                        id: 'route',
+                        type: 'line',
+                        source: 'route',
+                        layout: {
+                          'line-join': 'round',
+                          'line-cap': 'round'
+                        },
+                        paint: {
+                          'line-color': ['interpolate', ['linear'], ['line-progress'], 0, '#00FFFF', 1, '#6B4C9A'],
+                          'line-width': 6
+                        }
+                      });
+                      setError('Demo route loaded! (Vancouver to client location)');
+                    }
+                  } else {
+                    setError('No route found for demo');
+                  }
+                })
+                .catch(err => {
+                  console.error('Demo route error:', err);
+                  setError('Demo route failed: ' + err.message);
+                });
+            }
+          }}
+          className="absolute bottom-2 left-2 bg-green-600 hover:bg-green-700 text-white border-none px-3 py-2 rounded-lg cursor-pointer font-bold text-sm"
+        >
+          Demo Route
+        </button>
+
         {/* GPS Permission Notice */}
         {isGettingLocation && (
           <div className="absolute bottom-16 right-2 bg-black bg-opacity-80 text-white p-2 rounded text-xs max-w-48">
