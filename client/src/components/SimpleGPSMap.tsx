@@ -377,11 +377,21 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           center: start,
           zoom: 18, // Very close zoom like driving GPS
           bearing: 0, // Start with north up
-          pitch: 60, // 3D angle for driving perspective
+          pitch: 0, // Start flat, then add 3D perspective
           speed: 2, // Faster zoom to close-up view
           curve: 1,
           essential: true
         });
+        
+        // Add 3D perspective after initial zoom
+        setTimeout(() => {
+          if (map.current) {
+            map.current.easeTo({
+              pitch: 60,
+              duration: 800
+            });
+          }
+        }, 1000);
 
         console.log('Navigation started - zoomed to GPS view at zoom level 18');
 
@@ -397,9 +407,15 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
               console.log('Live position update:', newPos);
               setUserCoords(newPos);
               
-              // Track heading if available
+              // Track heading if available and update locked bearing in compass mode
               if (position.coords.heading !== null) {
-                setCurrentHeading(position.coords.heading);
+                const newHeading = position.coords.heading;
+                setCurrentHeading(newHeading);
+                
+                // If compass mode is active, continuously update the locked bearing
+                if (isCompassMode) {
+                  setLockedBearing(newHeading);
+                }
               }
               
               // Update user marker position
@@ -413,10 +429,11 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
                 // Only auto-zoom if user hasn't manually zoomed out
                 const targetZoom = currentZoom < 14 ? currentZoom : Math.max(currentZoom, 16);
                 
-                // Maintain locked bearing in compass mode
+                // Use appropriate bearing based on compass mode
                 let targetBearing;
-                if (isCompassMode) {
-                  targetBearing = lockedBearing; // Keep the locked bearing, don't change it
+                if (isCompassMode && position.coords.heading !== null) {
+                  // In compass mode, continuously follow heading direction
+                  targetBearing = position.coords.heading;
                 } else {
                   targetBearing = 0; // North up mode
                 }
@@ -569,7 +586,7 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
               }}
               className={`absolute bottom-16 right-2 ${isCompassMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-600 hover:bg-gray-700'} text-white border-none px-3 py-2 rounded-lg cursor-pointer font-bold text-sm`}
             >
-              {isCompassMode ? '🧭 Locked' : '⬆️ North Up'}
+              {isCompassMode ? '🧭 Direction' : '⬆️ North Up'}
             </button>
 
             {/* Stop Navigation Button */}
