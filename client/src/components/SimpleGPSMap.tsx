@@ -279,6 +279,13 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           {isGettingLocation ? 'Getting GPS...' : 'Start'}
         </button>
 
+        {/* GPS Permission Notice */}
+        {isGettingLocation && (
+          <div className="absolute bottom-16 right-2 bg-black bg-opacity-80 text-white p-2 rounded text-xs max-w-48">
+            Allow location access in your browser when prompted, or wait for timeout to try demo route.
+          </div>
+        )}
+
         {/* Fullscreen Button (like your example) */}
         <button
           onClick={toggleFullscreen}
