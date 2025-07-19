@@ -90,56 +90,8 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
         console.log('Got user position:', userPosition);
         setUserCoords(userPosition);
         
-        if (map.current && (window as any).MapboxDirections) {
-          // Use professional Mapbox Directions plugin
-          const directions = new (window as any).MapboxDirections({
-            accessToken: mapboxgl.accessToken,
-            unit: 'metric',
-            profile: 'mapbox/driving',
-            alternatives: false,
-            geometries: 'geojson',
-            controls: { inputs: false, instructions: true },
-            styles: [
-              {
-                'route': {
-                  'line-color': '#8a2be2',
-                  'line-width': 4
-                }
-              }
-            ]
-          });
-
-          // Add directions control to map
-          map.current.addControl(directions, 'top-left');
-          
-          // Set origin (user) and destination (client)
-          directions.setOrigin(userPosition);
-          directions.setDestination(clientCoords);
-
-          // Add live location tracking
-          const geolocateControl = new mapboxgl.GeolocateControl({
-            positionOptions: { enableHighAccuracy: true },
-            trackUserLocation: true,
-            showAccuracyCircle: false
-          });
-          
-          map.current.addControl(geolocateControl);
-          
-          // Fly to user location
-          map.current.flyTo({
-            center: userPosition,
-            zoom: 15,
-            speed: 0.8,
-            curve: 1,
-            essential: true
-          });
-
-          setError('Professional navigation active! Follow turn-by-turn instructions.');
-          setIsGettingLocation(false);
-        } else {
-          // Fallback to custom route if Directions plugin not available
-          getRoute(userPosition, clientCoords);
-        }
+        // Get route and draw clean navigation line
+        getRoute(userPosition, clientCoords);
       },
       (err) => {
         setError('Failed to get GPS location: ' + err.message);
@@ -210,6 +162,15 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           .setLngLat(start)
           .addTo(map.current);
 
+        // Add live location tracking control
+        const geolocateControl = new mapboxgl.GeolocateControl({
+          positionOptions: { enableHighAccuracy: true },
+          trackUserLocation: true,
+          showAccuracyCircle: false
+        });
+        
+        map.current.addControl(geolocateControl);
+
         // Fly to user location with smooth animation
         map.current.flyTo({
           center: start,
@@ -219,37 +180,7 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           essential: true
         });
 
-        // Start live position tracking
-        if (watchId.current) {
-          navigator.geolocation.clearWatch(watchId.current);
-        }
-
-        watchId.current = navigator.geolocation.watchPosition(
-          (position) => {
-            const newCoords: [number, number] = [position.coords.longitude, position.coords.latitude];
-            console.log('Live position update:', newCoords);
-            
-            // Update user marker position
-            if (userMarker.current) {
-              userMarker.current.setLngLat(newCoords);
-            }
-            
-            // Keep map centered on user with smooth animation
-            if (map.current) {
-              map.current.easeTo({ center: newCoords, duration: 1000 });
-            }
-          },
-          (err) => {
-            console.error('Live tracking error:', err);
-          },
-          {
-            enableHighAccuracy: true,
-            maximumAge: 0,
-            timeout: 10000
-          }
-        );
-
-        setError('Route displayed! Following your live location...');
+        setError('Route displayed! Follow the purple line to your destination.');
       }
     } catch (err) {
       console.error('Route error:', err);
@@ -315,13 +246,13 @@ const SimpleGPSMap: React.FC<SimpleGPSMapProps> = ({
           🧭 Start Navigation
         </button>
 
-        {/* Professional Turn-by-Turn Navigation */}
+        {/* Show Route Navigation */}
         <button
           onClick={startRoute}
           disabled={isGettingLocation}
           className="absolute bottom-16 right-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 disabled:cursor-not-allowed text-white border-none px-4 py-2 rounded-lg cursor-pointer font-bold text-sm"
         >
-          {isGettingLocation ? 'Getting GPS...' : 'Turn-by-Turn'}
+          {isGettingLocation ? 'Getting GPS...' : 'Show Route'}
         </button>
 
 
