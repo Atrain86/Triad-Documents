@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
 
 import { generateMapsLink, generateDirectionsLink } from '@/lib/maps';
 import { compressMultipleImages, formatFileSize } from '@/lib/imageCompression';
@@ -296,6 +298,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   
   // QueryClient for cache management
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   // State management
   const [showPhotoCarousel, setShowPhotoCarousel] = useState(false);
@@ -351,6 +354,13 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     projectType: '',
     roomCount: 0,
     hourlyRate: 0,
+  });
+
+  // Email dialog state
+  const [showEmailDialog, setShowEmailDialog] = useState(false);
+  const [emailForm, setEmailForm] = useState({
+    subject: '',
+    message: ''
   });
 
   // File upload state
@@ -585,6 +595,58 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const handleSaveEdit = () => {
     editProjectMutation.mutate(editForm);
+  };
+
+  // Email functionality
+  const sendEmailMutation = useMutation({
+    mutationFn: async ({ recipientEmail, subject, message }: { recipientEmail: string; subject: string; message: string }) => {
+      const response = await fetch('/api/send-basic-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: recipientEmail,
+          subject: subject,
+          text: message,
+          html: message.replace(/\n/g, '<br>')
+        }),
+      });
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Failed to send email: ${error}`);
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Email Sent",
+        description: "Your email has been sent successfully!",
+      });
+      setShowEmailDialog(false);
+      setEmailForm({ subject: '', message: '' });
+    },
+    onError: (error) => {
+      toast({
+        title: "Email Failed",
+        description: error.message || "Failed to send email. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleEmailClient = () => {
+    if (!project?.clientEmail) {
+      toast({
+        title: "No Email Address",
+        description: "This client doesn't have an email address. Please add one in the client details.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setEmailForm({
+      subject: '',
+      message: ''
+    });
+    setShowEmailDialog(true);
   };
 
   // Photo selection functions
@@ -966,9 +1028,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
               )}
               {project.clientEmail && (
                 <button
-                  onClick={() => {
-                    window.location.href = `mailto:${project.clientEmail}`;
-                  }}
+                  onClick={handleEmailClient}
                   className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
                   style={{ color: paintBrainColors.purple }}
                   title={`Email ${project.clientEmail}`}
@@ -1819,6 +1879,59 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             >
               Cancel
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Email Client Dialog */}
+      <Dialog open={showEmailDialog} onOpenChange={setShowEmailDialog}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Email {project?.clientName}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="subject">Subject</Label>
+              <Input
+                id="subject"
+                value={emailForm.subject}
+                onChange={(e) => setEmailForm({ ...emailForm, subject: e.target.value })}
+                placeholder="Email subject"
+              />
+            </div>
+            <div>
+              <Label htmlFor="message">Message</Label>
+              <Textarea
+                id="message"
+                value={emailForm.message}
+                onChange={(e) => setEmailForm({ ...emailForm, message: e.target.value })}
+                placeholder="Enter your message..."
+                rows={8}
+              />
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button
+                variant="outline"
+                onClick={() => setShowEmailDialog(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  if (project?.clientEmail && emailForm.subject && emailForm.message) {
+                    sendEmailMutation.mutate({
+                      recipientEmail: project.clientEmail,
+                      subject: emailForm.subject,
+                      message: emailForm.message
+                    });
+                  }
+                }}
+                disabled={!emailForm.subject || !emailForm.message || sendEmailMutation.isPending}
+                style={{ backgroundColor: paintBrainColors.purple }}
+              >
+                {sendEmailMutation.isPending ? 'Sending...' : 'Send Email'}
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
