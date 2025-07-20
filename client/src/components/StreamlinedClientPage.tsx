@@ -44,7 +44,7 @@ const openWorkCalendar = (clientProject: Project | null = null) => {
     window.open(createEventUrl, '_blank');
   } else {
     // Open A-Frame work calendar with dark mode - this shows the colored event bars
-    const workCalendarDirectUrl = 'https://calendar.google.com/calendar/embed?src=6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981%40group.calendar.google.com&ctz=America%2FVancouver&bgcolor=%23000000&color=%23FFFFFF&mode=MONTH&showTitle=1&showNav=1&showDate=1&showPrint=0&showTabs=1&showCalendars=1&showTz=0';
+    const workCalendarDirectUrl = 'https://calendar.google.com/calendar/embed?src=6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981%40group.calendar.google.com&ctz=America%2FVancouver&mode=MONTH&showTitle=1&showNav=1&showDate=1&showPrint=0&showTabs=1&showCalendars=1&showTz=0&bgcolor=%23000000&color=%23FFFFFF';
     window.open(workCalendarDirectUrl, '_blank');
   }
 };
