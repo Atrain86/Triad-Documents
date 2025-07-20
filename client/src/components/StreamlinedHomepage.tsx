@@ -268,47 +268,45 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
           </Button>
         </div>
 
-        <div className="flex gap-3 mb-6">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 -translate-y-3" style={{ color: paintBrainColors.orange }} size={20} />
+        <div className="flex justify-center mb-6">
+          <div className="relative w-96">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2" style={{ color: paintBrainColors.orange }} size={20} />
             <Input
               placeholder="Search clients"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 py-3 border-2"
+              className="pl-10 py-3 border-2 w-full"
               style={{ borderColor: paintBrainColors.orange }}
             />
-          </div>
-          <div className="flex items-center gap-3 px-4 py-3">
-            <span className="text-sm font-medium" style={{ color: paintBrainColors.red }}>
-              Active
-            </span>
-            <button
-              onClick={() => setShowArchived(!showArchived)}
-              className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none"
-              style={{ 
-                backgroundColor: showArchived ? paintBrainColors.green : paintBrainColors.red
-              }}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  showArchived ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
-            <span className="text-sm font-medium" style={{ color: paintBrainColors.green }}>
-              Archive
-            </span>
           </div>
         </div>
 
         {projects.length > 0 && (
           <div className="flex justify-between items-center mb-4">
-            <p className="text-sm text-muted-foreground">
-              {filteredProjects.length} {showArchived ? 'archived' : 'active'} project{filteredProjects.length !== 1 ? 's' : ''}
-              {searchTerm && ` matching "${searchTerm}"`}
-              {projects.length > filteredProjects.length && ` (${projects.length} total)`}
-            </p>
+            <h2 className="text-lg font-semibold" style={{ color: '#DCDCAA' }}>
+              {showArchived ? 'Archived' : 'Active'} Projects
+            </h2>
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium" style={{ color: paintBrainColors.red }}>
+                Active
+              </span>
+              <button
+                onClick={() => setShowArchived(!showArchived)}
+                className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none"
+                style={{ 
+                  backgroundColor: showArchived ? paintBrainColors.green : paintBrainColors.red
+                }}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    showArchived ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+              <span className="text-sm font-medium" style={{ color: paintBrainColors.green }}>
+                Archive
+              </span>
+            </div>
           </div>
         )}
 
