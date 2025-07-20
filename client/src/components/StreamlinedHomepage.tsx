@@ -567,7 +567,7 @@ function StatusIcon({ status }: { status: string }) {
 
   return (
     <div 
-      className="w-6 h-6 rounded-full mr-3 flex-shrink-0"
+      className="w-4 h-4 rounded-full mr-2 flex-shrink-0"
       style={{ backgroundColor: color }}
       title={status}
     />
