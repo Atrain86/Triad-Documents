@@ -220,8 +220,9 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
   const displayProjects = sortProjectsByPriority(filteredProjects);
 
   const openWorkCalendar = () => {
-    // Open A-Frame work calendar with dark mode - shows colored event bars
-    const workCalendarDirectUrl = 'https://calendar.google.com/calendar/embed?src=6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981%40group.calendar.google.com&ctz=America%2FVancouver&mode=MONTH&showTitle=1&showNav=1&showDate=1&showPrint=0&showTabs=1&showCalendars=1&showTz=0&bgcolor=%23000000&color=%23FFFFFF';
+    // Try Google Calendar's main interface which better supports dark mode
+    // This opens in the main Google Calendar app which respects system dark mode
+    const workCalendarDirectUrl = 'https://calendar.google.com/calendar/u/0?cid=NmI5OTBhZjU2NTg0MDg0MjJjNDI2Nzc1NzJmMmVmMTk3NDAwOTZhMTYwODE2NWYxNWY1OTEzNWRiNGYyYTk4MUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t';
     window.open(workCalendarDirectUrl, '_blank');
   };
 
