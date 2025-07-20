@@ -1710,12 +1710,12 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
       {/* Edit Client Dialog */}
       <Dialog open={showEditClient} onOpenChange={setShowEditClient}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Client Information</DialogTitle>
           </DialogHeader>
           
-          <div className="space-y-4">
+          <div className="max-h-[70vh] overflow-y-auto pr-2 space-y-4">
             <div>
               <label className="text-sm font-medium mb-2 block">Client Name</label>
               <Input
