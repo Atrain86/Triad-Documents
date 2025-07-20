@@ -19,6 +19,7 @@ import PhotoCarousel from './PhotoCarousel';
 import PaintBrainCalendar from './PaintBrainCalendar';
 import ClientPhone from './ClientPhone';
 import SimpleGPSMap from './SimpleGPSMap';
+import DarkModeCalendar from './DarkModeCalendar';
 import { ReactSortable } from 'react-sortablejs';
 
 // Paint Brain Color Palette
@@ -33,7 +34,7 @@ const paintBrainColors = {
 };
 
 // Calendar function for A-Frame calendar integration
-const openWorkCalendar = (clientProject: Project | null = null) => {
+const openWorkCalendar = (clientProject: Project | null = null, setShowCalendar: (show: boolean) => void) => {
   if (clientProject) {
     // Create new calendar event with client details
     const eventTitle = `${clientProject.clientName} - ${clientProject.projectType}`;
@@ -43,10 +44,8 @@ const openWorkCalendar = (clientProject: Project | null = null) => {
     
     window.open(createEventUrl, '_blank');
   } else {
-    // Try Google Calendar's main interface which better supports dark mode
-    // This opens in the main Google Calendar app which respects system dark mode
-    const workCalendarDirectUrl = 'https://calendar.google.com/calendar/u/0?cid=NmI5OTBhZjU2NTg0MDg0MjJjNDI2Nzc1NzJmMmVmMTk3NDAwOTZhMTYwODE2NWYxNWY1OTEzNWRiNGYyYTk4MUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t';
-    window.open(workCalendarDirectUrl, '_blank');
+    // Open custom dark mode calendar within the app
+    setShowCalendar(true);
   }
 };
 
@@ -305,6 +304,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const [showInvoiceGenerator, setShowInvoiceGenerator] = useState(false);
   const [showEstimateGenerator, setShowEstimateGenerator] = useState(false);
   const [showEditClient, setShowEditClient] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
   const [notes, setNotes] = useState('');
   
   // Photo selection states
@@ -972,7 +972,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         
         <div className="flex items-center gap-3">
           <button
-            onClick={() => openWorkCalendar(project)}
+            onClick={() => openWorkCalendar(project, setShowCalendar)}
             className="p-2 transition-colors"
             style={{ color: paintBrainColors.blue }}
             title="Add to calendar"
@@ -1934,6 +1934,21 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Dark Mode Calendar */}
+      <DarkModeCalendar
+        isOpen={showCalendar}
+        onClose={() => setShowCalendar(false)}
+        onCreateEvent={(project) => {
+          if (project) {
+            const eventTitle = `${project.clientName} - ${project.projectType}`;
+            const eventLocation = `${project.address}, ${project.clientCity || ''}`;
+            const createEventUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventTitle)}&location=${encodeURIComponent(eventLocation)}&details=${encodeURIComponent(`Client: ${project.clientName}\nProject: ${project.projectType}`)}&cid=6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981@group.calendar.google.com`;
+            window.open(createEventUrl, '_blank');
+          }
+        }}
+        project={project}
+      />
     </div>
   );
 }

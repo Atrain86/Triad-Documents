@@ -8,6 +8,7 @@ import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import ClientPhone from './ClientPhone';
+import DarkModeCalendar from './DarkModeCalendar';
 
 // Paint Brain Color Palette
 const paintBrainColors = {
@@ -40,6 +41,7 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
   const [showNewClientDialog, setShowNewClientDialog] = useState(false);
   const [showEmailDialog, setShowEmailDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
   const [selectedProject, setSelectedProject] = useState<any>(null);
   const [editingProject, setEditingProject] = useState<any>(null);
   const [emailForm, setEmailForm] = useState({
@@ -220,10 +222,8 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
   const displayProjects = sortProjectsByPriority(filteredProjects);
 
   const openWorkCalendar = () => {
-    // Try Google Calendar's main interface which better supports dark mode
-    // This opens in the main Google Calendar app which respects system dark mode
-    const workCalendarDirectUrl = 'https://calendar.google.com/calendar/u/0?cid=NmI5OTBhZjU2NTg0MDg0MjJjNDI2Nzc1NzJmMmVmMTk3NDAwOTZhMTYwODE2NWYxNWY1OTEzNWRiNGYyYTk4MUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t';
-    window.open(workCalendarDirectUrl, '_blank');
+    // Open custom dark mode calendar within the app
+    setShowCalendar(true);
   };
 
   if (isLoading) {
@@ -431,6 +431,12 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Dark Mode Calendar */}
+        <DarkModeCalendar
+          isOpen={showCalendar}
+          onClose={() => setShowCalendar(false)}
+        />
       </div>
     </div>
   );
