@@ -113,6 +113,43 @@ const DarkModeCalendar: React.FC<DarkModeCalendarProps> = ({
   const isCurrentMonth = currentDate.getMonth() === today.getMonth() && 
                          currentDate.getFullYear() === today.getFullYear();
 
+  const calculateEventPositions = () => {
+    const eventPositions: any[] = [];
+    
+    events.forEach(event => {
+      const startDate = new Date(event.startDate);
+      const endDate = new Date(event.endDate);
+      
+      // Find the week and day position for start and end
+      let startPos = null;
+      let endPos = null;
+      
+      for (let day = 1; day <= daysInMonth; day++) {
+        const checkDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+        const dayOfWeek = (firstDay + day - 1) % 7;
+        const weekNum = Math.floor((firstDay + day - 1) / 7);
+        
+        if (checkDate >= startDate && checkDate <= endDate) {
+          if (!startPos) {
+            startPos = { day, week: weekNum, dayOfWeek };
+          }
+          endPos = { day, week: weekNum, dayOfWeek };
+        }
+      }
+      
+      if (startPos && endPos) {
+        eventPositions.push({
+          ...event,
+          startPos,
+          endPos,
+          isSameWeek: startPos.week === endPos.week
+        });
+      }
+    });
+    
+    return eventPositions;
+  };
+
   const renderCalendarDays = () => {
     const days = [];
     const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -131,59 +168,98 @@ const DarkModeCalendar: React.FC<DarkModeCalendarProps> = ({
       days.push(<div key={`empty-${i}`} className="p-2"></div>);
     }
 
-    // Days of the month
+    // Days of the month - just day numbers, no events
     for (let day = 1; day <= daysInMonth; day++) {
-      const dateEvents = getEventsForDate(day);
       const isToday = isCurrentMonth && day === today.getDate();
 
       days.push(
-        <div key={day} className="p-1 h-20 border border-gray-700 relative">
+        <div key={day} className="p-1 h-20 border border-gray-700 relative bg-gray-900">
           <div className={`text-sm font-medium ${isToday ? 'text-red-400' : 'text-white'}`}>
             {day}
-          </div>
-          <div className="mt-1 space-y-0.5">
-            {dateEvents.map((event, index) => {
-              const spanInfo = getEventSpanInfo(event, day);
-              const { isStart, isEnd, isMiddle, isSingle } = spanInfo;
-              
-              return (
-                <div
-                  key={`${event.id}-${day}`}
-                  className="text-xs px-1 py-0.5 text-white cursor-pointer hover:opacity-80 transition-opacity relative"
-                  style={{ 
-                    backgroundColor: event.color,
-                    borderRadius: isSingle ? '4px' : 
-                                 isStart ? '4px 0 0 4px' : 
-                                 isEnd ? '0 4px 4px 0' : '0',
-                    marginLeft: isMiddle || isEnd ? '-4px' : '0',
-                    marginRight: isMiddle || isStart ? '-4px' : '0',
-                    paddingLeft: isMiddle || isEnd ? '8px' : '4px',
-                    paddingRight: isMiddle || isStart ? '8px' : '4px'
-                  }}
-                  title={`${event.title} (${event.startDate} to ${event.endDate})`}
-                  onClick={() => {
-                    // Open Google Calendar event for editing
-                    const eventTitle = event.title;
-                    const startDate = event.startDate;
-                    const endDate = event.endDate;
-                    const editEventUrl = `https://calendar.google.com/calendar/u/0/r/week/${startDate.replace(/-/g, '/')}`;
-                    window.open(editEventUrl, '_blank');
-                  }}
-                >
-                  {(isStart || isSingle) && (
-                    <span className="truncate block">{event.title}</span>
-                  )}
-                  {isMiddle && <span className="block">&nbsp;</span>}
-                  {isEnd && !isStart && <span className="block">&nbsp;</span>}
-                </div>
-              );
-            })}
           </div>
         </div>
       );
     }
 
     return days;
+  };
+
+  const renderEventOverlays = () => {
+    const eventPositions = calculateEventPositions();
+    
+    return eventPositions.map((event, index) => {
+      if (event.isSameWeek) {
+        // Single week event - create one continuous bar
+        const startCol = event.startPos.dayOfWeek + 1; // +1 for 1-based CSS grid
+        const endCol = event.endPos.dayOfWeek + 2; // +2 to include end day
+        const row = event.startPos.week + 2; // +2 to account for header row
+        
+        return (
+          <div
+            key={`overlay-${event.id}`}
+            className="absolute text-xs text-white cursor-pointer hover:brightness-110 transition-all flex items-center px-2 font-medium"
+            style={{
+              backgroundColor: event.color,
+              borderRadius: '4px',
+              gridColumn: `${startCol} / ${endCol}`,
+              gridRow: row,
+              top: '28px', // Below the day number
+              height: '16px',
+              zIndex: 20
+            }}
+            title={`${event.title} (${event.startDate} to ${event.endDate}) - Click to edit`}
+            onClick={() => {
+              const editEventUrl = `https://calendar.google.com/calendar/u/0/r/week/${event.startDate.replace(/-/g, '/')}`;
+              window.open(editEventUrl, '_blank');
+            }}
+          >
+            <span className="truncate">{event.title}</span>
+          </div>
+        );
+      } else {
+        // Multi-week event - create multiple bars (one per week)
+        const bars = [];
+        let currentWeek = event.startPos.week;
+        
+        while (currentWeek <= event.endPos.week) {
+          const isFirstWeek = currentWeek === event.startPos.week;
+          const isLastWeek = currentWeek === event.endPos.week;
+          
+          const startCol = isFirstWeek ? event.startPos.dayOfWeek + 1 : 1;
+          const endCol = isLastWeek ? event.endPos.dayOfWeek + 2 : 8;
+          const row = currentWeek + 2;
+          
+          bars.push(
+            <div
+              key={`overlay-${event.id}-week-${currentWeek}`}
+              className="absolute text-xs text-white cursor-pointer hover:brightness-110 transition-all flex items-center px-2 font-medium"
+              style={{
+                backgroundColor: event.color,
+                borderRadius: isFirstWeek && isLastWeek ? '4px' : 
+                            isFirstWeek ? '4px 0 0 4px' :
+                            isLastWeek ? '0 4px 4px 0' : '0',
+                gridColumn: `${startCol} / ${endCol}`,
+                gridRow: row,
+                top: '28px',
+                height: '16px',
+                zIndex: 20
+              }}
+              title={`${event.title} (${event.startDate} to ${event.endDate}) - Click to edit`}
+              onClick={() => {
+                const editEventUrl = `https://calendar.google.com/calendar/u/0/r/week/${event.startDate.replace(/-/g, '/')}`;
+                window.open(editEventUrl, '_blank');
+              }}
+            >
+              {isFirstWeek && <span className="truncate">{event.title}</span>}
+            </div>
+          );
+          
+          currentWeek++;
+        }
+        
+        return bars;
+      }
+    });
   };
 
   const handleCreateEvent = () => {
@@ -242,8 +318,16 @@ const DarkModeCalendar: React.FC<DarkModeCalendarProps> = ({
           </div>
 
           {/* Calendar Grid */}
-          <div className="grid grid-cols-7 gap-0 bg-gray-900 rounded-lg overflow-hidden">
-            {renderCalendarDays()}
+          <div className="relative">
+            <div className="grid grid-cols-7 gap-0 bg-gray-900 rounded-lg overflow-hidden border border-gray-700">
+              {renderCalendarDays()}
+            </div>
+            {/* Event Overlays */}
+            <div className="absolute inset-0 grid grid-cols-7 gap-0 pointer-events-none">
+              <div className="contents pointer-events-auto">
+                {renderEventOverlays()}
+              </div>
+            </div>
           </div>
 
           {/* Legend */}
