@@ -546,7 +546,7 @@ function NewClientForm({ onSubmit, onCancel, isLoading }: { onSubmit: (data: any
   );
 }
 
-// Status icon component - simple colored circles
+// Status icon component - larger colored circles
 function StatusIcon({ status }: { status: string }) {
   const statusColors: { [key: string]: string } = {
     'in-progress': '#6A9955',        // Green
@@ -567,7 +567,7 @@ function StatusIcon({ status }: { status: string }) {
 
   return (
     <div 
-      className="w-3 h-3 rounded-full mr-2 flex-shrink-0"
+      className="w-6 h-6 rounded-full mr-3 flex-shrink-0"
       style={{ backgroundColor: color }}
       title={status}
     />
@@ -596,7 +596,16 @@ function ProjectCard({ project, onSelectProject, updateStatusMutation, deletePro
 
   const handleTouchEnd = (e: React.TouchEvent) => {
     const target = e.target as HTMLElement;
-    if (target.tagName === 'SELECT' || target.tagName === 'OPTION' || target.tagName === 'BUTTON' || target.closest('select') || target.closest('button')) {
+    // More comprehensive check for interactive elements
+    if (target.tagName === 'SELECT' || 
+        target.tagName === 'OPTION' || 
+        target.tagName === 'BUTTON' || 
+        target.closest('select') || 
+        target.closest('button') ||
+        target.classList.contains('pointer-events-auto') ||
+        target.closest('[class*="z-20"]') ||
+        target.closest('[class*="z-30"]')) {
+      e.stopPropagation();
       return;
     }
 
@@ -736,21 +745,38 @@ function ProjectCard({ project, onSelectProject, updateStatusMutation, deletePro
         </div>
         
         <div className="flex items-center gap-2">
-          <div className="flex items-center">
+          <div className="flex items-center relative z-20">
             <StatusIcon status={project.status} />
             <select
               value={project.status}
               onChange={(e) => {
+                e.preventDefault();
                 e.stopPropagation();
                 updateStatusMutation.mutate({ 
                   projectId: project.id, 
                   status: e.target.value 
                 });
               }}
-              onClick={(e) => e.stopPropagation()}
-              onTouchEnd={(e) => e.stopPropagation()}
-              className="text-xs font-medium border-none bg-transparent cursor-pointer focus:outline-none relative z-10"
-              style={{ color: statusConfig[project.status as keyof typeof statusConfig]?.color || paintBrainColors.gray }}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+              onTouchStart={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+              onMouseDown={(e) => {
+                e.stopPropagation();
+              }}
+              className="text-sm font-medium border-none bg-transparent cursor-pointer focus:outline-none relative z-30 min-w-0 pointer-events-auto"
+              style={{ 
+                color: statusConfig[project.status as keyof typeof statusConfig]?.color || paintBrainColors.gray,
+                touchAction: 'manipulation'
+              }}
             >
               <option value="in-progress">In Progress</option>
               <option value="scheduled">Scheduled</option>
