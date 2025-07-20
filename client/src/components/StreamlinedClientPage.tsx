@@ -33,22 +33,10 @@ const paintBrainColors = {
 };
 
 // Calendar function for A-Frame calendar integration
-const openWorkCalendar = (clientProject: Project | null = null) => {
-  const aframeCalendarOnlyUrl = 'https://calendar.google.com/calendar/embed?src=6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981%40group.calendar.google.com&ctz=America%2FVancouver&mode=WEEK&showTitle=1&showNav=1&showDate=1&showPrint=0&showTabs=1&showCalendars=0&showTz=0&bgcolor=%23000000&color=%23ffffff';
-  
-  if (clientProject) {
-    const eventTitle = `${clientProject.clientName} - ${clientProject.projectType}`;
-    const eventLocation = `${clientProject.address}, ${clientProject.clientCity || ''}`;
-    
-    const createEventUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventTitle)}&location=${encodeURIComponent(eventLocation)}&details=${encodeURIComponent(`Client: ${clientProject.clientName}\nProject: ${clientProject.projectType}`)}&cid=6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981@group.calendar.google.com`;
-    
-    window.open(createEventUrl, '_blank');
-  } else {
-    // Open ONLY the A-Frame work calendar (isolated view with dark mode)
-    // This direct URL shows just the A-Frame calendar without your other calendars
-    const workCalendarDirectUrl = 'https://calendar.google.com/calendar/u/0?cid=NmI5OTBhZjU2NTg0MDg0MjJjNDI2Nzc1NzJmMmVmMTk3NDAwOTZhMTYwODE2NWYxNWY1OTEzNWRiNGYyYTk4MUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&color=%23039BE5&bgcolor=%23000000';
-    window.open(workCalendarDirectUrl, '_blank');
-  }
+const openWorkCalendar = () => {
+  // Open A-Frame work calendar with dark mode
+  const workCalendarDirectUrl = 'https://calendar.google.com/calendar/embed?src=6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981%40group.calendar.google.com&ctz=America%2FVancouver&bgcolor=%23000000&color=%23FFFFFF&mode=WEEK&showTitle=1&showNav=1&showDate=1&showPrint=0&showTabs=1&showCalendars=0&showTz=0';
+  window.open(workCalendarDirectUrl, '_blank');
 };
 
 // Improved file list component
@@ -973,10 +961,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         
         <div className="flex items-center gap-3">
           <button
-            onClick={() => openWorkCalendar(project)}
+            onClick={() => openWorkCalendar()}
             className="p-2 transition-colors"
             style={{ color: paintBrainColors.blue }}
-            title="Add to calendar"
+            title="Open work calendar"
           >
             <Calendar size={20} />
           </button>
