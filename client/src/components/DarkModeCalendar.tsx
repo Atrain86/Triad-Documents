@@ -17,7 +17,8 @@ const paintBrainColors = {
 interface CalendarEvent {
   id: string;
   title: string;
-  date: string;
+  startDate: string;
+  endDate: string;
   color: string;
   time?: string;
 }
@@ -38,16 +39,12 @@ const DarkModeCalendar: React.FC<DarkModeCalendarProps> = ({
   const [currentDate, setCurrentDate] = useState(new Date());
   const [events, setEvents] = useState<CalendarEvent[]>([]);
 
-  // Mock events that represent your actual calendar data
+  // Mock events that represent your actual calendar data with multi-day spans
   useEffect(() => {
     // These would be fetched from your Google Calendar API in a real implementation
     const mockEvents: CalendarEvent[] = [
-      { id: '1', title: 'Mike Manson', date: '2025-07-16', color: paintBrainColors.green },
-      { id: '2', title: 'Client Project', date: '2025-07-20', color: paintBrainColors.purple },
-      { id: '3', title: 'Client Project', date: '2025-07-21', color: paintBrainColors.purple },
-      { id: '4', title: 'Client Project', date: '2025-07-22', color: paintBrainColors.purple },
-      { id: '5', title: 'Client Project', date: '2025-07-23', color: paintBrainColors.purple },
-      { id: '6', title: 'Client Project', date: '2025-07-24', color: paintBrainColors.purple },
+      { id: '1', title: 'Mike Manson', startDate: '2025-07-16', endDate: '2025-07-16', color: paintBrainColors.green },
+      { id: '2', title: 'Client Project', startDate: '2025-07-20', endDate: '2025-07-24', color: paintBrainColors.purple },
     ];
     setEvents(mockEvents);
   }, []);
@@ -75,7 +72,27 @@ const DarkModeCalendar: React.FC<DarkModeCalendarProps> = ({
 
   const getEventsForDate = (day: number) => {
     const dateString = getDateString(day);
-    return events.filter(event => event.date === dateString);
+    return events.filter(event => {
+      const eventStart = new Date(event.startDate);
+      const eventEnd = new Date(event.endDate);
+      const currentDate = new Date(dateString);
+      
+      return currentDate >= eventStart && currentDate <= eventEnd;
+    });
+  };
+
+  const getEventSpanInfo = (event: CalendarEvent, day: number) => {
+    const dateString = getDateString(day);
+    const currentDate = new Date(dateString);
+    const eventStart = new Date(event.startDate);
+    const eventEnd = new Date(event.endDate);
+    
+    const isStart = currentDate.getTime() === eventStart.getTime();
+    const isEnd = currentDate.getTime() === eventEnd.getTime();
+    const isMiddle = currentDate > eventStart && currentDate < eventEnd;
+    const isSingle = eventStart.getTime() === eventEnd.getTime();
+    
+    return { isStart, isEnd, isMiddle, isSingle };
   };
 
   const navigateMonth = (direction: 'prev' | 'next') => {
@@ -125,16 +142,42 @@ const DarkModeCalendar: React.FC<DarkModeCalendarProps> = ({
             {day}
           </div>
           <div className="mt-1 space-y-0.5">
-            {dateEvents.map((event, index) => (
-              <div
-                key={event.id}
-                className="text-xs px-1 py-0.5 rounded text-white truncate"
-                style={{ backgroundColor: event.color }}
-                title={event.title}
-              >
-                {event.title}
-              </div>
-            ))}
+            {dateEvents.map((event, index) => {
+              const spanInfo = getEventSpanInfo(event, day);
+              const { isStart, isEnd, isMiddle, isSingle } = spanInfo;
+              
+              return (
+                <div
+                  key={`${event.id}-${day}`}
+                  className="text-xs px-1 py-0.5 text-white cursor-pointer hover:opacity-80 transition-opacity relative"
+                  style={{ 
+                    backgroundColor: event.color,
+                    borderRadius: isSingle ? '4px' : 
+                                 isStart ? '4px 0 0 4px' : 
+                                 isEnd ? '0 4px 4px 0' : '0',
+                    marginLeft: isMiddle || isEnd ? '-4px' : '0',
+                    marginRight: isMiddle || isStart ? '-4px' : '0',
+                    paddingLeft: isMiddle || isEnd ? '8px' : '4px',
+                    paddingRight: isMiddle || isStart ? '8px' : '4px'
+                  }}
+                  title={`${event.title} (${event.startDate} to ${event.endDate})`}
+                  onClick={() => {
+                    // Open Google Calendar event for editing
+                    const eventTitle = event.title;
+                    const startDate = event.startDate;
+                    const endDate = event.endDate;
+                    const editEventUrl = `https://calendar.google.com/calendar/u/0/r/week/${startDate.replace(/-/g, '/')}`;
+                    window.open(editEventUrl, '_blank');
+                  }}
+                >
+                  {(isStart || isSingle) && (
+                    <span className="truncate block">{event.title}</span>
+                  )}
+                  {isMiddle && <span className="block">&nbsp;</span>}
+                  {isEnd && !isStart && <span className="block">&nbsp;</span>}
+                </div>
+              );
+            })}
           </div>
         </div>
       );
@@ -150,11 +193,7 @@ const DarkModeCalendar: React.FC<DarkModeCalendarProps> = ({
     onClose();
   };
 
-  const handleOpenGoogleCalendar = () => {
-    // Open the main Google Calendar interface
-    const workCalendarDirectUrl = 'https://calendar.google.com/calendar/u/0?cid=NmI5OTBhZjU2NTg0MDg0MjJjNDI2Nzc1NzJmMmVmMTk3NDAwOTZhMTYwODE2NWYxNWY1OTEzNWRiNGYyYTk4MUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t';
-    window.open(workCalendarDirectUrl, '_blank');
-  };
+
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -175,14 +214,6 @@ const DarkModeCalendar: React.FC<DarkModeCalendarProps> = ({
                 Add Event
               </Button>
             )}
-            <Button
-              onClick={handleOpenGoogleCalendar}
-              size="sm"
-              variant="outline"
-              className="border-gray-600 text-white hover:bg-gray-800"
-            >
-              Open in Google
-            </Button>
           </div>
         </DialogHeader>
         
