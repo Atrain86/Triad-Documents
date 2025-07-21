@@ -360,7 +360,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(receipt);
     } catch (error) {
       console.error('Receipt creation error:', error);
-      res.status(400).json({ error: 'Failed to create receipt', details: error.message });
+      res.status(400).json({ error: 'Failed to create receipt', details: error instanceof Error ? error.message : String(error) });
     }
   });
 
