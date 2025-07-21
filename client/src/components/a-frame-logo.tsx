@@ -6,11 +6,17 @@ interface AFrameLogoProps {
 
 export default function AFrameLogo({ className = "w-8 h-8" }: AFrameLogoProps) {
   return (
-    <img
-      src={`${logoImage}?v=${Date.now()}`}
-      alt="Paint Brain Logo"
-      className={className}
-      style={{ objectFit: 'contain' }}
-    />
+    <div className={`${className} flex items-center justify-center`} style={{ background: 'transparent' }}>
+      <img
+        src={`${logoImage}?v=${Date.now()}`}
+        alt="Paint Brain Logo"
+        className="max-w-full max-h-full"
+        style={{ 
+          objectFit: 'contain',
+          background: 'transparent',
+          mixBlendMode: 'normal'
+        }}
+      />
+    </div>
   );
 }
