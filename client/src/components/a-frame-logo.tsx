@@ -7,7 +7,7 @@ interface AFrameLogoProps {
 export default function AFrameLogo({ className = "w-8 h-8" }: AFrameLogoProps) {
   return (
     <img
-      src={logoImage}
+      src={`${logoImage}?v=${Date.now()}`}
       alt="Paint Brain Logo"
       className={className}
       style={{ objectFit: 'contain' }}
