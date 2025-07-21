@@ -102,7 +102,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('authToken');
+    sessionStorage.clear();
     setUser(null);
+    // Clear any cached auth state
+    setIsLoading(false);
   };
 
   const checkAuthStatus = async () => {

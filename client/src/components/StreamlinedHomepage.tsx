@@ -248,8 +248,12 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
           />
           <Button
             onClick={() => {
+              // Complete authentication reset
+              localStorage.clear();
+              sessionStorage.clear();
               logout();
-              window.location.reload(); // Force reload to show login page
+              // Force hard reload to clear all cached state
+              window.location.href = window.location.origin;
             }}
             variant="ghost"
             size="sm"
