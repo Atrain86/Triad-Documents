@@ -53,7 +53,7 @@ const LoginForm: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-8">
+      <div className="w-full max-w-md space-y-12">
         {/* Paint Brain Logo */}
         <div className="text-center mb-4">
           <div className="w-64 h-64 mx-auto flex items-center justify-center" style={{ backgroundColor: '#000000', boxShadow: 'inset 0 0 100px #000000, inset 0 0 200px #000000' }}>
