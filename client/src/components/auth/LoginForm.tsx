@@ -56,38 +56,43 @@ const LoginForm: React.FC = () => {
       <div className="w-full max-w-md space-y-4">
         {/* Paint Brain Logo */}
         <div className="text-center mb-4">
-          <div className="w-64 h-64 mx-auto flex items-center justify-center" style={{ backgroundColor: '#000000' }}>
+          <div className="w-64 h-64 mx-auto flex items-center justify-center" style={{ backgroundColor: '#000000', boxShadow: 'inset 0 0 50px #000000' }}>
             <img 
               src="/PAINY BRAIN LOGO 1_1752338774418.png" 
               alt="Paint Brain Logo" 
               className="h-60 w-60 object-contain"
             />
           </div>
-          <p className="text-gray-400 text-base mt-2">Smart project management for painters</p>
+          <div className="text-gray-400 text-base mt-1 leading-tight">
+            <p className="text-center">Smart project management</p>
+            <p className="text-center">for painters</p>
+          </div>
         </div>
 
         <Card className="border-0 shadow-xl">
           <CardContent className="space-y-4 pt-6">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
+                placeholder="Email"
                 value={loginEmail}
                 onChange={(e) => setLoginEmail(e.target.value)}
                 required
                 disabled={isLoading}
+                className="placeholder:opacity-75"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
+                placeholder="Password"
                 value={loginPassword}
                 onChange={(e) => setLoginPassword(e.target.value)}
                 required
                 disabled={isLoading}
+                className="placeholder:opacity-75"
               />
             </div>
             
