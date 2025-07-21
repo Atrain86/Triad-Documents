@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Search, User, MapPin, Edit3, Archive, RotateCcw, Trash2, Mail } from 'lucide-react';
+import { Search, User, MapPin, Edit3, Archive, RotateCcw, Trash2, Mail, LogOut } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import ClientPhone from './ClientPhone';
 import DarkModeCalendar from './DarkModeCalendar';
 
@@ -51,6 +52,7 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
   
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { logout } = useAuth();
 
   const { data: projects = [], isLoading } = useQuery({
     queryKey: ['/api/projects'],
@@ -237,12 +239,21 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="p-6">
-        <div className="flex justify-center mb-6">
+        <div className="flex justify-between items-center mb-6">
+          <div className="w-10"></div> {/* Spacer for centering */}
           <img 
             src="/aframe-logo.png" 
             alt="A-Frame Painting" 
             className="h-32 w-auto object-contain"
           />
+          <Button
+            onClick={logout}
+            variant="ghost"
+            size="sm"
+            className="text-gray-400 hover:text-white"
+          >
+            <LogOut size={18} />
+          </Button>
         </div>
 
         <div 
