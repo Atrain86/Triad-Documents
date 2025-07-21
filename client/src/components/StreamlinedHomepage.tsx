@@ -247,10 +247,14 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
             className="h-32 w-auto object-contain"
           />
           <Button
-            onClick={logout}
+            onClick={() => {
+              logout();
+              window.location.reload(); // Force reload to show login page
+            }}
             variant="ghost"
             size="sm"
             className="text-gray-400 hover:text-white"
+            title="Logout"
           >
             <LogOut size={18} />
           </Button>
