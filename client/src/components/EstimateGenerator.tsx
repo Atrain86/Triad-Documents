@@ -22,9 +22,31 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   const { toast } = useToast();
   const printRef = useRef<HTMLDivElement>(null);
 
-  const [estimateNumber, setEstimateNumber] = useState('');
-  const [projectTitle, setProjectTitle] = useState('');
-  const [projectDescription, setProjectDescription] = useState(project?.notes || '');
+  // Helper function to get stored data for this project
+  const getStoredEstimateData = () => {
+    const storageKey = `estimate_${project?.id || 'default'}`;
+    const stored = localStorage.getItem(storageKey);
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+
+  // Helper function to save estimate data
+  const saveEstimateData = (data: any) => {
+    const storageKey = `estimate_${project?.id || 'default'}`;
+    localStorage.setItem(storageKey, JSON.stringify(data));
+  };
+
+  const storedData = getStoredEstimateData();
+
+  const [estimateNumber, setEstimateNumber] = useState(storedData?.estimateNumber || '');
+  const [projectTitle, setProjectTitle] = useState(storedData?.projectTitle || '');
+  const [projectDescription, setProjectDescription] = useState(storedData?.projectDescription || project?.notes || '');
 
   // Auto-populated client info from project
   const clientName = project?.clientName || '';
@@ -35,52 +57,52 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   const clientPhone = project?.clientPhone || '';
 
   // Example work stages state
-  const [workStages, setWorkStages] = useState([
+  const [workStages, setWorkStages] = useState(storedData?.workStages || [
     { name: 'Prep', description: '', hours: '', rate: 60 },
     { name: 'Priming', description: '', hours: '', rate: 60 },
     { name: 'Painting', description: '', hours: '', rate: 60 },
   ]);
 
   // Paint costs state
-  const [primerCosts, setPrimerCosts] = useState({
+  const [primerCosts, setPrimerCosts] = useState(storedData?.primerCosts || {
     pricePerGallon: '',
     gallons: '',
     coats: '1'
   });
 
-  const [paintCosts, setPaintCosts] = useState({
+  const [paintCosts, setPaintCosts] = useState(storedData?.paintCosts || {
     pricePerGallon: '',
     gallons: '',
     coats: '2'
   });
 
-  const [supplies, setSupplies] = useState([
+  const [supplies, setSupplies] = useState(storedData?.supplies || [
     { name: 'Tape', unitCost: '', quantity: '', total: 0 },
     { name: 'Brushes', unitCost: '', quantity: '', total: 0 },
     { name: 'Rollers', unitCost: '', quantity: '', total: 0 }
   ]);
 
   // Travel costs state
-  const [travelCosts, setTravelCosts] = useState({
+  const [travelCosts, setTravelCosts] = useState(storedData?.travelCosts || {
     ratePerKm: '0.50',
     distance: '',
     trips: '2'
   });
 
   // Additional Services state (Power Washing, Drywall Repair, Wood Reconditioning)
-  const [additionalServices, setAdditionalServices] = useState([
+  const [additionalServices, setAdditionalServices] = useState(storedData?.additionalServices || [
     { name: 'Power Washing', enabled: false, hours: 0, rate: 60 },
     { name: 'Drywall Repair', enabled: false, hours: 0, rate: 60 },
     { name: 'Wood Reconditioning', enabled: false, hours: 0, rate: 60 }
   ]);
 
   // Additional labor state
-  const [additionalLabor, setAdditionalLabor] = useState([
+  const [additionalLabor, setAdditionalLabor] = useState(storedData?.additionalLabor || [
     { name: '', hours: '', rate: '' }
   ]);
 
   // Tax configuration state
-  const [taxConfig, setTaxConfig] = useState({
+  const [taxConfig, setTaxConfig] = useState(storedData?.taxConfig || {
     country: 'CA',
     gst: 5,
     pst: 0,
@@ -92,6 +114,24 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
   // Toggle state for action buttons
   const [actionMode, setActionMode] = useState<'download' | 'email'>('email');
+
+  // Save form data to localStorage whenever any state changes
+  useEffect(() => {
+    const dataToSave = {
+      estimateNumber,
+      projectTitle,
+      projectDescription,
+      workStages,
+      primerCosts,
+      paintCosts,
+      supplies,
+      travelCosts,
+      additionalServices,
+      additionalLabor,
+      taxConfig
+    };
+    saveEstimateData(dataToSave);
+  }, [estimateNumber, projectTitle, projectDescription, workStages, primerCosts, paintCosts, supplies, travelCosts, additionalServices, additionalLabor, taxConfig]);
 
   // Handle input changes for work stages
   const updateWorkStage = (index: number, field: string, value: string | number) => {
