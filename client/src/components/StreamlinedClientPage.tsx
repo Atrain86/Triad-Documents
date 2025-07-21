@@ -19,6 +19,7 @@ import PaintBrainCalendar from './PaintBrainCalendar';
 import ClientPhone from './ClientPhone';
 import DarkModeCalendar from './DarkModeCalendar';
 import { ReactSortable } from 'react-sortablejs';
+import ReceiptUploadChallenge from './ReceiptUploadChallenge';
 
 // Paint Brain Color Palette
 const paintBrainColors = {
@@ -355,6 +356,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   // Menu customization states
   const [menuSections, setMenuSections] = useState([
+    { id: 'challenge', name: 'Receipt Challenge', icon: Upload },
     { id: 'photos', name: 'Photos', icon: Camera },
     { id: 'tools', name: 'Tools', icon: Wrench },
     { id: 'dailyHours', name: 'Daily Hours', icon: Calendar },
@@ -364,6 +366,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   // Collapsible menu state - all collapsed by default
   const [expandedSections, setExpandedSections] = useState({
+    challenge: true,  // Challenge expanded by default to encourage engagement
     photos: false,
     tools: false,
     dailyHours: false,
@@ -847,26 +850,89 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const uploadReceiptsMutation = useMutation({
     mutationFn: async (files: FileList) => {
-      const formData = new FormData();
-      Array.from(files).forEach((file) => {
-        formData.append('receipt', file); // Changed from 'receipts' to 'receipt'
-      });
+      const results = [];
+      
+      // Upload each file individually to get challenge updates
+      for (const file of Array.from(files)) {
+        const formData = new FormData();
+        formData.append('receipt', file);
 
-      const response = await apiRequest(`/api/projects/${projectId}/receipts`, {
-        method: 'POST',
-        body: formData,
+        const response = await apiRequest(`/api/projects/${projectId}/receipts`, {
+          method: 'POST',
+          body: formData,
+        });
+        
+        results.push(await response.json());
+      }
+      
+      return results;
+    },
+    onSuccess: (results) => {
+      console.log('Receipts uploaded successfully:', results);
+      
+      let totalPointsEarned = 0;
+      const allNewAchievements: string[] = [];
+      
+      // Process challenge updates from all uploads
+      results.forEach((result: any) => {
+        if (result.challengeUpdate) {
+          const { pointsEarned, newAchievements } = result.challengeUpdate;
+          totalPointsEarned += pointsEarned || 0;
+          if (newAchievements) {
+            allNewAchievements.push(...newAchievements);
+          }
+        }
       });
       
-      return response.json();
-    },
-    onSuccess: () => {
+      // Show consolidated points earned notification
+      if (totalPointsEarned > 0) {
+        toast({
+          title: `🎯 +${totalPointsEarned} Points Earned!`,
+          description: totalPointsEarned > 10 ? "Amazing streak bonus!" : "Keep uploading receipts!",
+          className: "bg-purple-600 text-white border-purple-500",
+          duration: 3000,
+        });
+      }
+      
+      // Show achievement notifications
+      const achievementTitles: Record<string, string> = {
+        'first_receipt': 'Getting Started',
+        'five_receipts': 'Receipt Collector', 
+        'ten_receipts': 'Paper Trail Master',
+        'receipt_ninja': 'Receipt Ninja',
+        'three_day_streak': 'Consistency Champion',
+        'week_streak': 'Weekly Warrior',
+        'level_five': 'Level Up Master',
+        'point_collector': 'Point Collector'
+      };
+      
+      allNewAchievements.forEach((achievementId, index) => {
+        setTimeout(() => {
+          toast({
+            title: "🏆 Achievement Unlocked!",
+            description: achievementTitles[achievementId] || "New achievement",
+            className: "bg-yellow-600 text-white border-yellow-500",
+            duration: 5000,
+          });
+        }, 1000 + (index * 1500)); // Stagger achievement notifications
+      });
+      
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/receipts`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/receipt-challenge/stats`, projectId] });
+      queryClient.invalidateQueries({ queryKey: [`/api/receipt-challenge/achievements`, projectId] });
+      
       if (receiptInputRef.current) {
         receiptInputRef.current.value = '';
       }
     },
     onError: (error) => {
       console.error('Receipt upload failed:', error);
+      toast({
+        title: "Upload Failed",
+        description: "There was an error uploading your receipts. Please try again.",
+        variant: "destructive",
+        duration: 4000,
+      });
     },
   });
 
@@ -1149,6 +1215,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             // Get section data count for badges
             let itemCount = 0;
             switch(section.id) {
+              case 'challenge': itemCount = receipts.length; break; // Use receipts for challenge progress
               case 'photos': itemCount = photos.length; break;
               case 'tools': itemCount = tools.length; break;
               case 'dailyHours': itemCount = dailyHours.length; break;
@@ -1157,16 +1224,18 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             }
             
             // Update section names for better display and get appropriate color
-            const sectionName = section.id === 'photos' ? 'Photo Gallery' : 
+            const sectionName = section.id === 'challenge' ? 'Receipt Challenge' :
+                                section.id === 'photos' ? 'Photo Gallery' : 
                                 section.id === 'dailyHours' ? 'Hours' :
                                 section.id === 'receipts' ? 'Expenses' : section.name;
             const getSectionColor = (sectionId: string) => {
               switch (sectionId) {
-                case 'photos': return paintBrainColors.red;      // Red for photo gallery
-                case 'tools': return paintBrainColors.yellow;    // Yellow for tools
-                case 'dailyHours': return paintBrainColors.green; // Green for daily hours
-                case 'notes': return paintBrainColors.blue;      // Blue for project notes
-                case 'receipts': return paintBrainColors.purple; // Purple for receipts
+                case 'challenge': return paintBrainColors.purple;  // Purple for gamified challenge
+                case 'photos': return paintBrainColors.orange;     // Orange for photo gallery  
+                case 'tools': return paintBrainColors.yellow;      // Yellow for tools
+                case 'dailyHours': return paintBrainColors.green;  // Green for daily hours
+                case 'notes': return paintBrainColors.blue;        // Blue for project notes
+                case 'receipts': return paintBrainColors.red;      // Red for receipts  
                 default: return paintBrainColors.gray;
               }
             };
@@ -1205,6 +1274,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                         >
                         {(() => {
                           switch(section.id) {
+                            case 'challenge': 
+                              return itemCount > 0 ? `Level ${Math.floor((itemCount * 10) / 100) + 1} • ${itemCount * 10} pts` : 'Start uploading!';
                             case 'photos': 
                               return `${itemCount} photo${itemCount !== 1 ? 's' : ''}`;
                             case 'tools': 
@@ -1238,6 +1309,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                 {/* Section Content */}
                 {isExpanded && (
                   <div className="border-t border-gray-600 p-4 bg-gray-900">
+                    {section.id === 'challenge' && (
+                      <ReceiptUploadChallenge projectId={project.id} />
+                    )}
+
                     {section.id === 'photos' && (
                       <div>
                         {/* Photo Upload Options */}

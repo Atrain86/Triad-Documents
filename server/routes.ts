@@ -3,7 +3,7 @@ import express from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
-import { insertProjectSchema, insertPhotoSchema, insertReceiptSchema, insertDailyHoursSchema, insertToolsChecklistSchema, insertUserSchema, projects, photos, receipts, dailyHours, toolsChecklist, users, tokenUsage } from "@shared/schema";
+import { insertProjectSchema, insertPhotoSchema, insertReceiptSchema, insertDailyHoursSchema, insertToolsChecklistSchema, insertUserSchema, projects, photos, receipts, dailyHours, toolsChecklist, users, tokenUsage, challengeProgress, userAchievements } from "@shared/schema";
 import { sql, eq, desc } from "drizzle-orm";
 import { hashPassword, verifyPassword, generateToken, verifyToken } from "./auth";
 import { sendInvoiceEmailWithReceipts, sendEstimateEmail } from "./email";
@@ -359,7 +359,135 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const validatedData = insertReceiptSchema.parse(receiptData);
       const receipt = await storage.createReceipt(validatedData);
-      res.status(201).json(receipt);
+      console.log('Receipt saved successfully:', receipt);
+      
+      // Update challenge progress after successful receipt upload
+      try {
+        // Get or create challenge progress
+        let progress = await db
+          .select()
+          .from(challengeProgress)
+          .where(eq(challengeProgress.projectId, projectId))
+          .limit(1);
+
+        if (progress.length === 0) {
+          // Create new progress record
+          const [newProgress] = await db
+            .insert(challengeProgress)
+            .values({
+              projectId,
+              receiptsUploaded: 1,
+              currentStreak: 1,
+              longestStreak: 1,
+              totalPoints: 10,
+              level: 1,
+              weeklyGoal: 5,
+              weeklyProgress: 1,
+              lastUploadDate: new Date()
+            })
+            .returning();
+          
+          // Award first receipt achievement
+          await db.insert(userAchievements).values({
+            projectId,
+            achievementId: 'first_receipt'
+          });
+
+          console.log('Challenge progress created:', newProgress);
+          res.status(201).json({
+            ...receipt,
+            challengeUpdate: { 
+              progress: newProgress, 
+              pointsEarned: 10,
+              newAchievements: ['first_receipt']
+            }
+          });
+          return;
+        }
+
+        // Update existing progress
+        const currentProgress = progress[0];
+        const now = new Date();
+        const lastUpload = currentProgress.lastUploadDate ? new Date(currentProgress.lastUploadDate) : null;
+        
+        // Calculate streak
+        let newStreak = currentProgress.currentStreak || 0;
+        let streakBonus = 0;
+        
+        if (lastUpload) {
+          const daysDiff = Math.floor((now.getTime() - lastUpload.getTime()) / (1000 * 60 * 60 * 24));
+          if (daysDiff === 1) {
+            newStreak += 1;
+            streakBonus = 25;
+          } else if (daysDiff > 1) {
+            newStreak = 1;
+          }
+        } else {
+          newStreak = 1;
+        }
+
+        const basePoints = 10;
+        const totalPointsEarned = basePoints + streakBonus;
+        const newTotalPoints = (currentProgress.totalPoints || 0) + totalPointsEarned;
+        const newLevel = Math.floor(newTotalPoints / 100) + 1;
+
+        // Update progress
+        const [updatedProgress] = await db
+          .update(challengeProgress)
+          .set({
+            receiptsUploaded: (currentProgress.receiptsUploaded || 0) + 1,
+            currentStreak: newStreak,
+            longestStreak: Math.max((currentProgress.longestStreak || 0), newStreak),
+            totalPoints: newTotalPoints,
+            level: newLevel,
+            weeklyProgress: (currentProgress.weeklyProgress || 0) + 1,
+            lastUploadDate: now
+          })
+          .where(eq(challengeProgress.projectId, projectId))
+          .returning();
+
+        // Check for new achievements
+        const newAchievements = [];
+        const receiptsCount = updatedProgress.receiptsUploaded || 0;
+        const currentStreak = updatedProgress.currentStreak || 0;
+        
+        const achievementChecks = [
+          { id: 'five_receipts', condition: receiptsCount >= 5 },
+          { id: 'ten_receipts', condition: receiptsCount >= 10 },
+          { id: 'receipt_ninja', condition: receiptsCount >= 25 },
+          { id: 'three_day_streak', condition: currentStreak >= 3 },
+          { id: 'week_streak', condition: currentStreak >= 7 },
+          { id: 'level_five', condition: newLevel >= 5 },
+          { id: 'point_collector', condition: newTotalPoints >= 500 }
+        ];
+
+        for (const check of achievementChecks) {
+          if (check.condition) {
+            try {
+              await db.insert(userAchievements).values({
+                projectId,
+                achievementId: check.id
+              });
+              newAchievements.push(check.id);
+            } catch (error) {
+              // Achievement already exists, ignore
+            }
+          }
+        }
+
+        console.log('Challenge progress updated:', updatedProgress);
+        res.status(201).json({
+          ...receipt,
+          challengeUpdate: {
+            progress: updatedProgress,
+            pointsEarned: totalPointsEarned,
+            newAchievements
+          }
+        });
+      } catch (challengeError) {
+        console.error('Challenge update error:', challengeError);
+        res.status(201).json(receipt);
+      }
     } catch (error) {
       console.error('Receipt creation error:', error);
       res.status(400).json({ error: 'Failed to create receipt', details: error instanceof Error ? error.message : String(error) });
@@ -779,6 +907,293 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error adding historical token usage:', error);
       res.status(500).json({ error: 'Failed to add historical usage' });
+    }
+  });
+
+  // Receipt Challenge API Routes
+  app.get('/api/receipt-challenge/stats/:projectId', async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.projectId);
+      
+      // Get or create challenge progress for the project
+      let progress = await db
+        .select()
+        .from(challengeProgress)
+        .where(eq(challengeProgress.projectId, projectId))
+        .limit(1);
+
+      if (progress.length === 0) {
+        // Create new challenge progress
+        const [newProgress] = await db
+          .insert(challengeProgress)
+          .values({
+            projectId,
+            receiptsUploaded: 0,
+            currentStreak: 0,
+            longestStreak: 0,
+            totalPoints: 0,
+            level: 1,
+            weeklyGoal: 5,
+            weeklyProgress: 0,
+            weeklyResetDate: new Date()
+          })
+          .returning();
+        progress = [newProgress];
+      }
+
+      // Check if weekly reset is needed
+      const now = new Date();
+      const resetDate = new Date(progress[0].weeklyResetDate);
+      const daysSinceReset = Math.floor((now.getTime() - resetDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      if (daysSinceReset >= 7) {
+        // Reset weekly progress
+        await db
+          .update(challengeProgress)
+          .set({
+            weeklyProgress: 0,
+            weeklyResetDate: now
+          })
+          .where(eq(challengeProgress.projectId, projectId));
+        progress[0].weeklyProgress = 0;
+      }
+
+      res.json(progress[0]);
+    } catch (error) {
+      console.error('Error fetching challenge stats:', error);
+      res.status(500).json({ error: 'Failed to fetch challenge statistics' });
+    }
+  });
+
+  app.get('/api/receipt-challenge/achievements/:projectId', async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.projectId);
+      
+      // Get project stats for achievement calculation
+      const progress = await db
+        .select()
+        .from(challengeProgress)
+        .where(eq(challengeProgress.projectId, projectId))
+        .limit(1);
+      
+      const stats = progress[0] || { receiptsUploaded: 0, currentStreak: 0, longestStreak: 0, totalPoints: 0 };
+
+      // Get unlocked achievements
+      const unlockedAchievements = await db
+        .select()
+        .from(userAchievements)
+        .where(eq(userAchievements.projectId, projectId));
+
+      const unlockedIds = unlockedAchievements.map(a => a.achievementId);
+
+      // Define all available achievements
+      const allAchievements = [
+        {
+          id: 'first_receipt',
+          title: 'Getting Started',
+          description: 'Upload your first receipt',
+          icon: '🎯',
+          unlocked: unlockedIds.includes('first_receipt'),
+          progress: Math.min(stats.receiptsUploaded, 1),
+          requirement: 1
+        },
+        {
+          id: 'five_receipts',
+          title: 'Receipt Collector',
+          description: 'Upload 5 receipts',
+          icon: '📄',
+          unlocked: unlockedIds.includes('five_receipts'),
+          progress: Math.min(stats.receiptsUploaded, 5),
+          requirement: 5
+        },
+        {
+          id: 'ten_receipts',
+          title: 'Paper Trail Master',
+          description: 'Upload 10 receipts',
+          icon: '📊',
+          unlocked: unlockedIds.includes('ten_receipts'),
+          progress: Math.min(stats.receiptsUploaded, 10),
+          requirement: 10
+        },
+        {
+          id: 'three_day_streak',
+          title: 'Consistency Champion',
+          description: 'Upload receipts 3 days in a row',
+          icon: '🔥',
+          unlocked: unlockedIds.includes('three_day_streak'),
+          progress: Math.min(stats.currentStreak, 3),
+          requirement: 3
+        },
+        {
+          id: 'week_streak',
+          title: 'Weekly Warrior',
+          description: 'Upload receipts 7 days in a row',
+          icon: '⚡',
+          unlocked: unlockedIds.includes('week_streak'),
+          progress: Math.min(stats.currentStreak, 7),
+          requirement: 7
+        },
+        {
+          id: 'level_five',
+          title: 'Level Up Master',
+          description: 'Reach level 5',
+          icon: '🏆',
+          unlocked: unlockedIds.includes('level_five'),
+          progress: Math.min((stats.totalPoints / 100), 5),
+          requirement: 5
+        },
+        {
+          id: 'point_collector',
+          title: 'Point Collector',
+          description: 'Earn 500 points',
+          icon: '💎',
+          unlocked: unlockedIds.includes('point_collector'),
+          progress: Math.min(stats.totalPoints, 500),
+          requirement: 500
+        },
+        {
+          id: 'receipt_ninja',
+          title: 'Receipt Ninja',
+          description: 'Upload 25 receipts',
+          icon: '🥷',
+          unlocked: unlockedIds.includes('receipt_ninja'),
+          progress: Math.min(stats.receiptsUploaded, 25),
+          requirement: 25
+        }
+      ];
+
+      res.json(allAchievements);
+    } catch (error) {
+      console.error('Error fetching achievements:', error);
+      res.status(500).json({ error: 'Failed to fetch achievements' });
+    }
+  });
+
+  app.post('/api/receipt-challenge/update/:projectId', async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.projectId);
+      
+      // Get current progress
+      let progress = await db
+        .select()
+        .from(challengeProgress)
+        .where(eq(challengeProgress.projectId, projectId))
+        .limit(1);
+
+      if (progress.length === 0) {
+        // Create new progress record
+        const [newProgress] = await db
+          .insert(challengeProgress)
+          .values({
+            projectId,
+            receiptsUploaded: 1,
+            currentStreak: 1,
+            longestStreak: 1,
+            totalPoints: 10,
+            level: 1,
+            weeklyGoal: 5,
+            weeklyProgress: 1,
+            lastUploadDate: new Date()
+          })
+          .returning();
+        
+        // Award first receipt achievement
+        await db.insert(userAchievements).values({
+          projectId,
+          achievementId: 'first_receipt'
+        });
+
+        return res.json({ 
+          progress: newProgress, 
+          pointsEarned: 10,
+          newAchievements: ['first_receipt']
+        });
+      }
+
+      // Update existing progress
+      const currentProgress = progress[0];
+      const now = new Date();
+      const lastUpload = currentProgress.lastUploadDate ? new Date(currentProgress.lastUploadDate) : null;
+      
+      // Calculate streak
+      let newStreak = currentProgress.currentStreak;
+      let streakBonus = 0;
+      
+      if (lastUpload) {
+        const daysDiff = Math.floor((now.getTime() - lastUpload.getTime()) / (1000 * 60 * 60 * 24));
+        if (daysDiff === 1) {
+          // Consecutive day
+          newStreak += 1;
+          streakBonus = 25; // Bonus for maintaining streak
+        } else if (daysDiff > 1) {
+          // Streak broken
+          newStreak = 1;
+        }
+        // Same day uploads don't affect streak
+      } else {
+        newStreak = 1;
+      }
+
+      // Calculate points (10 base + streak bonus)
+      const basePoints = 10;
+      const totalPointsEarned = basePoints + streakBonus;
+      const newTotalPoints = currentProgress.totalPoints + totalPointsEarned;
+      const newLevel = Math.floor(newTotalPoints / 100) + 1;
+
+      // Update progress
+      const [updatedProgress] = await db
+        .update(challengeProgress)
+        .set({
+          receiptsUploaded: currentProgress.receiptsUploaded + 1,
+          currentStreak: newStreak,
+          longestStreak: Math.max(currentProgress.longestStreak, newStreak),
+          totalPoints: newTotalPoints,
+          level: newLevel,
+          weeklyProgress: currentProgress.weeklyProgress + 1,
+          lastUploadDate: now
+        })
+        .where(eq(challengeProgress.projectId, projectId))
+        .returning();
+
+      // Check for new achievements
+      const newAchievements = [];
+      const receiptsCount = updatedProgress.receiptsUploaded;
+      const currentStreak = updatedProgress.currentStreak;
+      
+      const achievementChecks = [
+        { id: 'five_receipts', condition: receiptsCount >= 5 },
+        { id: 'ten_receipts', condition: receiptsCount >= 10 },
+        { id: 'receipt_ninja', condition: receiptsCount >= 25 },
+        { id: 'three_day_streak', condition: currentStreak >= 3 },
+        { id: 'week_streak', condition: currentStreak >= 7 },
+        { id: 'level_five', condition: newLevel >= 5 },
+        { id: 'point_collector', condition: newTotalPoints >= 500 }
+      ];
+
+      for (const check of achievementChecks) {
+        if (check.condition) {
+          try {
+            const [achievement] = await db.insert(userAchievements).values({
+              projectId,
+              achievementId: check.id
+            }).returning();
+            if (achievement) {
+              newAchievements.push(check.id);
+            }
+          } catch (error) {
+            // Achievement already exists, ignore
+          }
+        }
+      }
+
+      res.json({
+        progress: updatedProgress,
+        pointsEarned: totalPointsEarned,
+        newAchievements
+      });
+    } catch (error) {
+      console.error('Error updating challenge progress:', error);
+      res.status(500).json({ error: 'Failed to update challenge progress' });
     }
   });
 
