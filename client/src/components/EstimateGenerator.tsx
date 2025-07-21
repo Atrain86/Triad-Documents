@@ -874,174 +874,111 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
         </div>
       </DialogContent>
       
-      {/* Hidden PDF Template */}
+      {/* Hidden PDF Template - Dark Theme */}
       <div ref={printRef} className="hidden print:block">
-        <div className="bg-white text-black p-8 max-w-4xl mx-auto">
+        <div style={{ backgroundColor: '#1a1a1a', color: 'white', padding: '32px', maxWidth: '800px', margin: '0 auto', fontFamily: 'Arial, sans-serif' }}>
           {/* Header */}
-          <div className="flex justify-between items-start mb-8">
-            <div className="flex items-center">
-              <img src="/aframe-logo.png" alt="A-Frame Painting" className="h-24 w-auto mr-4" />
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px' }}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <img src="/aframe-logo.png" alt="A-Frame Painting" style={{ height: '60px', width: 'auto', marginRight: '16px' }} />
             </div>
-            <div className="text-right">
-              <h1 className="text-3xl font-bold text-gray-800 mb-2">ESTIMATE</h1>
-              <p className="text-lg">#{estimateNumber || 'EST-001'}</p>
-              <p className="text-gray-600">{new Date().toLocaleDateString()}</p>
-            </div>
-          </div>
-
-          {/* Company Info */}
-          <div className="mb-6">
-            <h2 className="text-xl font-semibold mb-2">A-Frame Painting</h2>
-            <div className="text-gray-700">
-              <p>884 Hayes Rd, Manson's Landing, BC V0P1K0</p>
-              <p>Email: cortespainter@gmail.com</p>
+            <div style={{ textAlign: 'right', color: 'white' }}>
+              <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: '0 0 8px 0', color: 'white' }}>ESTIMATE</h1>
+              <p style={{ fontSize: '16px', margin: '0 0 4px 0', color: '#cccccc' }}>{estimateNumber || 'EST #'}</p>
+              <p style={{ fontSize: '14px', margin: '0', color: '#cccccc' }}>{new Date().toLocaleDateString()}</p>
             </div>
           </div>
 
-          {/* Client Information */}
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold mb-3 text-gray-800">Client Information</h3>
-            <div className="bg-gray-50 p-4 rounded">
-              <div className="grid grid-cols-2 gap-4">
+          {/* Estimate For Section */}
+          <div style={{ marginBottom: '24px', backgroundColor: '#2a2a2a', padding: '16px', borderRadius: '8px' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 'bold', margin: '0 0 12px 0', color: 'white' }}>Estimate For:</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div>
+                <p style={{ margin: '0 0 4px 0', color: '#cccccc' }}>{clientName}</p>
+                <p style={{ margin: '0 0 4px 0', color: '#cccccc' }}>{clientAddress}</p>
+                <p style={{ margin: '0 0 4px 0', color: '#cccccc' }}>{clientCity}, {clientPostal}</p>
+              </div>
+              <div>
+                <p style={{ margin: '0 0 4px 0', color: '#cccccc' }}>{clientEmail}</p>
+                <p style={{ margin: '0 0 4px 0', color: '#cccccc' }}>{clientPhone}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Services & Labor */}
+          <div style={{ marginBottom: '24px' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 'bold', margin: '0 0 12px 0', color: 'white' }}>Services & Labor</h3>
+            
+            {/* Work Stages */}
+            {workStages.filter(stage => parseFloat(String(stage.hours)) > 0).map((stage, i) => (
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #333' }}>
                 <div>
-                  <p><strong>Name:</strong> {clientName}</p>
-                  <p><strong>Address:</strong> {clientAddress}</p>
+                  <p style={{ margin: '0', color: 'white', fontSize: '14px' }}>{stage.description}</p>
+                  <p style={{ margin: '0', color: '#888', fontSize: '12px' }}>{stage.hours}h × ${stage.rate}</p>
                 </div>
+                <span style={{ color: 'white', fontSize: '14px' }}>${calculateStageTotal(stage).toFixed(2)}</span>
+              </div>
+            ))}
+
+            {/* Additional Labor */}
+            {additionalLabor.filter(member => member.name && parseFloat(String(member.hours)) > 0).map((member, i) => (
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #333' }}>
                 <div>
-                  <p><strong>City:</strong> {clientCity}</p>
-                  <p><strong>Postal Code:</strong> {clientPostal}</p>
-                  <p><strong>Email:</strong> {clientEmail}</p>
-                  <p><strong>Phone:</strong> {clientPhone}</p>
+                  <p style={{ margin: '0', color: 'white', fontSize: '14px' }}>{member.name}</p>
+                  <p style={{ margin: '0', color: '#888', fontSize: '12px' }}>{member.hours}h × ${member.rate}</p>
                 </div>
+                <span style={{ color: 'white', fontSize: '14px' }}>${((parseFloat(String(member.hours)) || 0) * (parseFloat(String(member.rate)) || 0)).toFixed(2)}</span>
               </div>
+            ))}
+          </div>
+
+          {/* Additional Services */}
+          <div style={{ marginBottom: '24px' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 'bold', margin: '0 0 12px 0', color: 'white' }}>Additional Services</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0' }}>
+              <span style={{ color: 'white', fontSize: '14px' }}>Power Washing</span>
+              <span style={{ color: 'white', fontSize: '14px' }}>${(woodReconditioning.hours * 60).toFixed(2)}</span>
             </div>
           </div>
 
-          {/* Project Details */}
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold mb-3 text-gray-800">Project Details</h3>
-            <div className="bg-gray-50 p-4 rounded">
-              <p><strong>Project:</strong> {projectTitle || 'Painting Estimate'}</p>
-              <p><strong>Date:</strong> {estimateDate}</p>
+          {/* Materials & Paint */}
+          <div style={{ marginBottom: '24px' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 'bold', margin: '0 0 12px 0', color: 'white' }}>Materials & Paint</h3>
+            
+            {/* Paint & Supplies */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #333' }}>
+              <span style={{ color: 'white', fontSize: '14px' }}>Paint & Supplies</span>
+              <span style={{ color: 'white', fontSize: '14px' }}>${(calculatePrimerCosts() + calculatePaintCosts() + calculateSuppliesTotal()).toFixed(2)}</span>
+            </div>
+            
+            {/* Delivery */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0' }}>
+              <span style={{ color: 'white', fontSize: '14px' }}>Delivery</span>
+              <span style={{ color: 'white', fontSize: '14px' }}>${calculateTravelTotal().toFixed(2)}</span>
             </div>
           </div>
-
-          {/* Work Breakdown */}
-          {workStages.some(stage => stage.hours > 0) && (
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-3 text-gray-800">Labor</h3>
-              <table className="w-full border border-gray-300">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border border-gray-300 px-3 py-2 text-left">Description</th>
-                    <th className="border border-gray-300 px-3 py-2 text-center">Hours</th>
-                    <th className="border border-gray-300 px-3 py-2 text-center">Rate</th>
-                    <th className="border border-gray-300 px-3 py-2 text-right">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {workStages.filter(stage => stage.hours > 0).map((stage, i) => (
-                    <tr key={i}>
-                      <td className="border border-gray-300 px-3 py-2">{stage.description}</td>
-                      <td className="border border-gray-300 px-3 py-2 text-center">{stage.hours}</td>
-                      <td className="border border-gray-300 px-3 py-2 text-center">${stage.rate}</td>
-                      <td className="border border-gray-300 px-3 py-2 text-right">${calculateStageTotal(stage).toFixed(2)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {/* Additional Labor */}
-          {additionalLabor.some(member => member.name && member.hours) && (
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-3 text-gray-800">Additional Labor</h3>
-              <table className="w-full border border-gray-300">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border border-gray-300 px-3 py-2 text-left">Name</th>
-                    <th className="border border-gray-300 px-3 py-2 text-center">Hours</th>
-                    <th className="border border-gray-300 px-3 py-2 text-center">Rate</th>
-                    <th className="border border-gray-300 px-3 py-2 text-right">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {additionalLabor.filter(member => member.name && member.hours).map((member, i) => (
-                    <tr key={i}>
-                      <td className="border border-gray-300 px-3 py-2">{member.name}</td>
-                      <td className="border border-gray-300 px-3 py-2 text-center">{member.hours}</td>
-                      <td className="border border-gray-300 px-3 py-2 text-center">${member.rate}</td>
-                      <td className="border border-gray-300 px-3 py-2 text-right">${((parseFloat(member.hours) || 0) * (parseFloat(member.rate) || 0)).toFixed(2)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {/* Materials */}
-          {(calculatePrimerCosts() > 0 || calculatePaintCosts() > 0 || calculateSuppliesTotal() > 0) && (
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-3 text-gray-800">Materials</h3>
-              <div className="space-y-2">
-                {calculatePrimerCosts() > 0 && (
-                  <div className="flex justify-between py-1">
-                    <span>Primer ({primerCosts.gallons} gallons × {primerCosts.coats} coats)</span>
-                    <span>${calculatePrimerCosts().toFixed(2)}</span>
-                  </div>
-                )}
-                {calculatePaintCosts() > 0 && (
-                  <div className="flex justify-between py-1">
-                    <span>Paint ({paintCosts.gallons} gallons × {paintCosts.coats} coats)</span>
-                    <span>${calculatePaintCosts().toFixed(2)}</span>
-                  </div>
-                )}
-                {supplies.filter(supply => supply.name && supply.total > 0).map((supply, i) => (
-                  <div key={i} className="flex justify-between py-1">
-                    <span>{supply.name} ({supply.quantity} units)</span>
-                    <span>${supply.total.toFixed(2)}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Travel Costs */}
-          {calculateTravelTotal() > 0 && (
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-3 text-gray-800">Travel</h3>
-              <div className="flex justify-between">
-                <span>Travel ({travelCosts.distance}km × {travelCosts.trips} trips @ ${travelCosts.ratePerKm}/km)</span>
-                <span>${calculateTravelTotal().toFixed(2)}</span>
-              </div>
-            </div>
-          )}
 
           {/* Summary */}
-          <div className="border-t-2 border-gray-300 pt-4">
-            <div className="space-y-2">
-              <div className="flex justify-between text-lg">
-                <span>Subtotal:</span>
-                <span>${calculateSubtotal().toFixed(2)}</span>
-              </div>
-              {calculateTaxAmount() > 0 && (
-                <div className="flex justify-between">
-                  <span>Tax ({calculateTaxRate()}%):</span>
-                  <span>${calculateTaxAmount().toFixed(2)}</span>
-                </div>
-              )}
-              <div className="flex justify-between text-xl font-bold border-t border-gray-300 pt-2">
-                <span>Grand Total:</span>
-                <span className="bg-green-100 px-3 py-1 rounded">${calculateTotal().toFixed(2)}</span>
-              </div>
+          <div style={{ backgroundColor: '#2a2a2a', padding: '16px', borderRadius: '8px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <span style={{ color: 'white' }}>Subtotal:</span>
+              <span style={{ color: 'white' }}>${calculateSubtotal().toFixed(2)}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <span style={{ color: 'white' }}>Paint & Materials:</span>
+              <span style={{ color: 'white' }}>${(calculatePrimerCosts() + calculatePaintCosts() + calculateSuppliesTotal()).toFixed(2)}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '2px solid #059669' }}>
+              <span style={{ fontSize: '18px', fontWeight: 'bold', color: 'white' }}>Total Estimate:</span>
+              <span style={{ fontSize: '18px', fontWeight: 'bold', backgroundColor: '#059669', color: 'white', padding: '4px 12px', borderRadius: '4px' }}>${calculateTotal().toFixed(2)}</span>
             </div>
           </div>
 
           {/* Footer */}
-          <div className="mt-8 pt-4 border-t border-gray-200 text-center text-gray-600">
-            <p>Thanks for considering A-Frame Painting!</p>
-            <p className="text-sm mt-2">This estimate is valid for 30 days. Final costs may vary based on site conditions.</p>
+          <div style={{ marginTop: '32px', textAlign: 'center', padding: '16px', backgroundColor: '#2a2a2a', borderRadius: '8px' }}>
+            <p style={{ margin: '0 0 8px 0', color: 'white', fontSize: '16px', fontWeight: 'bold' }}>Thank you for considering A-Frame Painting!</p>
+            <p style={{ margin: '0 0 8px 0', color: '#cccccc', fontSize: '14px' }}>884 Hayes Rd, Manson's Landing, BC V0P1K0</p>
+            <p style={{ margin: '0', color: '#cccccc', fontSize: '14px' }}>This estimate is valid for 30 days from the date above.</p>
           </div>
         </div>
       </div>
