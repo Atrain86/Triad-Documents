@@ -239,7 +239,27 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     if (!printRef.current) return;
 
     try {
-      const canvas = await html2canvas(printRef.current, { scale: 1, backgroundColor: '#fff', useCORS: true });
+      // Temporarily show the hidden PDF template
+      printRef.current.style.display = 'block';
+      printRef.current.style.position = 'fixed';
+      printRef.current.style.top = '-10000px';
+      printRef.current.style.left = '-10000px';
+      printRef.current.style.zIndex = '-1000';
+
+      const canvas = await html2canvas(printRef.current, { 
+        scale: 1, 
+        backgroundColor: '#1a1a1a',
+        useCORS: true,
+        allowTaint: false
+      });
+
+      // Hide the template again
+      printRef.current.style.display = 'none';
+      printRef.current.style.position = '';
+      printRef.current.style.top = '';
+      printRef.current.style.left = '';
+      printRef.current.style.zIndex = '';
+
       const imgData = canvas.toDataURL('image/jpeg', 0.8);
       const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
       const imgProps = pdf.getImageProperties(imgData);
@@ -274,14 +294,28 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     }
 
     try {
+      // Temporarily show the hidden PDF template
+      printRef.current!.style.display = 'block';
+      printRef.current!.style.position = 'fixed';
+      printRef.current!.style.top = '-10000px';
+      printRef.current!.style.left = '-10000px';
+      printRef.current!.style.zIndex = '-1000';
+
       // Generate PDF as blob with optimized settings
       const canvas = await html2canvas(printRef.current!, { 
         scale: 1, 
-        backgroundColor: '#fff', 
+        backgroundColor: '#1a1a1a', 
         useCORS: true,
         allowTaint: false,
         logging: false
       });
+
+      // Hide the template again
+      printRef.current!.style.display = 'none';
+      printRef.current!.style.position = '';
+      printRef.current!.style.top = '';
+      printRef.current!.style.left = '';
+      printRef.current!.style.zIndex = '';
       
       // Validate canvas
       if (canvas.width === 0 || canvas.height === 0) {
