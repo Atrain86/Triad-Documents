@@ -365,13 +365,26 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       
       yPos += 15;  // More bottom spacing before next section
       
-      // Services & Labor Section
+      // Services & Labor Section with gray container
+      const laborStartY = yPos;
+      
+      // Calculate container height based on content
+      const validWorkStages = workStages.filter(stage => parseFloat(String(stage.hours)) > 0);
+      const validAdditionalLabor = additionalLabor.filter(member => member.name && parseFloat(String(member.hours)) > 0);
+      const laborItemCount = validWorkStages.length + validAdditionalLabor.length;
+      const laborContainerHeight = 8 + (laborItemCount * 15) + 10; // Header + items + bottom padding
+      
+      // Draw gray container for Services & Labor
+      pdf.setFillColor(42, 42, 42); // #2a2a2a
+      pdf.rect(10, yPos, 190, laborContainerHeight, 'F');
+      
+      yPos += 8;
       pdf.setFont('helvetica', 'bold');
-      pdf.text('Services & Labor', 10, yPos);
+      pdf.text('Services & Labor', 15, yPos);
       yPos += 8;
       
       // Work stages (increased spacing for better readability)
-      workStages.filter(stage => parseFloat(String(stage.hours)) > 0).forEach((stage) => {
+      validWorkStages.forEach((stage) => {
         const hours = parseFloat(String(stage.hours)) || 0;
         const total = (hours * stage.rate).toFixed(2);
         
@@ -383,7 +396,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       });
       
       // Additional Labor (increased spacing for better readability)
-      additionalLabor.filter(member => member.name && parseFloat(String(member.hours)) > 0).forEach((member) => {
+      validAdditionalLabor.forEach((member) => {
         const hours = parseFloat(String(member.hours)) || 0;
         const rate = parseFloat(String(member.rate)) || 0;
         const total = (hours * rate).toFixed(2);
@@ -394,14 +407,28 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
         yPos += 15;  // Increased spacing from 12 to 15
       });
       
-      yPos += 10;
+      yPos = laborStartY + laborContainerHeight + 10;
       
-      // Materials & Paint Section
+      // Materials & Paint Section with gray container
+      const materialsStartY = yPos;
+      const materialsTotal = (calculatePrimerCosts() + calculatePaintCosts() + calculateSuppliesTotal()).toFixed(2);
+      const travelTotal = calculateTravelTotal().toFixed(2);
+      
+      // Calculate materials container height
+      let materialsItemCount = 0;
+      if (parseFloat(materialsTotal) > 0) materialsItemCount++;
+      if (parseFloat(travelTotal) > 0) materialsItemCount++;
+      const materialsContainerHeight = 8 + (materialsItemCount * 8) + 10; // Header + items + bottom padding
+      
+      // Draw gray container for Materials & Paint
+      pdf.setFillColor(42, 42, 42); // #2a2a2a
+      pdf.rect(10, yPos, 190, materialsContainerHeight, 'F');
+      
+      yPos += 8;
       pdf.setFont('helvetica', 'bold');
-      pdf.text('Materials & Paint', 10, yPos);
+      pdf.text('Materials & Paint', 15, yPos);
       yPos += 8;
       
-      const materialsTotal = (calculatePrimerCosts() + calculatePaintCosts() + calculateSuppliesTotal()).toFixed(2);
       if (parseFloat(materialsTotal) > 0) {
         pdf.setFont('helvetica', 'normal');
         pdf.text('Paint & Supplies', 15, yPos);
@@ -409,12 +436,13 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
         yPos += 8;
       }
       
-      const travelTotal = calculateTravelTotal().toFixed(2);
       if (parseFloat(travelTotal) > 0) {
         pdf.text('Delivery', 15, yPos);
         pdf.text(`$${travelTotal}`, 190, yPos, { align: 'right' });
         yPos += 8;
       }
+      
+      yPos = materialsStartY + materialsContainerHeight + 10;
       
       yPos += 15;
       
@@ -535,13 +563,26 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       
       yPos += 15;  // More bottom spacing before next section
       
-      // Services & Labor Section
+      // Services & Labor Section with gray container
+      const laborStartY2 = yPos;
+      
+      // Calculate container height based on content
+      const validWorkStages2 = workStages.filter(stage => parseFloat(String(stage.hours)) > 0);
+      const validAdditionalLabor2 = additionalLabor.filter(member => member.name && parseFloat(String(member.hours)) > 0);
+      const laborItemCount2 = validWorkStages2.length + validAdditionalLabor2.length;
+      const laborContainerHeight2 = 8 + (laborItemCount2 * 15) + 10; // Header + items + bottom padding
+      
+      // Draw gray container for Services & Labor
+      pdf.setFillColor(42, 42, 42); // #2a2a2a
+      pdf.rect(10, yPos, 190, laborContainerHeight2, 'F');
+      
+      yPos += 8;
       pdf.setFont('helvetica', 'bold');
-      pdf.text('Services & Labor', 10, yPos);
+      pdf.text('Services & Labor', 15, yPos);
       yPos += 8;
       
       // Work stages (increased spacing for better readability)
-      workStages.filter(stage => parseFloat(String(stage.hours)) > 0).forEach((stage) => {
+      validWorkStages2.forEach((stage) => {
         const hours = parseFloat(String(stage.hours)) || 0;
         const total = (hours * stage.rate).toFixed(2);
         
@@ -553,7 +594,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       });
       
       // Additional Labor (increased spacing for better readability)
-      additionalLabor.filter(member => member.name && parseFloat(String(member.hours)) > 0).forEach((member) => {
+      validAdditionalLabor2.forEach((member) => {
         const hours = parseFloat(String(member.hours)) || 0;
         const rate = parseFloat(String(member.rate)) || 0;
         const total = (hours * rate).toFixed(2);
@@ -564,27 +605,42 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
         yPos += 15;  // Increased spacing from 12 to 15
       });
       
-      yPos += 10;
+      yPos = laborStartY2 + laborContainerHeight2 + 10;
       
-      // Materials & Paint Section
+      // Materials & Paint Section with gray container
+      const materialsStartY2 = yPos;
+      const materialsTotal2 = (calculatePrimerCosts() + calculatePaintCosts() + calculateSuppliesTotal()).toFixed(2);
+      const travelTotal2 = calculateTravelTotal().toFixed(2);
+      
+      // Calculate materials container height
+      let materialsItemCount2 = 0;
+      if (parseFloat(materialsTotal2) > 0) materialsItemCount2++;
+      if (parseFloat(travelTotal2) > 0) materialsItemCount2++;
+      const materialsContainerHeight2 = 8 + (materialsItemCount2 * 8) + 10; // Header + items + bottom padding
+      
+      // Draw gray container for Materials & Paint
+      pdf.setFillColor(42, 42, 42); // #2a2a2a
+      pdf.rect(10, yPos, 190, materialsContainerHeight2, 'F');
+      
+      yPos += 8;
       pdf.setFont('helvetica', 'bold');
-      pdf.text('Materials & Paint', 10, yPos);
+      pdf.text('Materials & Paint', 15, yPos);
       yPos += 8;
       
-      const materialsTotal = (calculatePrimerCosts() + calculatePaintCosts() + calculateSuppliesTotal()).toFixed(2);
-      if (parseFloat(materialsTotal) > 0) {
+      if (parseFloat(materialsTotal2) > 0) {
         pdf.setFont('helvetica', 'normal');
         pdf.text('Paint & Supplies', 15, yPos);
-        pdf.text(`$${materialsTotal}`, 190, yPos, { align: 'right' });
+        pdf.text(`$${materialsTotal2}`, 190, yPos, { align: 'right' });
         yPos += 8;
       }
       
-      const travelTotal = calculateTravelTotal().toFixed(2);
-      if (parseFloat(travelTotal) > 0) {
+      if (parseFloat(travelTotal2) > 0) {
         pdf.text('Delivery', 15, yPos);
-        pdf.text(`$${travelTotal}`, 190, yPos, { align: 'right' });
+        pdf.text(`$${travelTotal2}`, 190, yPos, { align: 'right' });
         yPos += 8;
       }
+      
+      yPos = materialsStartY2 + materialsContainerHeight2 + 10;
       
       yPos += 15;
       
@@ -598,7 +654,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       
       yPos += 8;
       pdf.text('Paint & Materials:', 15, yPos);
-      pdf.text(`$${materialsTotal}`, 190, yPos, { align: 'right' });
+      pdf.text(`$${materialsTotal2}`, 190, yPos, { align: 'right' });
       
       yPos += 12;
       // Total with green background effect (extend green box to cover both text and price)
