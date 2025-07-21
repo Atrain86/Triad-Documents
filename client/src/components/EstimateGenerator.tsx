@@ -933,13 +933,29 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           </div>
 
           {/* Additional Services */}
-          <div style={{ marginBottom: '24px' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 'bold', margin: '0 0 12px 0', color: 'white' }}>Additional Services</h3>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0' }}>
-              <span style={{ color: 'white', fontSize: '14px' }}>Power Washing</span>
-              <span style={{ color: 'white', fontSize: '14px' }}>${(woodReconditioning.hours * 60).toFixed(2)}</span>
+          {(drywallRepair.hours > 0 || additionalServices.length > 0) && (
+            <div style={{ marginBottom: '24px' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: 'bold', margin: '0 0 12px 0', color: 'white' }}>Additional Services</h3>
+              {drywallRepair.hours > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #333' }}>
+                  <div>
+                    <span style={{ color: 'white', fontSize: '14px' }}>Drywall Repair</span>
+                    <p style={{ margin: '0', color: '#888', fontSize: '12px' }}>{drywallRepair.hours}h × $60</p>
+                  </div>
+                  <span style={{ color: 'white', fontSize: '14px' }}>${(drywallRepair.hours * 60).toFixed(2)}</span>
+                </div>
+              )}
+              {additionalServices.filter(service => service.description && service.hours > 0).map((service, i) => (
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #333' }}>
+                  <div>
+                    <span style={{ color: 'white', fontSize: '14px' }}>{service.description}</span>
+                    <p style={{ margin: '0', color: '#888', fontSize: '12px' }}>{service.hours}h × $60</p>
+                  </div>
+                  <span style={{ color: 'white', fontSize: '14px' }}>${(service.hours * 60).toFixed(2)}</span>
+                </div>
+              ))}
             </div>
-          </div>
+          )}
 
           {/* Materials & Paint */}
           <div style={{ marginBottom: '24px' }}>
