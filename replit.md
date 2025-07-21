@@ -170,6 +170,12 @@ externalPort = 80
 
 ## Recent Changes
 
+### January 21, 2025 - Enhanced Estimate Email Formatting
+- **Professional email styling**: Updated estimate email formatting to match the high-quality invoice design with structured sections, professional branding, and enhanced visual hierarchy
+- **Comprehensive content**: Added detailed breakdown of included services, estimate validity information, and clear next steps for clients
+- **Improved presentation**: Enhanced both HTML and plain text versions with proper formatting, color-coded sections, and professional messaging
+- **Brand consistency**: Aligned estimate emails with A-Frame Painting brand standards including consistent typography, colors, and messaging tone
+
 ### January 21, 2025 - Database Schema Fix and Application Recovery
 - **Fixed database connection issue**: Resolved PostgreSQL connection timeout errors by addressing schema conflicts in estimates and sessions tables
 - **Database schema cleanup**: Dropped conflicting table structures and successfully pushed current schema to database

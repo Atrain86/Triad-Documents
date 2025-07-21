@@ -131,9 +131,7 @@ cortespainter@gmail.com
     attachments: [
       {
         filename: `Invoice-${invoiceNumber}-${clientName.replace(/[^a-zA-Z0-9]/g, '')}.pdf`,
-        content: pdfBuffer,
-        contentType: 'application/pdf',
-        contentDisposition: 'attachment'
+        content: pdfBuffer
       }
     ]
   });
@@ -257,42 +255,84 @@ export async function sendEstimateEmail(
 
   const text = `Dear ${clientName},
 
-Please find attached your painting estimate for ${projectTitle}.
-${customMessageSection}Total Estimate: $${totalAmount}
+Thank you for considering A-Frame Painting for your project. Please find attached your detailed painting estimate for ${projectTitle}.
+${customMessageSection}================================
+TOTAL ESTIMATE: $${totalAmount}
+================================
 
-This estimate is valid for 30 days. Please let me know if you have any questions.
+WHAT'S INCLUDED:
+• Detailed work breakdown with labor estimates
+• High-quality paint and primer calculations
+• All necessary supplies and materials
+• Professional preparation and finishing work
+• Travel costs and project coordination
 
-Note: This is only an estimate, not a quote. Final cost may vary. If and when the job exceeds 20% of initial estimate, we will contact you to discuss options on how to proceed so there will be no surprises.
+ESTIMATE DETAILS:
+• Validity: This estimate is valid for 30 days from today's date
+• Next Steps: Please review the attached detailed estimate and contact me with any questions
+
+IMPORTANT NOTE: This is an estimate, not a final quote. Final costs may vary based on actual conditions discovered during the project. If the job scope changes significantly (exceeding 20% of this estimate), we will discuss options with you before proceeding to ensure complete transparency.
+
+I'm excited about the opportunity to work with you on this project. A-Frame Painting is committed to delivering exceptional results with attention to detail and professional service.
 
 Best regards,
+
 A-Frame Painting
+Licensed • Insured • Professional
 cortespainter@gmail.com
 884 Hayes Rd, Manson's Landing, BC V0P1K0`;
 
   const html = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2 style="color: #EA580C;">A-Frame Painting</h2>
-      <p>Dear <strong>${clientName}</strong>,</p>
-      
-      <p>Please find attached your painting estimate for <strong>${projectTitle}</strong>.</p>
-      
-      ${customMessage ? `<div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0; border-left: 4px solid #EA580C;">
-        <p style="margin: 0; font-style: italic;">${customMessage}</p>
-      </div>` : ''}
-      
-      <p><strong>Total Estimate: $${totalAmount}</strong></p>
-      
-      <p>This estimate is valid for 30 days. Please let me know if you have any questions.</p>
-      
-      <div style="background-color: #f5f5f5; padding: 15px; margin: 20px 0; border-left: 4px solid #6B7280; font-size: 14px;">
-        <p style="margin: 0; color: #4B5563;"><strong>Note:</strong> This is only an estimate, not a quote. Final cost may vary. If and when the job exceeds 20% of initial estimate, we will contact you to discuss options on how to proceed so there will be no surprises.</p>
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: #EA580C; margin: 0; font-size: 28px;">A-Frame Painting</h1>
+        <p style="color: #666; margin: 5px 0 0 0;">Professional Painting Services</p>
       </div>
       
-      <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
-        <p><strong>Best regards,</strong><br>
-        A-Frame Painting<br>
-        <a href="mailto:cortespainter@gmail.com">cortespainter@gmail.com</a><br>
-        884 Hayes Rd, Manson's Landing, BC V0P1K0</p>
+      <p style="color: #333; font-size: 16px;">Dear <strong>${clientName}</strong>,</p>
+      
+      <p style="color: #333; line-height: 1.6;">Thank you for considering A-Frame Painting for your project. Please find attached your detailed painting estimate for <strong>${projectTitle}</strong>.</p>
+      
+      ${customMessage ? `<div style="background-color: #f0f8ff; padding: 20px; margin: 20px 0; border-radius: 8px; border-left: 4px solid #EA580C;">
+        <h3 style="color: #EA580C; margin-top: 0; font-size: 16px;">Personal Message:</h3>
+        <p style="margin: 0; font-style: italic; color: #333; line-height: 1.5;">${customMessage}</p>
+      </div>` : ''}
+      
+      <div style="background-color: #ea580c; color: white; padding: 20px; border-radius: 8px; margin: 25px 0; text-align: center;">
+        <h2 style="margin: 0; font-size: 24px;">Total Estimate: $${totalAmount}</h2>
+        <p style="margin: 8px 0 0 0; font-size: 14px; opacity: 0.9;">Professional painting services with quality materials</p>
+      </div>
+      
+      <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <h3 style="color: #EA580C; margin-top: 0;">What's Included:</h3>
+        <ul style="color: #333; line-height: 1.6; margin: 10px 0; padding-left: 20px;">
+          <li>Detailed work breakdown with labor estimates</li>
+          <li>High-quality paint and primer calculations</li>
+          <li>All necessary supplies and materials</li>
+          <li>Professional preparation and finishing work</li>
+          <li>Travel costs and project coordination</li>
+        </ul>
+      </div>
+      
+      <div style="background-color: #e8f5e8; padding: 15px; border-radius: 8px; margin: 20px 0;">
+        <p style="margin: 0; color: #333;"><strong>Estimate Validity:</strong> This estimate is valid for 30 days from the date above.</p>
+        <p style="margin: 5px 0 0 0; color: #333;"><strong>Next Steps:</strong> Please review the attached detailed estimate and let me know if you have any questions.</p>
+      </div>
+      
+      <div style="background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
+        <p style="margin: 0; color: #856404; font-size: 14px;"><strong>Important Note:</strong> This is an estimate, not a final quote. Final costs may vary based on actual conditions discovered during the project. If the job scope changes significantly (exceeding 20% of this estimate), we will discuss options with you before proceeding to ensure complete transparency.</p>
+      </div>
+      
+      <p style="color: #333; line-height: 1.6;">I'm excited about the opportunity to work with you on this project. A-Frame Painting is committed to delivering exceptional results with attention to detail and professional service.</p>
+      
+      <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #EA580C; text-align: center;">
+        <p style="margin: 0; color: #333;"><strong>Best regards,</strong></p>
+        <p style="margin: 10px 0 5px 0; color: #EA580C; font-size: 18px; font-weight: bold;">A-Frame Painting</p>
+        <p style="margin: 0; color: #666;">
+          <a href="mailto:cortespainter@gmail.com" style="color: #EA580C; text-decoration: none;">cortespainter@gmail.com</a><br>
+          884 Hayes Rd, Manson's Landing, BC V0P1K0<br>
+          <span style="font-size: 14px; font-style: italic;">Licensed • Insured • Professional</span>
+        </p>
       </div>
     </div>
   `;
@@ -305,9 +345,7 @@ cortespainter@gmail.com
     attachments: [
       {
         filename: `Estimate-${estimateNumber}-${clientName.replace(/[^a-zA-Z0-9]/g, '')}.pdf`,
-        content: pdfBuffer,
-        contentType: 'application/pdf',
-        contentDisposition: 'attachment'
+        content: pdfBuffer
       }
     ]
   });
