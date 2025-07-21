@@ -168,6 +168,15 @@ externalPort = 80
 - Clickable address overlay provides additional navigation backup option
 - All navigation methods tested and functional in development environment
 
+## Recent Changes
+
+### January 21, 2025 - GPS Mapping System Archived
+- **Archived GPS/mapping functionality**: Moved ClientMap, EmbeddedClientMap, SimpleGPSMap components and maps utilities to `archived-features/gps-mapping-system/`
+- **Updated photo gallery theme**: Changed from orange to red color scheme as requested
+- **Simplified location features**: Replaced complex GPS navigation with basic Google Maps link integration
+- **Cleaned codebase**: Removed Mapbox dependencies from active code while preserving functionality in archive
+- **Status**: Application running smoothly without GPS features, ready for deployment
+
 ## Changelog
 - June 25, 2025. Initial setup
 - June 25, 2025. Rebranded to "A-Frame Painting" with custom logo and dark mode implementation

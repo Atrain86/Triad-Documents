@@ -10,7 +10,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 
-import { generateMapsLink, generateDirectionsLink } from '@/lib/maps';
 import { compressMultipleImages, formatFileSize } from '@/lib/imageCompression';
 import type { Project, Photo, Receipt, ToolsChecklist, DailyHours } from '@shared/schema';
 import InvoiceGenerator from './InvoiceGenerator';
@@ -18,7 +17,6 @@ import EstimateGenerator from './EstimateGenerator';
 import PhotoCarousel from './PhotoCarousel';
 import PaintBrainCalendar from './PaintBrainCalendar';
 import ClientPhone from './ClientPhone';
-import SimpleGPSMap from './SimpleGPSMap';
 import DarkModeCalendar from './DarkModeCalendar';
 import { ReactSortable } from 'react-sortablejs';
 
@@ -316,7 +314,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   // Menu customization states
   const [menuSections, setMenuSections] = useState([
     { id: 'photos', name: 'Photos', icon: Camera },
-    { id: 'gpsMap', name: 'Location Map', icon: MapPin },
     { id: 'tools', name: 'Tools', icon: Wrench },
     { id: 'dailyHours', name: 'Daily Hours', icon: Calendar },
     { id: 'notes', name: 'Project Notes', icon: FileText },
@@ -326,7 +323,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   // Collapsible menu state - all collapsed by default
   const [expandedSections, setExpandedSections] = useState({
     photos: false,
-    gpsMap: false,
     tools: false,
     dailyHours: false,
     notes: false,
@@ -980,7 +976,11 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             <Calendar size={20} />
           </button>
           <button
-            onClick={() => window.open(generateMapsLink(project.address, project.clientCity, project.clientPostal), '_blank')}
+            onClick={() => {
+              const addressParts = [project.address, project.clientCity, project.clientPostal].filter(Boolean);
+              const fullAddress = encodeURIComponent(addressParts.join(', '));
+              window.open(`https://www.google.com/maps/search/?api=1&query=${fullAddress}`, '_blank');
+            }}
             className="p-2 transition-colors relative"
             title="View on maps"
           >
@@ -1120,8 +1120,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                 section.id === 'receipts' ? 'Expenses' : section.name;
             const getSectionColor = (sectionId: string) => {
               switch (sectionId) {
-                case 'photos': return paintBrainColors.orange;   // Orange for photo gallery
-                case 'gpsMap': return paintBrainColors.red;      // Red for GPS map
+                case 'photos': return paintBrainColors.red;      // Red for photo gallery
                 case 'tools': return paintBrainColors.yellow;    // Yellow for tools
                 case 'dailyHours': return paintBrainColors.green; // Green for daily hours
                 case 'notes': return paintBrainColors.blue;      // Blue for project notes
@@ -1335,25 +1334,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                       </div>
                     )}
 
-                    {section.id === 'gpsMap' && (
-                      <div>
-                        {/* Client Info Header */}
-                        <div className="flex items-center gap-2 mb-3">
-                          <MapPin className="h-5 w-5 text-orange-400" />
-                          <span className="text-orange-400 font-medium">{project?.clientName}</span>
-                        </div>
-                        <p className="text-gray-300 text-sm mb-4">{project?.address}</p>
-                        
-                        {/* Simple GPS Map */}
-                        {project && project.address && (
-                          <SimpleGPSMap
-                            clientName={project.clientName}
-                            clientAddress={project.address}
-                            projectId={project.id}
-                          />
-                        )}
-                      </div>
-                    )}
+
 
                     {section.id === 'tools' && (
                       <div>
