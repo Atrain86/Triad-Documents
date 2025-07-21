@@ -351,9 +351,9 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           className="overflow-y-auto max-h-[calc(100vh-160px)] pr-2"
         >
           {/* Client Info (read-only) */}
-          <Card className="mb-4 border-2 border-[#D4A574]">
+          <Card className="mb-4 border-2 border-[#FF6B6B]">
             <CardHeader>
-              <CardTitle className="text-lg text-[#D4A574]">Client Information</CardTitle>
+              <CardTitle className="text-lg text-[#FF6B6B]">Client Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               <Input value={clientName} readOnly placeholder="Client Name" />
@@ -366,9 +366,9 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           </Card>
 
           {/* Estimate Details */}
-          <Card className="mb-4 border-2 border-[#569CD6]">
+          <Card className="mb-4 border-2 border-[#D4A574]">
             <CardHeader>
-              <CardTitle className="text-lg text-[#569CD6]">Estimate Details</CardTitle>
+              <CardTitle className="text-lg text-[#D4A574]">Estimate Details</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               <Input
@@ -395,16 +395,16 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           </Card>
 
           {/* Work Stages */}
-          <Card className="mb-4 border-2 border-[#6A9955]">
+          <Card className="mb-4 border-2 border-[#DCDCAA]">
             <CardHeader className="flex justify-between items-center">
-              <CardTitle className="text-lg text-[#6A9955]">Work Breakdown</CardTitle>
-              <Button size="sm" onClick={addWorkStage} className="bg-[#6A9955] hover:bg-[#5a8245]">+ Add Stage</Button>
+              <CardTitle className="text-lg text-[#DCDCAA]">Work Breakdown</CardTitle>
+              <Button size="sm" onClick={addWorkStage} className="bg-[#DCDCAA] hover:bg-[#c4c193] text-black">+ Add Stage</Button>
             </CardHeader>
             <CardContent>
               {workStages.map((stage, i) => (
                 <div
                   key={i}
-                  className="mb-3 border-2 border-[#6A9955] bg-[#6A9955]/10 rounded p-3"
+                  className="mb-3 border-2 border-[#DCDCAA] bg-[#DCDCAA]/10 rounded p-3"
                 >
                   <Input
                     placeholder="Stage Name"
@@ -514,13 +514,13 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           </Card>
 
           {/* Supply Costs */}
-          <Card className="mb-4 border-2 border-[#DCDCAA]">
+          <Card className="mb-4 border-2 border-[#6A9955]">
             <CardHeader>
-              <CardTitle className="text-lg text-[#DCDCAA]">Supply Costs</CardTitle>
+              <CardTitle className="text-lg text-[#6A9955]">Supply Costs</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Primer Costs */}
-              <div className="border border-[#DCDCAA] rounded p-3 bg-[#DCDCAA]/10">
+              <div className="border border-[#6A9955] rounded p-3 bg-[#6A9955]/10">
                 <h4 className="font-medium mb-2">Primer</h4>
                 <div className="grid grid-cols-3 gap-2">
                   <Input
@@ -555,7 +555,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
               </div>
 
               {/* Paint Costs */}
-              <div className="border border-[#DCDCAA] rounded p-3 bg-[#DCDCAA]/10">
+              <div className="border border-[#6A9955] rounded p-3 bg-[#6A9955]/10">
                 <h4 className="font-medium mb-2">Paint</h4>
                 <div className="grid grid-cols-3 gap-2">
                   <Input
@@ -643,12 +643,12 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           </Card>
 
           {/* Travel Costs */}
-          <Card className="mb-4 border-2 border-[#FF6B6B]">
+          <Card className="mb-4 border-2 border-[#569CD6]">
             <CardHeader>
-              <CardTitle className="text-lg text-[#FF6B6B]">Travel Costs</CardTitle>
+              <CardTitle className="text-lg text-[#569CD6]">Travel Costs</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="border border-[#FF6B6B] rounded p-3 bg-[#FF6B6B]/10">
+              <div className="border border-[#569CD6] rounded p-3 bg-[#569CD6]/10">
                 <div className="grid grid-cols-3 gap-2">
                   <Input
                     type="number"
@@ -677,9 +677,9 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           </Card>
 
           {/* Tax Configuration */}
-          <Card className="mb-4 border-2 border-[#F44747]">
+          <Card className="mb-4 border-2 border-[#569CD6]">
             <CardHeader>
-              <CardTitle className="text-lg text-[#F44747]">Tax Configuration</CardTitle>
+              <CardTitle className="text-lg text-[#569CD6]">Tax Configuration</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
