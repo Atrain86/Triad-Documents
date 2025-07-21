@@ -810,54 +810,56 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           </Card>
         </div>
 
-        {/* Action Toggle and Buttons */}
+        {/* Action Buttons */}
         <div className="mt-4 space-y-3">
-          {/* Toggle Switch */}
-          <div className="flex justify-center">
-            <div className="relative inline-flex items-center">
-              <button
-                onClick={() => setActionMode(actionMode === 'email' ? 'download' : 'email')}
-                className={`relative inline-flex h-10 w-20 items-center rounded-full transition-colors duration-200 focus:outline-none ${
-                  actionMode === 'email' ? 'bg-[#569CD6]' : 'bg-[#6A9955]'
-                }`}
-              >
-                <span
-                  className={`inline-block h-8 w-8 transform rounded-full bg-white transition-transform duration-200 ${
-                    actionMode === 'email' ? 'translate-x-1' : 'translate-x-11'
-                  }`}
-                />
-                <Mail 
-                  className={`absolute left-2 h-4 w-4 transition-opacity duration-200 ${
-                    actionMode === 'email' ? 'text-white opacity-100' : 'text-gray-400 opacity-50'
-                  }`} 
-                />
-                <Download 
-                  className={`absolute right-2 h-4 w-4 transition-opacity duration-200 ${
-                    actionMode === 'download' ? 'text-white opacity-100' : 'text-gray-400 opacity-50'
-                  }`} 
-                />
-              </button>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex justify-between gap-2">
+          <div className="flex justify-between gap-2 items-end">
             <Button variant="outline" onClick={onClose} className="flex-1">Cancel</Button>
-            {actionMode === 'email' ? (
-              <Button 
-                onClick={sendEstimateEmail} 
-                className="flex-1 bg-[#569CD6] hover:bg-[#4a8bc2]"
-                disabled={sendEmailMutation.isPending}
-              >
-                <Mail className="w-4 h-4 mr-2" />
-                {sendEmailMutation.isPending ? 'Sending...' : 'Send Email'}
-              </Button>
-            ) : (
-              <Button onClick={generatePDF} className="flex-1 bg-[#6A9955] hover:bg-[#5a8245]">
-                <Download className="w-4 h-4 mr-2" />
-                Download PDF
-              </Button>
-            )}
+            <div className="flex flex-col items-center gap-2">
+              {/* Toggle Switch - positioned over send email button */}
+              <div className="relative inline-flex items-center">
+                <button
+                  onClick={() => setActionMode(actionMode === 'email' ? 'download' : 'email')}
+                  className={`relative inline-flex h-10 w-20 items-center rounded-full transition-colors duration-200 focus:outline-none ${
+                    actionMode === 'email' ? 'bg-[#569CD6]' : 'bg-[#6A9955]'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-8 w-8 transform rounded-full bg-white transition-transform duration-200 ${
+                      actionMode === 'email' ? 'translate-x-1' : 'translate-x-11'
+                    }`}
+                  />
+                  <Mail 
+                    className={`absolute left-2 h-4 w-4 transition-opacity duration-200 ${
+                      actionMode === 'email' ? 'text-white opacity-100' : 'text-white opacity-60'
+                    }`} 
+                    style={{ color: '#FFFFFF' }}
+                  />
+                  <Download 
+                    className={`absolute right-2 h-4 w-4 transition-opacity duration-200 ${
+                      actionMode === 'download' ? 'text-white opacity-100' : 'text-white opacity-60'
+                    }`} 
+                    style={{ color: '#FFFFFF' }}
+                  />
+                </button>
+              </div>
+              
+              {/* Action Button */}
+              {actionMode === 'email' ? (
+                <Button 
+                  onClick={sendEstimateEmail} 
+                  className="bg-[#569CD6] hover:bg-[#4a8bc2] min-w-[120px]"
+                  disabled={sendEmailMutation.isPending}
+                >
+                  <Mail className="w-4 h-4 mr-2" />
+                  {sendEmailMutation.isPending ? 'Sending...' : 'Send Email'}
+                </Button>
+              ) : (
+                <Button onClick={generatePDF} className="bg-[#6A9955] hover:bg-[#5a8245] min-w-[120px]">
+                  <Download className="w-4 h-4 mr-2" />
+                  Download PDF
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </DialogContent>
