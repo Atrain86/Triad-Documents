@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Activity, DollarSign, Users, Eye, Brain, Calendar, Plus } from 'lucide-react';
+import { Activity, DollarSign, Users, Eye, Brain, Calendar, Plus, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -29,7 +29,7 @@ interface TokenUsageEntry {
   createdAt: string;
 }
 
-const AdminDashboard: React.FC = () => {
+const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [historicalTokens, setHistoricalTokens] = useState('');
   const [historicalCost, setHistoricalCost] = useState('');
@@ -127,7 +127,17 @@ const AdminDashboard: React.FC = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+        <div className="flex items-center gap-4">
+          <Button
+            onClick={onBack}
+            variant="ghost"
+            size="sm"
+            className="text-gray-400 hover:text-white"
+          >
+            <ArrowLeft size={20} />
+          </Button>
+          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+        </div>
         
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>

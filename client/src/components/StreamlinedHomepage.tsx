@@ -36,7 +36,13 @@ const statusConfig = {
   'archived': { label: 'Archived', color: paintBrainColors.gray, priority: 12 }
 };
 
-export default function StreamlinedHomepage({ onSelectProject }: { onSelectProject: (projectId: number) => void }) {
+export default function StreamlinedHomepage({ 
+  onSelectProject, 
+  onAccessAdmin 
+}: { 
+  onSelectProject: (projectId: number) => void;
+  onAccessAdmin?: () => void;
+}) {
   const [searchTerm, setSearchTerm] = useState('');
   const [showArchived, setShowArchived] = useState(false);
   const [showNewClientDialog, setShowNewClientDialog] = useState(false);
@@ -285,6 +291,17 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
           >
             Schedule
           </Button>
+
+          {onAccessAdmin && (
+            <Button
+              onClick={onAccessAdmin}
+              style={{ backgroundColor: paintBrainColors.purple, color: 'white' }}
+              className="px-4 py-2 text-sm font-semibold hover:opacity-90"
+              title="OpenAI API Usage Dashboard"
+            >
+              Admin
+            </Button>
+          )}
         </div>
 
         <div className="flex justify-center mb-6">
