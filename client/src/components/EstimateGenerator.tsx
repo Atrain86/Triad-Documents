@@ -339,18 +339,17 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       
       yPos += 20;
       
-      // Client Information Section (make wider and taller to fit all content)
+      // Client Information Section (make wider and taller to fit all content with proper spacing)
       pdf.setFillColor(42, 42, 42); // #2a2a2a
-      pdf.rect(10, yPos, 190, 35, 'F');  // Made taller to fit email address
+      pdf.rect(10, yPos, 190, 45, 'F');  // Made taller to fit all information with spacing
       
-      yPos += 8;
+      yPos += 10;  // More top spacing
       pdf.setFont('helvetica', 'bold');
       pdf.text('Estimate For:', 15, yPos);
       
       yPos += 8;
       pdf.setFont('helvetica', 'normal');
       pdf.text(clientName, 15, yPos);
-      pdf.text(clientPhone, 110, yPos);
       
       yPos += 6;
       pdf.text(clientAddress, 15, yPos);
@@ -359,9 +358,12 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       pdf.text(`${clientCity}, ${clientPostal}`, 15, yPos);
       
       yPos += 6;
-      pdf.text(clientEmail, 15, yPos);  // Move email to left side, inside the box
+      pdf.text(clientPhone, 15, yPos);  // Move phone to left side with other info
       
-      yPos += 15;
+      yPos += 6;
+      pdf.text(clientEmail, 15, yPos);  // Keep email on left side
+      
+      yPos += 15;  // More bottom spacing before next section
       
       // Services & Labor Section
       pdf.setFont('helvetica', 'bold');
@@ -507,18 +509,17 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       
       yPos += 20;
       
-      // Client Information Section (make wider and taller to fit all content)
+      // Client Information Section (make wider and taller to fit all content with proper spacing)
       pdf.setFillColor(42, 42, 42); // #2a2a2a
-      pdf.rect(10, yPos, 190, 35, 'F');  // Made taller to fit email address
+      pdf.rect(10, yPos, 190, 45, 'F');  // Made taller to fit all information with spacing
       
-      yPos += 8;
+      yPos += 10;  // More top spacing
       pdf.setFont('helvetica', 'bold');
       pdf.text('Estimate For:', 15, yPos);
       
       yPos += 8;
       pdf.setFont('helvetica', 'normal');
       pdf.text(clientName, 15, yPos);
-      pdf.text(clientPhone, 110, yPos);
       
       yPos += 6;
       pdf.text(clientAddress, 15, yPos);
@@ -527,9 +528,12 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       pdf.text(`${clientCity}, ${clientPostal}`, 15, yPos);
       
       yPos += 6;
-      pdf.text(clientEmail, 15, yPos);  // Move email to left side, inside the box
+      pdf.text(clientPhone, 15, yPos);  // Move phone to left side with other info
       
-      yPos += 9;  // Adjusted spacing since box is taller
+      yPos += 6;
+      pdf.text(clientEmail, 15, yPos);  // Keep email on left side
+      
+      yPos += 15;  // More bottom spacing before next section
       
       // Services & Labor Section
       pdf.setFont('helvetica', 'bold');

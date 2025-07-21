@@ -326,7 +326,7 @@ cortespainter@gmail.com
         <p style="margin: 10px 0 5px 0; color: #EA580C; font-size: 18px; font-weight: bold;">A-Frame Painting</p>
         <p style="margin: 0; color: #666;">
           <a href="mailto:cortespainter@gmail.com" style="color: #EA580C; text-decoration: none;">cortespainter@gmail.com</a><br>
-          <span style="font-size: 14px; font-style: italic;">Licensed • Insured • Professional</span>
+          884 Hayes Rd, Manson's Landing, BC V0P1K0
         </p>
       </div>
     </div>
