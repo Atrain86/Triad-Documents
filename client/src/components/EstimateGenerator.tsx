@@ -339,9 +339,9 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       
       yPos += 20;
       
-      // Client Information Section (make wider)
+      // Client Information Section (make wider and taller to fit all content)
       pdf.setFillColor(42, 42, 42); // #2a2a2a
-      pdf.rect(10, yPos, 190, 25, 'F');
+      pdf.rect(10, yPos, 190, 35, 'F');  // Made taller to fit email address
       
       yPos += 8;
       pdf.setFont('helvetica', 'bold');
@@ -350,14 +350,16 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       yPos += 8;
       pdf.setFont('helvetica', 'normal');
       pdf.text(clientName, 15, yPos);
-      pdf.text(clientEmail, 110, yPos);
-      
-      yPos += 6;
-      pdf.text(clientAddress, 15, yPos);
       pdf.text(clientPhone, 110, yPos);
       
       yPos += 6;
+      pdf.text(clientAddress, 15, yPos);
+      
+      yPos += 6;
       pdf.text(`${clientCity}, ${clientPostal}`, 15, yPos);
+      
+      yPos += 6;
+      pdf.text(clientEmail, 15, yPos);  // Move email to left side, inside the box
       
       yPos += 15;
       
@@ -427,10 +429,10 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       pdf.text(`$${materialsTotal}`, 190, yPos, { align: 'right' });
       
       yPos += 12;
-      // Total with green background effect (make smaller and properly aligned)
+      // Total with green background effect (extend green box to cover both text and price)
       pdf.setFont('helvetica', 'bold');
       pdf.setFillColor(5, 150, 105); // #059669
-      pdf.rect(130, yPos - 5, 60, 8, 'F');  // Smaller green box, better aligned
+      pdf.rect(10, yPos - 5, 190, 10, 'F');  // Wide green box covering full width
       pdf.setTextColor(255, 255, 255);
       pdf.text('Total Estimate:', 15, yPos);
       pdf.text(`$${calculateTotal().toFixed(2)}`, 190, yPos, { align: 'right' });
@@ -505,9 +507,9 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       
       yPos += 20;
       
-      // Client Information Section (make wider)
+      // Client Information Section (make wider and taller to fit all content)
       pdf.setFillColor(42, 42, 42); // #2a2a2a
-      pdf.rect(10, yPos, 190, 25, 'F');
+      pdf.rect(10, yPos, 190, 35, 'F');  // Made taller to fit email address
       
       yPos += 8;
       pdf.setFont('helvetica', 'bold');
@@ -516,16 +518,18 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       yPos += 8;
       pdf.setFont('helvetica', 'normal');
       pdf.text(clientName, 15, yPos);
-      pdf.text(clientEmail, 110, yPos);
+      pdf.text(clientPhone, 110, yPos);
       
       yPos += 6;
       pdf.text(clientAddress, 15, yPos);
-      pdf.text(clientPhone, 110, yPos);
       
       yPos += 6;
       pdf.text(`${clientCity}, ${clientPostal}`, 15, yPos);
       
-      yPos += 15;
+      yPos += 6;
+      pdf.text(clientEmail, 15, yPos);  // Move email to left side, inside the box
+      
+      yPos += 9;  // Adjusted spacing since box is taller
       
       // Services & Labor Section
       pdf.setFont('helvetica', 'bold');
@@ -593,10 +597,10 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       pdf.text(`$${materialsTotal}`, 190, yPos, { align: 'right' });
       
       yPos += 12;
-      // Total with green background effect (make smaller and properly aligned)
+      // Total with green background effect (extend green box to cover both text and price)
       pdf.setFont('helvetica', 'bold');
       pdf.setFillColor(5, 150, 105); // #059669
-      pdf.rect(130, yPos - 5, 60, 8, 'F');  // Smaller green box, better aligned
+      pdf.rect(10, yPos - 5, 190, 10, 'F');  // Wide green box covering full width
       pdf.setTextColor(255, 255, 255);
       pdf.text('Total Estimate:', 15, yPos);
       pdf.text(`$${calculateTotal().toFixed(2)}`, 190, yPos, { align: 'right' });
