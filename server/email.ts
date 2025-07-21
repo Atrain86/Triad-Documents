@@ -273,7 +273,7 @@ WHAT'S INCLUDED:
 ESTIMATE DETAILS:
 • Validity: This estimate is valid for 30 days from today's date
 
-IMPORTANT NOTE: This is an estimate, not a final quote. Final costs may vary based on actual conditions discovered during the project. If the job scope changes significantly (exceeding 20% of this estimate), we will discuss options with you before proceeding.
+IMPORTANT NOTE: This is an estimate, not a final quote. Final costs may vary based on actual conditions discovered during the project. If the job scope changes significantly (exceeding 20% of this estimate), we will discuss options with you before proceeding to ensure complete transparency.
 
 Best regards,
 
