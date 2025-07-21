@@ -280,7 +280,7 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
           
           <Button
             onClick={() => openWorkCalendar()}
-            style={{ backgroundColor: paintBrainColors.green, color: 'white' }}
+            style={{ backgroundColor: '#7B4FF2', color: 'white' }}
             className="flex items-center px-4 py-2 text-sm font-semibold hover:opacity-90"
           >
             Schedule
