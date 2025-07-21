@@ -189,39 +189,37 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
           {/* Close Button */}
           <button
             onClick={() => setViewingReceipt(null)}
-            className="absolute top-4 right-4 z-60 p-3 rounded-full bg-white bg-opacity-20 text-white hover:bg-opacity-30 transition-all duration-200 backdrop-blur-sm"
+            className="absolute top-4 right-4 z-60 p-3 rounded-full bg-black bg-opacity-50 text-white hover:bg-opacity-70 transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30"
             type="button"
             style={{ zIndex: 9999 }}
           >
             <X className="w-8 h-8" />
           </button>
           
+          {/* Receipt Info Header */}
+          <div className="absolute top-4 left-4 z-60 p-3 rounded-lg bg-black bg-opacity-50 text-white backdrop-blur-sm border border-white border-opacity-30">
+            <h3 className="text-lg font-semibold">
+              {viewingReceipt.vendor} - ${(() => {
+                const amount = viewingReceipt.amount;
+                return typeof amount === 'number' ? amount.toFixed(2) : parseFloat(String(amount) || '0').toFixed(2);
+              })()}
+            </h3>
+            {viewingReceipt.description && (
+              <p className="text-sm text-gray-300 mt-1">{viewingReceipt.description}</p>
+            )}
+            {viewingReceipt.date && (
+              <p className="text-xs text-gray-400 mt-1">{formatDate(String(viewingReceipt.date))}</p>
+            )}
+          </div>
+          
           {/* Receipt Content */}
           <div className="max-w-4xl max-h-full p-4 overflow-auto">
-            <div className="bg-white rounded-lg shadow-xl">
-              <div className="p-4 bg-gray-100 border-b">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  {viewingReceipt.vendor} - ${(() => {
-                    const amount = viewingReceipt.amount;
-                    return typeof amount === 'number' ? amount.toFixed(2) : parseFloat(String(amount) || '0').toFixed(2);
-                  })()}
-                </h3>
-                {viewingReceipt.description && (
-                  <p className="text-sm text-gray-600 mt-1">{viewingReceipt.description}</p>
-                )}
-                {viewingReceipt.date && (
-                  <p className="text-xs text-gray-500 mt-1">{formatDate(String(viewingReceipt.date))}</p>
-                )}
-              </div>
-              <div className="p-4">
-                <img 
-                  src={`/uploads/${viewingReceipt.filename}`} 
-                  alt={`Receipt from ${viewingReceipt.vendor}`}
-                  className="w-full h-auto max-w-full"
-                  style={{ maxHeight: 'calc(100vh - 200px)' }}
-                />
-              </div>
-            </div>
+            <img 
+              src={`/uploads/${viewingReceipt.filename}`} 
+              alt={`Receipt from ${viewingReceipt.vendor}`}
+              className="w-full h-auto max-w-full rounded-lg shadow-2xl"
+              style={{ maxHeight: 'calc(100vh - 100px)' }}
+            />
           </div>
           
           {/* Click background to close */}
