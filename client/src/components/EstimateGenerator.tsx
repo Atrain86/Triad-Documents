@@ -318,52 +318,52 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       // Set white text color
       pdf.setTextColor(255, 255, 255);
       
-      // Header - ESTIMATE
+      // Header - ESTIMATE (make wider by using more of the page)
       pdf.setFontSize(24);
       pdf.setFont('helvetica', 'bold');
-      pdf.text('ESTIMATE', 150, yPos, { align: 'right' });
+      pdf.text('ESTIMATE', 190, yPos, { align: 'right' });
       
-      // Add A-Frame Painting logo text (since we can't easily embed images in jsPDF without screenshots)
+      // Add A-Frame Painting logo text (start closer to left edge)
       pdf.setFontSize(16);
-      pdf.text('A-FRAME PAINTING', 20, yPos);
+      pdf.text('A-FRAME PAINTING', 10, yPos);
       
       yPos += 10;
       pdf.setFontSize(12);
       pdf.setFont('helvetica', 'normal');
-      pdf.text(`#${estimateNumber || 'EST-001'}`, 150, yPos, { align: 'right' });
-      pdf.text('884 Hayes Rd, Manson\'s Landing, BC V0P1K0', 20, yPos);
+      pdf.text(`#${estimateNumber || 'EST-001'}`, 190, yPos, { align: 'right' });
+      pdf.text('884 Hayes Rd, Manson\'s Landing, BC V0P1K0', 10, yPos);
       
       yPos += 10;
-      pdf.text(new Date().toLocaleDateString(), 150, yPos, { align: 'right' });
-      pdf.text('Email: cortespainter@gmail.com', 20, yPos);
+      pdf.text(new Date().toLocaleDateString(), 190, yPos, { align: 'right' });
+      pdf.text('Email: cortespainter@gmail.com', 10, yPos);
       
       yPos += 20;
       
-      // Client Information Section
+      // Client Information Section (make wider)
       pdf.setFillColor(42, 42, 42); // #2a2a2a
-      pdf.rect(20, yPos, 170, 25, 'F');
+      pdf.rect(10, yPos, 190, 25, 'F');
       
       yPos += 8;
       pdf.setFont('helvetica', 'bold');
-      pdf.text('Estimate For:', 25, yPos);
+      pdf.text('Estimate For:', 15, yPos);
       
       yPos += 8;
       pdf.setFont('helvetica', 'normal');
-      pdf.text(clientName, 25, yPos);
+      pdf.text(clientName, 15, yPos);
       pdf.text(clientEmail, 110, yPos);
       
       yPos += 6;
-      pdf.text(clientAddress, 25, yPos);
+      pdf.text(clientAddress, 15, yPos);
       pdf.text(clientPhone, 110, yPos);
       
       yPos += 6;
-      pdf.text(`${clientCity}, ${clientPostal}`, 25, yPos);
+      pdf.text(`${clientCity}, ${clientPostal}`, 15, yPos);
       
       yPos += 15;
       
       // Services & Labor Section
       pdf.setFont('helvetica', 'bold');
-      pdf.text('Services & Labor', 20, yPos);
+      pdf.text('Services & Labor', 10, yPos);
       yPos += 8;
       
       // Work stages
@@ -372,9 +372,9 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
         const total = (hours * stage.rate).toFixed(2);
         
         pdf.setFont('helvetica', 'normal');
-        pdf.text(stage.description || stage.name, 25, yPos);
-        pdf.text(`${hours}h × $${stage.rate}`, 25, yPos + 4);
-        pdf.text(`$${total}`, 150, yPos, { align: 'right' });
+        pdf.text(stage.description || stage.name, 15, yPos);
+        pdf.text(`${hours}h × $${stage.rate}`, 15, yPos + 4);
+        pdf.text(`$${total}`, 190, yPos, { align: 'right' });
         yPos += 12;
       });
       
@@ -384,9 +384,9 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
         const rate = parseFloat(String(member.rate)) || 0;
         const total = (hours * rate).toFixed(2);
         
-        pdf.text(member.name, 25, yPos);
-        pdf.text(`${hours}h × $${rate}`, 25, yPos + 4);
-        pdf.text(`$${total}`, 150, yPos, { align: 'right' });
+        pdf.text(member.name, 15, yPos);
+        pdf.text(`${hours}h × $${rate}`, 15, yPos + 4);
+        pdf.text(`$${total}`, 190, yPos, { align: 'right' });
         yPos += 12;
       });
       
@@ -394,46 +394,46 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       
       // Materials & Paint Section
       pdf.setFont('helvetica', 'bold');
-      pdf.text('Materials & Paint', 20, yPos);
+      pdf.text('Materials & Paint', 10, yPos);
       yPos += 8;
       
       const materialsTotal = (calculatePrimerCosts() + calculatePaintCosts() + calculateSuppliesTotal()).toFixed(2);
       if (parseFloat(materialsTotal) > 0) {
         pdf.setFont('helvetica', 'normal');
-        pdf.text('Paint & Supplies', 25, yPos);
-        pdf.text(`$${materialsTotal}`, 150, yPos, { align: 'right' });
+        pdf.text('Paint & Supplies', 15, yPos);
+        pdf.text(`$${materialsTotal}`, 190, yPos, { align: 'right' });
         yPos += 8;
       }
       
       const travelTotal = calculateTravelTotal().toFixed(2);
       if (parseFloat(travelTotal) > 0) {
-        pdf.text('Delivery', 25, yPos);
-        pdf.text(`$${travelTotal}`, 150, yPos, { align: 'right' });
+        pdf.text('Delivery', 15, yPos);
+        pdf.text(`$${travelTotal}`, 190, yPos, { align: 'right' });
         yPos += 8;
       }
       
       yPos += 15;
       
-      // Summary Section
+      // Summary Section (make wider)
       pdf.setFillColor(42, 42, 42); // #2a2a2a
-      pdf.rect(20, yPos, 170, 35, 'F');
+      pdf.rect(10, yPos, 190, 35, 'F');
       
       yPos += 10;
-      pdf.text('Subtotal:', 25, yPos);
-      pdf.text(`$${calculateSubtotal().toFixed(2)}`, 150, yPos, { align: 'right' });
+      pdf.text('Subtotal:', 15, yPos);
+      pdf.text(`$${calculateSubtotal().toFixed(2)}`, 190, yPos, { align: 'right' });
       
       yPos += 8;
-      pdf.text('Paint & Materials:', 25, yPos);
-      pdf.text(`$${materialsTotal}`, 150, yPos, { align: 'right' });
+      pdf.text('Paint & Materials:', 15, yPos);
+      pdf.text(`$${materialsTotal}`, 190, yPos, { align: 'right' });
       
       yPos += 12;
-      // Total with green background effect (using text formatting)
+      // Total with green background effect (make smaller and properly aligned)
       pdf.setFont('helvetica', 'bold');
       pdf.setFillColor(5, 150, 105); // #059669
-      pdf.rect(120, yPos - 5, 70, 8, 'F');
+      pdf.rect(130, yPos - 5, 60, 8, 'F');  // Smaller green box, better aligned
       pdf.setTextColor(255, 255, 255);
-      pdf.text('Total Estimate:', 25, yPos);
-      pdf.text(`$${calculateTotal().toFixed(2)}`, 150, yPos, { align: 'right' });
+      pdf.text('Total Estimate:', 15, yPos);
+      pdf.text(`$${calculateTotal().toFixed(2)}`, 190, yPos, { align: 'right' });
       
       // Footer
       yPos += 20;
@@ -484,52 +484,52 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       // Set white text color
       pdf.setTextColor(255, 255, 255);
       
-      // Header - ESTIMATE
+      // Header - ESTIMATE (make wider by using more of the page)
       pdf.setFontSize(24);
       pdf.setFont('helvetica', 'bold');
-      pdf.text('ESTIMATE', 150, yPos, { align: 'right' });
+      pdf.text('ESTIMATE', 190, yPos, { align: 'right' });
       
-      // Add A-Frame Painting logo text
+      // Add A-Frame Painting logo text (start closer to left edge)
       pdf.setFontSize(16);
-      pdf.text('A-FRAME PAINTING', 20, yPos);
+      pdf.text('A-FRAME PAINTING', 10, yPos);
       
       yPos += 10;
       pdf.setFontSize(12);
       pdf.setFont('helvetica', 'normal');
-      pdf.text(`#${estimateNumber || 'EST-001'}`, 150, yPos, { align: 'right' });
-      pdf.text('884 Hayes Rd, Manson\'s Landing, BC V0P1K0', 20, yPos);
+      pdf.text(`#${estimateNumber || 'EST-001'}`, 190, yPos, { align: 'right' });
+      pdf.text('884 Hayes Rd, Manson\'s Landing, BC V0P1K0', 10, yPos);
       
       yPos += 10;
-      pdf.text(new Date().toLocaleDateString(), 150, yPos, { align: 'right' });
-      pdf.text('Email: cortespainter@gmail.com', 20, yPos);
+      pdf.text(new Date().toLocaleDateString(), 190, yPos, { align: 'right' });
+      pdf.text('Email: cortespainter@gmail.com', 10, yPos);
       
       yPos += 20;
       
-      // Client Information Section
+      // Client Information Section (make wider)
       pdf.setFillColor(42, 42, 42); // #2a2a2a
-      pdf.rect(20, yPos, 170, 25, 'F');
+      pdf.rect(10, yPos, 190, 25, 'F');
       
       yPos += 8;
       pdf.setFont('helvetica', 'bold');
-      pdf.text('Estimate For:', 25, yPos);
+      pdf.text('Estimate For:', 15, yPos);
       
       yPos += 8;
       pdf.setFont('helvetica', 'normal');
-      pdf.text(clientName, 25, yPos);
+      pdf.text(clientName, 15, yPos);
       pdf.text(clientEmail, 110, yPos);
       
       yPos += 6;
-      pdf.text(clientAddress, 25, yPos);
+      pdf.text(clientAddress, 15, yPos);
       pdf.text(clientPhone, 110, yPos);
       
       yPos += 6;
-      pdf.text(`${clientCity}, ${clientPostal}`, 25, yPos);
+      pdf.text(`${clientCity}, ${clientPostal}`, 15, yPos);
       
       yPos += 15;
       
       // Services & Labor Section
       pdf.setFont('helvetica', 'bold');
-      pdf.text('Services & Labor', 20, yPos);
+      pdf.text('Services & Labor', 10, yPos);
       yPos += 8;
       
       // Work stages
@@ -538,9 +538,9 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
         const total = (hours * stage.rate).toFixed(2);
         
         pdf.setFont('helvetica', 'normal');
-        pdf.text(stage.description || stage.name, 25, yPos);
-        pdf.text(`${hours}h × $${stage.rate}`, 25, yPos + 4);
-        pdf.text(`$${total}`, 150, yPos, { align: 'right' });
+        pdf.text(stage.description || stage.name, 15, yPos);
+        pdf.text(`${hours}h × $${stage.rate}`, 15, yPos + 4);
+        pdf.text(`$${total}`, 190, yPos, { align: 'right' });
         yPos += 12;
       });
       
@@ -550,9 +550,9 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
         const rate = parseFloat(String(member.rate)) || 0;
         const total = (hours * rate).toFixed(2);
         
-        pdf.text(member.name, 25, yPos);
-        pdf.text(`${hours}h × $${rate}`, 25, yPos + 4);
-        pdf.text(`$${total}`, 150, yPos, { align: 'right' });
+        pdf.text(member.name, 15, yPos);
+        pdf.text(`${hours}h × $${rate}`, 15, yPos + 4);
+        pdf.text(`$${total}`, 190, yPos, { align: 'right' });
         yPos += 12;
       });
       
@@ -560,46 +560,46 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       
       // Materials & Paint Section
       pdf.setFont('helvetica', 'bold');
-      pdf.text('Materials & Paint', 20, yPos);
+      pdf.text('Materials & Paint', 10, yPos);
       yPos += 8;
       
       const materialsTotal = (calculatePrimerCosts() + calculatePaintCosts() + calculateSuppliesTotal()).toFixed(2);
       if (parseFloat(materialsTotal) > 0) {
         pdf.setFont('helvetica', 'normal');
-        pdf.text('Paint & Supplies', 25, yPos);
-        pdf.text(`$${materialsTotal}`, 150, yPos, { align: 'right' });
+        pdf.text('Paint & Supplies', 15, yPos);
+        pdf.text(`$${materialsTotal}`, 190, yPos, { align: 'right' });
         yPos += 8;
       }
       
       const travelTotal = calculateTravelTotal().toFixed(2);
       if (parseFloat(travelTotal) > 0) {
-        pdf.text('Delivery', 25, yPos);
-        pdf.text(`$${travelTotal}`, 150, yPos, { align: 'right' });
+        pdf.text('Delivery', 15, yPos);
+        pdf.text(`$${travelTotal}`, 190, yPos, { align: 'right' });
         yPos += 8;
       }
       
       yPos += 15;
       
-      // Summary Section
+      // Summary Section (make wider)
       pdf.setFillColor(42, 42, 42); // #2a2a2a
-      pdf.rect(20, yPos, 170, 35, 'F');
+      pdf.rect(10, yPos, 190, 35, 'F');
       
       yPos += 10;
-      pdf.text('Subtotal:', 25, yPos);
-      pdf.text(`$${calculateSubtotal().toFixed(2)}`, 150, yPos, { align: 'right' });
+      pdf.text('Subtotal:', 15, yPos);
+      pdf.text(`$${calculateSubtotal().toFixed(2)}`, 190, yPos, { align: 'right' });
       
       yPos += 8;
-      pdf.text('Paint & Materials:', 25, yPos);
-      pdf.text(`$${materialsTotal}`, 150, yPos, { align: 'right' });
+      pdf.text('Paint & Materials:', 15, yPos);
+      pdf.text(`$${materialsTotal}`, 190, yPos, { align: 'right' });
       
       yPos += 12;
-      // Total with green background effect
+      // Total with green background effect (make smaller and properly aligned)
       pdf.setFont('helvetica', 'bold');
       pdf.setFillColor(5, 150, 105); // #059669
-      pdf.rect(120, yPos - 5, 70, 8, 'F');
+      pdf.rect(130, yPos - 5, 60, 8, 'F');  // Smaller green box, better aligned
       pdf.setTextColor(255, 255, 255);
-      pdf.text('Total Estimate:', 25, yPos);
-      pdf.text(`$${calculateTotal().toFixed(2)}`, 150, yPos, { align: 'right' });
+      pdf.text('Total Estimate:', 15, yPos);
+      pdf.text(`$${calculateTotal().toFixed(2)}`, 190, yPos, { align: 'right' });
       
       // Footer
       yPos += 20;
