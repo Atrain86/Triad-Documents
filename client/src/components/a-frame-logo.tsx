@@ -1,31 +1,29 @@
-import logoImage from "@assets/PAINt BRAIN LOGO 1_trans_1753079466082.png";
+import logoImage from "@assets/PAINt BRAIN LOGO 2_trans_1753079675546.png";
 
 interface AFrameLogoProps {
   className?: string;
 }
 
 export default function AFrameLogo({ className = "w-8 h-8" }: AFrameLogoProps) {
-  const timestamp = Date.now();
-  
   return (
     <div 
-      className={className} 
+      className={`${className} flex items-center justify-center`}
       style={{ 
-        background: 'transparent', 
-        border: '1px solid red' // Temporary debug border
+        backgroundColor: 'transparent',
+        border: '2px solid lime' // Very visible debug border
       }}
     >
       <img
-        src={`${logoImage}?v=${timestamp}`}
+        src={logoImage}
         alt="Paint Brain Logo"
-        className="w-full h-full"
+        className="max-w-full max-h-full"
         style={{ 
           objectFit: 'contain',
-          background: 'transparent',
-          border: '1px solid blue' // Temporary debug border
+          backgroundColor: 'transparent',
+          border: '2px solid magenta' // Very visible debug border
         }}
-        onLoad={() => console.log('Logo loaded:', logoImage)}
-        onError={() => console.error('Logo failed to load:', logoImage)}
+        onLoad={() => console.log('NEW LOGO LOADED SUCCESSFULLY!')}
+        onError={(e) => console.error('LOGO FAILED TO LOAD:', e)}
       />
     </div>
   );
