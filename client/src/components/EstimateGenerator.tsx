@@ -812,9 +812,9 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
         {/* Action Buttons */}
         <div className="mt-4 space-y-3">
-          <div className="flex justify-between gap-2 items-end">
-            <Button variant="outline" onClick={onClose} className="flex-1">Cancel</Button>
-            <div className="flex flex-col items-center gap-2">
+          <div className="flex gap-2 items-end">
+            <Button variant="outline" onClick={onClose} className="w-24 h-10 text-sm">Cancel</Button>
+            <div className="flex flex-col items-center gap-2 flex-1 justify-center">
               {/* Toggle Switch - positioned over send email button */}
               <div className="relative inline-flex items-center">
                 <button
@@ -843,22 +843,24 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                 </button>
               </div>
               
-              {/* Action Button */}
-              {actionMode === 'email' ? (
-                <Button 
-                  onClick={sendEstimateEmail} 
-                  className="bg-[#569CD6] hover:bg-[#4a8bc2] px-4 py-2 text-sm"
-                  disabled={sendEmailMutation.isPending}
-                >
-                  <Mail className="w-4 h-4 mr-2" />
-                  {sendEmailMutation.isPending ? 'Sending...' : 'Send Email'}
-                </Button>
-              ) : (
-                <Button onClick={generatePDF} className="bg-[#6A9955] hover:bg-[#5a8245] px-4 py-2 text-sm">
-                  <Download className="w-4 h-4 mr-2" />
-                  Download PDF
-                </Button>
-              )}
+              {/* Action Button - Fixed Size Container */}
+              <div className="w-32 h-10 flex items-center justify-center">
+                {actionMode === 'email' ? (
+                  <Button 
+                    onClick={sendEstimateEmail} 
+                    className="bg-[#569CD6] hover:bg-[#4a8bc2] w-full h-full text-sm"
+                    disabled={sendEmailMutation.isPending}
+                  >
+                    <Mail className="w-4 h-4 mr-2" />
+                    {sendEmailMutation.isPending ? 'Sending...' : 'Send Email'}
+                  </Button>
+                ) : (
+                  <Button onClick={generatePDF} className="bg-[#6A9955] hover:bg-[#5a8245] w-full h-full text-sm">
+                    <Download className="w-4 h-4 mr-2" />
+                    Download PDF
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </div>
