@@ -63,7 +63,7 @@ const LoginForm: React.FC = () => {
               className="h-60 w-60 object-contain"
             />
           </div>
-          <div className="text-gray-400 text-base -mt-1 leading-tight">
+          <div className="text-white text-base -mt-3 leading-tight">
             <p className="text-center">Smart project management</p>
             <p className="text-center">for painters</p>
           </div>
@@ -80,7 +80,8 @@ const LoginForm: React.FC = () => {
                 onChange={(e) => setLoginEmail(e.target.value)}
                 required
                 disabled={isLoading}
-                className="placeholder:opacity-75"
+                className="placeholder:opacity-75 border-2 border-orange-500 focus:border-orange-400"
+                style={{ borderColor: '#D4A574' }}
               />
             </div>
             <div className="space-y-2">
@@ -92,7 +93,8 @@ const LoginForm: React.FC = () => {
                 onChange={(e) => setLoginPassword(e.target.value)}
                 required
                 disabled={isLoading}
-                className="placeholder:opacity-75"
+                className="placeholder:opacity-75 border-2 border-orange-500 focus:border-orange-400"
+                style={{ borderColor: '#D4A574' }}
               />
             </div>
             
@@ -108,8 +110,9 @@ const LoginForm: React.FC = () => {
               </Button>
               <Button 
                 onClick={handleRegister}
-                variant="outline"
+                className="bg-purple-600 hover:bg-purple-700 text-white"
                 disabled={isLoading}
+                style={{ backgroundColor: '#8B5FBF' }}
               >
                 Register
               </Button>
