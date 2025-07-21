@@ -21,6 +21,7 @@ export default function CleanPhotoGrid({ projectId }: CleanPhotoGridProps) {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [initialPinchDistance, setInitialPinchDistance] = useState(0);
   const [initialZoom, setInitialZoom] = useState(1);
+  const [lastTap, setLastTap] = useState(0);
 
   // Fetch photos with aggressive refresh
   const { data: photos = [], isLoading, refetch } = useQuery<Photo[]>({
@@ -106,6 +107,34 @@ export default function CleanPhotoGrid({ projectId }: CleanPhotoGridProps) {
     const dx = touches[0].clientX - touches[1].clientX;
     const dy = touches[0].clientY - touches[1].clientY;
     return Math.sqrt(dx * dx + dy * dy);
+  };
+
+  // Double-tap handler to exit enlarged view
+  const handleDoubleTap = () => {
+    setShowViewer(false);
+    resetZoomAndPan();
+  };
+
+  // Handle touch events for double-tap detection
+  const handleImageTouch = (e: React.TouchEvent) => {
+    const now = Date.now();
+    const timeSince = now - lastTap;
+    
+    if (timeSince < 300 && timeSince > 0) {
+      // Double tap detected
+      e.preventDefault();
+      handleDoubleTap();
+    } else {
+      // Single tap - start dragging if zoomed
+      if (e.touches.length === 1 && zoom > 1) {
+        setIsDragging(true);
+        setDragStart({ 
+          x: e.touches[0].clientX - panPosition.x, 
+          y: e.touches[0].clientY - panPosition.y 
+        });
+      }
+    }
+    setLastTap(now);
   };
 
   // Simplified touch handlers - pinch-to-zoom disabled due to iOS limitations
@@ -303,6 +332,8 @@ export default function CleanPhotoGrid({ projectId }: CleanPhotoGridProps) {
                 transformOrigin: 'center center'
               }}
               draggable={false}
+              onDoubleClick={handleDoubleTap}
+              onTouchStart={handleImageTouch}
             />
           </div>
 
