@@ -306,7 +306,8 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
               {showArchived ? 
                 <span className="font-semibold">Archived Projects</span> : 
                 <>
-                  <span className="font-bold">{projects.filter((p: any) => p.status !== 'archived').length} active project{projects.filter((p: any) => p.status !== 'archived').length === 1 ? '' : 's'}</span>
+                  <span className="font-bold">{projects.filter((p: any) => p.status !== 'archived').length}</span>
+                  <span className="font-normal"> active project{projects.filter((p: any) => p.status !== 'archived').length === 1 ? '' : 's'}</span>
                 </>
               }
             </h2>
