@@ -55,7 +55,7 @@ const LoginForm: React.FC = () => {
     <div className="min-h-screen bg-black flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-4">
         {/* Paint Brain Logo */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-4">
           <div className="w-64 h-64 mx-auto bg-black rounded-lg flex items-center justify-center">
             <img 
               src="/PAINY BRAIN LOGO 1_1752338774418.png" 
@@ -63,7 +63,7 @@ const LoginForm: React.FC = () => {
               className="h-60 w-60 object-contain"
             />
           </div>
-          <p className="text-gray-400 text-sm mt-4">Smart project management for painters</p>
+          <p className="text-gray-400 text-base mt-2">Smart project management for painters</p>
         </div>
 
         <Card className="border-0 shadow-xl">
