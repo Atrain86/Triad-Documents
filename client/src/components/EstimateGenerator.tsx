@@ -873,6 +873,178 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           </Card>
         </div>
       </DialogContent>
+      
+      {/* Hidden PDF Template */}
+      <div ref={printRef} className="hidden print:block">
+        <div className="bg-white text-black p-8 max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="flex justify-between items-start mb-8">
+            <div className="flex items-center">
+              <img src="/aframe-logo.png" alt="A-Frame Painting" className="h-24 w-auto mr-4" />
+            </div>
+            <div className="text-right">
+              <h1 className="text-3xl font-bold text-gray-800 mb-2">ESTIMATE</h1>
+              <p className="text-lg">#{estimateNumber || 'EST-001'}</p>
+              <p className="text-gray-600">{new Date().toLocaleDateString()}</p>
+            </div>
+          </div>
+
+          {/* Company Info */}
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold mb-2">A-Frame Painting</h2>
+            <div className="text-gray-700">
+              <p>884 Hayes Rd, Manson's Landing, BC V0P1K0</p>
+              <p>Email: cortespainter@gmail.com</p>
+            </div>
+          </div>
+
+          {/* Client Information */}
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold mb-3 text-gray-800">Client Information</h3>
+            <div className="bg-gray-50 p-4 rounded">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p><strong>Name:</strong> {clientName}</p>
+                  <p><strong>Address:</strong> {clientAddress}</p>
+                </div>
+                <div>
+                  <p><strong>City:</strong> {clientCity}</p>
+                  <p><strong>Postal Code:</strong> {clientPostal}</p>
+                  <p><strong>Email:</strong> {clientEmail}</p>
+                  <p><strong>Phone:</strong> {clientPhone}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Project Details */}
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold mb-3 text-gray-800">Project Details</h3>
+            <div className="bg-gray-50 p-4 rounded">
+              <p><strong>Project:</strong> {projectTitle || 'Painting Estimate'}</p>
+              <p><strong>Date:</strong> {estimateDate}</p>
+            </div>
+          </div>
+
+          {/* Work Breakdown */}
+          {workStages.some(stage => stage.hours > 0) && (
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-3 text-gray-800">Labor</h3>
+              <table className="w-full border border-gray-300">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="border border-gray-300 px-3 py-2 text-left">Description</th>
+                    <th className="border border-gray-300 px-3 py-2 text-center">Hours</th>
+                    <th className="border border-gray-300 px-3 py-2 text-center">Rate</th>
+                    <th className="border border-gray-300 px-3 py-2 text-right">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {workStages.filter(stage => stage.hours > 0).map((stage, i) => (
+                    <tr key={i}>
+                      <td className="border border-gray-300 px-3 py-2">{stage.description}</td>
+                      <td className="border border-gray-300 px-3 py-2 text-center">{stage.hours}</td>
+                      <td className="border border-gray-300 px-3 py-2 text-center">${stage.rate}</td>
+                      <td className="border border-gray-300 px-3 py-2 text-right">${calculateStageTotal(stage).toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Additional Labor */}
+          {additionalLabor.some(member => member.name && member.hours) && (
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-3 text-gray-800">Additional Labor</h3>
+              <table className="w-full border border-gray-300">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="border border-gray-300 px-3 py-2 text-left">Name</th>
+                    <th className="border border-gray-300 px-3 py-2 text-center">Hours</th>
+                    <th className="border border-gray-300 px-3 py-2 text-center">Rate</th>
+                    <th className="border border-gray-300 px-3 py-2 text-right">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {additionalLabor.filter(member => member.name && member.hours).map((member, i) => (
+                    <tr key={i}>
+                      <td className="border border-gray-300 px-3 py-2">{member.name}</td>
+                      <td className="border border-gray-300 px-3 py-2 text-center">{member.hours}</td>
+                      <td className="border border-gray-300 px-3 py-2 text-center">${member.rate}</td>
+                      <td className="border border-gray-300 px-3 py-2 text-right">${((parseFloat(member.hours) || 0) * (parseFloat(member.rate) || 0)).toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Materials */}
+          {(calculatePrimerCosts() > 0 || calculatePaintCosts() > 0 || calculateSuppliesTotal() > 0) && (
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-3 text-gray-800">Materials</h3>
+              <div className="space-y-2">
+                {calculatePrimerCosts() > 0 && (
+                  <div className="flex justify-between py-1">
+                    <span>Primer ({primerCosts.gallons} gallons × {primerCosts.coats} coats)</span>
+                    <span>${calculatePrimerCosts().toFixed(2)}</span>
+                  </div>
+                )}
+                {calculatePaintCosts() > 0 && (
+                  <div className="flex justify-between py-1">
+                    <span>Paint ({paintCosts.gallons} gallons × {paintCosts.coats} coats)</span>
+                    <span>${calculatePaintCosts().toFixed(2)}</span>
+                  </div>
+                )}
+                {supplies.filter(supply => supply.name && supply.total > 0).map((supply, i) => (
+                  <div key={i} className="flex justify-between py-1">
+                    <span>{supply.name} ({supply.quantity} units)</span>
+                    <span>${supply.total.toFixed(2)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Travel Costs */}
+          {calculateTravelTotal() > 0 && (
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-3 text-gray-800">Travel</h3>
+              <div className="flex justify-between">
+                <span>Travel ({travelCosts.distance}km × {travelCosts.trips} trips @ ${travelCosts.ratePerKm}/km)</span>
+                <span>${calculateTravelTotal().toFixed(2)}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Summary */}
+          <div className="border-t-2 border-gray-300 pt-4">
+            <div className="space-y-2">
+              <div className="flex justify-between text-lg">
+                <span>Subtotal:</span>
+                <span>${calculateSubtotal().toFixed(2)}</span>
+              </div>
+              {calculateTaxAmount() > 0 && (
+                <div className="flex justify-between">
+                  <span>Tax ({calculateTaxRate()}%):</span>
+                  <span>${calculateTaxAmount().toFixed(2)}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-xl font-bold border-t border-gray-300 pt-2">
+                <span>Grand Total:</span>
+                <span className="bg-green-100 px-3 py-1 rounded">${calculateTotal().toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="mt-8 pt-4 border-t border-gray-200 text-center text-gray-600">
+            <p>Thanks for considering A-Frame Painting!</p>
+            <p className="text-sm mt-2">This estimate is valid for 30 days. Final costs may vary based on site conditions.</p>
+          </div>
+        </div>
+      </div>
     </Dialog>
   );
 }
