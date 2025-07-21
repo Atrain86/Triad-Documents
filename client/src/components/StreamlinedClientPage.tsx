@@ -204,9 +204,6 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
                 return typeof amount === 'number' ? amount.toFixed(2) : parseFloat(String(amount) || '0').toFixed(2);
               })()}
             </h3>
-            {viewingReceipt.description && (
-              <p className="text-sm text-gray-300 mt-1">{viewingReceipt.description}</p>
-            )}
             {viewingReceipt.date && (
               <p className="text-xs text-gray-400 mt-1">{formatDate(String(viewingReceipt.date))}</p>
             )}
