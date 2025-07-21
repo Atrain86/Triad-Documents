@@ -300,6 +300,15 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
           </div>
         </div>
 
+        {/* Active Projects Count */}
+        {!showArchived && projects.filter((p: any) => p.status !== 'archived').length > 0 && (
+          <div className="text-center mb-4">
+            <p className="text-sm font-medium" style={{ color: paintBrainColors.orange }}>
+              {projects.filter((p: any) => p.status !== 'archived').length} active project{projects.filter((p: any) => p.status !== 'archived').length === 1 ? '' : 's'}
+            </p>
+          </div>
+        )}
+
         {projects.length > 0 && (
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-semibold" style={{ color: '#DCDCAA' }}>
