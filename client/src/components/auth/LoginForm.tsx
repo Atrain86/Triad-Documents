@@ -63,7 +63,7 @@ const LoginForm: React.FC = () => {
               className="h-60 w-60 object-contain"
             />
           </div>
-          <div className="text-gray-400 text-base mt-1 leading-tight">
+          <div className="text-gray-400 text-base -mt-1 leading-tight">
             <p className="text-center">Smart project management</p>
             <p className="text-center">for painters</p>
           </div>
@@ -124,13 +124,6 @@ const LoginForm: React.FC = () => {
             </div>
           )}
         </Card>
-        
-        <div className="text-center text-sm text-gray-600 dark:text-gray-400">
-          <p className="font-semibold mb-2">Login Credentials:</p>
-          <p><strong>Email:</strong> cortespainter@gmail.com</p>
-          <p><strong>Password:</strong> brain</p>
-          <p className="mt-2 text-xs">Or register as a new client</p>
-        </div>
       </div>
     </div>
   );
