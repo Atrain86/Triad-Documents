@@ -467,13 +467,13 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       pdf.text('Total Estimate:', 15, yPos);
       pdf.text(`$${calculateTotal().toFixed(2)}`, 190, yPos, { align: 'right' });
       
-      // Footer
-      yPos += 20;
+      // Footer (increased spacing to prevent cutoff)
+      yPos += 25;
       pdf.setTextColor(255, 255, 255);
       pdf.setFont('helvetica', 'bold');
       pdf.text('Thank you for considering A-Frame Painting!', 105, yPos, { align: 'center' });
       
-      yPos += 8;
+      yPos += 10;
       pdf.setFont('helvetica', 'normal');
       pdf.text('This estimate is valid for 30 days from the date above.', 105, yPos, { align: 'center' });
       
@@ -665,13 +665,13 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       pdf.text('Total Estimate:', 15, yPos);
       pdf.text(`$${calculateTotal().toFixed(2)}`, 190, yPos, { align: 'right' });
       
-      // Footer
-      yPos += 20;
+      // Footer (increased spacing to prevent cutoff)
+      yPos += 25;
       pdf.setTextColor(255, 255, 255);
       pdf.setFont('helvetica', 'bold');
       pdf.text('Thank you for considering A-Frame Painting!', 105, yPos, { align: 'center' });
       
-      yPos += 8;
+      yPos += 10;
       pdf.setFont('helvetica', 'normal');
       pdf.text('This estimate is valid for 30 days from the date above.', 105, yPos, { align: 'center' });
       
