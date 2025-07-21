@@ -196,18 +196,7 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
             <X className="w-8 h-8" />
           </button>
           
-          {/* Receipt Info Header */}
-          <div className="absolute top-4 left-4 z-60 p-3 rounded-lg bg-black bg-opacity-50 text-white backdrop-blur-sm border border-white border-opacity-30">
-            <h3 className="text-lg font-semibold">
-              {viewingReceipt.vendor} - ${(() => {
-                const amount = viewingReceipt.amount;
-                return typeof amount === 'number' ? amount.toFixed(2) : parseFloat(String(amount) || '0').toFixed(2);
-              })()}
-            </h3>
-            {viewingReceipt.date && (
-              <p className="text-xs text-gray-400 mt-1">{formatDate(String(viewingReceipt.date))}</p>
-            )}
-          </div>
+
           
           {/* Receipt Content */}
           <div className="max-w-4xl max-h-full p-4 overflow-auto">
