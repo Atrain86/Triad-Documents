@@ -239,7 +239,7 @@ If unable to read clearly:
       // Clean items (remove codes, SKUs, extra descriptions, expand abbreviations)
       let cleanItems = [];
       if (Array.isArray(parsedData.items)) {
-        cleanItems = parsedData.items.map(item => {
+        cleanItems = parsedData.items.map((item: any) => {
           let cleanItem = String(item).trim();
           
           // Remove common patterns like SKUs, codes
@@ -284,7 +284,7 @@ If unable to read clearly:
           cleanItem = cleanItem.replace(/\b\w/g, l => l.toUpperCase());
           
           return cleanItem;
-        }).filter(item => item.length > 2); // Keep only meaningful items
+        }).filter((item: string) => item.length > 2); // Keep only meaningful items
       }
 
       return {
@@ -302,7 +302,7 @@ If unable to read clearly:
 
   } catch (error) {
     console.error('Vision API extraction failed:', error);
-    console.error('Error details:', error.message);
+    console.error('Error details:', (error as Error).message);
     
     // Log failed token usage attempt for analytics
     if (userId) {
@@ -315,7 +315,7 @@ If unable to read clearly:
           model: 'gpt-4o',
           imageSize: imageBuffer.length,
           success: false,
-          errorMessage: error.message || 'Unknown error'
+          errorMessage: (error as Error).message || 'Unknown error'
         });
       } catch (logError) {
         console.error('Failed to log failed token usage:', logError);

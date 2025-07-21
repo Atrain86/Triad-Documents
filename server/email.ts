@@ -341,3 +341,32 @@ cortespainter@gmail.com`;
     ]
   });
 }
+
+export async function sendBasicEmail(
+  to: string,
+  subject: string,
+  message: string
+): Promise<boolean> {
+  const text = message;
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h2 style="color: #EA580C; margin: 0;">A-Frame Painting</h2>
+      </div>
+      <div style="white-space: pre-wrap; color: #333; line-height: 1.6;">${message}</div>
+      <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; text-align: center;">
+        <p style="margin: 0; color: #666;">
+          <strong>A-Frame Painting</strong><br>
+          <a href="mailto:cortespainter@gmail.com" style="color: #EA580C;">cortespainter@gmail.com</a>
+        </p>
+      </div>
+    </div>
+  `;
+
+  return sendEmail({
+    to,
+    subject,
+    text,
+    html
+  });
+}

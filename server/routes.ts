@@ -87,13 +87,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         password: hashedPassword,
         firstName,
         lastName,
-        role: 'user'
+        role: 'client'
       }).returning();
 
       const token = generateToken({
         userId: user.id,
         email: user.email,
-        role: user.role
+        role: user.role as 'admin' | 'client'
       });
 
       res.json({ 
@@ -327,7 +327,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const receiptData = {
           projectId,
           vendor,
-          amount: parseFloat(amount),
+          amount: amount.toString(),
           description: description || '',
           date: date ? new Date(date) : new Date(),
           filename: '',
@@ -341,16 +341,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Processing receipt file: ${file.filename} for project ${projectId}`);
 
       // Process with OpenAI Vision API
-      const { processReceiptWithVision } = await import('./visionReceiptHandler');
-      const visionResult = await processReceiptWithVision(file.path, file.filename);
+      const { extractReceiptWithVision } = await import('./visionReceiptHandler');
+      const fileBuffer = fs.readFileSync(file.path);
+      const visionResult = await extractReceiptWithVision(fileBuffer, file.filename);
 
       const receiptData = {
         projectId,
         filename: file.filename,
         originalName: file.originalname,
         vendor: visionResult.vendor,
-        amount: visionResult.amount,
-        description: visionResult.description || '',
+        amount: visionResult.amount.toString(),
+        description: '',
         date: visionResult.date ? new Date(visionResult.date) : new Date(),
         items: visionResult.items
       };
@@ -371,7 +372,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const updatedReceipt = await storage.updateReceipt(id, {
         vendor,
-        amount: parseFloat(amount),
+        amount: amount.toString(),
         description
       });
       
@@ -532,8 +533,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error sending estimate email:', error);
       console.error('Request body keys:', Object.keys(req.body));
-      console.error('Email data:', { recipientEmail, clientName, estimateNumber, projectTitle, totalAmount });
-      res.status(500).json({ error: `Failed to send estimate email: ${error.message}` });
+      console.error('Email data:', { 
+        recipientEmail: req.body.recipientEmail, 
+        clientName: req.body.clientName, 
+        estimateNumber: req.body.estimateNumber, 
+        projectTitle: req.body.projectTitle, 
+        totalAmount: req.body.totalAmount 
+      });
+      res.status(500).json({ error: `Failed to send estimate email: ${(error as Error).message}` });
     }
   });
 

@@ -5,6 +5,7 @@ import {
   dailyHours,
   toolsChecklist,
   tokenUsage,
+  users,
   type Project, 
   type Photo, 
   type Receipt, 
@@ -29,25 +30,36 @@ export interface IStorage {
 
   // Photos
   getProjectPhotos(projectId: number): Promise<Photo[]>;
+  getPhotos(projectId: number): Promise<Photo[]>;
+  getPhoto(id: number): Promise<Photo | undefined>;
   createPhoto(photo: InsertPhoto): Promise<Photo>;
   deletePhoto(id: number): Promise<boolean>;
 
   // Receipts
   getProjectReceipts(projectId: number): Promise<Receipt[]>;
+  getReceipts(projectId: number): Promise<Receipt[]>;
+  getReceipt(id: number): Promise<Receipt | undefined>;
   createReceipt(receipt: InsertReceipt): Promise<Receipt>;
   updateReceipt(id: number, receipt: Partial<InsertReceipt>): Promise<Receipt | undefined>;
   deleteReceipt(id: number): Promise<boolean>;
 
   // Daily Hours
   getProjectHours(projectId: number): Promise<DailyHours[]>;
+  getDailyHours(projectId: number): Promise<DailyHours[]>;
   createDailyHours(hours: InsertDailyHours): Promise<DailyHours>;
   updateDailyHours(id: number, hours: Partial<InsertDailyHours>): Promise<DailyHours | undefined>;
   deleteDailyHours(id: number): Promise<boolean>;
 
   // Tools Checklist
   getProjectTools(projectId: number): Promise<ToolsChecklist[]>;
+  getToolsChecklist(projectId: number): Promise<ToolsChecklist[]>;
   createTool(tool: InsertToolsChecklist): Promise<ToolsChecklist>;
+  createToolsChecklistItem(tool: InsertToolsChecklist): Promise<ToolsChecklist>;
   deleteTool(id: number): Promise<boolean>;
+  deleteToolsChecklistItem(id: number): Promise<boolean>;
+
+  // Users
+  getUserById(id: number): Promise<any | undefined>;
 
   // Token Usage Tracking
   logTokenUsage(usage: {
@@ -129,6 +141,15 @@ export class DatabaseStorage implements IStorage {
     return (result.rowCount || 0) > 0;
   }
 
+  async getPhotos(projectId: number): Promise<Photo[]> {
+    return this.getProjectPhotos(projectId);
+  }
+
+  async getPhoto(id: number): Promise<Photo | undefined> {
+    const [photo] = await db.select().from(photos).where(eq(photos.id, id));
+    return photo || undefined;
+  }
+
   // Receipts
   async getProjectReceipts(projectId: number): Promise<Receipt[]> {
     const result = await db.select().from(receipts).where(eq(receipts.projectId, projectId));
@@ -155,6 +176,15 @@ export class DatabaseStorage implements IStorage {
   async deleteReceipt(id: number): Promise<boolean> {
     const result = await db.delete(receipts).where(eq(receipts.id, id));
     return (result.rowCount || 0) > 0;
+  }
+
+  async getReceipts(projectId: number): Promise<Receipt[]> {
+    return this.getProjectReceipts(projectId);
+  }
+
+  async getReceipt(id: number): Promise<Receipt | undefined> {
+    const [receipt] = await db.select().from(receipts).where(eq(receipts.id, id));
+    return receipt || undefined;
   }
 
   // Daily Hours
@@ -185,6 +215,10 @@ export class DatabaseStorage implements IStorage {
     return (result.rowCount || 0) > 0;
   }
 
+  async getDailyHours(projectId: number): Promise<DailyHours[]> {
+    return this.getProjectHours(projectId);
+  }
+
   // Tools Checklist
   async getProjectTools(projectId: number): Promise<ToolsChecklist[]> {
     const result = await db.select().from(toolsChecklist).where(eq(toolsChecklist.projectId, projectId));
@@ -202,6 +236,23 @@ export class DatabaseStorage implements IStorage {
   async deleteTool(id: number): Promise<boolean> {
     const result = await db.delete(toolsChecklist).where(eq(toolsChecklist.id, id));
     return (result.rowCount || 0) > 0;
+  }
+
+  async getToolsChecklist(projectId: number): Promise<ToolsChecklist[]> {
+    return this.getProjectTools(projectId);
+  }
+
+  async createToolsChecklistItem(insertTool: InsertToolsChecklist): Promise<ToolsChecklist> {
+    return this.createTool(insertTool);
+  }
+
+  async deleteToolsChecklistItem(id: number): Promise<boolean> {
+    return this.deleteTool(id);
+  }
+
+  async getUserById(id: number): Promise<any | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
   }
 
   async logTokenUsage(usage: {
