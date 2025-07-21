@@ -503,12 +503,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/send-estimate', async (req, res) => {
     try {
-      const { to, subject, message, pdfData } = req.body;
+      const { recipientEmail, clientName, estimateNumber, projectTitle, totalAmount, customMessage, pdfData } = req.body;
+      
+      // Validate required fields
+      if (!recipientEmail || !clientName || !pdfData) {
+        return res.status(400).json({ error: 'recipientEmail, clientName, and pdfData are required' });
+      }
       
       // Convert base64 PDF to buffer
       const pdfBuffer = Buffer.from(pdfData.split(',')[1], 'base64');
 
-      await sendEstimateEmail(to, subject, message, pdfBuffer);
+      await sendEstimateEmail(
+        recipientEmail,
+        clientName,
+        estimateNumber || 'EST-001',
+        projectTitle || 'Painting Estimate',
+        totalAmount || '0.00',
+        customMessage || '',
+        pdfBuffer
+      );
       res.json({ success: true, message: 'Estimate email sent successfully' });
     } catch (error) {
       console.error('Error sending estimate email:', error);

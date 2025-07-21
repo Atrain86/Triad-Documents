@@ -1163,7 +1163,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                 section.id === 'receipts' ? 'Expenses' : section.name;
             const getSectionColor = (sectionId: string) => {
               switch (sectionId) {
-                case 'photos': return paintBrainColors.orange;     // Orange for photo gallery  
+                case 'photos': return paintBrainColors.red;       // Red for photo gallery  
                 case 'tools': return paintBrainColors.yellow;      // Yellow for tools
                 case 'dailyHours': return paintBrainColors.green;  // Green for daily hours
                 case 'notes': return paintBrainColors.blue;        // Blue for project notes

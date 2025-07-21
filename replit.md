@@ -187,6 +187,9 @@ externalPort = 80
 - **Enhanced PDF styling**: Applied Paint Brain theme colors to estimate PDF category borders and information containers
 - **Improved PDF fonts**: Increased font sizes for final estimate totals and pricing display in PDFs for better readability
 - **Server optimization**: Fixed critical syntax errors in routes.ts and restored stable server operation on port 5000
+- **Email system fix**: Resolved "string not matching pattern" errors by fixing parameter mismatch between EstimateGenerator frontend and /api/send-estimate backend route
+- **Email template cleanup**: Removed business address from plain text estimate emails as requested (HTML templates partially completed)
+- **Photo gallery color fix**: Restored photo gallery theme color from orange back to red (#E53E3E) as requested to match Paint Brain color scheme
 
 ### January 21, 2025 - GPS Mapping System Archived
 - **Archived GPS/mapping functionality**: Moved ClientMap, EmbeddedClientMap, SimpleGPSMap components and maps utilities to `archived-features/gps-mapping-system/`
