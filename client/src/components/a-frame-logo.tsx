@@ -1,4 +1,4 @@
-import logoImage from "@assets/IMG_2014_1753077429858.jpeg";
+import logoImage from "@assets/IMG_2014_1753077652007.jpeg";
 
 interface AFrameLogoProps {
   className?: string;
