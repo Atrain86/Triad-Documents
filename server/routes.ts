@@ -502,13 +502,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/send-estimate', async (req, res) => {
+  app.post('/api/send-estimate-email', async (req, res) => {
     try {
-      const { recipientEmail, clientName, estimateNumber, projectTitle, totalAmount, customMessage, pdfData } = req.body;
+      const { recipientEmail, clientName, estimateNumber, projectTitle, totalAmount, customMessage, pdfBase64, pdfData } = req.body;
       
+      // Use either pdfBase64 or pdfData (for backward compatibility)
+      const actualPdfData = pdfBase64 || pdfData;
+      
+      // Debug: Log what we received
+      console.log('Received estimate request:');
+      console.log('- recipientEmail:', recipientEmail);
+      console.log('- clientName:', clientName);
+      console.log('- pdfBase64:', typeof pdfBase64);
+      console.log('- pdfData:', typeof pdfData);
+      console.log('- actualPdfData type:', typeof actualPdfData);
+      console.log('- actualPdfData length:', actualPdfData ? actualPdfData.length : 'undefined');
+      console.log('- actualPdfData preview:', actualPdfData ? actualPdfData.substring(0, 50) + '...' : 'undefined');
+
       // Validate required fields
-      if (!recipientEmail || !clientName || !pdfData) {
-        return res.status(400).json({ error: 'recipientEmail, clientName, and pdfData are required' });
+      if (!recipientEmail || !clientName) {
+        return res.status(400).json({ error: 'recipientEmail and clientName are required' });
+      }
+      
+      if (!actualPdfData || typeof actualPdfData !== 'string') {
+        return res.status(400).json({ error: 'PDF data must be provided as a base64 string' });
       }
       
       // Basic email validation
@@ -517,8 +534,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Invalid email address format' });
       }
       
-      // Convert base64 PDF to buffer
-      const pdfBuffer = Buffer.from(pdfData.split(',')[1], 'base64');
+      // Validate and convert base64 PDF to buffer
+      let pdfBuffer;
+      try {
+        // Handle both with and without data URL prefix
+        const base64Data = actualPdfData.includes(',') ? actualPdfData.split(',')[1] : actualPdfData;
+        if (!base64Data || base64Data.length === 0) {
+          throw new Error('Empty PDF data after processing');
+        }
+        pdfBuffer = Buffer.from(base64Data, 'base64');
+        console.log('Successfully created PDF buffer, size:', pdfBuffer.length, 'bytes');
+      } catch (pdfError) {
+        console.error('Error processing PDF data:', pdfError);
+        return res.status(400).json({ error: 'Invalid PDF data format' });
+      }
 
       await sendEstimateEmail(
         recipientEmail,
