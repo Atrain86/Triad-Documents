@@ -51,6 +51,7 @@ const openWorkCalendar = (clientProject: Project | null = null, setShowCalendar:
 function SimpleFilesList({ projectId }: { projectId: number }) {
   const queryClient = useQueryClient();
   const [editingReceipt, setEditingReceipt] = useState<Receipt | null>(null);
+  const [viewingReceipt, setViewingReceipt] = useState<Receipt | null>(null);
   const [editVendor, setEditVendor] = useState('');
   const [editAmount, setEditAmount] = useState('');
   const [editDescription, setEditDescription] = useState('');
@@ -181,8 +182,58 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
   }
 
   return (
-    <div className="space-y-3">
-      {receipts.map((receipt) => (
+    <>
+      {/* Receipt Viewer Modal */}
+      {viewingReceipt && (
+        <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center">
+          {/* Close Button */}
+          <button
+            onClick={() => setViewingReceipt(null)}
+            className="absolute top-4 right-4 z-60 p-3 rounded-full bg-white bg-opacity-20 text-white hover:bg-opacity-30 transition-all duration-200 backdrop-blur-sm"
+            type="button"
+            style={{ zIndex: 9999 }}
+          >
+            <X className="w-8 h-8" />
+          </button>
+          
+          {/* Receipt Content */}
+          <div className="max-w-4xl max-h-full p-4 overflow-auto">
+            <div className="bg-white rounded-lg shadow-xl">
+              <div className="p-4 bg-gray-100 border-b">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {viewingReceipt.vendor} - ${(() => {
+                    const amount = viewingReceipt.amount;
+                    return typeof amount === 'number' ? amount.toFixed(2) : parseFloat(String(amount) || '0').toFixed(2);
+                  })()}
+                </h3>
+                {viewingReceipt.description && (
+                  <p className="text-sm text-gray-600 mt-1">{viewingReceipt.description}</p>
+                )}
+                {viewingReceipt.date && (
+                  <p className="text-xs text-gray-500 mt-1">{formatDate(String(viewingReceipt.date))}</p>
+                )}
+              </div>
+              <div className="p-4">
+                <img 
+                  src={`/uploads/${viewingReceipt.filename}`} 
+                  alt={`Receipt from ${viewingReceipt.vendor}`}
+                  className="w-full h-auto max-w-full"
+                  style={{ maxHeight: 'calc(100vh - 200px)' }}
+                />
+              </div>
+            </div>
+          </div>
+          
+          {/* Click background to close */}
+          <div 
+            className="absolute inset-0 -z-10"
+            onClick={() => setViewingReceipt(null)}
+          />
+        </div>
+      )}
+      
+      <div className="space-y-3">
+        {receipts.map((receipt) => (
         <div key={receipt.id} className="p-3 bg-gray-800 rounded-lg border border-gray-600">
           {editingReceipt?.id === receipt.id ? (
             // Edit mode
@@ -239,14 +290,20 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
                 <div className="flex items-center gap-2">
                   {receipt.filename ? (
                     <button
-                      onClick={() => window.open(`/uploads/${receipt.filename}`, '_blank')}
+                      onClick={() => setViewingReceipt(receipt)}
                       className="text-blue-400 hover:text-blue-300 underline text-sm"
                     >
-                      {receipt.vendor} - ${typeof receipt.amount === 'number' ? receipt.amount.toFixed(2) : parseFloat(receipt.amount || '0').toFixed(2)}
+                      {receipt.vendor} - ${(() => {
+                        const amount = receipt.amount;
+                        return typeof amount === 'number' ? amount.toFixed(2) : parseFloat(String(amount) || '0').toFixed(2);
+                      })()}
                     </button>
                   ) : (
                     <span className="text-gray-200 text-sm">
-                      {receipt.vendor} - ${typeof receipt.amount === 'number' ? receipt.amount.toFixed(2) : parseFloat(receipt.amount || '0').toFixed(2)}
+                      {receipt.vendor} - ${(() => {
+                        const amount = receipt.amount;
+                        return typeof amount === 'number' ? amount.toFixed(2) : parseFloat(String(amount) || '0').toFixed(2);
+                      })()}
                     </span>
                   )}
                 </div>
@@ -254,7 +311,7 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
                   <p className="text-xs text-gray-400 mt-1">{receipt.description}</p>
                 )}
                 {receipt.date && (
-                  <p className="text-xs" style={{ color: paintBrainColors.orange }}>{formatDate(receipt.date)}</p>
+                  <p className="text-xs" style={{ color: paintBrainColors.orange }}>{formatDate(String(receipt.date))}</p>
                 )}
               </div>
               <div className="flex items-center gap-2">
@@ -278,7 +335,8 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
           )}
         </div>
       ))}
-    </div>
+      </div>
+    </>
   );
 }
 
@@ -921,7 +979,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     const files = event.target.files;
     console.log('Selected files:', files);
     if (files && files.length > 0) {
-      console.log('Files detected, starting upload:', Array.from(files).map(f => f.name));
+      console.log('Files detected, starting upload:', Array.from(files).map((f: File) => f.name));
       uploadPhotosMutation.mutate(files);
     } else {
       console.log('No files selected');
@@ -933,7 +991,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     const files = event.target.files;
     console.log('Selected receipt files:', files);
     if (files && files.length > 0) {
-      console.log('Receipt files detected, starting upload:', Array.from(files).map(f => f.name));
+      console.log('Receipt files detected, starting upload:', Array.from(files).map((f: File) => f.name));
       uploadReceiptsMutation.mutate(files);
     } else {
       console.log('No receipt files selected');
