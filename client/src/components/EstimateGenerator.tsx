@@ -234,46 +234,154 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     }
   });
 
-  // Generate PDF (basic)
+  // Generate proper PDF with jsPDF (not screenshot)
   const generatePDF = async () => {
-    if (!printRef.current) return;
-
     try {
-      // Temporarily show the hidden PDF template
-      printRef.current.style.display = 'block';
-      printRef.current.style.position = 'fixed';
-      printRef.current.style.top = '-10000px';
-      printRef.current.style.left = '-10000px';
-      printRef.current.style.zIndex = '-1000';
-
-      const canvas = await html2canvas(printRef.current, { 
-        scale: 1, 
-        backgroundColor: '#1a1a1a',
-        useCORS: true,
-        allowTaint: false
-      });
-
-      // Hide the template again
-      printRef.current.style.display = 'none';
-      printRef.current.style.position = '';
-      printRef.current.style.top = '';
-      printRef.current.style.left = '';
-      printRef.current.style.zIndex = '';
-
-      const imgData = canvas.toDataURL('image/jpeg', 0.8);
       const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
-      const imgProps = pdf.getImageProperties(imgData);
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+      let yPos = 20;
+      
+      // Set dark background
+      pdf.setFillColor(26, 26, 26); // #1a1a1a
+      pdf.rect(0, 0, 210, 297, 'F'); // Fill entire A4 page
+      
+      // Set white text color
+      pdf.setTextColor(255, 255, 255);
+      
+      // Header - ESTIMATE
+      pdf.setFontSize(24);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('ESTIMATE', 150, yPos, { align: 'right' });
+      
+      // Add A-Frame Painting logo text (since we can't easily embed images in jsPDF without screenshots)
+      pdf.setFontSize(16);
+      pdf.text('A-FRAME PAINTING', 20, yPos);
+      
+      yPos += 10;
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(`#${estimateNumber || 'EST-001'}`, 150, yPos, { align: 'right' });
+      pdf.text('884 Hayes Rd, Manson\'s Landing, BC V0P1K0', 20, yPos);
+      
+      yPos += 10;
+      pdf.text(new Date().toLocaleDateString(), 150, yPos, { align: 'right' });
+      pdf.text('Email: cortespainter@gmail.com', 20, yPos);
+      
+      yPos += 20;
+      
+      // Client Information Section
+      pdf.setFillColor(42, 42, 42); // #2a2a2a
+      pdf.rect(20, yPos, 170, 25, 'F');
+      
+      yPos += 8;
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Estimate For:', 25, yPos);
+      
+      yPos += 8;
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(clientName, 25, yPos);
+      pdf.text(clientEmail, 110, yPos);
+      
+      yPos += 6;
+      pdf.text(clientAddress, 25, yPos);
+      pdf.text(clientPhone, 110, yPos);
+      
+      yPos += 6;
+      pdf.text(`${clientCity}, ${clientPostal}`, 25, yPos);
+      
+      yPos += 15;
+      
+      // Services & Labor Section
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Services & Labor', 20, yPos);
+      yPos += 8;
+      
+      // Work stages
+      workStages.filter(stage => parseFloat(String(stage.hours)) > 0).forEach((stage) => {
+        const hours = parseFloat(String(stage.hours)) || 0;
+        const total = (hours * stage.rate).toFixed(2);
+        
+        pdf.setFont('helvetica', 'normal');
+        pdf.text(stage.description || stage.name, 25, yPos);
+        pdf.text(`${hours}h × $${stage.rate}`, 25, yPos + 4);
+        pdf.text(`$${total}`, 150, yPos, { align: 'right' });
+        yPos += 12;
+      });
+      
+      // Additional Labor
+      additionalLabor.filter(member => member.name && parseFloat(String(member.hours)) > 0).forEach((member) => {
+        const hours = parseFloat(String(member.hours)) || 0;
+        const rate = parseFloat(String(member.rate)) || 0;
+        const total = (hours * rate).toFixed(2);
+        
+        pdf.text(member.name, 25, yPos);
+        pdf.text(`${hours}h × $${rate}`, 25, yPos + 4);
+        pdf.text(`$${total}`, 150, yPos, { align: 'right' });
+        yPos += 12;
+      });
+      
+      yPos += 10;
+      
+      // Materials & Paint Section
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Materials & Paint', 20, yPos);
+      yPos += 8;
+      
+      const materialsTotal = (calculatePrimerCosts() + calculatePaintCosts() + calculateSuppliesTotal()).toFixed(2);
+      if (parseFloat(materialsTotal) > 0) {
+        pdf.setFont('helvetica', 'normal');
+        pdf.text('Paint & Supplies', 25, yPos);
+        pdf.text(`$${materialsTotal}`, 150, yPos, { align: 'right' });
+        yPos += 8;
+      }
+      
+      const travelTotal = calculateTravelTotal().toFixed(2);
+      if (parseFloat(travelTotal) > 0) {
+        pdf.text('Delivery', 25, yPos);
+        pdf.text(`$${travelTotal}`, 150, yPos, { align: 'right' });
+        yPos += 8;
+      }
+      
+      yPos += 15;
+      
+      // Summary Section
+      pdf.setFillColor(42, 42, 42); // #2a2a2a
+      pdf.rect(20, yPos, 170, 35, 'F');
+      
+      yPos += 10;
+      pdf.text('Subtotal:', 25, yPos);
+      pdf.text(`$${calculateSubtotal().toFixed(2)}`, 150, yPos, { align: 'right' });
+      
+      yPos += 8;
+      pdf.text('Paint & Materials:', 25, yPos);
+      pdf.text(`$${materialsTotal}`, 150, yPos, { align: 'right' });
+      
+      yPos += 12;
+      // Total with green background effect (using text formatting)
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFillColor(5, 150, 105); // #059669
+      pdf.rect(120, yPos - 5, 70, 8, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.text('Total Estimate:', 25, yPos);
+      pdf.text(`$${calculateTotal().toFixed(2)}`, 150, yPos, { align: 'right' });
+      
+      // Footer
+      yPos += 20;
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Thank you for considering A-Frame Painting!', 105, yPos, { align: 'center' });
+      
+      yPos += 8;
+      pdf.setFont('helvetica', 'normal');
+      pdf.text('This estimate is valid for 30 days from the date above.', 105, yPos, { align: 'center' });
+      
       pdf.save(`Estimate-${estimateNumber || 'unknown'}.pdf`);
 
       toast({
         title: 'PDF Generated',
-        description: 'Estimate PDF has been downloaded.',
+        description: 'Professional estimate PDF has been downloaded.',
       });
     } catch (error) {
+      console.error('PDF generation error:', error);
       toast({
         title: 'Error',
         description: 'Failed to generate PDF.',
@@ -282,7 +390,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     }
   };
 
-  // Generate PDF and send email
+  // Generate proper PDF and send email (no screenshots)
   const sendEstimateEmail = async () => {
     if (!clientEmail || !clientEmail.trim()) {
       toast({
@@ -294,49 +402,145 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     }
 
     try {
-      // Temporarily show the hidden PDF template
-      printRef.current!.style.display = 'block';
-      printRef.current!.style.position = 'fixed';
-      printRef.current!.style.top = '-10000px';
-      printRef.current!.style.left = '-10000px';
-      printRef.current!.style.zIndex = '-1000';
-
-      // Generate PDF as blob with optimized settings
-      const canvas = await html2canvas(printRef.current!, { 
-        scale: 1, 
-        backgroundColor: '#1a1a1a', 
-        useCORS: true,
-        allowTaint: false,
-        logging: false
-      });
-
-      // Hide the template again
-      printRef.current!.style.display = 'none';
-      printRef.current!.style.position = '';
-      printRef.current!.style.top = '';
-      printRef.current!.style.left = '';
-      printRef.current!.style.zIndex = '';
-      
-      // Validate canvas
-      if (canvas.width === 0 || canvas.height === 0) {
-        throw new Error('Failed to generate valid canvas');
-      }
-      
-      const imgData = canvas.toDataURL('image/jpeg', 0.7);
-      
-      // Validate image data
-      if (!imgData || imgData === 'data:,') {
-        throw new Error('Failed to generate image data');
-      }
-      
+      // Generate proper PDF using jsPDF (same as download function)
       const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
-      const imgProps = pdf.getImageProperties(imgData);
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+      let yPos = 20;
       
-      // Get PDF as base64
+      // Set dark background
+      pdf.setFillColor(26, 26, 26); // #1a1a1a
+      pdf.rect(0, 0, 210, 297, 'F'); // Fill entire A4 page
+      
+      // Set white text color
+      pdf.setTextColor(255, 255, 255);
+      
+      // Header - ESTIMATE
+      pdf.setFontSize(24);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('ESTIMATE', 150, yPos, { align: 'right' });
+      
+      // Add A-Frame Painting logo text
+      pdf.setFontSize(16);
+      pdf.text('A-FRAME PAINTING', 20, yPos);
+      
+      yPos += 10;
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(`#${estimateNumber || 'EST-001'}`, 150, yPos, { align: 'right' });
+      pdf.text('884 Hayes Rd, Manson\'s Landing, BC V0P1K0', 20, yPos);
+      
+      yPos += 10;
+      pdf.text(new Date().toLocaleDateString(), 150, yPos, { align: 'right' });
+      pdf.text('Email: cortespainter@gmail.com', 20, yPos);
+      
+      yPos += 20;
+      
+      // Client Information Section
+      pdf.setFillColor(42, 42, 42); // #2a2a2a
+      pdf.rect(20, yPos, 170, 25, 'F');
+      
+      yPos += 8;
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Estimate For:', 25, yPos);
+      
+      yPos += 8;
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(clientName, 25, yPos);
+      pdf.text(clientEmail, 110, yPos);
+      
+      yPos += 6;
+      pdf.text(clientAddress, 25, yPos);
+      pdf.text(clientPhone, 110, yPos);
+      
+      yPos += 6;
+      pdf.text(`${clientCity}, ${clientPostal}`, 25, yPos);
+      
+      yPos += 15;
+      
+      // Services & Labor Section
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Services & Labor', 20, yPos);
+      yPos += 8;
+      
+      // Work stages
+      workStages.filter(stage => parseFloat(String(stage.hours)) > 0).forEach((stage) => {
+        const hours = parseFloat(String(stage.hours)) || 0;
+        const total = (hours * stage.rate).toFixed(2);
+        
+        pdf.setFont('helvetica', 'normal');
+        pdf.text(stage.description || stage.name, 25, yPos);
+        pdf.text(`${hours}h × $${stage.rate}`, 25, yPos + 4);
+        pdf.text(`$${total}`, 150, yPos, { align: 'right' });
+        yPos += 12;
+      });
+      
+      // Additional Labor
+      additionalLabor.filter(member => member.name && parseFloat(String(member.hours)) > 0).forEach((member) => {
+        const hours = parseFloat(String(member.hours)) || 0;
+        const rate = parseFloat(String(member.rate)) || 0;
+        const total = (hours * rate).toFixed(2);
+        
+        pdf.text(member.name, 25, yPos);
+        pdf.text(`${hours}h × $${rate}`, 25, yPos + 4);
+        pdf.text(`$${total}`, 150, yPos, { align: 'right' });
+        yPos += 12;
+      });
+      
+      yPos += 10;
+      
+      // Materials & Paint Section
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Materials & Paint', 20, yPos);
+      yPos += 8;
+      
+      const materialsTotal = (calculatePrimerCosts() + calculatePaintCosts() + calculateSuppliesTotal()).toFixed(2);
+      if (parseFloat(materialsTotal) > 0) {
+        pdf.setFont('helvetica', 'normal');
+        pdf.text('Paint & Supplies', 25, yPos);
+        pdf.text(`$${materialsTotal}`, 150, yPos, { align: 'right' });
+        yPos += 8;
+      }
+      
+      const travelTotal = calculateTravelTotal().toFixed(2);
+      if (parseFloat(travelTotal) > 0) {
+        pdf.text('Delivery', 25, yPos);
+        pdf.text(`$${travelTotal}`, 150, yPos, { align: 'right' });
+        yPos += 8;
+      }
+      
+      yPos += 15;
+      
+      // Summary Section
+      pdf.setFillColor(42, 42, 42); // #2a2a2a
+      pdf.rect(20, yPos, 170, 35, 'F');
+      
+      yPos += 10;
+      pdf.text('Subtotal:', 25, yPos);
+      pdf.text(`$${calculateSubtotal().toFixed(2)}`, 150, yPos, { align: 'right' });
+      
+      yPos += 8;
+      pdf.text('Paint & Materials:', 25, yPos);
+      pdf.text(`$${materialsTotal}`, 150, yPos, { align: 'right' });
+      
+      yPos += 12;
+      // Total with green background effect
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFillColor(5, 150, 105); // #059669
+      pdf.rect(120, yPos - 5, 70, 8, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.text('Total Estimate:', 25, yPos);
+      pdf.text(`$${calculateTotal().toFixed(2)}`, 150, yPos, { align: 'right' });
+      
+      // Footer
+      yPos += 20;
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Thank you for considering A-Frame Painting!', 105, yPos, { align: 'center' });
+      
+      yPos += 8;
+      pdf.setFont('helvetica', 'normal');
+      pdf.text('This estimate is valid for 30 days from the date above.', 105, yPos, { align: 'center' });
+      
+      // Get PDF as base64 for email
       const pdfOutput = pdf.output('datauristring');
       if (!pdfOutput) {
         throw new Error('Failed to generate PDF output');
@@ -344,8 +548,8 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       
       const pdfBase64 = pdfOutput.split(',')[1];
       
-      // Validate base64 data size (should be reasonable for email)
-      if (pdfBase64.length > 10000000) { // ~7.5MB base64 limit
+      // Validate base64 data size (should be much smaller now)
+      if (pdfBase64.length > 5000000) { // ~3.75MB base64 limit
         throw new Error('PDF too large for email. Please reduce content.');
       }
 
@@ -908,121 +1112,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
         </div>
       </DialogContent>
       
-      {/* Hidden PDF Template - Dark Theme */}
-      <div ref={printRef} className="hidden print:block">
-        <div style={{ backgroundColor: '#1a1a1a', color: 'white', padding: '32px', maxWidth: '800px', margin: '0 auto', fontFamily: 'Arial, sans-serif' }}>
-          {/* Header */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px' }}>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <img src="/aframe-logo.png" alt="A-Frame Painting" style={{ height: '60px', width: 'auto', marginRight: '16px' }} />
-            </div>
-            <div style={{ textAlign: 'right', color: 'white' }}>
-              <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: '0 0 8px 0', color: 'white' }}>ESTIMATE</h1>
-              <p style={{ fontSize: '16px', margin: '0 0 4px 0', color: '#cccccc' }}>{estimateNumber || 'EST #'}</p>
-              <p style={{ fontSize: '14px', margin: '0', color: '#cccccc' }}>{new Date().toLocaleDateString()}</p>
-            </div>
-          </div>
 
-          {/* Estimate For Section */}
-          <div style={{ marginBottom: '24px', backgroundColor: '#2a2a2a', padding: '16px', borderRadius: '8px' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 'bold', margin: '0 0 12px 0', color: 'white' }}>Estimate For:</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-              <div>
-                <p style={{ margin: '0 0 4px 0', color: '#cccccc' }}>{clientName}</p>
-                <p style={{ margin: '0 0 4px 0', color: '#cccccc' }}>{clientAddress}</p>
-                <p style={{ margin: '0 0 4px 0', color: '#cccccc' }}>{clientCity}, {clientPostal}</p>
-              </div>
-              <div>
-                <p style={{ margin: '0 0 4px 0', color: '#cccccc' }}>{clientEmail}</p>
-                <p style={{ margin: '0 0 4px 0', color: '#cccccc' }}>{clientPhone}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Services & Labor */}
-          <div style={{ marginBottom: '24px' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 'bold', margin: '0 0 12px 0', color: 'white' }}>Services & Labor</h3>
-            
-            {/* Work Stages */}
-            {workStages.filter(stage => parseFloat(String(stage.hours)) > 0).map((stage, i) => (
-              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #333' }}>
-                <div>
-                  <p style={{ margin: '0', color: 'white', fontSize: '14px' }}>{stage.description}</p>
-                  <p style={{ margin: '0', color: '#888', fontSize: '12px' }}>{stage.hours}h × ${stage.rate}</p>
-                </div>
-                <span style={{ color: 'white', fontSize: '14px' }}>${calculateStageTotal(stage).toFixed(2)}</span>
-              </div>
-            ))}
-
-            {/* Additional Labor */}
-            {additionalLabor.filter(member => member.name && parseFloat(String(member.hours)) > 0).map((member, i) => (
-              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #333' }}>
-                <div>
-                  <p style={{ margin: '0', color: 'white', fontSize: '14px' }}>{member.name}</p>
-                  <p style={{ margin: '0', color: '#888', fontSize: '12px' }}>{member.hours}h × ${member.rate}</p>
-                </div>
-                <span style={{ color: 'white', fontSize: '14px' }}>${((parseFloat(String(member.hours)) || 0) * (parseFloat(String(member.rate)) || 0)).toFixed(2)}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Additional Labor */}
-          {additionalLabor.some(member => member.name && parseFloat(String(member.hours)) > 0) && (
-            <div style={{ marginBottom: '24px' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: 'bold', margin: '0 0 12px 0', color: 'white' }}>Additional Services</h3>
-              {additionalLabor.filter(member => member.name && parseFloat(String(member.hours)) > 0).map((member, i) => (
-                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #333' }}>
-                  <div>
-                    <span style={{ color: 'white', fontSize: '14px' }}>{member.name}</span>
-                    <p style={{ margin: '0', color: '#888', fontSize: '12px' }}>{member.hours}h × ${member.rate}</p>
-                  </div>
-                  <span style={{ color: 'white', fontSize: '14px' }}>${((parseFloat(String(member.hours)) || 0) * (parseFloat(String(member.rate)) || 0)).toFixed(2)}</span>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Materials & Paint */}
-          <div style={{ marginBottom: '24px' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 'bold', margin: '0 0 12px 0', color: 'white' }}>Materials & Paint</h3>
-            
-            {/* Paint & Supplies */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #333' }}>
-              <span style={{ color: 'white', fontSize: '14px' }}>Paint & Supplies</span>
-              <span style={{ color: 'white', fontSize: '14px' }}>${(calculatePrimerCosts() + calculatePaintCosts() + calculateSuppliesTotal()).toFixed(2)}</span>
-            </div>
-            
-            {/* Delivery */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0' }}>
-              <span style={{ color: 'white', fontSize: '14px' }}>Delivery</span>
-              <span style={{ color: 'white', fontSize: '14px' }}>${calculateTravelTotal().toFixed(2)}</span>
-            </div>
-          </div>
-
-          {/* Summary */}
-          <div style={{ backgroundColor: '#2a2a2a', padding: '16px', borderRadius: '8px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <span style={{ color: 'white' }}>Subtotal:</span>
-              <span style={{ color: 'white' }}>${calculateSubtotal().toFixed(2)}</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <span style={{ color: 'white' }}>Paint & Materials:</span>
-              <span style={{ color: 'white' }}>${(calculatePrimerCosts() + calculatePaintCosts() + calculateSuppliesTotal()).toFixed(2)}</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '2px solid #059669' }}>
-              <span style={{ fontSize: '18px', fontWeight: 'bold', color: 'white' }}>Total Estimate:</span>
-              <span style={{ fontSize: '18px', fontWeight: 'bold', backgroundColor: '#059669', color: 'white', padding: '4px 12px', borderRadius: '4px' }}>${calculateTotal().toFixed(2)}</span>
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div style={{ marginTop: '32px', textAlign: 'center', padding: '16px', backgroundColor: '#2a2a2a', borderRadius: '8px' }}>
-            <p style={{ margin: '0 0 8px 0', color: 'white', fontSize: '16px', fontWeight: 'bold' }}>Thank you for considering A-Frame Painting!</p>
-            <p style={{ margin: '0 0 8px 0', color: '#cccccc', fontSize: '14px' }}>884 Hayes Rd, Manson's Landing, BC V0P1K0</p>
-            <p style={{ margin: '0', color: '#cccccc', fontSize: '14px' }}>This estimate is valid for 30 days from the date above.</p>
-          </div>
-        </div>
-      </div>
     </Dialog>
   );
 }
