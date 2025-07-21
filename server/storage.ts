@@ -4,6 +4,7 @@ import {
   receipts, 
   dailyHours,
   toolsChecklist,
+  tokenUsage,
   type Project, 
   type Photo, 
   type Receipt, 
@@ -47,6 +48,18 @@ export interface IStorage {
   getProjectTools(projectId: number): Promise<ToolsChecklist[]>;
   createTool(tool: InsertToolsChecklist): Promise<ToolsChecklist>;
   deleteTool(id: number): Promise<boolean>;
+
+  // Token Usage Tracking
+  logTokenUsage(usage: {
+    userId?: number;
+    operation: string;
+    tokensUsed: number;
+    cost: number;
+    model: string;
+    imageSize?: number;
+    success: boolean;
+    errorMessage?: string;
+  }): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -189,6 +202,33 @@ export class DatabaseStorage implements IStorage {
   async deleteTool(id: number): Promise<boolean> {
     const result = await db.delete(toolsChecklist).where(eq(toolsChecklist.id, id));
     return (result.rowCount || 0) > 0;
+  }
+
+  async logTokenUsage(usage: {
+    userId?: number;
+    operation: string;
+    tokensUsed: number;
+    cost: number;
+    model: string;
+    imageSize?: number;
+    success: boolean;
+    errorMessage?: string;
+  }): Promise<void> {
+    try {
+      await db.insert(tokenUsage).values({
+        userId: usage.userId || null,
+        operation: usage.operation,
+        tokensUsed: usage.tokensUsed,
+        cost: usage.cost,
+        model: usage.model,
+        imageSize: usage.imageSize || null,
+        success: usage.success ? 'true' : 'false',
+        errorMessage: usage.errorMessage || null
+      });
+    } catch (error) {
+      console.error('Failed to log token usage:', error);
+      throw error;
+    }
   }
 }
 

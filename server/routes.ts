@@ -2,7 +2,9 @@ import type { Express } from "express";
 import express from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertProjectSchema, insertPhotoSchema, insertReceiptSchema, insertDailyHoursSchema, insertToolsChecklistSchema, insertUserSchema } from "@shared/schema";
+import { db } from "./db";
+import { insertProjectSchema, insertPhotoSchema, insertReceiptSchema, insertDailyHoursSchema, insertToolsChecklistSchema, insertUserSchema, projects, photos, receipts, dailyHours, toolsChecklist, users, tokenUsage } from "@shared/schema";
+import { sql, eq, desc } from "drizzle-orm";
 import { hashPassword, verifyPassword, generateToken, verifyToken } from "./auth";
 import { sendInvoiceEmailWithReceipts, sendEstimateEmail } from "./email";
 import multer from "multer";
@@ -693,6 +695,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Basic email error:', error);
       res.status(500).json({ error: 'Server error while sending email' });
+    }
+  });
+
+  // Admin routes for token usage analytics
+  app.get('/api/admin/token-usage/total', async (req, res) => {
+    try {
+      const result = await db
+        .select({
+          totalTokens: sql<number>`COALESCE(SUM(${tokenUsage.tokensUsed}), 0)`.as('totalTokens'),
+          totalCost: sql<number>`COALESCE(SUM(${tokenUsage.cost}), 0)`.as('totalCost')
+        })
+        .from(tokenUsage);
+
+      const stats = result[0] || { totalTokens: 0, totalCost: 0 };
+      res.json(stats);
+    } catch (error) {
+      console.error('Error fetching total token usage:', error);
+      res.status(500).json({ error: 'Failed to fetch token usage statistics' });
+    }
+  });
+
+  app.get('/api/admin/token-usage/by-user', async (req, res) => {
+    try {
+      const result = await db
+        .select({
+          userId: tokenUsage.userId,
+          email: users.email,
+          totalTokens: sql<number>`COALESCE(SUM(${tokenUsage.tokensUsed}), 0)`.as('totalTokens'),
+          totalCost: sql<number>`COALESCE(SUM(${tokenUsage.cost}), 0)`.as('totalCost')
+        })
+        .from(tokenUsage)
+        .leftJoin(users, eq(users.id, tokenUsage.userId))
+        .groupBy(tokenUsage.userId, users.email);
+
+      res.json(result);
+    } catch (error) {
+      console.error('Error fetching user token usage:', error);
+      res.status(500).json({ error: 'Failed to fetch user token usage statistics' });
+    }
+  });
+
+  app.get('/api/admin/token-usage/recent', async (req, res) => {
+    try {
+      const result = await db
+        .select({
+          id: tokenUsage.id,
+          userId: tokenUsage.userId,
+          operation: tokenUsage.operation,
+          tokensUsed: tokenUsage.tokensUsed,
+          estimatedCost: tokenUsage.cost,
+          createdAt: tokenUsage.createdAt
+        })
+        .from(tokenUsage)
+        .orderBy(desc(tokenUsage.createdAt))
+        .limit(20);
+
+      res.json(result);
+    } catch (error) {
+      console.error('Error fetching recent token usage:', error);
+      res.status(500).json({ error: 'Failed to fetch recent token usage' });
+    }
+  });
+
+  app.post('/api/admin/token-usage/historical', async (req, res) => {
+    try {
+      const { tokens, cost, description } = req.body;
+      
+      if (!tokens || !cost) {
+        return res.status(400).json({ error: 'Tokens and cost are required' });
+      }
+
+      await db.insert(tokenUsage).values({
+        userId: 1, // Admin user
+        operation: description || 'Historical entry',
+        tokensUsed: parseInt(tokens),
+        cost: parseFloat(cost),
+        model: 'historical',
+        success: 'true'
+      });
+
+      res.json({ success: true, message: 'Historical usage added successfully' });
+    } catch (error) {
+      console.error('Error adding historical token usage:', error);
+      res.status(500).json({ error: 'Failed to add historical usage' });
     }
   });
 
