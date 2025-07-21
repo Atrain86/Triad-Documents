@@ -6,11 +6,24 @@ interface AFrameLogoProps {
 
 export default function AFrameLogo({ className = "w-8 h-8" }: AFrameLogoProps) {
   return (
-    <img
-      src={logoImage}
-      alt="A-Frame Painting Logo"
-      className={className}
-      style={{ objectFit: 'contain' }}
+    <div 
+      className={`${className} flex items-center justify-center`}
+      style={{
+        background: `url(${logoImage})`,
+        backgroundSize: 'contain',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center',
+        WebkitMask: `url(${logoImage})`,
+        mask: `url(${logoImage})`,
+        WebkitMaskSize: 'contain',
+        maskSize: 'contain',
+        WebkitMaskRepeat: 'no-repeat',
+        maskRepeat: 'no-repeat',
+        WebkitMaskPosition: 'center',
+        maskPosition: 'center',
+        backgroundColor: 'currentColor',
+        filter: 'invert(1) brightness(2) contrast(1.5)'
+      }}
     />
   );
 }
