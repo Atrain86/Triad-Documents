@@ -56,7 +56,7 @@ const LoginForm: React.FC = () => {
       <div className="w-full max-w-md space-y-4">
         {/* Paint Brain Logo */}
         <div className="text-center mb-4">
-          <div className="w-64 h-64 mx-auto bg-black rounded-lg flex items-center justify-center">
+          <div className="w-64 h-64 mx-auto flex items-center justify-center" style={{ backgroundColor: '#000000' }}>
             <img 
               src="/PAINY BRAIN LOGO 1_1752338774418.png" 
               alt="Paint Brain Logo" 
