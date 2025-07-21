@@ -510,6 +510,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'recipientEmail, clientName, and pdfData are required' });
       }
       
+      // Basic email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(recipientEmail)) {
+        return res.status(400).json({ error: 'Invalid email address format' });
+      }
+      
       // Convert base64 PDF to buffer
       const pdfBuffer = Buffer.from(pdfData.split(',')[1], 'base64');
 
@@ -525,7 +531,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true, message: 'Estimate email sent successfully' });
     } catch (error) {
       console.error('Error sending estimate email:', error);
-      res.status(500).json({ error: 'Failed to send estimate email' });
+      console.error('Request body keys:', Object.keys(req.body));
+      console.error('Email data:', { recipientEmail, clientName, estimateNumber, projectTitle, totalAmount });
+      res.status(500).json({ error: `Failed to send estimate email: ${error.message}` });
     }
   });
 

@@ -277,7 +277,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   // Email sending functionality
   const sendEmailMutation = useMutation({
     mutationFn: async (emailData: any) => {
-      const response = await fetch('/api/send-estimate-email', {
+      const response = await fetch('/api/send-estimate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(emailData)
