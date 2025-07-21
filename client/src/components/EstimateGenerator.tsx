@@ -572,13 +572,15 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       const laborItemCount2 = validWorkStages2.length + validAdditionalLabor2.length;
       const laborContainerHeight2 = 8 + (laborItemCount2 * 15) + 10; // Header + items + bottom padding
       
-      // Draw gray container for Services & Labor
-      pdf.setFillColor(42, 42, 42); // #2a2a2a
+      // Draw Paint Brain green container for Services & Labor
+      pdf.setFillColor(106, 153, 85); // Paint Brain Green #6A9955
       pdf.rect(10, yPos, 190, laborContainerHeight2, 'F');
       
       yPos += 8;
       pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(255, 255, 255); // White text on green background
       pdf.text('Services & Labor', 15, yPos);
+      pdf.setTextColor(255, 255, 255); // Keep white for content
       yPos += 8;
       
       // Work stages (increased spacing for better readability)
@@ -618,23 +620,26 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       if (parseFloat(travelTotal2) > 0) materialsItemCount2++;
       const materialsContainerHeight2 = 8 + (materialsItemCount2 * 8) + 10; // Header + items + bottom padding
       
-      // Draw gray container for Materials & Paint
-      pdf.setFillColor(42, 42, 42); // #2a2a2a
+      // Draw Paint Brain yellow container for Materials & Paint
+      pdf.setFillColor(220, 220, 170); // Paint Brain Yellow #DCDCAA
       pdf.rect(10, yPos, 190, materialsContainerHeight2, 'F');
       
       yPos += 8;
       pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(0, 0, 0); // Black text on yellow background
       pdf.text('Materials & Paint', 15, yPos);
       yPos += 8;
       
       if (parseFloat(materialsTotal2) > 0) {
         pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(0, 0, 0); // Black text on yellow background
         pdf.text('Paint & Supplies', 15, yPos);
         pdf.text(`$${materialsTotal2}`, 190, yPos, { align: 'right' });
         yPos += 8;
       }
       
       if (parseFloat(travelTotal2) > 0) {
+        pdf.setTextColor(0, 0, 0); // Black text on yellow background
         pdf.text('Delivery', 15, yPos);
         pdf.text(`$${travelTotal2}`, 190, yPos, { align: 'right' });
         yPos += 8;
@@ -644,11 +649,12 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       
       yPos += 15;
       
-      // Summary Section (make wider)
-      pdf.setFillColor(42, 42, 42); // #2a2a2a
+      // Summary Section (Paint Brain purple background)
+      pdf.setFillColor(139, 95, 191); // Paint Brain Purple #8B5FBF
       pdf.rect(10, yPos, 190, 35, 'F');
       
       yPos += 10;
+      pdf.setTextColor(255, 255, 255); // White text on purple background
       pdf.text('Subtotal:', 15, yPos);
       pdf.text(`$${calculateSubtotal().toFixed(2)}`, 190, yPos, { align: 'right' });
       
@@ -657,13 +663,15 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       pdf.text(`$${materialsTotal2}`, 190, yPos, { align: 'right' });
       
       yPos += 12;
-      // Total with green background effect (extend green box to cover both text and price)
+      // Total with Paint Brain orange background and larger font
       pdf.setFont('helvetica', 'bold');
-      pdf.setFillColor(5, 150, 105); // #059669
-      pdf.rect(10, yPos - 5, 190, 10, 'F');  // Wide green box covering full width
-      pdf.setTextColor(255, 255, 255);
-      pdf.text('Total Estimate:', 15, yPos);
+      pdf.setFillColor(212, 165, 116); // Paint Brain Orange #D4A574
+      pdf.rect(10, yPos - 7, 190, 16, 'F');  // Taller box for larger font
+      pdf.setTextColor(0, 0, 0); // Black text on orange background
+      pdf.setFontSize(16); // Larger font for total
+      pdf.text('TOTAL ESTIMATE:', 15, yPos);
       pdf.text(`$${calculateTotal().toFixed(2)}`, 190, yPos, { align: 'right' });
+      pdf.setFontSize(12); // Reset font size
       
       // Footer (increased spacing to prevent cutoff)
       yPos += 25;

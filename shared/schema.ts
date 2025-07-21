@@ -109,28 +109,7 @@ export const sessions = pgTable("sessions", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const challengeProgress = pgTable("challenge_progress", {
-  id: serial("id").primaryKey(),
-  projectId: integer("project_id").notNull(),
-  receiptsUploaded: integer("receipts_uploaded").default(0),
-  currentStreak: integer("current_streak").default(0),
-  longestStreak: integer("longest_streak").default(0),
-  totalPoints: integer("total_points").default(0),
-  level: integer("level").default(1),
-  weeklyGoal: integer("weekly_goal").default(5),
-  weeklyProgress: integer("weekly_progress").default(0),
-  weeklyResetDate: timestamp("weekly_reset_date").defaultNow(),
-  lastUploadDate: timestamp("last_upload_date"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
 
-export const userAchievements = pgTable("user_achievements", {
-  id: serial("id").primaryKey(),
-  projectId: integer("project_id").notNull(),
-  achievementId: text("achievement_id").notNull(),
-  unlockedAt: timestamp("unlocked_at").defaultNow().notNull(),
-  progress: integer("progress").default(0),
-});
 
 export const insertProjectSchema = createInsertSchema(projects).omit({
   id: true,

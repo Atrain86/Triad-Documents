@@ -102,8 +102,7 @@ Thank you for choosing A-Frame Painting for your project. We appreciate your bus
 Best regards,
 
 A-Frame Painting
-cortespainter@gmail.com
-884 Hayes Rd, Manson's Landing, BC V0P1K0`;
+cortespainter@gmail.com`;
 
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -117,8 +116,7 @@ cortespainter@gmail.com
       <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
         <p><strong>Best regards,</strong><br>
         A-Frame Painting<br>
-        <a href="mailto:cortespainter@gmail.com">cortespainter@gmail.com</a><br>
-        884 Hayes Rd, Manson's Landing, BC V0P1K0</p>
+        <a href="mailto:cortespainter@gmail.com">cortespainter@gmail.com</a></p>
       </div>
     </div>
   `;
@@ -169,8 +167,7 @@ Thank you for choosing A-Frame Painting for your project. We appreciate your bus
 Best regards,
 
 A-Frame Painting
-cortespainter@gmail.com
-884 Hayes Rd, Manson's Landing, BC V0P1K0`;
+cortespainter@gmail.com`;
 
   const receiptHtml = receiptAttachments.length > 0 
     ? `<p>I've also included <strong>${receiptAttachments.length} receipt photo(s)</strong> showing the materials purchased for your project.</p>`
@@ -278,8 +275,7 @@ IMPORTANT NOTE: This is an estimate, not a final quote. Final costs may vary bas
 Best regards,
 
 A-Frame Painting
-cortespainter@gmail.com
-884 Hayes Rd, Manson's Landing, BC V0P1K0`;
+cortespainter@gmail.com`;
 
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff;">
