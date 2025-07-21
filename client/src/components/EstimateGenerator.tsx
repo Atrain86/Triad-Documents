@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { Download, Mail, Plus, Trash2 } from 'lucide-react';
@@ -66,6 +67,13 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     trips: '2'
   });
 
+  // Additional Services state (Power Washing, Drywall Repair, Wood Reconditioning)
+  const [additionalServices, setAdditionalServices] = useState([
+    { name: 'Power Washing', enabled: false, hours: 0, rate: 60 },
+    { name: 'Drywall Repair', enabled: false, hours: 0, rate: 60 },
+    { name: 'Wood Reconditioning', enabled: false, hours: 0, rate: 60 }
+  ]);
+
   // Additional labor state
   const [additionalLabor, setAdditionalLabor] = useState([
     { name: '', hours: '', rate: '' }
@@ -115,6 +123,23 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   // Remove labor member
   const removeLaborMember = (index: number) => {
     setAdditionalLabor(additionalLabor.filter((_, i) => i !== index));
+  };
+
+  // Update additional service
+  const updateAdditionalService = (index: number, field: string, value: boolean | number) => {
+    const newServices = [...additionalServices];
+    if (field === 'enabled') {
+      newServices[index].enabled = value as boolean;
+      // Reset hours to 0 when disabled
+      if (!value) {
+        newServices[index].hours = 0;
+      }
+    } else if (field === 'hours') {
+      // Ensure minimum of 0 and increment by 0.5
+      const hours = Math.max(0, Math.round((value as number) * 2) / 2);
+      newServices[index].hours = hours;
+    }
+    setAdditionalServices(newServices);
   };
 
   // Update labor member
@@ -172,6 +197,12 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     return ratePerKm * distance * trips;
   };
 
+  const calculateAdditionalServicesTotal = () => {
+    return additionalServices
+      .filter(service => service.enabled && service.hours > 0)
+      .reduce((total, service) => total + (service.hours * service.rate), 0);
+  };
+
   const calculateAdditionalLaborTotal = () => {
     return additionalLabor.reduce((sum, member) => {
       const hours = parseFloat(member.hours) || 0;
@@ -180,7 +211,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     }, 0);
   };
 
-  const calculateLaborSubtotal = () => workStages.reduce((sum, stage) => sum + calculateStageTotal(stage), 0) + calculateAdditionalLaborTotal();
+  const calculateLaborSubtotal = () => workStages.reduce((sum, stage) => sum + calculateStageTotal(stage), 0) + calculateAdditionalServicesTotal() + calculateAdditionalLaborTotal();
   const calculateMaterialsSubtotal = () => calculatePrimerCosts() + calculatePaintCosts() + calculateSuppliesTotal();
   const calculateSubtotal = () => calculateLaborSubtotal() + calculateMaterialsSubtotal() + calculateTravelTotal();
   
@@ -691,6 +722,63 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                   </Button>
                 </div>
               ))}
+            </CardContent>
+          </Card>
+
+          {/* Additional Services */}
+          <Card className="mb-4 border-2 border-[#D4A574]">
+            <CardHeader>
+              <CardTitle className="text-lg text-[#D4A574]">Additional Services</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {additionalServices.map((service, i) => (
+                <div key={i} className="border border-[#D4A574] rounded p-3 mb-2 bg-[#D4A574]/10">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Checkbox 
+                        checked={service.enabled}
+                        onCheckedChange={(checked: boolean) => updateAdditionalService(i, 'enabled', checked)}
+                      />
+                      <span className="font-medium">{service.name}</span>
+                    </div>
+                    <span className="text-sm text-gray-600">${service.rate}/hour</span>
+                  </div>
+                  {service.enabled && (
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => updateAdditionalService(i, 'hours', Math.max(0, service.hours - 0.5))}
+                        disabled={service.hours <= 0}
+                        className="px-2"
+                      >
+                        -
+                      </Button>
+                      <Input
+                        type="number"
+                        step="0.5"
+                        min="0"
+                        value={service.hours}
+                        onChange={(e) => updateAdditionalService(i, 'hours', Math.max(0, parseFloat(e.target.value) || 0))}
+                        className="w-20 text-center"
+                      />
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => updateAdditionalService(i, 'hours', service.hours + 0.5)}
+                        className="px-2"
+                      >
+                        +
+                      </Button>
+                      <span className="text-sm">hours</span>
+                      <span className="ml-auto font-medium">${(service.hours * service.rate).toFixed(2)}</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+              <div className="text-right font-medium">
+                Additional Services Total: ${calculateAdditionalServicesTotal().toFixed(2)}
+              </div>
             </CardContent>
           </Card>
 
