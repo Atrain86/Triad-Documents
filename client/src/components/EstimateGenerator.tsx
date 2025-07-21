@@ -368,28 +368,28 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       pdf.text('Services & Labor', 10, yPos);
       yPos += 8;
       
-      // Work stages
+      // Work stages (increased spacing for better readability)
       workStages.filter(stage => parseFloat(String(stage.hours)) > 0).forEach((stage) => {
         const hours = parseFloat(String(stage.hours)) || 0;
         const total = (hours * stage.rate).toFixed(2);
         
         pdf.setFont('helvetica', 'normal');
         pdf.text(stage.description || stage.name, 15, yPos);
-        pdf.text(`${hours}h × $${stage.rate}`, 15, yPos + 4);
+        pdf.text(`${hours}h × $${stage.rate}`, 15, yPos + 5);  // Increased spacing from 4 to 5
         pdf.text(`$${total}`, 190, yPos, { align: 'right' });
-        yPos += 12;
+        yPos += 15;  // Increased spacing from 12 to 15
       });
       
-      // Additional Labor
+      // Additional Labor (increased spacing for better readability)
       additionalLabor.filter(member => member.name && parseFloat(String(member.hours)) > 0).forEach((member) => {
         const hours = parseFloat(String(member.hours)) || 0;
         const rate = parseFloat(String(member.rate)) || 0;
         const total = (hours * rate).toFixed(2);
         
         pdf.text(member.name, 15, yPos);
-        pdf.text(`${hours}h × $${rate}`, 15, yPos + 4);
+        pdf.text(`${hours}h × $${rate}`, 15, yPos + 5);  // Increased spacing from 4 to 5
         pdf.text(`$${total}`, 190, yPos, { align: 'right' });
-        yPos += 12;
+        yPos += 15;  // Increased spacing from 12 to 15
       });
       
       yPos += 10;
@@ -536,28 +536,28 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       pdf.text('Services & Labor', 10, yPos);
       yPos += 8;
       
-      // Work stages
+      // Work stages (increased spacing for better readability)
       workStages.filter(stage => parseFloat(String(stage.hours)) > 0).forEach((stage) => {
         const hours = parseFloat(String(stage.hours)) || 0;
         const total = (hours * stage.rate).toFixed(2);
         
         pdf.setFont('helvetica', 'normal');
         pdf.text(stage.description || stage.name, 15, yPos);
-        pdf.text(`${hours}h × $${stage.rate}`, 15, yPos + 4);
+        pdf.text(`${hours}h × $${stage.rate}`, 15, yPos + 5);  // Increased spacing from 4 to 5
         pdf.text(`$${total}`, 190, yPos, { align: 'right' });
-        yPos += 12;
+        yPos += 15;  // Increased spacing from 12 to 15
       });
       
-      // Additional Labor
+      // Additional Labor (increased spacing for better readability)
       additionalLabor.filter(member => member.name && parseFloat(String(member.hours)) > 0).forEach((member) => {
         const hours = parseFloat(String(member.hours)) || 0;
         const rate = parseFloat(String(member.rate)) || 0;
         const total = (hours * rate).toFixed(2);
         
         pdf.text(member.name, 15, yPos);
-        pdf.text(`${hours}h × $${rate}`, 15, yPos + 4);
+        pdf.text(`${hours}h × $${rate}`, 15, yPos + 5);  // Increased spacing from 4 to 5
         pdf.text(`$${total}`, 190, yPos, { align: 'right' });
-        yPos += 12;
+        yPos += 15;  // Increased spacing from 12 to 15
       });
       
       yPos += 10;

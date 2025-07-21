@@ -278,7 +278,6 @@ IMPORTANT NOTE: This is an estimate, not a final quote. Final costs may vary bas
 Best regards,
 
 A-Frame Painting
-Licensed • Insured • Professional
 cortespainter@gmail.com
 884 Hayes Rd, Manson's Landing, BC V0P1K0`;
 
