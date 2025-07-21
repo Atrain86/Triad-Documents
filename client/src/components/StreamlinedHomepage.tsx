@@ -302,7 +302,7 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
 
         {projects.length > 0 && (
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg" style={{ color: '#DCDCAA' }}>
+            <h2 className="text-lg" style={{ color: paintBrainColors.orange }}>
               {showArchived ? 
                 <span className="font-semibold">Archived Projects</span> : 
                 <>
