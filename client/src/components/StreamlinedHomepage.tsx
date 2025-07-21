@@ -302,10 +302,12 @@ export default function StreamlinedHomepage({ onSelectProject }: { onSelectProje
 
         {projects.length > 0 && (
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold" style={{ color: '#DCDCAA' }}>
+            <h2 className="text-lg" style={{ color: '#DCDCAA' }}>
               {showArchived ? 
-                `Archived Projects` : 
-                `${projects.filter((p: any) => p.status !== 'archived').length} active project${projects.filter((p: any) => p.status !== 'archived').length === 1 ? '' : 's'}`
+                <span className="font-semibold">Archived Projects</span> : 
+                <>
+                  <span className="font-bold">{projects.filter((p: any) => p.status !== 'archived').length} active project{projects.filter((p: any) => p.status !== 'archived').length === 1 ? '' : 's'}</span>
+                </>
               }
             </h2>
             <div className="flex items-center gap-3">
