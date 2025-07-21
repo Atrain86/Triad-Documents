@@ -847,14 +847,14 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
               {actionMode === 'email' ? (
                 <Button 
                   onClick={sendEstimateEmail} 
-                  className="bg-[#569CD6] hover:bg-[#4a8bc2] min-w-[120px]"
+                  className="bg-[#569CD6] hover:bg-[#4a8bc2] px-4 py-2 text-sm"
                   disabled={sendEmailMutation.isPending}
                 >
                   <Mail className="w-4 h-4 mr-2" />
                   {sendEmailMutation.isPending ? 'Sending...' : 'Send Email'}
                 </Button>
               ) : (
-                <Button onClick={generatePDF} className="bg-[#6A9955] hover:bg-[#5a8245] min-w-[120px]">
+                <Button onClick={generatePDF} className="bg-[#6A9955] hover:bg-[#5a8245] px-4 py-2 text-sm">
                   <Download className="w-4 h-4 mr-2" />
                   Download PDF
                 </Button>
