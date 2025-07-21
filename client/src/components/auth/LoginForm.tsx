@@ -63,7 +63,7 @@ const LoginForm: React.FC = () => {
               className="h-60 w-60 object-contain"
             />
           </div>
-          <div className="text-white text-xl font-medium -mt-8 leading-relaxed">
+          <div className="text-white text-xl font-medium -mt-8 leading-relaxed" style={{ fontFamily: 'Source Sans Pro, sans-serif' }}>
             <p className="text-center">Smart project management</p>
             <p className="text-center">for painters</p>
           </div>
