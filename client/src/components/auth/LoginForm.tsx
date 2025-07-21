@@ -109,9 +109,9 @@ const LoginForm: React.FC = () => {
               </Button>
               <Button 
                 onClick={handleRegister}
-                className="bg-purple-600 hover:bg-purple-700 text-white"
+                className="text-white hover:opacity-90"
                 disabled={isLoading}
-                style={{ backgroundColor: '#8B5FBF' }}
+                style={{ backgroundColor: '#7B4FF2', borderColor: '#7B4FF2' }}
               >
                 Register
               </Button>
