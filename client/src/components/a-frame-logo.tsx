@@ -1,4 +1,4 @@
-import logoImage from "@assets/IMG_2014_1753077652007.jpeg";
+import logoImage from "@assets/11B133FD-4E46-4980-9620-6520E00C0B57_1753078345192.png";
 
 interface AFrameLogoProps {
   className?: string;
@@ -6,24 +6,11 @@ interface AFrameLogoProps {
 
 export default function AFrameLogo({ className = "w-8 h-8" }: AFrameLogoProps) {
   return (
-    <div 
-      className={`${className} flex items-center justify-center`}
-      style={{
-        background: `url(${logoImage})`,
-        backgroundSize: 'contain',
-        backgroundRepeat: 'no-repeat',
-        backgroundPosition: 'center',
-        WebkitMask: `url(${logoImage})`,
-        mask: `url(${logoImage})`,
-        WebkitMaskSize: 'contain',
-        maskSize: 'contain',
-        WebkitMaskRepeat: 'no-repeat',
-        maskRepeat: 'no-repeat',
-        WebkitMaskPosition: 'center',
-        maskPosition: 'center',
-        backgroundColor: 'currentColor',
-        filter: 'invert(1) brightness(2) contrast(1.5)'
-      }}
+    <img
+      src={logoImage}
+      alt="Paint Brain Logo"
+      className={className}
+      style={{ objectFit: 'contain' }}
     />
   );
 }
