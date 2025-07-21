@@ -58,7 +58,7 @@ const LoginForm: React.FC = () => {
         <div className="text-center mb-4">
           <div className="w-64 h-64 mx-auto flex items-center justify-center" style={{ backgroundColor: '#000000', boxShadow: 'inset 0 0 100px #000000, inset 0 0 200px #000000' }}>
             <img 
-              src="/PAINY BRAIN LOGO 1_1752338774418.png" 
+              src="/attached_assets/PAINt BRAIN LOGO 2_trans_1753080051916.png" 
               alt="Paint Brain Logo" 
               className="h-60 w-60 object-contain"
             />
