@@ -5,12 +5,28 @@ interface AFrameLogoProps {
 }
 
 export default function AFrameLogo({ className = "w-8 h-8" }: AFrameLogoProps) {
+  const timestamp = Date.now();
+  
   return (
-    <img
-      src={logoImage}
-      alt="Paint Brain Logo"
-      className={className}
-      style={{ objectFit: 'contain' }}
-    />
+    <div 
+      className={className} 
+      style={{ 
+        background: 'transparent', 
+        border: '1px solid red' // Temporary debug border
+      }}
+    >
+      <img
+        src={`${logoImage}?v=${timestamp}`}
+        alt="Paint Brain Logo"
+        className="w-full h-full"
+        style={{ 
+          objectFit: 'contain',
+          background: 'transparent',
+          border: '1px solid blue' // Temporary debug border
+        }}
+        onLoad={() => console.log('Logo loaded:', logoImage)}
+        onError={() => console.error('Logo failed to load:', logoImage)}
+      />
+    </div>
   );
 }
