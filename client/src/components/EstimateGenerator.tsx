@@ -464,7 +464,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       pdf.setFillColor(5, 150, 105); // #059669
       pdf.rect(10, yPos - 5, 190, 10, 'F');  // Wide green box covering full width
       pdf.setTextColor(255, 255, 255);
-      pdf.text('Estimate Total:', 15, yPos);
+      pdf.text('Estimate Total', 15, yPos);
       pdf.text(`$${calculateTotal().toFixed(2)}`, 190, yPos, { align: 'right' });
       
       // Footer with Important Note and Estimate Validity (increased spacing to prevent cutoff)
@@ -680,7 +680,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       pdf.rect(10, yPos - 7, 190, 16, 'F');  // Taller box for larger font
       pdf.setTextColor(0, 0, 0); // Black text on orange background
       pdf.setFontSize(16); // Larger font for total
-      pdf.text('ESTIMATE TOTAL:', 15, yPos);
+      pdf.text('ESTIMATE TOTAL', 15, yPos);
       pdf.text(`$${calculateTotal().toFixed(2)}`, 190, yPos, { align: 'right' });
       pdf.setFontSize(12); // Reset font size
       
