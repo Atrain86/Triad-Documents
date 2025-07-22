@@ -369,8 +369,8 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       const laborStartY = yPos;
       
       // Calculate container height based on content
-      const validWorkStages = workStages.filter(stage => parseFloat(String(stage.hours)) > 0);
-      const validAdditionalLabor = additionalLabor.filter(member => member.name && parseFloat(String(member.hours)) > 0);
+      const validWorkStages = workStages.filter((stage: any) => parseFloat(String(stage.hours)) > 0);
+      const validAdditionalLabor = additionalLabor.filter((member: any) => member.name && parseFloat(String(member.hours)) > 0);
       const laborItemCount = validWorkStages.length + validAdditionalLabor.length;
       const laborContainerHeight = 8 + (laborItemCount * 15) + 10; // Header + items + bottom padding
       
@@ -706,7 +706,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
         if (pdfBase64.length > 5000000) { // ~3.75MB base64 limit
           throw new Error('PDF too large for email. Please reduce content.');
         }
-      } catch (pdfError) {
+      } catch (pdfError: any) {
         console.error('PDF generation error:', pdfError);
         throw new Error(`PDF generation failed: ${pdfError.message}`);
       }
