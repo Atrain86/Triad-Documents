@@ -234,24 +234,150 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     }
   });
 
-  // Generate PDF (basic)
+  // Generate PDF using your HTML template
   const generatePDF = async () => {
-    if (!printRef.current) return;
-
     try {
-      const canvas = await html2canvas(printRef.current, { scale: 1, backgroundColor: '#fff', useCORS: true });
-      const imgData = canvas.toDataURL('image/jpeg', 0.8);
-      const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
-      const imgProps = pdf.getImageProperties(imgData);
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      // Create HTML content using your exact template
+      const htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>A-FRAME Estimate</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-black text-white font-sans p-8">
+    <!-- Header -->
+    <div class="flex justify-between items-start border-b border-gray-700 pb-4 mb-6">
+      <div>
+        <img src="/logo.png" alt="A-FRAME Logo" class="h-12 mb-2" />
+        <h1 class="text-2xl font-semibold">Estimate</h1>
+      </div>
+      <div class="text-right text-sm">
+        <p><span class="text-gray-400">Estimate #</span> ${estimateNumber || 'EST-001'}</p>
+        <p><span class="text-gray-400">Date:</span> ${new Date().toISOString().split('T')[0]}</p>
+      </div>
+    </div>
 
-      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`Estimate-${estimateNumber || 'unknown'}.pdf`);
+    <!-- Contact Info -->
+    <div class="grid grid-cols-2 gap-4 mb-10">
+      <div>
+        <p class="text-gray-400 uppercase text-sm font-medium mb-1">Estimate For:</p>
+        <p class="font-semibold">${clientName || 'Client Name'}</p>
+        <p>${clientAddress || '123 Main St'}</p>
+        <p>${clientCity || 'City'}, ${clientPostal || 'Postal Code'}</p>
+        <p>${clientEmail || 'client@email.com'}</p>
+      </div>
+      <div class="text-right">
+        <p class="text-gray-400 uppercase text-sm font-medium mb-1">From:</p>
+        <p class="font-semibold">A-Frame Painting</p>
+        <p>884 Hayes Rd</p>
+        <p>Mansons Landing, BC</p>
+        <p>cortespainter@gmail.com</p>
+      </div>
+    </div>
+
+    <!-- Category Box Generator -->
+    <script>
+      const categories = [
+        {
+          title: 'Services & Labor',
+          color: 'border-red-500 text-red-500',
+          items: [
+            { label: 'Prep', price: '$480.00' },
+            { label: '8h × $60', price: '$480.00' },
+            { label: 'Priming', price: '$480.00' },
+            { label: '8h × $60', price: '$480.00' },
+          ],
+        },
+        {
+          title: 'Materials & Paint',
+          color: 'border-yellow-400 text-yellow-400',
+          items: [
+            { label: 'Paint & Supplies', price: '$665.00' },
+            { label: 'Delivery', price: '$50.00' },
+          ],
+        },
+        {
+          title: 'Additional Tools',
+          color: 'border-green-400 text-green-400',
+          items: [
+            { label: 'Drop Cloths', price: '$60.00' },
+          ],
+        },
+        {
+          title: 'Project Notes',
+          color: 'border-blue-400 text-blue-400',
+          items: [
+            { label: 'Exterior 4 Rooms', price: '' },
+          ],
+        },
+        {
+          title: 'Expenses',
+          color: 'border-purple-400 text-purple-400',
+          items: [
+            { label: '3 receipts • Materials', price: '$63.75' },
+          ],
+        },
+      ];
+    </script>
+
+    <div id="estimates"></div>
+
+    <script>
+      const container = document.getElementById('estimates');
+      categories.forEach(cat => {
+        const block = document.createElement('div');
+        block.className = \`mb-8\`;
+
+        const title = document.createElement('h2');
+        title.className = \`mb-2 text-lg font-semibold \${cat.color}\`;
+        title.textContent = cat.title;
+        block.appendChild(title);
+
+        const box = document.createElement('div');
+        box.className = \`border rounded-md border-opacity-50 p-4 \${cat.color} bg-gray-900\`;
+
+        cat.items.forEach(item => {
+          const row = document.createElement('div');
+          row.className = 'flex justify-between border-b border-gray-700 py-1';
+          row.innerHTML = \`<span>\${item.label}</span><span>\${item.price}</span>\`;
+          box.appendChild(row);
+        });
+
+        block.appendChild(box);
+        container.appendChild(block);
+      });
+    </script>
+
+    <!-- Total -->
+    <div class="text-right border-t border-gray-600 pt-4 text-xl font-bold">
+      Estimate Total: $${calculateTotal().toFixed(2)}
+    </div>
+  </body>
+</html>`;
+
+      // Create a new window to render and print the HTML
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        throw new Error('Could not open print window. Please allow popups.');
+      }
+      
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+      
+      // Wait for content to load, then trigger print dialog
+      printWindow.onload = () => {
+        setTimeout(() => {
+          printWindow.print();
+          printWindow.close();
+        }, 500);
+      };
 
       toast({
         title: 'PDF Generated',
-        description: 'Estimate PDF has been downloaded.',
+        description: 'Estimate PDF opened for download.',
       });
     } catch (error) {
       toast({
