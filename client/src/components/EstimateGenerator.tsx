@@ -242,18 +242,9 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     const subtotal = calculateSubtotal();
     let totalTax = 0;
     
-    console.log('Tax Debug:', {
-      country: taxConfig.country,
-      gst: taxConfig.gst,
-      subtotal: subtotal,
-      taxConfig: taxConfig
-    });
-    
     if (taxConfig.country === 'CA') {
-      const gstAmount = subtotal * ((taxConfig.gst || 0) / 100);
-      const pstAmount = subtotal * ((taxConfig.pst || taxConfig.hst || 0) / 100);
-      totalTax += gstAmount + pstAmount;
-      console.log('CA Tax Calculation:', { gstAmount, pstAmount, totalTax });
+      totalTax += subtotal * ((taxConfig.gst || 0) / 100);
+      totalTax += subtotal * ((taxConfig.pst || taxConfig.hst || 0) / 100);
     } else if (taxConfig.country === 'US') {
       totalTax += subtotal * ((taxConfig.salesTax || 0) / 100);
     } else if (taxConfig.country === 'OTHER') {
@@ -261,7 +252,6 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     }
     
     totalTax += subtotal * ((taxConfig.otherTax || 0) / 100);
-    console.log('Final Tax Amount:', totalTax);
     return totalTax;
   };
   

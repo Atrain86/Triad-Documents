@@ -1211,9 +1211,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                             case 'tools': 
                               return `${itemCount} tool${itemCount !== 1 ? 's' : ''}`;
                             case 'dailyHours': {
-                              const totalHours = dailyHours.reduce((sum, entry) => sum + entry.hours, 0);
+                              const totalHours = dailyHours.reduce((sum, entry) => sum + (typeof entry.hours === 'number' ? entry.hours : parseFloat(entry.hours) || 0), 0);
                               const totalEarnings = totalHours * (project?.hourlyRate || 60);
-                              return `${totalHours}hr • $${totalEarnings.toLocaleString()}`;
+                              return `${totalHours.toFixed(1)}hr • $${totalEarnings.toLocaleString()}`;
                             }
                             case 'receipts': {
                               const totalAmount = receipts.reduce((sum, receipt) => sum + parseFloat(receipt.amount), 0);
@@ -1588,10 +1588,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                             <div className="pt-2 border-t border-green-700">
                               <div className="flex items-center justify-between w-full">
                                 <span className="font-semibold text-green-300 text-sm sm:text-base">
-                                  {dailyHours.reduce((sum, h) => sum + h.hours, 0).toFixed(1)} hours
+                                  {dailyHours.reduce((sum, h) => sum + (typeof h.hours === 'number' ? h.hours : parseFloat(h.hours) || 0), 0).toFixed(1)} hours
                                 </span>
                                 <span className="text-sm sm:text-base text-green-400 font-bold">
-                                  ${(dailyHours.reduce((sum, h) => sum + (h.hours * 60), 0)).toLocaleString()}
+                                  ${(dailyHours.reduce((sum, h) => sum + ((typeof h.hours === 'number' ? h.hours : parseFloat(h.hours) || 0) * 60), 0)).toLocaleString()}
                                 </span>
                               </div>
                             </div>
