@@ -441,6 +441,12 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     queryKey: [`/api/projects/${projectId}/hours`],
   });
 
+  // Debug daily hours data
+  React.useEffect(() => {
+    console.log('Daily hours data:', dailyHours);
+    console.log('Daily hours length:', dailyHours.length);
+  }, [dailyHours]);
+
   // Critical mutations that need to be declared early
   const editProjectMutation = useMutation({
     mutationFn: async (projectData: any) => {
@@ -498,6 +504,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/hours`] });
+      queryClient.refetchQueries({ queryKey: [`/api/projects/${projectId}/hours`] });
       setShowDatePicker(false);
       setSelectedDate('');
       setHoursInput('');
