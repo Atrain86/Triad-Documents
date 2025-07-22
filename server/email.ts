@@ -1,7 +1,5 @@
 import nodemailer from 'nodemailer';
 import fs from 'fs';
-// @ts-ignore - html-pdf-node doesn't have types
-import htmlPdf from 'html-pdf-node';
 
 // Create reusable transporter object using Gmail
 const createTransporter = () => {
@@ -237,28 +235,7 @@ cortespainter@gmail.com`;
   });
 }
 
-async function generatePDFFromHTML(htmlContent: string): Promise<Buffer> {
-  const options = {
-    format: 'A4',
-    printBackground: true,
-    margin: {
-      top: '20px',
-      right: '20px', 
-      bottom: '20px',
-      left: '20px'
-    }
-  };
 
-  const file = { content: htmlContent };
-  
-  try {
-    const pdfBuffer = await htmlPdf.generatePdf(file, options);
-    return pdfBuffer;
-  } catch (error: any) {
-    console.error('Error generating PDF:', error);
-    throw new Error(`PDF generation failed: ${error?.message || 'Unknown error'}`);
-  }
-}
 
 export async function sendEstimateEmail(
   recipientEmail: string,
@@ -267,7 +244,7 @@ export async function sendEstimateEmail(
   projectTitle: string,
   totalAmount: string,
   customMessage: string,
-  htmlContent: string
+  pdfBuffer: Buffer
 ): Promise<boolean> {
   const subject = `Your Painting Estimate from A-Frame Painting - ${projectTitle}`;
   
@@ -335,10 +312,7 @@ cortespainter@gmail.com`;
     </div>
   `;
 
-  // Generate PDF from HTML content
-  console.log('Generating PDF from HTML content...');
-  const pdfBuffer = await generatePDFFromHTML(htmlContent);
-  console.log('PDF generated successfully, size:', pdfBuffer.length, 'bytes');
+  console.log('Received PDF buffer, size:', pdfBuffer.length, 'bytes');
 
   return sendEmail({
     to: recipientEmail,

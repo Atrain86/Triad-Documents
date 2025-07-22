@@ -504,22 +504,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/send-estimate-email', async (req, res) => {
     try {
-      const { recipientEmail, clientName, estimateNumber, projectTitle, totalAmount, customMessage, htmlContent } = req.body;
+      const { recipientEmail, clientName, estimateNumber, projectTitle, totalAmount, customMessage, pdfData } = req.body;
       
       // Debug: Log what we received
       console.log('Received estimate request:');
       console.log('- recipientEmail:', recipientEmail);
       console.log('- clientName:', clientName);
-      console.log('- htmlContent type:', typeof htmlContent);
-      console.log('- htmlContent length:', htmlContent ? htmlContent.length : 'undefined');
+      console.log('- pdfData type:', typeof pdfData);
+      console.log('- pdfData length:', pdfData ? pdfData.length : 'undefined');
 
       // Validate required fields
       if (!recipientEmail || !clientName) {
         return res.status(400).json({ error: 'recipientEmail and clientName are required' });
       }
       
-      if (!htmlContent || typeof htmlContent !== 'string') {
-        return res.status(400).json({ error: 'HTML content must be provided' });
+      if (!pdfData || typeof pdfData !== 'string') {
+        return res.status(400).json({ error: 'PDF data must be provided as base64 string' });
       }
       
       // Basic email validation
@@ -528,7 +528,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Invalid email address format' });
       }
 
-      // Send estimate email with HTML content
+      // Convert base64 PDF to buffer
+      const base64Data = pdfData.includes(',') ? pdfData.split(',')[1] : pdfData;
+      const pdfBuffer = Buffer.from(base64Data, 'base64');
+      console.log('Successfully created PDF buffer, size:', pdfBuffer.length, 'bytes');
+
+      // Send estimate email with PDF buffer
       await sendEstimateEmail(
         recipientEmail,
         clientName,
@@ -536,7 +541,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         projectTitle || 'Painting Estimate',
         totalAmount || '0.00',
         customMessage || '',
-        htmlContent  // Send HTML content instead of PDF buffer
+        pdfBuffer
       );
       res.json({ success: true, message: 'Estimate email sent successfully' });
     } catch (error) {

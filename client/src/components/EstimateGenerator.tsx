@@ -388,7 +388,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     }
   };
 
-  // Generate PDF using HTML template and send email
+  // Generate PDF and send email
   const sendEstimateEmail = async () => {
     if (!clientEmail || !clientEmail.trim()) {
       toast({
@@ -400,7 +400,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     }
 
     try {
-      // Create HTML content using your exact template (same as generatePDF)
+      // Generate PDF using browser's print functionality
       const htmlContent = `
 <!DOCTYPE html>
 <html lang="en">
@@ -414,7 +414,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     <!-- Header -->
     <div class="flex justify-between items-start border-b border-gray-700 pb-4 mb-6">
       <div>
-        <img src="/logo.png" alt="A-FRAME Logo" class="h-12 mb-2" />
+        <img src="/aframe-logo.png" alt="A-FRAME Logo" class="h-12 mb-2" />
         <h1 class="text-2xl font-semibold">Estimate</h1>
       </div>
       <div class="text-right text-sm">
@@ -441,78 +441,24 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       </div>
     </div>
 
-    <!-- Category Box Generator -->
-    <script>
-      const categories = [
-        {
-          title: 'Services & Labor',
-          color: 'border-red-500 text-red-500',
-          items: [
-            { label: 'Prep', price: '$480.00' },
-            { label: '8h × $60', price: '$480.00' },
-            { label: 'Priming', price: '$480.00' },
-            { label: '8h × $60', price: '$480.00' },
-          ],
-        },
-        {
-          title: 'Materials & Paint',
-          color: 'border-yellow-400 text-yellow-400',
-          items: [
-            { label: 'Paint & Supplies', price: '$665.00' },
-            { label: 'Delivery', price: '$50.00' },
-          ],
-        },
-        {
-          title: 'Additional Tools',
-          color: 'border-green-400 text-green-400',
-          items: [
-            { label: 'Drop Cloths', price: '$60.00' },
-          ],
-        },
-        {
-          title: 'Project Notes',
-          color: 'border-blue-400 text-blue-400',
-          items: [
-            { label: 'Exterior 4 Rooms', price: '' },
-          ],
-        },
-        {
-          title: 'Expenses',
-          color: 'border-purple-400 text-purple-400',
-          items: [
-            { label: '3 receipts • Materials', price: '$63.75' },
-          ],
-        },
-      ];
-    </script>
-
-    <div id="estimates"></div>
-
-    <script>
-      const container = document.getElementById('estimates');
-      categories.forEach(cat => {
-        const block = document.createElement('div');
-        block.className = \`mb-8\`;
-
-        const title = document.createElement('h2');
-        title.className = \`mb-2 text-lg font-semibold \${cat.color}\`;
-        title.textContent = cat.title;
-        block.appendChild(title);
-
-        const box = document.createElement('div');
-        box.className = \`border rounded-md border-opacity-50 p-4 \${cat.color} bg-gray-900\`;
-
-        cat.items.forEach(item => {
-          const row = document.createElement('div');
-          row.className = 'flex justify-between border-b border-gray-700 py-1';
-          row.innerHTML = \`<span>\${item.label}</span><span>\${item.price}</span>\`;
-          box.appendChild(row);
-        });
-
-        block.appendChild(box);
-        container.appendChild(block);
-      });
-    </script>
+    <!-- Services & Labor -->
+    <div class="mb-8">
+      <h2 class="mb-2 text-lg font-semibold border-red-500 text-red-500">Services & Labor</h2>
+      <div class="border rounded-md border-opacity-50 p-4 border-red-500 text-red-500 bg-gray-900">
+        ${workStages.map(stage => 
+          stage.hours ? `<div class="flex justify-between border-b border-gray-700 py-1">
+            <span>${stage.name}</span>
+            <span>$${(parseFloat(stage.hours) * stage.rate).toFixed(2)}</span>
+          </div>` : ''
+        ).join('')}
+        ${additionalLabor.map(labor => 
+          labor.name && labor.hours && labor.rate ? `<div class="flex justify-between border-b border-gray-700 py-1">
+            <span>${labor.name}</span>
+            <span>$${(parseFloat(labor.hours) * parseFloat(labor.rate)).toFixed(2)}</span>
+          </div>` : ''
+        ).join('')}
+      </div>
+    </div>
 
     <!-- Total -->
     <div class="text-right border-t border-gray-600 pt-4 text-xl font-bold">
@@ -521,7 +467,54 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   </body>
 </html>`;
 
-      // Send HTML content directly to email API
+      // Create hidden window to generate PDF
+      const printWindow = window.open('', '_blank', 'width=800,height=600');
+      if (!printWindow) {
+        throw new Error('Pop-up blocked. Please allow pop-ups and try again.');
+      }
+      
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+      
+      // Wait for content to load
+      await new Promise((resolve) => {
+        printWindow.onload = () => {
+          setTimeout(resolve, 1000);
+        };
+      });
+
+      // Capture as canvas and convert to PDF
+      const canvas = await html2canvas(printWindow.document.body, {
+        backgroundColor: '#000000',
+        scale: 1,
+        useCORS: true,
+        allowTaint: true
+      });
+
+      printWindow.close();
+
+      // Convert canvas to PDF
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgData = canvas.toDataURL('image/jpeg', 0.7);
+      const imgWidth = 210;
+      const pageHeight = 295;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+
+      let position = 0;
+      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      // Convert PDF to base64
+      const pdfData = pdf.output('datauristring');
+
       const emailData = {
         recipientEmail: clientEmail,
         clientName: clientName || 'Client',
@@ -529,7 +522,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
         projectTitle: projectTitle || 'Painting Estimate',
         totalAmount: calculateTotal().toFixed(2),
         customMessage: '',
-        htmlContent: htmlContent  // Send HTML instead of PDF
+        pdfData: pdfData
       };
 
       await sendEmailMutation.mutateAsync(emailData);
