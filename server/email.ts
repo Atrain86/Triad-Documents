@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer';
 import fs from 'fs';
-import puppeteer from 'puppeteer';
+// @ts-ignore - html-pdf-node doesn't have types
+import htmlPdf from 'html-pdf-node';
 
 // Create reusable transporter object using Gmail
 const createTransporter = () => {
@@ -237,29 +238,25 @@ cortespainter@gmail.com`;
 }
 
 async function generatePDFFromHTML(htmlContent: string): Promise<Buffer> {
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
-  });
+  const options = {
+    format: 'A4',
+    printBackground: true,
+    margin: {
+      top: '20px',
+      right: '20px', 
+      bottom: '20px',
+      left: '20px'
+    }
+  };
+
+  const file = { content: htmlContent };
   
   try {
-    const page = await browser.newPage();
-    await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
-    
-    const pdfBuffer = await page.pdf({
-      format: 'A4',
-      printBackground: true,
-      margin: {
-        top: '20px',
-        right: '20px',
-        bottom: '20px',
-        left: '20px'
-      }
-    });
-    
-    return Buffer.from(pdfBuffer);
-  } finally {
-    await browser.close();
+    const pdfBuffer = await htmlPdf.generatePdf(file, options);
+    return pdfBuffer;
+  } catch (error: any) {
+    console.error('Error generating PDF:', error);
+    throw new Error(`PDF generation failed: ${error?.message || 'Unknown error'}`);
   }
 }
 
