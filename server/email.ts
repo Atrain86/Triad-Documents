@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import fs from 'fs';
+import puppeteer from 'puppeteer';
 
 // Create reusable transporter object using Gmail
 const createTransporter = () => {
@@ -235,6 +236,33 @@ cortespainter@gmail.com`;
   });
 }
 
+async function generatePDFFromHTML(htmlContent: string): Promise<Buffer> {
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+  });
+  
+  try {
+    const page = await browser.newPage();
+    await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+    
+    const pdfBuffer = await page.pdf({
+      format: 'A4',
+      printBackground: true,
+      margin: {
+        top: '20px',
+        right: '20px',
+        bottom: '20px',
+        left: '20px'
+      }
+    });
+    
+    return Buffer.from(pdfBuffer);
+  } finally {
+    await browser.close();
+  }
+}
+
 export async function sendEstimateEmail(
   recipientEmail: string,
   clientName: string,
@@ -310,11 +338,22 @@ cortespainter@gmail.com`;
     </div>
   `;
 
+  // Generate PDF from HTML content
+  console.log('Generating PDF from HTML content...');
+  const pdfBuffer = await generatePDFFromHTML(htmlContent);
+  console.log('PDF generated successfully, size:', pdfBuffer.length, 'bytes');
+
   return sendEmail({
     to: recipientEmail,
     subject,
     text,
-    html: htmlContent  // Use the HTML template directly as email content
+    html,
+    attachments: [
+      {
+        filename: `Estimate-${estimateNumber}-${clientName.replace(/[^a-zA-Z0-9]/g, '')}.pdf`,
+        content: pdfBuffer
+      }
+    ]
   });
 }
 
