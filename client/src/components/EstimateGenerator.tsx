@@ -405,9 +405,22 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       });
     </script>
 
-    <!-- Total -->
-    <div class="text-right border-t border-gray-600 pt-4 text-xl font-bold">
-      Estimate Total: $${calculateTotal().toFixed(2)}
+    <!-- Totals Section -->
+    <div class="border-t border-gray-600 pt-4">
+      <div class="flex justify-between text-lg mb-2">
+        <span>Subtotal:</span>
+        <span>$${calculateSubtotal().toFixed(2)}</span>
+      </div>
+      ${calculateTaxes() > 0 ? `
+      <div class="flex justify-between text-lg mb-2">
+        <span>GST (${taxConfig.gst}%):</span>
+        <span>$${calculateTaxes().toFixed(2)}</span>
+      </div>
+      ` : ''}
+      <div class="flex justify-between text-xl font-bold border-t border-gray-500 pt-2">
+        <span>Estimate Total:</span>
+        <span>$${calculateTotal().toFixed(2)}</span>
+      </div>
     </div>
   </body>
 </html>`;
@@ -568,9 +581,22 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       </div>
     </div>` : ''}
 
-    <!-- Total -->
-    <div class="text-right border-t border-gray-600 pt-4 text-xl font-bold">
-      Estimate Total: $${calculateTotal().toFixed(2)}
+    <!-- Totals Section -->
+    <div class="border-t border-gray-600 pt-4">
+      <div class="flex justify-between text-lg mb-2">
+        <span>Subtotal:</span>
+        <span>$${calculateSubtotal().toFixed(2)}</span>
+      </div>
+      ${calculateTaxes() > 0 ? `
+      <div class="flex justify-between text-lg mb-2">
+        <span>GST (${taxConfig.gst}%):</span>
+        <span>$${calculateTaxes().toFixed(2)}</span>
+      </div>
+      ` : ''}
+      <div class="flex justify-between text-xl font-bold border-t border-gray-500 pt-2">
+        <span>Estimate Total:</span>
+        <span>$${calculateTotal().toFixed(2)}</span>
+      </div>
     </div>
   </body>
 </html>`;
