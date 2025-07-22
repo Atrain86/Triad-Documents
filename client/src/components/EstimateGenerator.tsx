@@ -152,7 +152,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
   // Remove supply item
   const removeSupply = (index: number) => {
-    setSupplies(supplies.filter((_, i) => i !== index));
+    setSupplies(supplies.filter((_: any, i: number) => i !== index));
   };
 
   // Add new labor member
@@ -162,7 +162,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
   // Remove labor member
   const removeLaborMember = (index: number) => {
-    setAdditionalLabor(additionalLabor.filter((_, i) => i !== index));
+    setAdditionalLabor(additionalLabor.filter((_: any, i: number) => i !== index));
   };
 
   // Update additional service
@@ -205,7 +205,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
   // Remove work stage
   const removeWorkStage = (index: number) => {
-    setWorkStages(workStages.filter((_, i) => i !== index));
+    setWorkStages(workStages.filter((_: any, i: number) => i !== index));
   };
 
   // Calculate totals
@@ -226,8 +226,8 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     return pricePerGallon * gallons;
   };
 
-  const calculateSuppliesTotal = () => {
-    return supplies.reduce((sum, supply) => sum + supply.total, 0);
+  const calculateSuppliesTotal = (): number => {
+    return supplies.reduce((sum: number, supply: any) => sum + supply.total, 0);
   };
 
   const calculateTravelTotal = () => {
@@ -237,21 +237,21 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     return ratePerKm * distance * trips;
   };
 
-  const calculateAdditionalServicesTotal = () => {
+  const calculateAdditionalServicesTotal = (): number => {
     return additionalServices
-      .filter(service => service.enabled && service.hours > 0)
-      .reduce((total, service) => total + (service.hours * service.rate), 0);
+      .filter((service: any) => service.enabled && service.hours > 0)
+      .reduce((total: number, service: any) => total + (service.hours * service.rate), 0);
   };
 
-  const calculateAdditionalLaborTotal = () => {
-    return additionalLabor.reduce((sum, member) => {
+  const calculateAdditionalLaborTotal = (): number => {
+    return additionalLabor.reduce((sum: number, member: any) => {
       const hours = parseFloat(member.hours) || 0;
       const rate = parseFloat(member.rate) || 0;
       return sum + (hours * rate);
     }, 0);
   };
 
-  const calculateLaborSubtotal = () => workStages.reduce((sum, stage) => sum + calculateStageTotal(stage), 0) + calculateAdditionalServicesTotal() + calculateAdditionalLaborTotal();
+  const calculateLaborSubtotal = (): number => workStages.reduce((sum: number, stage: any) => sum + calculateStageTotal(stage), 0) + calculateAdditionalServicesTotal() + calculateAdditionalLaborTotal();
   const calculateMaterialsSubtotal = () => calculatePrimerCosts() + calculatePaintCosts() + calculateSuppliesTotal();
   const calculateSubtotal = () => calculateLaborSubtotal() + calculateMaterialsSubtotal() + calculateTravelTotal();
   
@@ -384,7 +384,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       yPos += 8;
       
       // Work stages (increased spacing for better readability)
-      validWorkStages.forEach((stage) => {
+      validWorkStages.forEach((stage: any) => {
         const hours = parseFloat(String(stage.hours)) || 0;
         const total = (hours * stage.rate).toFixed(2);
         
@@ -396,7 +396,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       });
       
       // Additional Labor (increased spacing for better readability)
-      validAdditionalLabor.forEach((member) => {
+      validAdditionalLabor.forEach((member: any) => {
         const hours = parseFloat(String(member.hours)) || 0;
         const rate = parseFloat(String(member.rate)) || 0;
         const total = (hours * rate).toFixed(2);
@@ -567,8 +567,8 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       const laborStartY2 = yPos;
       
       // Calculate container height based on content
-      const validWorkStages2 = workStages.filter(stage => parseFloat(String(stage.hours)) > 0);
-      const validAdditionalLabor2 = additionalLabor.filter(member => member.name && parseFloat(String(member.hours)) > 0);
+      const validWorkStages2 = workStages.filter((stage: any) => parseFloat(String(stage.hours)) > 0);
+      const validAdditionalLabor2 = additionalLabor.filter((member: any) => member.name && parseFloat(String(member.hours)) > 0);
       const laborItemCount2 = validWorkStages2.length + validAdditionalLabor2.length;
       const laborContainerHeight2 = 8 + (laborItemCount2 * 15) + 10; // Header + items + bottom padding
       
@@ -584,7 +584,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       yPos += 8;
       
       // Work stages (increased spacing for better readability)
-      validWorkStages2.forEach((stage) => {
+      validWorkStages2.forEach((stage: any) => {
         const hours = parseFloat(String(stage.hours)) || 0;
         const total = (hours * stage.rate).toFixed(2);
         
@@ -596,7 +596,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       });
       
       // Additional Labor (increased spacing for better readability)
-      validAdditionalLabor2.forEach((member) => {
+      validAdditionalLabor2.forEach((member: any) => {
         const hours = parseFloat(String(member.hours)) || 0;
         const rate = parseFloat(String(member.rate)) || 0;
         const total = (hours * rate).toFixed(2);
@@ -684,16 +684,31 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       pdf.text('This estimate is valid for 30 days from the date above.', 105, yPos, { align: 'center' });
       
       // Get PDF as base64 for email
-      const pdfOutput = pdf.output('datauristring');
-      if (!pdfOutput) {
-        throw new Error('Failed to generate PDF output');
-      }
+      let pdfOutput;
+      let pdfBase64;
       
-      const pdfBase64 = pdfOutput.split(',')[1];
-      
-      // Validate base64 data size (should be much smaller now)
-      if (pdfBase64.length > 5000000) { // ~3.75MB base64 limit
-        throw new Error('PDF too large for email. Please reduce content.');
+      try {
+        pdfOutput = pdf.output('datauristring');
+        console.log('PDF output generated:', pdfOutput ? 'Success' : 'Failed');
+        
+        if (!pdfOutput || typeof pdfOutput !== 'string') {
+          throw new Error('Failed to generate PDF output - output is not a string');
+        }
+        
+        pdfBase64 = pdfOutput.split(',')[1];
+        console.log('PDF base64 extracted, length:', pdfBase64 ? pdfBase64.length : 'undefined');
+        
+        if (!pdfBase64 || pdfBase64.length === 0) {
+          throw new Error('Failed to extract base64 data from PDF');
+        }
+        
+        // Validate base64 data size (should be much smaller now)
+        if (pdfBase64.length > 5000000) { // ~3.75MB base64 limit
+          throw new Error('PDF too large for email. Please reduce content.');
+        }
+      } catch (pdfError) {
+        console.error('PDF generation error:', pdfError);
+        throw new Error(`PDF generation failed: ${pdfError.message}`);
       }
 
       const emailData = {
@@ -782,7 +797,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
               <Button size="sm" onClick={addWorkStage} className="bg-[#DCDCAA] hover:bg-[#c4c193] text-black">+ Add Stage</Button>
             </CardHeader>
             <CardContent>
-              {workStages.map((stage, i) => (
+              {workStages.map((stage: any, i: number) => (
                 <div
                   key={i}
                   className="mb-3 border-2 border-[#DCDCAA] bg-[#DCDCAA]/10 rounded p-3"
@@ -843,7 +858,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
               <CardTitle className="text-lg text-[#D4A574]">Additional Services</CardTitle>
             </CardHeader>
             <CardContent>
-              {additionalServices.map((service, i) => (
+              {additionalServices.map((service: any, i: number) => (
                 <div key={i} className="border border-[#D4A574] rounded p-3 mb-2 bg-[#D4A574]/10">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
@@ -907,7 +922,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                   Add Member
                 </Button>
               </div>
-              {additionalLabor.map((member, i) => (
+              {additionalLabor.map((member: any, i: number) => (
                 <div key={i} className="border border-[#4ECDC4] rounded p-3 mb-2 bg-[#4ECDC4]/10">
                   <div className="grid grid-cols-4 gap-2 mb-2">
                     <Input
@@ -1035,7 +1050,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     Add Supply
                   </Button>
                 </div>
-                {supplies.map((supply, i) => (
+                {supplies.map((supply: any, i: number) => (
                   <div key={i} className="border border-[#DCDCAA] rounded p-3 mb-2 bg-[#DCDCAA]/10">
                     <div className="grid grid-cols-4 gap-2 mb-2">
                       <Input
