@@ -2,13 +2,14 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
-import { Download, Mail, Plus, Trash2 } from 'lucide-react';
+import { Download, Mail, Plus, Trash2, Loader2 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
@@ -18,7 +19,7 @@ interface EstimateGeneratorProps {
   onClose: () => void;
 }
 
-export default function EstimateGenerator({ project, isOpen, onClose }: EstimateGeneratorProps) {
+function EstimateGenerator({ project, isOpen, onClose }: EstimateGeneratorProps) {
   const { toast } = useToast();
   const printRef = useRef<HTMLDivElement>(null);
 
@@ -113,7 +114,19 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   });
 
   // Toggle state for action buttons
-  const [actionMode, setActionMode] = useState<'download' | 'email'>('email');
+  const [actionMode, setActionMode] = useState<'download' | 'email' | 'pdf'>('email');
+  
+  // Loading state
+  const [isGenerating, setIsGenerating] = useState(false);
+  
+  // Additional missing state variables
+  const [estimateDate, setEstimateDate] = useState(storedData?.estimateDate || new Date().toISOString().split('T')[0]);
+  const [primerGallons, setPrimerGallons] = useState(storedData?.primerGallons || '');
+  const [paintGallons, setPaintGallons] = useState(storedData?.paintGallons || '');
+  const [paintCostPerGallon, setPaintCostPerGallon] = useState(storedData?.paintCostPerGallon || '');
+  const [travelDistance, setTravelDistance] = useState(storedData?.travelDistance || '');
+  const [travelRate, setTravelRate] = useState(storedData?.travelRate || '0.50');
+  const [travelTrips, setTravelTrips] = useState(storedData?.travelTrips || '2');
 
   // Save form data to localStorage whenever any state changes
   useEffect(() => {
@@ -187,6 +200,23 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     const newLabor = [...additionalLabor];
     newLabor[index] = { ...newLabor[index], [field]: value };
     setAdditionalLabor(newLabor);
+  };
+
+  // Update additional labor (alias for updateLaborMember)
+  const updateAdditionalLabor = (index: number, field: string, value: string) => {
+    const newLabor = [...additionalLabor];
+    newLabor[index] = { ...newLabor[index], [field]: value };
+    setAdditionalLabor(newLabor);
+  };
+
+  // Remove additional labor member
+  const removeAdditionalLabor = (index: number) => {
+    setAdditionalLabor(additionalLabor.filter((_: any, i: number) => i !== index));
+  };
+
+  // Add additional labor member
+  const addAdditionalLabor = () => {
+    setAdditionalLabor([...additionalLabor, { name: '', hours: '', rate: '' }]);
   };
 
   // Update supply item
@@ -709,7 +739,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             {/* Work Stages */}
             <div className="space-y-3 mb-4">
               <Label className="text-gray-300">Work Stages</Label>
-              {workStages.map((stage, index) => (
+              {workStages.map((stage: any, index: number) => (
                 <div key={index} className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <Input
                     value={stage.description}
@@ -760,7 +790,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           <div className="border border-teal-500 bg-teal-900/20 rounded-lg p-4">
             <h3 className="text-teal-300 font-semibold mb-3">Additional Labor</h3>
             <div className="space-y-3">
-              {additionalLabor.map((member, index) => (
+              {additionalLabor.map((member: any, index: number) => (
                 <div key={index} className="grid grid-cols-1 sm:grid-cols-4 gap-2">
                   <Input
                     value={member.name}
@@ -868,7 +898,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             {/* Additional Supplies */}
             <div className="space-y-3">
               <Label className="text-gray-300">Additional Supplies</Label>
-              {supplies.map((supply, index) => (
+              {supplies.map((supply: any, index: number) => (
                 <div key={index} className="grid grid-cols-1 sm:grid-cols-4 gap-2">
                   <Input
                     value={supply.item}
@@ -961,7 +991,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                 <Label className="text-gray-300">Country/Region</Label>
                 <select
                   value={taxConfig.country}
-                  onChange={(e) => setTaxConfig(prev => ({ ...prev, country: e.target.value }))}
+                  onChange={(e) => setTaxConfig((prev: any) => ({ ...prev, country: e.target.value }))}
                   className="w-full bg-gray-800 border border-gray-600 text-white rounded px-3 py-2"
                 >
                   <option value="CA">Canada</option>
@@ -978,7 +1008,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                       type="number"
                       inputMode="decimal"
                       value={taxConfig.gst || ''}
-                      onChange={(e) => setTaxConfig(prev => ({ ...prev, gst: parseFloat(e.target.value) || 0 }))}
+                      onChange={(e) => setTaxConfig((prev: any) => ({ ...prev, gst: parseFloat(e.target.value) || 0 }))}
                       className="bg-gray-800 border-gray-600 text-white"
                       placeholder="5"
                     />
@@ -989,7 +1019,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                       type="number"
                       inputMode="decimal"
                       value={taxConfig.pst || taxConfig.hst || ''}
-                      onChange={(e) => setTaxConfig(prev => ({ 
+                      onChange={(e) => setTaxConfig((prev: any) => ({ 
                         ...prev, 
                         pst: parseFloat(e.target.value) || 0,
                         hst: parseFloat(e.target.value) || 0 
@@ -1008,7 +1038,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     type="number"
                     inputMode="decimal"
                     value={taxConfig.salesTax || ''}
-                    onChange={(e) => setTaxConfig(prev => ({ ...prev, salesTax: parseFloat(e.target.value) || 0 }))}
+                    onChange={(e) => setTaxConfig((prev: any) => ({ ...prev, salesTax: parseFloat(e.target.value) || 0 }))}
                     className="bg-gray-800 border-gray-600 text-white"
                     placeholder="0"
                   />
@@ -1022,7 +1052,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     type="number"
                     inputMode="decimal"
                     value={taxConfig.vat || ''}
-                    onChange={(e) => setTaxConfig(prev => ({ ...prev, vat: parseFloat(e.target.value) || 0 }))}
+                    onChange={(e) => setTaxConfig((prev: any) => ({ ...prev, vat: parseFloat(e.target.value) || 0 }))}
                     className="bg-gray-800 border-gray-600 text-white"
                     placeholder="0"
                   />
@@ -1035,7 +1065,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                   type="number"
                   inputMode="decimal"
                   value={taxConfig.otherTax || ''}
-                  onChange={(e) => setTaxConfig(prev => ({ ...prev, otherTax: parseFloat(e.target.value) || 0 }))}
+                  onChange={(e) => setTaxConfig((prev: any) => ({ ...prev, otherTax: parseFloat(e.target.value) || 0 }))}
                   className="bg-gray-800 border-gray-600 text-white"
                   placeholder="0"
                 />
