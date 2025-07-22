@@ -188,7 +188,135 @@ export default function EstimateGenerator({ projectId }: EstimateGeneratorProps)
       setIsSending(true);
       
       // Generate PDF data for email
-      const htmlContent = `<!-- Same HTML template as above -->`;
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="UTF-8">
+            <title>Estimate</title>
+            <style>
+              body {
+                font-family: Inter, sans-serif;
+                background-color: #000000;
+                color: #ffffff;
+                padding: 32px;
+                line-height: 1.4;
+                margin: 0;
+                width: 794px;
+              }
+            </style>
+          </head>
+          <body>
+            <!-- Header with Logo -->
+            <div style="margin-bottom: 32px; text-align: center;">
+              <img 
+                src="/aframe-logo.png" 
+                alt="A-Frame Painting"
+                style="height: 96px; width: auto;"
+              />
+            </div>
+
+            <!-- Title Section -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; padding-bottom: 16px; border-bottom: 2px solid #EA580C;">
+              <div>
+                <h1 style="color: #EA580C; font-size: 36px; font-weight: bold; margin: 0;">ESTIMATE</h1>
+                <p style="color: #d1d5db; font-size: 18px; margin: 8px 0 0 0;">${estimateData.date}</p>
+              </div>
+              <div style="text-align: right;">
+                <p style="color: #EA580C; font-size: 24px; font-weight: bold; margin: 0;">EST ${estimateData.estimateNumber}</p>
+              </div>
+            </div>
+
+            <!-- Client Information -->
+            <div style="display: flex; justify-content: space-between; margin-bottom: 32px;">
+              <div style="flex: 1;">
+                <h2 style="color: #EA580C; font-size: 20px; font-weight: bold; margin: 0 0 16px 0;">Client Information</h2>
+                <div style="color: #ffffff; font-size: 16px; line-height: 1.6;">
+                  <p style="margin: 0 0 8px 0; font-weight: bold;">${estimateData.clientName}</p>
+                  <p style="margin: 0 0 8px 0;">${project?.address || ''}</p>
+                  <p style="margin: 0 0 8px 0;">${project?.clientCity || ''} ${project?.clientPostal || ''}</p>
+                  <p style="margin: 0 0 8px 0;">${project?.clientEmail || ''}</p>
+                  <p style="margin: 0;">${project?.clientPhone || ''}</p>
+                </div>
+              </div>
+              <div style="flex: 1; text-align: right;">
+                <h2 style="color: #EA580C; font-size: 20px; font-weight: bold; margin: 0 0 16px 0;">From</h2>
+                <div style="color: #ffffff; font-size: 16px; line-height: 1.6;">
+                  <p style="margin: 0 0 8px 0; font-weight: bold;">A-Frame Painting</p>
+                  <p style="margin: 0 0 8px 0;">884 Hayes Rd</p>
+                  <p style="margin: 0 0 8px 0;">Manson's Landing, BC V0P1K0</p>
+                  <p style="margin: 0 0 8px 0;">cortespainter@gmail.com</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Project Title -->
+            <div style="margin-bottom: 24px;">
+              <h2 style="color: #EA580C; font-size: 24px; font-weight: bold; margin: 0;">${estimateData.projectTitle || 'Painting Estimate'}</h2>
+            </div>
+
+            <!-- Services Section -->
+            <div style="margin-bottom: 32px;">
+              <h3 style="color: #6A9955; font-size: 20px; font-weight: bold; margin: 0 0 16px 0; padding-bottom: 8px; border-bottom: 2px solid #6A9955;">Services & Labor</h3>
+              <div style="background-color: #1a1a1a; padding: 16px; border-radius: 8px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                  <span style="flex: 1; color: #ffffff;">Prep/Priming/Painting: ${estimateData.prepWork} hours</span>
+                  <span style="color: #6A9955; font-weight: bold;">$${(estimateData.prepWork * 60).toFixed(2)}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                  <span style="flex: 1; color: #ffffff;">Wood Reconditioning: ${estimateData.woodReconditioning} hours</span>
+                  <span style="color: #6A9955; font-weight: bold;">$${(estimateData.woodReconditioning * 60).toFixed(2)}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                  <span style="flex: 1; color: #ffffff;">Drywall Repair: ${estimateData.drywallRepair} hours</span>
+                  <span style="color: #6A9955; font-weight: bold;">$${(estimateData.drywallRepair * 60).toFixed(2)}</span>
+                </div>
+                <div style="border-top: 1px solid #4b5563; margin-top: 16px; padding-top: 16px;">
+                  <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 18px;">
+                    <span style="color: #ffffff;">Labor Total:</span>
+                    <span style="color: #6A9955;">$${((estimateData.prepWork + estimateData.woodReconditioning + estimateData.drywallRepair) * 60).toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Paint & Materials -->
+            <div style="margin-bottom: 32px;">
+              <h3 style="color: #DCDCAA; font-size: 20px; font-weight: bold; margin: 0 0 16px 0; padding-bottom: 8px; border-bottom: 2px solid #DCDCAA;">Paint & Materials</h3>
+              <div style="background-color: #1a1a1a; padding: 16px; border-radius: 8px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+                  <span style="color: #ffffff;">Paint Costs:</span>
+                  <span style="color: #DCDCAA; font-weight: bold;">$${estimateData.paintCost.toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Total Section -->
+            <div style="margin-top: 32px; text-align: center; background-color: #059669; padding: 20px; border-radius: 8px;">
+              <div style="color: #ffffff; font-size: 28px; font-weight: bold;">
+                GRAND TOTAL: $${(((estimateData.prepWork + estimateData.woodReconditioning + estimateData.drywallRepair) * 60) + estimateData.paintCost).toFixed(2)}
+              </div>
+            </div>
+
+            <!-- Payment Method -->
+            <div style="margin-top: 32px; text-align: center;">
+              <h3 style="color: #EA580C; font-size: 18px; font-weight: bold; margin: 0 0 8px 0;">
+                Payment Method
+              </h3>
+              <p style="color: #d1d5db; font-size: 14px; line-height: 1.5; font-weight: 600;">
+                Please send e-transfer to cortespainter@gmail.com
+              </p>
+            </div>
+
+            <!-- Disclaimer -->
+            <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #4b5563;">
+              <p style="color: #EA580C; font-size: 12px; font-weight: 600; line-height: 1.4; text-align: center;">
+                <strong>NOTE:</strong> This is an estimate only. Price excludes structural repairs discovered during work (charged hourly). If total cost may exceed estimate by 20%+, you'll be notified for approval first.
+              </p>
+            </div>
+          </body>
+        </html>
+      `;
       const iframe = document.createElement('iframe');
       iframe.style.position = 'absolute';
       iframe.style.left = '-9999px';
