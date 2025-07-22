@@ -479,7 +479,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       yPos += 5;
       pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(9);
-      const importantNoteText = 'This is an estimate, not a final quote. Final costs may vary based on actual conditions discovered during the project. If the job scope changes significantly (exceeding 20% of this estimate), we will discuss options with you before proceeding. This estimate is valid for 30 days from the date above.';
+      const importantNoteText = 'This is an estimate, not a final quote. Final costs may vary based on actual conditions discovered during the project. If the job scope changes significantly (exceeding 20% of this estimate), we will discuss options with you before proceeding. Estimate Validity: This estimate is valid for 30 days from the date above.';
       const importantNoteLines = pdf.splitTextToSize(importantNoteText, 180);
       pdf.text(importantNoteLines, 105, yPos, { align: 'center' });
       
@@ -696,7 +696,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       yPos += 5;
       pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(9);
-      const importantNoteText2 = 'This is an estimate, not a final quote. Final costs may vary based on actual conditions discovered during the project. If the job scope changes significantly (exceeding 20% of this estimate), we will discuss options with you before proceeding. This estimate is valid for 30 days from the date above.';
+      const importantNoteText2 = 'This is an estimate, not a final quote. Final costs may vary based on actual conditions discovered during the project. If the job scope changes significantly (exceeding 20% of this estimate), we will discuss options with you before proceeding. Estimate Validity: This estimate is valid for 30 days from the date above.';
       const importantNoteLines2 = pdf.splitTextToSize(importantNoteText2, 180);
       pdf.text(importantNoteLines2, 105, yPos, { align: 'center' });
       
