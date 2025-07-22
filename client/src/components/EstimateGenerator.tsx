@@ -305,218 +305,190 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     }
   });
 
-  // Generate proper PDF with jsPDF (not screenshot)
-  const generatePDF = async () => {
-    try {
-      const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
-      let yPos = 20;
+  // Helper function to generate category HTML blocks
+  const generateCategoriesHTML = () => {
+    let html = '';
+    
+    // Services & Labor Section (RED)
+    const validWorkStages = workStages.filter((stage: any) => parseFloat(String(stage.hours)) > 0);
+    const validAdditionalLabor = additionalLabor.filter((member: any) => member.name && parseFloat(String(member.hours)) > 0);
+    
+    if (validWorkStages.length > 0 || validAdditionalLabor.length > 0) {
+      html += `
+      <div class="w-full">
+        <p class="text-red-500 font-semibold mb-1">SERVICES & LABOUR</p>
+        <div class="border border-red-500 bg-zinc-900 px-4 py-2">`;
       
-      // Set black background
-      pdf.setFillColor(0, 0, 0); // Pure black
-      pdf.rect(0, 0, 210, 297, 'F'); // Fill entire A4 page
-      
-      // Set white text color
-      pdf.setTextColor(255, 255, 255);
-      
-      // A-Frame Logo centered at top
-      pdf.setFontSize(18);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('A-FRAME PAINTING', 105, yPos, { align: 'center' });
-      
-      yPos += 15;
-      
-      // Header - ESTIMATE
-      pdf.setFontSize(24);
-      pdf.setTextColor(234, 88, 12); // Orange color like "Invoice" in your example
-      pdf.text('ESTIMATE', 15, yPos);
-      
-      // Estimate number and date on right
-      pdf.setFontSize(12);
-      pdf.setTextColor(255, 255, 255);
-      pdf.setFont('helvetica', 'normal');
-      pdf.text(`Estimate #: ${estimateNumber || 'EST-001'}`, 190, yPos - 8, { align: 'right' });
-      pdf.text(`Date: ${new Date().toLocaleDateString()}`, 190, yPos + 2, { align: 'right' });
-      
-      yPos += 20;
-      
-      // Two-column layout for client and contractor info
-      // BILL TO (Left side)
-      pdf.setFontSize(10);
-      pdf.setTextColor(150, 150, 150); // Gray
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('BILL TO', 15, yPos);
-      
-      // FROM (Right side)
-      pdf.text('FROM', 115, yPos);
-      
-      yPos += 8;
-      
-      // Client info (Left)
-      pdf.setTextColor(255, 255, 255);
-      pdf.setFont('helvetica', 'normal');
-      pdf.text(clientName, 15, yPos);
-      pdf.text(clientAddress, 15, yPos + 6);
-      pdf.text(`${clientCity}, ${clientPostal}`, 15, yPos + 12);
-      pdf.text(clientPhone, 15, yPos + 18);
-      pdf.text(clientEmail, 15, yPos + 24);
-      
-      // Contractor info (Right)
-      pdf.text('A-Frame Painting', 115, yPos);
-      pdf.text('884 Hayes Rd', 115, yPos + 6);
-      pdf.text('Manson\'s Landing, BC', 115, yPos + 12);
-      pdf.text('cortespainter@gmail.com', 115, yPos + 18);
-      
-      yPos += 40;
-      
-      // Services & Labor Section with RED perimeter (1st color)
-      const laborStartY = yPos;
-      
-      // Calculate container height based on content
-      const validWorkStages = workStages.filter((stage: any) => parseFloat(String(stage.hours)) > 0);
-      const validAdditionalLabor = additionalLabor.filter((member: any) => member.name && parseFloat(String(member.hours)) > 0);
-      const laborItemCount = validWorkStages.length + validAdditionalLabor.length;
-      const laborContainerHeight = 8 + (laborItemCount * 15) + 10; // Header + items + bottom padding
-      
-      // Draw dark gray background with RED border
-      pdf.setFillColor(42, 42, 42); // Dark gray fill
-      pdf.rect(10, yPos, 190, laborContainerHeight, 'F');
-      pdf.setDrawColor(229, 62, 62); // RED border #E53E3E
-      pdf.setLineWidth(1);
-      pdf.rect(10, yPos, 190, laborContainerHeight, 'S');
-      
-      yPos += 8;
-      pdf.setFont('helvetica', 'bold');
-      pdf.setTextColor(229, 62, 62); // RED text for section title
-      pdf.text('Services & Labor', 15, yPos);
-      pdf.setTextColor(255, 255, 255); // Reset to white
-      yPos += 8;
-      
-      // Work stages (increased spacing for better readability)
-      validWorkStages.forEach((stage: any) => {
+      validWorkStages.forEach((stage: any, index: number) => {
         const hours = parseFloat(String(stage.hours)) || 0;
         const total = (hours * stage.rate).toFixed(2);
+        const isLast = index === validWorkStages.length - 1 && validAdditionalLabor.length === 0;
         
-        pdf.setFont('helvetica', 'normal');
-        pdf.text(stage.description || stage.name, 15, yPos);
-        pdf.text(`${hours}h × $${stage.rate}`, 15, yPos + 5);  // Increased spacing from 4 to 5
-        pdf.text(`$${total}`, 190, yPos, { align: 'right' });
-        yPos += 15;  // Increased spacing from 12 to 15
+        html += `
+          <div class="flex justify-between ${isLast ? '' : 'border-b border-gray-700'} py-1">
+            <span>${stage.description || stage.name}</span>
+            <span>$${total}</span>
+          </div>`;
       });
       
-      // Additional Labor (increased spacing for better readability)
-      validAdditionalLabor.forEach((member: any) => {
+      validAdditionalLabor.forEach((member: any, index: number) => {
         const hours = parseFloat(String(member.hours)) || 0;
         const rate = parseFloat(String(member.rate)) || 0;
         const total = (hours * rate).toFixed(2);
+        const isLast = index === validAdditionalLabor.length - 1;
         
-        pdf.text(member.name, 15, yPos);
-        pdf.text(`${hours}h × $${rate}`, 15, yPos + 5);  // Increased spacing from 4 to 5
-        pdf.text(`$${total}`, 190, yPos, { align: 'right' });
-        yPos += 15;  // Increased spacing from 12 to 15
+        html += `
+          <div class="flex justify-between ${isLast ? '' : 'border-b border-gray-700'} py-1">
+            <span>${member.name}</span>
+            <span>$${total}</span>
+          </div>`;
       });
       
-      yPos = laborStartY + laborContainerHeight + 10;
+      html += `
+        </div>
+      </div>`;
+    }
+    
+    // Materials & Paint Section (ORANGE)  
+    const materialsTotal = calculatePrimerCosts() + calculatePaintCosts() + calculateSuppliesTotal();
+    const travelTotal = calculateTravelTotal();
+    
+    if (materialsTotal > 0 || travelTotal > 0) {
+      html += `
+      <div class="w-full">
+        <p class="text-orange-500 font-semibold mb-1">MATERIALS & PAINT</p>
+        <div class="border border-orange-500 bg-zinc-900 px-4 py-2">`;
       
-      // Materials & Paint Section with gray container
-      const materialsStartY = yPos;
-      const materialsTotal = (calculatePrimerCosts() + calculatePaintCosts() + calculateSuppliesTotal()).toFixed(2);
-      const travelTotal = calculateTravelTotal().toFixed(2);
-      
-      // Calculate materials container height
-      let materialsItemCount = 0;
-      if (parseFloat(materialsTotal) > 0) materialsItemCount++;
-      if (parseFloat(travelTotal) > 0) materialsItemCount++;
-      const materialsContainerHeight = 8 + (materialsItemCount * 8) + 10; // Header + items + bottom padding
-      
-      // Draw dark gray background with ORANGE border
-      pdf.setFillColor(42, 42, 42); // Dark gray fill
-      pdf.rect(10, yPos, 190, materialsContainerHeight, 'F');
-      pdf.setDrawColor(234, 88, 12); // ORANGE border #EA580C
-      pdf.setLineWidth(1);
-      pdf.rect(10, yPos, 190, materialsContainerHeight, 'S');
-      
-      yPos += 8;
-      pdf.setFont('helvetica', 'bold');
-      pdf.setTextColor(234, 88, 12); // ORANGE text for section title
-      pdf.text('Materials & Paint', 15, yPos);
-      pdf.setTextColor(255, 255, 255); // Reset to white
-      yPos += 8;
-      
-      if (parseFloat(materialsTotal) > 0) {
-        pdf.setFont('helvetica', 'normal');
-        pdf.text('Paint & Supplies', 15, yPos);
-        pdf.text(`$${materialsTotal}`, 190, yPos, { align: 'right' });
-        yPos += 8;
+      if (materialsTotal > 0) {
+        html += `
+          <div class="flex justify-between ${travelTotal > 0 ? 'border-b border-gray-700' : ''} py-1">
+            <span>Paint & Supplies</span>
+            <span>$${materialsTotal.toFixed(2)}</span>
+          </div>`;
       }
       
-      if (parseFloat(travelTotal) > 0) {
-        pdf.text('Delivery', 15, yPos);
-        pdf.text(`$${travelTotal}`, 190, yPos, { align: 'right' });
-        yPos += 8;
+      if (travelTotal > 0) {
+        html += `
+          <div class="flex justify-between py-1">
+            <span>Delivery</span>
+            <span>$${travelTotal.toFixed(2)}</span>
+          </div>`;
       }
       
-      yPos = materialsStartY + materialsContainerHeight + 10;
-      
-      yPos += 15;
-      
-      // Summary Section with YELLOW perimeter (3rd color)
-      pdf.setFillColor(42, 42, 42); // Dark gray fill
-      pdf.rect(10, yPos, 190, 35, 'F');
-      pdf.setDrawColor(220, 220, 170); // YELLOW border #DCDCAA
-      pdf.setLineWidth(1);
-      pdf.rect(10, yPos, 190, 35, 'S');
-      
-      yPos += 10;
-      pdf.text('Subtotal:', 15, yPos);
-      pdf.text(`$${calculateSubtotal().toFixed(2)}`, 190, yPos, { align: 'right' });
-      
-      yPos += 8;
-      pdf.text('Paint & Materials:', 15, yPos);
-      pdf.text(`$${materialsTotal}`, 190, yPos, { align: 'right' });
-      
-      yPos += 12;
-      // Total with green background effect (extend green box to cover both text and price)
-      pdf.setFont('helvetica', 'bold');
-      pdf.setFillColor(5, 150, 105); // #059669
-      pdf.rect(10, yPos - 5, 190, 10, 'F');  // Wide green box covering full width
-      pdf.setTextColor(255, 255, 255);
-      pdf.text('Estimate Total', 15, yPos);
-      pdf.text(`$${calculateTotal().toFixed(2)}`, 190, yPos, { align: 'right' });
-      
-      // Footer with single yellow validity note
-      yPos += 25;
-      
-      // Validity section with GREEN perimeter (4th color)
-      pdf.setFillColor(42, 42, 42); // Dark gray fill
-      pdf.rect(10, yPos - 5, 190, 20, 'F');
-      pdf.setDrawColor(106, 153, 85); // GREEN border #6A9955
-      pdf.setLineWidth(1);
-      pdf.rect(10, yPos - 5, 190, 20, 'S');
-      pdf.setTextColor(106, 153, 85); // GREEN text
-      pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(10);
-      const validityText = 'This estimate is valid for the next 30 days after we will discuss options with you before proceeding.';
-      const validityLines = pdf.splitTextToSize(validityText, 175);
-      pdf.text(validityLines, 105, yPos, { align: 'center' });
-      
-      yPos += 25;
-      pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(12);
-      pdf.text('Thank you for considering A-Frame Painting!', 105, yPos, { align: 'center' });
-      
-      pdf.save(`Estimate-${estimateNumber || 'unknown'}.pdf`);
+      html += `
+        </div>
+      </div>`;
+    }
+    
+    return html;
+  };
 
+  // Generate HTML-based PDF using your custom template
+  const generatePDF = async () => {
+    try {
+      setIsGenerating(true);
+      
+      // Create HTML content using your template
+      const htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Estimate PDF</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @media print {
+        body {
+          -webkit-print-color-adjust: exact;
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-black text-white font-sans p-12">
+    <!-- Logo and Title -->
+    <div class="flex flex-col items-center mb-8">
+      <div class="h-16 mb-2 flex items-center justify-center">
+        <span class="text-2xl font-bold text-white">A-FRAME PAINTING</span>
+      </div>
+      <h1 class="text-orange-500 text-3xl font-bold">ESTIMATE</h1>
+    </div>
+
+    <!-- Recipient & Sender Info -->
+    <div class="flex justify-between text-sm mb-10">
+      <div>
+        <p class="text-gray-300 font-semibold">Estimate For:</p>
+        <p>${clientName || 'Client Name'}</p>
+        <p>${clientAddress || '123 Client Street'}</p>
+        <p>${clientCity || 'Client City'}, ${clientPostal || 'BC'}</p>
+        ${clientPhone ? `<p>${clientPhone}</p>` : ''}
+        ${clientEmail ? `<p>${clientEmail}</p>` : ''}
+      </div>
+      <div class="text-right">
+        <p class="text-gray-300 font-semibold">From:</p>
+        <p>A-Frame Painting</p>
+        <p>884 Hayes Rd</p>
+        <p>Manson's Landing, BC</p>
+        <p>cortespainter@gmail.com</p>
+      </div>
+    </div>
+
+    <!-- Dynamic Categories Container -->
+    <div id="categories" class="space-y-8">
+      ${generateCategoriesHTML()}
+    </div>
+
+    <!-- Estimate Total -->
+    <div class="flex justify-end mt-10">
+      <div class="w-full max-w-sm">
+        <div class="flex justify-between border-t border-gray-700 pt-4">
+          <span class="text-lg">Subtotal</span>
+          <span class="text-lg">$${calculateSubtotal().toFixed(2)}</span>
+        </div>
+        <div class="flex justify-between bg-green-700 text-white px-4 py-2 mt-2">
+          <span class="text-xl font-bold">Estimate Total</span>
+          <span class="text-xl font-bold">$${calculateTotal().toFixed(2)}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Validity Note -->
+    <div class="text-center text-sm text-gray-400 mt-8">
+      <p>This estimate is valid for the next 30 days after we will discuss options with you before proceeding.</p>
+    </div>
+  </body>
+</html>`;
+
+      // Create a temporary element to render the HTML
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        throw new Error('Could not open print window. Please allow popups.');
+      }
+      
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+      
+      // Wait for content to load, then print
+      printWindow.onload = () => {
+        setTimeout(() => {
+          printWindow.print();
+          printWindow.close();
+        }, 500);
+      };
+      
       toast({
-        title: 'PDF Generated',
-        description: 'Professional estimate PDF has been downloaded.',
+        title: "Success",
+        description: "Estimate PDF opened for download",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('PDF generation error:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to generate PDF.',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to generate PDF",
+        variant: "destructive",
       });
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -532,249 +504,89 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     }
 
     try {
-      // Generate proper PDF using jsPDF (same as download function)
-      const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
-      let yPos = 20;
-      
-      // Set black background
-      pdf.setFillColor(0, 0, 0); // Pure black
-      pdf.rect(0, 0, 210, 297, 'F'); // Fill entire A4 page
-      
-      // Set white text color
-      pdf.setTextColor(255, 255, 255);
-      
-      // A-Frame Logo centered at top
-      pdf.setFontSize(18);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('A-FRAME PAINTING', 105, yPos, { align: 'center' });
-      
-      yPos += 15;
-      
-      // Header - ESTIMATE
-      pdf.setFontSize(24);
-      pdf.setTextColor(234, 88, 12); // Orange color like "Invoice" in your example
-      pdf.text('ESTIMATE', 15, yPos);
-      
-      // Estimate number and date on right
-      pdf.setFontSize(12);
-      pdf.setTextColor(255, 255, 255);
-      pdf.setFont('helvetica', 'normal');
-      pdf.text(`Estimate #: ${estimateNumber || 'EST-001'}`, 190, yPos - 8, { align: 'right' });
-      pdf.text(`Date: ${new Date().toLocaleDateString()}`, 190, yPos + 2, { align: 'right' });
-      
-      yPos += 20;
-      
-      // Two-column layout for client and contractor info
-      // BILL TO (Left side)
-      pdf.setFontSize(10);
-      pdf.setTextColor(150, 150, 150); // Gray
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('BILL TO', 15, yPos);
-      
-      // FROM (Right side)
-      pdf.text('FROM', 115, yPos);
-      
-      yPos += 8;
-      
-      // Client info (Left)
-      pdf.setTextColor(255, 255, 255);
-      pdf.setFont('helvetica', 'normal');
-      pdf.text(clientName, 15, yPos);
-      pdf.text(clientAddress, 15, yPos + 6);
-      pdf.text(`${clientCity}, ${clientPostal}`, 15, yPos + 12);
-      pdf.text(clientPhone, 15, yPos + 18);
-      pdf.text(clientEmail, 15, yPos + 24);
-      
-      // Contractor info (Right)
-      pdf.text('A-Frame Painting', 115, yPos);
-      pdf.text('884 Hayes Rd', 115, yPos + 6);
-      pdf.text('Manson\'s Landing, BC', 115, yPos + 12);
-      pdf.text('cortespainter@gmail.com', 115, yPos + 18);
-      
-      yPos += 40;
-      
-      // Services & Labor Section with gray container
-      const laborStartY2 = yPos;
-      
-      // Calculate container height based on content
-      const validWorkStages2 = workStages.filter((stage: any) => parseFloat(String(stage.hours)) > 0);
-      const validAdditionalLabor2 = additionalLabor.filter((member: any) => member.name && parseFloat(String(member.hours)) > 0);
-      const laborItemCount2 = validWorkStages2.length + validAdditionalLabor2.length;
-      const laborContainerHeight2 = 8 + (laborItemCount2 * 15) + 10; // Header + items + bottom padding
-      
-      // Draw dark gray background with RED border
-      pdf.setFillColor(42, 42, 42); // Dark gray fill
-      pdf.rect(10, yPos, 190, laborContainerHeight2, 'F');
-      pdf.setDrawColor(229, 62, 62); // RED border #E53E3E
-      pdf.setLineWidth(1);
-      pdf.rect(10, yPos, 190, laborContainerHeight2, 'S');
-      
-      yPos += 8;
-      pdf.setFont('helvetica', 'bold');
-      pdf.setTextColor(229, 62, 62); // RED text for section title
-      pdf.text('Services & Labor', 15, yPos);
-      pdf.setTextColor(255, 255, 255); // Reset to white
-      yPos += 8;
-      
-      // Work stages (increased spacing for better readability)
-      validWorkStages2.forEach((stage: any) => {
-        const hours = parseFloat(String(stage.hours)) || 0;
-        const total = (hours * stage.rate).toFixed(2);
-        
-        pdf.setFont('helvetica', 'normal');
-        pdf.text(stage.description || stage.name, 15, yPos);
-        pdf.text(`${hours}h × $${stage.rate}`, 15, yPos + 5);  // Increased spacing from 4 to 5
-        pdf.text(`$${total}`, 190, yPos, { align: 'right' });
-        yPos += 15;  // Increased spacing from 12 to 15
-      });
-      
-      // Additional Labor (increased spacing for better readability)
-      validAdditionalLabor2.forEach((member: any) => {
-        const hours = parseFloat(String(member.hours)) || 0;
-        const rate = parseFloat(String(member.rate)) || 0;
-        const total = (hours * rate).toFixed(2);
-        
-        pdf.text(member.name, 15, yPos);
-        pdf.text(`${hours}h × $${rate}`, 15, yPos + 5);  // Increased spacing from 4 to 5
-        pdf.text(`$${total}`, 190, yPos, { align: 'right' });
-        yPos += 15;  // Increased spacing from 12 to 15
-      });
-      
-      yPos = laborStartY2 + laborContainerHeight2 + 10;
-      
-      // Materials & Paint Section with gray container
-      const materialsStartY2 = yPos;
-      const materialsTotal2 = (calculatePrimerCosts() + calculatePaintCosts() + calculateSuppliesTotal()).toFixed(2);
-      const travelTotal2 = calculateTravelTotal().toFixed(2);
-      
-      // Calculate materials container height
-      let materialsItemCount2 = 0;
-      if (parseFloat(materialsTotal2) > 0) materialsItemCount2++;
-      if (parseFloat(travelTotal2) > 0) materialsItemCount2++;
-      const materialsContainerHeight2 = 8 + (materialsItemCount2 * 8) + 10; // Header + items + bottom padding
-      
-      // Draw dark gray background with ORANGE border
-      pdf.setFillColor(42, 42, 42); // Dark gray fill
-      pdf.rect(10, yPos, 190, materialsContainerHeight2, 'F');
-      pdf.setDrawColor(234, 88, 12); // ORANGE border #EA580C
-      pdf.setLineWidth(1);
-      pdf.rect(10, yPos, 190, materialsContainerHeight2, 'S');
-      
-      yPos += 8;
-      pdf.setFont('helvetica', 'bold');
-      pdf.setTextColor(234, 88, 12); // ORANGE text for section title
-      pdf.text('Materials & Paint', 15, yPos);
-      pdf.setTextColor(255, 255, 255); // Reset to white
-      yPos += 8;
-      
-      if (parseFloat(materialsTotal2) > 0) {
-        pdf.setFont('helvetica', 'normal');
-        pdf.setTextColor(255, 255, 255); // White text
-        pdf.text('Paint & Supplies', 15, yPos);
-        pdf.text(`$${materialsTotal2}`, 190, yPos, { align: 'right' });
-        yPos += 8;
-      }
-      
-      if (parseFloat(travelTotal2) > 0) {
-        pdf.setTextColor(255, 255, 255); // White text
-        pdf.text('Delivery', 15, yPos);
-        pdf.text(`$${travelTotal2}`, 190, yPos, { align: 'right' });
-        yPos += 8;
-      }
-      
-      yPos = materialsStartY2 + materialsContainerHeight2 + 10;
-      
-      yPos += 15;
-      
-      // Summary Section with YELLOW perimeter (3rd color)
-      pdf.setFillColor(42, 42, 42); // Dark gray fill
-      pdf.rect(10, yPos, 190, 35, 'F');
-      pdf.setDrawColor(220, 220, 170); // YELLOW border #DCDCAA
-      pdf.setLineWidth(1);
-      pdf.rect(10, yPos, 190, 35, 'S');
-      
-      yPos += 10;
-      pdf.setTextColor(255, 255, 255); // White text on purple background
-      pdf.text('Subtotal:', 15, yPos);
-      pdf.text(`$${calculateSubtotal().toFixed(2)}`, 190, yPos, { align: 'right' });
-      
-      yPos += 8;
-      pdf.text('Paint & Materials:', 15, yPos);
-      pdf.text(`$${materialsTotal2}`, 190, yPos, { align: 'right' });
-      
-      yPos += 12;
-      // Total with Paint Brain orange background and larger font
-      pdf.setFont('helvetica', 'bold');
-      pdf.setFillColor(212, 165, 116); // Paint Brain Orange #D4A574
-      pdf.rect(10, yPos - 7, 190, 16, 'F');  // Taller box for larger font
-      pdf.setTextColor(0, 0, 0); // Black text on orange background
-      pdf.setFontSize(16); // Larger font for total
-      pdf.text('ESTIMATE TOTAL', 15, yPos);
-      pdf.text(`$${calculateTotal().toFixed(2)}`, 190, yPos, { align: 'right' });
-      pdf.setFontSize(12); // Reset font size
-      
-      // Footer with single yellow validity note
-      yPos += 25;
-      
-      // Validity section with GREEN perimeter (4th color)
-      pdf.setFillColor(42, 42, 42); // Dark gray fill
-      pdf.rect(10, yPos - 5, 190, 20, 'F');
-      pdf.setDrawColor(106, 153, 85); // GREEN border #6A9955
-      pdf.setLineWidth(1);
-      pdf.rect(10, yPos - 5, 190, 20, 'S');
-      pdf.setTextColor(106, 153, 85); // GREEN text
-      pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(10);
-      const validityText2 = 'This estimate is valid for the next 30 days after we will discuss options with you before proceeding.';
-      const validityLines2 = pdf.splitTextToSize(validityText2, 175);
-      pdf.text(validityLines2, 105, yPos, { align: 'center' });
-      
-      yPos += 25;
-      pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(12);
-      pdf.text('Thank you for considering A-Frame Painting!', 105, yPos, { align: 'center' });
-      
-      // Get PDF as base64 for email
-      let pdfOutput;
-      let pdfBase64;
-      
-      try {
-        pdfOutput = pdf.output('datauristring');
-        console.log('PDF output generated:', pdfOutput ? 'Success' : 'Failed');
-        
-        if (!pdfOutput || typeof pdfOutput !== 'string') {
-          throw new Error('Failed to generate PDF output - output is not a string');
+      // Generate proper HTML PDF and send email
+      const htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Estimate PDF</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @media print {
+        body {
+          -webkit-print-color-adjust: exact;
         }
-        
-        pdfBase64 = pdfOutput.split(',')[1];
-        console.log('PDF base64 extracted, length:', pdfBase64 ? pdfBase64.length : 'undefined');
-        
-        if (!pdfBase64 || pdfBase64.length === 0) {
-          throw new Error('Failed to extract base64 data from PDF');
-        }
-        
-        // Validate base64 data size (should be much smaller now)
-        if (pdfBase64.length > 5000000) { // ~3.75MB base64 limit
-          throw new Error('PDF too large for email. Please reduce content.');
-        }
-      } catch (pdfError: any) {
-        console.error('PDF generation error:', pdfError);
-        throw new Error(`PDF generation failed: ${pdfError.message}`);
       }
+    </style>
+  </head>
+  <body class="bg-black text-white font-sans p-12">
+    <!-- Logo and Title -->
+    <div class="flex flex-col items-center mb-8">
+      <div class="h-16 mb-2 flex items-center justify-center">
+        <span class="text-2xl font-bold text-white">A-FRAME PAINTING</span>
+      </div>
+      <h1 class="text-orange-500 text-3xl font-bold">ESTIMATE</h1>
+    </div>
+
+    <!-- Recipient & Sender Info -->
+    <div class="flex justify-between text-sm mb-10">
+      <div>
+        <p class="text-gray-300 font-semibold">Estimate For:</p>
+        <p>${clientName || 'Client Name'}</p>
+        <p>${clientAddress || '123 Client Street'}</p>
+        <p>${clientCity || 'Client City'}, ${clientPostal || 'BC'}</p>
+        ${clientPhone ? `<p>${clientPhone}</p>` : ''}
+        ${clientEmail ? `<p>${clientEmail}</p>` : ''}
+      </div>
+      <div class="text-right">
+        <p class="text-gray-300 font-semibold">From:</p>
+        <p>A-Frame Painting</p>
+        <p>884 Hayes Rd</p>
+        <p>Manson's Landing, BC</p>
+        <p>cortespainter@gmail.com</p>
+      </div>
+    </div>
+
+    <!-- Dynamic Categories Container -->
+    <div id="categories" class="space-y-8">
+      ${generateCategoriesHTML()}
+    </div>
+
+    <!-- Estimate Total -->
+    <div class="flex justify-end mt-10">
+      <div class="w-full max-w-sm">
+        <div class="flex justify-between border-t border-gray-700 pt-4">
+          <span class="text-lg">Subtotal</span>
+          <span class="text-lg">$${calculateSubtotal().toFixed(2)}</span>
+        </div>
+        <div class="flex justify-between bg-green-700 text-white px-4 py-2 mt-2">
+          <span class="text-xl font-bold">Estimate Total</span>
+          <span class="text-xl font-bold">$${calculateTotal().toFixed(2)}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Validity Note -->
+    <div class="text-center text-sm text-gray-400 mt-8">
+      <p>This estimate is valid for the next 30 days after we will discuss options with you before proceeding.</p>
+    </div>
+  </body>
+</html>`;
 
       const emailData = {
-        recipientEmail: clientEmail,
-        clientName: clientName || 'Client',
-        estimateNumber: estimateNumber || 'EST-001',
-        projectTitle: projectTitle || 'Painting Estimate',
-        totalAmount: calculateTotal().toFixed(2),
-        customMessage: '',
-        pdfData: pdfBase64
+        to: clientEmail,
+        subject: 'Your Painting Estimate from A-Frame Painting',
+        htmlContent: htmlContent,
+        plainText: `Here is your estimate from A-Frame Painting for a total of $${calculateTotal().toFixed(2)}.`,
+        clientName: clientName,
+        estimateTotal: calculateTotal().toFixed(2)
       };
 
       await sendEmailMutation.mutateAsync(emailData);
     } catch (error: any) {
-      console.error('Email preparation failed:', error);
+      console.error('Email sending error:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to send estimate email",
@@ -785,600 +597,549 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent 
-        className="w-screen max-w-md h-screen p-4 sm:max-w-3xl sm:h-auto overflow-hidden"
-        style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}
-      >
+      <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[90vh] overflow-y-auto bg-black border-gray-800">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold mb-4">Generate Estimate</DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="text-white text-xl font-bold">Estimate Generator</DialogTitle>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              className="text-gray-400 hover:text-white"
+            >
+              ✕
+            </Button>
+          </div>
         </DialogHeader>
 
-        <div
-          ref={printRef}
-          className="overflow-y-auto max-h-[calc(100vh-160px)] pr-2"
-        >
-          {/* Client Info (read-only) */}
-          <Card className="mb-4 border-2 border-[#FF6B6B]">
-            <CardHeader>
-              <CardTitle className="text-lg text-[#FF6B6B]">Client Information</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <Input value={clientName} readOnly placeholder="Client Name" />
-              <Input value={clientEmail} readOnly placeholder="Client Email" />
-              <Input value={clientAddress} readOnly placeholder="Client Address" />
-              <Input value={clientCity} readOnly placeholder="City" />
-              <Input value={clientPostal} readOnly placeholder="Postal Code" />
-              <Input value={clientPhone} readOnly placeholder="Phone" />
-            </CardContent>
-          </Card>
-
+        <div className="space-y-6 pr-2">
           {/* Estimate Details */}
-          <Card className="mb-4 border-2 border-[#D4A574]">
-            <CardHeader>
-              <CardTitle className="text-lg text-[#D4A574]">Estimate Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <Input
-                placeholder="Estimate Number"
-                value={estimateNumber}
-                onChange={(e) => setEstimateNumber(e.target.value)}
-              />
-              <Input
-                type="date"
-                value={new Date().toISOString().split('T')[0]}
-                readOnly
-              />
-              <Input
-                placeholder="Project Title"
-                value={projectTitle}
-                onChange={(e) => setProjectTitle(e.target.value)}
-              />
-              <Textarea
-                placeholder="Project Description"
-                value={projectDescription}
-                onChange={(e) => setProjectDescription(e.target.value)}
-              />
-            </CardContent>
-          </Card>
-
-          {/* Work Stages */}
-          <Card className="mb-4 border-2 border-[#DCDCAA]">
-            <CardHeader className="flex justify-between items-center">
-              <CardTitle className="text-lg text-[#DCDCAA]">Work Breakdown</CardTitle>
-              <Button size="sm" onClick={addWorkStage} className="bg-[#DCDCAA] hover:bg-[#c4c193] text-black">+ Add Stage</Button>
-            </CardHeader>
-            <CardContent>
-              {workStages.map((stage: any, i: number) => (
-                <div
-                  key={i}
-                  className="mb-3 border-2 border-[#DCDCAA] bg-[#DCDCAA]/10 rounded p-3"
-                >
-                  <Input
-                    placeholder="Stage Name"
-                    value={stage.name}
-                    onChange={(e) => updateWorkStage(i, 'name', e.target.value)}
-                    className="mb-1"
-                  />
-                  <Textarea
-                    placeholder="Description"
-                    value={stage.description}
-                    onChange={(e) => updateWorkStage(i, 'description', e.target.value)}
-                    className="mb-1"
-                    rows={2}
-                  />
-                  <div className="flex gap-2">
-                    <Input
-                      type="number"
-                      placeholder="Hours"
-                      value={stage.hours}
-                      onChange={(e) => updateWorkStage(i, 'hours', e.target.value)}
-                      className="flex-1"
-                      min={0}
-                    />
-                    <Input
-                      type="number"
-                      placeholder="Rate"
-                      value={stage.rate}
-                      onChange={(e) => updateWorkStage(i, 'rate', Number(e.target.value))}
-                      className="flex-1"
-                      min={0}
-                    />
-                    <Input
-                      placeholder="Total"
-                      value={calculateStageTotal(stage).toFixed(2)}
-                      readOnly
-                      className="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                    />
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => removeWorkStage(i)}
-                    className="mt-2 bg-[#E03E3E] hover:bg-[#c63535]"
-                  >
-                    Remove
-                  </Button>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-
-          {/* Additional Services */}
-          <Card className="mb-4 border-2 border-[#D4A574]">
-            <CardHeader>
-              <CardTitle className="text-lg text-[#D4A574]">Additional Services</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {additionalServices.map((service: any, i: number) => (
-                <div key={i} className="border border-[#D4A574] rounded p-3 mb-2 bg-[#D4A574]/10">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <Checkbox 
-                        checked={service.enabled}
-                        onCheckedChange={(checked: boolean) => updateAdditionalService(i, 'enabled', checked)}
-                      />
-                      <span className="font-medium">{service.name}</span>
-                    </div>
-                    <span className="text-sm text-gray-600">${service.rate}/hour</span>
-                  </div>
-                  {service.enabled && (
-                    <div className="flex items-center gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => updateAdditionalService(i, 'hours', Math.max(0, service.hours - 0.5))}
-                        disabled={service.hours <= 0}
-                        className="px-2"
-                      >
-                        -
-                      </Button>
-                      <Input
-                        type="number"
-                        step="0.5"
-                        min="0"
-                        value={service.hours}
-                        onChange={(e) => updateAdditionalService(i, 'hours', Math.max(0, parseFloat(e.target.value) || 0))}
-                        className="w-20 text-center"
-                      />
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => updateAdditionalService(i, 'hours', service.hours + 0.5)}
-                        className="px-2"
-                      >
-                        +
-                      </Button>
-                      <span className="text-sm">hours</span>
-                      <span className="ml-auto font-medium">${(service.hours * service.rate).toFixed(2)}</span>
-                    </div>
-                  )}
-                </div>
-              ))}
-              <div className="text-right font-medium">
-                Additional Services Total: ${calculateAdditionalServicesTotal().toFixed(2)}
+          <div className="border border-gray-700 bg-gray-900/50 rounded-lg p-4">
+            <h3 className="text-white font-semibold mb-3">Estimate Details</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Label className="text-gray-300">Project Title</Label>
+                <Input
+                  value={projectTitle}
+                  onChange={(e) => setProjectTitle(e.target.value)}
+                  className="bg-gray-800 border-gray-600 text-white"
+                  placeholder=""
+                />
               </div>
-            </CardContent>
-          </Card>
+              <div>
+                <Label className="text-gray-300">Date</Label>
+                <Input
+                  type="date"
+                  value={estimateDate}
+                  onChange={(e) => setEstimateDate(e.target.value)}
+                  className="bg-gray-800 border-gray-600 text-white"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Client Information - Auto-populated */}
+          <div className="border border-blue-500 bg-blue-900/20 rounded-lg p-4">
+            <h3 className="text-blue-300 font-semibold mb-3 flex items-center gap-2">
+              Client Information
+              <span className="text-xs bg-blue-700 px-2 py-1 rounded">Auto-populated</span>
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Label className="text-gray-300">Client Name</Label>
+                <Input
+                  value={clientName}
+                  readOnly
+                  className="bg-gray-700/50 border-gray-500 text-gray-300 cursor-not-allowed"
+                  title="Auto-populated from project data"
+                />
+              </div>
+              <div>
+                <Label className="text-gray-300">Address</Label>
+                <Input
+                  value={clientAddress}
+                  readOnly
+                  className="bg-gray-700/50 border-gray-500 text-gray-300 cursor-not-allowed"
+                  title="Auto-populated from project data"
+                />
+              </div>
+              <div>
+                <Label className="text-gray-300">City</Label>
+                <Input
+                  value={clientCity}
+                  readOnly
+                  className="bg-gray-700/50 border-gray-500 text-gray-300 cursor-not-allowed"
+                  title="Auto-populated from project data"
+                />
+              </div>
+              <div>
+                <Label className="text-gray-300">Postal Code</Label>
+                <Input
+                  value={clientPostal}
+                  readOnly
+                  className="bg-gray-700/50 border-gray-500 text-gray-300 cursor-not-allowed"
+                  title="Auto-populated from project data"
+                />
+              </div>
+              <div>
+                <Label className="text-gray-300">Email</Label>
+                <Input
+                  value={clientEmail}
+                  readOnly
+                  className="bg-gray-700/50 border-gray-500 text-gray-300 cursor-not-allowed"
+                  title="Auto-populated from project data"
+                />
+              </div>
+              <div>
+                <Label className="text-gray-300">Phone</Label>
+                <Input
+                  value={clientPhone}
+                  readOnly
+                  className="bg-gray-700/50 border-gray-500 text-gray-300 cursor-not-allowed"
+                  title="Auto-populated from project data"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Services & Labour */}
+          <div className="border border-red-500 bg-red-900/20 rounded-lg p-4">
+            <h3 className="text-red-300 font-semibold mb-3">Services & Labour</h3>
+            
+            {/* Work Stages */}
+            <div className="space-y-3 mb-4">
+              <Label className="text-gray-300">Work Stages</Label>
+              {workStages.map((stage, index) => (
+                <div key={index} className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <Input
+                    value={stage.description}
+                    onChange={(e) => updateWorkStage(index, 'description', e.target.value)}
+                    placeholder="Description"
+                    className="bg-gray-800 border-gray-600 text-white text-sm"
+                  />
+                  <Input
+                    type="number"
+                    inputMode="decimal"
+                    value={stage.hours}
+                    onChange={(e) => updateWorkStage(index, 'hours', e.target.value)}
+                    placeholder="Hours"
+                    className="bg-gray-800 border-gray-600 text-white text-sm"
+                  />
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      inputMode="decimal"
+                      value={stage.rate}
+                      onChange={(e) => updateWorkStage(index, 'rate', e.target.value)}
+                      placeholder="Rate"
+                      className="bg-gray-800 border-gray-600 text-white text-sm"
+                    />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeWorkStage(index)}
+                      className="text-red-400 hover:text-red-300 px-2"
+                    >
+                      ×
+                    </Button>
+                  </div>
+                </div>
+              ))}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={addWorkStage}
+                className="border-red-600 text-red-300 hover:bg-red-900/30"
+              >
+                + Add Work Stage
+              </Button>
+            </div>
+          </div>
 
           {/* Additional Labor */}
-          <Card className="mb-4 border-2 border-[#4ECDC4]">
-            <CardHeader>
-              <CardTitle className="text-lg text-[#4ECDC4]">Additional Labor</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex justify-between items-center mb-2">
-                <h4 className="font-medium">Crew Members</h4>
-                <Button size="sm" onClick={addLaborMember} className="bg-[#4ECDC4] hover:bg-[#45b3b8] text-black">
-                  <Plus className="w-4 h-4 mr-1" />
-                  Add Member
-                </Button>
-              </div>
-              {additionalLabor.map((member: any, i: number) => (
-                <div key={i} className="border border-[#4ECDC4] rounded p-3 mb-2 bg-[#4ECDC4]/10">
-                  <div className="grid grid-cols-4 gap-2 mb-2">
-                    <Input
-                      placeholder="Name"
-                      value={member.name}
-                      onChange={(e) => updateLaborMember(i, 'name', e.target.value)}
-                    />
+          <div className="border border-teal-500 bg-teal-900/20 rounded-lg p-4">
+            <h3 className="text-teal-300 font-semibold mb-3">Additional Labor</h3>
+            <div className="space-y-3">
+              {additionalLabor.map((member, index) => (
+                <div key={index} className="grid grid-cols-1 sm:grid-cols-4 gap-2">
+                  <Input
+                    value={member.name}
+                    onChange={(e) => updateAdditionalLabor(index, 'name', e.target.value)}
+                    placeholder="Name"
+                    className="bg-gray-800 border-gray-600 text-white text-sm"
+                  />
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => updateAdditionalLabor(index, 'hours', Math.max(0, parseFloat(member.hours || '0') - 0.5).toString())}
+                      className="border-gray-600 text-gray-300 hover:bg-gray-700 px-2"
+                    >
+                      −
+                    </Button>
                     <Input
                       type="number"
-                      placeholder="Hours"
+                      inputMode="decimal"
+                      step="0.5"
                       value={member.hours}
-                      onChange={(e) => updateLaborMember(i, 'hours', e.target.value)}
+                      onChange={(e) => updateAdditionalLabor(index, 'hours', e.target.value)}
+                      placeholder="Hours"
+                      className="bg-gray-800 border-gray-600 text-white text-sm"
                     />
-                    <Input
-                      type="number"
-                      placeholder="Rate/hour"
-                      value={member.rate}
-                      onChange={(e) => updateLaborMember(i, 'rate', e.target.value)}
-                    />
-                    <Input
-                      placeholder="Total"
-                      value={((parseFloat(member.hours) || 0) * (parseFloat(member.rate) || 0)).toFixed(2)}
-                      readOnly
-                      className="bg-gray-100 dark:bg-gray-700"
-                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => updateAdditionalLabor(index, 'hours', (parseFloat(member.hours || '0') + 0.5).toString())}
+                      className="border-gray-600 text-gray-300 hover:bg-gray-700 px-2"
+                    >
+                      +
+                    </Button>
                   </div>
+                  <Input
+                    type="number"
+                    inputMode="decimal"
+                    value={member.rate}
+                    onChange={(e) => updateAdditionalLabor(index, 'rate', e.target.value)}
+                    placeholder="Rate"
+                    className="bg-gray-800 border-gray-600 text-white text-sm"
+                  />
                   <Button
+                    variant="ghost"
                     size="sm"
-                    variant="destructive"
-                    onClick={() => removeLaborMember(i)}
-                    className="bg-[#E03E3E] hover:bg-[#c63535]"
+                    onClick={() => removeAdditionalLabor(index)}
+                    className="text-red-400 hover:text-red-300 px-2"
                   >
-                    <Trash2 className="w-4 h-4 mr-1" />
-                    Remove
+                    ×
                   </Button>
                 </div>
               ))}
-              <div className="text-right font-medium">
-                Additional Labor Total: ${calculateAdditionalLaborTotal().toFixed(2)}
-              </div>
-            </CardContent>
-          </Card>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={addAdditionalLabor}
+                className="border-teal-600 text-teal-300 hover:bg-teal-900/30"
+              >
+                + Add Crew Member
+              </Button>
+            </div>
+          </div>
 
           {/* Supply Costs */}
-          <Card className="mb-4 border-2 border-[#6A9955]">
-            <CardHeader>
-              <CardTitle className="text-lg text-[#6A9955]">Supply Costs</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Primer Costs */}
-              <div className="border border-[#6A9955] rounded p-3 bg-[#6A9955]/10">
-                <h4 className="font-medium mb-2">Primer</h4>
-                <div className="grid grid-cols-3 gap-2">
-                  <Input
-                    type="number"
-                    placeholder="Price per gallon"
-                    value={primerCosts.pricePerGallon}
-                    onChange={(e) => setPrimerCosts({...primerCosts, pricePerGallon: e.target.value})}
-                  />
-                  <Input
-                    type="number"
-                    placeholder="Gallons"
-                    value={primerCosts.gallons}
-                    onChange={(e) => setPrimerCosts({...primerCosts, gallons: e.target.value})}
-                  />
-                  <Select value={primerCosts.coats} onValueChange={(value) => setPrimerCosts({...primerCosts, coats: value})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Coats" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-black border border-gray-600">
-                      <SelectItem value="0" className="text-white hover:bg-gray-800">0 coats</SelectItem>
-                      <SelectItem value="1" className="text-white hover:bg-gray-800">1 coat</SelectItem>
-                      <SelectItem value="2" className="text-white hover:bg-gray-800">2 coats</SelectItem>
-                      <SelectItem value="3" className="text-white hover:bg-gray-800">3 coats</SelectItem>
-                      <SelectItem value="4" className="text-white hover:bg-gray-800">4 coats</SelectItem>
-                      <SelectItem value="5" className="text-white hover:bg-gray-800">5 coats</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="mt-2 text-right font-medium">
-                  Primer Total: ${calculatePrimerCosts().toFixed(2)}
-                </div>
-              </div>
-
-              {/* Paint Costs */}
-              <div className="border border-[#6A9955] rounded p-3 bg-[#6A9955]/10">
-                <h4 className="font-medium mb-2">Paint</h4>
-                <div className="grid grid-cols-3 gap-2">
-                  <Input
-                    type="number"
-                    placeholder="Price per gallon"
-                    value={paintCosts.pricePerGallon}
-                    onChange={(e) => setPaintCosts({...paintCosts, pricePerGallon: e.target.value})}
-                  />
-                  <Input
-                    type="number"
-                    placeholder="Gallons"
-                    value={paintCosts.gallons}
-                    onChange={(e) => setPaintCosts({...paintCosts, gallons: e.target.value})}
-                  />
-                  <Select value={paintCosts.coats} onValueChange={(value) => setPaintCosts({...paintCosts, coats: value})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Coats" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-black border border-gray-600">
-                      <SelectItem value="1" className="text-white hover:bg-gray-800">1 coat</SelectItem>
-                      <SelectItem value="2" className="text-white hover:bg-gray-800">2 coats</SelectItem>
-                      <SelectItem value="3" className="text-white hover:bg-gray-800">3 coats</SelectItem>
-                      <SelectItem value="4" className="text-white hover:bg-gray-800">4 coats</SelectItem>
-                      <SelectItem value="5" className="text-white hover:bg-gray-800">5 coats</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="mt-2 text-right font-medium">
-                  Paint Total: ${calculatePaintCosts().toFixed(2)}
-                </div>
-              </div>
-
-              {/* Other Supplies */}
+          <div className="border border-yellow-500 bg-yellow-900/20 rounded-lg p-4">
+            <h3 className="text-yellow-300 font-semibold mb-3">Supply Costs</h3>
+            
+            {/* Paint Costs */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
               <div>
-                <div className="flex justify-between items-center mb-2">
-                  <h4 className="font-medium">Other Supplies</h4>
-                  <Button size="sm" onClick={addSupply} className="bg-[#DCDCAA] hover:bg-[#c5c593] text-black">
-                    <Plus className="w-4 h-4 mr-1" />
-                    Add Supply
+                <Label className="text-gray-300">Primer Gallons</Label>
+                <Input
+                  type="number"
+                  inputMode="decimal"
+                  value={primerGallons}
+                  onChange={(e) => setPrimerGallons(e.target.value)}
+                  className="bg-gray-800 border-gray-600 text-white"
+                  placeholder=""
+                />
+              </div>
+              <div>
+                <Label className="text-gray-300">Paint Gallons</Label>
+                <Input
+                  type="number"
+                  inputMode="decimal"
+                  value={paintGallons}
+                  onChange={(e) => setPaintGallons(e.target.value)}
+                  className="bg-gray-800 border-gray-600 text-white"
+                  placeholder=""
+                />
+              </div>
+              <div>
+                <Label className="text-gray-300">Cost per Gallon</Label>
+                <Input
+                  type="number"
+                  inputMode="decimal"
+                  value={paintCostPerGallon}
+                  onChange={(e) => setPaintCostPerGallon(e.target.value)}
+                  className="bg-gray-800 border-gray-600 text-white"
+                  placeholder=""
+                />
+              </div>
+            </div>
+
+            {/* Additional Supplies */}
+            <div className="space-y-3">
+              <Label className="text-gray-300">Additional Supplies</Label>
+              {supplies.map((supply, index) => (
+                <div key={index} className="grid grid-cols-1 sm:grid-cols-4 gap-2">
+                  <Input
+                    value={supply.item}
+                    onChange={(e) => updateSupply(index, 'item', e.target.value)}
+                    placeholder="Item"
+                    className="bg-gray-800 border-gray-600 text-white text-sm"
+                  />
+                  <Input
+                    type="number"
+                    inputMode="decimal"
+                    value={supply.quantity}
+                    onChange={(e) => updateSupply(index, 'quantity', e.target.value)}
+                    placeholder="Qty"
+                    className="bg-gray-800 border-gray-600 text-white text-sm"
+                  />
+                  <Input
+                    type="number"
+                    inputMode="decimal"
+                    value={supply.unitCost}
+                    onChange={(e) => updateSupply(index, 'unitCost', e.target.value)}
+                    placeholder="Unit Cost"
+                    className="bg-gray-800 border-gray-600 text-white text-sm"
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeSupply(index)}
+                    className="text-red-400 hover:text-red-300 px-2"
+                  >
+                    ×
                   </Button>
                 </div>
-                {supplies.map((supply: any, i: number) => (
-                  <div key={i} className="border border-[#DCDCAA] rounded p-3 mb-2 bg-[#DCDCAA]/10">
-                    <div className="grid grid-cols-4 gap-2 mb-2">
-                      <Input
-                        placeholder="Item name"
-                        value={supply.name}
-                        onChange={(e) => updateSupply(i, 'name', e.target.value)}
-                      />
-                      <Input
-                        type="number"
-                        placeholder="Price"
-                        value={supply.unitCost}
-                        onChange={(e) => updateSupply(i, 'unitCost', e.target.value)}
-                      />
-                      <Input
-                        type="number"
-                        placeholder="Quantity"
-                        value={supply.quantity}
-                        onChange={(e) => updateSupply(i, 'quantity', e.target.value)}
-                      />
-                      <Input
-                        placeholder="Total"
-                        value={supply.total.toFixed(2)}
-                        readOnly
-                        className="bg-gray-100 dark:bg-gray-700"
-                      />
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => removeSupply(i)}
-                      className="bg-[#E03E3E] hover:bg-[#c63535]"
-                    >
-                      <Trash2 className="w-4 h-4 mr-1" />
-                      Remove
-                    </Button>
-                  </div>
-                ))}
-                <div className="text-right font-medium">
-                  Supplies Total: ${calculateSuppliesTotal().toFixed(2)}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              ))}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={addSupply}
+                className="border-yellow-600 text-yellow-300 hover:bg-yellow-900/30"
+              >
+                + Add Supply
+              </Button>
+            </div>
+          </div>
 
           {/* Travel Costs */}
-          <Card className="mb-4 border-2 border-[#569CD6]">
-            <CardHeader>
-              <CardTitle className="text-lg text-[#569CD6]">Travel Costs</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="border border-[#569CD6] rounded p-3 bg-[#569CD6]/10">
-                <div className="grid grid-cols-3 gap-2">
-                  <Input
-                    type="number"
-                    placeholder="Rate per km"
-                    value={travelCosts.ratePerKm}
-                    onChange={(e) => setTravelCosts({...travelCosts, ratePerKm: e.target.value})}
-                  />
-                  <Input
-                    type="number"
-                    placeholder="Distance (km)"
-                    value={travelCosts.distance}
-                    onChange={(e) => setTravelCosts({...travelCosts, distance: e.target.value})}
-                  />
-                  <Input
-                    type="number"
-                    placeholder="Number of trips"
-                    value={travelCosts.trips}
-                    onChange={(e) => setTravelCosts({...travelCosts, trips: e.target.value})}
-                  />
-                </div>
-                <div className="mt-2 text-right font-medium">
-                  Travel Total: ${calculateTravelTotal().toFixed(2)}
-                </div>
+          <div className="border border-red-400 bg-red-900/20 rounded-lg p-4">
+            <h3 className="text-red-300 font-semibold mb-3">Travel Costs</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <Label className="text-gray-300">Distance (km)</Label>
+                <Input
+                  type="number"
+                  inputMode="decimal"
+                  value={travelDistance}
+                  onChange={(e) => setTravelDistance(e.target.value)}
+                  className="bg-gray-800 border-gray-600 text-white"
+                  placeholder=""
+                />
               </div>
-            </CardContent>
-          </Card>
+              <div>
+                <Label className="text-gray-300">Cost per km</Label>
+                <Input
+                  type="number"
+                  inputMode="decimal"
+                  value={travelRate}
+                  onChange={(e) => setTravelRate(e.target.value)}
+                  className="bg-gray-800 border-gray-600 text-white"
+                  placeholder=""
+                />
+              </div>
+              <div>
+                <Label className="text-gray-300">Number of Trips</Label>
+                <Input
+                  type="number"
+                  inputMode="decimal"
+                  value={travelTrips}
+                  onChange={(e) => setTravelTrips(e.target.value)}
+                  className="bg-gray-800 border-gray-600 text-white"
+                  placeholder=""
+                />
+              </div>
+            </div>
+          </div>
 
           {/* Tax Configuration */}
-          <Card className="mb-4 border-2 border-[#569CD6]">
-            <CardHeader>
-              <CardTitle className="text-lg text-[#569CD6]">Tax Configuration</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {/* Country Selector */}
-                <div>
-                  <label className="block text-sm font-medium mb-2">Country</label>
-                  <Select value={taxConfig.country} onValueChange={(value) => setTaxConfig({...taxConfig, country: value})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Country" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-black border border-gray-600">
-                      <SelectItem value="CA" className="text-white hover:bg-gray-800">Canada</SelectItem>
-                      <SelectItem value="US" className="text-white hover:bg-gray-800">United States</SelectItem>
-                      <SelectItem value="OTHER" className="text-white hover:bg-gray-800">Other / International</SelectItem>
-                    </SelectContent>
-                  </Select>
+          <div className="border border-red-500 bg-red-900/20 rounded-lg p-4">
+            <h3 className="text-red-300 font-semibold mb-3">Tax Configuration</h3>
+            <div className="space-y-4">
+              <div>
+                <Label className="text-gray-300">Country/Region</Label>
+                <select
+                  value={taxConfig.country}
+                  onChange={(e) => setTaxConfig(prev => ({ ...prev, country: e.target.value }))}
+                  className="w-full bg-gray-800 border border-gray-600 text-white rounded px-3 py-2"
+                >
+                  <option value="CA">Canada</option>
+                  <option value="US">United States</option>
+                  <option value="OTHER">Other/International</option>
+                </select>
+              </div>
+              
+              {taxConfig.country === 'CA' && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-gray-300">GST (%)</Label>
+                    <Input
+                      type="number"
+                      inputMode="decimal"
+                      value={taxConfig.gst || ''}
+                      onChange={(e) => setTaxConfig(prev => ({ ...prev, gst: parseFloat(e.target.value) || 0 }))}
+                      className="bg-gray-800 border-gray-600 text-white"
+                      placeholder="5"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-gray-300">PST/HST (%)</Label>
+                    <Input
+                      type="number"
+                      inputMode="decimal"
+                      value={taxConfig.pst || taxConfig.hst || ''}
+                      onChange={(e) => setTaxConfig(prev => ({ 
+                        ...prev, 
+                        pst: parseFloat(e.target.value) || 0,
+                        hst: parseFloat(e.target.value) || 0 
+                      }))}
+                      className="bg-gray-800 border-gray-600 text-white"
+                      placeholder="0"
+                    />
+                  </div>
                 </div>
-
-                {/* Canadian Tax Fields */}
-                {taxConfig.country === 'CA' && (
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-sm font-medium mb-1">GST (%)</label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        placeholder="5"
-                        value={taxConfig.gst || ''}
-                        onChange={(e) => setTaxConfig({...taxConfig, gst: parseFloat(e.target.value) || 0})}
-                      />
-                      <small className="text-gray-500">Goods and Services Tax</small>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">PST/HST (%)</label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        placeholder="0"
-                        value={taxConfig.pst || taxConfig.hst || ''}
-                        onChange={(e) => setTaxConfig({...taxConfig, pst: parseFloat(e.target.value) || 0, hst: parseFloat(e.target.value) || 0})}
-                      />
-                      <small className="text-gray-500">Provincial/Harmonized Tax</small>
-                    </div>
-                  </div>
-                )}
-
-                {/* US Tax Fields */}
-                {taxConfig.country === 'US' && (
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Sales Tax (%)</label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      placeholder="0"
-                      value={taxConfig.salesTax || ''}
-                      onChange={(e) => setTaxConfig({...taxConfig, salesTax: parseFloat(e.target.value) || 0})}
-                    />
-                    <small className="text-gray-500">State and local sales taxes</small>
-                  </div>
-                )}
-
-                {/* International Tax Fields */}
-                {taxConfig.country === 'OTHER' && (
-                  <div>
-                    <label className="block text-sm font-medium mb-1">VAT (%)</label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      placeholder="0"
-                      value={taxConfig.vat || ''}
-                      onChange={(e) => setTaxConfig({...taxConfig, vat: parseFloat(e.target.value) || 0})}
-                    />
-                    <small className="text-gray-500">Value Added Tax</small>
-                  </div>
-                )}
-
-                {/* Other Tax Field - Always Show */}
+              )}
+              
+              {taxConfig.country === 'US' && (
                 <div>
-                  <label className="block text-sm font-medium mb-1">Other Tax/Fees (%)</label>
+                  <Label className="text-gray-300">Sales Tax (%)</Label>
                   <Input
                     type="number"
-                    step="0.01"
+                    inputMode="decimal"
+                    value={taxConfig.salesTax || ''}
+                    onChange={(e) => setTaxConfig(prev => ({ ...prev, salesTax: parseFloat(e.target.value) || 0 }))}
+                    className="bg-gray-800 border-gray-600 text-white"
                     placeholder="0"
-                    value={taxConfig.otherTax || ''}
-                    onChange={(e) => setTaxConfig({...taxConfig, otherTax: parseFloat(e.target.value) || 0})}
                   />
-                  <small className="text-gray-500">Any additional taxes or fees</small>
                 </div>
+              )}
+              
+              {taxConfig.country === 'OTHER' && (
+                <div>
+                  <Label className="text-gray-300">VAT (%)</Label>
+                  <Input
+                    type="number"
+                    inputMode="decimal"
+                    value={taxConfig.vat || ''}
+                    onChange={(e) => setTaxConfig(prev => ({ ...prev, vat: parseFloat(e.target.value) || 0 }))}
+                    className="bg-gray-800 border-gray-600 text-white"
+                    placeholder="0"
+                  />
+                </div>
+              )}
+              
+              <div>
+                <Label className="text-gray-300">Other Tax (%)</Label>
+                <Input
+                  type="number"
+                  inputMode="decimal"
+                  value={taxConfig.otherTax || ''}
+                  onChange={(e) => setTaxConfig(prev => ({ ...prev, otherTax: parseFloat(e.target.value) || 0 }))}
+                  className="bg-gray-800 border-gray-600 text-white"
+                  placeholder="0"
+                />
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Summary */}
-          <Card className="mb-4 border-2 border-[#8B5FBF]">
-            <CardHeader>
-              <CardTitle className="text-lg text-[#8B5FBF]">Summary</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span>Labor:</span>
-                  <span>${calculateLaborSubtotal().toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Materials:</span>
-                  <span>${calculateMaterialsSubtotal().toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Travel:</span>
-                  <span>${calculateTravelTotal().toFixed(2)}</span>
-                </div>
-                <div className="border-t pt-2">
-                  <div className="flex justify-between">
-                    <span>Subtotal:</span>
-                    <span>${calculateSubtotal().toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Taxes:</span>
-                    <span>${calculateTaxes().toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between font-bold text-lg">
-                    <span>Total:</span>
-                    <span>${calculateTotal().toFixed(2)}</span>
-                  </div>
-                </div>
+          <div className="border border-green-600 bg-green-900/20 rounded-lg p-4">
+            <h3 className="text-green-300 font-semibold mb-3">Estimate Summary</h3>
+            <div className="space-y-2">
+              <div className="flex justify-between text-gray-300">
+                <span>Labor Subtotal:</span>
+                <span>$\{calculateLaborSubtotal().toFixed(2)}</span>
               </div>
-            </CardContent>
-          </Card>
+              <div className="flex justify-between text-gray-300">
+                <span>Materials:</span>
+                <span>$\{(calculatePrimerCosts() + calculatePaintCosts() + calculateSuppliesTotal()).toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-gray-300">
+                <span>Travel:</span>
+                <span>$\{calculateTravelTotal().toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-gray-300 border-t border-gray-700 pt-2">
+                <span>Subtotal:</span>
+                <span>$\{calculateSubtotal().toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-gray-300">
+                <span>Taxes:</span>
+                <span>$\{calculateTaxes().toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-green-300 font-bold text-lg border-t border-green-600 pt-2">
+                <span>Total Estimate:</span>
+                <span>$\{calculateTotal().toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
 
-          {/* Action Section - Inside scrollable content */}
-          <Card className="mb-4 border-2 border-[#8B5FBF]">
-            <CardHeader>
-              <CardTitle className="text-lg text-[#8B5FBF]">Generate Estimate</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {/* Toggle Switch */}
-                <div className="flex justify-center">
-                  <div className="relative inline-flex items-center">
-                    <button
-                      onClick={() => setActionMode(actionMode === 'email' ? 'download' : 'email')}
-                      className={`relative inline-flex h-12 w-24 items-center rounded-full transition-colors duration-200 focus:outline-none ${
-                        actionMode === 'email' ? 'bg-[#569CD6]' : 'bg-[#6A9955]'
-                      }`}
-                    >
-                      <span
-                        className={`inline-block h-10 w-10 transform rounded-full bg-white transition-transform duration-200 ${
-                          actionMode === 'email' ? 'translate-x-1' : 'translate-x-[3.25rem]'
-                        }`}
-                      />
-                      <Mail 
-                        className={`absolute left-2 h-5 w-5 transition-opacity duration-200 ${
-                          actionMode === 'email' ? 'text-white opacity-100' : 'text-white opacity-60'
-                        }`} 
-                        style={{ color: '#FFFFFF' }}
-                      />
-                      <Download 
-                        className={`absolute right-2 h-5 w-5 transition-opacity duration-200 ${
-                          actionMode === 'download' ? 'text-white opacity-100' : 'text-white opacity-60'
-                        }`} 
-                        style={{ color: '#FFFFFF' }}
-                      />
-                    </button>
-                  </div>
-                </div>
-                
-                {/* Action Buttons */}
-                <div className="flex gap-3">
-                  <Button variant="outline" onClick={onClose} className="flex-1 h-12">
-                    Cancel
-                  </Button>
-                  
-                  {actionMode === 'email' ? (
-                    <Button 
-                      onClick={sendEstimateEmail} 
-                      className="bg-[#569CD6] hover:bg-[#4a8bc2] flex-1 h-12"
-                      disabled={sendEmailMutation.isPending}
-                    >
-                      <Mail className="w-5 h-5 mr-2" />
-                      {sendEmailMutation.isPending ? 'Sending...' : 'Send Email'}
-                    </Button>
-                  ) : (
-                    <Button onClick={generatePDF} className="bg-[#6A9955] hover:bg-[#5a8245] flex-1 h-12">
-                      <Download className="w-5 h-5 mr-2" />
-                      Download PDF
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3 pt-4">
+            {actionMode === 'pdf' ? (
+              <Button
+                onClick={generatePDF}
+                disabled={isGenerating}
+                className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Download className="mr-2 h-4 w-4" />
+                    Download PDF
+                  </>
+                )}
+              </Button>
+            ) : (
+              <Button
+                onClick={sendEstimateEmail}
+                disabled={sendEmailMutation.isPending || !clientEmail}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                {sendEmailMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Mail className="mr-2 h-4 w-4" />
+                    Send Email
+                  </>
+                )}
+              </Button>
+            )}
+            
+            <div className="flex bg-gray-800 rounded-lg p-1">
+              <Button
+                variant={actionMode === 'pdf' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setActionMode('pdf')}
+                className={actionMode === 'pdf' ? 'bg-purple-600 text-white' : 'text-gray-400'}
+              >
+                <Download className="mr-1 h-3 w-3" />
+                PDF
+              </Button>
+              <Button
+                variant={actionMode === 'email' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setActionMode('email')}
+                className={actionMode === 'email' ? 'bg-blue-600 text-white' : 'text-gray-400'}
+              >
+                <Mail className="mr-1 h-3 w-3" />
+                Email
+              </Button>
+            </div>
+          </div>
         </div>
       </DialogContent>
-      
-
     </Dialog>
   );
 }
+
+// Default export for the component
+export default EstimateGenerator;
