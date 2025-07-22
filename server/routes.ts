@@ -504,28 +504,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/send-estimate-email', async (req, res) => {
     try {
-      const { recipientEmail, clientName, estimateNumber, projectTitle, totalAmount, customMessage, pdfBase64, pdfData } = req.body;
-      
-      // Use either pdfBase64 or pdfData (for backward compatibility)
-      const actualPdfData = pdfBase64 || pdfData;
+      const { recipientEmail, clientName, estimateNumber, projectTitle, totalAmount, customMessage, htmlContent } = req.body;
       
       // Debug: Log what we received
       console.log('Received estimate request:');
       console.log('- recipientEmail:', recipientEmail);
       console.log('- clientName:', clientName);
-      console.log('- pdfBase64:', typeof pdfBase64);
-      console.log('- pdfData:', typeof pdfData);
-      console.log('- actualPdfData type:', typeof actualPdfData);
-      console.log('- actualPdfData length:', actualPdfData ? actualPdfData.length : 'undefined');
-      console.log('- actualPdfData preview:', actualPdfData ? actualPdfData.substring(0, 50) + '...' : 'undefined');
+      console.log('- htmlContent type:', typeof htmlContent);
+      console.log('- htmlContent length:', htmlContent ? htmlContent.length : 'undefined');
 
       // Validate required fields
       if (!recipientEmail || !clientName) {
         return res.status(400).json({ error: 'recipientEmail and clientName are required' });
       }
       
-      if (!actualPdfData || typeof actualPdfData !== 'string') {
-        return res.status(400).json({ error: 'PDF data must be provided as a base64 string' });
+      if (!htmlContent || typeof htmlContent !== 'string') {
+        return res.status(400).json({ error: 'HTML content must be provided' });
       }
       
       // Basic email validation
@@ -533,22 +527,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!emailRegex.test(recipientEmail)) {
         return res.status(400).json({ error: 'Invalid email address format' });
       }
-      
-      // Validate and convert base64 PDF to buffer
-      let pdfBuffer;
-      try {
-        // Handle both with and without data URL prefix
-        const base64Data = actualPdfData.includes(',') ? actualPdfData.split(',')[1] : actualPdfData;
-        if (!base64Data || base64Data.length === 0) {
-          throw new Error('Empty PDF data after processing');
-        }
-        pdfBuffer = Buffer.from(base64Data, 'base64');
-        console.log('Successfully created PDF buffer, size:', pdfBuffer.length, 'bytes');
-      } catch (pdfError) {
-        console.error('Error processing PDF data:', pdfError);
-        return res.status(400).json({ error: 'Invalid PDF data format' });
-      }
 
+      // Send estimate email with HTML content
       await sendEstimateEmail(
         recipientEmail,
         clientName,
@@ -556,7 +536,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         projectTitle || 'Painting Estimate',
         totalAmount || '0.00',
         customMessage || '',
-        pdfBuffer
+        htmlContent  // Send HTML content instead of PDF buffer
       );
       res.json({ success: true, message: 'Estimate email sent successfully' });
     } catch (error) {
@@ -573,72 +553,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Legacy endpoint for backward compatibility
-  app.post('/api/send-estimate', async (req, res) => {
-    try {
-      const { recipientEmail, clientName, estimateNumber, projectTitle, totalAmount, customMessage, pdfData } = req.body;
-      
-      // Debug: Log what we received
-      console.log('Received legacy estimate request:');
-      console.log('- recipientEmail:', recipientEmail);
-      console.log('- clientName:', clientName);
-      console.log('- pdfData type:', typeof pdfData);
-      console.log('- pdfData length:', pdfData ? pdfData.length : 'undefined');
-      console.log('- pdfData preview:', pdfData ? pdfData.substring(0, 50) + '...' : 'undefined');
 
-      // Validate required fields
-      if (!recipientEmail || !clientName) {
-        return res.status(400).json({ error: 'recipientEmail and clientName are required' });
-      }
-      
-      if (!pdfData || typeof pdfData !== 'string') {
-        return res.status(400).json({ error: 'PDF data must be provided as a base64 string' });
-      }
-      
-      // Basic email validation
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(recipientEmail)) {
-        return res.status(400).json({ error: 'Invalid email address format' });
-      }
-      
-      // Validate and convert base64 PDF to buffer
-      let pdfBuffer;
-      try {
-        // Handle both with and without data URL prefix
-        const base64Data = pdfData.includes(',') ? pdfData.split(',')[1] : pdfData;
-        if (!base64Data || base64Data.length === 0) {
-          throw new Error('Empty PDF data after processing');
-        }
-        pdfBuffer = Buffer.from(base64Data, 'base64');
-        console.log('Successfully created PDF buffer, size:', pdfBuffer.length, 'bytes');
-      } catch (pdfError) {
-        console.error('Error processing PDF data:', pdfError);
-        return res.status(400).json({ error: 'Invalid PDF data format' });
-      }
-
-      await sendEstimateEmail(
-        recipientEmail,
-        clientName,
-        estimateNumber || 'EST-001',
-        projectTitle || 'Painting Estimate',
-        totalAmount || '0.00',
-        customMessage || '',
-        pdfBuffer
-      );
-      res.json({ success: true, message: 'Estimate email sent successfully' });
-    } catch (error) {
-      console.error('Error sending legacy estimate email:', error);
-      console.error('Request body keys:', Object.keys(req.body));
-      console.error('Email data:', { 
-        recipientEmail: req.body.recipientEmail, 
-        clientName: req.body.clientName, 
-        estimateNumber: req.body.estimateNumber, 
-        projectTitle: req.body.projectTitle, 
-        totalAmount: req.body.totalAmount 
-      });
-      res.status(500).json({ error: `Failed to send estimate email: ${(error as Error).message}` });
-    }
-  });
 
   // Basic email route for simple communication
   app.post('/api/send-basic-email', async (req, res) => {

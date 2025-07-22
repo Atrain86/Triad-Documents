@@ -242,7 +242,7 @@ export async function sendEstimateEmail(
   projectTitle: string,
   totalAmount: string,
   customMessage: string,
-  pdfBuffer: Buffer
+  htmlContent: string
 ): Promise<boolean> {
   const subject = `Your Painting Estimate from A-Frame Painting - ${projectTitle}`;
   
@@ -314,13 +314,7 @@ cortespainter@gmail.com`;
     to: recipientEmail,
     subject,
     text,
-    html,
-    attachments: [
-      {
-        filename: `Estimate-${estimateNumber}-${clientName.replace(/[^a-zA-Z0-9]/g, '')}.pdf`,
-        content: pdfBuffer
-      }
-    ]
+    html: htmlContent  // Use the HTML template directly as email content
   });
 }
 
