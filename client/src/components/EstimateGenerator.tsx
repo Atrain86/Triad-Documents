@@ -470,15 +470,15 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       // Footer with single yellow validity note
       yPos += 25;
       
-      // Yellow validity section
-      pdf.setFillColor(220, 220, 170); // Light yellow background
+      // Yellow validity section (NEW VERSION)
+      pdf.setFillColor(255, 255, 0); // Bright yellow to test
       pdf.rect(10, yPos - 5, 190, 20, 'F');
       pdf.setTextColor(0, 0, 0); // Black text on yellow background
       pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(9);
+      pdf.setFontSize(10);
       const validityText = 'This estimate is valid for the next 30 days after we will discuss options with you before proceeding.';
-      const validityLines = pdf.splitTextToSize(validityText, 180);
-      pdf.text(validityLines, 105, yPos + 2, { align: 'center' });
+      const validityLines = pdf.splitTextToSize(validityText, 175);
+      pdf.text(validityLines, 105, yPos, { align: 'center' });
       
       yPos += 25;
       pdf.setFont('helvetica', 'bold');
@@ -684,15 +684,15 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       // Footer with single yellow validity note
       yPos += 25;
       
-      // Yellow validity section
-      pdf.setFillColor(220, 220, 170); // Light yellow background
+      // Yellow validity section (NEW VERSION)
+      pdf.setFillColor(255, 255, 0); // Bright yellow to test
       pdf.rect(10, yPos - 5, 190, 20, 'F');
       pdf.setTextColor(0, 0, 0); // Black text on yellow background
       pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(9);
+      pdf.setFontSize(10);
       const validityText2 = 'This estimate is valid for the next 30 days after we will discuss options with you before proceeding.';
-      const validityLines2 = pdf.splitTextToSize(validityText2, 180);
-      pdf.text(validityLines2, 105, yPos + 2, { align: 'center' });
+      const validityLines2 = pdf.splitTextToSize(validityText2, 175);
+      pdf.text(validityLines2, 105, yPos, { align: 'center' });
       
       yPos += 25;
       pdf.setFont('helvetica', 'bold');
