@@ -311,61 +311,64 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
       let yPos = 20;
       
-      // Set dark background
-      pdf.setFillColor(26, 26, 26); // #1a1a1a
+      // Set black background
+      pdf.setFillColor(0, 0, 0); // Pure black
       pdf.rect(0, 0, 210, 297, 'F'); // Fill entire A4 page
       
       // Set white text color
       pdf.setTextColor(255, 255, 255);
       
-      // Header - ESTIMATE (make wider by using more of the page)
-      pdf.setFontSize(24);
+      // A-Frame Logo centered at top
+      pdf.setFontSize(18);
       pdf.setFont('helvetica', 'bold');
-      pdf.text('ESTIMATE', 190, yPos, { align: 'right' });
+      pdf.text('A-FRAME PAINTING', 105, yPos, { align: 'center' });
       
-      // Add A-Frame Painting logo text (start closer to left edge)
-      pdf.setFontSize(16);
-      pdf.text('A-FRAME PAINTING', 10, yPos);
+      yPos += 15;
       
-      yPos += 10;
+      // Header - ESTIMATE
+      pdf.setFontSize(24);
+      pdf.setTextColor(234, 88, 12); // Orange color like "Invoice" in your example
+      pdf.text('ESTIMATE', 15, yPos);
+      
+      // Estimate number and date on right
       pdf.setFontSize(12);
+      pdf.setTextColor(255, 255, 255);
       pdf.setFont('helvetica', 'normal');
-      pdf.text(`#${estimateNumber || 'EST-001'}`, 190, yPos, { align: 'right' });
-      pdf.text('884 Hayes Rd, Manson\'s Landing, BC V0P1K0', 10, yPos);
-      
-      yPos += 10;
-      pdf.text(new Date().toLocaleDateString(), 190, yPos, { align: 'right' });
-      pdf.text('Email: cortespainter@gmail.com', 10, yPos);
+      pdf.text(`Estimate #: ${estimateNumber || 'EST-001'}`, 190, yPos - 8, { align: 'right' });
+      pdf.text(`Date: ${new Date().toLocaleDateString()}`, 190, yPos + 2, { align: 'right' });
       
       yPos += 20;
       
-      // Client Information Section (make wider and taller to fit all content with proper spacing)
-      pdf.setFillColor(42, 42, 42); // #2a2a2a
-      pdf.rect(10, yPos, 190, 45, 'F');  // Made taller to fit all information with spacing
-      
-      yPos += 10;  // More top spacing
+      // Two-column layout for client and contractor info
+      // BILL TO (Left side)
+      pdf.setFontSize(10);
+      pdf.setTextColor(150, 150, 150); // Gray
       pdf.setFont('helvetica', 'bold');
-      pdf.text('Estimate For:', 15, yPos);
+      pdf.text('BILL TO', 15, yPos);
+      
+      // FROM (Right side)
+      pdf.text('FROM', 115, yPos);
       
       yPos += 8;
+      
+      // Client info (Left)
+      pdf.setTextColor(255, 255, 255);
       pdf.setFont('helvetica', 'normal');
       pdf.text(clientName, 15, yPos);
+      pdf.text(clientAddress, 15, yPos + 6);
+      pdf.text(`${clientCity}, ${clientPostal}`, 15, yPos + 12);
+      pdf.text(clientPhone, 15, yPos + 18);
+      pdf.text(clientEmail, 15, yPos + 24);
       
-      yPos += 6;
-      pdf.text(clientAddress, 15, yPos);
+      // Contractor info (Right)
+      pdf.text('A-Frame Painting', 115, yPos);
+      pdf.text('884 Hayes Rd', 115, yPos + 6);
+      pdf.text('Manson\'s Landing, BC', 115, yPos + 12);
+      pdf.text('cortespainter@gmail.com', 115, yPos + 18);
       
-      yPos += 6;
-      pdf.text(`${clientCity}, ${clientPostal}`, 15, yPos);
+      yPos += 40;
       
-      yPos += 6;
-      pdf.text(clientPhone, 15, yPos);  // Move phone to left side with other info
-      
-      yPos += 6;
-      pdf.text(clientEmail, 15, yPos);  // Keep email on left side
-      
-      yPos += 15;  // More bottom spacing before next section
-      
-      // Services & Labor Section with gray container
+      // Services & Labor Section with RED perimeter (1st color)
       const laborStartY = yPos;
       
       // Calculate container height based on content
@@ -374,13 +377,18 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       const laborItemCount = validWorkStages.length + validAdditionalLabor.length;
       const laborContainerHeight = 8 + (laborItemCount * 15) + 10; // Header + items + bottom padding
       
-      // Draw gray container for Services & Labor
-      pdf.setFillColor(42, 42, 42); // #2a2a2a
+      // Draw dark gray background with RED border
+      pdf.setFillColor(42, 42, 42); // Dark gray fill
       pdf.rect(10, yPos, 190, laborContainerHeight, 'F');
+      pdf.setDrawColor(229, 62, 62); // RED border #E53E3E
+      pdf.setLineWidth(1);
+      pdf.rect(10, yPos, 190, laborContainerHeight, 'S');
       
       yPos += 8;
       pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(229, 62, 62); // RED text for section title
       pdf.text('Services & Labor', 15, yPos);
+      pdf.setTextColor(255, 255, 255); // Reset to white
       yPos += 8;
       
       // Work stages (increased spacing for better readability)
@@ -420,13 +428,18 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       if (parseFloat(travelTotal) > 0) materialsItemCount++;
       const materialsContainerHeight = 8 + (materialsItemCount * 8) + 10; // Header + items + bottom padding
       
-      // Draw gray container for Materials & Paint
-      pdf.setFillColor(42, 42, 42); // #2a2a2a
+      // Draw dark gray background with ORANGE border
+      pdf.setFillColor(42, 42, 42); // Dark gray fill
       pdf.rect(10, yPos, 190, materialsContainerHeight, 'F');
+      pdf.setDrawColor(234, 88, 12); // ORANGE border #EA580C
+      pdf.setLineWidth(1);
+      pdf.rect(10, yPos, 190, materialsContainerHeight, 'S');
       
       yPos += 8;
       pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(234, 88, 12); // ORANGE text for section title
       pdf.text('Materials & Paint', 15, yPos);
+      pdf.setTextColor(255, 255, 255); // Reset to white
       yPos += 8;
       
       if (parseFloat(materialsTotal) > 0) {
@@ -446,9 +459,12 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       
       yPos += 15;
       
-      // Summary Section (make wider)
-      pdf.setFillColor(42, 42, 42); // #2a2a2a
+      // Summary Section with YELLOW perimeter (3rd color)
+      pdf.setFillColor(42, 42, 42); // Dark gray fill
       pdf.rect(10, yPos, 190, 35, 'F');
+      pdf.setDrawColor(220, 220, 170); // YELLOW border #DCDCAA
+      pdf.setLineWidth(1);
+      pdf.rect(10, yPos, 190, 35, 'S');
       
       yPos += 10;
       pdf.text('Subtotal:', 15, yPos);
@@ -470,10 +486,13 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       // Footer with single yellow validity note
       yPos += 25;
       
-      // Yellow validity section (NEW VERSION)
-      pdf.setFillColor(255, 255, 0); // Bright yellow to test
+      // Validity section with GREEN perimeter (4th color)
+      pdf.setFillColor(42, 42, 42); // Dark gray fill
       pdf.rect(10, yPos - 5, 190, 20, 'F');
-      pdf.setTextColor(0, 0, 0); // Black text on yellow background
+      pdf.setDrawColor(106, 153, 85); // GREEN border #6A9955
+      pdf.setLineWidth(1);
+      pdf.rect(10, yPos - 5, 190, 20, 'S');
+      pdf.setTextColor(106, 153, 85); // GREEN text
       pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(10);
       const validityText = 'This estimate is valid for the next 30 days after we will discuss options with you before proceeding.';
@@ -517,59 +536,62 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
       let yPos = 20;
       
-      // Set dark background
-      pdf.setFillColor(26, 26, 26); // #1a1a1a
+      // Set black background
+      pdf.setFillColor(0, 0, 0); // Pure black
       pdf.rect(0, 0, 210, 297, 'F'); // Fill entire A4 page
       
       // Set white text color
       pdf.setTextColor(255, 255, 255);
       
-      // Header - ESTIMATE (make wider by using more of the page)
-      pdf.setFontSize(24);
+      // A-Frame Logo centered at top
+      pdf.setFontSize(18);
       pdf.setFont('helvetica', 'bold');
-      pdf.text('ESTIMATE', 190, yPos, { align: 'right' });
+      pdf.text('A-FRAME PAINTING', 105, yPos, { align: 'center' });
       
-      // Add A-Frame Painting logo text (start closer to left edge)
-      pdf.setFontSize(16);
-      pdf.text('A-FRAME PAINTING', 10, yPos);
+      yPos += 15;
       
-      yPos += 10;
+      // Header - ESTIMATE
+      pdf.setFontSize(24);
+      pdf.setTextColor(234, 88, 12); // Orange color like "Invoice" in your example
+      pdf.text('ESTIMATE', 15, yPos);
+      
+      // Estimate number and date on right
       pdf.setFontSize(12);
+      pdf.setTextColor(255, 255, 255);
       pdf.setFont('helvetica', 'normal');
-      pdf.text(`#${estimateNumber || 'EST-001'}`, 190, yPos, { align: 'right' });
-      pdf.text('884 Hayes Rd, Manson\'s Landing, BC V0P1K0', 10, yPos);
-      
-      yPos += 10;
-      pdf.text(new Date().toLocaleDateString(), 190, yPos, { align: 'right' });
-      pdf.text('Email: cortespainter@gmail.com', 10, yPos);
+      pdf.text(`Estimate #: ${estimateNumber || 'EST-001'}`, 190, yPos - 8, { align: 'right' });
+      pdf.text(`Date: ${new Date().toLocaleDateString()}`, 190, yPos + 2, { align: 'right' });
       
       yPos += 20;
       
-      // Client Information Section (make wider and taller to fit all content with proper spacing)
-      pdf.setFillColor(42, 42, 42); // #2a2a2a
-      pdf.rect(10, yPos, 190, 45, 'F');  // Made taller to fit all information with spacing
-      
-      yPos += 10;  // More top spacing
+      // Two-column layout for client and contractor info
+      // BILL TO (Left side)
+      pdf.setFontSize(10);
+      pdf.setTextColor(150, 150, 150); // Gray
       pdf.setFont('helvetica', 'bold');
-      pdf.text('Estimate For:', 15, yPos);
+      pdf.text('BILL TO', 15, yPos);
+      
+      // FROM (Right side)
+      pdf.text('FROM', 115, yPos);
       
       yPos += 8;
+      
+      // Client info (Left)
+      pdf.setTextColor(255, 255, 255);
       pdf.setFont('helvetica', 'normal');
       pdf.text(clientName, 15, yPos);
+      pdf.text(clientAddress, 15, yPos + 6);
+      pdf.text(`${clientCity}, ${clientPostal}`, 15, yPos + 12);
+      pdf.text(clientPhone, 15, yPos + 18);
+      pdf.text(clientEmail, 15, yPos + 24);
       
-      yPos += 6;
-      pdf.text(clientAddress, 15, yPos);
+      // Contractor info (Right)
+      pdf.text('A-Frame Painting', 115, yPos);
+      pdf.text('884 Hayes Rd', 115, yPos + 6);
+      pdf.text('Manson\'s Landing, BC', 115, yPos + 12);
+      pdf.text('cortespainter@gmail.com', 115, yPos + 18);
       
-      yPos += 6;
-      pdf.text(`${clientCity}, ${clientPostal}`, 15, yPos);
-      
-      yPos += 6;
-      pdf.text(clientPhone, 15, yPos);  // Move phone to left side with other info
-      
-      yPos += 6;
-      pdf.text(clientEmail, 15, yPos);  // Keep email on left side
-      
-      yPos += 15;  // More bottom spacing before next section
+      yPos += 40;
       
       // Services & Labor Section with gray container
       const laborStartY2 = yPos;
@@ -580,15 +602,18 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       const laborItemCount2 = validWorkStages2.length + validAdditionalLabor2.length;
       const laborContainerHeight2 = 8 + (laborItemCount2 * 15) + 10; // Header + items + bottom padding
       
-      // Draw Paint Brain green container for Services & Labor
-      pdf.setFillColor(106, 153, 85); // Paint Brain Green #6A9955
+      // Draw dark gray background with RED border
+      pdf.setFillColor(42, 42, 42); // Dark gray fill
       pdf.rect(10, yPos, 190, laborContainerHeight2, 'F');
+      pdf.setDrawColor(229, 62, 62); // RED border #E53E3E
+      pdf.setLineWidth(1);
+      pdf.rect(10, yPos, 190, laborContainerHeight2, 'S');
       
       yPos += 8;
       pdf.setFont('helvetica', 'bold');
-      pdf.setTextColor(255, 255, 255); // White text on green background
+      pdf.setTextColor(229, 62, 62); // RED text for section title
       pdf.text('Services & Labor', 15, yPos);
-      pdf.setTextColor(255, 255, 255); // Keep white for content
+      pdf.setTextColor(255, 255, 255); // Reset to white
       yPos += 8;
       
       // Work stages (increased spacing for better readability)
@@ -628,26 +653,30 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       if (parseFloat(travelTotal2) > 0) materialsItemCount2++;
       const materialsContainerHeight2 = 8 + (materialsItemCount2 * 8) + 10; // Header + items + bottom padding
       
-      // Draw Paint Brain yellow container for Materials & Paint
-      pdf.setFillColor(220, 220, 170); // Paint Brain Yellow #DCDCAA
+      // Draw dark gray background with ORANGE border
+      pdf.setFillColor(42, 42, 42); // Dark gray fill
       pdf.rect(10, yPos, 190, materialsContainerHeight2, 'F');
+      pdf.setDrawColor(234, 88, 12); // ORANGE border #EA580C
+      pdf.setLineWidth(1);
+      pdf.rect(10, yPos, 190, materialsContainerHeight2, 'S');
       
       yPos += 8;
       pdf.setFont('helvetica', 'bold');
-      pdf.setTextColor(0, 0, 0); // Black text on yellow background
+      pdf.setTextColor(234, 88, 12); // ORANGE text for section title
       pdf.text('Materials & Paint', 15, yPos);
+      pdf.setTextColor(255, 255, 255); // Reset to white
       yPos += 8;
       
       if (parseFloat(materialsTotal2) > 0) {
         pdf.setFont('helvetica', 'normal');
-        pdf.setTextColor(0, 0, 0); // Black text on yellow background
+        pdf.setTextColor(255, 255, 255); // White text
         pdf.text('Paint & Supplies', 15, yPos);
         pdf.text(`$${materialsTotal2}`, 190, yPos, { align: 'right' });
         yPos += 8;
       }
       
       if (parseFloat(travelTotal2) > 0) {
-        pdf.setTextColor(0, 0, 0); // Black text on yellow background
+        pdf.setTextColor(255, 255, 255); // White text
         pdf.text('Delivery', 15, yPos);
         pdf.text(`$${travelTotal2}`, 190, yPos, { align: 'right' });
         yPos += 8;
@@ -657,9 +686,12 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       
       yPos += 15;
       
-      // Summary Section (Paint Brain purple background)
-      pdf.setFillColor(139, 95, 191); // Paint Brain Purple #8B5FBF
+      // Summary Section with YELLOW perimeter (3rd color)
+      pdf.setFillColor(42, 42, 42); // Dark gray fill
       pdf.rect(10, yPos, 190, 35, 'F');
+      pdf.setDrawColor(220, 220, 170); // YELLOW border #DCDCAA
+      pdf.setLineWidth(1);
+      pdf.rect(10, yPos, 190, 35, 'S');
       
       yPos += 10;
       pdf.setTextColor(255, 255, 255); // White text on purple background
@@ -684,10 +716,13 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       // Footer with single yellow validity note
       yPos += 25;
       
-      // Yellow validity section (NEW VERSION)
-      pdf.setFillColor(255, 255, 0); // Bright yellow to test
+      // Validity section with GREEN perimeter (4th color)
+      pdf.setFillColor(42, 42, 42); // Dark gray fill
       pdf.rect(10, yPos - 5, 190, 20, 'F');
-      pdf.setTextColor(0, 0, 0); // Black text on yellow background
+      pdf.setDrawColor(106, 153, 85); // GREEN border #6A9955
+      pdf.setLineWidth(1);
+      pdf.rect(10, yPos - 5, 190, 20, 'S');
+      pdf.setTextColor(106, 153, 85); // GREEN text
       pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(10);
       const validityText2 = 'This estimate is valid for the next 30 days after we will discuss options with you before proceeding.';
