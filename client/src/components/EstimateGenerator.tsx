@@ -467,31 +467,41 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   </body>
 </html>`;
 
-      // Create hidden window to generate PDF
-      const printWindow = window.open('', '_blank', 'width=800,height=600');
-      if (!printWindow) {
-        throw new Error('Pop-up blocked. Please allow pop-ups and try again.');
+      // Create invisible iframe instead of popup window
+      const iframe = document.createElement('iframe');
+      iframe.style.position = 'fixed';
+      iframe.style.left = '-9999px';
+      iframe.style.top = '-9999px';
+      iframe.style.width = '800px';
+      iframe.style.height = '600px';
+      iframe.style.visibility = 'hidden';
+      document.body.appendChild(iframe);
+
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (!iframeDoc) {
+        throw new Error('Could not access iframe document');
       }
-      
-      printWindow.document.write(htmlContent);
-      printWindow.document.close();
+
+      iframeDoc.write(htmlContent);
+      iframeDoc.close();
       
       // Wait for content to load
       await new Promise((resolve) => {
-        printWindow.onload = () => {
+        iframe.onload = () => {
           setTimeout(resolve, 1000);
         };
       });
 
       // Capture as canvas and convert to PDF
-      const canvas = await html2canvas(printWindow.document.body, {
+      const canvas = await html2canvas(iframeDoc.body, {
         backgroundColor: '#000000',
         scale: 1,
         useCORS: true,
         allowTaint: true
       });
 
-      printWindow.close();
+      // Clean up iframe
+      document.body.removeChild(iframe);
 
       // Convert canvas to PDF
       const pdf = new jsPDF('p', 'mm', 'a4');
