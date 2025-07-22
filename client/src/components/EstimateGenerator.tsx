@@ -467,23 +467,20 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       pdf.text('Estimate Total', 15, yPos);
       pdf.text(`$${calculateTotal().toFixed(2)}`, 190, yPos, { align: 'right' });
       
-      // Footer with Important Note and Estimate Validity (increased spacing to prevent cutoff)
+      // Footer with single yellow validity note
       yPos += 25;
       
-      // Important Note Section (combined with validity)
-      pdf.setTextColor(255, 255, 255);
-      pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(10);
-      pdf.text('IMPORTANT NOTE:', 105, yPos, { align: 'center' });
-      
-      yPos += 5;
+      // Yellow validity section
+      pdf.setFillColor(220, 220, 170); // Light yellow background
+      pdf.rect(10, yPos - 5, 190, 20, 'F');
+      pdf.setTextColor(0, 0, 0); // Black text on yellow background
       pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(9);
-      const importantNoteText = 'This is an estimate, not a final quote. Final costs may vary based on actual conditions discovered during the project. If the job scope changes significantly (exceeding 20% of this estimate), we will discuss options with you before proceeding. Estimate Validity: This estimate is valid for 30 days from the date above.';
-      const importantNoteLines = pdf.splitTextToSize(importantNoteText, 180);
-      pdf.text(importantNoteLines, 105, yPos, { align: 'center' });
+      const validityText = 'This estimate is valid for the next 30 days after we will discuss options with you before proceeding.';
+      const validityLines = pdf.splitTextToSize(validityText, 180);
+      pdf.text(validityLines, 105, yPos + 2, { align: 'center' });
       
-      yPos += (importantNoteLines.length * 4) + 10;
+      yPos += 25;
       pdf.setFont('helvetica', 'bold');
       pdf.setFontSize(12);
       pdf.text('Thank you for considering A-Frame Painting!', 105, yPos, { align: 'center' });
@@ -684,23 +681,20 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       pdf.text(`$${calculateTotal().toFixed(2)}`, 190, yPos, { align: 'right' });
       pdf.setFontSize(12); // Reset font size
       
-      // Footer with Important Note and Estimate Validity (increased spacing to prevent cutoff)
+      // Footer with single yellow validity note
       yPos += 25;
       
-      // Important Note Section (combined with validity)
-      pdf.setTextColor(255, 255, 255);
-      pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(10);
-      pdf.text('IMPORTANT NOTE:', 105, yPos, { align: 'center' });
-      
-      yPos += 5;
+      // Yellow validity section
+      pdf.setFillColor(220, 220, 170); // Light yellow background
+      pdf.rect(10, yPos - 5, 190, 20, 'F');
+      pdf.setTextColor(0, 0, 0); // Black text on yellow background
       pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(9);
-      const importantNoteText2 = 'This is an estimate, not a final quote. Final costs may vary based on actual conditions discovered during the project. If the job scope changes significantly (exceeding 20% of this estimate), we will discuss options with you before proceeding. Estimate Validity: This estimate is valid for 30 days from the date above.';
-      const importantNoteLines2 = pdf.splitTextToSize(importantNoteText2, 180);
-      pdf.text(importantNoteLines2, 105, yPos, { align: 'center' });
+      const validityText2 = 'This estimate is valid for the next 30 days after we will discuss options with you before proceeding.';
+      const validityLines2 = pdf.splitTextToSize(validityText2, 180);
+      pdf.text(validityLines2, 105, yPos + 2, { align: 'center' });
       
-      yPos += (importantNoteLines2.length * 4) + 10;
+      yPos += 25;
       pdf.setFont('helvetica', 'bold');
       pdf.setFontSize(12);
       pdf.text('Thank you for considering A-Frame Painting!', 105, yPos, { align: 'center' });
