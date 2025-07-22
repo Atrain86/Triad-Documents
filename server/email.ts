@@ -261,16 +261,9 @@ ${customMessageSection}================================
 TOTAL ESTIMATE: $${totalAmount}
 ================================
 
-WHAT'S INCLUDED:
-• Detailed work breakdown with labor estimates
-• All necessary supplies and materials
-• Professional preparation and finishing work
-• Travel costs and project coordination
+IMPORTANT NOTE: This is an estimate, not a final quote. Final costs may vary based on actual conditions discovered during the project. If the job scope changes significantly (exceeding 20% of this estimate), we will discuss options with you before proceeding.
 
-ESTIMATE DETAILS:
-• Validity: This estimate is valid for 30 days from today's date
-
-IMPORTANT NOTE: This is an estimate, not a final quote. Final costs may vary based on actual conditions discovered during the project. If the job scope changes significantly (exceeding 20% of this estimate), we will discuss options with you before proceeding to ensure complete transparency.
+ESTIMATE VALIDITY: This estimate is valid for 30 days from today's date
 
 Best regards,
 
@@ -299,30 +292,19 @@ cortespainter@gmail.com`;
         <h2 style="margin: 0; font-size: 24px;">Total Estimate: $${totalAmount}</h2>
       </div>
       
-      <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-        <h3 style="color: #EA580C; margin-top: 0;">What's Included:</h3>
-        <ul style="color: #333; line-height: 1.6; margin: 10px 0; padding-left: 20px;">
-          <li>Detailed work breakdown with labor estimates</li>
-          <li>All necessary supplies and materials</li>
-          <li>Professional preparation and finishing work</li>
-          <li>Travel costs and project coordination</li>
-        </ul>
+      <div style="background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
+        <p style="margin: 0; color: #856404; font-size: 14px;"><strong>Important Note:</strong> This is an estimate, not a final quote. Final costs may vary based on actual conditions discovered during the project. If the job scope changes significantly (exceeding 20% of this estimate), we will discuss options with you before proceeding.</p>
       </div>
       
       <div style="background-color: #e8f5e8; padding: 15px; border-radius: 8px; margin: 20px 0;">
         <p style="margin: 0; color: #333;"><strong>Estimate Validity:</strong> This estimate is valid for 30 days from the date above.</p>
       </div>
       
-      <div style="background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
-        <p style="margin: 0; color: #856404; font-size: 14px;"><strong>Important Note:</strong> This is an estimate, not a final quote. Final costs may vary based on actual conditions discovered during the project. If the job scope changes significantly (exceeding 20% of this estimate), we will discuss options with you before proceeding to ensure complete transparency.</p>
-      </div>
-      
       <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #EA580C; text-align: center;">
         <p style="margin: 0; color: #333;"><strong>Best regards,</strong></p>
         <p style="margin: 10px 0 5px 0; color: #EA580C; font-size: 18px; font-weight: bold;">A-Frame Painting</p>
         <p style="margin: 0; color: #666;">
-          <a href="mailto:cortespainter@gmail.com" style="color: #EA580C; text-decoration: none;">cortespainter@gmail.com</a><br>
-          884 Hayes Rd, Manson's Landing, BC V0P1K0
+          <a href="mailto:cortespainter@gmail.com" style="color: #EA580C; text-decoration: none;">cortespainter@gmail.com</a>
         </p>
       </div>
     </div>
