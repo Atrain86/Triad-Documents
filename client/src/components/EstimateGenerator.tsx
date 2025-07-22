@@ -1,14 +1,15 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
-import { Download, Mail } from 'lucide-react';
-import jsPDF from 'jspdf';
+import { Download, Mail, Plus, Trash2 } from 'lucide-react';
 import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 interface EstimateGeneratorProps {
   project: any;
@@ -16,475 +17,852 @@ interface EstimateGeneratorProps {
   onClose: () => void;
 }
 
-function EstimateGenerator({ project, isOpen, onClose }: EstimateGeneratorProps) {
+export default function EstimateGenerator({ project, isOpen, onClose }: EstimateGeneratorProps) {
   const { toast } = useToast();
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [isSending, setIsSending] = useState(false);
-  const estimateRef = useRef<HTMLDivElement>(null);
+  const printRef = useRef<HTMLDivElement>(null);
 
-  const [estimateData, setEstimateData] = useState({
-    estimateNumber: '',
-    date: new Date().toLocaleDateString('en-CA'),
-    projectTitle: '',
-    prepWork: 0,
-    woodReconditioning: 0,
-    drywallRepair: 0,
-    paintSupplier: 'A-Frame',
-    paintCost: 0,
+  const [estimateNumber, setEstimateNumber] = useState('');
+  const [projectTitle, setProjectTitle] = useState('');
+  const [projectDescription, setProjectDescription] = useState(project?.notes || '');
+
+  // Auto-populated client info from project
+  const clientName = project?.clientName || '';
+  const clientEmail = project?.clientEmail || '';
+  const clientAddress = project?.address || '';
+  const clientCity = project?.clientCity || '';
+  const clientPostal = project?.clientPostal || '';
+  const clientPhone = project?.clientPhone || '';
+
+  // Example work stages state
+  const [workStages, setWorkStages] = useState([
+    { name: 'Prep', description: '', hours: '', rate: 60 },
+    { name: 'Priming', description: '', hours: '', rate: 60 },
+    { name: 'Painting', description: '', hours: '', rate: 60 },
+  ]);
+
+  // Paint costs state
+  const [primerCosts, setPrimerCosts] = useState({
+    pricePerGallon: '',
+    gallons: '',
+    coats: '1'
   });
 
+  const [paintCosts, setPaintCosts] = useState({
+    pricePerGallon: '',
+    gallons: '',
+    coats: '2'
+  });
+
+  const [supplies, setSupplies] = useState([
+    { name: 'Tape', unitCost: '', quantity: '', total: 0 },
+    { name: 'Brushes', unitCost: '', quantity: '', total: 0 },
+    { name: 'Rollers', unitCost: '', quantity: '', total: 0 }
+  ]);
+
+  // Travel costs state
+  const [travelCosts, setTravelCosts] = useState({
+    ratePerKm: '0.50',
+    distance: '',
+    trips: '2'
+  });
+
+  // Additional labor state
+  const [additionalLabor, setAdditionalLabor] = useState([
+    { name: '', hours: '', rate: '' }
+  ]);
+
+  // Tax configuration state
+  const [taxConfig, setTaxConfig] = useState({
+    country: 'CA',
+    gst: 5,
+    pst: 0,
+    hst: 0,
+    salesTax: 0,
+    vat: 0,
+    otherTax: 0
+  });
+
+  // Toggle state for action buttons
+  const [actionMode, setActionMode] = useState<'download' | 'email'>('email');
+
+  // Handle input changes for work stages
+  const updateWorkStage = (index: number, field: string, value: string | number) => {
+    const newStages = [...workStages];
+    newStages[index] = { ...newStages[index], [field]: value };
+    setWorkStages(newStages);
+  };
+
+  // Add new work stage
+  const addWorkStage = () => {
+    setWorkStages([...workStages, { name: '', description: '', hours: '', rate: 60 }]);
+  };
+
+  // Add new supply item
+  const addSupply = () => {
+    setSupplies([...supplies, { name: '', unitCost: '', quantity: '', total: 0 }]);
+  };
+
+  // Remove supply item
+  const removeSupply = (index: number) => {
+    setSupplies(supplies.filter((_, i) => i !== index));
+  };
+
+  // Add new labor member
+  const addLaborMember = () => {
+    setAdditionalLabor([...additionalLabor, { name: '', hours: '', rate: '' }]);
+  };
+
+  // Remove labor member
+  const removeLaborMember = (index: number) => {
+    setAdditionalLabor(additionalLabor.filter((_, i) => i !== index));
+  };
+
+  // Update labor member
+  const updateLaborMember = (index: number, field: string, value: string) => {
+    const newLabor = [...additionalLabor];
+    newLabor[index] = { ...newLabor[index], [field]: value };
+    setAdditionalLabor(newLabor);
+  };
+
+  // Update supply item
+  const updateSupply = (index: number, field: string, value: string) => {
+    const newSupplies = [...supplies];
+    newSupplies[index] = { ...newSupplies[index], [field]: value };
+    
+    if (field === 'unitCost' || field === 'quantity') {
+      const unitCost = parseFloat(newSupplies[index].unitCost) || 0;
+      const quantity = parseFloat(newSupplies[index].quantity) || 0;
+      newSupplies[index].total = unitCost * quantity;
+    }
+    
+    setSupplies(newSupplies);
+  };
+
+  // Remove work stage
+  const removeWorkStage = (index: number) => {
+    setWorkStages(workStages.filter((_, i) => i !== index));
+  };
+
   // Calculate totals
-  const laborSubtotal = (
-    estimateData.prepWork +
-    estimateData.woodReconditioning +
-    estimateData.drywallRepair
-  ) * 60;
+  const calculateStageTotal = (stage: typeof workStages[0]) => {
+    const hours = typeof stage.hours === 'string' ? parseFloat(stage.hours) || 0 : stage.hours;
+    return hours * stage.rate;
+  };
 
-  const paintCosts = estimateData.paintCost;
-  const grandTotal = laborSubtotal + paintCosts;
+  const calculatePrimerCosts = () => {
+    const pricePerGallon = parseFloat(primerCosts.pricePerGallon) || 0;
+    const gallons = parseFloat(primerCosts.gallons) || 0;
+    return pricePerGallon * gallons;
+  };
 
-  const generatePDF = async () => {
-    if (!estimateRef.current) {
+  const calculatePaintCosts = () => {
+    const pricePerGallon = parseFloat(paintCosts.pricePerGallon) || 0;
+    const gallons = parseFloat(paintCosts.gallons) || 0;
+    return pricePerGallon * gallons;
+  };
+
+  const calculateSuppliesTotal = () => {
+    return supplies.reduce((sum, supply) => sum + supply.total, 0);
+  };
+
+  const calculateTravelTotal = () => {
+    const ratePerKm = parseFloat(travelCosts.ratePerKm) || 0;
+    const distance = parseFloat(travelCosts.distance) || 0;
+    const trips = parseFloat(travelCosts.trips) || 0;
+    return ratePerKm * distance * trips;
+  };
+
+  const calculateAdditionalLaborTotal = () => {
+    return additionalLabor.reduce((sum, member) => {
+      const hours = parseFloat(member.hours) || 0;
+      const rate = parseFloat(member.rate) || 0;
+      return sum + (hours * rate);
+    }, 0);
+  };
+
+  const calculateLaborSubtotal = () => workStages.reduce((sum, stage) => sum + calculateStageTotal(stage), 0) + calculateAdditionalLaborTotal();
+  const calculateMaterialsSubtotal = () => calculatePrimerCosts() + calculatePaintCosts() + calculateSuppliesTotal();
+  const calculateSubtotal = () => calculateLaborSubtotal() + calculateMaterialsSubtotal() + calculateTravelTotal();
+  
+  const calculateTaxes = () => {
+    const subtotal = calculateSubtotal();
+    let totalTax = 0;
+    
+    if (taxConfig.country === 'CA') {
+      totalTax += subtotal * ((taxConfig.gst || 0) / 100);
+      totalTax += subtotal * ((taxConfig.pst || taxConfig.hst || 0) / 100);
+    } else if (taxConfig.country === 'US') {
+      totalTax += subtotal * ((taxConfig.salesTax || 0) / 100);
+    } else if (taxConfig.country === 'OTHER') {
+      totalTax += subtotal * ((taxConfig.vat || 0) / 100);
+    }
+    
+    totalTax += subtotal * ((taxConfig.otherTax || 0) / 100);
+    return totalTax;
+  };
+  
+  const calculateTotal = () => calculateSubtotal() + calculateTaxes();
+
+  // Email sending functionality
+  const sendEmailMutation = useMutation({
+    mutationFn: async (emailData: any) => {
+      const response = await fetch('/api/send-estimate-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(emailData)
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to send email');
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
       toast({
-        title: "Error",
-        description: "Estimate preview not ready. Please try again.",
+        title: "Email sent successfully!",
+        description: "The estimate has been sent to your client.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Email failed",
+        description: error.message || "Failed to send estimate email. Please try again.",
         variant: "destructive",
       });
-      return;
     }
+  });
+
+  // Generate PDF (basic)
+  const generatePDF = async () => {
+    if (!printRef.current) return;
 
     try {
-      setIsGenerating(true);
-      
-      // Temporarily show the estimate preview element for capture
-      const originalDisplay = estimateRef.current.style.display;
-      estimateRef.current.style.display = 'block';
-      estimateRef.current.style.visibility = 'visible';
-      estimateRef.current.style.position = 'absolute';
-      estimateRef.current.style.top = '-9999px';
-      estimateRef.current.style.left = '-9999px';
-      estimateRef.current.style.width = '794px';
-      
-      // Wait for rendering
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const canvas = await html2canvas(printRef.current, { scale: 1, backgroundColor: '#fff', useCORS: true });
+      const imgData = canvas.toDataURL('image/jpeg', 0.8);
+      const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
-      // Capture the estimate preview
-      const canvas = await html2canvas(estimateRef.current, {
-        scale: 1,
-        backgroundColor: '#000000',
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-        width: 794,
-        height: 1123
-      });
-
-      // Restore original styles
-      estimateRef.current.style.display = originalDisplay;
-      estimateRef.current.style.visibility = 'hidden';
-      estimateRef.current.style.position = 'static';
-
-      // Create PDF
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'px',
-        format: [794, 1123]
-      });
-
-      const imgData = canvas.toDataURL('image/jpeg', 0.7);
-      pdf.addImage(imgData, 'JPEG', 0, 0, 794, 1123);
-
-      // Download PDF
-      pdf.save(`Estimate-${estimateData.estimateNumber || 'Draft'}-${project?.clientName || 'Client'}.pdf`);
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`Estimate-${estimateNumber || 'unknown'}.pdf`);
 
       toast({
-        title: "PDF Generated",
-        description: "Estimate PDF downloaded successfully!",
+        title: 'PDF Generated',
+        description: 'Estimate PDF has been downloaded.',
       });
-
     } catch (error) {
-      console.error('PDF generation failed:', error);
       toast({
-        title: "PDF Generation Failed",
-        description: "Could not generate PDF. Please try again.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to generate PDF.',
+        variant: 'destructive',
       });
-    } finally {
-      setIsGenerating(false);
     }
   };
 
+  // Generate PDF and send email
   const sendEstimateEmail = async () => {
-    if (!project?.clientEmail) {
+    if (!clientEmail || !clientEmail.trim()) {
       toast({
-        title: "No Email Address",
-        description: "Client email address is required to send estimate.",
+        title: "Email Required",
+        description: "Please add client email to send estimate",
         variant: "destructive",
       });
       return;
     }
 
     try {
-      setIsSending(true);
-      
-      // Generate PDF for email attachment (similar to generatePDF but return blob)
-      // Implementation would be similar to above but return PDF as blob for email attachment
-      
-      toast({
-        title: "Email Sent Successfully",
-        description: `Estimate sent to ${project.clientEmail}`,
+      // Generate PDF as blob with optimized settings
+      const canvas = await html2canvas(printRef.current!, { 
+        scale: 1, 
+        backgroundColor: '#fff', 
+        useCORS: true,
+        allowTaint: false,
+        logging: false
       });
+      
+      // Validate canvas
+      if (canvas.width === 0 || canvas.height === 0) {
+        throw new Error('Failed to generate valid canvas');
+      }
+      
+      const imgData = canvas.toDataURL('image/jpeg', 0.7);
+      
+      // Validate image data
+      if (!imgData || imgData === 'data:,') {
+        throw new Error('Failed to generate image data');
+      }
+      
+      const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
-    } catch (error) {
-      console.error('Email sending failed:', error);
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+      
+      // Get PDF as base64
+      const pdfOutput = pdf.output('datauristring');
+      if (!pdfOutput) {
+        throw new Error('Failed to generate PDF output');
+      }
+      
+      const pdfBase64 = pdfOutput.split(',')[1];
+      
+      // Validate base64 data size (should be reasonable for email)
+      if (pdfBase64.length > 10000000) { // ~7.5MB base64 limit
+        throw new Error('PDF too large for email. Please reduce content.');
+      }
+
+      const emailData = {
+        recipientEmail: clientEmail,
+        clientName: clientName || 'Client',
+        estimateNumber: estimateNumber || 'EST-001',
+        projectTitle: projectTitle || 'Painting Estimate',
+        totalAmount: calculateTotal().toFixed(2),
+        customMessage: '',
+        pdfData: pdfBase64
+      };
+
+      await sendEmailMutation.mutateAsync(emailData);
+    } catch (error: any) {
+      console.error('Email preparation failed:', error);
       toast({
-        title: "Email Failed",
-        description: "Could not send estimate email. Please try again.",
+        title: "Error",
+        description: error.message || "Failed to send estimate email",
         variant: "destructive",
       });
-    } finally {
-      setIsSending(false);
     }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-screen max-w-md md:max-w-4xl max-h-[95vh] overflow-y-auto bg-black text-white">
+      <DialogContent 
+        className="w-screen max-w-md h-screen p-4 sm:max-w-3xl sm:h-auto overflow-hidden"
+        style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}
+      >
         <DialogHeader>
-          <DialogTitle className="text-orange-500">Estimate Generator</DialogTitle>
+          <DialogTitle className="text-xl font-bold mb-4">Generate Estimate</DialogTitle>
         </DialogHeader>
-        
-        <div className="space-y-6">
+
+        <div
+          ref={printRef}
+          className="overflow-y-auto max-h-[calc(100vh-160px)] pr-2"
+        >
+          {/* Client Info (read-only) */}
+          <Card className="mb-4 border-2 border-[#D4A574]">
+            <CardHeader>
+              <CardTitle className="text-lg text-[#D4A574]">Client Information</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Input value={clientName} readOnly placeholder="Client Name" />
+              <Input value={clientEmail} readOnly placeholder="Client Email" />
+              <Input value={clientAddress} readOnly placeholder="Client Address" />
+              <Input value={clientCity} readOnly placeholder="City" />
+              <Input value={clientPostal} readOnly placeholder="Postal Code" />
+              <Input value={clientPhone} readOnly placeholder="Phone" />
+            </CardContent>
+          </Card>
+
           {/* Estimate Details */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="estimateNumber">Estimate Number</Label>
+          <Card className="mb-4 border-2 border-[#569CD6]">
+            <CardHeader>
+              <CardTitle className="text-lg text-[#569CD6]">Estimate Details</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
               <Input
-                id="estimateNumber"
-                value={estimateData.estimateNumber}
-                onChange={(e) => setEstimateData(prev => ({ ...prev, estimateNumber: e.target.value }))}
-                placeholder="EST-001"
-                className="bg-gray-800 border-gray-600"
+                placeholder="Estimate Number"
+                value={estimateNumber}
+                onChange={(e) => setEstimateNumber(e.target.value)}
               />
-            </div>
-            <div>
-              <Label htmlFor="date">Date</Label>
               <Input
-                id="date"
                 type="date"
-                value={estimateData.date}
-                onChange={(e) => setEstimateData(prev => ({ ...prev, date: e.target.value }))}
-                className="bg-gray-800 border-gray-600"
+                value={new Date().toISOString().split('T')[0]}
+                readOnly
               />
-            </div>
-          </div>
+              <Input
+                placeholder="Project Title"
+                value={projectTitle}
+                onChange={(e) => setProjectTitle(e.target.value)}
+              />
+              <Textarea
+                placeholder="Project Description"
+                value={projectDescription}
+                onChange={(e) => setProjectDescription(e.target.value)}
+              />
+            </CardContent>
+          </Card>
 
           {/* Work Stages */}
-          <div>
-            <h3 className="text-orange-500 font-semibold mb-3">Work Stages</h3>
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <Label>Prep (hours)</Label>
-                <Input
-                  type="number"
-                  inputMode="decimal"
-                  step="0.5"
-                  value={estimateData.prepWork || ''}
-                  onChange={(e) => setEstimateData(prev => ({ ...prev, prepWork: Number(e.target.value) || 0 }))}
-                  className="bg-gray-800 border-gray-600"
-                />
-              </div>
-              <div>
-                <Label>Wood Reconditioning (hours)</Label>
-                <Input
-                  type="number"
-                  inputMode="decimal" 
-                  step="0.5"
-                  value={estimateData.woodReconditioning || ''}
-                  onChange={(e) => setEstimateData(prev => ({ ...prev, woodReconditioning: Number(e.target.value) || 0 }))}
-                  className="bg-gray-800 border-gray-600"
-                />
-              </div>
-              <div>
-                <Label>Drywall Repair (hours)</Label>
-                <Input
-                  type="number"
-                  inputMode="decimal"
-                  step="0.5" 
-                  value={estimateData.drywallRepair || ''}
-                  onChange={(e) => setEstimateData(prev => ({ ...prev, drywallRepair: Number(e.target.value) || 0 }))}
-                  className="bg-gray-800 border-gray-600"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Paint & Materials */}
-          <div>
-            <h3 className="text-orange-500 font-semibold mb-3">Paint & Materials</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label>Paint Supplier</Label>
-                <Select
-                  value={estimateData.paintSupplier}
-                  onValueChange={(value) => setEstimateData(prev => ({ ...prev, paintSupplier: value }))}
+          <Card className="mb-4 border-2 border-[#6A9955]">
+            <CardHeader className="flex justify-between items-center">
+              <CardTitle className="text-lg text-[#6A9955]">Work Breakdown</CardTitle>
+              <Button size="sm" onClick={addWorkStage} className="bg-[#6A9955] hover:bg-[#5a8245]">+ Add Stage</Button>
+            </CardHeader>
+            <CardContent>
+              {workStages.map((stage, i) => (
+                <div
+                  key={i}
+                  className="mb-3 border-2 border-[#6A9955] bg-[#6A9955]/10 rounded p-3"
                 >
-                  <SelectTrigger className="bg-gray-800 border-gray-600">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="A-Frame">A-Frame</SelectItem>
-                    <SelectItem value="Client Provided">Client Provided</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Paint Cost</Label>
-                <Input
-                  type="number"
-                  inputMode="decimal"
-                  step="0.01"
-                  value={estimateData.paintCost || ''}
-                  onChange={(e) => setEstimateData(prev => ({ ...prev, paintCost: Number(e.target.value) || 0 }))}
-                  className="bg-gray-800 border-gray-600"
-                  placeholder="0.00"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Summary */}
-          <div className="bg-gray-800 p-4 rounded-lg">
-            <h3 className="text-orange-500 font-semibold mb-3">Estimate Summary</h3>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span>Labor Subtotal:</span>
-                <span>${laborSubtotal.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Paint & Materials:</span>
-                <span>${paintCosts.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-lg font-bold text-green-400">
-                <span>Grand Total:</span>
-                <span>${grandTotal.toFixed(2)}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex gap-4">
-            <Button
-              onClick={generatePDF}
-              disabled={isGenerating}
-              className="flex-1 bg-orange-600 hover:bg-orange-700"
-            >
-              <Download className="w-4 h-4 mr-2" />
-              {isGenerating ? 'Generating...' : 'Download PDF'}
-            </Button>
-            <Button
-              onClick={sendEstimateEmail}
-              disabled={isSending || !project?.clientEmail}
-              variant="outline"
-              className="flex-1"
-            >
-              <Mail className="w-4 h-4 mr-2" />
-              {isSending ? 'Sending...' : 'Email Estimate'}
-            </Button>
-          </div>
-        </div>
-
-        {/* Hidden PDF Preview Component */}
-        <div 
-          ref={estimateRef}
-          style={{
-            display: 'none',
-            width: '794px',
-            backgroundColor: '#000000',
-            color: '#ffffff',
-            fontFamily: 'Inter, sans-serif',
-            padding: '32px',
-            lineHeight: '1.4'
-          }}
-        >
-          {/* Header with Logo */}
-          <div style={{ marginBottom: '32px', textAlign: 'center' }}>
-            <img 
-              src="/aframe-logo.png" 
-              alt="A-Frame Painting"
-              style={{ height: '96px', width: 'auto' }}
-            />
-          </div>
-
-          {/* Title Section */}
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center',
-            marginBottom: '32px',
-            paddingBottom: '16px',
-            borderBottom: '1px solid #4b5563'
-          }}>
-            <div>
-              <h2 style={{ 
-                fontSize: '48px', 
-                fontWeight: '700', 
-                color: '#EA580C',
-                margin: '0 0 4px 0'
-              }}>
-                ESTIMATE
-              </h2>
-              <p style={{ 
-                fontSize: '16px', 
-                color: '#9CA3AF', 
-                margin: '0'
-              }}>
-                {estimateData.estimateNumber && `#${estimateData.estimateNumber}`}
-              </p>
-            </div>
-            <div style={{ 
-              textAlign: 'right',
-              fontSize: '14px',
-              color: '#9CA3AF'
-            }}>
-              <div>Date: {estimateData.date}</div>
-            </div>
-          </div>
-
-          {/* Client Information */}
-          <div style={{ marginBottom: '32px' }}>
-            <h3 style={{ 
-              fontSize: '16px', 
-              fontWeight: '600', 
-              color: '#EA580C', 
-              marginBottom: '12px'
-            }}>
-              CLIENT INFORMATION
-            </h3>
-            <div style={{ fontSize: '14px', lineHeight: '1.6' }}>
-              <div><strong>{project?.clientName}</strong></div>
-              <div>{project?.address}</div>
-              {project?.clientCity && <div>{project.clientCity}, {project.clientPostal}</div>}
-              {project?.clientEmail && <div>{project.clientEmail}</div>}
-              {project?.clientPhone && <div>{project.clientPhone}</div>}
-            </div>
-          </div>
-
-          {/* Labor Section */}
-          {laborSubtotal > 0 && (
-            <div style={{ marginBottom: '24px' }}>
-              <h3 style={{ 
-                fontSize: '16px', 
-                fontWeight: '600', 
-                color: '#EF4444', 
-                marginBottom: '12px'
-              }}>
-                SERVICES & LABOUR
-              </h3>
-              <div style={{ 
-                border: '1px solid #EF4444',
-                backgroundColor: '#18181B',
-                padding: '16px'
-              }}>
-                {estimateData.prepWork > 0 && (
-                  <div style={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between',
-                    paddingBottom: '8px',
-                    borderBottom: '1px solid #374151'
-                  }}>
-                    <span>Prep Work</span>
-                    <span>${(estimateData.prepWork * 60).toFixed(2)}</span>
+                  <Input
+                    placeholder="Stage Name"
+                    value={stage.name}
+                    onChange={(e) => updateWorkStage(i, 'name', e.target.value)}
+                    className="mb-1"
+                  />
+                  <Textarea
+                    placeholder="Description"
+                    value={stage.description}
+                    onChange={(e) => updateWorkStage(i, 'description', e.target.value)}
+                    className="mb-1"
+                    rows={2}
+                  />
+                  <div className="flex gap-2">
+                    <Input
+                      type="number"
+                      placeholder="Hours"
+                      value={stage.hours}
+                      onChange={(e) => updateWorkStage(i, 'hours', e.target.value)}
+                      className="flex-1"
+                      min={0}
+                    />
+                    <Input
+                      type="number"
+                      placeholder="Rate"
+                      value={stage.rate}
+                      onChange={(e) => updateWorkStage(i, 'rate', Number(e.target.value))}
+                      className="flex-1"
+                      min={0}
+                    />
+                    <Input
+                      placeholder="Total"
+                      value={calculateStageTotal(stage).toFixed(2)}
+                      readOnly
+                      className="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    />
                   </div>
-                )}
-                {estimateData.woodReconditioning > 0 && (
-                  <div style={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between',
-                    paddingTop: '8px',
-                    paddingBottom: '8px',
-                    borderBottom: '1px solid #374151'
-                  }}>
-                    <span>Wood Reconditioning</span>
-                    <span>${(estimateData.woodReconditioning * 60).toFixed(2)}</span>
-                  </div>
-                )}
-                {estimateData.drywallRepair > 0 && (
-                  <div style={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between',
-                    paddingTop: '8px'
-                  }}>
-                    <span>Drywall Repair</span>
-                    <span>${(estimateData.drywallRepair * 60).toFixed(2)}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => removeWorkStage(i)}
+                    className="mt-2 bg-[#E03E3E] hover:bg-[#c63535]"
+                  >
+                    Remove
+                  </Button>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
 
-          {/* Materials Section */}
-          {paintCosts > 0 && (
-            <div style={{ marginBottom: '24px' }}>
-              <h3 style={{ 
-                fontSize: '16px', 
-                fontWeight: '600', 
-                color: '#EA580C', 
-                marginBottom: '12px'
-              }}>
-                MATERIALS & PAINT
-              </h3>
-              <div style={{ 
-                border: '1px solid #EA580C',
-                backgroundColor: '#18181B',
-                padding: '16px'
-              }}>
-                <div style={{ 
-                  display: 'flex', 
-                  justifyContent: 'space-between'
-                }}>
-                  <span>Paint & Supplies</span>
-                  <span>${paintCosts.toFixed(2)}</span>
+          {/* Additional Labor */}
+          <Card className="mb-4 border-2 border-[#4ECDC4]">
+            <CardHeader>
+              <CardTitle className="text-lg text-[#4ECDC4]">Additional Labor</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex justify-between items-center mb-2">
+                <h4 className="font-medium">Crew Members</h4>
+                <Button size="sm" onClick={addLaborMember} className="bg-[#4ECDC4] hover:bg-[#45b3b8] text-black">
+                  <Plus className="w-4 h-4 mr-1" />
+                  Add Member
+                </Button>
+              </div>
+              {additionalLabor.map((member, i) => (
+                <div key={i} className="border border-[#4ECDC4] rounded p-3 mb-2 bg-[#4ECDC4]/10">
+                  <div className="grid grid-cols-4 gap-2 mb-2">
+                    <Input
+                      placeholder="Name"
+                      value={member.name}
+                      onChange={(e) => updateLaborMember(i, 'name', e.target.value)}
+                    />
+                    <Input
+                      type="number"
+                      placeholder="Hours"
+                      value={member.hours}
+                      onChange={(e) => updateLaborMember(i, 'hours', e.target.value)}
+                    />
+                    <Input
+                      type="number"
+                      placeholder="Rate/hour"
+                      value={member.rate}
+                      onChange={(e) => updateLaborMember(i, 'rate', e.target.value)}
+                    />
+                    <Input
+                      placeholder="Total"
+                      value={((parseFloat(member.hours) || 0) * (parseFloat(member.rate) || 0)).toFixed(2)}
+                      readOnly
+                      className="bg-gray-100 dark:bg-gray-700"
+                    />
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => removeLaborMember(i)}
+                    className="bg-[#E03E3E] hover:bg-[#c63535]"
+                  >
+                    <Trash2 className="w-4 h-4 mr-1" />
+                    Remove
+                  </Button>
+                </div>
+              ))}
+              <div className="text-right font-medium">
+                Additional Labor Total: ${calculateAdditionalLaborTotal().toFixed(2)}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Supply Costs */}
+          <Card className="mb-4 border-2 border-[#DCDCAA]">
+            <CardHeader>
+              <CardTitle className="text-lg text-[#DCDCAA]">Supply Costs</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Primer Costs */}
+              <div className="border border-[#DCDCAA] rounded p-3 bg-[#DCDCAA]/10">
+                <h4 className="font-medium mb-2">Primer</h4>
+                <div className="grid grid-cols-3 gap-2">
+                  <Input
+                    type="number"
+                    placeholder="Price per gallon"
+                    value={primerCosts.pricePerGallon}
+                    onChange={(e) => setPrimerCosts({...primerCosts, pricePerGallon: e.target.value})}
+                  />
+                  <Input
+                    type="number"
+                    placeholder="Gallons"
+                    value={primerCosts.gallons}
+                    onChange={(e) => setPrimerCosts({...primerCosts, gallons: e.target.value})}
+                  />
+                  <Select value={primerCosts.coats} onValueChange={(value) => setPrimerCosts({...primerCosts, coats: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Coats" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-black border border-gray-600">
+                      <SelectItem value="0" className="text-white hover:bg-gray-800">0 coats</SelectItem>
+                      <SelectItem value="1" className="text-white hover:bg-gray-800">1 coat</SelectItem>
+                      <SelectItem value="2" className="text-white hover:bg-gray-800">2 coats</SelectItem>
+                      <SelectItem value="3" className="text-white hover:bg-gray-800">3 coats</SelectItem>
+                      <SelectItem value="4" className="text-white hover:bg-gray-800">4 coats</SelectItem>
+                      <SelectItem value="5" className="text-white hover:bg-gray-800">5 coats</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="mt-2 text-right font-medium">
+                  Primer Total: ${calculatePrimerCosts().toFixed(2)}
                 </div>
               </div>
-            </div>
-          )}
 
-          {/* Total */}
-          <div style={{ 
-            display: 'flex',
-            justifyContent: 'flex-end',
-            marginTop: '32px'
-          }}>
-            <div style={{
-              backgroundColor: '#059669',
-              color: '#ffffff',
-              padding: '16px 24px',
-              borderRadius: '6px',
-              textAlign: 'center'
-            }}>
-              <div style={{ 
-                fontSize: '18px', 
-                fontWeight: '700'
-              }}>
-                Grand Total: ${grandTotal.toFixed(2)}
+              {/* Paint Costs */}
+              <div className="border border-[#DCDCAA] rounded p-3 bg-[#DCDCAA]/10">
+                <h4 className="font-medium mb-2">Paint</h4>
+                <div className="grid grid-cols-3 gap-2">
+                  <Input
+                    type="number"
+                    placeholder="Price per gallon"
+                    value={paintCosts.pricePerGallon}
+                    onChange={(e) => setPaintCosts({...paintCosts, pricePerGallon: e.target.value})}
+                  />
+                  <Input
+                    type="number"
+                    placeholder="Gallons"
+                    value={paintCosts.gallons}
+                    onChange={(e) => setPaintCosts({...paintCosts, gallons: e.target.value})}
+                  />
+                  <Select value={paintCosts.coats} onValueChange={(value) => setPaintCosts({...paintCosts, coats: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Coats" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-black border border-gray-600">
+                      <SelectItem value="1" className="text-white hover:bg-gray-800">1 coat</SelectItem>
+                      <SelectItem value="2" className="text-white hover:bg-gray-800">2 coats</SelectItem>
+                      <SelectItem value="3" className="text-white hover:bg-gray-800">3 coats</SelectItem>
+                      <SelectItem value="4" className="text-white hover:bg-gray-800">4 coats</SelectItem>
+                      <SelectItem value="5" className="text-white hover:bg-gray-800">5 coats</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="mt-2 text-right font-medium">
+                  Paint Total: ${calculatePaintCosts().toFixed(2)}
+                </div>
               </div>
-            </div>
-          </div>
 
-          {/* Footer */}
-          <div style={{ 
-            marginTop: '48px',
-            textAlign: 'center',
-            fontSize: '16px',
-            color: '#9CA3AF'
-          }}>
-            Thanks for considering A-Frame Painting!
+              {/* Other Supplies */}
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <h4 className="font-medium">Other Supplies</h4>
+                  <Button size="sm" onClick={addSupply} className="bg-[#DCDCAA] hover:bg-[#c5c593] text-black">
+                    <Plus className="w-4 h-4 mr-1" />
+                    Add Supply
+                  </Button>
+                </div>
+                {supplies.map((supply, i) => (
+                  <div key={i} className="border border-[#DCDCAA] rounded p-3 mb-2 bg-[#DCDCAA]/10">
+                    <div className="grid grid-cols-4 gap-2 mb-2">
+                      <Input
+                        placeholder="Item name"
+                        value={supply.name}
+                        onChange={(e) => updateSupply(i, 'name', e.target.value)}
+                      />
+                      <Input
+                        type="number"
+                        placeholder="Price"
+                        value={supply.unitCost}
+                        onChange={(e) => updateSupply(i, 'unitCost', e.target.value)}
+                      />
+                      <Input
+                        type="number"
+                        placeholder="Quantity"
+                        value={supply.quantity}
+                        onChange={(e) => updateSupply(i, 'quantity', e.target.value)}
+                      />
+                      <Input
+                        placeholder="Total"
+                        value={supply.total.toFixed(2)}
+                        readOnly
+                        className="bg-gray-100 dark:bg-gray-700"
+                      />
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => removeSupply(i)}
+                      className="bg-[#E03E3E] hover:bg-[#c63535]"
+                    >
+                      <Trash2 className="w-4 h-4 mr-1" />
+                      Remove
+                    </Button>
+                  </div>
+                ))}
+                <div className="text-right font-medium">
+                  Supplies Total: ${calculateSuppliesTotal().toFixed(2)}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Travel Costs */}
+          <Card className="mb-4 border-2 border-[#FF6B6B]">
+            <CardHeader>
+              <CardTitle className="text-lg text-[#FF6B6B]">Travel Costs</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="border border-[#FF6B6B] rounded p-3 bg-[#FF6B6B]/10">
+                <div className="grid grid-cols-3 gap-2">
+                  <Input
+                    type="number"
+                    placeholder="Rate per km"
+                    value={travelCosts.ratePerKm}
+                    onChange={(e) => setTravelCosts({...travelCosts, ratePerKm: e.target.value})}
+                  />
+                  <Input
+                    type="number"
+                    placeholder="Distance (km)"
+                    value={travelCosts.distance}
+                    onChange={(e) => setTravelCosts({...travelCosts, distance: e.target.value})}
+                  />
+                  <Input
+                    type="number"
+                    placeholder="Number of trips"
+                    value={travelCosts.trips}
+                    onChange={(e) => setTravelCosts({...travelCosts, trips: e.target.value})}
+                  />
+                </div>
+                <div className="mt-2 text-right font-medium">
+                  Travel Total: ${calculateTravelTotal().toFixed(2)}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Tax Configuration */}
+          <Card className="mb-4 border-2 border-[#F44747]">
+            <CardHeader>
+              <CardTitle className="text-lg text-[#F44747]">Tax Configuration</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {/* Country Selector */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">Country</label>
+                  <Select value={taxConfig.country} onValueChange={(value) => setTaxConfig({...taxConfig, country: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Country" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-black border border-gray-600">
+                      <SelectItem value="CA" className="text-white hover:bg-gray-800">Canada</SelectItem>
+                      <SelectItem value="US" className="text-white hover:bg-gray-800">United States</SelectItem>
+                      <SelectItem value="OTHER" className="text-white hover:bg-gray-800">Other / International</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Canadian Tax Fields */}
+                {taxConfig.country === 'CA' && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">GST (%)</label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="5"
+                        value={taxConfig.gst || ''}
+                        onChange={(e) => setTaxConfig({...taxConfig, gst: parseFloat(e.target.value) || 0})}
+                      />
+                      <small className="text-gray-500">Goods and Services Tax</small>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">PST/HST (%)</label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="0"
+                        value={taxConfig.pst || taxConfig.hst || ''}
+                        onChange={(e) => setTaxConfig({...taxConfig, pst: parseFloat(e.target.value) || 0, hst: parseFloat(e.target.value) || 0})}
+                      />
+                      <small className="text-gray-500">Provincial/Harmonized Tax</small>
+                    </div>
+                  </div>
+                )}
+
+                {/* US Tax Fields */}
+                {taxConfig.country === 'US' && (
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Sales Tax (%)</label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      placeholder="0"
+                      value={taxConfig.salesTax || ''}
+                      onChange={(e) => setTaxConfig({...taxConfig, salesTax: parseFloat(e.target.value) || 0})}
+                    />
+                    <small className="text-gray-500">State and local sales taxes</small>
+                  </div>
+                )}
+
+                {/* International Tax Fields */}
+                {taxConfig.country === 'OTHER' && (
+                  <div>
+                    <label className="block text-sm font-medium mb-1">VAT (%)</label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      placeholder="0"
+                      value={taxConfig.vat || ''}
+                      onChange={(e) => setTaxConfig({...taxConfig, vat: parseFloat(e.target.value) || 0})}
+                    />
+                    <small className="text-gray-500">Value Added Tax</small>
+                  </div>
+                )}
+
+                {/* Other Tax Field - Always Show */}
+                <div>
+                  <label className="block text-sm font-medium mb-1">Other Tax/Fees (%)</label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    placeholder="0"
+                    value={taxConfig.otherTax || ''}
+                    onChange={(e) => setTaxConfig({...taxConfig, otherTax: parseFloat(e.target.value) || 0})}
+                  />
+                  <small className="text-gray-500">Any additional taxes or fees</small>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Summary */}
+          <Card className="mb-4 border-2 border-[#8B5FBF]">
+            <CardHeader>
+              <CardTitle className="text-lg text-[#8B5FBF]">Summary</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span>Labor:</span>
+                  <span>${calculateLaborSubtotal().toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Materials:</span>
+                  <span>${calculateMaterialsSubtotal().toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Travel:</span>
+                  <span>${calculateTravelTotal().toFixed(2)}</span>
+                </div>
+                <div className="border-t pt-2">
+                  <div className="flex justify-between">
+                    <span>Subtotal:</span>
+                    <span>${calculateSubtotal().toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Taxes:</span>
+                    <span>${calculateTaxes().toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between font-bold text-lg">
+                    <span>Total:</span>
+                    <span>${calculateTotal().toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="mt-4 space-y-3">
+          <div className="flex justify-between gap-2 items-end">
+            <Button variant="outline" onClick={onClose} className="flex-1">Cancel</Button>
+            <div className="flex flex-col items-center gap-2">
+              {/* Toggle Switch - positioned over send email button */}
+              <div className="relative inline-flex items-center">
+                <button
+                  onClick={() => setActionMode(actionMode === 'email' ? 'download' : 'email')}
+                  className={`relative inline-flex h-10 w-20 items-center rounded-full transition-colors duration-200 focus:outline-none ${
+                    actionMode === 'email' ? 'bg-[#569CD6]' : 'bg-[#6A9955]'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-8 w-8 transform rounded-full bg-white transition-transform duration-200 ${
+                      actionMode === 'email' ? 'translate-x-1' : 'translate-x-11'
+                    }`}
+                  />
+                  <Mail 
+                    className={`absolute left-2 h-4 w-4 transition-opacity duration-200 ${
+                      actionMode === 'email' ? 'text-white opacity-100' : 'text-white opacity-60'
+                    }`} 
+                    style={{ color: '#FFFFFF' }}
+                  />
+                  <Download 
+                    className={`absolute right-2 h-4 w-4 transition-opacity duration-200 ${
+                      actionMode === 'download' ? 'text-white opacity-100' : 'text-white opacity-60'
+                    }`} 
+                    style={{ color: '#FFFFFF' }}
+                  />
+                </button>
+              </div>
+              
+              {/* Action Button */}
+              {actionMode === 'email' ? (
+                <Button 
+                  onClick={sendEstimateEmail} 
+                  className="bg-[#569CD6] hover:bg-[#4a8bc2] min-w-[120px]"
+                  disabled={sendEmailMutation.isPending}
+                >
+                  <Mail className="w-4 h-4 mr-2" />
+                  {sendEmailMutation.isPending ? 'Sending...' : 'Send Email'}
+                </Button>
+              ) : (
+                <Button onClick={generatePDF} className="bg-[#6A9955] hover:bg-[#5a8245] min-w-[120px]">
+                  <Download className="w-4 h-4 mr-2" />
+                  Download PDF
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </DialogContent>
     </Dialog>
   );
 }
-
-export default EstimateGenerator;
