@@ -441,10 +441,10 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       </div>
     </div>
 
-    <!-- Services & Labor -->
+    <!-- Services & Labor (Red) -->
     <div class="mb-8">
-      <h2 class="mb-2 text-lg font-semibold border-red-500 text-red-500">Services & Labor</h2>
-      <div class="border rounded-md border-opacity-50 p-4 border-red-500 text-red-500 bg-gray-900">
+      <h2 class="mb-2 text-lg font-semibold text-red-500">Services & Labor</h2>
+      <div class="border-2 rounded-md border-red-500 p-4 bg-gray-900">
         ${workStages.map(stage => 
           stage.hours ? `<div class="flex justify-between border-b border-gray-700 py-1">
             <span>${stage.name}</span>
@@ -459,6 +459,60 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
         ).join('')}
       </div>
     </div>
+
+    <!-- Paint & Materials (Orange) -->
+    ${(primerCosts.pricePerGallon && primerCosts.gallons) || (paintCosts.pricePerGallon && paintCosts.gallons) ? `
+    <div class="mb-8">
+      <h2 class="mb-2 text-lg font-semibold text-orange-500">Paint & Materials</h2>
+      <div class="border-2 rounded-md border-orange-500 p-4 bg-gray-900">
+        ${primerCosts.pricePerGallon && primerCosts.gallons ? `<div class="flex justify-between border-b border-gray-700 py-1">
+          <span>Primer (${primerCosts.gallons} gal × ${primerCosts.coats} coats)</span>
+          <span>$${(parseFloat(primerCosts.pricePerGallon) * parseFloat(primerCosts.gallons) * parseFloat(primerCosts.coats)).toFixed(2)}</span>
+        </div>` : ''}
+        ${paintCosts.pricePerGallon && paintCosts.gallons ? `<div class="flex justify-between border-b border-gray-700 py-1">
+          <span>Paint (${paintCosts.gallons} gal × ${paintCosts.coats} coats)</span>
+          <span>$${(parseFloat(paintCosts.pricePerGallon) * parseFloat(paintCosts.gallons) * parseFloat(paintCosts.coats)).toFixed(2)}</span>
+        </div>` : ''}
+      </div>
+    </div>` : ''}
+
+    <!-- Supply Costs (Yellow) -->
+    ${supplies.some(supply => supply.unitCost && supply.quantity) ? `
+    <div class="mb-8">
+      <h2 class="mb-2 text-lg font-semibold text-yellow-400">Supply Costs</h2>
+      <div class="border-2 rounded-md border-yellow-400 p-4 bg-gray-900">
+        ${supplies.map(supply => 
+          supply.unitCost && supply.quantity ? `<div class="flex justify-between border-b border-gray-700 py-1">
+            <span>${supply.name} (${supply.quantity} × $${supply.unitCost})</span>
+            <span>$${(parseFloat(supply.unitCost) * parseFloat(supply.quantity)).toFixed(2)}</span>
+          </div>` : ''
+        ).join('')}
+      </div>
+    </div>` : ''}
+
+    <!-- Travel Costs (Green) -->
+    ${travelCosts.distance && parseFloat(travelCosts.distance) > 0 ? `
+    <div class="mb-8">
+      <h2 class="mb-2 text-lg font-semibold text-green-400">Travel Costs</h2>
+      <div class="border-2 rounded-md border-green-400 p-4 bg-gray-900">
+        <div class="flex justify-between border-b border-gray-700 py-1">
+          <span>${travelCosts.distance} km × ${travelCosts.trips} trips × $${travelCosts.ratePerKm}/km</span>
+          <span>$${(parseFloat(travelCosts.distance) * parseFloat(travelCosts.trips) * parseFloat(travelCosts.ratePerKm)).toFixed(2)}</span>
+        </div>
+      </div>
+    </div>` : ''}
+
+    <!-- Tax Information (Blue) -->
+    ${taxConfig.country !== 'none' ? `
+    <div class="mb-8">
+      <h2 class="mb-2 text-lg font-semibold text-blue-400">Tax Information</h2>
+      <div class="border-2 rounded-md border-blue-400 p-4 bg-gray-900">
+        <div class="flex justify-between border-b border-gray-700 py-1">
+          <span>${taxConfig.country === 'canada' ? 'GST' : taxConfig.country === 'usa' ? 'Sales Tax' : 'VAT'} (${taxConfig.taxRate}%)</span>
+          <span>$${(calculateLaborSubtotal() * (parseFloat(taxConfig.taxRate) / 100)).toFixed(2)}</span>
+        </div>
+      </div>
+    </div>` : ''}
 
     <!-- Total -->
     <div class="text-right border-t border-gray-600 pt-4 text-xl font-bold">
@@ -503,24 +557,16 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       // Clean up iframe
       document.body.removeChild(iframe);
 
-      // Convert canvas to PDF
+      // Convert canvas to PDF - single page only
       const pdf = new jsPDF('p', 'mm', 'a4');
       const imgData = canvas.toDataURL('image/jpeg', 0.7);
       const imgWidth = 210;
       const pageHeight = 295;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-
-      let position = 0;
-      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
+      
+      // Fit content to single page
+      const finalHeight = Math.min(imgHeight, pageHeight);
+      pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, finalHeight);
 
       // Convert PDF to base64
       const pdfData = pdf.output('datauristring');
