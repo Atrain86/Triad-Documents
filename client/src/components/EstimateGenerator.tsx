@@ -21,8 +21,20 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   const { toast } = useToast();
   const printRef = useRef<HTMLDivElement>(null);
 
-  const [estimateNumber, setEstimateNumber] = useState('');
-  const [projectTitle, setProjectTitle] = useState('');
+  // Load saved form data from localStorage
+  const loadSavedData = () => {
+    try {
+      const saved = localStorage.getItem('estimateFormData');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  };
+
+  const savedData = loadSavedData();
+
+  const [estimateNumber, setEstimateNumber] = useState(savedData.estimateNumber || '');
+  const [projectTitle, setProjectTitle] = useState(savedData.projectTitle || '');
   const [projectDescription, setProjectDescription] = useState(project?.notes || '');
 
   // Auto-populated client info from project
@@ -33,46 +45,46 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   const clientPostal = project?.clientPostal || '';
   const clientPhone = project?.clientPhone || '';
 
-  // Example work stages state
-  const [workStages, setWorkStages] = useState([
+  // Work stages state with localStorage persistence
+  const [workStages, setWorkStages] = useState(savedData.workStages || [
     { name: 'Prep', description: '', hours: '', rate: 60 },
     { name: 'Priming', description: '', hours: '', rate: 60 },
     { name: 'Painting', description: '', hours: '', rate: 60 },
   ]);
 
-  // Paint costs state
-  const [primerCosts, setPrimerCosts] = useState({
+  // Paint costs state with localStorage persistence
+  const [primerCosts, setPrimerCosts] = useState(savedData.primerCosts || {
     pricePerGallon: '',
     gallons: '',
     coats: '1'
   });
 
-  const [paintCosts, setPaintCosts] = useState({
+  const [paintCosts, setPaintCosts] = useState(savedData.paintCosts || {
     pricePerGallon: '',
     gallons: '',
     coats: '2'
   });
 
-  const [supplies, setSupplies] = useState([
+  const [supplies, setSupplies] = useState(savedData.supplies || [
     { name: 'Tape', unitCost: '', quantity: '', total: 0 },
     { name: 'Brushes', unitCost: '', quantity: '', total: 0 },
     { name: 'Rollers', unitCost: '', quantity: '', total: 0 }
   ]);
 
-  // Travel costs state
-  const [travelCosts, setTravelCosts] = useState({
+  // Travel costs state with localStorage persistence
+  const [travelCosts, setTravelCosts] = useState(savedData.travelCosts || {
     ratePerKm: '0.50',
     distance: '',
     trips: '2'
   });
 
-  // Additional labor state
-  const [additionalLabor, setAdditionalLabor] = useState([
+  // Additional labor state with localStorage persistence
+  const [additionalLabor, setAdditionalLabor] = useState(savedData.additionalLabor || [
     { name: '', hours: '', rate: '' }
   ]);
 
-  // Tax configuration state
-  const [taxConfig, setTaxConfig] = useState({
+  // Tax configuration state with localStorage persistence
+  const [taxConfig, setTaxConfig] = useState(savedData.taxConfig || {
     country: 'CA',
     gst: 5,
     pst: 0,
@@ -84,6 +96,48 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
   // Toggle state for action buttons
   const [actionMode, setActionMode] = useState<'download' | 'email'>('email');
+
+  // Save form data to localStorage whenever state changes
+  useEffect(() => {
+    const formData = {
+      estimateNumber,
+      projectTitle,
+      workStages,
+      primerCosts,
+      paintCosts,
+      supplies,
+      travelCosts,
+      additionalLabor,
+      taxConfig
+    };
+    localStorage.setItem('estimateFormData', JSON.stringify(formData));
+  }, [estimateNumber, projectTitle, workStages, primerCosts, paintCosts, supplies, travelCosts, additionalLabor, taxConfig]);
+
+  // Clear all saved form data
+  const clearFormData = () => {
+    localStorage.removeItem('estimateFormData');
+    setEstimateNumber('');
+    setProjectTitle('');
+    setWorkStages([
+      { name: 'Prep', description: '', hours: '', rate: 60 },
+      { name: 'Priming', description: '', hours: '', rate: 60 },
+      { name: 'Painting', description: '', hours: '', rate: 60 },
+    ]);
+    setPrimerCosts({ pricePerGallon: '', gallons: '', coats: '1' });
+    setPaintCosts({ pricePerGallon: '', gallons: '', coats: '2' });
+    setSupplies([
+      { name: 'Tape', unitCost: '', quantity: '', total: 0 },
+      { name: 'Brushes', unitCost: '', quantity: '', total: 0 },
+      { name: 'Rollers', unitCost: '', quantity: '', total: 0 }
+    ]);
+    setTravelCosts({ ratePerKm: '0.50', distance: '', trips: '2' });
+    setAdditionalLabor([{ name: '', hours: '', rate: '' }]);
+    setTaxConfig({ country: 'CA', gst: 5, pst: 0, hst: 0, salesTax: 0, vat: 0, otherTax: 0 });
+    toast({
+      title: "Form Cleared",
+      description: "All estimate data has been reset.",
+    });
+  };
 
   // Handle input changes for work stages
   const updateWorkStage = (index: number, field: string, value: string | number) => {
@@ -447,13 +501,13 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       <div class="border-2 rounded-md border-red-500 p-4 bg-gray-900">
         ${workStages.map(stage => 
           stage.hours ? `<div class="flex justify-between border-b border-gray-700 py-1">
-            <span>${stage.name}</span>
+            <span>${stage.name} - ${stage.hours}h × $${stage.rate}/hr</span>
             <span>$${(parseFloat(stage.hours) * stage.rate).toFixed(2)}</span>
           </div>` : ''
         ).join('')}
         ${additionalLabor.map(labor => 
           labor.name && labor.hours && labor.rate ? `<div class="flex justify-between border-b border-gray-700 py-1">
-            <span>${labor.name}</span>
+            <span>${labor.name} - ${labor.hours}h × $${labor.rate}/hr</span>
             <span>$${(parseFloat(labor.hours) * parseFloat(labor.rate)).toFixed(2)}</span>
           </div>` : ''
         ).join('')}
@@ -599,7 +653,17 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
         style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}
       >
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold mb-4">Generate Estimate</DialogTitle>
+          <div className="flex justify-between items-center">
+            <DialogTitle className="text-xl font-bold mb-4">Generate Estimate</DialogTitle>
+            <Button 
+              onClick={clearFormData}
+              variant="outline"
+              size="sm"
+              className="text-xs"
+            >
+              Clear Form
+            </Button>
+          </div>
         </DialogHeader>
 
         <div

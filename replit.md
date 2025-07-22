@@ -198,6 +198,13 @@ externalPort = 80
 - **Cleaned codebase**: Removed Mapbox dependencies from active code while preserving functionality in archive
 - **Status**: Application running smoothly without GPS features, ready for deployment
 
+### January 22, 2025 - Enhanced PDF Labor Breakdown and Form Persistence
+- **Enhanced Services & Labor PDF section**: Updated estimate PDFs to show detailed labor breakdown with hours and rates (e.g., "Prep - 32h × $60/hr = $1,920")
+- **Form data persistence**: Implemented localStorage to save all estimate form data between page refreshes, eliminating need to re-enter information
+- **Clear form functionality**: Added "Clear Form" button in dialog header to reset all saved data when starting fresh estimates
+- **Improved PDF formatting**: Labor sections now display worker names, hours, and rates for complete transparency in estimates
+- **Automatic data saving**: All form fields (work stages, paint costs, supplies, travel, additional labor, tax config) save automatically as user types
+
 ### January 21, 2025 - Complete Email System Restoration and PDF Generation Fix
 - **Fixed critical estimate PDF generation**: Resolved TypeScript compilation errors in EstimateGenerator.tsx that were preventing PDF creation, added proper type annotations to all array operations (workStages.forEach, additionalLabor.forEach, etc.)
 - **Email system fully operational**: Successfully restored complete estimate email functionality with PDF attachments, confirmed working with test email sent to cortespainter@gmail.com
