@@ -129,6 +129,8 @@ export const insertReceiptSchema = createInsertSchema(receipts).omit({
 export const insertDailyHoursSchema = createInsertSchema(dailyHours).omit({
   id: true,
   createdAt: true,
+}).extend({
+  date: z.coerce.date(),
 });
 
 export const insertToolsChecklistSchema = createInsertSchema(toolsChecklist).omit({
