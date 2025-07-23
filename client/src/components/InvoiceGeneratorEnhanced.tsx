@@ -864,9 +864,10 @@ cortespainter@gmail.com`;
     </Dialog>
 
     {/* Email Composition Dialog */}
+    {console.log('showEmailDialog state:', showEmailDialog)}
     {showEmailDialog && (
       <Dialog open={showEmailDialog} onOpenChange={setShowEmailDialog}>
-        <DialogContent className="max-w-2xl bg-gray-900 text-white border-gray-700">
+        <DialogContent className="max-w-2xl bg-gray-900 text-white border-gray-700 z-[9999]">
           <DialogHeader>
             <DialogTitle className="text-white text-lg font-semibold">Send Invoice Email</DialogTitle>
           </DialogHeader>
