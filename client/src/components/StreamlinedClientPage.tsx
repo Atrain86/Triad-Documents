@@ -1482,14 +1482,16 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                       <div>
                         {/* Add Hours Button */}
                         {!showDatePicker && (
-                          <button
-                            onClick={() => setShowDatePicker(true)}
-                            className="mb-4 px-3 py-1 text-xs text-white border-0 rounded-md font-medium inline-flex items-center"
-                            style={{ backgroundColor: '#6A9955', borderColor: '#6A9955', border: 'none' }}
-                          >
-                            <Plus size={12} className="mr-1" />
-                            + Hours
-                          </button>
+                          <div className="flex justify-center mb-4">
+                            <button
+                              onClick={() => setShowDatePicker(true)}
+                              className="px-4 py-2 text-sm text-white border-0 rounded-md font-medium inline-flex items-center"
+                              style={{ backgroundColor: '#6A9955', borderColor: '#6A9955', border: 'none' }}
+                            >
+                              <Plus size={14} className="mr-1" />
+                              Hours
+                            </button>
+                          </div>
                         )}
 
                         {/* Date Picker and Hours Input */}
@@ -1670,7 +1672,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                         </span>
                                         <span className="text-gray-400">-</span>
                                         <span className="font-semibold text-green-400">
-                                          {hours.hours}hrs
+                                          {Math.round(hours.hours)} hrs
                                         </span>
                                       </div>
                                       <span className="font-bold text-green-300">
