@@ -145,11 +145,15 @@ export async function sendInvoiceEmailWithReceipts(
 ): Promise<boolean> {
   const subject = `Invoice #${invoiceNumber} from A-Frame Painting`;
   
+  // Extract first name for casual greeting
+  const firstName = clientName.split(' ')[0];
+  
   const receiptText = receiptAttachments.length > 0 
     ? `\n\nI've also included ${receiptAttachments.length} receipt photo(s) showing the materials purchased for your project.`
     : '';
   
-  const text = `Dear ${clientName},
+  // Use custom message if provided, otherwise use default professional message
+  const emailBody = customMessage || `Hi ${firstName},
 
 I hope this message finds you well. Please find attached Invoice #${invoiceNumber} for your recent painting project with A-Frame Painting.${receiptText}
 
@@ -169,19 +173,31 @@ Best regards,
 
 A-Frame Painting
 cortespainter@gmail.com`;
+  
+  const text = emailBody;
 
   const receiptHtml = receiptAttachments.length > 0 
     ? `<p>I've also included <strong>${receiptAttachments.length} receipt photo(s)</strong> showing the materials purchased for your project.</p>`
     : '';
 
-  const html = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff;">
+  // Create HTML version - use custom message if provided, otherwise use professional format
+  const html = customMessage ? 
+    // Simple HTML version for custom messages
+    `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: #EA580C; margin: 0; font-size: 28px;">A-Frame Painting</h1>
+        <p style="color: #666; margin: 5px 0 0 0;">Professional Painting Services</p>
+      </div>
+      <div style="color: #333; line-height: 1.6; white-space: pre-line;">${customMessage}</div>
+    </div>` :
+    // Professional format for default messages
+    `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff;">
       <div style="text-align: center; margin-bottom: 30px;">
         <h1 style="color: #EA580C; margin: 0; font-size: 28px;">A-Frame Painting</h1>
         <p style="color: #666; margin: 5px 0 0 0;">Professional Painting Services</p>
       </div>
       
-      <p style="color: #333; font-size: 16px;">Dear <strong>${clientName}</strong>,</p>
+      <p style="color: #333; font-size: 16px;">Hi <strong>${firstName}</strong>,</p>
       
       <p style="color: #333; line-height: 1.6;">I hope this message finds you well. Please find attached <strong>Invoice #${invoiceNumber}</strong> for your recent painting project with A-Frame Painting.</p>
       

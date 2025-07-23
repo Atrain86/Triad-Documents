@@ -35,7 +35,8 @@ export default function InvoiceGenerator({
   
   // Initialize email message
   React.useEffect(() => {
-    const defaultMessage = `Dear ${invoiceData.clientName || project.clientName},
+    const firstName = (invoiceData.clientName || project.clientName).split(' ')[0];
+    const defaultMessage = `Hi ${firstName},
 
 Please find attached your invoice for painting services.
 
