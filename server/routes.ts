@@ -592,6 +592,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Token usage tracking and admin routes
+  app.get('/api/admin/token-usage/total', async (req, res) => {
+    try {
+      const result = await db
+        .select({
+          totalTokens: sql<number>`COALESCE(SUM(${tokenUsage.tokensUsed}), 0)`.as('totalTokens'),
+          totalCost: sql<number>`COALESCE(SUM(${tokenUsage.cost}), 0)`.as('totalCost')
+        })
+        .from(tokenUsage);
+
+      const stats = result[0] || { totalTokens: 0, totalCost: 0 };
+      res.json(stats);
+    } catch (error) {
+      console.error('Error fetching total token usage:', error);
+      res.status(500).json({ error: 'Failed to fetch token usage statistics' });
+    }
+  });
+
+  app.get('/api/admin/token-usage/by-user', async (req, res) => {
+    try {
+      const result = await db
+        .select({
+          userId: tokenUsage.userId,
+          email: users.email,
+          totalTokens: sql<number>`COALESCE(SUM(${tokenUsage.tokensUsed}), 0)`.as('totalTokens'),
+          totalCost: sql<number>`COALESCE(SUM(${tokenUsage.cost}), 0)`.as('totalCost')
+        })
+        .from(tokenUsage)
+        .leftJoin(users, eq(users.id, tokenUsage.userId))
+        .groupBy(tokenUsage.userId, users.email);
+
+      res.json(result);
+    } catch (error) {
+      console.error('Error fetching user token usage:', error);
+      res.status(500).json({ error: 'Failed to fetch user token usage statistics' });
+    }
+  });
+
   app.get('/api/admin/token-usage/stats', async (req, res) => {
     try {
       const result = await db
