@@ -278,17 +278,11 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
                       onClick={() => setViewingReceipt(receipt)}
                       className="text-blue-400 hover:text-blue-300 underline text-sm"
                     >
-                      {receipt.vendor} - ${(() => {
-                        const amount = receipt.amount;
-                        return typeof amount === 'number' ? amount.toFixed(2) : parseFloat(String(amount) || '0').toFixed(2);
-                      })()}
+                      {receipt.vendor} - ${Number(receipt.amount || 0).toFixed(2)}
                     </button>
                   ) : (
                     <span className="text-gray-200 text-sm">
-                      {receipt.vendor} - ${(() => {
-                        const amount = receipt.amount;
-                        return typeof amount === 'number' ? amount.toFixed(2) : parseFloat(String(amount) || '0').toFixed(2);
-                      })()}
+                      {receipt.vendor} - ${Number(receipt.amount || 0).toFixed(2)}
                     </span>
                   )}
                 </div>
@@ -1002,7 +996,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     const files = event.target.files;
     console.log('Selected files:', files);
     if (files && files.length > 0) {
-      console.log('Files detected, starting upload:', Array.from(files).map((f: File) => f.name));
+      console.log('Files detected, starting upload:', Array.from(files).map((f: any) => f.name));
       uploadPhotosMutation.mutate(files);
     } else {
       console.log('No files selected');
@@ -1014,7 +1008,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     const files = event.target.files;
     console.log('Selected receipt files:', files);
     if (files && files.length > 0) {
-      console.log('Receipt files detected, starting upload:', Array.from(files).map((f: File) => f.name));
+      console.log('Receipt files detected, starting upload:', Array.from(files).map((f: any) => f.name));
       uploadReceiptsMutation.mutate(files);
     } else {
       console.log('No receipt files selected');
@@ -1671,14 +1665,14 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                       <button
                                         onClick={() => {
                                           setEditingHours(hours.id);
-                                          setEditDate(hours.date.split('T')[0]); // Extract date part
+                                          setEditDate(typeof hours.date === 'string' ? hours.date.split('T')[0] : new Date(hours.date).toISOString().split('T')[0]); // Extract date part
                                           setEditHours(hours.hours.toString());
                                           setEditDescription(hours.description || '');
                                         }}
                                         className="p-0.5 text-blue-400 hover:text-blue-300 transition-colors opacity-60 hover:opacity-100"
                                         title="Edit"
                                       >
-                                        <Edit size={10} />
+                                        <Edit3 size={10} />
                                       </button>
                                       <button
                                         onClick={() => deleteHoursMutation.mutate(hours.id)}
