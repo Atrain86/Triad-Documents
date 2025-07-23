@@ -278,6 +278,10 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
         title: "Email sent successfully!",
         description: "The estimate has been sent to your client.",
       });
+      // Auto-close dialog after 5 seconds
+      setTimeout(() => {
+        onClose();
+      }, 5000);
     },
     onError: (error: Error) => {
       toast({
