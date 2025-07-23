@@ -1585,13 +1585,18 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                 {editingHours === hours.id ? (
                                   // Edit form
                                   <div className="space-y-3">
-                                    <div className="grid grid-cols-2 gap-2">
-                                      <Input
-                                        type="date"
-                                        value={editDate}
-                                        onChange={(e) => setEditDate(e.target.value)}
-                                        className="text-sm bg-gray-700 border-gray-600 text-gray-200"
+                                    {/* Date picker using our custom calendar */}
+                                    <div className="space-y-2">
+                                      <div className="text-sm text-gray-300">Edit Date:</div>
+                                      <PaintBrainCalendar
+                                        selectedDate={editDate}
+                                        onDateSelect={setEditDate}
+                                        maxDate={new Date().toISOString().split('T')[0]}
                                       />
+                                    </div>
+                                    
+                                    {/* Hours and Description */}
+                                    <div className="grid grid-cols-2 gap-2">
                                       <Input
                                         type="number"
                                         step="0.5"
@@ -1602,13 +1607,14 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                         placeholder="Hours"
                                         className="text-sm bg-gray-700 border-gray-600 text-gray-200"
                                       />
+                                      <Input
+                                        value={editDescription}
+                                        onChange={(e) => setEditDescription(e.target.value)}
+                                        placeholder="Work description"
+                                        className="text-sm bg-gray-700 border-gray-600 text-gray-200"
+                                      />
                                     </div>
-                                    <Input
-                                      value={editDescription}
-                                      onChange={(e) => setEditDescription(e.target.value)}
-                                      placeholder="Work description"
-                                      className="text-sm bg-gray-700 border-gray-600 text-gray-200"
-                                    />
+                                    
                                     <div className="flex gap-2">
                                       <Button
                                         onClick={() => {

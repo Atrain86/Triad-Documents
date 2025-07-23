@@ -3,7 +3,7 @@ import express from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
-import { insertProjectSchema, insertPhotoSchema, insertReceiptSchema, insertDailyHoursSchema, insertToolsChecklistSchema, insertUserSchema, projects, photos, receipts, dailyHours, toolsChecklist, users, tokenUsage } from "@shared/schema";
+import { insertProjectSchema, insertPhotoSchema, insertReceiptSchema, insertDailyHoursSchema, updateDailyHoursSchema, insertToolsChecklistSchema, insertUserSchema, projects, photos, receipts, dailyHours, toolsChecklist, users, tokenUsage } from "@shared/schema";
 import { sql, eq, desc } from "drizzle-orm";
 import { hashPassword, verifyPassword, generateToken, verifyToken } from "./auth";
 import { sendInvoiceEmailWithReceipts, sendEstimateEmail } from "./email";
@@ -437,7 +437,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/daily-hours/:id', async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const validatedData = insertDailyHoursSchema.parse(req.body);
+      const validatedData = updateDailyHoursSchema.parse(req.body);
       const updatedHours = await storage.updateDailyHours(id, validatedData);
       res.json(updatedHours);
     } catch (error) {
