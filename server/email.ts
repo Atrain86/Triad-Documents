@@ -140,7 +140,8 @@ export async function sendInvoiceEmailWithReceipts(
   clientName: string,
   invoiceNumber: string,
   pdfBuffer: Buffer,
-  receiptAttachments: Array<{ filename: string; path: string }>
+  receiptAttachments: Array<{ filename: string; path: string }>,
+  customMessage?: string
 ): Promise<boolean> {
   const subject = `Invoice #${invoiceNumber} from A-Frame Painting`;
   

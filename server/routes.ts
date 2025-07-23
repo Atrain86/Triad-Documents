@@ -629,22 +629,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Send email with PDF and receipt attachments
       const { sendInvoiceEmailWithReceipts } = await import('./email');
       
-      const subject = `Invoice #${invoiceNumber} - A-Frame Painting`;
-      const message = customMessage || `Dear ${clientName},
-
-Please find attached your invoice for painting services.
-
-Payment Instructions:
-Please send e-transfer to cortespainter@gmail.com
-
-Thank you for your business!
-
-Best regards,
-A-Frame Painting
-cortespainter@gmail.com
-884 Hayes Rd, Manson's Landing, BC V0P1K0`;
-
-      await sendInvoiceEmailWithReceipts(recipientEmail, subject, message, pdfBuffer, receiptAttachments);
+      await sendInvoiceEmailWithReceipts(recipientEmail, clientName, invoiceNumber, pdfBuffer, receiptAttachments, customMessage);
       
       console.log('Invoice email sent successfully to:', recipientEmail);
       res.json({ success: true, message: 'Invoice email sent successfully' });
