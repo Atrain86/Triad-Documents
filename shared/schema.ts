@@ -131,16 +131,16 @@ export const insertDailyHoursSchema = createInsertSchema(dailyHours).omit({
   createdAt: true,
 }).extend({
   date: z.string().transform((str) => {
-    // If it's already a YYYY-MM-DD format, append time for proper timestamp
+    // If it's already a YYYY-MM-DD format, append time for proper timestamp and convert to Date
     if (str.match(/^\d{4}-\d{2}-\d{2}$/)) {
-      return `${str}T12:00:00.000Z`; // Use noon UTC to avoid timezone issues
+      return new Date(`${str}T12:00:00.000Z`); // Use noon UTC to avoid timezone issues
     }
     // If it includes time, extract just the date part and use noon UTC
     if (str.includes('T')) {
       const datePart = str.split('T')[0];
-      return `${datePart}T12:00:00.000Z`;
+      return new Date(`${datePart}T12:00:00.000Z`);
     }
-    return str;
+    return new Date(str);
   }),
 });
 
