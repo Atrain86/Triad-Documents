@@ -733,8 +733,10 @@ cortespainter@gmail.com`;
             </Button>
             <Button
               onClick={() => {
-                console.log('Send Invoice button clicked');
+                console.log('Send Invoice button clicked - opening email dialog');
+                console.log('showEmailDialog state before:', showEmailDialog);
                 setShowEmailDialog(true);
+                console.log('showEmailDialog state after:', true);
               }}
               disabled={!invoiceData.clientEmail}
               className="flex items-center"
