@@ -184,7 +184,7 @@ cortespainter@gmail.com`;
       // Hide the preview again
       invoiceElement.style.display = 'none';
 
-      const imgData = canvas.getDataURL('image/png');
+      const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
       
       const imgWidth = 210;
@@ -259,7 +259,7 @@ cortespainter@gmail.com`;
       setIsSending(true);
       
       // First generate the PDF
-      const printElement = printRef.current;
+      const printElement = invoiceRef.current;
       if (!printElement) {
         throw new Error('Print element not found');
       }
@@ -374,6 +374,7 @@ cortespainter@gmail.com`;
   };
 
   return (
+    <>
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto" style={{ backgroundColor: darkTheme.background }}>
         <DialogHeader>
@@ -642,7 +643,7 @@ cortespainter@gmail.com`;
                 {receipts.map((receipt) => (
                   <div key={receipt.id} className="flex justify-between p-2 rounded" style={{ backgroundColor: darkTheme.inputBg }}>
                     <span>{receipt.vendor}</span>
-                    <span>${receipt.amount.toFixed(2)}</span>
+                    <span>${parseFloat(receipt.amount.toString()).toFixed(2)}</span>
                   </div>
                 ))}
                 {receipts.length === 0 && (
@@ -817,7 +818,7 @@ cortespainter@gmail.com`;
                   <td className="border border-gray-300 p-3">Materials - {receipt.vendor}</td>
                   <td className="border border-gray-300 p-3 text-center">-</td>
                   <td className="border border-gray-300 p-3 text-center">-</td>
-                  <td className="border border-gray-300 p-3 text-right">${receipt.amount.toFixed(2)}</td>
+                  <td className="border border-gray-300 p-3 text-right">${parseFloat(receipt.amount.toString()).toFixed(2)}</td>
                 </tr>
               ))}
               {invoiceData.additionalSupplies > 0 && (
@@ -966,5 +967,6 @@ cortespainter@gmail.com`;
       </DialogContent>
     </Dialog>
     )}
+    </>
   );
 }
