@@ -64,6 +64,25 @@ export default function InvoiceGeneratorEnhanced({
     attachReceipts: false
   });
 
+  // Email message state
+  const [emailMessage, setEmailMessage] = useState('');
+  const [showEmailDialog, setShowEmailDialog] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+
+  // Initialize email message with default template
+  useEffect(() => {
+    const defaultMessage = `Dear ${invoiceData.clientName},
+
+Please find your invoice attached for painting services completed.
+
+Thank you for choosing A-Frame Painting for your painting needs!
+
+Best regards,
+A-Frame Painting
+cortespainter@gmail.com`;
+    setEmailMessage(defaultMessage);
+  }, [invoiceData.clientName]);
+
   // Brand colors - A-Frame Painting theme
   const [brandColors, setBrandColors] = useState({
     primary: '#EA580C',         // Burnt orange - A-Frame brand color
@@ -308,46 +327,8 @@ export default function InvoiceGeneratorEnhanced({
       console.log('PDF pages:', pdf.getNumberOfPages());
       console.log('PDF size estimate:', pdfData.length * 0.75, 'bytes');
 
-      // Create email content
+      // Use custom email message from dialog
       const subject = `Invoice #${invoiceData.invoiceNumber} - A-Frame Painting`;
-      const lineItemsText = invoiceData.lineItems
-        .filter(item => item.hours > 0 || item.description.trim() !== '')
-        .map(item => `• ${item.description}: ${item.hours} hrs @ $${item.unitPrice}/hr = $${item.total.toFixed(2)}`)
-        .join('\n');
-
-      const materialsText = receipts.length > 0 
-        ? receipts.map(receipt => `• ${receipt.vendor}: $${receipt.amount.toFixed(2)}`).join('\n')
-        : '';
-
-      const message = `Dear ${invoiceData.clientName},
-
-Please find your invoice attached for painting services completed.
-
-INVOICE #${invoiceData.invoiceNumber}
-Date: ${invoiceData.date}
-From: A-Frame Painting
-
-Services Provided:
-${lineItemsText}
-
-${materialsText ? `Materials:
-${materialsText}
-
-` : ''}${invoiceData.additionalSupplies > 0 ? `Additional Supplies: $${invoiceData.additionalSupplies.toFixed(2)}
-
-` : ''}TOTALS:
-Subtotal: $${calculateSubtotal().toFixed(2)}
-GST (5%): $${calculateGST().toFixed(2)}
-TOTAL AMOUNT: $${calculateTotal().toFixed(2)} CAD
-
-Payment Instructions:
-${invoiceData.notes}
-
-Thank you for choosing A-Frame Painting for your painting needs!
-
-Best regards,
-A-Frame Painting
-cortespainter@gmail.com`;
 
       // Send email with PDF attachment
       const response = await fetch('/api/send-invoice', {
@@ -358,7 +339,7 @@ cortespainter@gmail.com`;
         body: JSON.stringify({
           to: invoiceData.clientEmail,
           subject: subject,
-          message: message,
+          message: emailMessage,
           pdfData: pdfData,
           receiptFilenames: invoiceData.attachReceipts ? receipts.map(r => r.filename) : []
         }),
@@ -373,7 +354,8 @@ cortespainter@gmail.com`;
         description: "The invoice has been sent to your client."
       });
 
-      // Auto-close dialog after 5 seconds
+      // Close email dialog immediately and main dialog after 5 seconds
+      setShowEmailDialog(false);
       setTimeout(() => {
         onClose();
       }, 5000);
@@ -748,13 +730,13 @@ cortespainter@gmail.com`;
               Generate PDF
             </Button>
             <Button
-              onClick={sendInvoice}
+              onClick={() => setShowEmailDialog(true)}
               disabled={!invoiceData.clientEmail}
               className="flex items-center"
-              style={{ backgroundColor: invoiceData.clientEmail ? brandColors.secondary : '#9ca3af' }}
+              style={{ backgroundColor: invoiceData.clientEmail ? brandColors.accent : '#9ca3af' }}
             >
               <Send className="mr-2 h-5 w-5" />
-              Open Gmail
+              Send Invoice
             </Button>
           </div>
         </div>
@@ -870,6 +852,111 @@ cortespainter@gmail.com`;
               <div className="text-gray-700 whitespace-pre-line">{invoiceData.notes}</div>
             </div>
           )}
+        </div>
+      </DialogContent>
+    </Dialog>
+
+    {/* Email Composition Dialog */}
+    <Dialog open={showEmailDialog} onOpenChange={setShowEmailDialog}>
+      <DialogContent className="max-w-2xl" style={{ backgroundColor: darkTheme.background, color: darkTheme.text }}>
+        <DialogHeader>
+          <DialogTitle style={{ color: darkTheme.text }}>Send Invoice Email</DialogTitle>
+        </DialogHeader>
+        
+        <div className="space-y-4">
+          {/* Email Details */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1" style={{ color: darkTheme.textSecondary }}>
+                To:
+              </label>
+              <input
+                type="email"
+                value={invoiceData.clientEmail}
+                onChange={(e) => setInvoiceData({ ...invoiceData, clientEmail: e.target.value })}
+                className="w-full p-2 rounded border"
+                style={{ 
+                  backgroundColor: darkTheme.inputBg, 
+                  color: darkTheme.text,
+                  borderColor: darkTheme.border
+                }}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1" style={{ color: darkTheme.textSecondary }}>
+                Subject:
+              </label>
+              <input
+                type="text"
+                value={`Invoice #${invoiceData.invoiceNumber} - A-Frame Painting`}
+                readOnly
+                className="w-full p-2 rounded border"
+                style={{ 
+                  backgroundColor: darkTheme.inputBg, 
+                  color: darkTheme.text,
+                  borderColor: darkTheme.border
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Email Message */}
+          <div>
+            <label className="block text-sm font-medium mb-1" style={{ color: darkTheme.textSecondary }}>
+              Message:
+            </label>
+            <textarea
+              value={emailMessage}
+              onChange={(e) => setEmailMessage(e.target.value)}
+              rows={12}
+              className="w-full p-3 rounded border font-mono text-sm"
+              style={{ 
+                backgroundColor: darkTheme.inputBg, 
+                color: darkTheme.text,
+                borderColor: darkTheme.border
+              }}
+              placeholder="Customize your email message..."
+            />
+          </div>
+
+          {/* Receipt Attachment Option */}
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id="attachReceipts"
+              checked={invoiceData.attachReceipts}
+              onChange={(e) => setInvoiceData({ ...invoiceData, attachReceipts: e.target.checked })}
+            />
+            <label htmlFor="attachReceipts" style={{ color: darkTheme.textSecondary }}>
+              Attach receipt photos to email (as additional attachments)
+            </label>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex justify-end space-x-3 pt-4">
+            <Button
+              onClick={() => setShowEmailDialog(false)}
+              variant="outline"
+              style={{ borderColor: darkTheme.border, color: darkTheme.text }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={sendInvoice}
+              disabled={isSending || !invoiceData.clientEmail}
+              className="flex items-center"
+              style={{ backgroundColor: brandColors.accent, color: 'white' }}
+            >
+              {isSending ? (
+                <>Processing...</>
+              ) : (
+                <>
+                  <Send className="mr-2 h-4 w-4" />
+                  Send Invoice
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
