@@ -236,9 +236,80 @@ export default function InvoiceGeneratorEnhanced({
 
   const sendInvoice = async () => {
     try {
-      const subject = `Invoice #${invoiceData.invoiceNumber} - A-Frame Painting`;
+      setIsSending(true);
       
-      // Create detailed invoice content for email body
+      // First generate the PDF
+      const printElement = printRef.current;
+      if (!printElement) {
+        throw new Error('Print element not found');
+      }
+
+      const canvas = await html2canvas(printElement, {
+        scale: 1,
+        useCORS: true,
+        allowTaint: false
+      });
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.7);
+      console.log('Canvas dimensions:', canvas.width, 'x', canvas.height);
+      console.log('Image data length:', imgData.length);
+
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgWidth = 210;
+      const pageHeight = 295;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+
+      let position = 0;
+      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      // Add receipt attachments if selected
+      if (invoiceData.attachReceipts && receipts.length > 0) {
+        for (const receipt of receipts) {
+          try {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            
+            await new Promise((resolve, reject) => {
+              img.onload = resolve;
+              img.onerror = reject;
+              img.src = `/uploads/${receipt.filename}`;
+            });
+
+            pdf.addPage();
+            
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx?.drawImage(img, 0, 0);
+            
+            const receiptImgData = canvas.toDataURL('image/jpeg');
+            const receiptAspectRatio = img.height / img.width;
+            const receiptWidth = 180;
+            const receiptHeight = receiptWidth * receiptAspectRatio;
+            
+            pdf.addImage(receiptImgData, 'JPEG', 15, 15, receiptWidth, receiptHeight);
+          } catch (error) {
+            console.error(`Failed to add receipt ${receipt.filename}:`, error);
+          }
+        }
+      }
+
+      const pdfData = pdf.output('datauristring');
+      console.log('PDF pages:', pdf.getNumberOfPages());
+      console.log('PDF size estimate:', pdfData.length * 0.75, 'bytes');
+
+      // Create email content
+      const subject = `Invoice #${invoiceData.invoiceNumber} - A-Frame Painting`;
       const lineItemsText = invoiceData.lineItems
         .filter(item => item.hours > 0 || item.description.trim() !== '')
         .map(item => `• ${item.description}: ${item.hours} hrs @ $${item.unitPrice}/hr = $${item.total.toFixed(2)}`)
@@ -248,9 +319,9 @@ export default function InvoiceGeneratorEnhanced({
         ? receipts.map(receipt => `• ${receipt.vendor}: $${receipt.amount.toFixed(2)}`).join('\n')
         : '';
 
-      const body = `Dear ${invoiceData.clientName},
+      const message = `Dear ${invoiceData.clientName},
 
-Please find your invoice details below for painting services completed.
+Please find your invoice attached for painting services completed.
 
 INVOICE #${invoiceData.invoiceNumber}
 Date: ${invoiceData.date}
@@ -278,33 +349,44 @@ Best regards,
 A-Frame Painting
 cortespainter@gmail.com`;
 
-      // Create professional HTML email content for clipboard
-      const htmlEmailContent = `
-Subject: ${subject}
-To: ${invoiceData.clientEmail}
-
-${body}
-      `.trim();
-
-      // Copy to clipboard as fallback
-      await navigator.clipboard.writeText(htmlEmailContent);
-      
-      toast({
-        title: "Email Content Copied",
-        description: "Invoice email content has been copied to your clipboard. You can paste it into Gmail."
+      // Send email with PDF attachment
+      const response = await fetch('/api/send-invoice', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          to: invoiceData.clientEmail,
+          subject: subject,
+          message: message,
+          pdfData: pdfData,
+          receiptFilenames: invoiceData.attachReceipts ? receipts.map(r => r.filename) : []
+        }),
       });
 
-      // Try to open Gmail compose
-      const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(invoiceData.clientEmail)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-      window.open(gmailComposeUrl, '_blank');
-      
+      if (!response.ok) {
+        throw new Error('Failed to send email');
+      }
+
+      toast({
+        title: "Invoice sent successfully!",
+        description: "The invoice has been sent to your client."
+      });
+
+      // Auto-close dialog after 5 seconds
+      setTimeout(() => {
+        onClose();
+      }, 5000);
+
     } catch (error) {
-      console.error('Email preparation failed:', error);
+      console.error('Email sending failed:', error);
       toast({
         title: "Error",
-        description: "Failed to prepare email",
+        description: "Failed to send invoice email",
         variant: "destructive"
       });
+    } finally {
+      setIsSending(false);
     }
   };
 
