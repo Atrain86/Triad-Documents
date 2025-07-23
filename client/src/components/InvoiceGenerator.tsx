@@ -488,7 +488,8 @@ cortespainter@gmail.com
                 clientName: invoiceData.clientName,
                 invoiceNumber: invoiceData.invoiceNumber,
                 pdfData: pdfBase64,
-                receiptFilenames: selectedReceiptFilenames
+                receiptFilenames: selectedReceiptFilenames,
+                customMessage: emailMessage
               })
             });
 

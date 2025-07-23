@@ -591,6 +591,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Invoice email route with PDF attachment
+  app.post('/api/send-invoice-email', async (req, res) => {
+    try {
+      const { recipientEmail, clientName, invoiceNumber, pdfData, receiptFilenames, customMessage } = req.body;
+      
+      console.log('Invoice email request received:', {
+        recipientEmail,
+        clientName,
+        invoiceNumber,
+        hasPdfData: !!pdfData,
+        pdfDataLength: pdfData?.length || 0,
+        receiptCount: receiptFilenames?.length || 0,
+        hasCustomMessage: !!customMessage
+      });
+      
+      if (!recipientEmail || !clientName || !invoiceNumber || !pdfData) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Missing required fields: recipientEmail, clientName, invoiceNumber, pdfData' 
+        });
+      }
+
+      // Convert base64 PDF to buffer
+      const base64Data = pdfData.includes(',') ? pdfData.split(',')[1] : pdfData;
+      const pdfBuffer = Buffer.from(base64Data, 'base64');
+      console.log('PDF buffer created, size:', pdfBuffer.length, 'bytes');
+
+      // Prepare receipt attachments
+      const receiptAttachments = (receiptFilenames || []).map((filename: string) => ({
+        filename,
+        path: path.join(uploadDir, filename)
+      })).filter((attachment: any) => fs.existsSync(attachment.path));
+
+      console.log('Receipt attachments prepared:', receiptAttachments.length);
+
+      // Send email with PDF and receipt attachments
+      const { sendInvoiceEmailWithReceipts } = await import('./email');
+      
+      const subject = `Invoice #${invoiceNumber} - A-Frame Painting`;
+      const message = customMessage || `Dear ${clientName},
+
+Please find attached your invoice for painting services.
+
+Payment Instructions:
+Please send e-transfer to cortespainter@gmail.com
+
+Thank you for your business!
+
+Best regards,
+A-Frame Painting
+cortespainter@gmail.com
+884 Hayes Rd, Manson's Landing, BC V0P1K0`;
+
+      await sendInvoiceEmailWithReceipts(recipientEmail, subject, message, pdfBuffer, receiptAttachments);
+      
+      console.log('Invoice email sent successfully to:', recipientEmail);
+      res.json({ success: true, message: 'Invoice email sent successfully' });
+      
+    } catch (error) {
+      console.error('Error sending invoice email:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: `Failed to send invoice email: ${(error as Error).message}` 
+      });
+    }
+  });
+
   // Token usage tracking and admin routes
   app.get('/api/admin/token-usage/total', async (req, res) => {
     try {
