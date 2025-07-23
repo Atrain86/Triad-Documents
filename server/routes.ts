@@ -434,6 +434,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put('/api/daily-hours/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertDailyHoursSchema.parse(req.body);
+      const updatedHours = await storage.updateDailyHours(id, validatedData);
+      res.json(updatedHours);
+    } catch (error) {
+      console.error('Error updating daily hours:', error);
+      res.status(500).json({ error: 'Failed to update daily hours' });
+    }
+  });
+
   app.delete('/api/daily-hours/:id', async (req, res) => {
     try {
       const id = parseInt(req.params.id);
