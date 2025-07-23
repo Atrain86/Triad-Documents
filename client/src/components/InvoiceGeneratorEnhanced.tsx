@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Calendar, Download, Send, Plus, Trash2, User, MapPin, Phone, Mail, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -730,7 +731,10 @@ cortespainter@gmail.com`;
               Generate PDF
             </Button>
             <Button
-              onClick={() => setShowEmailDialog(true)}
+              onClick={() => {
+                console.log('Send Invoice button clicked');
+                setShowEmailDialog(true);
+              }}
               disabled={!invoiceData.clientEmail}
               className="flex items-center"
               style={{ backgroundColor: invoiceData.clientEmail ? brandColors.accent : '#9ca3af' }}
@@ -857,11 +861,12 @@ cortespainter@gmail.com`;
     </Dialog>
 
     {/* Email Composition Dialog */}
-    <Dialog open={showEmailDialog} onOpenChange={setShowEmailDialog}>
-      <DialogContent className="max-w-2xl" style={{ backgroundColor: darkTheme.background, color: darkTheme.text }}>
-        <DialogHeader>
-          <DialogTitle style={{ color: darkTheme.text }}>Send Invoice Email</DialogTitle>
-        </DialogHeader>
+    {showEmailDialog && (
+      <Dialog open={showEmailDialog} onOpenChange={setShowEmailDialog}>
+        <DialogContent className="max-w-2xl bg-gray-900 text-white border-gray-700">
+          <DialogHeader>
+            <DialogTitle className="text-white text-lg font-semibold">Send Invoice Email</DialogTitle>
+          </DialogHeader>
         
         <div className="space-y-4">
           {/* Email Details */}
@@ -905,11 +910,11 @@ cortespainter@gmail.com`;
             <label className="block text-sm font-medium mb-1" style={{ color: darkTheme.textSecondary }}>
               Message:
             </label>
-            <textarea
+            <Textarea
               value={emailMessage}
               onChange={(e) => setEmailMessage(e.target.value)}
               rows={12}
-              className="w-full p-3 rounded border font-mono text-sm"
+              className="w-full font-mono text-sm"
               style={{ 
                 backgroundColor: darkTheme.inputBg, 
                 color: darkTheme.text,
@@ -960,5 +965,6 @@ cortespainter@gmail.com`;
         </div>
       </DialogContent>
     </Dialog>
+    )}
   );
 }
