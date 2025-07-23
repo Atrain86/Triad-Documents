@@ -30,6 +30,28 @@ export default function InvoiceGenerator({
   const [isSending, setIsSending] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [showEmailDialog, setShowEmailDialog] = useState(false);
+  const [emailMessage, setEmailMessage] = useState('');
+  
+  // Initialize email message
+  React.useEffect(() => {
+    const defaultMessage = `Dear ${invoiceData.clientName || project.clientName},
+
+Please find attached your invoice for painting services.
+
+Payment Instructions:
+Please send e-transfer to cortespainter@gmail.com
+
+Thank you for your business!
+
+Best regards,
+A-Frame Painting
+cortespainter@gmail.com
+884 Hayes Rd, Manson's Landing, BC V0P1K0`;
+    
+    setEmailMessage(defaultMessage);
+  }, [project.clientName]);
+  
   const [invoiceData, setInvoiceData] = useState({
     invoiceNumber: 101,
     date: new Date().toISOString().split('T')[0],
@@ -425,19 +447,7 @@ export default function InvoiceGenerator({
 
     const subject = `Invoice #${invoiceData.invoiceNumber} - ${invoiceData.businessName}`;
     
-    const textBody = `Dear ${invoiceData.clientName},
-
-${invoiceData.emailMessage}
-
-Payment Instructions:
-${invoiceData.notes}
-
-Thank you for your business!
-
-Best regards,
-${invoiceData.businessName}
-cortespainter@gmail.com
-884 Hayes Rd, Manson's Landing, BC V0P1K0`;
+    const textBody = emailMessage;
 
     try {
       // Show loading state
@@ -491,6 +501,9 @@ cortespainter@gmail.com
                 description: `Invoice #${invoiceData.invoiceNumber} sent to ${invoiceData.clientEmail}`,
                 duration: 5000,
               });
+              
+              // Close email composition dialog
+              setShowEmailDialog(false);
               
               // Also show success dialog
               setSuccessMessage(`Invoice #${invoiceData.invoiceNumber} sent successfully to ${invoiceData.clientEmail} with PDF attachment!`);
@@ -863,10 +876,13 @@ ${textBody}`;
                 Download PDF
               </Button>
               <Button
-                onClick={sendInvoice}
-                disabled={!invoiceData.clientEmail || isSending}
+                onClick={() => {
+                  console.log('Send Invoice button clicked - opening email dialog');
+                  setShowEmailDialog(true);
+                }}
+                disabled={!invoiceData.clientEmail}
                 className="text-white hover:opacity-90 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                style={{ backgroundColor: (invoiceData.clientEmail && !isSending) ? paintBrainColors.green : '#9ca3af' }}
+                style={{ backgroundColor: invoiceData.clientEmail ? paintBrainColors.green : '#9ca3af' }}
               >
                 {isSending ? (
                   <>
@@ -1051,6 +1067,107 @@ ${textBody}`;
         </div>
       </DialogContent>
     </Dialog>
+
+    {/* Email Composition Dialog */}
+    {showEmailDialog && (
+      <Dialog open={showEmailDialog} onOpenChange={setShowEmailDialog}>
+        <DialogContent className="max-w-2xl bg-gray-900 text-white border-gray-700 z-[9999]">
+          <DialogHeader>
+            <DialogTitle className="text-white text-lg font-semibold">Send Invoice Email</DialogTitle>
+          </DialogHeader>
+        
+          <div className="space-y-4">
+            {/* Email Details */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1 text-gray-300">
+                  To:
+                </label>
+                <Input
+                  type="email"
+                  value={invoiceData.clientEmail}
+                  onChange={(e) => setInvoiceData({ ...invoiceData, clientEmail: e.target.value })}
+                  className="bg-gray-800 border-gray-600 text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1 text-gray-300">
+                  Subject:
+                </label>
+                <Input
+                  type="text"
+                  value={`Invoice #${invoiceData.invoiceNumber} - A-Frame Painting`}
+                  readOnly
+                  className="bg-gray-800 border-gray-600 text-white"
+                />
+              </div>
+            </div>
+
+            {/* Email Message */}
+            <div>
+              <label className="block text-sm font-medium mb-1 text-gray-300">
+                Message:
+              </label>
+              <Textarea
+                value={emailMessage}
+                onChange={(e) => setEmailMessage(e.target.value)}
+                rows={12}
+                className="w-full font-mono text-sm bg-gray-800 border-gray-600 text-white"
+                placeholder="Customize your email message..."
+              />
+            </div>
+
+            {/* Receipt Attachment Option */}
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="attachReceipts"
+                checked={receipts.length > 0 && receipts.every(r => invoiceData.selectedReceipts.has(r.id))}
+                onChange={(e) => {
+                  const newSelection = new Set<number>();
+                  if (e.target.checked) {
+                    receipts.forEach(receipt => newSelection.add(receipt.id));
+                  }
+                  setInvoiceData({...invoiceData, selectedReceipts: newSelection});
+                }}
+              />
+              <label htmlFor="attachReceipts" className="text-gray-300">
+                Attach receipt photos to email (as additional attachments)
+              </label>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end space-x-3 pt-4">
+              <Button
+                onClick={() => setShowEmailDialog(false)}
+                variant="outline"
+                className="border-gray-600 text-gray-300 hover:bg-gray-800"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={sendInvoice}
+                disabled={isSending || !invoiceData.clientEmail}
+                className="text-white"
+                style={{ backgroundColor: paintBrainColors.green }}
+              >
+                {isSending ? (
+                  <>
+                    <div className="mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Send className="mr-2 h-4 w-4" />
+                    Send Invoice
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    )}
 
     {/* Success Dialog */}
     <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
