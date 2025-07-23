@@ -1484,11 +1484,11 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                         {!showDatePicker && (
                           <button
                             onClick={() => setShowDatePicker(true)}
-                            className="w-full mb-4 py-2 text-sm text-white border-0 rounded-md font-medium"
+                            className="mb-4 px-3 py-1 text-xs text-white border-0 rounded-md font-medium inline-flex items-center"
                             style={{ backgroundColor: '#6A9955', borderColor: '#6A9955', border: 'none' }}
                           >
-                            <Plus size={16} className="mr-2" />
-                            Log Hours for a Day
+                            <Plus size={12} className="mr-1" />
+                            + Hours
                           </button>
                         )}
 
