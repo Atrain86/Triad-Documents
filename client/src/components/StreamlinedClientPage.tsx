@@ -438,7 +438,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   });
 
   const { data: dailyHours = [] } = useQuery<DailyHours[]>({
-    queryKey: [`/api/projects/${projectId}/hours`],
+    queryKey: [`/api/projects/${projectId}/daily-hours`],
   });
 
   // Debug daily hours data
@@ -490,7 +490,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       hours: number;
       description: string;
     }) => {
-      const response = await apiRequest(`/api/projects/${projectId}/hours`, {
+      const response = await apiRequest(`/api/projects/${projectId}/daily-hours`, {
         method: 'POST',
         body: {
           date: hoursData.date,
@@ -503,8 +503,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/hours`] });
-      queryClient.refetchQueries({ queryKey: [`/api/projects/${projectId}/hours`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/daily-hours`] });
+      queryClient.refetchQueries({ queryKey: [`/api/projects/${projectId}/daily-hours`] });
       setShowDatePicker(false);
       setSelectedDate('');
       setHoursInput('');
@@ -949,14 +949,15 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const deleteHoursMutation = useMutation({
     mutationFn: async (hoursId: number) => {
-      await apiRequest(`/api/hours/${hoursId}`, {
+      await apiRequest(`/api/daily-hours/${hoursId}`, {
         method: 'DELETE',
       });
       
       return hoursId;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/hours`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/daily-hours`] });
+      queryClient.refetchQueries({ queryKey: [`/api/projects/${projectId}/daily-hours`] });
     },
     onError: (error) => {
       console.error('Delete hours failed:', error);

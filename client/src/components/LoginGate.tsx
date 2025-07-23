@@ -9,7 +9,7 @@ interface LoginGateProps {
 }
 
 export default function LoginGate({ onAuthenticated }: LoginGateProps) {
-  const [passcode, setPasscode] = useState('');
+  const [passcode, setPasscode] = useState('demo2025');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 

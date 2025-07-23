@@ -15,7 +15,7 @@ const LoginForm: React.FC = () => {
   
   // Login form state
   const [loginEmail, setLoginEmail] = useState('cortespainter@gmail.com');
-  const [loginPassword, setLoginPassword] = useState('');
+  const [loginPassword, setLoginPassword] = useState('brain');
   
   // Register form state
   const [registerEmail, setRegisterEmail] = useState('');
