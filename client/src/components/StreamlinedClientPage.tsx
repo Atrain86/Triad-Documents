@@ -588,9 +588,16 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       return;
     }
     
+    // Format the date to ensure it's timezone-safe (YYYY-MM-DD format only)
+    let formattedDate = selectedDate;
+    if (selectedDate.includes('T')) {
+      // If it's an ISO string, extract just the date part
+      formattedDate = selectedDate.split('T')[0];
+    }
+    
     addHoursMutation.mutate({
       projectId,
-      date: selectedDate,
+      date: formattedDate,
       hours: parsedHours,
       description: descriptionInput.trim() || 'Painting',
     });
@@ -964,10 +971,17 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const updateHoursMutation = useMutation({
     mutationFn: async (data: { id: number; date: string; hours: number; description: string }) => {
+      // Format the date to ensure it's timezone-safe (YYYY-MM-DD format only)
+      let formattedDate = data.date;
+      if (data.date.includes('T')) {
+        // If it's an ISO string, extract just the date part
+        formattedDate = data.date.split('T')[0];
+      }
+      
       const response = await apiRequest(`/api/daily-hours/${data.id}`, {
         method: 'PUT',
         body: {
-          date: data.date,
+          date: formattedDate,
           hours: data.hours,
           description: data.description,
         },
@@ -1665,7 +1679,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                       <button
                                         onClick={() => {
                                           setEditingHours(hours.id);
-                                          setEditDate(typeof hours.date === 'string' ? hours.date.split('T')[0] : new Date(hours.date).toISOString().split('T')[0]); // Extract date part
+                                          setEditDate(typeof hours.date === 'string' ? String(hours.date).split('T')[0] : new Date(hours.date).toISOString().split('T')[0]); // Extract date part
                                           setEditHours(hours.hours.toString());
                                           setEditDescription(hours.description || '');
                                         }}
