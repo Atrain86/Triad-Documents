@@ -569,17 +569,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       </div>
     </div>` : ''}
 
-    <!-- Tax Information (Blue) -->
-    ${taxConfig.country !== 'none' ? `
-    <div class="mb-8">
-      <h2 class="mb-2 text-lg font-semibold text-blue-400">Tax Information</h2>
-      <div class="border-2 rounded-md border-blue-400 p-4 bg-gray-900">
-        <div class="flex justify-between border-b border-gray-700 py-1">
-          <span>${taxConfig.country === 'canada' ? 'GST' : taxConfig.country === 'usa' ? 'Sales Tax' : 'VAT'} (${taxConfig.taxRate}%)</span>
-          <span>$${(calculateLaborSubtotal() * (parseFloat(taxConfig.taxRate) / 100)).toFixed(2)}</span>
-        </div>
-      </div>
-    </div>` : ''}
+
 
     <!-- Totals Section -->
     <div class="border-t border-gray-600 pt-4">
