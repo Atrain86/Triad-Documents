@@ -1259,7 +1259,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                             case 'dailyHours': {
                               const totalHours = dailyHours.reduce((sum, entry) => sum + (typeof entry.hours === 'number' ? entry.hours : parseFloat(entry.hours) || 0), 0);
                               const totalEarnings = totalHours * (project?.hourlyRate || 60);
-                              return `${totalHours.toFixed(1)}hr • $${totalEarnings.toLocaleString()}`;
+                              return `${Math.round(totalHours)} hrs • $${totalEarnings.toLocaleString()}`;
                             }
                             case 'receipts': {
                               const totalAmount = receipts.reduce((sum, receipt) => sum + parseFloat(receipt.amount), 0);
