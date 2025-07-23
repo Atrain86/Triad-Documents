@@ -1640,61 +1640,61 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                     </div>
                                   </div>
                                 ) : (
-                                  // Display mode
-                                  <div className="flex items-center justify-between">
-                                    <div className="flex-1">
-                                      <div className="flex items-center gap-2 text-sm">
-                                        <span className="font-medium text-gray-100">
-                                          {(() => {
-                                            try {
-                                              const date = new Date(hours.date);
-                                              return date.toLocaleDateString('en-US', { 
-                                                weekday: 'short', 
-                                                month: 'short', 
-                                                day: 'numeric' 
-                                              });
-                                            } catch {
-                                              return 'Invalid Date';
-                                            }
-                                          })()}
-                                        </span>
-                                        <span className="text-gray-400">•</span>
-                                        <span className="font-semibold text-blue-400">
-                                          {hours.hours}hr
-                                        </span>
-                                        {hours.description && (
-                                          <>
-                                            <span className="text-gray-400">•</span>
-                                            <span className="text-gray-400">
-                                              {hours.description}
-                                            </span>
-                                          </>
-                                        )}
+                                  // Display mode - cleaner layout with more space
+                                  <div className="space-y-3 pb-8 relative">
+                                    {/* Date - prominent display */}
+                                    <div className="text-lg font-semibold text-blue-300">
+                                      {(() => {
+                                        try {
+                                          const date = new Date(hours.date);
+                                          return date.toLocaleDateString('en-US', { 
+                                            weekday: 'long', 
+                                            year: 'numeric',
+                                            month: 'long', 
+                                            day: 'numeric' 
+                                          });
+                                        } catch {
+                                          return 'Invalid Date';
+                                        }
+                                      })()}
+                                    </div>
+                                    
+                                    {/* Job Description */}
+                                    <div className="text-gray-200 text-base">
+                                      {hours.description || 'Painting'}
+                                    </div>
+                                    
+                                    {/* Time and Money - side by side */}
+                                    <div className="flex justify-between items-center">
+                                      <div className="text-xl font-bold text-green-400">
+                                        {hours.hours} hours
+                                      </div>
+                                      <div className="text-xl font-bold text-green-300">
+                                        ${(hours.hours * 60).toFixed(0)}
                                       </div>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                      <span className="text-xs text-green-400 font-medium">
-                                        ${(hours.hours * 60).toFixed(0)}
-                                      </span>
+                                    
+                                    {/* Edit/Delete buttons - bottom right */}
+                                    <div className="absolute bottom-1 right-1 flex gap-1">
                                       <button
                                         onClick={() => {
                                           setEditingHours(hours.id);
-                                          setEditDate(typeof hours.date === 'string' ? String(hours.date).split('T')[0] : new Date(hours.date).toISOString().split('T')[0]); // Extract date part
+                                          setEditDate(typeof hours.date === 'string' ? String(hours.date).split('T')[0] : new Date(hours.date).toISOString().split('T')[0]);
                                           setEditHours(hours.hours.toString());
                                           setEditDescription(hours.description || '');
                                         }}
-                                        className="p-0.5 text-blue-400 hover:text-blue-300 transition-colors opacity-60 hover:opacity-100"
+                                        className="p-2 text-blue-400 hover:text-blue-300 transition-colors bg-gray-700/60 rounded-md hover:bg-gray-600/60"
                                         title="Edit"
                                       >
-                                        <Edit3 size={10} />
+                                        <Edit3 size={14} />
                                       </button>
                                       <button
                                         onClick={() => deleteHoursMutation.mutate(hours.id)}
                                         disabled={deleteHoursMutation.isPending}
-                                        className="p-0.5 text-red-400 hover:text-red-300 transition-colors opacity-60 hover:opacity-100"
+                                        className="p-2 text-red-400 hover:text-red-300 transition-colors bg-gray-700/60 rounded-md hover:bg-gray-600/60"
                                         title="Delete"
                                       >
-                                        <Trash2 size={10} />
+                                        <Trash2 size={14} />
                                       </button>
                                     </div>
                                   </div>
