@@ -1640,42 +1640,40 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                     </div>
                                   </div>
                                 ) : (
-                                  // Display mode - cleaner layout with more space
-                                  <div className="space-y-3 pb-8 relative">
-                                    {/* Date - prominent display */}
-                                    <div className="text-lg font-semibold text-blue-300">
-                                      {(() => {
-                                        try {
-                                          const date = new Date(hours.date);
-                                          return date.toLocaleDateString('en-US', { 
-                                            weekday: 'long', 
-                                            year: 'numeric',
-                                            month: 'long', 
-                                            day: 'numeric' 
-                                          });
-                                        } catch {
-                                          return 'Invalid Date';
-                                        }
-                                      })()}
-                                    </div>
-                                    
-                                    {/* Job Description */}
-                                    <div className="text-gray-200 text-base">
-                                      {hours.description || 'Painting'}
-                                    </div>
-                                    
-                                    {/* Time and Money - side by side */}
-                                    <div className="flex justify-between items-center">
-                                      <div className="text-xl font-bold text-green-400">
-                                        {hours.hours} hours
+                                  // Display mode - compact two-line layout
+                                  <div className="space-y-1">
+                                    {/* First line: Date - Description - Hours - Money */}
+                                    <div className="flex items-center justify-between text-sm">
+                                      <div className="flex items-center gap-2">
+                                        <span className="font-medium text-blue-300">
+                                          {(() => {
+                                            try {
+                                              const date = new Date(hours.date);
+                                              return date.toLocaleDateString('en-US', { 
+                                                month: 'long', 
+                                                day: 'numeric' 
+                                              });
+                                            } catch {
+                                              return 'Invalid Date';
+                                            }
+                                          })()}
+                                        </span>
+                                        <span className="text-gray-400">-</span>
+                                        <span className="text-gray-200">
+                                          {hours.description || 'painting'}
+                                        </span>
+                                        <span className="text-gray-400">-</span>
+                                        <span className="font-semibold text-green-400">
+                                          {hours.hours}hrs
+                                        </span>
                                       </div>
-                                      <div className="text-xl font-bold text-green-300">
+                                      <span className="font-bold text-green-300">
                                         ${(hours.hours * 60).toFixed(0)}
-                                      </div>
+                                      </span>
                                     </div>
                                     
-                                    {/* Edit/Delete buttons - bottom right */}
-                                    <div className="absolute bottom-1 right-1 flex gap-1">
+                                    {/* Second line: Edit/Delete buttons */}
+                                    <div className="flex justify-end gap-1 pt-1">
                                       <button
                                         onClick={() => {
                                           setEditingHours(hours.id);
@@ -1683,18 +1681,18 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                           setEditHours(hours.hours.toString());
                                           setEditDescription(hours.description || '');
                                         }}
-                                        className="p-2 text-blue-400 hover:text-blue-300 transition-colors bg-gray-700/60 rounded-md hover:bg-gray-600/60"
+                                        className="px-2 py-1 text-xs text-blue-400 hover:text-blue-300 transition-colors bg-gray-700/40 rounded hover:bg-gray-600/40"
                                         title="Edit"
                                       >
-                                        <Edit3 size={14} />
+                                        Edit
                                       </button>
                                       <button
                                         onClick={() => deleteHoursMutation.mutate(hours.id)}
                                         disabled={deleteHoursMutation.isPending}
-                                        className="p-2 text-red-400 hover:text-red-300 transition-colors bg-gray-700/60 rounded-md hover:bg-gray-600/60"
+                                        className="px-2 py-1 text-xs text-red-400 hover:text-red-300 transition-colors bg-gray-700/40 rounded hover:bg-gray-600/40"
                                         title="Delete"
                                       >
-                                        <Trash2 size={14} />
+                                        Delete
                                       </button>
                                     </div>
                                   </div>
