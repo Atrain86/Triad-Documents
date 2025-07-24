@@ -508,7 +508,7 @@ cortespainter@gmail.com
       // If Gmail OAuth is not connected, offer clipboard fallback
       if (error.message.includes('Gmail account not connected') || error.message.includes('redirect_uri_mismatch')) {
         const laborTotal = dailyHours.reduce((sum, hourEntry) => sum + (hourEntry.hours * (project.hourlyRate || 60)), 0);
-        const materialsTotal = receipts.reduce((sum, receipt) => sum + (receipt.amount || 0), 0);
+        const materialsTotal = receipts.reduce((sum, receipt) => sum + (Number(receipt.amount) || 0), 0);
         const subtotal = laborTotal + materialsTotal + invoiceData.suppliesCost;
         const gstAmount = (laborTotal + invoiceData.suppliesCost) * 0.05; // 5% GST
         const total = subtotal + gstAmount;
@@ -527,7 +527,7 @@ Services & Labor:
 ${dailyHours.map(entry => `• ${new Date(entry.date).toLocaleDateString()}: ${entry.hours}h × $${project.hourlyRate || 60}/hr = $${(entry.hours * (project.hourlyRate || 60)).toFixed(2)}${entry.description ? ` (${entry.description})` : ''}`).join('\n')}
 
 Materials from Receipts:
-${receipts.map(receipt => `• ${receipt.vendor}: $${receipt.amount?.toFixed(2) || '0.00'}`).join('\n')}
+${receipts.map(receipt => `• ${receipt.vendor}: $${(Number(receipt.amount) || 0).toFixed(2)}`).join('\n')}
 
 ${invoiceData.suppliesCost > 0 ? `Additional Supplies: $${invoiceData.suppliesCost.toFixed(2)}` : ''}
 
