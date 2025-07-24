@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Settings, DollarSign, Globe } from 'lucide-react';
+import { ArrowLeft, Settings, DollarSign, Globe, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AdminDashboard from '../admin/AdminDashboard';
 import TaxConfiguration from './TaxConfiguration';
+import GmailIntegration from './GmailIntegration';
 
 interface SettingsPageProps {
   onBack: () => void;
@@ -32,8 +33,12 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
         </div>
       </div>
 
-      <Tabs defaultValue="tax" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-8">
+      <Tabs defaultValue="gmail" className="w-full">
+        <TabsList className="grid w-full grid-cols-3 mb-8">
+          <TabsTrigger value="gmail" className="flex items-center gap-2">
+            <Mail className="h-4 w-4" />
+            Gmail Integration
+          </TabsTrigger>
           <TabsTrigger value="tax" className="flex items-center gap-2">
             <DollarSign className="h-4 w-4" />
             Tax Configuration
@@ -43,6 +48,10 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
             API Usage Analytics
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="gmail">
+          <GmailIntegration />
+        </TabsContent>
 
         <TabsContent value="tax">
           <Card>

@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import { Download, Mail, Plus, Trash2 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -19,6 +20,7 @@ interface EstimateGeneratorProps {
 
 export default function EstimateGenerator({ project, isOpen, onClose }: EstimateGeneratorProps) {
   const { toast } = useToast();
+  const { user } = useAuth();
   const printRef = useRef<HTMLDivElement>(null);
 
   // Load saved form data from localStorage
@@ -271,13 +273,61 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   
   const calculateTotal = () => calculateSubtotal() + calculateTaxes();
 
-  // Email sending functionality
-  const sendEmailMutation = useMutation({
+  // Gmail OAuth email sending functionality
+  const sendGmailMutation = useMutation({
     mutationFn: async (emailData: any) => {
-      const response = await fetch('/api/send-estimate-email', {
+      // Check if user has Gmail connected
+      const statusResponse = await fetch(`/api/gmail/status/${user?.id}`);
+      const statusData = await statusResponse.json();
+      
+      if (!statusData.connected) {
+        throw new Error('Gmail account not connected. Please connect your Gmail account in Settings first.');
+      }
+
+      const response = await fetch('/api/gmail/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(emailData)
+        body: JSON.stringify({
+          userId: user?.id,
+          to: emailData.recipientEmail,
+          subject: `Painting Estimate from A-Frame Painting - EST ${emailData.estimateNumber}`,
+          message: `Dear ${emailData.clientName},
+
+Please find attached your painting estimate from A-Frame Painting.
+
+Project: ${emailData.projectTitle}
+Estimate Total: $${emailData.totalAmount}
+
+This estimate is valid for 30 days. If you have any questions or would like to proceed with the project, please don't hesitate to contact us.
+
+Thank you for considering A-Frame Painting for your project.
+
+Best regards,
+A-Frame Painting Team
+cortespainter@gmail.com`,
+          htmlMessage: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #EA580C;">Painting Estimate from A-Frame Painting</h2>
+              <p>Dear ${emailData.clientName},</p>
+              <p>Please find attached your painting estimate from A-Frame Painting.</p>
+              <ul>
+                <li><strong>Project:</strong> ${emailData.projectTitle}</li>
+                <li><strong>Estimate Total:</strong> <span style="color: #059669; font-weight: bold;">$${emailData.totalAmount}</span></li>
+              </ul>
+              <p>This estimate is valid for 30 days. If you have any questions or would like to proceed with the project, please don't hesitate to contact us.</p>
+              <p>Thank you for considering A-Frame Painting for your project.</p>
+              <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ccc;">
+                <p style="margin: 0;"><strong>A-Frame Painting Team</strong></p>
+                <p style="margin: 0;">cortespainter@gmail.com</p>
+              </div>
+            </div>
+          `,
+          attachments: emailData.pdfData ? [{
+            filename: `Estimate-${emailData.estimateNumber}-${emailData.clientName.replace(/\s+/g, '')}.pdf`,
+            content: Buffer.from(emailData.pdfData.split(',')[1], 'base64'),
+            mimeType: 'application/pdf'
+          }] : []
+        })
       });
       
       if (!response.ok) {
@@ -290,7 +340,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     onSuccess: () => {
       toast({
         title: "Email sent successfully!",
-        description: "The estimate has been sent to your client.",
+        description: "The estimate has been sent from your Gmail account.",
       });
       // Auto-close dialog after 5 seconds
       setTimeout(() => {
@@ -669,7 +719,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
         pdfData: pdfData
       };
 
-      await sendEmailMutation.mutateAsync(emailData);
+      await sendGmailMutation.mutateAsync(emailData);
     } catch (error: any) {
       console.error('Email preparation failed:', error);
       toast({
@@ -1108,10 +1158,10 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                 <Button 
                   onClick={sendEstimateEmail} 
                   className="bg-[#569CD6] hover:bg-[#4a8bc2] min-w-[120px]"
-                  disabled={sendEmailMutation.isPending}
+                  disabled={sendGmailMutation.isPending}
                 >
                   <Mail className="w-4 h-4 mr-2" />
-                  {sendEmailMutation.isPending ? 'Sending...' : 'Send Email'}
+                  {sendGmailMutation.isPending ? 'Sending...' : 'Send Email'}
                 </Button>
               ) : (
                 <Button onClick={generatePDF} className="bg-[#6A9955] hover:bg-[#5a8245] min-w-[120px]">

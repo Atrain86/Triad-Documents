@@ -7,6 +7,7 @@ import { insertProjectSchema, insertPhotoSchema, insertReceiptSchema, insertDail
 import { sql, eq, desc } from "drizzle-orm";
 import { hashPassword, verifyPassword, generateToken, verifyToken } from "./auth";
 import { sendInvoiceEmailWithReceipts, sendEstimateEmail } from "./email";
+import { gmailAuthService } from "./gmailAuth";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -724,7 +725,129 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Gmail OAuth2 Routes
+  app.get('/api/gmail/auth/:userId', async (req, res) => {
+    try {
+      const { userId } = req.params;
+      
+      if (!userId) {
+        return res.status(400).json({ error: 'User ID is required' });
+      }
 
+      const authUrl = gmailAuthService.generateAuthUrl(userId);
+      res.json({ authUrl });
+    } catch (error) {
+      console.error('Error generating Gmail auth URL:', error);
+      res.status(500).json({ error: 'Failed to generate Gmail authentication URL' });
+    }
+  });
+
+  app.get('/api/gmail/callback', async (req, res) => {
+    try {
+      const { code, state: userId } = req.query;
+
+      if (!code || !userId) {
+        return res.status(400).send('❌ Missing authorization code or user ID');
+      }
+
+      const result = await gmailAuthService.handleCallback(code as string, userId as string);
+
+      if (result.success) {
+        res.send(`
+          <html>
+            <head><title>Gmail Connected</title></head>
+            <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+              <h2 style="color: #4CAF50;">✅ Gmail Connected Successfully!</h2>
+              <p>Your Gmail account <strong>${result.email}</strong> has been connected.</p>
+              <p>You can now close this window and return to the app.</p>
+              <script>
+                setTimeout(() => {
+                  window.close();
+                }, 3000);
+              </script>
+            </body>
+          </html>
+        `);
+      } else {
+        res.status(400).send(`
+          <html>
+            <head><title>Gmail Connection Failed</title></head>
+            <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+              <h2 style="color: #f44336;">❌ Gmail Connection Failed</h2>
+              <p>${result.error}</p>
+              <p>Please try again or contact support.</p>
+            </body>
+          </html>
+        `);
+      }
+    } catch (error) {
+      console.error('Gmail OAuth callback error:', error);
+      res.status(500).send('❌ Gmail authentication failed');
+    }
+  });
+
+  app.get('/api/gmail/status/:userId', async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const isConnected = await gmailAuthService.isGmailConnected(parseInt(userId));
+      
+      if (isConnected) {
+        const [user] = await db.select({ gmailAddress: users.gmailAddress })
+          .from(users)
+          .where(eq(users.id, parseInt(userId)));
+        
+        res.json({ connected: true, gmailAddress: user?.gmailAddress });
+      } else {
+        res.json({ connected: false });
+      }
+    } catch (error) {
+      console.error('Error checking Gmail status:', error);
+      res.status(500).json({ error: 'Failed to check Gmail connection status' });
+    }
+  });
+
+  app.post('/api/gmail/send', async (req, res) => {
+    try {
+      const { userId, to, subject, message, htmlMessage, attachments } = req.body;
+
+      if (!userId || !to || !subject || !message) {
+        return res.status(400).json({ error: 'Missing required fields' });
+      }
+
+      const result = await gmailAuthService.sendEmail(parseInt(userId), {
+        to,
+        subject,
+        message,
+        htmlMessage,
+        attachments
+      });
+
+      if (result.success) {
+        res.json({ success: true, messageId: result.messageId });
+      } else {
+        res.status(400).json({ error: result.error });
+      }
+    } catch (error) {
+      console.error('Error sending Gmail:', error);
+      res.status(500).json({ error: 'Failed to send email via Gmail' });
+    }
+  });
+
+  app.delete('/api/gmail/disconnect/:userId', async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const success = await gmailAuthService.disconnectGmail(parseInt(userId));
+      
+      if (success) {
+        res.json({ success: true });
+      } else {
+        res.status(500).json({ error: 'Failed to disconnect Gmail' });
+      }
+    } catch (error) {
+      console.error('Error disconnecting Gmail:', error);
+      res.status(500).json({ error: 'Failed to disconnect Gmail' });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;
