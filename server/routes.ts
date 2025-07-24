@@ -724,29 +724,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/admin/token-usage/historical', async (req, res) => {
-    try {
-      const { tokens, cost, description } = req.body;
-      
-      if (!tokens || !cost) {
-        return res.status(400).json({ error: 'Tokens and cost are required' });
-      }
 
-      await db.insert(tokenUsage).values({
-        userId: 1, // Admin user
-        operation: description || 'Historical entry',
-        tokensUsed: parseInt(tokens),
-        cost: parseFloat(cost),
-        model: 'historical',
-        success: 'true'
-      });
-
-      res.json({ success: true, message: 'Historical usage added successfully' });
-    } catch (error) {
-      console.error('Error adding historical token usage:', error);
-      res.status(500).json({ error: 'Failed to add historical usage' });
-    }
-  });
 
   const httpServer = createServer(app);
   return httpServer;
