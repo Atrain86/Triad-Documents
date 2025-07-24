@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import fs from 'fs';
+import { MailService } from '@sendgrid/mail';
 
 // Create reusable transporter object using Gmail
 const createTransporter = () => {
@@ -30,6 +31,49 @@ interface EmailOptions {
     content?: Buffer;
     path?: string;
   }>;
+}
+
+// SendGrid email function
+export async function sendEmailWithSendGrid(options: EmailOptions): Promise<boolean> {
+  try {
+    if (!process.env.SENDGRID_API_KEY) {
+      console.log('SendGrid API key not found, falling back to nodemailer');
+      return sendEmail(options);
+    }
+
+    const mailService = new MailService();
+    mailService.setApiKey(process.env.SENDGRID_API_KEY);
+
+    const sendGridOptions = {
+      to: options.to,
+      from: 'cortespainter@gmail.com', // Must be verified in SendGrid
+      subject: options.subject,
+      text: options.text,
+      html: options.html,
+      attachments: options.attachments?.map(att => ({
+        filename: att.filename,
+        content: att.content ? att.content.toString('base64') : undefined,
+        type: 'application/pdf',
+        disposition: 'attachment'
+      })) || []
+    };
+
+    console.log("Sending email via SendGrid:", {
+      to: sendGridOptions.to,
+      from: sendGridOptions.from,
+      subject: sendGridOptions.subject,
+      hasHtml: !!sendGridOptions.html,
+      hasAttachments: sendGridOptions.attachments.length > 0
+    });
+
+    await mailService.send(sendGridOptions);
+    console.log("SendGrid email sent successfully");
+    return true;
+  } catch (error) {
+    console.error("SendGrid email failed:", error);
+    console.log("Falling back to nodemailer");
+    return sendEmail(options);
+  }
 }
 
 export async function sendEmail(options: EmailOptions): Promise<boolean> {
@@ -243,7 +287,7 @@ cortespainter@gmail.com`;
     ...receiptAttachments
   ];
 
-  return sendEmail({
+  return sendEmailWithSendGrid({
     to: recipientEmail,
     subject,
     text,

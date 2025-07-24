@@ -456,8 +456,8 @@ cortespainter@gmail.com
       const statusData = await statusResponse.json();
       
       if (!statusData.connected) {
-        // Fall back to clipboard system instead of throwing error
-        return { fallbackToClipboard: true };
+        // Fall back to SendGrid email system instead of throwing error
+        return { useSendGrid: true };
       }
 
       const response = await fetch('/api/gmail/send', {
@@ -493,9 +493,9 @@ cortespainter@gmail.com
       return response.json();
     },
     onSuccess: (result: any) => {
-      if (result?.fallbackToClipboard) {
-        // Trigger clipboard fallback
-        performClipboardFallback();
+      if (result?.useSendGrid) {
+        // Trigger SendGrid email sending
+        sendViaSendGrid();
       } else {
         toast({
           title: "Email sent successfully!",
@@ -633,6 +633,84 @@ cortespainter@gmail.com
       toast({
         title: "Gmail Setup Needed", 
         description: "Connect Gmail in Settings for direct sending. Email content shown in popup.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // SendGrid email sending function
+  const sendViaSendGrid = async () => {
+    if (!invoiceData.clientEmail) {
+      toast({
+        title: "No Email Address",
+        description: "Please add client email to send invoice",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Show preparing message
+      toast({
+        title: "Sending Email",
+        description: "Preparing invoice email...",
+      });
+
+      // Generate PDF for attachment
+      const pdfBlob = await generatePDFBlob();
+      let pdfBase64 = '';
+      
+      if (pdfBlob) {
+        const arrayBuffer = await pdfBlob.arrayBuffer();
+        const bytes = new Uint8Array(arrayBuffer);
+        pdfBase64 = btoa(String.fromCharCode(...bytes));
+      }
+
+      // Prepare email data
+      const laborTotal = dailyHours.reduce((sum, hourEntry) => sum + (hourEntry.hours * (project.hourlyRate || 60)), 0);
+      const materialsTotal = receipts.reduce((sum, receipt) => sum + (Number(receipt.amount) || 0), 0);
+      const subtotal = laborTotal + materialsTotal + invoiceData.suppliesCost;
+      const gstAmount = (laborTotal + invoiceData.suppliesCost) * 0.05;
+      const total = subtotal + gstAmount;
+
+      // Prepare data for existing invoice email API
+      const emailData = {
+        recipientEmail: invoiceData.clientEmail,
+        clientName: invoiceData.clientName || 'Valued Client',
+        invoiceNumber: invoiceData.invoiceNumber,
+        pdfData: pdfBase64,
+        receiptFilenames: [], // No separate receipt files - they're in the PDF
+        customMessage: emailMessage || 'Payment is due within 30 days. Thank you for your business!'
+      };
+
+      // Send via existing route
+      const response = await fetch('/api/send-invoice-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(emailData)
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to send email');
+      }
+
+      toast({
+        title: "Email Sent Successfully!",
+        description: `Invoice sent to ${invoiceData.clientEmail}`,
+      });
+
+      // Auto-close dialog after 3 seconds
+      setTimeout(() => {
+        setShowEmailDialog(false);
+        onClose();
+      }, 3000);
+
+    } catch (error: any) {
+      console.error('SendGrid email failed:', error);
+      toast({
+        title: "Email Failed",
+        description: error.message || "Failed to send invoice email. Please try again.",
         variant: "destructive",
       });
     }
