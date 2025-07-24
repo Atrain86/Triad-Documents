@@ -324,7 +324,7 @@ cortespainter@gmail.com`,
           `,
           attachments: emailData.pdfData ? [{
             filename: `Estimate-${emailData.estimateNumber}-${emailData.clientName.replace(/\s+/g, '')}.pdf`,
-            content: Buffer.from(emailData.pdfData.split(',')[1], 'base64'),
+            content: emailData.pdfData.split(',')[1],
             mimeType: 'application/pdf'
           }] : []
         })

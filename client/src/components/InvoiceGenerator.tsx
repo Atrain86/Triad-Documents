@@ -602,7 +602,7 @@ cortespainter@gmail.com
           // Prepare attachments array
           const attachments = [{
             filename: pdfFilename,
-            content: Buffer.from(pdfBase64, 'base64'),
+            content: pdfBase64,
             mimeType: 'application/pdf'
           }];
 

@@ -350,7 +350,7 @@ Logo: Custom A-frame house structure with paint brush accent
 - **Enhanced user experience**: Settings structure prepared for theme options and additional user preferences expansion
 - **System stability**: All core functionality operational with server running on port 5000, centralized settings working perfectly
 
-### July 24, 2025 - Gmail OAuth2 Integration Implementation
+### July 24, 2025 - Gmail OAuth2 Integration Implementation & Buffer Fix
 - **Implemented complete Gmail OAuth2 system**: Added comprehensive Gmail authentication using OAuth2 instead of app passwords for enhanced security and user control
 - **Database schema updates**: Successfully added gmail_email, gmail_refresh_token, gmail_connected_at fields to users table via Railway PostgreSQL
 - **Server-side OAuth handling**: Created complete Gmail OAuth service with authentication, callback handling, token refresh, and email sending capabilities
@@ -359,3 +359,5 @@ Logo: Custom A-frame house structure with paint brush accent
 - **Multi-user email support**: Each user now connects their own Gmail account to send emails from their personal account rather than shared system account
 - **Graceful error handling**: System handles missing OAuth credentials gracefully, allowing app to start and showing setup instructions when needed
 - **Enhanced user experience**: Users can now send professional estimates and invoices directly from their personal Gmail accounts with proper PDF attachments
+- **Fixed Buffer error in email attachments**: Resolved browser compatibility issue where Node.js Buffer was being used in frontend code, replaced with base64 string handling
+- **Implemented comprehensive clipboard fallback**: Added automatic email content copying to clipboard when Gmail OAuth is not connected, with detailed estimate/invoice information

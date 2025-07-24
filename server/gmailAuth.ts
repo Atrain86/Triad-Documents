@@ -114,7 +114,7 @@ export class GmailAuthService {
     subject: string;
     message: string;
     htmlMessage?: string;
-    attachments?: Array<{ filename: string; content: Buffer; mimeType: string }>;
+    attachments?: Array<{ filename: string; content: string; mimeType: string }>;
   }): Promise<{ success: boolean; messageId?: string; error?: string }> {
     if (!this.isConfigured) {
       return { success: false, error: 'Gmail OAuth2 not configured' };
@@ -144,7 +144,7 @@ export class GmailAuthService {
           emailContent += `Content-Type: ${attachment.mimeType}\r\n`;
           emailContent += `Content-Disposition: attachment; filename="${attachment.filename}"\r\n`;
           emailContent += `Content-Transfer-Encoding: base64\r\n\r\n`;
-          emailContent += attachment.content.toString('base64') + '\r\n\r\n';
+          emailContent += attachment.content + '\r\n\r\n';
         }
         
         emailContent += `--${boundary}--`;
