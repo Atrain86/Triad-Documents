@@ -46,7 +46,11 @@ export async function sendEmailWithSendGrid(options: EmailOptions): Promise<bool
 
     const sendGridOptions = {
       to: options.to,
-      from: 'cortespainter@gmail.com', // Must be verified in SendGrid
+      from: {
+        email: 'cortespainter@gmail.com',
+        name: 'A-Frame Painting'
+      },
+      reply_to: 'cortespainter@gmail.com',
       subject: options.subject,
       text: options.text,
       html: options.html,
