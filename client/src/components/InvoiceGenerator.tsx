@@ -456,7 +456,8 @@ cortespainter@gmail.com
       const statusData = await statusResponse.json();
       
       if (!statusData.connected) {
-        throw new Error('Gmail account not connected. Please connect your Gmail account in Settings first.');
+        // Fall back to clipboard system instead of throwing error
+        return { fallbackToClipboard: true };
       }
 
       const response = await fetch('/api/gmail/send', {
@@ -491,16 +492,21 @@ cortespainter@gmail.com
       
       return response.json();
     },
-    onSuccess: () => {
-      toast({
-        title: "Email sent successfully!",
-        description: "The invoice has been sent from your Gmail account.",
-      });
-      // Auto-close dialog after 2 seconds
-      setTimeout(() => {
-        setShowEmailDialog(false);
-        onClose();
-      }, 2000);
+    onSuccess: (result: any) => {
+      if (result?.fallbackToClipboard) {
+        // Trigger clipboard fallback
+        performClipboardFallback();
+      } else {
+        toast({
+          title: "Email sent successfully!",
+          description: "The invoice has been sent from your Gmail account.",
+        });
+        // Auto-close dialog after 2 seconds
+        setTimeout(() => {
+          setShowEmailDialog(false);
+          onClose();
+        }, 2000);
+      }
     },
     onError: async (error: Error) => {
       console.log('Gmail error:', error.message);
@@ -569,6 +575,68 @@ cortespainter@gmail.com
       }
     }
   });
+
+  // Clipboard fallback function
+  const performClipboardFallback = async () => {
+    const laborTotal = dailyHours.reduce((sum, hourEntry) => sum + (hourEntry.hours * (project.hourlyRate || 60)), 0);
+    const materialsTotal = receipts.reduce((sum, receipt) => sum + (Number(receipt.amount) || 0), 0);
+    const subtotal = laborTotal + materialsTotal + invoiceData.suppliesCost;
+    const gstAmount = (laborTotal + invoiceData.suppliesCost) * 0.05; // 5% GST
+    const total = subtotal + gstAmount;
+
+    const emailContent = `To: ${invoiceData.clientEmail || 'client@email.com'}
+Subject: Invoice #${invoiceData.invoiceNumber} - A-Frame Painting
+
+Dear ${invoiceData.clientName || 'Valued Client'},
+
+Please find your invoice details below:
+
+INVOICE #${invoiceData.invoiceNumber}
+Date: ${new Date().toISOString().split('T')[0]}
+
+Services & Labor:
+${dailyHours.map(entry => `• ${new Date(entry.date).toLocaleDateString()}: ${entry.hours}h × $${project.hourlyRate || 60}/hr = $${(entry.hours * (project.hourlyRate || 60)).toFixed(2)}${entry.description ? ` (${entry.description})` : ''}`).join('\n')}
+
+Materials from Receipts:
+${receipts.map(receipt => `• ${receipt.vendor}: $${(Number(receipt.amount) || 0).toFixed(2)}`).join('\n')}
+
+${invoiceData.suppliesCost > 0 ? `Additional Supplies: $${invoiceData.suppliesCost.toFixed(2)}` : ''}
+
+Subtotal: $${subtotal.toFixed(2)}
+GST (5%): $${gstAmount.toFixed(2)}
+TOTAL: $${total.toFixed(2)}
+
+${emailMessage || 'Payment is due within 30 days. Thank you for your business!'}
+
+Best regards,
+A-Frame Painting
+cortespainter@gmail.com
+884 Hayes Rd, Manson's Landing, BC V0P1K0`;
+
+    try {
+      await navigator.clipboard.writeText(emailContent);
+      toast({
+        title: "Email Ready!",
+        description: "Complete invoice email copied to clipboard. Open Gmail and paste!",
+        duration: 8000,
+      });
+      
+      // Auto-close dialog after 3 seconds
+      setTimeout(() => {
+        setShowEmailDialog(false);
+        onClose();
+      }, 3000);
+      
+    } catch (clipboardError) {
+      console.error('Clipboard error:', clipboardError);
+      alert('Gmail not connected. Here is the invoice email content:\n\n' + emailContent);
+      toast({
+        title: "Gmail Setup Needed", 
+        description: "Connect Gmail in Settings for direct sending. Email content shown in popup.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const sendInvoice = async () => {
     if (!invoiceData.clientEmail) {

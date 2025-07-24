@@ -281,7 +281,8 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       const statusData = await statusResponse.json();
       
       if (!statusData.connected) {
-        throw new Error('Gmail account not connected. Please connect your Gmail account in Settings first.');
+        // Fall back to clipboard system instead of throwing error
+        return { fallbackToClipboard: true };
       }
 
       const response = await fetch('/api/gmail/send', {
@@ -337,15 +338,20 @@ cortespainter@gmail.com`,
       
       return response.json();
     },
-    onSuccess: () => {
-      toast({
-        title: "Email sent successfully!",
-        description: "The estimate has been sent from your Gmail account.",
-      });
-      // Auto-close dialog after 5 seconds
-      setTimeout(() => {
-        onClose();
-      }, 5000);
+    onSuccess: (result: any) => {
+      if (result?.fallbackToClipboard) {
+        // Trigger clipboard fallback
+        performEstimateClipboardFallback();
+      } else {
+        toast({
+          title: "Email sent successfully!",
+          description: "The estimate has been sent from your Gmail account.",
+        });
+        // Auto-close dialog after 5 seconds
+        setTimeout(() => {
+          onClose();
+        }, 5000);
+      }
     },
     onError: async (error: Error) => {
       console.log('Gmail error:', error.message);
@@ -409,6 +415,62 @@ cortespainter@gmail.com`;
       }
     }
   });
+
+  // Clipboard fallback function for estimates
+  const performEstimateClipboardFallback = async () => {
+    const emailContent = `To: ${project.clientEmail || 'client@email.com'}
+Subject: Painting Estimate from A-Frame Painting - EST ${estimateNumber || '001'}
+
+Dear ${project.clientName || 'Valued Client'},
+
+Please find your painting estimate details below:
+
+Project: ${projectTitle || project.projectType}
+Total Estimate: $${grandTotal.toFixed(2)}
+
+Services & Labor:
+${workStages.map(stage => `• ${stage.name}: ${stage.hours}h × $${stage.rate}/hr = $${(stage.hours * stage.rate).toFixed(2)}`).join('\n')}
+
+${additionalLabor.length > 0 ? `Additional Labor:
+${additionalLabor.map(labor => `• ${labor.name}: ${labor.hours}h × $${labor.rate}/hr = $${(labor.hours * labor.rate).toFixed(2)}`).join('\n')}` : ''}
+
+${paintCosts.total > 0 ? `Paint & Materials: $${paintCosts.total.toFixed(2)}` : ''}
+${supplyCosts.total > 0 ? `Supplies: $${supplyCosts.total.toFixed(2)}` : ''}
+${travelCosts.total > 0 ? `Travel: $${travelCosts.total.toFixed(2)}` : ''}
+
+Subtotal: $${subtotal.toFixed(2)}
+${taxConfig.enabled ? `${taxConfig.country === 'canada' ? 'GST' : 'Tax'} (${taxConfig.rate}%): $${(subtotal * taxConfig.rate / 100).toFixed(2)}` : ''}
+TOTAL: $${grandTotal.toFixed(2)}
+
+This estimate is valid for 30 days. Please contact us with any questions.
+
+Best regards,
+A-Frame Painting Team
+cortespainter@gmail.com`;
+
+    try {
+      await navigator.clipboard.writeText(emailContent);
+      toast({
+        title: "Email Ready!",
+        description: "Complete estimate email copied to clipboard. Open Gmail and paste!",
+        duration: 8000,
+      });
+      
+      // Auto-close dialog after 3 seconds
+      setTimeout(() => {
+        onClose();
+      }, 3000);
+      
+    } catch (clipboardError) {
+      console.error('Clipboard error:', clipboardError);
+      alert('Gmail not connected. Here is the estimate email content:\n\n' + emailContent);
+      toast({
+        title: "Gmail Setup Needed", 
+        description: "Connect Gmail in Settings for direct sending. Email content shown in popup.",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Generate PDF using your HTML template
   const generatePDF = async () => {
