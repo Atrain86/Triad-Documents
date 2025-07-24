@@ -68,8 +68,9 @@ export class GmailAuthService {
       // Save or update user's Gmail credentials in database
       await db.update(users)
         .set({ 
-          gmailAddress,
-          gmailRefreshToken: tokens.refresh_token 
+          gmailEmail: gmailAddress,
+          gmailRefreshToken: tokens.refresh_token,
+          gmailConnectedAt: new Date()
         })
         .where(eq(users.id, parseInt(userId)));
 
@@ -196,8 +197,9 @@ export class GmailAuthService {
     try {
       await db.update(users)
         .set({ 
-          gmailAddress: null,
-          gmailRefreshToken: null 
+          gmailEmail: null,
+          gmailRefreshToken: null,
+          gmailConnectedAt: null
         })
         .where(eq(users.id, userId));
       

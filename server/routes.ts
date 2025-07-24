@@ -792,11 +792,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const isConnected = await gmailAuthService.isGmailConnected(parseInt(userId));
       
       if (isConnected) {
-        const [user] = await db.select({ gmailAddress: users.gmailAddress })
+        const [user] = await db.select({ gmailEmail: users.gmailEmail })
           .from(users)
           .where(eq(users.id, parseInt(userId)));
         
-        res.json({ connected: true, gmailAddress: user?.gmailAddress });
+        res.json({ connected: true, gmailAddress: user?.gmailEmail });
       } else {
         res.json({ connected: false });
       }

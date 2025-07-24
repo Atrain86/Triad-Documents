@@ -10,8 +10,9 @@ export const users = pgTable("users", {
   lastName: text("last_name").notNull(),
   role: text("role").notNull().default("client"), // admin or client
   isActive: text("is_active").default("true"), // keeping as text for compatibility
-  gmailAddress: text("gmail_address"),
+  gmailEmail: text("gmail_email"),
   gmailRefreshToken: text("gmail_refresh_token"),
+  gmailConnectedAt: timestamp("gmail_connected_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   lastLoginAt: timestamp("last_login_at"),
 });
