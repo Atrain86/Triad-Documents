@@ -384,15 +384,19 @@ cortespainter@gmail.com`;
 
         try {
           await navigator.clipboard.writeText(emailContent);
+          console.log('Estimate content copied to clipboard successfully');
           toast({
             title: "Gmail Setup Required",
-            description: "Email content copied to clipboard. Connect Gmail in Settings for direct sending, or paste this into your email app.",
+            description: "Estimate content copied to clipboard. Connect Gmail in Settings for direct sending, or paste this into your email app.",
             duration: 8000,
           });
         } catch (clipboardError) {
+          console.error('Clipboard error:', clipboardError);
+          // Fallback: show the content in an alert
+          alert('Gmail not connected. Here is the estimate email content:\n\n' + emailContent);
           toast({
             title: "Gmail Connection Required",
-            description: "Please connect your Gmail account in Settings to send estimates directly.",
+            description: "Please connect your Gmail account in Settings to send estimates directly. Email content shown in popup.",
             variant: "destructive",
           });
         }
