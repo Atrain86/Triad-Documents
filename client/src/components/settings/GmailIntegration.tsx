@@ -28,9 +28,9 @@ export default function GmailIntegration() {
     } catch (error) {
       console.error('Error checking Gmail status:', error);
       toast({
-        title: "Error",
-        description: "Failed to check Gmail connection status",
-        variant: "destructive",
+        title: "Gmail Setup Needed",
+        description: "Gmail OAuth requires test user approval in Google Cloud Console. Using clipboard backup for now.",
+        variant: "default",
       });
     } finally {
       setIsLoading(false);
