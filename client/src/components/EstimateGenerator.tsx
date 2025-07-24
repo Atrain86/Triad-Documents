@@ -347,12 +347,62 @@ cortespainter@gmail.com`,
         onClose();
       }, 5000);
     },
-    onError: (error: Error) => {
-      toast({
-        title: "Email failed",
-        description: error.message || "Failed to send estimate email. Please try again.",
-        variant: "destructive",
-      });
+    onError: async (error: Error) => {
+      console.log('Gmail error:', error.message);
+      
+      // If Gmail OAuth is not connected, offer clipboard fallback
+      if (error.message.includes('Gmail account not connected') || error.message.includes('redirect_uri_mismatch')) {
+        const emailContent = `To: ${project.clientEmail || 'client@email.com'}
+Subject: Painting Estimate from A-Frame Painting - EST ${estimateNumber || '001'}
+
+Dear ${project.clientName || 'Valued Client'},
+
+Please find your painting estimate details below:
+
+Project: ${projectTitle || project.projectType}
+Total Estimate: $${grandTotal.toFixed(2)}
+
+Services & Labor:
+${workStages.map(stage => `• ${stage.name}: ${stage.hours}h × $${stage.rate}/hr = $${(stage.hours * stage.rate).toFixed(2)}`).join('\n')}
+
+${additionalLabor.length > 0 ? `Additional Labor:
+${additionalLabor.map(labor => `• ${labor.name}: ${labor.hours}h × $${labor.rate}/hr = $${(labor.hours * labor.rate).toFixed(2)}`).join('\n')}` : ''}
+
+${paintCosts.total > 0 ? `Paint & Materials: $${paintCosts.total.toFixed(2)}` : ''}
+${supplyCosts.total > 0 ? `Supplies: $${supplyCosts.total.toFixed(2)}` : ''}
+${travelCosts.total > 0 ? `Travel: $${travelCosts.total.toFixed(2)}` : ''}
+
+Subtotal: $${subtotal.toFixed(2)}
+${taxConfig.enabled ? `${taxConfig.country === 'canada' ? 'GST' : 'Tax'} (${taxConfig.rate}%): $${(subtotal * taxConfig.rate / 100).toFixed(2)}` : ''}
+TOTAL: $${grandTotal.toFixed(2)}
+
+This estimate is valid for 30 days. Please contact us with any questions.
+
+Best regards,
+A-Frame Painting Team
+cortespainter@gmail.com`;
+
+        try {
+          await navigator.clipboard.writeText(emailContent);
+          toast({
+            title: "Gmail Setup Required",
+            description: "Email content copied to clipboard. Connect Gmail in Settings for direct sending, or paste this into your email app.",
+            duration: 8000,
+          });
+        } catch (clipboardError) {
+          toast({
+            title: "Gmail Connection Required",
+            description: "Please connect your Gmail account in Settings to send estimates directly.",
+            variant: "destructive",
+          });
+        }
+      } else {
+        toast({
+          title: "Email failed",
+          description: error.message || "Failed to send estimate email. Please try again.",
+          variant: "destructive",
+        });
+      }
     }
   });
 

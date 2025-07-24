@@ -502,12 +502,67 @@ cortespainter@gmail.com
         onClose();
       }, 2000);
     },
-    onError: (error: Error) => {
-      toast({
-        title: "Email failed",
-        description: error.message || "Failed to send invoice email. Please try again.",
-        variant: "destructive",
-      });
+    onError: async (error: Error) => {
+      console.log('Gmail error:', error.message);
+      
+      // If Gmail OAuth is not connected, offer clipboard fallback
+      if (error.message.includes('Gmail account not connected') || error.message.includes('redirect_uri_mismatch')) {
+        const laborTotal = dailyHours.reduce((sum, hourEntry) => sum + (hourEntry.hours * (project.hourlyRate || 60)), 0);
+        const materialsTotal = receipts.reduce((sum, receipt) => sum + (receipt.amount || 0), 0);
+        const subtotal = laborTotal + materialsTotal + invoiceData.suppliesCost;
+        const gstAmount = (laborTotal + invoiceData.suppliesCost) * 0.05; // 5% GST
+        const total = subtotal + gstAmount;
+
+        const emailContent = `To: ${invoiceData.clientEmail || 'client@email.com'}
+Subject: Invoice #${invoiceData.invoiceNumber} - A-Frame Painting
+
+Dear ${invoiceData.clientName || 'Valued Client'},
+
+Please find your invoice details below:
+
+INVOICE #${invoiceData.invoiceNumber}
+Date: ${new Date().toISOString().split('T')[0]}
+
+Services & Labor:
+${dailyHours.map(entry => `• ${new Date(entry.date).toLocaleDateString()}: ${entry.hours}h × $${project.hourlyRate || 60}/hr = $${(entry.hours * (project.hourlyRate || 60)).toFixed(2)}${entry.description ? ` (${entry.description})` : ''}`).join('\n')}
+
+Materials from Receipts:
+${receipts.map(receipt => `• ${receipt.vendor}: $${receipt.amount?.toFixed(2) || '0.00'}`).join('\n')}
+
+${invoiceData.suppliesCost > 0 ? `Additional Supplies: $${invoiceData.suppliesCost.toFixed(2)}` : ''}
+
+Subtotal: $${subtotal.toFixed(2)}
+GST (5%): $${gstAmount.toFixed(2)}
+TOTAL: $${total.toFixed(2)}
+
+${invoiceData.paymentNotes || 'Payment is due within 30 days. Thank you for your business!'}
+
+Best regards,
+A-Frame Painting
+cortespainter@gmail.com
+884 Hayes Rd, Manson's Landing, BC V0P1K0`;
+
+        try {
+          await navigator.clipboard.writeText(emailContent);
+          toast({
+            title: "Gmail Setup Required",
+            description: "Invoice content copied to clipboard. Connect Gmail in Settings for direct sending, or paste this into your email app.",
+            duration: 8000,
+          });
+        } catch (clipboardError) {
+          toast({
+            title: "Gmail Connection Required",
+            description: "Please connect your Gmail account in Settings to send invoices directly.",
+            variant: "destructive",
+          });
+        }
+      } else {
+        toast({
+          title: "Email failed",
+          description: error.message || "Failed to send invoice email. Please try again.",
+          variant: "destructive",
+        });
+      }
     }
   });
 
