@@ -4,13 +4,13 @@ import { ThemeProvider } from "./components/theme-provider";
 import { queryClient } from "./lib/queryClient";
 import StreamlinedHomepage from "./components/StreamlinedHomepage";
 import StreamlinedClientPage from "./components/StreamlinedClientPage";
-import AdminDashboard from "./components/admin/AdminDashboard";
+import SettingsPage from "./components/settings/SettingsPage";
 import LoginForm from "./components/auth/LoginForm";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { Toaster } from "@/components/ui/toaster";
 import "./index.css";
 
-type View = "home" | "client" | "admin";
+type View = "home" | "client" | "settings";
 
 function AppContent() {
   const { user, isLoading } = useAuth();
@@ -27,8 +27,8 @@ function AppContent() {
     setSelectedProjectId(null);
   };
 
-  const handleAccessAdmin = () => {
-    setCurrentView("admin");
+  const handleAccessSettings = () => {
+    setCurrentView("settings");
   };
 
   if (isLoading) {
@@ -52,7 +52,7 @@ function AppContent() {
         {currentView === "home" && (
           <StreamlinedHomepage 
             onSelectProject={handleSelectProject}
-            onAccessAdmin={user?.role === 'admin' ? handleAccessAdmin : undefined}
+            onAccessSettings={user?.role === 'admin' ? handleAccessSettings : undefined}
           />
         )}
 
@@ -63,8 +63,8 @@ function AppContent() {
           />
         )}
 
-        {currentView === "admin" && (
-          <AdminDashboard onBack={handleBackToHome} />
+        {currentView === "settings" && (
+          <SettingsPage onBack={handleBackToHome} />
         )}
       </main>
       <Toaster />

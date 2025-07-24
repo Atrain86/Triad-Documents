@@ -166,9 +166,20 @@ cortespainter@gmail.com
   };
 
   const calculateGST = () => {
+    // Get global tax configuration
+    const getGlobalTaxConfig = () => {
+      try {
+        const saved = localStorage.getItem('taxConfiguration');
+        return saved ? JSON.parse(saved) : { country: 'CA', gst: 5, pst: 0 };
+      } catch {
+        return { country: 'CA', gst: 5, pst: 0 };
+      }
+    };
+    
+    const taxConfig = getGlobalTaxConfig();
     // Only apply GST to labor and supplies, not to materials (receipts already include taxes)
     const laborTotal = dailyHours.reduce((sum, hourEntry) => sum + (hourEntry.hours * (project.hourlyRate || 60)), 0);
-    return (laborTotal + invoiceData.suppliesCost) * invoiceData.gstRate;
+    return (laborTotal + invoiceData.suppliesCost) * ((taxConfig.gst || 5) / 100);
   };
 
   const calculateTotal = () => {

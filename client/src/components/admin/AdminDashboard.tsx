@@ -25,7 +25,7 @@ interface TokenUsageEntry {
   createdAt: string;
 }
 
-const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
+const AdminDashboard: React.FC<{ onBack: () => void; hideBackButton?: boolean }> = ({ onBack, hideBackButton = false }) => {
 
   // Fetch overall token usage statistics
   const { data: totalStats, isLoading: totalStatsLoading } = useQuery<TokenUsageStats>({
@@ -68,15 +68,17 @@ const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     <div className="p-6">
       <div className="flex justify-between items-center mb-8">
         <div className="flex items-center gap-4">
-          <Button
-            onClick={onBack}
-            variant="ghost"
-            size="sm"
-            className="text-gray-400 hover:text-white"
-          >
-            <ArrowLeft size={20} />
-          </Button>
-          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+          {!hideBackButton && (
+            <Button
+              onClick={onBack}
+              variant="ghost"
+              size="sm"
+              className="text-gray-400 hover:text-white"
+            >
+              <ArrowLeft size={20} />
+            </Button>
+          )}
+          <h1 className="text-3xl font-bold">API Usage Analytics</h1>
         </div>
 
       </div>

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Search, User, MapPin, Edit3, Archive, RotateCcw, Trash2, Mail, LogOut } from 'lucide-react';
+import { Search, User, MapPin, Edit3, Archive, RotateCcw, Trash2, Mail, LogOut, Settings } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import ClientPhone from './ClientPhone';
 import DarkModeCalendar from './DarkModeCalendar';
+import TaxSetupModal from './settings/TaxSetupModal';
 
 // Paint Brain Color Palette
 const paintBrainColors = {
@@ -38,10 +39,10 @@ const statusConfig = {
 
 export default function StreamlinedHomepage({ 
   onSelectProject, 
-  onAccessAdmin 
+  onAccessSettings 
 }: { 
   onSelectProject: (projectId: number) => void;
-  onAccessAdmin?: () => void;
+  onAccessSettings?: () => void;
 }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [showArchived, setShowArchived] = useState(false);
@@ -49,6 +50,7 @@ export default function StreamlinedHomepage({
   const [showEmailDialog, setShowEmailDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
+  const [showTaxSetup, setShowTaxSetup] = useState(false);
   const [selectedProject, setSelectedProject] = useState<any>(null);
   const [editingProject, setEditingProject] = useState<any>(null);
   const [emailForm, setEmailForm] = useState({
@@ -59,6 +61,14 @@ export default function StreamlinedHomepage({
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { logout } = useAuth();
+
+  // Check for first login and show tax setup modal
+  useEffect(() => {
+    const taxSetupCompleted = localStorage.getItem('taxSetupCompleted');
+    if (!taxSetupCompleted) {
+      setShowTaxSetup(true);
+    }
+  }, []);
 
   const { data: projects = [], isLoading } = useQuery({
     queryKey: ['/api/projects'],
@@ -252,22 +262,35 @@ export default function StreamlinedHomepage({
             alt="A-Frame Painting" 
             className="h-32 w-auto object-contain"
           />
-          <Button
-            onClick={() => {
-              // Complete authentication reset
-              localStorage.clear();
-              sessionStorage.clear();
-              logout();
-              // Force hard reload to clear all cached state
-              window.location.href = window.location.origin;
-            }}
-            variant="ghost"
-            size="sm"
-            className="text-gray-400 hover:text-white"
-            title="Logout"
-          >
-            <LogOut size={18} />
-          </Button>
+          <div className="flex items-center gap-2">
+            {onAccessSettings && (
+              <Button
+                onClick={onAccessSettings}
+                variant="ghost"
+                size="sm"
+                className="text-gray-400 hover:text-white"
+                title="Settings"
+              >
+                <Settings size={18} />
+              </Button>
+            )}
+            <Button
+              onClick={() => {
+                // Complete authentication reset
+                localStorage.clear();
+                sessionStorage.clear();
+                logout();
+                // Force hard reload to clear all cached state
+                window.location.href = window.location.origin;
+              }}
+              variant="ghost"
+              size="sm"
+              className="text-gray-400 hover:text-white"
+              title="Logout"
+            >
+              <LogOut size={18} />
+            </Button>
+          </div>
         </div>
 
         <div 
@@ -292,16 +315,7 @@ export default function StreamlinedHomepage({
             Schedule
           </Button>
 
-          {onAccessAdmin && (
-            <Button
-              onClick={onAccessAdmin}
-              style={{ backgroundColor: paintBrainColors.purple, color: 'white' }}
-              className="px-4 py-2 text-sm font-semibold hover:opacity-90"
-              title="OpenAI API Usage Dashboard"
-            >
-              Admin
-            </Button>
-          )}
+
         </div>
 
         <div className="flex justify-center mb-6">
@@ -476,6 +490,12 @@ export default function StreamlinedHomepage({
         <DarkModeCalendar
           isOpen={showCalendar}
           onClose={() => setShowCalendar(false)}
+        />
+
+        {/* Tax Setup Modal */}
+        <TaxSetupModal
+          isOpen={showTaxSetup}
+          onClose={() => setShowTaxSetup(false)}
         />
       </div>
     </div>

@@ -83,16 +83,31 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     { name: '', hours: '', rate: '' }
   ]);
 
-  // Tax configuration state with localStorage persistence
-  const [taxConfig, setTaxConfig] = useState(savedData.taxConfig || {
-    country: 'CA',
-    gst: 5,
-    pst: 0,
-    hst: 0,
-    salesTax: 0,
-    vat: 0,
-    otherTax: 0
-  });
+  // Load global tax configuration from localStorage
+  const getGlobalTaxConfig = () => {
+    try {
+      const saved = localStorage.getItem('taxConfiguration');
+      return saved ? JSON.parse(saved) : {
+        country: 'CA',
+        gst: 5,
+        pst: 0,
+        hst: 0,
+        salesTax: 0,
+        vat: 0,
+        otherTax: 0
+      };
+    } catch {
+      return {
+        country: 'CA',
+        gst: 5,
+        pst: 0,
+        hst: 0,
+        salesTax: 0,
+        vat: 0,
+        otherTax: 0
+      };
+    }
+  };
 
   // Toggle state for action buttons
   const [actionMode, setActionMode] = useState<'download' | 'email'>('email');
@@ -107,11 +122,10 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       paintCosts,
       supplies,
       travelCosts,
-      additionalLabor,
-      taxConfig
+      additionalLabor
     };
     localStorage.setItem('estimateFormData', JSON.stringify(formData));
-  }, [estimateNumber, projectTitle, workStages, primerCosts, paintCosts, supplies, travelCosts, additionalLabor, taxConfig]);
+  }, [estimateNumber, projectTitle, workStages, primerCosts, paintCosts, supplies, travelCosts, additionalLabor]);
 
   // Clear all saved form data
   const clearFormData = () => {
@@ -132,7 +146,6 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     ]);
     setTravelCosts({ ratePerKm: '0.50', distance: '', trips: '2' });
     setAdditionalLabor([{ name: '', hours: '', rate: '' }]);
-    setTaxConfig({ country: 'CA', gst: 5, pst: 0, hst: 0, salesTax: 0, vat: 0, otherTax: 0 });
     toast({
       title: "Form Cleared",
       description: "All estimate data has been reset.",
@@ -240,6 +253,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   
   const calculateTaxes = () => {
     const subtotal = calculateSubtotal();
+    const taxConfig = getGlobalTaxConfig();
     let totalTax = 0;
     
     if (taxConfig.country === 'CA') {
@@ -1016,101 +1030,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             </CardContent>
           </Card>
 
-          {/* Tax Configuration */}
-          <Card className="mb-4 border-2 border-[#F44747]">
-            <CardHeader>
-              <CardTitle className="text-lg text-[#F44747]">Tax Configuration</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {/* Country Selector */}
-                <div>
-                  <label className="block text-sm font-medium mb-2">Country</label>
-                  <Select value={taxConfig.country} onValueChange={(value) => setTaxConfig({...taxConfig, country: value})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Country" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-black border border-gray-600">
-                      <SelectItem value="CA" className="text-white hover:bg-gray-800">Canada</SelectItem>
-                      <SelectItem value="US" className="text-white hover:bg-gray-800">United States</SelectItem>
-                      <SelectItem value="OTHER" className="text-white hover:bg-gray-800">Other / International</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
 
-                {/* Canadian Tax Fields */}
-                {taxConfig.country === 'CA' && (
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-sm font-medium mb-1">GST (%)</label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        placeholder="5"
-                        value={taxConfig.gst || ''}
-                        onChange={(e) => setTaxConfig({...taxConfig, gst: parseFloat(e.target.value) || 0})}
-                      />
-                      <small className="text-gray-500">Goods and Services Tax</small>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">PST/HST (%)</label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        placeholder="0"
-                        value={taxConfig.pst || taxConfig.hst || ''}
-                        onChange={(e) => setTaxConfig({...taxConfig, pst: parseFloat(e.target.value) || 0, hst: parseFloat(e.target.value) || 0})}
-                      />
-                      <small className="text-gray-500">Provincial/Harmonized Tax</small>
-                    </div>
-                  </div>
-                )}
-
-                {/* US Tax Fields */}
-                {taxConfig.country === 'US' && (
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Sales Tax (%)</label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      placeholder="0"
-                      value={taxConfig.salesTax || ''}
-                      onChange={(e) => setTaxConfig({...taxConfig, salesTax: parseFloat(e.target.value) || 0})}
-                    />
-                    <small className="text-gray-500">State and local sales taxes</small>
-                  </div>
-                )}
-
-                {/* International Tax Fields */}
-                {taxConfig.country === 'OTHER' && (
-                  <div>
-                    <label className="block text-sm font-medium mb-1">VAT (%)</label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      placeholder="0"
-                      value={taxConfig.vat || ''}
-                      onChange={(e) => setTaxConfig({...taxConfig, vat: parseFloat(e.target.value) || 0})}
-                    />
-                    <small className="text-gray-500">Value Added Tax</small>
-                  </div>
-                )}
-
-                {/* Other Tax Field - Always Show */}
-                <div>
-                  <label className="block text-sm font-medium mb-1">Other Tax/Fees (%)</label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    placeholder="0"
-                    value={taxConfig.otherTax || ''}
-                    onChange={(e) => setTaxConfig({...taxConfig, otherTax: parseFloat(e.target.value) || 0})}
-                  />
-                  <small className="text-gray-500">Any additional taxes or fees</small>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
 
           {/* Summary */}
           <Card className="mb-4 border-2 border-[#8B5FBF]">
