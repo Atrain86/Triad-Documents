@@ -535,7 +535,7 @@ Subtotal: $${subtotal.toFixed(2)}
 GST (5%): $${gstAmount.toFixed(2)}
 TOTAL: $${total.toFixed(2)}
 
-${invoiceData.paymentNotes || 'Payment is due within 30 days. Thank you for your business!'}
+${emailMessage || 'Payment is due within 30 days. Thank you for your business!'}
 
 Best regards,
 A-Frame Painting
