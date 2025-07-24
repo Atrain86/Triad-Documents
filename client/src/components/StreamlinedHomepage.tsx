@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Search, User, MapPin, Edit3, Archive, RotateCcw, Trash2, Mail, LogOut, Settings } from 'lucide-react';
+import { Search, User, MapPin, Edit3, Archive, RotateCcw, Trash2, Mail, LogOut, Settings, GripVertical } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
@@ -255,42 +255,28 @@ export default function StreamlinedHomepage({
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="p-6">
-        <div className="flex justify-between items-center mb-6">
-          <div className="w-10"></div> {/* Spacer for centering */}
+        {/* Settings gear icon at top-left */}
+        <div className="mb-4">
+          {onAccessSettings && (
+            <Button
+              onClick={onAccessSettings}
+              variant="ghost"
+              size="sm"
+              className="text-gray-400 hover:text-white"
+              title="Settings"
+            >
+              <Settings size={18} />
+            </Button>
+          )}
+        </div>
+        
+        {/* Centered logo */}
+        <div className="flex justify-center mb-6">
           <img 
             src="/aframe-logo.png" 
             alt="A-Frame Painting" 
             className="h-32 w-auto object-contain"
           />
-          <div className="flex items-center gap-2">
-            {onAccessSettings && (
-              <Button
-                onClick={onAccessSettings}
-                variant="ghost"
-                size="sm"
-                className="text-gray-400 hover:text-white"
-                title="Settings"
-              >
-                <Settings size={18} />
-              </Button>
-            )}
-            <Button
-              onClick={() => {
-                // Complete authentication reset
-                localStorage.clear();
-                sessionStorage.clear();
-                logout();
-                // Force hard reload to clear all cached state
-                window.location.href = window.location.origin;
-              }}
-              variant="ghost"
-              size="sm"
-              className="text-gray-400 hover:text-white"
-              title="Logout"
-            >
-              <LogOut size={18} />
-            </Button>
-          </div>
         </div>
 
         <div 
@@ -299,6 +285,37 @@ export default function StreamlinedHomepage({
         />
 
         <div className="flex justify-center gap-4 mb-6">
+          <Button
+            onClick={() => {
+              // Complete authentication reset
+              localStorage.clear();
+              sessionStorage.clear();
+              logout();
+              // Force hard reload to clear all cached state
+              window.location.href = window.location.origin;
+            }}
+            variant="ghost"
+            size="sm"
+            className="text-gray-400 hover:text-white flex items-center gap-2"
+            title="Logout"
+          >
+            <svg
+              width={18}
+              height={18}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+              <polyline points="8,7 3,12 8,17" />
+              <line x1="3" y1="12" x2="15" y2="12" />
+            </svg>
+            Logout
+          </Button>
+          
           <Button
             onClick={() => setShowNewClientDialog(true)}
             style={{ backgroundColor: paintBrainColors.red, color: 'white' }}
@@ -314,8 +331,6 @@ export default function StreamlinedHomepage({
           >
             Schedule
           </Button>
-
-
         </div>
 
         <div className="flex justify-center mb-6">
