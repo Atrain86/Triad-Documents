@@ -642,7 +642,9 @@ Subject: Invoice #${invoiceData.invoiceNumber} - A-Frame Painting
 
 ${emailMessage}`;
 
-      navigator.clipboard.writeText(emailContent).catch(() => {});
+      navigator.clipboard.writeText(emailContent).catch((err) => {
+        console.log('Clipboard fallback needed:', err);
+      });
       
       toast({
         title: "Content Copied",
@@ -922,7 +924,7 @@ ${emailMessage}`;
                 {receipts.filter(receipt => invoiceData.selectedReceipts.has(receipt.id)).length > 0 && (
                   <div className="flex justify-between py-2 border-b" style={{ borderColor: darkTheme.border }}>
                     <span className="font-medium" style={{ color: darkTheme.text }}>Materials (incl. taxes):</span>
-                    <span className="font-semibold" style={{ color: darkTheme.text }}>${receipts.filter(receipt => invoiceData.selectedReceipts.has(receipt.id)).reduce((sum, receipt) => sum + parseFloat(receipt.amount), 0).toFixed(2)}</span>
+                    <span className="font-semibold" style={{ color: darkTheme.text }}>${receipts.filter(receipt => invoiceData.selectedReceipts.has(receipt.id)).reduce((sum, receipt) => sum + (Number(receipt.amount) || 0), 0).toFixed(2)}</span>
                   </div>
                 )}
                 <div className="flex justify-between py-2 border-b" style={{ borderColor: darkTheme.border }}>
@@ -1102,7 +1104,7 @@ ${emailMessage}`;
                         <td className="px-6 py-3 text-gray-300">Materials and supplies (see receipts)</td>
                         <td className="px-6 py-3 text-right font-semibold text-white">
                           ${receipts.filter(receipt => invoiceData.selectedReceipts.has(receipt.id))
-                            .reduce((sum, receipt) => sum + parseFloat(receipt.amount), 0).toFixed(2)}
+                            .reduce((sum, receipt) => sum + (Number(receipt.amount) || 0), 0).toFixed(2)}
                         </td>
                       </tr>
                     )}
