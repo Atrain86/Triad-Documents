@@ -170,19 +170,19 @@ externalPort = 80
 
 ## Recent Changes
 
-### January 21, 2025 - Enhanced Estimate Email Formatting
+### July 21, 2025 - Enhanced Estimate Email Formatting
 - **Professional email styling**: Updated estimate email formatting to match the high-quality invoice design with structured sections, professional branding, and enhanced visual hierarchy
 - **Comprehensive content**: Added detailed breakdown of included services, estimate validity information, and clear next steps for clients
 - **Improved presentation**: Enhanced both HTML and plain text versions with proper formatting, color-coded sections, and professional messaging
 - **Brand consistency**: Aligned estimate emails with A-Frame Painting brand standards including consistent typography, colors, and messaging tone
 
-### January 21, 2025 - Database Schema Fix and Application Recovery
+### July 21, 2025 - Database Schema Fix and Application Recovery
 - **Fixed database connection issue**: Resolved PostgreSQL connection timeout errors by addressing schema conflicts in estimates and sessions tables
 - **Database schema cleanup**: Dropped conflicting table structures and successfully pushed current schema to database
 - **Application status**: Successfully restored application functionality - server now running on port 5000 without errors
 - **Schema synchronization**: Resolved data type conflicts (boolean to text, varchar to text) to match current codebase requirements
 
-### January 21, 2025 - Challenge Route Cleanup and EstimateGenerator Enhancements
+### July 21, 2025 - Challenge Route Cleanup and EstimateGenerator Enhancements
 - **Removed gamification features**: Completely eliminated all receipt upload challenge system routes from server/routes.ts as explicitly rejected by user
 - **Enhanced PDF styling**: Applied Paint Brain theme colors to estimate PDF category borders and information containers
 - **Improved PDF fonts**: Increased font sizes for final estimate totals and pricing display in PDFs for better readability
@@ -191,21 +191,21 @@ externalPort = 80
 - **Email template cleanup**: Removed business address from plain text estimate emails as requested (HTML templates partially completed)
 - **Photo gallery color fix**: Restored photo gallery theme color from orange back to red (#E53E3E) as requested to match Paint Brain color scheme
 
-### January 21, 2025 - GPS Mapping System Archived
+### July 21, 2025 - GPS Mapping System Archived
 - **Archived GPS/mapping functionality**: Moved ClientMap, EmbeddedClientMap, SimpleGPSMap components and maps utilities to `archived-features/gps-mapping-system/`
 - **Updated photo gallery theme**: Changed from orange to red color scheme as requested
 - **Simplified location features**: Replaced complex GPS navigation with basic Google Maps link integration
 - **Cleaned codebase**: Removed Mapbox dependencies from active code while preserving functionality in archive
 - **Status**: Application running smoothly without GPS features, ready for deployment
 
-### January 22, 2025 - Enhanced PDF Labor Breakdown and Form Persistence
+### July 22, 2025 - Enhanced PDF Labor Breakdown and Form Persistence
 - **Enhanced Services & Labor PDF section**: Updated estimate PDFs to show detailed labor breakdown with hours and rates (e.g., "Prep - 32h × $60/hr = $1,920")
 - **Form data persistence**: Implemented localStorage to save all estimate form data between page refreshes, eliminating need to re-enter information
 - **Clear form functionality**: Added "Clear Form" button in dialog header to reset all saved data when starting fresh estimates
 - **Improved PDF formatting**: Labor sections now display worker names, hours, and rates for complete transparency in estimates
 - **Automatic data saving**: All form fields (work stages, paint costs, supplies, travel, additional labor, tax config) save automatically as user types
 
-### January 21, 2025 - Complete Email System Restoration and PDF Generation Fix
+### July 21, 2025 - Complete Email System Restoration and PDF Generation Fix
 - **Fixed critical estimate PDF generation**: Resolved TypeScript compilation errors in EstimateGenerator.tsx that were preventing PDF creation, added proper type annotations to all array operations (workStages.forEach, additionalLabor.forEach, etc.)
 - **Email system fully operational**: Successfully restored complete estimate email functionality with PDF attachments, confirmed working with test email sent to cortespainter@gmail.com
 - **Enhanced email templates**: Updated estimate email content per user requirements - removed "What's Included" section, simplified transparency language, reordered sections (Important Note before Estimate Validity), removed business address from email signature
@@ -213,7 +213,7 @@ externalPort = 80
 - **Core functionality restored**: All storage methods working (getPhotos, getPhoto, getReceipts, getDailyHours, getToolsChecklist, upsertUser)
 - **Server stability**: Application running successfully on port 5000 with all core painting business features fully functional including estimate generation and email sending
 
-### January 21, 2025 - Custom Estimate PDF Design Implementation (SNAPSHOT)
+### July 21, 2025 - Custom Estimate PDF Design Implementation (SNAPSHOT)
 - **PDF Design Evolution**: Successfully redesigned estimate PDFs to match invoice-style layout with black background theme and colored category containers
 - **Applied colored perimeter system**: Implemented client card color scheme progression (red → orange → yellow → green) with translucent dark gray containers and colored border lines only
 - **Two-column layout**: Added professional "BILL TO" and "FROM" sections with A-Frame logo centered at top, matching user's invoice design
@@ -339,7 +339,7 @@ Logo: Custom A-frame house structure with paint brush accent
 
 - July 19, 2025. Applied deployment fixes for production readiness: Confirmed all required environment variables (DATABASE_URL, MAPBOX_ACCESS_TOKEN, OPENAI_API_KEY, SENDGRID_API_KEY) are properly configured as secrets. Verified production build script works correctly with ESBuild bundling server code and Vite optimizing frontend assets. Updated deployment documentation with comprehensive configuration details. NOTE: .replit file needs manual update to stable-24_11 Nix channel and simplified modules list (remove "web" module, keep only "nodejs-20" and "postgresql-16") to resolve artifact registry errors. Production-ready codebase with proper static file serving and 0.0.0.0 host binding for deployment.
 - July 20, 2025. UNIFIED EMAIL & CALENDAR FUNCTIONALITY: Successfully unified email functionality across homepage and client detail pages to use consistent in-app forms instead of external Gmail app triggers. Both locations now use same `/api/send-basic-email` endpoint with identical dialog interfaces and Paint Brain purple styling. Fixed client detail page edit dialog scrolling issue with proper max-height container. UNIFIED CALENDAR FUNCTIONALITY: Made calendar buttons consistent across both homepage "Schedule" button and client detail page calendar icon - both now open the same A-Frame work calendar view instead of client detail page creating new events. Enhanced Google Calendar integration with dark mode styling (black background #000000, white text #FFFFFF) for better visual consistency. All calendar and email functionality now provides uniform user experience across the application.
-- January 21, 2025. SUCCESSFUL HTML-BASED PDF GENERATION IMPLEMENTATION: Completely transitioned EstimateGenerator from jsPDF manual drawing approach to HTML template-based PDF generation for superior design control and consistency. Features include: custom HTML template with black background and A-Frame branding, colored category containers with red/orange perimeter borders following client card color scheme, identical styling between Download PDF and Send Email functions, browser print dialog integration for better user control, Tailwind CSS integration with responsive design, and eliminated blank page generation issues. System now uses window.open() with HTML content injection and browser's native print functionality, providing much more reliable PDF generation with full design customization capability.
+- July 21, 2025. SUCCESSFUL HTML-BASED PDF GENERATION IMPLEMENTATION: Completely transitioned EstimateGenerator from jsPDF manual drawing approach to HTML template-based PDF generation for superior design control and consistency. Features include: custom HTML template with black background and A-Frame branding, colored category containers with red/orange perimeter borders following client card color scheme, identical styling between Download PDF and Send Email functions, browser print dialog integration for better user control, Tailwind CSS integration with responsive design, and eliminated blank page generation issues. System now uses window.open() with HTML content injection and browser's native print functionality, providing much more reliable PDF generation with full design customization capability.
 
 ### July 24, 2025 - Email System Improvements & Admin Dashboard Cleanup
 - **Enhanced email greeting system**: Updated from formal "Dear [Full Name]" to friendly "Hi [First Name]" throughout all email templates and default messages
