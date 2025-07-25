@@ -1173,69 +1173,72 @@ ${emailMessage}`;
 
 
 
-            {/* Action Mode Toggle and Button */}
-            <div className="flex items-center justify-between pt-6 border-t" style={{ borderColor: darkTheme.border }}>
-              {/* Toggle Switch */}
-              <div className="flex items-center bg-gray-800 rounded-lg p-1 border border-gray-600">
-                <button
-                  onClick={() => setActionMode('email')}
-                  className={`px-6 py-2 rounded-md transition-all flex items-center gap-2 ${
-                    actionMode === 'email' ? 'bg-[#569CD6] text-white shadow-md' : 'text-gray-400 hover:text-white'
-                  }`}
-                >
-                  <Send className={`w-4 h-4 ${
-                    actionMode === 'email' ? 'text-white opacity-100' : 'text-white opacity-60'
-                  }`} />
-                  Send Email
-                </button>
-                <button
-                  onClick={() => setActionMode('download')}
-                  className={`px-6 py-2 rounded-md transition-all flex items-center gap-2 ${
-                    actionMode === 'download' ? 'bg-[#6A9955] text-white shadow-md' : 'text-gray-400 hover:text-white'
-                  }`}
-                >
-                  <Download className={`w-4 h-4 ${
-                    actionMode === 'download' ? 'text-white opacity-100' : 'text-white opacity-60'
-                  }`} 
-                    style={{ color: '#FFFFFF' }}
-                  />
-                  Download PDF
-                </button>
+            {/* Action Buttons */}
+            <div className="flex flex-wrap gap-4 pt-6 border-t justify-between items-end" style={{ borderColor: darkTheme.border }}>
+              <Button variant="outline" className="flex-1">Cancel</Button>
+              <div className="flex flex-col items-center gap-2">
+                {/* Toggle Switch - positioned over send email button */}
+                <div className="relative inline-flex items-center">
+                  <button
+                    onClick={() => setActionMode(actionMode === 'email' ? 'download' : 'email')}
+                    className={`relative inline-flex h-10 w-20 items-center rounded-full transition-colors duration-200 focus:outline-none ${
+                      actionMode === 'email' ? 'bg-[#569CD6]' : 'bg-[#6A9955]'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-8 w-8 transform rounded-full bg-white transition-transform duration-200 ${
+                        actionMode === 'email' ? 'translate-x-1' : 'translate-x-11'
+                      }`}
+                    />
+                    <Send 
+                      className={`absolute left-2 h-4 w-4 transition-opacity duration-200 ${
+                        actionMode === 'email' ? 'text-white opacity-100' : 'text-white opacity-60'
+                      }`} 
+                      style={{ color: '#FFFFFF' }}
+                    />
+                    <Download 
+                      className={`absolute right-2 h-4 w-4 transition-opacity duration-200 ${
+                        actionMode === 'download' ? 'text-white opacity-100' : 'text-white opacity-60'
+                      }`} 
+                      style={{ color: '#FFFFFF' }}
+                    />
+                  </button>
+                </div>
+                
+                {/* Action Button */}
+                {actionMode === 'email' ? (
+                  <Button 
+                    onClick={() => {
+                      console.log('Send Invoice button clicked - opening email dialog');
+                      setShowEmailDialog(true);
+                    }}
+                    disabled={!invoiceData.clientEmail}
+                    className="text-white hover:opacity-90 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    style={{ backgroundColor: invoiceData.clientEmail ? '#569CD6' : '#9ca3af' }}
+                  >
+                    {isSending ? (
+                      <>
+                        <div className="mr-2 h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Sending...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="mr-2 h-5 w-5" />
+                        Send Email
+                      </>
+                    )}
+                  </Button>
+                ) : (
+                  <Button 
+                    onClick={generatePDF} 
+                    className="text-white hover:opacity-90"
+                    style={{ backgroundColor: '#6A9955' }}
+                  >
+                    <Download className="mr-2 h-5 w-5" />
+                    Download PDF
+                  </Button>
+                )}
               </div>
-              
-              {/* Action Button */}
-              {actionMode === 'email' ? (
-                <Button 
-                  onClick={() => {
-                    console.log('Send Invoice button clicked - opening email dialog');
-                    setShowEmailDialog(true);
-                  }}
-                  disabled={!invoiceData.clientEmail}
-                  className="text-white hover:opacity-90 disabled:bg-gray-400 disabled:cursor-not-allowed min-w-[120px]"
-                  style={{ backgroundColor: invoiceData.clientEmail ? '#569CD6' : '#9ca3af' }}
-                >
-                  {isSending ? (
-                    <>
-                      <div className="mr-2 h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Sending...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="mr-2 h-5 w-5" />
-                      Send Email
-                    </>
-                  )}
-                </Button>
-              ) : (
-                <Button 
-                  onClick={generatePDF} 
-                  className="text-white hover:opacity-90 min-w-[120px]"
-                  style={{ backgroundColor: '#6A9955' }}
-                >
-                  <Download className="mr-2 h-5 w-5" />
-                  Download PDF
-                </Button>
-              )}
             </div>
           </div>
         </div>
