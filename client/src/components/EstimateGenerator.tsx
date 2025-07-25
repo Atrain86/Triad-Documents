@@ -57,6 +57,11 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     { name: 'Wood Reconditioning', hours: '', rate: 60 }
   ]);
 
+  // Additional labor (crew members) - This was missing!
+  const [additionalLabor, setAdditionalLabor] = useState(savedData.additionalLabor || [
+    { name: '', hours: '', rate: '' }
+  ]);
+
   // Toggle state for action buttons
   const [actionMode, setActionMode] = useState<'download' | 'email'>('email');
 
@@ -67,10 +72,11 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       estimateDate,
       workStages,
       paintCosts,
-      additionalServices
+      additionalServices,
+      additionalLabor
     };
     localStorage.setItem('estimateFormData', JSON.stringify(formData));
-  }, [projectTitle, estimateDate, workStages, paintCosts, additionalServices]);
+  }, [projectTitle, estimateDate, workStages, paintCosts, additionalServices, additionalLabor]);
 
   // Load global tax configuration from localStorage
   const getGlobalTaxConfig = () => {
@@ -112,6 +118,25 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     const updated = [...additionalServices];
     updated[index] = { ...updated[index], [field]: value };
     setAdditionalServices(updated);
+  };
+
+  // Update additional labor (crew member)
+  const updateAdditionalLabor = (index: number, field: string, value: string) => {
+    const updated = [...additionalLabor];
+    updated[index] = { ...updated[index], [field]: value };
+    setAdditionalLabor(updated);
+  };
+
+  // Add new crew member
+  const addLabor = () => {
+    setAdditionalLabor([...additionalLabor, { name: '', hours: '', rate: '' }]);
+  };
+
+  // Remove crew member
+  const removeLabor = (index: number) => {
+    if (additionalLabor.length > 1) {
+      setAdditionalLabor(additionalLabor.filter((_, i) => i !== index));
+    }
   };
 
   // Calculate totals
