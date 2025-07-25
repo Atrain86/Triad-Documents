@@ -135,7 +135,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   // Remove crew member
   const removeLabor = (index: number) => {
     if (additionalLabor.length > 1) {
-      setAdditionalLabor(additionalLabor.filter((_, i) => i !== index));
+      setAdditionalLabor(additionalLabor.filter((_: any, i: number) => i !== index));
     }
   };
 
@@ -152,11 +152,17 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     return sum + (hours * rate);
   }, 0);
 
+  const additionalLaborSubtotal = additionalLabor.reduce((sum: number, member: any) => {
+    const hours = parseFloat(member.hours) || 0;
+    const rate = parseFloat(member.rate.toString()) || 0;
+    return sum + (hours * rate);
+  }, 0);
+
   const paintSubtotal = (parseFloat(paintCosts.pricePerGallon) || 0) * 
                        (parseFloat(paintCosts.gallons) || 0) * 
                        (parseFloat(paintCosts.coats) || 1);
 
-  const subtotal = laborSubtotal + additionalServicesSubtotal + paintSubtotal;
+  const subtotal = laborSubtotal + additionalServicesSubtotal + additionalLaborSubtotal + paintSubtotal;
   const taxAmount = subtotal * (taxConfig.gst + taxConfig.pst + taxConfig.hst + taxConfig.salesTax + taxConfig.vat + taxConfig.otherTax) / 100;
   const grandTotal = subtotal + taxAmount;
 
@@ -361,6 +367,76 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             </CardContent>
           </Card>
 
+          {/* Additional Labor (Crew Members) */}
+          <Card className="bg-gray-900 border-gray-700">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-[#4ECDC4]">Additional Labor</CardTitle>
+              <Button
+                onClick={addLabor}
+                size="sm"
+                className="bg-[#4ECDC4] hover:bg-[#3EB8B8] text-black"
+              >
+                <Plus className="w-4 h-4 mr-1" />
+                Add Crew Member
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {additionalLabor.map((member: any, index: number) => (
+                <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-800 rounded-lg border border-[#4ECDC4]">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Crew Member Name</label>
+                    <Input
+                      value={member.name}
+                      onChange={(e) => updateAdditionalLabor(index, 'name', e.target.value)}
+                      placeholder="Enter name"
+                      className="bg-gray-700 border-gray-600 text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Hours</label>
+                    <Input
+                      type="number"
+                      inputMode="decimal"
+                      step="0.5"
+                      value={member.hours}
+                      onChange={(e) => updateAdditionalLabor(index, 'hours', e.target.value)}
+                      placeholder="0"
+                      className="bg-gray-700 border-gray-600 text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Rate/Hour</label>
+                    <Input
+                      type="number"
+                      value={member.rate}
+                      onChange={(e) => updateAdditionalLabor(index, 'rate', e.target.value)}
+                      placeholder="0"
+                      className="bg-gray-700 border-gray-600 text-white"
+                    />
+                  </div>
+                  <div className="flex flex-col justify-between">
+                    <div className="text-right text-[#6A9955] font-semibold mb-2">
+                      Total: ${((parseFloat(member.hours) || 0) * (parseFloat(member.rate) || 0)).toFixed(2)}
+                    </div>
+                    {additionalLabor.length > 1 && (
+                      <Button
+                        onClick={() => removeLabor(index)}
+                        size="sm"
+                        variant="destructive"
+                        className="ml-auto"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
+              <div className="text-right text-lg font-semibold text-[#4ECDC4]">
+                Additional Labor Total: ${additionalLaborSubtotal.toFixed(2)}
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Additional Services */}
           <Card className="bg-gray-900 border-gray-700">
             <CardHeader>
@@ -410,6 +486,29 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
               <CardTitle className="text-[#569CD6]">Summary</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
+              <div className="flex justify-between">
+                <span>Labor Subtotal:</span>
+                <span>${laborSubtotal.toFixed(2)}</span>
+              </div>
+              {additionalLaborSubtotal > 0 && (
+                <div className="flex justify-between">
+                  <span>Additional Labor:</span>
+                  <span>${additionalLaborSubtotal.toFixed(2)}</span>
+                </div>
+              )}
+              {paintSubtotal > 0 && (
+                <div className="flex justify-between">
+                  <span>Paint & Materials:</span>
+                  <span>${paintSubtotal.toFixed(2)}</span>
+                </div>
+              )}
+              {additionalServicesSubtotal > 0 && (
+                <div className="flex justify-between">
+                  <span>Additional Services:</span>
+                  <span>${additionalServicesSubtotal.toFixed(2)}</span>
+                </div>
+              )}
+              <hr className="border-gray-600" />
               <div className="flex justify-between">
                 <span>Subtotal:</span>
                 <span>${subtotal.toFixed(2)}</span>
@@ -509,6 +608,24 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
               <div className="flex justify-between mb-2">
                 <span>Paint ({paintCosts.gallons} gallons @ ${paintCosts.pricePerGallon}/gal, {paintCosts.coats} coats)</span>
                 <span>${paintSubtotal.toFixed(2)}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Additional Labor Section */}
+          {additionalLaborSubtotal > 0 && (
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-[#4ECDC4] mb-4 border-b border-[#4ECDC4] pb-2">
+                Additional Labor
+              </h3>
+              {additionalLabor.filter((member: any) => member.name && parseFloat(member.hours) > 0).map((member: any, index: number) => (
+                <div key={index} className="flex justify-between mb-2">
+                  <span>{member.name} ({member.hours} hrs @ ${member.rate}/hr)</span>
+                  <span>${((parseFloat(member.hours) || 0) * (parseFloat(member.rate) || 0)).toFixed(2)}</span>
+                </div>
+              ))}
+              <div className="text-right font-semibold text-[#4ECDC4] mt-2">
+                Additional Labor Total: ${additionalLaborSubtotal.toFixed(2)}
               </div>
             </div>
           )}
