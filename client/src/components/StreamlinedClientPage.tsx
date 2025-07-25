@@ -583,8 +583,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     if (!selectedDate || !hoursInput) return;
     
     const parsedHours = parseFloat(hoursInput);
-    if (isNaN(parsedHours) || parsedHours <= 0) {
-      console.error('Invalid hours input:', hoursInput);
+    if (isNaN(parsedHours) || parsedHours < 0.5) {
+      console.error('Invalid hours input:', hoursInput, 'parsed as:', parsedHours);
       return;
     }
     
@@ -1525,8 +1525,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                               <input
                                 type="number"
                                 step="0.5"
-                                min="0"
+                                min="0.5"
                                 max="24"
+                                inputMode="decimal"
                                 value={hoursInput}
                                 onChange={(e) => setHoursInput(e.target.value)}
                                 onKeyDown={(e) => {
@@ -1534,7 +1535,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                     handleAddHours();
                                   }
                                 }}
-                                placeholder="0"
+                                placeholder="Enter hours (e.g., 3.5)"
                                 className="w-full px-3 py-2 text-sm border border-gray-600 rounded-lg bg-gray-800 text-gray-200"
                               />
                             </div>
@@ -1602,11 +1603,12 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                       <Input
                                         type="number"
                                         step="0.5"
-                                        min="0"
+                                        min="0.5"
                                         max="24"
+                                        inputMode="decimal"
                                         value={editHours}
                                         onChange={(e) => setEditHours(e.target.value)}
-                                        placeholder="Hours"
+                                        placeholder="Hours (e.g., 3.5)"
                                         className="text-sm bg-gray-700 border-gray-600 text-gray-200"
                                       />
                                       <Input
