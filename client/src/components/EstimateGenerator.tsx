@@ -46,18 +46,16 @@ interface EstimateData {
 }
 
 interface EstimateGeneratorProps {
-  projectId: number;
+  project: any;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-export default function EstimateGenerator({ projectId }: EstimateGeneratorProps) {
+export default function EstimateGenerator({ project, isOpen, onClose }: EstimateGeneratorProps) {
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const estimateRef = useRef<HTMLDivElement>(null);
-
-  const { data: project } = useQuery<Project>({
-    queryKey: [`/api/projects/${projectId}`],
-  });
 
   const [estimateData, setEstimateData] = useState<EstimateData>({
     estimateNumber: '',
@@ -260,29 +258,21 @@ export default function EstimateGenerator({ projectId }: EstimateGeneratorProps)
               <h3 style="color: #6A9955; font-size: 20px; font-weight: bold; margin: 0 0 16px 0; padding-bottom: 8px; border-bottom: 2px solid #6A9955;">Services & Labor</h3>
               <div style="background-color: #1a1a1a; padding: 16px; border-radius: 8px;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-                  <span style="flex: 1; color: #ffffff;">Prep: ${estimateData.workStages.prep} hours</span>
-                  <span style="color: #6A9955; font-weight: bold;">$${(estimateData.workStages.prep * 60).toFixed(2)}</span>
+                  <span style="flex: 1; color: #ffffff;">Prep/Priming/Painting: ${estimateData.prepWork} hours</span>
+                  <span style="color: #6A9955; font-weight: bold;">$${(estimateData.prepWork * 60).toFixed(2)}</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-                  <span style="flex: 1; color: #ffffff;">Priming: ${estimateData.workStages.priming} hours</span>
-                  <span style="color: #6A9955; font-weight: bold;">$${(estimateData.workStages.priming * 60).toFixed(2)}</span>
+                  <span style="flex: 1; color: #ffffff;">Wood Reconditioning: ${estimateData.woodReconditioning} hours</span>
+                  <span style="color: #6A9955; font-weight: bold;">$${(estimateData.woodReconditioning * 60).toFixed(2)}</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-                  <span style="flex: 1; color: #ffffff;">Painting: ${estimateData.workStages.painting} hours</span>
-                  <span style="color: #6A9955; font-weight: bold;">$${(estimateData.workStages.painting * 60).toFixed(2)}</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-                  <span style="flex: 1; color: #ffffff;">Wood Reconditioning: ${estimateData.additionalServices.woodReconditioning} hours</span>
-                  <span style="color: #6A9955; font-weight: bold;">$${(estimateData.additionalServices.woodReconditioning * 60).toFixed(2)}</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-                  <span style="flex: 1; color: #ffffff;">Drywall Repair: ${estimateData.additionalServices.drywallRepair} hours</span>
-                  <span style="color: #6A9955; font-weight: bold;">$${(estimateData.additionalServices.drywallRepair * 60).toFixed(2)}</span>
+                  <span style="flex: 1; color: #ffffff;">Drywall Repair: ${estimateData.drywallRepair} hours</span>
+                  <span style="color: #6A9955; font-weight: bold;">$${(estimateData.drywallRepair * 60).toFixed(2)}</span>
                 </div>
                 <div style="border-top: 1px solid #4b5563; margin-top: 16px; padding-top: 16px;">
                   <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 18px;">
                     <span style="color: #ffffff;">Labor Total:</span>
-                    <span style="color: #6A9955;">$${((estimateData.workStages.prep + estimateData.workStages.priming + estimateData.workStages.painting + estimateData.additionalServices.woodReconditioning + estimateData.additionalServices.drywallRepair) * 60).toFixed(2)}</span>
+                    <span style="color: #6A9955;">$${((estimateData.prepWork + estimateData.woodReconditioning + estimateData.drywallRepair) * 60).toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -294,7 +284,7 @@ export default function EstimateGenerator({ projectId }: EstimateGeneratorProps)
               <div style="background-color: #1a1a1a; padding: 16px; border-radius: 8px;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
                   <span style="color: #ffffff;">Paint Costs:</span>
-                  <span style="color: #DCDCAA; font-weight: bold;">$${estimateData.paintCosts.toFixed(2)}</span>
+                  <span style="color: #DCDCAA; font-weight: bold;">$${estimateData.paintCost.toFixed(2)}</span>
                 </div>
               </div>
             </div>
@@ -302,7 +292,7 @@ export default function EstimateGenerator({ projectId }: EstimateGeneratorProps)
             <!-- Total Section -->
             <div style="margin-top: 32px; text-align: center; background-color: #059669; padding: 20px; border-radius: 8px;">
               <div style="color: #ffffff; font-size: 28px; font-weight: bold;">
-                GRAND TOTAL: $${(((estimateData.workStages.prep + estimateData.workStages.priming + estimateData.workStages.painting + estimateData.additionalServices.woodReconditioning + estimateData.additionalServices.drywallRepair) * 60) + estimateData.paintCosts).toFixed(2)}
+                GRAND TOTAL: $${(((estimateData.prepWork + estimateData.woodReconditioning + estimateData.drywallRepair) * 60) + estimateData.paintCost).toFixed(2)}
               </div>
             </div>
 
@@ -348,7 +338,7 @@ export default function EstimateGenerator({ projectId }: EstimateGeneratorProps)
         allowTaint: true,
         backgroundColor: '#1a1a1a',
         width: 816,
-        height: undefined
+        height: null
       });
 
       document.body.removeChild(iframe);
@@ -367,7 +357,7 @@ export default function EstimateGenerator({ projectId }: EstimateGeneratorProps)
       const pdfBase64 = pdf.output('datauristring').split(',')[1];
 
       console.log('Sending estimate email with data:', {
-        recipientEmail: project?.clientEmail,
+        recipientEmail: project.clientEmail,
         clientName: estimateData.clientName,
         estimateNumber: estimateData.estimateNumber,
         projectTitle: estimateData.projectTitle,
@@ -380,7 +370,7 @@ export default function EstimateGenerator({ projectId }: EstimateGeneratorProps)
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          recipientEmail: project?.clientEmail,
+          recipientEmail: project.clientEmail,
           clientName: estimateData.clientName,
           estimateNumber: estimateData.estimateNumber,
           projectTitle: estimateData.projectTitle,
@@ -396,7 +386,7 @@ export default function EstimateGenerator({ projectId }: EstimateGeneratorProps)
         console.log('Showing success toast notification');
         toast({
           title: "Email Sent Successfully",
-          description: `Estimate sent to ${project?.clientEmail}`,
+          description: `Estimate sent to ${project.clientEmail}`,
         });
       } else {
         throw new Error(result.error || 'Failed to send email');
@@ -415,8 +405,12 @@ export default function EstimateGenerator({ projectId }: EstimateGeneratorProps)
   };
 
   return (
-    <>
-    <Card className="w-full max-w-4xl mx-auto bg-black text-white">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="w-screen max-w-md md:max-w-4xl max-h-[95vh] overflow-y-auto bg-black text-white">
+        <DialogHeader>
+          <DialogTitle className="text-orange-500">Estimate Generator</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-6">
       <CardHeader>
         <CardTitle className="text-orange-500">Estimate Generator</CardTitle>
       </CardHeader>
@@ -1069,6 +1063,5 @@ export default function EstimateGenerator({ projectId }: EstimateGeneratorProps)
         </p>
       </div>
     </div>
-    </>
   );
 }
