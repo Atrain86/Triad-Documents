@@ -369,3 +369,12 @@ Logo: Custom A-frame house structure with paint brush accent
 - **Professional email delivery**: Emails now sent successfully via nodemailer with Gmail SMTP, confirmed by server logs showing "Email sent successfully: 250 2.0.0 OK"
 - **Enhanced error handling**: Added comprehensive error handling and success notifications for email delivery process
 - **Delivery optimization**: System properly handles self-sending scenarios where emails may be filtered by Gmail when sending from/to same address
+
+### July 25, 2025 - Smart Email Architecture with OAuth Priority
+- **Implemented intelligent email routing**: Both InvoiceGenerator and EstimateGenerator now check Gmail OAuth status first and route accordingly
+- **OAuth priority system**: When user has Gmail connected via Settings, emails send from their personal Gmail account with proper authentication
+- **Server SMTP fallback**: When Gmail OAuth not connected, system falls back to server-side SMTP credentials for reliable delivery
+- **Enhanced user notifications**: Clear messaging distinguishes between "Sent via Gmail!" (personal account) vs "Sent via Server!" (with reminder to connect Gmail)
+- **Unified email architecture**: Both estimate and invoice systems use identical smart routing logic for consistent user experience
+- **Proper OAuth integration**: Gmail OAuth tokens stored in database enable sending from user's actual Gmail account with emails appearing in their Sent folder
+- **User control**: Users can choose to connect their personal Gmail (Settings > Gmail Integration) or continue using server-side delivery

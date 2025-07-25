@@ -768,31 +768,76 @@ cortespainter@gmail.com
             }
           }
 
-          // Send via invoice email API (uses SendGrid/nodemailer)
-          const response = await fetch('/api/send-invoice-email', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              recipientEmail: invoiceData.clientEmail,
-              clientName: invoiceData.clientName || 'Valued Client',
-              invoiceNumber: invoiceData.invoiceNumber,
-              pdfData: pdfBase64,
-              receiptFilenames: [], // No separate receipt files
-              customMessage: emailMessage || 'Payment is due within 30 days. Thank you for your business!'
-            })
-          });
-
-          if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || 'Failed to send email');
-          }
-
-          const result = await response.json();
+          // First check if user has Gmail OAuth connected
+          const gmailStatusResponse = await fetch(`/api/gmail/status/1`); // Using userId 1 for now
+          const gmailStatus = await gmailStatusResponse.json();
           
-          toast({
-            title: "Email Sent Successfully!",
-            description: `Invoice sent to ${invoiceData.clientEmail}`,
-          });
+          if (gmailStatus.connected) {
+            // Use Gmail OAuth API - sends from user's personal Gmail account
+            const gmailResponse = await fetch('/api/gmail/send', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                userId: 1, // Using userId 1 for now
+                to: invoiceData.clientEmail,
+                subject: `Invoice #${invoiceData.invoiceNumber} - A-Frame Painting`,
+                message: emailMessage || 'Payment is due within 30 days. Thank you for your business!',
+                htmlMessage: `
+                  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: white; color: black;">
+                    <h2 style="color: #6A9955;">Invoice from A-Frame Painting</h2>
+                    <div style="white-space: pre-line; margin: 20px 0;">
+                      ${(emailMessage || 'Payment is due within 30 days. Thank you for your business!').replace(/\n/g, '<br>')}
+                    </div>
+                    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ccc;">
+                      <p style="margin: 0;"><strong>A-Frame Painting</strong></p>
+                      <p style="margin: 0;">${gmailStatus.gmailAddress}</p>
+                      <p style="margin: 0;">884 Hayes Rd, Manson's Landing, BC V0P1K0</p>
+                    </div>
+                  </div>
+                `,
+                attachments: [{
+                  filename: pdfFilename,
+                  content: pdfBase64,
+                  mimeType: 'application/pdf'
+                }]
+              })
+            });
+            
+            if (!gmailResponse.ok) {
+              const error = await gmailResponse.json();
+              throw new Error(error.error || 'Failed to send via Gmail OAuth');
+            }
+            
+            toast({
+              title: "Email Sent via Gmail!",
+              description: `Invoice sent from your Gmail account (${gmailStatus.gmailAddress}) to ${invoiceData.clientEmail}`,
+            });
+            
+          } else {
+            // Fallback to server SMTP system
+            const response = await fetch('/api/send-invoice-email', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                recipientEmail: invoiceData.clientEmail,
+                clientName: invoiceData.clientName || 'Valued Client',
+                invoiceNumber: invoiceData.invoiceNumber,
+                pdfData: pdfBase64,
+                receiptFilenames: [], // No separate receipt files
+                customMessage: emailMessage || 'Payment is due within 30 days. Thank you for your business!'
+              })
+            });
+
+            if (!response.ok) {
+              const error = await response.json();
+              throw new Error(error.error || 'Failed to send email');
+            }
+
+            toast({
+              title: "Email Sent via Server!",
+              description: `Invoice sent to ${invoiceData.clientEmail} (Connect Gmail in Settings for personal account sending)`,
+            });
+          }
 
           // Auto-close dialog after 3 seconds
           setTimeout(() => {

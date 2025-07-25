@@ -825,17 +825,84 @@ cortespainter@gmail.com`;
       // Convert PDF to base64
       const pdfData = pdf.output('datauristring');
 
-      const emailData = {
-        recipientEmail: clientEmail,
-        clientName: clientName || 'Client',
-        estimateNumber: estimateNumber || 'EST-001',
-        projectTitle: projectTitle || 'Painting Estimate',
-        totalAmount: calculateTotal().toFixed(2),
-        customMessage: '',
-        pdfData: pdfData
-      };
+      // Check if user has Gmail OAuth connected first
+      const gmailStatusResponse = await fetch(`/api/gmail/status/1`); // Using userId 1 for now
+      const gmailStatus = await gmailStatusResponse.json();
+      
+      if (gmailStatus.connected) {
+        // Use Gmail OAuth API - sends from user's personal Gmail account
+        const pdfBase64 = pdfData.includes(',') ? pdfData.split(',')[1] : pdfData;
+        
+        const gmailResponse = await fetch('/api/gmail/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: 1, // Using userId 1 for now
+            to: clientEmail,
+            subject: `Estimate #${estimateNumber || 'EST-001'} - A-Frame Painting`,
+            message: `Dear ${clientName || 'Valued Client'},\n\nPlease find attached your painting estimate.\n\nBest regards,\nA-Frame Painting`,
+            htmlMessage: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: white; color: black;">
+                <h2 style="color: #EA580C;">Estimate from A-Frame Painting</h2>
+                <p>Dear ${clientName || 'Valued Client'},</p>
+                <p>Please find attached your detailed painting estimate for ${projectTitle || 'your project'}.</p>
+                <div style="background-color: #ea580c; color: white; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: center;">
+                  <h3 style="margin: 0;">Total Estimate: $${calculateTotal().toFixed(2)}</h3>
+                </div>
+                <p>This estimate is valid for 30 days. Please let us know if you have any questions.</p>
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ccc;">
+                  <p style="margin: 0;"><strong>A-Frame Painting</strong></p>
+                  <p style="margin: 0;">${gmailStatus.gmailAddress}</p>
+                  <p style="margin: 0;">884 Hayes Rd, Manson's Landing, BC V0P1K0</p>
+                </div>
+              </div>
+            `,
+            attachments: [{
+              filename: `Estimate-${estimateNumber || 'EST-001'}-${(clientName || 'Client').replace(/\s+/g, '-')}.pdf`,
+              content: pdfBase64,
+              mimeType: 'application/pdf'
+            }]
+          })
+        });
+        
+        if (!gmailResponse.ok) {
+          const error = await gmailResponse.json();
+          throw new Error(error.error || 'Failed to send via Gmail OAuth');
+        }
+        
+        toast({
+          title: "Estimate Sent via Gmail!",
+          description: `Estimate sent from your Gmail account (${gmailStatus.gmailAddress}) to ${clientEmail}`,
+        });
+        
+      } else {
+        // Fallback to server SMTP system
+        const pdfBase64 = pdfData.includes(',') ? pdfData.split(',')[1] : pdfData;
+        
+        const response = await fetch('/api/send-estimate-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            recipientEmail: clientEmail,
+            clientName: clientName || 'Client',
+            estimateNumber: estimateNumber || 'EST-001',
+            projectTitle: projectTitle || 'Painting Estimate',
+            totalAmount: calculateTotal().toFixed(2),
+            customMessage: '',
+            pdfData: pdfBase64
+          })
+        });
 
-      await sendGmailMutation.mutateAsync(emailData);
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to send estimate email');
+        }
+
+        toast({
+          title: "Estimate Sent via Server!",
+          description: `Estimate sent to ${clientEmail} (Connect Gmail in Settings for personal account sending)`,
+        });
+      }
     } catch (error: any) {
       console.error('Email preparation failed:', error);
       toast({
