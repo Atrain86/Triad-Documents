@@ -14,20 +14,25 @@ export class GmailAuthService {
   private isConfigured: boolean = false;
 
   constructor() {
-    if (!process.env.GMAIL_CLIENT_ID || !process.env.GMAIL_CLIENT_SECRET || !process.env.GMAIL_REDIRECT_URI) {
+    if (!process.env.GMAIL_CLIENT_ID || !process.env.GMAIL_CLIENT_SECRET) {
       console.warn('Gmail OAuth2 credentials not configured. Gmail integration will be disabled.');
       this.isConfigured = false;
       return;
     }
 
     try {
+      // Use current accessible domain for redirect URI
+      const redirectUri = process.env.REPLIT_DEV_DOMAIN 
+        ? `https://${process.env.REPLIT_DEV_DOMAIN}/api/gmail/callback`
+        : process.env.GMAIL_REDIRECT_URI;
+      
       this.oAuth2Client = new google.auth.OAuth2(
         process.env.GMAIL_CLIENT_ID,
         process.env.GMAIL_CLIENT_SECRET,
-        process.env.GMAIL_REDIRECT_URI
+        redirectUri
       );
       this.isConfigured = true;
-      console.log('Gmail OAuth2 client initialized successfully');
+      console.log('Gmail OAuth2 client initialized successfully with redirect URI:', redirectUri);
     } catch (error) {
       console.error('Failed to initialize Gmail OAuth2 client:', error);
       this.isConfigured = false;
