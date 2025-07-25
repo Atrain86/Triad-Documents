@@ -378,3 +378,12 @@ Logo: Custom A-frame house structure with paint brush accent
 - **Unified email architecture**: Both estimate and invoice systems use identical smart routing logic for consistent user experience
 - **Proper OAuth integration**: Gmail OAuth tokens stored in database enable sending from user's actual Gmail account with emails appearing in their Sent folder
 - **User control**: Users can choose to connect their personal Gmail (Settings > Gmail Integration) or continue using server-side delivery
+
+### July 25, 2025 - EstimateGenerator Restoration & Error Recovery
+- **Critical bug fix**: Resolved missing EstimateGenerator import that was causing application startup failures
+- **Component restoration**: Restored working EstimateGenerator with basic estimate functionality (labor breakdown, materials, GST calculation)
+- **Cleaned up corrupted files**: Removed broken backup files that contained mixed HTML/React content
+- **Preserved existing design**: Maintained user's established interface patterns and dark mode styling
+- **PDF generation working**: HTML2Canvas + jsPDF approach for estimate PDF creation with A-Frame branding
+- **Email integration**: Connected to existing email system for sending estimates with PDF attachments
+- **Server stability**: Application running successfully on port 5000 with all core features operational
