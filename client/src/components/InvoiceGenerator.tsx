@@ -768,13 +768,37 @@ cortespainter@gmail.com
             }
           }
 
-          // Send via Gmail OAuth
-          await sendGmailMutation.mutateAsync({
-            recipientEmail: invoiceData.clientEmail,
-            invoiceNumber: invoiceData.invoiceNumber,
-            message: emailMessage,
-            attachments: attachments
+          // Send via invoice email API (uses SendGrid/nodemailer)
+          const response = await fetch('/api/send-invoice-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              recipientEmail: invoiceData.clientEmail,
+              clientName: invoiceData.clientName || 'Valued Client',
+              invoiceNumber: invoiceData.invoiceNumber,
+              pdfData: pdfBase64,
+              receiptFilenames: [], // No separate receipt files
+              customMessage: emailMessage || 'Payment is due within 30 days. Thank you for your business!'
+            })
           });
+
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to send email');
+          }
+
+          const result = await response.json();
+          
+          toast({
+            title: "Email Sent Successfully!",
+            description: `Invoice sent to ${invoiceData.clientEmail}`,
+          });
+
+          // Auto-close dialog after 3 seconds
+          setTimeout(() => {
+            setShowEmailDialog(false);
+            onClose();
+          }, 3000);
         };
         reader.readAsDataURL(pdfBlob);
       }
