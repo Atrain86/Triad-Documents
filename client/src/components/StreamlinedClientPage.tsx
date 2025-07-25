@@ -1523,13 +1523,17 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                             <div>
                               <label className="text-sm font-medium mb-2 block text-gray-200">Hours Worked</label>
                               <input
-                                type="number"
-                                step="0.5"
-                                min="0.5"
-                                max="24"
+                                type="text"
+                                pattern="[0-9]+(\.[0-9]*)?"
                                 inputMode="decimal"
                                 value={hoursInput}
-                                onChange={(e) => setHoursInput(e.target.value)}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  // Allow only numbers and one decimal point
+                                  if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                                    setHoursInput(value);
+                                  }
+                                }}
                                 onKeyDown={(e) => {
                                   if (e.key === 'Enter' && hoursInput) {
                                     handleAddHours();
@@ -1601,13 +1605,17 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                     {/* Hours and Description */}
                                     <div className="grid grid-cols-2 gap-2">
                                       <Input
-                                        type="number"
-                                        step="0.5"
-                                        min="0.5"
-                                        max="24"
+                                        type="text"
+                                        pattern="[0-9]+(\.[0-9]*)?"
                                         inputMode="decimal"
                                         value={editHours}
-                                        onChange={(e) => setEditHours(e.target.value)}
+                                        onChange={(e) => {
+                                          const value = e.target.value;
+                                          // Allow only numbers and one decimal point
+                                          if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                                            setEditHours(value);
+                                          }
+                                        }}
                                         placeholder="Hours (e.g., 3.5)"
                                         className="text-sm bg-gray-700 border-gray-600 text-gray-200"
                                       />
