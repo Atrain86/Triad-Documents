@@ -74,6 +74,18 @@ export class GmailAuthService {
 
       console.log('Retrieved Gmail address:', gmailAddress, 'for user ID:', userId);
 
+      // Check if user exists first
+      const existingUser = await db.select({ id: users.id })
+        .from(users)
+        .where(eq(users.id, parseInt(userId)));
+      
+      console.log('Existing user check:', existingUser);
+
+      if (existingUser.length === 0) {
+        console.error('User not found with ID:', userId);
+        return { success: false, error: 'User not found' };
+      }
+
       // Save or update user's Gmail credentials in database
       const result = await db.update(users)
         .set({ 
@@ -85,6 +97,11 @@ export class GmailAuthService {
         .returning();
 
       console.log('Database update result:', result);
+
+      if (result.length === 0) {
+        console.error('Failed to update user Gmail credentials');
+        return { success: false, error: 'Failed to save Gmail connection' };
+      }
 
       return { success: true, email: gmailAddress };
     } catch (error) {
