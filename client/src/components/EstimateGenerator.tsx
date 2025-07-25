@@ -1,1361 +1,442 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useQuery, useMutation } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
-import { Download, Mail, Plus, Trash2 } from 'lucide-react';
-import html2canvas from 'html2canvas';
+import { Download, Mail } from 'lucide-react';
 import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+
+interface Project {
+  id: number;
+  clientName: string;
+  address: string;
+  clientCity?: string;
+  clientPostal?: string;
+  clientEmail?: string;
+  clientPhone?: string;
+  projectType: string;
+  roomCount: number;
+  difficulty: string;
+  hourlyRate: number;
+  status: string;
+  notes?: string;
+  createdAt: string;
+}
 
 interface EstimateGeneratorProps {
-  project: any;
+  project: Project;
   isOpen: boolean;
   onClose: () => void;
 }
 
 export default function EstimateGenerator({ project, isOpen, onClose }: EstimateGeneratorProps) {
   const { toast } = useToast();
-  const { user } = useAuth();
-  const printRef = useRef<HTMLDivElement>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const estimateRef = useRef<HTMLDivElement>(null);
 
-  // Load saved form data from localStorage
-  const loadSavedData = () => {
-    try {
-      const saved = localStorage.getItem('estimateFormData');
-      return saved ? JSON.parse(saved) : {};
-    } catch {
-      return {};
-    }
+  const [estimateNumber, setEstimateNumber] = useState('');
+  const [projectTitle, setProjectTitle] = useState('');
+  const [prepWork, setPrepWork] = useState(0);
+  const [woodReconditioning, setWoodReconditioning] = useState(0);
+  const [drywallRepair, setDrywallRepair] = useState(0);
+  const [paintCost, setPaintCost] = useState(0);
+
+  const calculateTotal = () => {
+    const laborTotal = (prepWork + woodReconditioning + drywallRepair) * 60;
+    return laborTotal + paintCost;
   };
 
-  const savedData = loadSavedData();
-
-  const [estimateNumber, setEstimateNumber] = useState(savedData.estimateNumber || '');
-  const [projectTitle, setProjectTitle] = useState(savedData.projectTitle || '');
-  const [projectDescription, setProjectDescription] = useState(project?.notes || '');
-
-  // Auto-populated client info from project
-  const clientName = project?.clientName || '';
-  const clientEmail = project?.clientEmail || '';
-  const clientAddress = project?.address || '';
-  const clientCity = project?.clientCity || '';
-  const clientPostal = project?.clientPostal || '';
-  const clientPhone = project?.clientPhone || '';
-
-  // Work stages state with localStorage persistence
-  const [workStages, setWorkStages] = useState(savedData.workStages || [
-    { name: 'Prep', description: '', hours: '', rate: 60 },
-    { name: 'Priming', description: '', hours: '', rate: 60 },
-    { name: 'Painting', description: '', hours: '', rate: 60 },
-  ]);
-
-  // Paint costs state with localStorage persistence
-  const [primerCosts, setPrimerCosts] = useState(savedData.primerCosts || {
-    pricePerGallon: '',
-    gallons: '',
-    coats: '1'
-  });
-
-  const [paintCosts, setPaintCosts] = useState(savedData.paintCosts || {
-    pricePerGallon: '',
-    gallons: '',
-    coats: '2'
-  });
-
-  const [supplies, setSupplies] = useState(savedData.supplies || [
-    { name: 'Tape', unitCost: '', quantity: '', total: 0 },
-    { name: 'Brushes', unitCost: '', quantity: '', total: 0 },
-    { name: 'Rollers', unitCost: '', quantity: '', total: 0 }
-  ]);
-
-  // Travel costs state with localStorage persistence
-  const [travelCosts, setTravelCosts] = useState(savedData.travelCosts || {
-    ratePerKm: '0.50',
-    distance: '',
-    trips: '2'
-  });
-
-  // Additional labor state with localStorage persistence
-  const [additionalLabor, setAdditionalLabor] = useState(savedData.additionalLabor || [
-    { name: '', hours: '', rate: '' }
-  ]);
-
-  // Load global tax configuration from localStorage
-  const getGlobalTaxConfig = () => {
-    try {
-      const saved = localStorage.getItem('taxConfiguration');
-      return saved ? JSON.parse(saved) : {
-        country: 'CA',
-        gst: 5,
-        pst: 0,
-        hst: 0,
-        salesTax: 0,
-        vat: 0,
-        otherTax: 0
-      };
-    } catch {
-      return {
-        country: 'CA',
-        gst: 5,
-        pst: 0,
-        hst: 0,
-        salesTax: 0,
-        vat: 0,
-        otherTax: 0
-      };
-    }
-  };
-
-  // Toggle state for action buttons
-  const [actionMode, setActionMode] = useState<'download' | 'email'>('email');
-
-  // Save form data to localStorage whenever state changes
-  useEffect(() => {
-    const formData = {
-      estimateNumber,
-      projectTitle,
-      workStages,
-      primerCosts,
-      paintCosts,
-      supplies,
-      travelCosts,
-      additionalLabor
-    };
-    localStorage.setItem('estimateFormData', JSON.stringify(formData));
-  }, [estimateNumber, projectTitle, workStages, primerCosts, paintCosts, supplies, travelCosts, additionalLabor]);
-
-  // Clear all saved form data
-  const clearFormData = () => {
-    localStorage.removeItem('estimateFormData');
-    setEstimateNumber('');
-    setProjectTitle('');
-    setWorkStages([
-      { name: 'Prep', description: '', hours: '', rate: 60 },
-      { name: 'Priming', description: '', hours: '', rate: 60 },
-      { name: 'Painting', description: '', hours: '', rate: 60 },
-    ]);
-    setPrimerCosts({ pricePerGallon: '', gallons: '', coats: '1' });
-    setPaintCosts({ pricePerGallon: '', gallons: '', coats: '2' });
-    setSupplies([
-      { name: 'Tape', unitCost: '', quantity: '', total: 0 },
-      { name: 'Brushes', unitCost: '', quantity: '', total: 0 },
-      { name: 'Rollers', unitCost: '', quantity: '', total: 0 }
-    ]);
-    setTravelCosts({ ratePerKm: '0.50', distance: '', trips: '2' });
-    setAdditionalLabor([{ name: '', hours: '', rate: '' }]);
-    toast({
-      title: "Form Cleared",
-      description: "All estimate data has been reset.",
-    });
-  };
-
-  // Handle input changes for work stages
-  const updateWorkStage = (index: number, field: string, value: string | number) => {
-    const newStages = [...workStages];
-    newStages[index] = { ...newStages[index], [field]: value };
-    setWorkStages(newStages);
-  };
-
-  // Add new work stage
-  const addWorkStage = () => {
-    setWorkStages([...workStages, { name: '', description: '', hours: '', rate: 60 }]);
-  };
-
-  // Add new supply item
-  const addSupply = () => {
-    setSupplies([...supplies, { name: '', unitCost: '', quantity: '', total: 0 }]);
-  };
-
-  // Remove supply item
-  const removeSupply = (index: number) => {
-    setSupplies(supplies.filter((_, i) => i !== index));
-  };
-
-  // Add new labor member
-  const addLaborMember = () => {
-    setAdditionalLabor([...additionalLabor, { name: '', hours: '', rate: '' }]);
-  };
-
-  // Remove labor member
-  const removeLaborMember = (index: number) => {
-    setAdditionalLabor(additionalLabor.filter((_, i) => i !== index));
-  };
-
-  // Update labor member
-  const updateLaborMember = (index: number, field: string, value: string) => {
-    const newLabor = [...additionalLabor];
-    newLabor[index] = { ...newLabor[index], [field]: value };
-    setAdditionalLabor(newLabor);
-  };
-
-  // Update supply item
-  const updateSupply = (index: number, field: string, value: string) => {
-    const newSupplies = [...supplies];
-    newSupplies[index] = { ...newSupplies[index], [field]: value };
-    
-    if (field === 'unitCost' || field === 'quantity') {
-      const unitCost = parseFloat(newSupplies[index].unitCost) || 0;
-      const quantity = parseFloat(newSupplies[index].quantity) || 0;
-      newSupplies[index].total = unitCost * quantity;
-    }
-    
-    setSupplies(newSupplies);
-  };
-
-  // Remove work stage
-  const removeWorkStage = (index: number) => {
-    setWorkStages(workStages.filter((_, i) => i !== index));
-  };
-
-  // Calculate totals
-  const calculateStageTotal = (stage: typeof workStages[0]) => {
-    const hours = typeof stage.hours === 'string' ? parseFloat(stage.hours) || 0 : stage.hours;
-    return hours * stage.rate;
-  };
-
-  const calculatePrimerCosts = () => {
-    const pricePerGallon = parseFloat(primerCosts.pricePerGallon) || 0;
-    const gallons = parseFloat(primerCosts.gallons) || 0;
-    return pricePerGallon * gallons;
-  };
-
-  const calculatePaintCosts = () => {
-    const pricePerGallon = parseFloat(paintCosts.pricePerGallon) || 0;
-    const gallons = parseFloat(paintCosts.gallons) || 0;
-    return pricePerGallon * gallons;
-  };
-
-  const calculateSuppliesTotal = () => {
-    return supplies.reduce((sum, supply) => sum + supply.total, 0);
-  };
-
-  const calculateTravelTotal = () => {
-    const ratePerKm = parseFloat(travelCosts.ratePerKm) || 0;
-    const distance = parseFloat(travelCosts.distance) || 0;
-    const trips = parseFloat(travelCosts.trips) || 0;
-    return ratePerKm * distance * trips;
-  };
-
-  const calculateAdditionalLaborTotal = () => {
-    return additionalLabor.reduce((sum, member) => {
-      const hours = parseFloat(member.hours) || 0;
-      const rate = parseFloat(member.rate) || 0;
-      return sum + (hours * rate);
-    }, 0);
-  };
-
-  const calculateLaborSubtotal = () => workStages.reduce((sum, stage) => sum + calculateStageTotal(stage), 0) + calculateAdditionalLaborTotal();
-  const calculateMaterialsSubtotal = () => calculatePrimerCosts() + calculatePaintCosts() + calculateSuppliesTotal();
-  const calculateSubtotal = () => calculateLaborSubtotal() + calculateMaterialsSubtotal() + calculateTravelTotal();
-  
-  const calculateTaxes = () => {
-    const subtotal = calculateSubtotal();
-    const taxConfig = getGlobalTaxConfig();
-    let totalTax = 0;
-    
-    if (taxConfig.country === 'CA') {
-      totalTax += subtotal * ((taxConfig.gst || 0) / 100);
-      totalTax += subtotal * ((taxConfig.pst || taxConfig.hst || 0) / 100);
-    } else if (taxConfig.country === 'US') {
-      totalTax += subtotal * ((taxConfig.salesTax || 0) / 100);
-    } else if (taxConfig.country === 'OTHER') {
-      totalTax += subtotal * ((taxConfig.vat || 0) / 100);
-    }
-    
-    totalTax += subtotal * ((taxConfig.otherTax || 0) / 100);
-    return totalTax;
-  };
-  
-  const calculateTotal = () => calculateSubtotal() + calculateTaxes();
-
-  // Gmail OAuth email sending functionality
-  const sendGmailMutation = useMutation({
-    mutationFn: async (emailData: any) => {
-      // Check if user has Gmail connected
-      const statusResponse = await fetch(`/api/gmail/status/${user?.id}`);
-      const statusData = await statusResponse.json();
-      
-      if (!statusData.connected) {
-        // Fall back to clipboard system instead of throwing error
-        return { fallbackToClipboard: true };
-      }
-
-      const response = await fetch('/api/gmail/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: user?.id,
-          to: emailData.recipientEmail,
-          subject: `Painting Estimate from A-Frame Painting - EST ${emailData.estimateNumber}`,
-          message: `Dear ${emailData.clientName},
-
-Please find attached your painting estimate from A-Frame Painting.
-
-Project: ${emailData.projectTitle}
-Estimate Total: $${emailData.totalAmount}
-
-This estimate is valid for 30 days. If you have any questions or would like to proceed with the project, please don't hesitate to contact us.
-
-Thank you for considering A-Frame Painting for your project.
-
-Best regards,
-A-Frame Painting Team
-cortespainter@gmail.com`,
-          htmlMessage: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-              <h2 style="color: #EA580C;">Painting Estimate from A-Frame Painting</h2>
-              <p>Dear ${emailData.clientName},</p>
-              <p>Please find attached your painting estimate from A-Frame Painting.</p>
-              <ul>
-                <li><strong>Project:</strong> ${emailData.projectTitle}</li>
-                <li><strong>Estimate Total:</strong> <span style="color: #059669; font-weight: bold;">$${emailData.totalAmount}</span></li>
-              </ul>
-              <p>This estimate is valid for 30 days. If you have any questions or would like to proceed with the project, please don't hesitate to contact us.</p>
-              <p>Thank you for considering A-Frame Painting for your project.</p>
-              <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ccc;">
-                <p style="margin: 0;"><strong>A-Frame Painting Team</strong></p>
-                <p style="margin: 0;">cortespainter@gmail.com</p>
-              </div>
-            </div>
-          `,
-          attachments: emailData.pdfData ? [{
-            filename: `Estimate-${emailData.estimateNumber}-${emailData.clientName.replace(/\s+/g, '')}.pdf`,
-            content: emailData.pdfData.split(',')[1],
-            mimeType: 'application/pdf'
-          }] : []
-        })
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to send email');
-      }
-      
-      return response.json();
-    },
-    onSuccess: (result: any) => {
-      if (result?.fallbackToClipboard) {
-        // Trigger clipboard fallback
-        performEstimateClipboardFallback();
-      } else {
-        toast({
-          title: "Email sent successfully!",
-          description: "The estimate has been sent from your Gmail account.",
-        });
-        // Auto-close dialog after 5 seconds
-        setTimeout(() => {
-          onClose();
-        }, 5000);
-      }
-    },
-    onError: async (error: Error) => {
-      console.log('Gmail error:', error.message);
-      
-      // If Gmail OAuth is not connected, offer clipboard fallback
-      if (error.message.includes('Gmail account not connected') || error.message.includes('redirect_uri_mismatch')) {
-        const emailContent = `To: ${project.clientEmail || 'client@email.com'}
-Subject: Painting Estimate from A-Frame Painting - EST ${estimateNumber || '001'}
-
-Dear ${project.clientName || 'Valued Client'},
-
-Please find your painting estimate details below:
-
-Project: ${projectTitle || project.projectType}
-Total Estimate: $${grandTotal.toFixed(2)}
-
-Services & Labor:
-${workStages.map(stage => `• ${stage.name}: ${stage.hours}h × $${stage.rate}/hr = $${(stage.hours * stage.rate).toFixed(2)}`).join('\n')}
-
-${additionalLabor.length > 0 ? `Additional Labor:
-${additionalLabor.map(labor => `• ${labor.name}: ${labor.hours}h × $${labor.rate}/hr = $${(labor.hours * labor.rate).toFixed(2)}`).join('\n')}` : ''}
-
-${paintCosts.total > 0 ? `Paint & Materials: $${paintCosts.total.toFixed(2)}` : ''}
-${supplyCosts.total > 0 ? `Supplies: $${supplyCosts.total.toFixed(2)}` : ''}
-${travelCosts.total > 0 ? `Travel: $${travelCosts.total.toFixed(2)}` : ''}
-
-Subtotal: $${subtotal.toFixed(2)}
-${taxConfig.enabled ? `${taxConfig.country === 'canada' ? 'GST' : 'Tax'} (${taxConfig.rate}%): $${(subtotal * taxConfig.rate / 100).toFixed(2)}` : ''}
-TOTAL: $${grandTotal.toFixed(2)}
-
-This estimate is valid for 30 days. Please contact us with any questions.
-
-Best regards,
-A-Frame Painting Team
-cortespainter@gmail.com`;
-
-        try {
-          await navigator.clipboard.writeText(emailContent);
-          console.log('Estimate content copied to clipboard successfully');
-          toast({
-            title: "Gmail Setup Required",
-            description: "Estimate content copied to clipboard. Connect Gmail in Settings for direct sending, or paste this into your email app.",
-            duration: 8000,
-          });
-        } catch (clipboardError) {
-          console.error('Clipboard error:', clipboardError);
-          // Fallback: show the content in an alert
-          alert('Gmail not connected. Here is the estimate email content:\n\n' + emailContent);
-          toast({
-            title: "Gmail Connection Required",
-            description: "Please connect your Gmail account in Settings to send estimates directly. Email content shown in popup.",
-            variant: "destructive",
-          });
-        }
-      } else {
-        toast({
-          title: "Email failed",
-          description: error.message || "Failed to send estimate email. Please try again.",
-          variant: "destructive",
-        });
-      }
-    }
-  });
-
-  // Clipboard fallback function for estimates
-  const performEstimateClipboardFallback = async () => {
-    const emailContent = `To: ${project.clientEmail || 'client@email.com'}
-Subject: Painting Estimate from A-Frame Painting - EST ${estimateNumber || '001'}
-
-Dear ${project.clientName || 'Valued Client'},
-
-Please find your painting estimate details below:
-
-Project: ${projectTitle || project.projectType}
-Total Estimate: $${grandTotal.toFixed(2)}
-
-Services & Labor:
-${workStages.map(stage => `• ${stage.name}: ${stage.hours}h × $${stage.rate}/hr = $${(stage.hours * stage.rate).toFixed(2)}`).join('\n')}
-
-${additionalLabor.length > 0 ? `Additional Labor:
-${additionalLabor.map(labor => `• ${labor.name}: ${labor.hours}h × $${labor.rate}/hr = $${(labor.hours * labor.rate).toFixed(2)}`).join('\n')}` : ''}
-
-${paintCosts.total > 0 ? `Paint & Materials: $${paintCosts.total.toFixed(2)}` : ''}
-${supplyCosts.total > 0 ? `Supplies: $${supplyCosts.total.toFixed(2)}` : ''}
-${travelCosts.total > 0 ? `Travel: $${travelCosts.total.toFixed(2)}` : ''}
-
-Subtotal: $${subtotal.toFixed(2)}
-${taxConfig.enabled ? `${taxConfig.country === 'canada' ? 'GST' : 'Tax'} (${taxConfig.rate}%): $${(subtotal * taxConfig.rate / 100).toFixed(2)}` : ''}
-TOTAL: $${grandTotal.toFixed(2)}
-
-This estimate is valid for 30 days. Please contact us with any questions.
-
-Best regards,
-A-Frame Painting Team
-cortespainter@gmail.com`;
-
-    try {
-      await navigator.clipboard.writeText(emailContent);
-      toast({
-        title: "Email Ready!",
-        description: "Complete estimate email copied to clipboard. Open Gmail and paste!",
-        duration: 8000,
-      });
-      
-      // Auto-close dialog after 3 seconds
-      setTimeout(() => {
-        onClose();
-      }, 3000);
-      
-    } catch (clipboardError) {
-      console.error('Clipboard error:', clipboardError);
-      alert('Gmail not connected. Here is the estimate email content:\n\n' + emailContent);
-      toast({
-        title: "Gmail Setup Needed", 
-        description: "Connect Gmail in Settings for direct sending. Email content shown in popup.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  // Generate PDF using your HTML template
   const generatePDF = async () => {
-    try {
-      // Create HTML content using your exact template
-      const htmlContent = `
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>A-FRAME Estimate</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-  </head>
-  <body class="bg-black text-white font-sans p-8">
-    <!-- Header -->
-    <div class="flex justify-between items-start border-b border-gray-700 pb-4 mb-6">
-      <div>
-        <img src="/logo.png" alt="A-FRAME Logo" class="h-12 mb-2" />
-        <h1 class="text-2xl font-semibold">Estimate</h1>
-      </div>
-      <div class="text-right text-sm">
-        <p><span class="text-gray-400">Estimate #</span> ${estimateNumber || 'EST-001'}</p>
-        <p><span class="text-gray-400">Date:</span> ${new Date().toISOString().split('T')[0]}</p>
-      </div>
-    </div>
-
-    <!-- Contact Info -->
-    <div class="grid grid-cols-2 gap-4 mb-10">
-      <div>
-        <p class="text-gray-400 uppercase text-sm font-medium mb-1">Estimate For:</p>
-        <p class="font-semibold">${clientName || 'Client Name'}</p>
-        <p>${clientAddress || '123 Main St'}</p>
-        <p>${clientCity || 'City'}, ${clientPostal || 'Postal Code'}</p>
-        <p>${clientEmail || 'client@email.com'}</p>
-      </div>
-      <div class="text-right">
-        <p class="text-gray-400 uppercase text-sm font-medium mb-1">From:</p>
-        <p class="font-semibold">A-Frame Painting</p>
-        <p>884 Hayes Rd</p>
-        <p>Mansons Landing, BC</p>
-        <p>cortespainter@gmail.com</p>
-      </div>
-    </div>
-
-    <!-- Category Box Generator -->
-    <script>
-      const categories = [
-        {
-          title: 'Services & Labor',
-          color: 'border-red-500 text-red-500',
-          items: [
-            { label: 'Prep', price: '$480.00' },
-            { label: '8h × $60', price: '$480.00' },
-            { label: 'Priming', price: '$480.00' },
-            { label: '8h × $60', price: '$480.00' },
-          ],
-        },
-        {
-          title: 'Materials & Paint',
-          color: 'border-yellow-400 text-yellow-400',
-          items: [
-            { label: 'Paint & Supplies', price: '$665.00' },
-            { label: 'Delivery', price: '$50.00' },
-          ],
-        },
-        {
-          title: 'Additional Tools',
-          color: 'border-green-400 text-green-400',
-          items: [
-            { label: 'Drop Cloths', price: '$60.00' },
-          ],
-        },
-        {
-          title: 'Project Notes',
-          color: 'border-blue-400 text-blue-400',
-          items: [
-            { label: 'Exterior 4 Rooms', price: '' },
-          ],
-        },
-        {
-          title: 'Expenses',
-          color: 'border-purple-400 text-purple-400',
-          items: [
-            { label: '3 receipts • Materials', price: '$63.75' },
-          ],
-        },
-      ];
-    </script>
-
-    <div id="estimates"></div>
-
-    <script>
-      const container = document.getElementById('estimates');
-      categories.forEach(cat => {
-        const block = document.createElement('div');
-        block.className = \`mb-8\`;
-
-        const title = document.createElement('h2');
-        title.className = \`mb-2 text-lg font-semibold \${cat.color}\`;
-        title.textContent = cat.title;
-        block.appendChild(title);
-
-        const box = document.createElement('div');
-        box.className = \`border rounded-md border-opacity-50 p-4 \${cat.color} bg-gray-900\`;
-
-        cat.items.forEach(item => {
-          const row = document.createElement('div');
-          row.className = 'flex justify-between border-b border-gray-700 py-1';
-          row.innerHTML = \`<span>\${item.label}</span><span>\${item.price}</span>\`;
-          box.appendChild(row);
-        });
-
-        block.appendChild(box);
-        container.appendChild(block);
-      });
-    </script>
-
-    <!-- Totals Section -->
-    <div class="border-t border-gray-600 pt-4">
-      <div class="flex justify-between text-lg mb-2">
-        <span>Subtotal:</span>
-        <span>$${calculateSubtotal().toFixed(2)}</span>
-      </div>
-      ${calculateTaxes() > 0 ? `
-      <div class="flex justify-between text-lg mb-2">
-        <span>GST (${taxConfig.gst}%):</span>
-        <span>$${calculateTaxes().toFixed(2)}</span>
-      </div>
-      ` : ''}
-      <div class="flex justify-between text-xl font-bold border-t border-gray-500 pt-2">
-        <span>Estimate Total:</span>
-        <span>$${calculateTotal().toFixed(2)}</span>
-      </div>
-    </div>
-  </body>
-</html>`;
-
-      // Create a new window to render and print the HTML
-      const printWindow = window.open('', '_blank');
-      if (!printWindow) {
-        throw new Error('Could not open print window. Please allow popups.');
-      }
-      
-      printWindow.document.write(htmlContent);
-      printWindow.document.close();
-      
-      // Wait for content to load, then trigger print dialog
-      printWindow.onload = () => {
-        setTimeout(() => {
-          printWindow.print();
-          printWindow.close();
-        }, 500);
-      };
-
+    if (!estimateRef.current) {
       toast({
-        title: 'PDF Generated',
-        description: 'Estimate PDF opened for download.',
-      });
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to generate PDF.',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  // Generate PDF and send email
-  const sendEstimateEmail = async () => {
-    if (!clientEmail || !clientEmail.trim()) {
-      toast({
-        title: "Email Required",
-        description: "Please add client email to send estimate",
+        title: "Error",
+        description: "Estimate preview not ready. Please try again.",
         variant: "destructive",
       });
       return;
     }
 
     try {
-      // Generate PDF using browser's print functionality
-      const htmlContent = `
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>A-FRAME Estimate</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-  </head>
-  <body class="bg-black text-white font-sans p-8">
-    <!-- Header -->
-    <div class="flex justify-between items-start border-b border-gray-700 pb-4 mb-6">
-      <div>
-        <img src="/aframe-logo.png" alt="A-FRAME Logo" class="h-12 mb-2" />
-        <h1 class="text-2xl font-semibold">Estimate</h1>
-      </div>
-      <div class="text-right text-sm">
-        <p><span class="text-gray-400">Estimate #</span> ${estimateNumber || 'EST-001'}</p>
-        <p><span class="text-gray-400">Date:</span> ${new Date().toISOString().split('T')[0]}</p>
-      </div>
-    </div>
-
-    <!-- Contact Info -->
-    <div class="grid grid-cols-2 gap-4 mb-10">
-      <div>
-        <p class="text-gray-400 uppercase text-sm font-medium mb-1">Estimate For:</p>
-        <p class="font-semibold">${clientName || 'Client Name'}</p>
-        <p>${clientAddress || '123 Main St'}</p>
-        <p>${clientCity || 'City'}, ${clientPostal || 'Postal Code'}</p>
-        <p>${clientEmail || 'client@email.com'}</p>
-      </div>
-      <div class="text-right">
-        <p class="text-gray-400 uppercase text-sm font-medium mb-1">From:</p>
-        <p class="font-semibold">A-Frame Painting</p>
-        <p>884 Hayes Rd</p>
-        <p>Mansons Landing, BC</p>
-        <p>cortespainter@gmail.com</p>
-      </div>
-    </div>
-
-    <!-- Services & Labor (Red) -->
-    <div class="mb-8">
-      <h2 class="mb-2 text-lg font-semibold text-red-500">Services & Labor</h2>
-      <div class="border-2 rounded-md border-red-500 p-4 bg-gray-900">
-        ${workStages.map(stage => 
-          stage.hours ? `<div class="flex justify-between border-b border-gray-700 py-1">
-            <span>${stage.name} - ${stage.hours}h × $${stage.rate}/hr</span>
-            <span>$${(parseFloat(stage.hours) * stage.rate).toFixed(2)}</span>
-          </div>` : ''
-        ).join('')}
-        ${additionalLabor.map(labor => 
-          labor.name && labor.hours && labor.rate ? `<div class="flex justify-between border-b border-gray-700 py-1">
-            <span>${labor.name} - ${labor.hours}h × $${labor.rate}/hr</span>
-            <span>$${(parseFloat(labor.hours) * parseFloat(labor.rate)).toFixed(2)}</span>
-          </div>` : ''
-        ).join('')}
-      </div>
-    </div>
-
-    <!-- Paint & Materials (Orange) -->
-    ${(primerCosts.pricePerGallon && primerCosts.gallons) || (paintCosts.pricePerGallon && paintCosts.gallons) ? `
-    <div class="mb-8">
-      <h2 class="mb-2 text-lg font-semibold text-orange-500">Paint & Materials</h2>
-      <div class="border-2 rounded-md border-orange-500 p-4 bg-gray-900">
-        ${primerCosts.pricePerGallon && primerCosts.gallons ? `<div class="flex justify-between border-b border-gray-700 py-1">
-          <span>Primer (${primerCosts.gallons} gal × ${primerCosts.coats} coats)</span>
-          <span>$${(parseFloat(primerCosts.pricePerGallon) * parseFloat(primerCosts.gallons) * parseFloat(primerCosts.coats)).toFixed(2)}</span>
-        </div>` : ''}
-        ${paintCosts.pricePerGallon && paintCosts.gallons ? `<div class="flex justify-between border-b border-gray-700 py-1">
-          <span>Paint (${paintCosts.gallons} gal × ${paintCosts.coats} coats)</span>
-          <span>$${(parseFloat(paintCosts.pricePerGallon) * parseFloat(paintCosts.gallons) * parseFloat(paintCosts.coats)).toFixed(2)}</span>
-        </div>` : ''}
-      </div>
-    </div>` : ''}
-
-    <!-- Supply Costs (Yellow) -->
-    ${supplies.some(supply => supply.unitCost && supply.quantity) ? `
-    <div class="mb-8">
-      <h2 class="mb-2 text-lg font-semibold text-yellow-400">Supply Costs</h2>
-      <div class="border-2 rounded-md border-yellow-400 p-4 bg-gray-900">
-        ${supplies.map(supply => 
-          supply.unitCost && supply.quantity ? `<div class="flex justify-between border-b border-gray-700 py-1">
-            <span>${supply.name} (${supply.quantity} × $${supply.unitCost})</span>
-            <span>$${(parseFloat(supply.unitCost) * parseFloat(supply.quantity)).toFixed(2)}</span>
-          </div>` : ''
-        ).join('')}
-      </div>
-    </div>` : ''}
-
-    <!-- Travel Costs (Green) -->
-    ${travelCosts.distance && parseFloat(travelCosts.distance) > 0 ? `
-    <div class="mb-8">
-      <h2 class="mb-2 text-lg font-semibold text-green-400">Travel Costs</h2>
-      <div class="border-2 rounded-md border-green-400 p-4 bg-gray-900">
-        <div class="flex justify-between border-b border-gray-700 py-1">
-          <span>${travelCosts.distance} km × ${travelCosts.trips} trips × $${travelCosts.ratePerKm}/km</span>
-          <span>$${(parseFloat(travelCosts.distance) * parseFloat(travelCosts.trips) * parseFloat(travelCosts.ratePerKm)).toFixed(2)}</span>
-        </div>
-      </div>
-    </div>` : ''}
-
-
-
-    <!-- Totals Section -->
-    <div class="border-t border-gray-600 pt-4">
-      <div class="flex justify-between text-lg mb-2">
-        <span>Subtotal:</span>
-        <span>$${calculateSubtotal().toFixed(2)}</span>
-      </div>
-      ${calculateTaxes() > 0 ? `
-      <div class="flex justify-between text-lg mb-2">
-        <span>GST (${taxConfig.gst}%):</span>
-        <span>$${calculateTaxes().toFixed(2)}</span>
-      </div>
-      ` : ''}
-      <div class="flex justify-between text-xl font-bold border-t border-gray-500 pt-2">
-        <span>Estimate Total:</span>
-        <span>$${calculateTotal().toFixed(2)}</span>
-      </div>
-    </div>
-  </body>
-</html>`;
-
-      // Create invisible iframe instead of popup window
-      const iframe = document.createElement('iframe');
-      iframe.style.position = 'fixed';
-      iframe.style.left = '-9999px';
-      iframe.style.top = '-9999px';
-      iframe.style.width = '800px';
-      iframe.style.height = '600px';
-      iframe.style.visibility = 'hidden';
-      document.body.appendChild(iframe);
-
-      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-      if (!iframeDoc) {
-        throw new Error('Could not access iframe document');
-      }
-
-      iframeDoc.write(htmlContent);
-      iframeDoc.close();
+      setIsGenerating(true);
       
-      // Wait for content to load
-      await new Promise((resolve) => {
-        iframe.onload = () => {
-          setTimeout(resolve, 1000);
-        };
-      });
+      // Show the estimate preview element for capture
+      const originalStyles = {
+        position: estimateRef.current.style.position,
+        opacity: estimateRef.current.style.opacity,
+        pointerEvents: estimateRef.current.style.pointerEvents,
+        top: estimateRef.current.style.top,
+        left: estimateRef.current.style.left
+      };
 
+      estimateRef.current.style.position = 'fixed';
+      estimateRef.current.style.opacity = '1';
+      estimateRef.current.style.pointerEvents = 'auto';
+      estimateRef.current.style.top = '0px';
+      estimateRef.current.style.left = '0px';
+      
+      // Wait for rendering
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       // Capture as canvas and convert to PDF
-      const canvas = await html2canvas(iframeDoc.body, {
+      const canvas = await html2canvas(estimateRef.current, {
         backgroundColor: '#000000',
         scale: 1,
         useCORS: true,
         allowTaint: true
       });
-
-      // Clean up iframe
-      document.body.removeChild(iframe);
-
-      // Convert canvas to PDF - single page only
+      
+      // Restore original styles
+      Object.assign(estimateRef.current.style, originalStyles);
+      
+      // Convert to PDF
       const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgData = canvas.toDataURL('image/jpeg', 0.7);
-      const imgWidth = 210;
-      const pageHeight = 295;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
       
-      // Fit content to single page
-      const finalHeight = Math.min(imgHeight, pageHeight);
-      pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, finalHeight);
-
-      // Convert PDF to base64
-      const pdfData = pdf.output('datauristring');
-
-      // Check if user has Gmail OAuth connected first
-      const gmailStatusResponse = await fetch(`/api/gmail/status/1`); // Using userId 1 for now
-      const gmailStatus = await gmailStatusResponse.json();
+      const imgWidth = pdfWidth;
+      const imgHeight = (canvas.height * pdfWidth) / canvas.width;
       
-      if (gmailStatus.connected) {
-        // Use Gmail OAuth API - sends from user's personal Gmail account
-        const pdfBase64 = pdfData.includes(',') ? pdfData.split(',')[1] : pdfData;
-        
-        const gmailResponse = await fetch('/api/gmail/send', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId: 1, // Using userId 1 for now
-            to: clientEmail,
-            subject: `Estimate #${estimateNumber || 'EST-001'} - A-Frame Painting`,
-            message: `Dear ${clientName || 'Valued Client'},\n\nPlease find attached your painting estimate.\n\nBest regards,\nA-Frame Painting`,
-            htmlMessage: `
-              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: white; color: black;">
-                <h2 style="color: #EA580C;">Estimate from A-Frame Painting</h2>
-                <p>Dear ${clientName || 'Valued Client'},</p>
-                <p>Please find attached your detailed painting estimate for ${projectTitle || 'your project'}.</p>
-                <div style="background-color: #ea580c; color: white; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: center;">
-                  <h3 style="margin: 0;">Total Estimate: $${calculateTotal().toFixed(2)}</h3>
-                </div>
-                <p>This estimate is valid for 30 days. Please let us know if you have any questions.</p>
-                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ccc;">
-                  <p style="margin: 0;"><strong>A-Frame Painting</strong></p>
-                  <p style="margin: 0;">${gmailStatus.gmailAddress}</p>
-                  <p style="margin: 0;">884 Hayes Rd, Manson's Landing, BC V0P1K0</p>
-                </div>
-              </div>
-            `,
-            attachments: [{
-              filename: `Estimate-${estimateNumber || 'EST-001'}-${(clientName || 'Client').replace(/\s+/g, '-')}.pdf`,
-              content: pdfBase64,
-              mimeType: 'application/pdf'
-            }]
-          })
-        });
-        
-        if (!gmailResponse.ok) {
-          const error = await gmailResponse.json();
-          throw new Error(error.error || 'Failed to send via Gmail OAuth');
-        }
-        
-        toast({
-          title: "Estimate Sent via Gmail!",
-          description: `Estimate sent from your Gmail account (${gmailStatus.gmailAddress}) to ${clientEmail}`,
-        });
-        
-      } else {
-        // Fallback to server SMTP system
-        const pdfBase64 = pdfData.includes(',') ? pdfData.split(',')[1] : pdfData;
-        
-        const response = await fetch('/api/send-estimate-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            recipientEmail: clientEmail,
-            clientName: clientName || 'Client',
-            estimateNumber: estimateNumber || 'EST-001',
-            projectTitle: projectTitle || 'Painting Estimate',
-            totalAmount: calculateTotal().toFixed(2),
-            customMessage: '',
-            pdfData: pdfBase64
-          })
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.error || 'Failed to send estimate email');
-        }
-
-        toast({
-          title: "Estimate Sent via Server!",
-          description: `Estimate sent to ${clientEmail} (Connect Gmail in Settings for personal account sending)`,
-        });
-      }
-    } catch (error: any) {
-      console.error('Email preparation failed:', error);
+      const imageData = canvas.toDataURL('image/jpeg', 0.7);
+      pdf.addImage(imageData, 'JPEG', 0, 0, imgWidth, imgHeight);
+      
+      // Download PDF
+      pdf.save(`Estimate-${estimateNumber || 'EST-001'}-${project.clientName.replace(/\s+/g, '-')}.pdf`);
+      
       toast({
-        title: "Error",
-        description: error.message || "Failed to send estimate email",
+        title: "PDF Generated",
+        description: "Estimate PDF has been downloaded successfully.",
+      });
+      
+    } catch (error: any) {
+      console.error('PDF Generation Error:', error);
+      toast({
+        title: "PDF Generation Failed",
+        description: error.message || "Failed to generate PDF. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const sendEstimateEmail = async () => {
+    if (!estimateNumber || !project?.clientEmail) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in estimate number and ensure client has an email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsSending(true);
+      
+      // Generate PDF for email
+      if (!estimateRef.current) {
+        throw new Error('Estimate preview not ready');
+      }
+
+      // Show the estimate preview element for capture
+      const originalStyles = {
+        position: estimateRef.current.style.position,
+        opacity: estimateRef.current.style.opacity,
+        pointerEvents: estimateRef.current.style.pointerEvents,
+        top: estimateRef.current.style.top,
+        left: estimateRef.current.style.left
+      };
+
+      estimateRef.current.style.position = 'fixed';
+      estimateRef.current.style.opacity = '1';
+      estimateRef.current.style.pointerEvents = 'auto';
+      estimateRef.current.style.top = '0px';
+      estimateRef.current.style.left = '0px';
+      
+      // Wait for rendering
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Capture as canvas and convert to PDF
+      const canvas = await html2canvas(estimateRef.current, {
+        backgroundColor: '#000000',
+        scale: 1,
+        useCORS: true,
+        allowTaint: true
+      });
+      
+      // Restore original styles
+      Object.assign(estimateRef.current.style, originalStyles);
+      
+      // Convert to PDF
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      
+      const imgWidth = pdfWidth;
+      const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      const imageData = canvas.toDataURL('image/jpeg', 0.7);
+      pdf.addImage(imageData, 'JPEG', 0, 0, imgWidth, imgHeight);
+      
+      // Convert PDF to base64
+      const pdfData = pdf.output('datauristring');
+      const pdfBase64 = pdfData.includes(',') ? pdfData.split(',')[1] : pdfData;
+      
+      // Send via server email
+      const response = await fetch('/api/send-estimate-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          recipientEmail: project.clientEmail,
+          clientName: project.clientName || 'Client',
+          estimateNumber: estimateNumber || 'EST-001',
+          projectTitle: projectTitle || 'Painting Estimate',
+          totalAmount: calculateTotal().toFixed(2),
+          customMessage: '',
+          pdfData: pdfBase64
+        })
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to send estimate email');
+      }
+
+      toast({
+        title: "Estimate Sent!",
+        description: `Estimate sent to ${project.clientEmail}`,
+      });
+      
+    } catch (error: any) {
+      console.error('Email Send Error:', error);
+      toast({
+        title: "Email Send Failed",
+        description: error.message || "Failed to send estimate email. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSending(false);
     }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent 
-        className="w-screen max-w-md h-screen p-4 sm:max-w-3xl sm:h-auto overflow-hidden"
-        style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}
-      >
+      <DialogContent className="w-screen max-w-md h-screen p-4 sm:max-w-3xl sm:h-auto overflow-y-auto">
         <DialogHeader>
-          <div className="flex justify-between items-center">
-            <DialogTitle className="text-xl font-bold mb-4">Generate Estimate</DialogTitle>
-            <Button 
-              onClick={clearFormData}
-              variant="outline"
-              size="sm"
-              className="text-xs"
-            >
-              Clear Form
-            </Button>
-          </div>
+          <DialogTitle className="text-orange-500">Generate Estimate</DialogTitle>
         </DialogHeader>
 
-        <div
-          ref={printRef}
-          className="overflow-y-auto max-h-[calc(100vh-160px)] pr-2"
-        >
-          {/* Client Info (read-only) */}
-          <Card className="mb-4 border-2 border-[#D4A574]">
-            <CardHeader>
-              <CardTitle className="text-lg text-[#D4A574]">Client Information</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <Input value={clientName} readOnly placeholder="Client Name" />
-              <Input value={clientEmail} readOnly placeholder="Client Email" />
-              <Input value={clientAddress} readOnly placeholder="Client Address" />
-              <Input value={clientCity} readOnly placeholder="City" />
-              <Input value={clientPostal} readOnly placeholder="Postal Code" />
-              <Input value={clientPhone} readOnly placeholder="Phone" />
-            </CardContent>
-          </Card>
-
-          {/* Estimate Details */}
-          <Card className="mb-4 border-2 border-[#569CD6]">
-            <CardHeader>
-              <CardTitle className="text-lg text-[#569CD6]">Estimate Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
+        <div className="space-y-6">
+          {/* Basic Information */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="estimateNumber">Estimate Number</Label>
               <Input
-                placeholder="Estimate Number"
+                id="estimateNumber"
                 value={estimateNumber}
                 onChange={(e) => setEstimateNumber(e.target.value)}
+                placeholder="EST-001"
+                className="bg-gray-800 border-gray-600 text-white"
               />
+            </div>
+            <div>
+              <Label htmlFor="projectTitle">Project Title</Label>
               <Input
-                type="date"
-                value={new Date().toISOString().split('T')[0]}
-                readOnly
-              />
-              <Input
-                placeholder="Project Title"
+                id="projectTitle"
                 value={projectTitle}
                 onChange={(e) => setProjectTitle(e.target.value)}
+                placeholder="Painting Project"
+                className="bg-gray-800 border-gray-600 text-white"
               />
-              <Textarea
-                placeholder="Project Description"
-                value={projectDescription}
-                onChange={(e) => setProjectDescription(e.target.value)}
-              />
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Work Stages */}
-          <Card className="mb-4 border-2 border-[#6A9955]">
-            <CardHeader className="flex justify-between items-center">
-              <CardTitle className="text-lg text-[#6A9955]">Work Breakdown</CardTitle>
-              <Button size="sm" onClick={addWorkStage} className="bg-[#6A9955] hover:bg-[#5a8245]">+ Add Stage</Button>
-            </CardHeader>
-            <CardContent>
-              {workStages.map((stage, i) => (
-                <div
-                  key={i}
-                  className="mb-3 border-2 border-[#6A9955] bg-[#6A9955]/10 rounded p-3"
-                >
-                  <Input
-                    placeholder="Stage Name"
-                    value={stage.name}
-                    onChange={(e) => updateWorkStage(i, 'name', e.target.value)}
-                    className="mb-1"
-                  />
-                  <Textarea
-                    placeholder="Description"
-                    value={stage.description}
-                    onChange={(e) => updateWorkStage(i, 'description', e.target.value)}
-                    className="mb-1"
-                    rows={2}
-                  />
-                  <div className="flex gap-2">
-                    <Input
-                      type="number"
-                      placeholder="Hours"
-                      value={stage.hours}
-                      onChange={(e) => updateWorkStage(i, 'hours', e.target.value)}
-                      className="flex-1"
-                      min={0}
-                    />
-                    <Input
-                      type="number"
-                      placeholder="Rate"
-                      value={stage.rate}
-                      onChange={(e) => updateWorkStage(i, 'rate', Number(e.target.value))}
-                      className="flex-1"
-                      min={0}
-                    />
-                    <Input
-                      placeholder="Total"
-                      value={calculateStageTotal(stage).toFixed(2)}
-                      readOnly
-                      className="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                    />
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => removeWorkStage(i)}
-                    className="mt-2 bg-[#E03E3E] hover:bg-[#c63535]"
-                  >
-                    Remove
-                  </Button>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-
-          {/* Additional Labor */}
-          <Card className="mb-4 border-2 border-[#4ECDC4]">
-            <CardHeader>
-              <CardTitle className="text-lg text-[#4ECDC4]">Additional Labor</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex justify-between items-center mb-2">
-                <h4 className="font-medium">Crew Members</h4>
-                <Button size="sm" onClick={addLaborMember} className="bg-[#4ECDC4] hover:bg-[#45b3b8] text-black">
-                  <Plus className="w-4 h-4 mr-1" />
-                  Add Member
-                </Button>
-              </div>
-              {additionalLabor.map((member, i) => (
-                <div key={i} className="border border-[#4ECDC4] rounded p-3 mb-2 bg-[#4ECDC4]/10">
-                  <div className="grid grid-cols-4 gap-2 mb-2">
-                    <Input
-                      placeholder="Name"
-                      value={member.name}
-                      onChange={(e) => updateLaborMember(i, 'name', e.target.value)}
-                    />
-                    <Input
-                      type="number"
-                      placeholder="Hours"
-                      value={member.hours}
-                      onChange={(e) => updateLaborMember(i, 'hours', e.target.value)}
-                    />
-                    <Input
-                      type="number"
-                      placeholder="Rate/hour"
-                      value={member.rate}
-                      onChange={(e) => updateLaborMember(i, 'rate', e.target.value)}
-                    />
-                    <Input
-                      placeholder="Total"
-                      value={((parseFloat(member.hours) || 0) * (parseFloat(member.rate) || 0)).toFixed(2)}
-                      readOnly
-                      className="bg-gray-100 dark:bg-gray-700"
-                    />
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => removeLaborMember(i)}
-                    className="bg-[#E03E3E] hover:bg-[#c63535]"
-                  >
-                    <Trash2 className="w-4 h-4 mr-1" />
-                    Remove
-                  </Button>
-                </div>
-              ))}
-              <div className="text-right font-medium">
-                Additional Labor Total: ${calculateAdditionalLaborTotal().toFixed(2)}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Supply Costs */}
-          <Card className="mb-4 border-2 border-[#DCDCAA]">
-            <CardHeader>
-              <CardTitle className="text-lg text-[#DCDCAA]">Supply Costs</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Primer Costs */}
-              <div className="border border-[#DCDCAA] rounded p-3 bg-[#DCDCAA]/10">
-                <h4 className="font-medium mb-2">Primer</h4>
-                <div className="grid grid-cols-3 gap-2">
-                  <Input
-                    type="number"
-                    placeholder="Price per gallon"
-                    value={primerCosts.pricePerGallon}
-                    onChange={(e) => setPrimerCosts({...primerCosts, pricePerGallon: e.target.value})}
-                  />
-                  <Input
-                    type="number"
-                    placeholder="Gallons"
-                    value={primerCosts.gallons}
-                    onChange={(e) => setPrimerCosts({...primerCosts, gallons: e.target.value})}
-                  />
-                  <Select value={primerCosts.coats} onValueChange={(value) => setPrimerCosts({...primerCosts, coats: value})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Coats" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-black border border-gray-600">
-                      <SelectItem value="0" className="text-white hover:bg-gray-800">0 coats</SelectItem>
-                      <SelectItem value="1" className="text-white hover:bg-gray-800">1 coat</SelectItem>
-                      <SelectItem value="2" className="text-white hover:bg-gray-800">2 coats</SelectItem>
-                      <SelectItem value="3" className="text-white hover:bg-gray-800">3 coats</SelectItem>
-                      <SelectItem value="4" className="text-white hover:bg-gray-800">4 coats</SelectItem>
-                      <SelectItem value="5" className="text-white hover:bg-gray-800">5 coats</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="mt-2 text-right font-medium">
-                  Primer Total: ${calculatePrimerCosts().toFixed(2)}
-                </div>
-              </div>
-
-              {/* Paint Costs */}
-              <div className="border border-[#DCDCAA] rounded p-3 bg-[#DCDCAA]/10">
-                <h4 className="font-medium mb-2">Paint</h4>
-                <div className="grid grid-cols-3 gap-2">
-                  <Input
-                    type="number"
-                    placeholder="Price per gallon"
-                    value={paintCosts.pricePerGallon}
-                    onChange={(e) => setPaintCosts({...paintCosts, pricePerGallon: e.target.value})}
-                  />
-                  <Input
-                    type="number"
-                    placeholder="Gallons"
-                    value={paintCosts.gallons}
-                    onChange={(e) => setPaintCosts({...paintCosts, gallons: e.target.value})}
-                  />
-                  <Select value={paintCosts.coats} onValueChange={(value) => setPaintCosts({...paintCosts, coats: value})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Coats" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-black border border-gray-600">
-                      <SelectItem value="1" className="text-white hover:bg-gray-800">1 coat</SelectItem>
-                      <SelectItem value="2" className="text-white hover:bg-gray-800">2 coats</SelectItem>
-                      <SelectItem value="3" className="text-white hover:bg-gray-800">3 coats</SelectItem>
-                      <SelectItem value="4" className="text-white hover:bg-gray-800">4 coats</SelectItem>
-                      <SelectItem value="5" className="text-white hover:bg-gray-800">5 coats</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="mt-2 text-right font-medium">
-                  Paint Total: ${calculatePaintCosts().toFixed(2)}
-                </div>
-              </div>
-
-              {/* Other Supplies */}
+          <div>
+            <h3 className="text-lg font-semibold text-green-500 mb-3">Services & Labor</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <div className="flex justify-between items-center mb-2">
-                  <h4 className="font-medium">Other Supplies</h4>
-                  <Button size="sm" onClick={addSupply} className="bg-[#DCDCAA] hover:bg-[#c5c593] text-black">
-                    <Plus className="w-4 h-4 mr-1" />
-                    Add Supply
-                  </Button>
-                </div>
-                {supplies.map((supply, i) => (
-                  <div key={i} className="border border-[#DCDCAA] rounded p-3 mb-2 bg-[#DCDCAA]/10">
-                    <div className="grid grid-cols-4 gap-2 mb-2">
-                      <Input
-                        placeholder="Item name"
-                        value={supply.name}
-                        onChange={(e) => updateSupply(i, 'name', e.target.value)}
-                      />
-                      <Input
-                        type="number"
-                        placeholder="Price"
-                        value={supply.unitCost}
-                        onChange={(e) => updateSupply(i, 'unitCost', e.target.value)}
-                      />
-                      <Input
-                        type="number"
-                        placeholder="Quantity"
-                        value={supply.quantity}
-                        onChange={(e) => updateSupply(i, 'quantity', e.target.value)}
-                      />
-                      <Input
-                        placeholder="Total"
-                        value={supply.total.toFixed(2)}
-                        readOnly
-                        className="bg-gray-100 dark:bg-gray-700"
-                      />
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => removeSupply(i)}
-                      className="bg-[#E03E3E] hover:bg-[#c63535]"
-                    >
-                      <Trash2 className="w-4 h-4 mr-1" />
-                      Remove
-                    </Button>
-                  </div>
-                ))}
-                <div className="text-right font-medium">
-                  Supplies Total: ${calculateSuppliesTotal().toFixed(2)}
-                </div>
+                <Label htmlFor="prepWork">Prep/Priming/Painting (hours)</Label>
+                <Input
+                  id="prepWork"
+                  type="number"
+                  inputMode="numeric"
+                  value={prepWork || ''}
+                  onChange={(e) => setPrepWork(parseFloat(e.target.value) || 0)}
+                  placeholder="0"
+                  className="bg-gray-800 border-gray-600 text-white"
+                />
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Travel Costs */}
-          <Card className="mb-4 border-2 border-[#FF6B6B]">
-            <CardHeader>
-              <CardTitle className="text-lg text-[#FF6B6B]">Travel Costs</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="border border-[#FF6B6B] rounded p-3 bg-[#FF6B6B]/10">
-                <div className="grid grid-cols-3 gap-2">
-                  <Input
-                    type="number"
-                    placeholder="Rate per km"
-                    value={travelCosts.ratePerKm}
-                    onChange={(e) => setTravelCosts({...travelCosts, ratePerKm: e.target.value})}
-                  />
-                  <Input
-                    type="number"
-                    placeholder="Distance (km)"
-                    value={travelCosts.distance}
-                    onChange={(e) => setTravelCosts({...travelCosts, distance: e.target.value})}
-                  />
-                  <Input
-                    type="number"
-                    placeholder="Number of trips"
-                    value={travelCosts.trips}
-                    onChange={(e) => setTravelCosts({...travelCosts, trips: e.target.value})}
-                  />
-                </div>
-                <div className="mt-2 text-right font-medium">
-                  Travel Total: ${calculateTravelTotal().toFixed(2)}
-                </div>
+              <div>
+                <Label htmlFor="woodReconditioning">Wood Reconditioning (hours)</Label>
+                <Input
+                  id="woodReconditioning"
+                  type="number"
+                  inputMode="numeric"
+                  value={woodReconditioning || ''}
+                  onChange={(e) => setWoodReconditioning(parseFloat(e.target.value) || 0)}
+                  placeholder="0"
+                  className="bg-gray-800 border-gray-600 text-white"
+                />
               </div>
-            </CardContent>
-          </Card>
-
-
-
-          {/* Summary */}
-          <Card className="mb-4 border-2 border-[#8B5FBF]">
-            <CardHeader>
-              <CardTitle className="text-lg text-[#8B5FBF]">Summary</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span>Labor:</span>
-                  <span>${calculateLaborSubtotal().toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Materials:</span>
-                  <span>${calculateMaterialsSubtotal().toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Travel:</span>
-                  <span>${calculateTravelTotal().toFixed(2)}</span>
-                </div>
-                <div className="border-t pt-2">
-                  <div className="flex justify-between">
-                    <span>Subtotal:</span>
-                    <span>${calculateSubtotal().toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Taxes:</span>
-                    <span>${calculateTaxes().toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between font-bold text-lg">
-                    <span>Total:</span>
-                    <span>${calculateTotal().toFixed(2)}</span>
-                  </div>
-                </div>
+              <div>
+                <Label htmlFor="drywallRepair">Drywall Repair (hours)</Label>
+                <Input
+                  id="drywallRepair"
+                  type="number"
+                  inputMode="numeric"
+                  value={drywallRepair || ''}
+                  onChange={(e) => setDrywallRepair(parseFloat(e.target.value) || 0)}
+                  placeholder="0"
+                  className="bg-gray-800 border-gray-600 text-white"
+                />
               </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="mt-4 space-y-3">
-          <div className="flex justify-between gap-2 items-end">
-            <Button variant="outline" onClick={onClose} className="flex-1">Cancel</Button>
-            <div className="flex flex-col items-center gap-2">
-              {/* Toggle Switch - positioned over send email button */}
-              <div className="relative inline-flex items-center">
-                <button
-                  onClick={() => setActionMode(actionMode === 'email' ? 'download' : 'email')}
-                  className={`relative inline-flex h-10 w-20 items-center rounded-full transition-colors duration-200 focus:outline-none ${
-                    actionMode === 'email' ? 'bg-[#569CD6]' : 'bg-[#6A9955]'
-                  }`}
-                >
-                  <span
-                    className={`inline-block h-8 w-8 transform rounded-full bg-white transition-transform duration-200 ${
-                      actionMode === 'email' ? 'translate-x-1' : 'translate-x-11'
-                    }`}
-                  />
-                  <Mail 
-                    className={`absolute left-2 h-4 w-4 transition-opacity duration-200 ${
-                      actionMode === 'email' ? 'text-white opacity-100' : 'text-white opacity-60'
-                    }`} 
-                    style={{ color: '#FFFFFF' }}
-                  />
-                  <Download 
-                    className={`absolute right-2 h-4 w-4 transition-opacity duration-200 ${
-                      actionMode === 'download' ? 'text-white opacity-100' : 'text-white opacity-60'
-                    }`} 
-                    style={{ color: '#FFFFFF' }}
-                  />
-                </button>
-              </div>
-              
-              {/* Action Button */}
-              {actionMode === 'email' ? (
-                <Button 
-                  onClick={sendEstimateEmail} 
-                  className="bg-[#569CD6] hover:bg-[#4a8bc2] min-w-[120px]"
-                  disabled={sendGmailMutation.isPending}
-                >
-                  <Mail className="w-4 h-4 mr-2" />
-                  {sendGmailMutation.isPending ? 'Sending...' : 'Send Email'}
-                </Button>
-              ) : (
-                <Button onClick={generatePDF} className="bg-[#6A9955] hover:bg-[#5a8245] min-w-[120px]">
-                  <Download className="w-4 h-4 mr-2" />
-                  Download PDF
-                </Button>
-              )}
             </div>
+          </div>
+
+          {/* Paint Costs */}
+          <div>
+            <h3 className="text-lg font-semibold text-yellow-500 mb-3">Paint & Materials</h3>
+            <div>
+              <Label htmlFor="paintCost">Paint Cost ($)</Label>
+              <Input
+                id="paintCost"
+                type="number"
+                inputMode="decimal"
+                value={paintCost || ''}
+                onChange={(e) => setPaintCost(parseFloat(e.target.value) || 0)}
+                placeholder="0.00"
+                className="bg-gray-800 border-gray-600 text-white"
+              />
+            </div>
+          </div>
+
+          {/* Total */}
+          <div className="bg-green-600 text-white p-4 rounded-md text-center">
+            <div className="text-2xl font-bold">
+              Total Estimate: ${calculateTotal().toFixed(2)}
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button
+              onClick={generatePDF}
+              disabled={isGenerating}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              <Download size={18} className="mr-2" />
+              {isGenerating ? 'Generating...' : 'Download PDF'}
+            </Button>
+            <Button
+              onClick={sendEstimateEmail}
+              disabled={isSending || !project?.clientEmail}
+              className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
+            >
+              <Mail size={18} className="mr-2" />
+              {isSending ? 'Sending...' : 'Send Email'}
+            </Button>
           </div>
         </div>
       </DialogContent>
+
+      {/* Estimate Preview (for PDF generation) */}
+      <div 
+        ref={estimateRef} 
+        className="fixed -top-[9999px] -left-[9999px] w-[794px] opacity-0 pointer-events-none"
+        style={{ backgroundColor: '#000000', color: '#fff', minHeight: '1200px' }}
+      >
+        <div className="p-8">
+          {/* Header Section */}
+          <div className="mb-8 text-center">
+            <img 
+              src="/aframe-logo.png" 
+              alt="A-Frame Painting Logo" 
+              className="h-24 w-auto mx-auto mb-4"
+            />
+            <h1 className="text-3xl font-bold text-orange-500">ESTIMATE</h1>
+          </div>
+          
+          {/* Client and Project Info */}
+          <div className="grid grid-cols-2 gap-8 mb-8">
+            <div>
+              <h3 className="text-lg font-semibold mb-3 text-orange-500">Client Information</h3>
+              <p className="font-semibold">{project.clientName}</p>
+              <p>{project.address}</p>
+              <p>{project.clientCity}, {project.clientPostal}</p>
+              <p>{project.clientPhone}</p>
+              <p>{project.clientEmail}</p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-3 text-orange-500">Project Details</h3>
+              <p><strong>Project:</strong> {projectTitle || 'Painting Project'}</p>
+              <p><strong>Date:</strong> {new Date().toLocaleDateString()}</p>
+              <p><strong>Estimate #:</strong> {estimateNumber || 'EST-001'}</p>
+            </div>
+          </div>
+
+          {/* Services & Labor Section */}
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold mb-3 text-green-500">Services & Labor</h2>
+            <div className="border-2 border-green-500 bg-gray-900 p-4 rounded">
+              {prepWork > 0 && (
+                <div className="flex justify-between py-1 border-b border-gray-700">
+                  <span>Prep/Priming/Painting - {prepWork}h × $60/hr</span>
+                  <span>${(prepWork * 60).toFixed(2)}</span>
+                </div>
+              )}
+              {woodReconditioning > 0 && (
+                <div className="flex justify-between py-1 border-b border-gray-700">
+                  <span>Wood Reconditioning - {woodReconditioning}h × $60/hr</span>
+                  <span>${(woodReconditioning * 60).toFixed(2)}</span>
+                </div>
+              )}
+              {drywallRepair > 0 && (
+                <div className="flex justify-between py-1 border-b border-gray-700 last:border-b-0">
+                  <span>Drywall Repair - {drywallRepair}h × $60/hr</span>
+                  <span>${(drywallRepair * 60).toFixed(2)}</span>
+                </div>
+              )}
+              <div className="border-t border-gray-600 pt-2 mt-2">
+                <div className="flex justify-between font-semibold">
+                  <span>Labor Total:</span>
+                  <span>${((prepWork + woodReconditioning + drywallRepair) * 60).toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Materials Section */}
+          {paintCost > 0 && (
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold mb-3 text-yellow-500">Paint & Materials</h2>
+              <div className="border-2 border-yellow-500 bg-gray-900 p-4 rounded">
+                <div className="flex justify-between">
+                  <span>Paint & Materials</span>
+                  <span>${paintCost.toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Total Section */}
+          <div className="mt-8 pt-4 border-t-2 border-green-500">
+            <div className="bg-green-500 text-white p-4 rounded text-center">
+              <div className="text-2xl font-bold">
+                Total Estimate: ${calculateTotal().toFixed(2)}
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="mt-8 text-center text-sm text-gray-400">
+            <p>A-Frame Painting • 884 Hayes Rd, Manson's Landing, BC V0P1K0</p>
+            <p>cortespainter@gmail.com</p>
+          </div>
+        </div>
+      </div>
     </Dialog>
   );
 }
