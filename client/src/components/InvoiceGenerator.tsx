@@ -314,81 +314,94 @@ cortespainter@gmail.com
 
   const generatePDFBlob = async (): Promise<Blob | null> => {
     if (!invoiceRef.current) {
+      console.error('Invoice ref not available for PDF generation');
       return null;
     }
 
-    let originalOpacity = '';
-    let originalPointerEvents = '';
-    let originalPosition = '';
-    let originalTop = '';
-    let originalLeft = '';
+    console.log('Starting PDF generation...');
     
     try {
-      // Temporarily make the element visible for PDF generation
-      originalOpacity = invoiceRef.current.style.opacity;
-      originalPointerEvents = invoiceRef.current.style.pointerEvents;
-      originalPosition = invoiceRef.current.style.position;
-      originalTop = invoiceRef.current.style.top;
-      originalLeft = invoiceRef.current.style.left;
+      // Store original styles
+      const originalStyles = {
+        display: invoiceRef.current.style.display,
+        visibility: invoiceRef.current.style.visibility,
+        position: invoiceRef.current.style.position,
+        top: invoiceRef.current.style.top,
+        left: invoiceRef.current.style.left,
+        opacity: invoiceRef.current.style.opacity,
+        pointerEvents: invoiceRef.current.style.pointerEvents,
+        zIndex: invoiceRef.current.style.zIndex,
+        width: invoiceRef.current.style.width,
+        transform: invoiceRef.current.style.transform
+      };
       
+      // Make element visible and properly positioned for capture
+      invoiceRef.current.style.display = 'block';
+      invoiceRef.current.style.visibility = 'visible';
+      invoiceRef.current.style.position = 'absolute';
+      invoiceRef.current.style.top = '0px';
+      invoiceRef.current.style.left = '0px';
       invoiceRef.current.style.opacity = '1';
       invoiceRef.current.style.pointerEvents = 'auto';
-      invoiceRef.current.style.position = 'fixed';
-      invoiceRef.current.style.top = '0';
-      invoiceRef.current.style.left = '0';
       invoiceRef.current.style.zIndex = '9999';
       invoiceRef.current.style.width = '794px';
       invoiceRef.current.style.transform = 'none';
       
-      // Wait for rendering and images to load - longer wait for better stability
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Wait for rendering and images to load
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      console.log('Element dimensions:', {
+        scrollHeight: invoiceRef.current.scrollHeight,
+        offsetHeight: invoiceRef.current.offsetHeight,
+        clientHeight: invoiceRef.current.clientHeight
+      });
 
       // Check if element is properly rendered
       if (!invoiceRef.current || invoiceRef.current.scrollHeight === 0) {
+        console.error('Invoice element not properly rendered');
         // Restore original styles before throwing error
-        invoiceRef.current.style.opacity = originalOpacity;
-        invoiceRef.current.style.pointerEvents = originalPointerEvents;
+        Object.assign(invoiceRef.current.style, originalStyles);
         throw new Error('Invoice preview not properly rendered');
       }
 
-      // Get the actual full height of the element including all content
-      // Add extra padding to accommodate varying amounts of daily hours and receipts
-      const baseHeight = Math.max(
+      // Calculate canvas height
+      const elementHeight = Math.max(
         invoiceRef.current.scrollHeight,
         invoiceRef.current.offsetHeight,
-        invoiceRef.current.clientHeight,
-        1600 // Minimum height
+        1200 // Minimum height
       );
       
-      // Add massive dynamic padding to ensure payment method and notes are never truncated
-      const contentPadding = Math.max(800, dailyHours.length * 80 + 400);
-      const fullHeight = baseHeight + contentPadding;
+      console.log('Capturing canvas with height:', elementHeight);
       
-      // Capture the invoice preview with optimized settings for smaller file size
+      // Capture the element using html2canvas
       const canvas = await html2canvas(invoiceRef.current, {
-        scale: 1, // Reduced from 2 to 1 for smaller file size
+        scale: 1.5, // Good balance between quality and file size
         backgroundColor: '#000000',
         useCORS: true,
         allowTaint: true,
-        logging: false,
+        logging: true, // Enable logging for debugging
         width: 794,
-        height: fullHeight,
-        scrollX: 0,
-        scrollY: 0,
+        height: elementHeight,
         windowWidth: 794,
-        windowHeight: fullHeight,
+        windowHeight: elementHeight,
+        removeContainer: false,
         onclone: (clonedDoc) => {
-          // Ensure all images are loaded and visible in the cloned document
-          const images = clonedDoc.querySelectorAll('img');
-          images.forEach(img => {
-            const htmlImg = img as HTMLImageElement;
-            if (htmlImg.src) {
-              htmlImg.style.display = 'block';
-              htmlImg.style.opacity = '1';
-              htmlImg.style.visibility = 'visible';
-            }
-          });
+          console.log('Cloning document for canvas capture');
+          const clonedElement = clonedDoc.querySelector('[data-invoice-ref]') as HTMLElement;
+          if (clonedElement) {
+            clonedElement.style.position = 'static';
+            clonedElement.style.opacity = '1';
+            clonedElement.style.visibility = 'visible';
+            clonedElement.style.transform = 'none';
+            clonedElement.style.width = '794px';
+            clonedElement.style.display = 'block';
+          }
         }
+      });
+      
+      console.log('Canvas captured:', {
+        width: canvas.width,
+        height: canvas.height
       });
 
       // Validate canvas dimensions
@@ -423,26 +436,25 @@ cortespainter@gmail.com
       // Receipts are now sent as separate email attachments only (not embedded in PDF)
 
       // Restore original styles
-      invoiceRef.current.style.opacity = originalOpacity;
-      invoiceRef.current.style.pointerEvents = originalPointerEvents;
-      invoiceRef.current.style.position = originalPosition;
-      invoiceRef.current.style.top = originalTop;
-      invoiceRef.current.style.left = originalLeft;
-      invoiceRef.current.style.zIndex = '';
+      Object.assign(invoiceRef.current.style, originalStyles);
 
-      // Return PDF as blob instead of downloading
+      console.log('PDF generation completed successfully');
       return pdf.output('blob');
     } catch (error) {
       console.error('Error generating PDF blob:', error);
       
       // Restore original styles even if error occurs
       if (invoiceRef.current) {
-        invoiceRef.current.style.opacity = originalOpacity || '';
-        invoiceRef.current.style.pointerEvents = originalPointerEvents || '';
-        invoiceRef.current.style.position = originalPosition || '';
-        invoiceRef.current.style.top = originalTop || '';
-        invoiceRef.current.style.left = originalLeft || '';
+        invoiceRef.current.style.display = '';
+        invoiceRef.current.style.visibility = '';
+        invoiceRef.current.style.position = '';
+        invoiceRef.current.style.top = '';
+        invoiceRef.current.style.left = '';
+        invoiceRef.current.style.opacity = '';
+        invoiceRef.current.style.pointerEvents = '';
         invoiceRef.current.style.zIndex = '';
+        invoiceRef.current.style.width = '';
+        invoiceRef.current.style.transform = '';
       }
       
       return null;
@@ -1175,7 +1187,7 @@ ${emailMessage}`;
 
             {/* Action Buttons */}
             <div className="flex flex-wrap gap-4 pt-6 border-t justify-between items-end" style={{ borderColor: darkTheme.border }}>
-              <Button variant="outline" className="flex-1">Cancel</Button>
+              <Button variant="outline" onClick={onClose} className="flex-1">Cancel</Button>
               <div className="flex flex-col items-center gap-2">
                 {/* Toggle Switch - positioned over send email button */}
                 <div className="relative inline-flex items-center">
