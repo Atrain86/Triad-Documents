@@ -13,7 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { compressMultipleImages, formatFileSize } from '@/lib/imageCompression';
 import type { Project, Photo, Receipt, ToolsChecklist, DailyHours } from '@shared/schema';
 import InvoiceGenerator from './InvoiceGenerator';
-import EstimateGenerator from './EstimateGenerator';
+import EstimateGenerator from './EstimateGeneratorNew';
 import PhotoCarousel from './PhotoCarousel';
 import PaintBrainCalendar from './PaintBrainCalendar';
 import ClientPhone from './ClientPhone';
@@ -1916,9 +1916,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       {/* Estimate Generator */}
       {project && (
         <EstimateGenerator
-          project={project}
-          isOpen={showEstimateGenerator}
-          onClose={() => setShowEstimateGenerator(false)}
+          projectId={project.id}
         />
       )}
 
