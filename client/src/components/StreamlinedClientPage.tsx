@@ -583,10 +583,12 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
     if (!selectedDate || !hoursInput) return;
     
     const parsedHours = parseFloat(hoursInput);
-    if (isNaN(parsedHours) || parsedHours < 0.5) {
+    if (isNaN(parsedHours) || parsedHours <= 0) {
       console.error('Invalid hours input:', hoursInput, 'parsed as:', parsedHours);
       return;
     }
+    
+    console.log('Adding hours:', parsedHours, 'for date:', selectedDate);
     
     // Format the date to ensure it's timezone-safe (YYYY-MM-DD format only)
     let formattedDate = selectedDate;
@@ -1524,12 +1526,11 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                               <label className="text-sm font-medium mb-2 block text-gray-200">Hours Worked</label>
                               <input
                                 type="text"
-                                pattern="[0-9]+(\.[0-9]*)?"
                                 inputMode="decimal"
                                 value={hoursInput}
                                 onChange={(e) => {
                                   const value = e.target.value;
-                                  // Allow only numbers and one decimal point
+                                  // Allow empty, digits, or digits with one decimal point
                                   if (value === '' || /^\d*\.?\d*$/.test(value)) {
                                     setHoursInput(value);
                                   }
@@ -1539,8 +1540,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                     handleAddHours();
                                   }
                                 }}
-                                placeholder="Enter hours (e.g., 3.5)"
-                                className="w-full px-3 py-2 text-sm border border-gray-600 rounded-lg bg-gray-800 text-gray-200"
+                                placeholder="3.5"
+                                className="w-full px-3 py-2 text-sm border border-gray-600 rounded-lg bg-gray-800 text-gray-200 focus:border-green-500 focus:ring-1 focus:ring-green-500"
                               />
                             </div>
                             
@@ -1682,11 +1683,11 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                         </span>
                                         <span className="text-gray-400">-</span>
                                         <span className="font-semibold text-green-400">
-                                          {Math.round(hours.hours)} hrs
+                                          {hours.hours} hrs
                                         </span>
                                       </div>
                                       <span className="font-bold text-green-300">
-                                        ${(hours.hours * 60).toFixed(0)}
+                                        ${(hours.hours * (project?.hourlyRate || 60)).toFixed(0)}
                                       </span>
                                     </div>
                                     
