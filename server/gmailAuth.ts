@@ -58,6 +58,8 @@ export class GmailAuthService {
       return { success: false, error: 'Gmail OAuth2 not configured' };
     }
     try {
+      console.log('Processing OAuth callback for user:', userId);
+      
       const { tokens } = await this.oAuth2Client.getToken(code);
       this.oAuth2Client.setCredentials(tokens);
 
@@ -70,14 +72,19 @@ export class GmailAuthService {
         return { success: false, error: 'Could not retrieve Gmail address' };
       }
 
+      console.log('Retrieved Gmail address:', gmailAddress, 'for user ID:', userId);
+
       // Save or update user's Gmail credentials in database
-      await db.update(users)
+      const result = await db.update(users)
         .set({ 
           gmailEmail: gmailAddress,
           gmailRefreshToken: tokens.refresh_token,
           gmailConnectedAt: new Date()
         })
-        .where(eq(users.id, parseInt(userId)));
+        .where(eq(users.id, parseInt(userId)))
+        .returning();
+
+      console.log('Database update result:', result);
 
       return { success: true, email: gmailAddress };
     } catch (error) {
