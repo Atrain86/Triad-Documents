@@ -35,6 +35,7 @@ export default function InvoiceGenerator({
   const [successMessage, setSuccessMessage] = useState('');
   const [showEmailDialog, setShowEmailDialog] = useState(false);
   const [emailMessage, setEmailMessage] = useState('');
+  const [actionMode, setActionMode] = useState<'download' | 'email'>('email');
   
   // Initialize email message
   React.useEffect(() => {
@@ -663,7 +664,7 @@ cortespainter@gmail.com
       if (pdfBlob) {
         const arrayBuffer = await pdfBlob.arrayBuffer();
         const bytes = new Uint8Array(arrayBuffer);
-        pdfBase64 = btoa(String.fromCharCode(...bytes));
+        pdfBase64 = btoa(String.fromCharCode.apply(null, Array.from(bytes)));
       }
 
       // Prepare email data
@@ -1172,37 +1173,69 @@ ${emailMessage}`;
 
 
 
-            {/* Action Buttons */}
-            <div className="flex flex-wrap gap-4 pt-6 border-t" style={{ borderColor: darkTheme.border }}>
-              <Button
-                onClick={generatePDF}
-                className="text-white hover:opacity-90"
-                style={{ backgroundColor: paintBrainColors.green }}
-              >
-                <Download className="mr-2 h-5 w-5" />
-                Download PDF
-              </Button>
-              <Button
-                onClick={() => {
-                  console.log('Send Invoice button clicked - opening email dialog');
-                  setShowEmailDialog(true);
-                }}
-                disabled={!invoiceData.clientEmail}
-                className="text-white hover:opacity-90 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                style={{ backgroundColor: invoiceData.clientEmail ? paintBrainColors.green : '#9ca3af' }}
-              >
-                {isSending ? (
-                  <>
-                    <div className="mr-2 h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Sending...
-                  </>
-                ) : (
-                  <>
-                    <Send className="mr-2 h-5 w-5" />
-                    Send Invoice
-                  </>
-                )}
-              </Button>
+            {/* Action Mode Toggle and Button */}
+            <div className="flex items-center justify-between pt-6 border-t" style={{ borderColor: darkTheme.border }}>
+              {/* Toggle Switch */}
+              <div className="flex items-center bg-gray-800 rounded-lg p-1 border border-gray-600">
+                <button
+                  onClick={() => setActionMode('email')}
+                  className={`px-6 py-2 rounded-md transition-all flex items-center gap-2 ${
+                    actionMode === 'email' ? 'bg-[#569CD6] text-white shadow-md' : 'text-gray-400 hover:text-white'
+                  }`}
+                >
+                  <Send className={`w-4 h-4 ${
+                    actionMode === 'email' ? 'text-white opacity-100' : 'text-white opacity-60'
+                  }`} />
+                  Send Email
+                </button>
+                <button
+                  onClick={() => setActionMode('download')}
+                  className={`px-6 py-2 rounded-md transition-all flex items-center gap-2 ${
+                    actionMode === 'download' ? 'bg-[#6A9955] text-white shadow-md' : 'text-gray-400 hover:text-white'
+                  }`}
+                >
+                  <Download className={`w-4 h-4 ${
+                    actionMode === 'download' ? 'text-white opacity-100' : 'text-white opacity-60'
+                  }`} 
+                    style={{ color: '#FFFFFF' }}
+                  />
+                  Download PDF
+                </button>
+              </div>
+              
+              {/* Action Button */}
+              {actionMode === 'email' ? (
+                <Button 
+                  onClick={() => {
+                    console.log('Send Invoice button clicked - opening email dialog');
+                    setShowEmailDialog(true);
+                  }}
+                  disabled={!invoiceData.clientEmail}
+                  className="text-white hover:opacity-90 disabled:bg-gray-400 disabled:cursor-not-allowed min-w-[120px]"
+                  style={{ backgroundColor: invoiceData.clientEmail ? '#569CD6' : '#9ca3af' }}
+                >
+                  {isSending ? (
+                    <>
+                      <div className="mr-2 h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="mr-2 h-5 w-5" />
+                      Send Email
+                    </>
+                  )}
+                </Button>
+              ) : (
+                <Button 
+                  onClick={generatePDF} 
+                  className="text-white hover:opacity-90 min-w-[120px]"
+                  style={{ backgroundColor: '#6A9955' }}
+                >
+                  <Download className="mr-2 h-5 w-5" />
+                  Download PDF
+                </Button>
+              )}
             </div>
           </div>
         </div>
