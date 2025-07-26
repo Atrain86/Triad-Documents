@@ -179,7 +179,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/projects', async (req, res) => {
     try {
-      const validatedData = insertProjectSchema.parse(req.body);
+      // Ensure difficulty has a default value if not provided
+      const dataWithDefaults = {
+        ...req.body,
+        difficulty: req.body.difficulty || "medium"
+      };
+      const validatedData = insertProjectSchema.parse(dataWithDefaults);
       const project = await storage.createProject(validatedData);
       res.json(project);
     } catch (error) {

@@ -27,7 +27,7 @@ export const projects = pgTable("projects", {
   clientPhone: text("client_phone"),
   projectType: text("project_type").notNull().default("exterior"), // interior or exterior
   roomCount: integer("room_count").notNull(),
-  difficulty: text("difficulty").default("medium"),
+  difficulty: text("difficulty").default("medium").notNull(),
   status: text("status").notNull().default("estimating"),
   estimate: real("estimate"),
   notes: text("notes"),
@@ -117,6 +117,9 @@ export const sessions = pgTable("sessions", {
 export const insertProjectSchema = createInsertSchema(projects).omit({
   id: true,
   createdAt: true,
+}).extend({
+  // Make difficulty optional in form since we provide a default
+  difficulty: z.string().optional().default("medium"),
 });
 
 export const insertPhotoSchema = createInsertSchema(photos).omit({

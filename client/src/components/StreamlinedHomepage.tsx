@@ -536,7 +536,8 @@ function NewClientForm({ onSubmit, onCancel, isLoading }: { onSubmit: (data: any
     onSubmit({
       ...formData,
       clientName: formData.clientName.trim(),
-      status: 'initial-contact'
+      status: 'initial-contact',
+      difficulty: 'medium'  // Always include difficulty with default value
     });
   };
 
