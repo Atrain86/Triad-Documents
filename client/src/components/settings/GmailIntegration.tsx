@@ -59,38 +59,79 @@ export default function GmailIntegration() {
       const data = await response.json();
       
       if (data.authUrl) {
+        console.log('Opening OAuth popup with URL:', data.authUrl);
+        
         // Open OAuth URL in new window
         const popup = window.open(
           data.authUrl,
           'gmail-auth',
-          'width=500,height=600,scrollbars=yes,resizable=yes'
+          'width=600,height=700,scrollbars=yes,resizable=yes,left=' + 
+          (window.screen.width / 2 - 300) + ',top=' + (window.screen.height / 2 - 350)
         );
 
-        // Poll for popup closure
+        if (!popup) {
+          throw new Error('Popup blocked. Please allow popups for this site.');
+        }
+
+        let pollCount = 0;
+        const maxPolls = 300; // 5 minutes at 1 second intervals
+
+        // Enhanced polling with better error detection
         const pollTimer = setInterval(() => {
+          pollCount++;
+          console.log(`Polling OAuth popup... (${pollCount}/${maxPolls})`);
+          
           try {
-            if (popup?.closed) {
+            // Check if popup is closed
+            if (popup.closed) {
+              console.log('OAuth popup closed, checking connection status...');
               clearInterval(pollTimer);
               setIsConnecting(false);
-              // Recheck status after OAuth flow
-              setTimeout(checkGmailStatus, 1000);
+              
+              // Recheck status after OAuth flow with delay
+              setTimeout(() => {
+                console.log('Rechecking Gmail status after OAuth...');
+                checkGmailStatus();
+              }, 2000);
+              return;
+            }
+
+            // Try to access popup URL to detect successful callback
+            try {
+              const popupUrl = popup.location.href;
+              if (popupUrl.includes('/api/gmail/callback')) {
+                console.log('OAuth callback detected in popup URL');
+                clearInterval(pollTimer);
+                setIsConnecting(false);
+                popup.close();
+                setTimeout(checkGmailStatus, 2000);
+                return;
+              }
+            } catch (e) {
+              // Cross-origin error is expected during OAuth flow
+            }
+
+            // Timeout after maximum polls
+            if (pollCount >= maxPolls) {
+              console.log('OAuth polling timeout reached');
+              clearInterval(pollTimer);
+              setIsConnecting(false);
+              if (!popup.closed) {
+                popup.close();
+              }
+              toast({
+                title: "Connection Timeout",
+                description: "Gmail connection attempt timed out. Please try again.",
+                variant: "destructive",
+              });
             }
           } catch (error) {
-            // Cross-origin error when popup redirects
+            console.error('Error during OAuth polling:', error);
             clearInterval(pollTimer);
             setIsConnecting(false);
-            setTimeout(checkGmailStatus, 1000);
+            setTimeout(checkGmailStatus, 2000);
           }
         }, 1000);
-
-        // Fallback: stop polling after 5 minutes
-        setTimeout(() => {
-          clearInterval(pollTimer);
-          setIsConnecting(false);
-          if (popup && !popup.closed) {
-            popup.close();
-          }
-        }, 300000);
       }
     } catch (error) {
       console.error('Error connecting Gmail:', error);
