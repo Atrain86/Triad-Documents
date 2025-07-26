@@ -818,6 +818,97 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test OpenAI operations for comprehensive tracking (simulate real usage patterns)
+  app.post('/api/test/openai/text-generation', async (req, res) => {
+    try {
+      const { prompt, userId = 1 } = req.body;
+      const { trackedOpenAI } = await import('./openaiWithTracking');
+      
+      const response = await trackedOpenAI.chatCompletions({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: "You are a helpful assistant for painting contractors." },
+          { role: "user", content: prompt || "Generate a professional estimate description for interior house painting." }
+        ],
+        max_tokens: 200,
+        temperature: 0.7
+      }, {
+        userId,
+        operation: 'text_generation',
+        description: 'AI-powered text generation for estimates/quotes'
+      });
+
+      res.json({ 
+        success: true, 
+        content: response.choices[0].message.content,
+        usage: response.usage 
+      });
+    } catch (error) {
+      console.error('Text generation test failed:', error);
+      res.status(500).json({ error: 'Text generation failed' });
+    }
+  });
+
+  app.post('/api/test/openai/code-analysis', async (req, res) => {
+    try {
+      const { code, userId = 1 } = req.body;
+      const { trackedOpenAI } = await import('./openaiWithTracking');
+      
+      const response = await trackedOpenAI.chatCompletions({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: "You are a code analysis assistant. Analyze the provided code and suggest improvements." },
+          { role: "user", content: code || "function calculateEstimate(rooms, difficulty) { return rooms * 100 * difficulty; }" }
+        ],
+        max_tokens: 300,
+        temperature: 0.3
+      }, {
+        userId,
+        operation: 'code_analysis',
+        description: 'AI code review and optimization suggestions'
+      });
+
+      res.json({ 
+        success: true, 
+        analysis: response.choices[0].message.content,
+        usage: response.usage 
+      });
+    } catch (error) {
+      console.error('Code analysis test failed:', error);
+      res.status(500).json({ error: 'Code analysis failed' });
+    }
+  });
+
+  app.post('/api/test/openai/debugging-help', async (req, res) => {
+    try {
+      const { errorMessage, userId = 1 } = req.body;
+      const { trackedOpenAI } = await import('./openaiWithTracking');
+      
+      const response = await trackedOpenAI.chatCompletions({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: "You are a debugging assistant. Help solve coding errors with clear explanations." },
+          { role: "user", content: errorMessage || "React error: Cannot read property 'map' of undefined in component rendering." }
+        ],
+        max_tokens: 400,
+        temperature: 0.2
+      }, {
+        userId,
+        operation: 'debugging_assistance',
+        description: 'AI debugging and error resolution'
+      });
+
+      res.json({ 
+        success: true, 
+        solution: response.choices[0].message.content,
+        usage: response.usage 
+      });
+    } catch (error) {
+      console.error('Debugging assistance test failed:', error);
+      res.status(500).json({ error: 'Debugging assistance failed' });
+    }
+  });
+
   // Token usage tracking and admin routes
   app.get('/api/admin/token-usage/total', async (req, res) => {
     try {

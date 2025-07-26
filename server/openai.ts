@@ -1,7 +1,4 @@
-import OpenAI from "openai";
-
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+import { trackedOpenAI } from "./openaiWithTracking";
 
 export interface ReceiptData {
   vendor: string;
@@ -12,12 +9,12 @@ export interface ReceiptData {
 }
 
 /**
- * Extract receipt data using OpenAI Vision API
+ * Extract receipt data using OpenAI Vision API with comprehensive tracking
  * Direct processing with GPT-4o Vision for maximum accuracy
  */
-export async function extractReceiptDataWithOpenAI(base64Image: string): Promise<ReceiptData> {
+export async function extractReceiptDataWithOpenAI(base64Image: string, userId?: number): Promise<ReceiptData> {
   try {
-    const response = await openai.chat.completions.create({
+    const response = await trackedOpenAI.chatCompletions({
       model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
       messages: [
         {
@@ -42,6 +39,10 @@ export async function extractReceiptDataWithOpenAI(base64Image: string): Promise
       ],
       response_format: { type: "json_object" },
       max_tokens: 300,
+    }, {
+      userId,
+      operation: 'receipt_ocr_sdk',
+      description: 'Receipt OCR processing via OpenAI SDK'
     });
 
     const result = JSON.parse(response.choices[0].message.content || '{}');

@@ -131,48 +131,17 @@ If unable to read clearly:
     console.log('Image size:', finalBuffer.length, 'bytes');
     console.log('Base64 preview (first 50 chars):', imageBase64.substring(0, 50) + '...');
     
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${OPENAI_API_KEY}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
+    // Use tracked OpenAI for comprehensive usage monitoring
+    const { trackedOpenAI } = await import('./openaiWithTracking');
+    
+    const data = await trackedOpenAI.visionApiCall(payload, {
+      userId,
+      operation: 'receipt_ocr_vision',
+      description: 'Advanced receipt OCR with Vision API',
+      imageSize: finalBuffer.length
     });
 
-    console.log('Vision API response status:', response.status);
-    
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error('Vision API error response:', errorData);
-      throw new Error(`OpenAI API error: ${response.status} - ${errorData}`);
-    }
-
-    const data = await response.json();
     const content = data.choices?.[0]?.message?.content;
-    
-    // Track token usage for admin analytics
-    if (userId && data.usage) {
-      try {
-        const tokensUsed = data.usage.total_tokens || 0;
-        const costPerToken = 0.00001; // Approximate cost for GPT-4o Vision
-        const totalCost = tokensUsed * costPerToken;
-        
-        await storage.logTokenUsage({
-          userId,
-          operation: 'receipt_ocr',
-          tokensUsed,
-          cost: totalCost,
-          model: 'gpt-4o',
-          imageSize: finalBuffer.length,
-          success: true
-        });
-        
-        console.log(`Token usage logged: ${tokensUsed} tokens, $${totalCost.toFixed(4)} cost`);
-      } catch (error) {
-        console.error('Failed to log token usage:', error);
-      }
-    }
     
     if (!content) {
       throw new Error('No response from OpenAI Vision API');
