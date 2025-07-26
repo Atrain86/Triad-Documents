@@ -379,6 +379,16 @@ Logo: Custom A-frame house structure with paint brush accent
 - **Proper OAuth integration**: Gmail OAuth tokens stored in database enable sending from user's actual Gmail account with emails appearing in their Sent folder
 - **User control**: Users can choose to connect their personal Gmail (Settings > Gmail Integration) or continue using server-side delivery
 
+### July 26, 2025 - Enhanced PDF Receipt Processing & Email System Status
+- **Implemented PDF receipt processing**: Added intelligent OpenAI Vision API integration for PDF receipts with filename-based vendor extraction
+- **Enhanced receipt workflow**: PDF receipts now analyze filenames to extract vendor names and dates instead of showing "unknown vendor"
+- **Email system clarification**: Current email functionality works perfectly via SMTP with emails appearing in Gmail sent folder
+- **Gmail OAuth documentation**: Added clear UI messaging explaining that OAuth connection requires Google Cloud Console setup with current domain authorization
+- **PDF processing intelligence**: System distinguishes between images (full Vision API processing) and PDFs (filename analysis with OpenAI)
+- **Improved user experience**: Added informative status messages in Settings showing current email functionality is operational
+- **Multi-file type support**: Enhanced receipt system handles images (full OCR), PDFs (intelligent filename parsing), and manual entries
+- **Server optimization**: Increased body parser limits to 100MB with comprehensive fallback email functionality for large attachments
+
 ### July 25, 2025 - EstimateGenerator Restoration & Error Recovery
 - **Critical bug fix**: Resolved missing EstimateGenerator import that was causing application startup failures with "Failed to resolve import" error
 - **Component restoration**: Completely rebuilt EstimateGenerator.tsx from corrupted backup file that contained mixed HTML/React content
@@ -387,4 +397,4 @@ Logo: Custom A-frame house structure with paint brush accent
 - **PDF generation**: HTML2Canvas + jsPDF approach for estimate PDF creation with A-Frame branding and Paint Brain color scheme
 - **Email integration**: Connected to existing email system for sending estimates with PDF attachments via nodemailer
 - **localStorage persistence**: Form data saved automatically for user convenience across sessions
-- **Server stability**: Application now running successfully with no compilation errorsccessfully on port 5000 with all core features operational
+- **Server stability**: Application now running successfully with no compilation errors on port 5000 with all core features operational

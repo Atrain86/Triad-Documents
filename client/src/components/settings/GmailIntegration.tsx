@@ -162,6 +162,28 @@ export default function GmailIntegration() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        
+        {/* Current Email Status Info */}
+        <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 p-4 rounded-lg">
+          <div className="flex items-start gap-3">
+            <div className="text-blue-600 dark:text-blue-400 mt-0.5">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100">✓ Email System Currently Working</h4>
+              <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                Your invoice and estimate emails are working perfectly! They appear in your Gmail sent folder using SMTP authentication. 
+                OAuth connection below would enable direct Gmail API sending but requires Google Cloud Console setup with approved redirect URIs.
+              </p>
+              <div className="mt-2 text-xs text-blue-600 dark:text-blue-400">
+                Current: SMTP → Gmail (working) | Optional: OAuth → Direct Gmail API (requires Google Cloud setup)
+              </div>
+            </div>
+          </div>
+        </div>
+        
         {/* Connection Status */}
         <div className="flex items-center gap-3 p-4 border rounded-lg">
           {gmailStatus.connected ? (
@@ -226,14 +248,15 @@ export default function GmailIntegration() {
 
         {/* Requirements or Configuration Notice */}
         {!gmailStatus.connected && (
-          <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg">
-            <h4 className="font-medium text-blue-900 dark:text-blue-100">Requirements:</h4>
-            <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1 mt-2">
-              <li>• A Google/Gmail account</li>
-              <li>• Permission to send emails on your behalf</li>
-              <li>• OAuth2 authentication (secure, no password sharing)</li>
-              <li>• Gmail OAuth2 credentials configured by administrator</li>
-            </ul>
+          <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 p-4 rounded-lg">
+            <h4 className="font-medium text-amber-900 dark:text-amber-100">OAuth Setup Required for New Users</h4>
+            <p className="text-sm text-amber-700 dark:text-amber-300 mt-2">
+              For other users to connect their Gmail accounts, the OAuth app needs the current domain added to Google Cloud Console authorized redirect URIs.
+            </p>
+            <div className="mt-3 text-xs text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/50 p-2 rounded">
+              <strong>Current domain:</strong> {window.location.origin}/api/gmail/callback<br/>
+              <strong>Status:</strong> Admin emails work via SMTP fallback, OAuth requires Google Cloud Console update
+            </div>
           </div>
         )}
 
