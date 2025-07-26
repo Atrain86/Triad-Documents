@@ -254,7 +254,6 @@ export default function StreamlinedHomepage({
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <div className="p-6">
         {/* Settings gear icon at top-left */}
         <div className="mb-4">
           {onAccessSettings && (
