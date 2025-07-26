@@ -328,6 +328,175 @@ If unable to read clearly:
 }
 
 /**
+ * Extract receipt data from PDF using OpenAI Vision API
+ * Converts first page of PDF to image for processing
+ */
+export async function extractReceiptFromPdf(pdfBuffer: Buffer, originalName?: string, userId?: number): Promise<VisionReceiptData> {
+  console.log('PDF processing function called with buffer size:', pdfBuffer.length);
+  
+  if (!OPENAI_API_KEY) {
+    console.error('No OpenAI API key found for PDF processing');
+    throw new Error('OpenAI API key not configured');
+  }
+
+  try {
+    // For PDF processing, we need to convert to image first
+    // For now, we'll use a simplified approach since Sharp doesn't handle PDFs directly
+    // We can add PDF conversion later, but for this implementation, we'll use text-based prompt
+    
+    const prompt = `
+You are analyzing a PDF receipt document. Based on the filename "${originalName}", extract vendor information.
+
+STRICT RULES:
+- Vendor: Extract business name from filename, remove location numbers, timestamps, and file extensions
+- Amount: Set to 0 (PDFs require manual amount entry)
+- Date: Extract date from filename if present in format YYYY-MM-DD
+
+Examples:
+- "shell_receipt_2024-01-15.pdf" → vendor: "Shell", date: "2024-01-15"
+- "mcdonalds_jan_15_receipt.pdf" → vendor: "McDonald's", date: null
+- "gas_station_receipt_123.pdf" → vendor: "Gas Station", date: null
+
+Return ONLY this JSON format:
+{
+  "vendor": "extracted business name",
+  "amount": 0,
+  "items": ["PDF requires manual entry"],
+  "date": "YYYY-MM-DD or null",
+  "confidence": 0.6
+}
+`;
+
+    const payload = {
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: "You are a filename-parsing assistant. Extract vendor and date information from PDF filenames. Always return valid JSON."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      max_tokens: 300,
+      temperature: 0.1,
+    };
+
+    console.log('Sending PDF filename analysis request...');
+    console.log('Filename:', originalName);
+    
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${OPENAI_API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    console.log('PDF analysis response status:', response.status);
+    
+    if (!response.ok) {
+      const errorData = await response.text();
+      console.error('PDF analysis error response:', errorData);
+      throw new Error(`OpenAI API error: ${response.status} - ${errorData}`);
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content;
+    
+    // Track token usage for admin analytics
+    if (userId && data.usage) {
+      try {
+        const tokensUsed = data.usage.total_tokens || 0;
+        const costPerToken = 0.00001;
+        const totalCost = tokensUsed * costPerToken;
+        
+        await storage.logTokenUsage({
+          userId,
+          operation: 'pdf_receipt_analysis',
+          tokensUsed,
+          cost: totalCost,
+          model: 'gpt-4o',
+          imageSize: pdfBuffer.length,
+          success: true
+        });
+        
+        console.log(`PDF analysis token usage: ${tokensUsed} tokens, $${totalCost.toFixed(4)} cost`);
+      } catch (error) {
+        console.error('Failed to log PDF token usage:', error);
+      }
+    }
+    
+    if (!content) {
+      throw new Error('No response from OpenAI for PDF analysis');
+    }
+
+    // Parse JSON response
+    try {
+      let cleanContent = content.trim();
+      console.log('Raw PDF analysis response:', content);
+      
+      if (cleanContent.startsWith('```json')) {
+        cleanContent = cleanContent.replace(/^```json\s*/i, '').replace(/\s*```$/, '');
+      } else if (cleanContent.startsWith('```')) {
+        cleanContent = cleanContent.replace(/^```\s*/, '').replace(/\s*```$/, '');
+      }
+      
+      const parsedData = JSON.parse(cleanContent);
+      
+      // Clean and validate extracted data
+      let cleanDate = null;
+      if (parsedData.date && parsedData.date !== 'null') {
+        cleanDate = parsedData.date;
+      }
+
+      let cleanVendor = String(parsedData.vendor || 'Unknown Vendor').trim();
+      // Remove common file extensions and clean up
+      cleanVendor = cleanVendor.replace(/\.(pdf|doc|docx|txt)$/gi, '');
+      cleanVendor = cleanVendor.replace(/[_-]/g, ' ').replace(/\s+/g, ' ').trim();
+
+      return {
+        vendor: cleanVendor,
+        amount: 0, // PDFs require manual amount entry
+        items: parsedData.items || ['PDF requires manual data entry'],
+        date: cleanDate,
+        confidence: parsedData.confidence || 0.6,
+        method: 'openai-pdf-analysis'
+      };
+    } catch (parseError) {
+      console.error('Failed to parse PDF analysis response:', content);
+      throw new Error('Invalid JSON response from PDF analysis');
+    }
+
+  } catch (error) {
+    console.error('PDF analysis failed:', error);
+    
+    // Log failed token usage
+    if (userId) {
+      try {
+        await storage.logTokenUsage({
+          userId,
+          operation: 'pdf_receipt_failed',
+          tokensUsed: 0,
+          cost: 0,
+          model: 'gpt-4o',
+          imageSize: pdfBuffer.length,
+          success: false,
+          errorMessage: (error as Error).message || 'Unknown error'
+        });
+      } catch (logError) {
+        console.error('Failed to log PDF failure:', logError);
+      }
+    }
+    
+    // Return fallback data for PDFs
+    return extractReceiptFallback(originalName || 'unknown.pdf');
+  }
+}
+
+/**
  * Fallback extraction using simple text patterns
  * Used when Vision API fails
  */

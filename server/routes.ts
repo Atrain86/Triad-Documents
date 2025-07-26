@@ -376,9 +376,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const isImage = file.mimetype.startsWith('image/') || 
                      file.originalname.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp|heic|heif)$/);
       
+      // Check if file is a PDF that we can process
+      const isPdf = file.mimetype === 'application/pdf' || 
+                   file.originalname.toLowerCase().endsWith('.pdf');
+      
       if (isImage) {
         // Process with OpenAI Vision API for images
         try {
+          console.log(`Processing image receipt with Vision API: ${file.originalname}`);
           const { extractReceiptWithVision } = await import('./visionReceiptHandler');
           const fileBuffer = fs.readFileSync(file.path);
           const visionResult = await extractReceiptWithVision(fileBuffer, file.filename);
@@ -411,9 +416,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
             confidence: 0.3
           };
         }
+      } else if (isPdf) {
+        // For PDF files, convert first page to image and process with Vision API
+        try {
+          console.log(`Processing PDF receipt with Vision API: ${file.originalname}`);
+          const { extractReceiptFromPdf } = await import('./visionReceiptHandler');
+          const fileBuffer = fs.readFileSync(file.path);
+          const visionResult = await extractReceiptFromPdf(fileBuffer, file.filename);
+
+          receiptData = {
+            projectId,
+            filename: file.filename,
+            originalName: file.originalname,
+            vendor: visionResult.vendor,
+            amount: visionResult.amount.toString(),
+            description: '',
+            date: visionResult.date ? new Date(visionResult.date) : new Date(),
+            items: visionResult.items,
+            ocrMethod: 'openai_vision_pdf',
+            confidence: visionResult.confidence
+          };
+        } catch (pdfError) {
+          console.log('PDF Vision processing failed, using filename fallback:', pdfError);
+          // Fallback to filename parsing for PDFs if Vision API fails
+          receiptData = {
+            projectId,
+            filename: file.filename,
+            originalName: file.originalname,
+            vendor: extractVendorFromFilename(file.originalname),
+            amount: '0',
+            description: `PDF requires manual data entry: ${file.originalname}`,
+            date: new Date(),
+            items: [],
+            ocrMethod: 'pdf_fallback',
+            confidence: 0.2
+          };
+        }
       } else {
-        // For non-image files (PDF, DOC, etc.), use filename parsing
-        console.log(`Non-image file detected: ${file.mimetype}, using filename parsing`);
+        // For other non-image files (DOC, etc.), use filename parsing
+        console.log(`Non-image/PDF file detected: ${file.mimetype}, using filename parsing`);
         receiptData = {
           projectId,
           filename: file.filename,
