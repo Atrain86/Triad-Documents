@@ -54,9 +54,9 @@ export async function sendEmailWithSendGrid(options: EmailOptions): Promise<bool
       subject: options.subject,
       text: options.text,
       html: options.html,
-      attachments: options.attachments?.map(att => ({
+      attachments: options.attachments?.filter(att => att.content).map(att => ({
         filename: att.filename,
-        content: att.content ? att.content.toString('base64') : undefined,
+        content: att.content!.toString('base64'),
         type: 'application/pdf',
         disposition: 'attachment'
       })) || []

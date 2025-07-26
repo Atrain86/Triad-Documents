@@ -618,16 +618,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('Successfully created PDF buffer, size:', pdfBuffer.length, 'bytes');
 
       // Send estimate email with PDF buffer
-      await sendEstimateEmail(
-        recipientEmail,
-        clientName,
-        estimateNumber || 'EST-001',
-        projectTitle || 'Painting Estimate',
-        totalAmount || '0.00',
-        customMessage || '',
-        pdfBuffer
-      );
-      res.json({ success: true, message: 'Estimate email sent successfully' });
+      try {
+        const { sendEstimateEmail } = await import('./email');
+        
+        const emailSent = await sendEstimateEmail(
+          recipientEmail,
+          clientName,
+          estimateNumber || 'EST-001',
+          projectTitle || 'Painting Estimate',
+          totalAmount || '0.00',
+          customMessage || '',
+          pdfBuffer
+        );
+        
+        if (emailSent) {
+          res.json({ success: true, message: 'Estimate email sent successfully' });
+        } else {
+          // Fallback to basic email without attachments
+          const { sendBasicEmail } = await import('./email');
+          const fallbackMessage = `Hi ${clientName},\n\nPlease find your estimate for ${projectTitle || 'your painting project'}.\n\nTotal Estimate: $${totalAmount || '0.00'}\n\nI'll send the PDF separately due to email size limits.\n\nBest regards,\nA-Frame Painting\ncortespainter@gmail.com`;
+          
+          const fallbackSent = await sendBasicEmail(recipientEmail, `Your Painting Estimate from A-Frame Painting`, fallbackMessage);
+          
+          if (fallbackSent) {
+            res.json({ success: true, message: 'Estimate sent successfully (without PDF attachment due to size)' });
+          } else {
+            res.status(500).json({ error: 'Failed to send email via both methods' });
+          }
+        }
+      } catch (emailError) {
+        console.error('Email sending error:', emailError);
+        res.status(500).json({ error: `Email service error: ${(emailError as Error).message}` });
+      }
     } catch (error) {
       console.error('Error sending estimate email:', error);
       console.error('Request body keys:', Object.keys(req.body));
@@ -685,10 +707,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Validate PDF data size (limit to reasonable size)
+      if (pdfData.length > 50 * 1024 * 1024) { // 50MB limit
+        return res.status(400).json({ 
+          success: false, 
+          error: 'PDF data too large. Please reduce PDF size.' 
+        });
+      }
+
       // Convert base64 PDF to buffer
       const base64Data = pdfData.includes(',') ? pdfData.split(',')[1] : pdfData;
       const pdfBuffer = Buffer.from(base64Data, 'base64');
       console.log('PDF buffer created, size:', pdfBuffer.length, 'bytes');
+
+      // Validate PDF buffer size
+      if (pdfBuffer.length === 0) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Invalid PDF data - empty buffer' 
+        });
+      }
 
       // Prepare receipt attachments
       const receiptAttachments = (receiptFilenames || []).map((filename: string) => ({
@@ -699,12 +737,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('Receipt attachments prepared:', receiptAttachments.length);
 
       // Send email with PDF and receipt attachments
-      const { sendInvoiceEmailWithReceipts } = await import('./email');
-      
-      await sendInvoiceEmailWithReceipts(recipientEmail, clientName, invoiceNumber, pdfBuffer, receiptAttachments, customMessage);
-      
-      console.log('Invoice email sent successfully to:', recipientEmail);
-      res.json({ success: true, message: 'Invoice email sent successfully' });
+      try {
+        const { sendInvoiceEmailWithReceipts } = await import('./email');
+        
+        const emailSent = await sendInvoiceEmailWithReceipts(recipientEmail, clientName, invoiceNumber, pdfBuffer, receiptAttachments, customMessage);
+        
+        if (emailSent) {
+          console.log('Invoice email sent successfully to:', recipientEmail);
+          res.json({ success: true, message: 'Invoice email sent successfully' });
+        } else {
+          console.log('Invoice email failed to send via primary method, trying fallback...');
+          
+          // Fallback to basic email without attachments
+          const { sendBasicEmail } = await import('./email');
+          const fallbackMessage = `Hi ${clientName},\n\nPlease find your invoice for project #${invoiceNumber}.\n\nI'll send the PDF separately due to email size limits.\n\nBest regards,\nA-Frame Painting\ncortespainter@gmail.com`;
+          
+          const fallbackSent = await sendBasicEmail(recipientEmail, `Invoice #${invoiceNumber} from A-Frame Painting`, fallbackMessage);
+          
+          if (fallbackSent) {
+            res.json({ success: true, message: 'Email sent successfully (without attachments due to size)' });
+          } else {
+            res.status(500).json({ success: false, error: 'Failed to send email via both methods' });
+          }
+        }
+      } catch (emailError) {
+        console.error('Email sending error:', emailError);
+        res.status(500).json({ 
+          success: false, 
+          error: `Email service error: ${(emailError as Error).message}` 
+        });
+      }
       
     } catch (error) {
       console.error('Error sending invoice email:', error);
