@@ -36,24 +36,31 @@ const AdminDashboard: React.FC<{ onBack: () => void; hideBackButton?: boolean }>
     
     try {
       const endpoint = `/api/test/openai/${operationType}`;
-      const response = await apiRequest(endpoint, {
+      const requestData = {
+        prompt: operationType === 'text-generation' ? 'Generate a professional painting estimate description' : undefined,
+        code: operationType === 'code-analysis' ? 'function calculateCost(rooms) { return rooms * 150; }' : undefined,
+        errorMessage: operationType === 'debugging-help' ? 'React component not updating after state change' : undefined,
+        userId: 1
+      };
+
+      const response = await fetch(endpoint, {
         method: 'POST',
-        body: JSON.stringify({
-          prompt: operationType === 'text-generation' ? 'Generate a professional painting estimate description' : undefined,
-          code: operationType === 'code-analysis' ? 'function calculateCost(rooms) { return rooms * 150; }' : undefined,
-          errorMessage: operationType === 'debugging-help' ? 'React component not updating after state change' : undefined,
-          userId: 1
-        })
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData)
       });
 
-      if (response.success) {
+      const data = await response.json();
+
+      if (response.ok && data.success) {
         setTestResult(`${operationType} test completed! Check usage stats above to see new tracking entry.`);
         // Refresh the dashboard data automatically
         setTimeout(() => {
           window.location.reload();
         }, 2000);
       } else {
-        setTestResult(`Test failed: ${response.error}`);
+        setTestResult(`Test failed: ${data.error || 'Unknown error'}`);
       }
     } catch (error) {
       setTestResult(`Test error: ${error instanceof Error ? error.message : 'Unknown error'}`);
