@@ -1277,7 +1277,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                     {itemCount > 0 && (
                       <span 
                         className="text-white text-xs px-4 py-1 rounded-full font-medium whitespace-nowrap ml-2"
-                        style={{ backgroundColor: getSectionColor(section.id) }}
+                        style={{ 
+                          backgroundColor: getSectionColor(section.id),
+                          textShadow: '0 1px 2px rgba(0, 0, 0, 0.8)'
+                        }}
                       >
                       {(() => {
                         switch(section.id) {
