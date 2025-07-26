@@ -286,37 +286,6 @@ export default function StreamlinedHomepage({
 
         <div className="flex justify-center gap-4 mb-6">
           <Button
-            onClick={() => {
-              // Complete authentication reset
-              localStorage.clear();
-              sessionStorage.clear();
-              logout();
-              // Force hard reload to clear all cached state
-              window.location.href = window.location.origin;
-            }}
-            variant="ghost"
-            size="sm"
-            className="text-gray-400 hover:text-white flex items-center gap-2"
-            title="Logout"
-          >
-            <svg
-              width={18}
-              height={18}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-              <polyline points="8,7 3,12 8,17" />
-              <line x1="3" y1="12" x2="15" y2="12" />
-            </svg>
-            Logout
-          </Button>
-          
-          <Button
             onClick={() => setShowNewClientDialog(true)}
             style={{ backgroundColor: paintBrainColors.red, color: 'white' }}
             className="px-4 py-2 text-sm font-semibold hover:opacity-90"
@@ -348,15 +317,47 @@ export default function StreamlinedHomepage({
 
         {projects.length > 0 && (
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg" style={{ color: paintBrainColors.orange }}>
-              {showArchived ? 
-                <span className="font-semibold">Archived Projects</span> : 
-                <>
-                  <span className="font-bold">{projects.filter((p: any) => p.status !== 'archived').length}</span>
-                  <span className="font-normal"> active project{projects.filter((p: any) => p.status !== 'archived').length === 1 ? '' : 's'}</span>
-                </>
-              }
-            </h2>
+            <div className="flex items-center gap-4">
+              <Button
+                onClick={() => {
+                  // Complete authentication reset
+                  localStorage.clear();
+                  sessionStorage.clear();
+                  logout();
+                  // Force hard reload to clear all cached state
+                  window.location.href = window.location.origin;
+                }}
+                variant="ghost"
+                size="sm"
+                className="text-gray-400 hover:text-white flex items-center gap-2"
+                title="Logout"
+              >
+                <svg
+                  width={18}
+                  height={18}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                  <polyline points="8,7 3,12 8,17" />
+                  <line x1="3" y1="12" x2="15" y2="12" />
+                </svg>
+              </Button>
+              
+              <h2 className="text-lg">
+                {showArchived ? 
+                  <span className="font-semibold" style={{ color: paintBrainColors.orange }}>Archived Projects</span> : 
+                  <>
+                    <span className="font-bold" style={{ color: paintBrainColors.green }}>{projects.filter((p: any) => p.status !== 'archived').length}</span>
+                    <span className="font-normal" style={{ color: paintBrainColors.orange }}> active project{projects.filter((p: any) => p.status !== 'archived').length === 1 ? '' : 's'}</span>
+                  </>
+                }
+              </h2>
+            </div>
             <div className="flex items-center gap-3">
               <span className="text-sm font-medium" style={{ color: paintBrainColors.red }}>
                 Active
