@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Settings, DollarSign, Globe, Mail } from 'lucide-react';
+import { ArrowLeft, Settings, DollarSign, Globe, Mail, ChevronRight, Info, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 import AdminDashboard from '../admin/AdminDashboard';
 import TaxConfiguration from './TaxConfiguration';
 import GmailIntegration from './GmailIntegration';
@@ -15,6 +14,8 @@ interface SettingsPageProps {
 
 const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
   const { logout } = useAuth();
+  const [expandedSection, setExpandedSection] = useState<string | null>(null);
+  const [showGmailBenefits, setShowGmailBenefits] = useState(false);
 
   const handleLogout = () => {
     // Complete authentication reset
@@ -23,6 +24,10 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
     logout();
     // Force hard reload to clear all cached state
     window.location.href = window.location.origin;
+  };
+
+  const toggleSection = (section: string) => {
+    setExpandedSection(expandedSection === section ? null : section);
   };
 
   return (
@@ -67,44 +72,114 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
         </div>
       </div>
 
-      <Tabs defaultValue="gmail" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-8">
-          <TabsTrigger value="gmail" className="flex items-center gap-2">
-            <Mail className="h-4 w-4" />
-            Gmail Integration
-          </TabsTrigger>
-          <TabsTrigger value="tax" className="flex items-center gap-2">
-            <DollarSign className="h-4 w-4" />
-            Tax Configuration
-          </TabsTrigger>
-          <TabsTrigger value="admin" className="flex items-center gap-2">
-            <Globe className="h-4 w-4" />
-            API Usage Analytics
-          </TabsTrigger>
-        </TabsList>
+      {/* Gmail Integration Section */}
+      <div className="mb-4">
+        <div 
+          className="flex items-center justify-between p-4 rounded-lg border-2 border-red-400 bg-gray-900/20 cursor-pointer hover:bg-gray-800/30 transition-colors"
+          onClick={() => toggleSection('gmail')}
+        >
+          <div className="flex items-center gap-4">
+            <Menu className="h-5 w-5 text-red-400" />
+            <Mail className="h-5 w-5 text-red-400" />
+            <span className="text-lg font-medium text-red-400">Gmail Integration</span>
+            <div className="bg-red-500 text-white px-3 py-1 rounded-full text-sm">
+              Not Connected
+            </div>
+          </div>
+          <ChevronRight 
+            className={`h-5 w-5 text-red-400 transition-transform ${
+              expandedSection === 'gmail' ? 'rotate-90' : ''
+            }`} 
+          />
+        </div>
+        
+        {expandedSection === 'gmail' && (
+          <div className="mt-4 p-6 rounded-lg border border-red-400/30 bg-gray-900/10">
+            <div className="flex items-center gap-2 mb-4">
+              <h3 className="text-lg font-medium text-white">Gmail Connection Status</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="p-1 text-gray-400 hover:text-white"
+                onClick={() => setShowGmailBenefits(!showGmailBenefits)}
+              >
+                <Info className="h-4 w-4" />
+              </Button>
+            </div>
+            
+            {showGmailBenefits && (
+              <div className="mb-6 p-4 rounded-lg bg-blue-900/20 border border-blue-400/30">
+                <h4 className="font-medium text-blue-400 mb-2">Benefits of Gmail Integration:</h4>
+                <ul className="text-sm text-gray-300 space-y-1">
+                  <li>• Emails sent from your own Gmail address</li>
+                  <li>• Sent emails appear in your Gmail Sent folder</li>
+                  <li>• Maintains professional email reputation</li>
+                  <li>• No shared account or quota limitations</li>
+                  <li>• Full control over your email communications</li>
+                </ul>
+              </div>
+            )}
+            
+            <GmailIntegration />
+          </div>
+        )}
+      </div>
 
-        <TabsContent value="gmail">
-          <GmailIntegration />
-        </TabsContent>
+      {/* Tax Configuration Section */}
+      <div className="mb-4">
+        <div 
+          className="flex items-center justify-between p-4 rounded-lg border-2 border-yellow-400 bg-gray-900/20 cursor-pointer hover:bg-gray-800/30 transition-colors"
+          onClick={() => toggleSection('tax')}
+        >
+          <div className="flex items-center gap-4">
+            <Menu className="h-5 w-5 text-yellow-400" />
+            <DollarSign className="h-5 w-5 text-yellow-400" />
+            <span className="text-lg font-medium text-yellow-400">Tax Configuration</span>
+            <div className="bg-yellow-500 text-black px-3 py-1 rounded-full text-sm font-medium">
+              Configured
+            </div>
+          </div>
+          <ChevronRight 
+            className={`h-5 w-5 text-yellow-400 transition-transform ${
+              expandedSection === 'tax' ? 'rotate-90' : ''
+            }`} 
+          />
+        </div>
+        
+        {expandedSection === 'tax' && (
+          <div className="mt-4 p-6 rounded-lg border border-yellow-400/30 bg-gray-900/10">
+            <TaxConfiguration />
+          </div>
+        )}
+      </div>
 
-        <TabsContent value="tax">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <DollarSign className="h-5 w-5" />
-                Tax Configuration
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <TaxConfiguration />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="admin">
-          <AdminDashboard onBack={onBack} hideBackButton={true} />
-        </TabsContent>
-      </Tabs>
+      {/* API Usage Analytics Section */}
+      <div className="mb-4">
+        <div 
+          className="flex items-center justify-between p-4 rounded-lg border-2 border-green-400 bg-gray-900/20 cursor-pointer hover:bg-gray-800/30 transition-colors"
+          onClick={() => toggleSection('admin')}
+        >
+          <div className="flex items-center gap-4">
+            <Menu className="h-5 w-5 text-green-400" />
+            <Globe className="h-5 w-5 text-green-400" />
+            <span className="text-lg font-medium text-green-400">API Usage Analytics</span>
+            <div className="bg-green-500 text-black px-3 py-1 rounded-full text-sm font-medium">
+              Active
+            </div>
+          </div>
+          <ChevronRight 
+            className={`h-5 w-5 text-green-400 transition-transform ${
+              expandedSection === 'admin' ? 'rotate-90' : ''
+            }`} 
+          />
+        </div>
+        
+        {expandedSection === 'admin' && (
+          <div className="mt-4 p-6 rounded-lg border border-green-400/30 bg-gray-900/10">
+            <AdminDashboard onBack={onBack} hideBackButton={true} />
+          </div>
+        )}
+      </div>
     </div>
   );
 };
