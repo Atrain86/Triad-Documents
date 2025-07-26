@@ -246,7 +246,7 @@ export default function GmailIntegration() {
               <Button
                 onClick={connectGmail}
                 disabled={isConnecting}
-                className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white border-red-400"
+                className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white border-green-400"
               >
                 {isConnecting ? (
                   <>
