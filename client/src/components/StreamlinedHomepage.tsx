@@ -255,7 +255,20 @@ export default function StreamlinedHomepage({
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="p-6">
-        
+        {/* Settings gear icon at top-left */}
+        <div className="mb-4">
+          {onAccessSettings && (
+            <Button
+              onClick={onAccessSettings}
+              variant="ghost"
+              size="sm"
+              className="text-gray-400 hover:text-white"
+              title="Settings"
+            >
+              <Settings size={18} />
+            </Button>
+          )}
+        </div>
         
         {/* Centered logo */}
         <div className="flex justify-center mb-6">
