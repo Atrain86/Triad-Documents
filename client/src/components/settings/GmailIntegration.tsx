@@ -195,26 +195,32 @@ export default function GmailIntegration() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Mail size={20} />
-          Gmail Integration
-        </CardTitle>
-        <CardDescription>
+    <div className="space-y-6">
+      {/* Gmail Integration Header */}
+      <div className="text-center space-y-2">
+        <h2 className="text-2xl font-bold text-red-400">Gmail Integration</h2>
+        <p className="text-[#DCDCAA] text-sm">
           Connect your Gmail account to send emails from your own Gmail address. 
           Emails will appear in your Gmail Sent folder.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Connection Status */}
-        <div className="flex items-center gap-3 p-4 border rounded-lg">
+        </p>
+      </div>
+
+      {/* Connection Status Container with Creative Border */}
+      <div className="relative p-6 rounded-xl border-2 border-red-400/50 bg-gradient-to-r from-red-900/10 to-red-800/5 backdrop-blur-sm">
+        {/* Decorative corner elements */}
+        <div className="absolute top-2 left-2 w-3 h-3 border-l-2 border-t-2 border-red-400 rounded-tl-lg"></div>
+        <div className="absolute top-2 right-2 w-3 h-3 border-r-2 border-t-2 border-red-400 rounded-tr-lg"></div>
+        <div className="absolute bottom-2 left-2 w-3 h-3 border-l-2 border-b-2 border-red-400 rounded-bl-lg"></div>
+        <div className="absolute bottom-2 right-2 w-3 h-3 border-r-2 border-b-2 border-red-400 rounded-br-lg"></div>
+        
+        <div className="flex items-center gap-4">
           {gmailStatus.connected ? (
             <>
-              <CheckCircle className="text-green-500" size={24} />
+              <CheckCircle className="text-green-500" size={32} />
               <div className="flex-1">
-                <div className="font-medium">Connected</div>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-xl font-bold text-red-300">Gmail Connection Status</div>
+                <div className="text-lg font-semibold text-red-400 mt-1">Connected</div>
+                <div className="text-sm text-[#DCDCAA] mt-1">
                   {gmailStatus.gmailAddress}
                 </div>
               </div>
@@ -222,24 +228,25 @@ export default function GmailIntegration() {
                 variant="outline"
                 size="sm"
                 onClick={disconnectGmail}
-                className="text-red-600 hover:text-red-700"
+                className="text-red-600 hover:text-red-700 border-red-400 hover:bg-red-900/20"
               >
                 Disconnect
               </Button>
             </>
           ) : (
             <>
-              <XCircle className="text-gray-400" size={24} />
+              <XCircle className="text-red-400" size={32} />
               <div className="flex-1">
-                <div className="font-medium">Not Connected</div>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-xl font-bold text-red-300">Gmail Connection Status</div>
+                <div className="text-lg font-semibold text-red-400 mt-1">Not Connected</div>
+                <div className="text-sm text-[#DCDCAA] mt-1">
                   No Gmail account connected
                 </div>
               </div>
               <Button
                 onClick={connectGmail}
                 disabled={isConnecting}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white border-red-400"
               >
                 {isConnecting ? (
                   <>
@@ -256,23 +263,24 @@ export default function GmailIntegration() {
             </>
           )}
         </div>
+      </div>
 
 
 
 
 
-        {gmailStatus.connected && (
-          <div className="bg-green-50 dark:bg-green-950 p-4 rounded-lg">
-            <h4 className="font-medium text-green-900 dark:text-green-100">
-              Gmail Connected Successfully!
-            </h4>
-            <p className="text-sm text-green-700 dark:text-green-300 mt-1">
-              You can now send invoices and estimates directly from your Gmail account. 
-              All sent emails will appear in your Gmail Sent folder for proper record keeping.
-            </p>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+      {/* Success Message */}
+      {gmailStatus.connected && (
+        <div className="bg-green-900/20 border border-green-400/30 p-4 rounded-lg">
+          <h4 className="font-medium text-green-400 text-lg">
+            Gmail Connected Successfully!
+          </h4>
+          <p className="text-sm text-[#DCDCAA] mt-1">
+            You can now send invoices and estimates directly from your Gmail account. 
+            All sent emails will appear in your Gmail Sent folder for proper record keeping.
+          </p>
+        </div>
+      )}
+    </div>
   );
 }
