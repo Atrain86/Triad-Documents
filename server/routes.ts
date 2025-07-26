@@ -918,9 +918,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/gmail/callback', async (req, res) => {
     try {
-      const { code, state: userId } = req.query;
+      const { code, state: userId, error } = req.query;
+      
+      console.log('Gmail OAuth callback received:', { 
+        hasCode: !!code, 
+        userId, 
+        error,
+        fullQuery: req.query 
+      });
+
+      if (error) {
+        console.error('OAuth error from Google:', error);
+        return res.status(400).send(`❌ OAuth Error: ${error}`);
+      }
 
       if (!code || !userId) {
+        console.error('Missing required OAuth parameters:', { code: !!code, userId });
         return res.status(400).send('❌ Missing authorization code or user ID');
       }
 

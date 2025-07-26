@@ -59,6 +59,7 @@ export class GmailAuthService {
     }
     try {
       console.log('Processing OAuth callback for user:', userId);
+      console.log('Authorization code received:', code.substring(0, 20) + '...');
       
       const { tokens } = await this.oAuth2Client.getToken(code);
       this.oAuth2Client.setCredentials(tokens);
