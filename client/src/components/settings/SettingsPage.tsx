@@ -45,13 +45,14 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
         </div>
         
         {/* Logout button with custom SVG */}
-        <Button
-          onClick={handleLogout}
-          variant="outline"
-          size="sm"
-          className="text-red-400 border-red-400 hover:bg-red-400 hover:text-white flex items-center gap-2"
-          title="Logout"
-        >
+        <div className="flex items-center">
+          <Button
+            onClick={handleLogout}
+            variant="outline" 
+            size="sm"
+            className="text-red-400 border-red-400 hover:bg-red-400 hover:text-white flex items-center gap-2 bg-transparent"
+            title="Logout"
+          >
           <svg
             width={18}
             height={18}
@@ -63,6 +64,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
           </svg>
           Logout
         </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="gmail" className="w-full">
