@@ -254,109 +254,109 @@ export default function StreamlinedHomepage({
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Settings gear icon at top-left */}
-      <div className="mb-4">
-        {onAccessSettings && (
-          <Button
-            onClick={onAccessSettings}
-            variant="ghost"
-            size="sm"
-            className="text-gray-400 hover:text-white"
-            title="Settings"
-          >
-            <Settings size={18} />
-          </Button>
-        )}
-      </div>
-      
-      {/* Centered logo */}
-      <div className="flex justify-center mb-6">
-        <img 
-          src="/aframe-logo.png" 
-          alt="A-Frame Painting" 
-          className="h-32 w-auto object-contain"
-        />
-      </div>
-
-      <div 
-        className="h-1 w-full mb-8"
-        style={{ background: "linear-gradient(to right, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3, #54a0ff)" }}
-      />
-
-      <div className="flex justify-center gap-4 mb-6">
-        <Button
-          onClick={() => setShowNewClientDialog(true)}
-          style={{ backgroundColor: paintBrainColors.red, color: 'white' }}
-          className="px-4 py-2 text-sm font-semibold hover:opacity-90"
-        >
-          New Client
-        </Button>
+      <div className="p-6">
+        {/* Settings gear icon at top-left */}
+        <div className="mb-4">
+          {onAccessSettings && (
+            <Button
+              onClick={onAccessSettings}
+              variant="ghost"
+              size="sm"
+              className="text-gray-400 hover:text-white"
+              title="Settings"
+            >
+              <Settings size={18} />
+            </Button>
+          )}
+        </div>
         
-        <Button
-          onClick={() => openWorkCalendar()}
-          style={{ backgroundColor: '#7B4FF2', color: 'white' }}
-          className="flex items-center px-4 py-2 text-sm font-semibold hover:opacity-90"
-        >
-          Schedule
-        </Button>
-      </div>
-
-      <div className="flex justify-center mb-6">
-        <div className="relative w-96">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2" style={{ color: paintBrainColors.orange }} size={20} />
-          <Input
-            placeholder="Search clients"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 py-3 border-2 w-full"
-            style={{ borderColor: paintBrainColors.orange }}
+        {/* Centered logo */}
+        <div className="flex justify-center mb-6">
+          <img 
+            src="/aframe-logo.png" 
+            alt="A-Frame Painting" 
+            className="h-32 w-auto object-contain"
           />
         </div>
-      </div>
 
-      {projects.length > 0 && (
+        <div 
+          className="h-1 w-full mb-8"
+          style={{ background: "linear-gradient(to right, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3, #54a0ff)" }}
+        />
+
+        <div className="flex justify-center gap-4 mb-6">
+          <Button
+            onClick={() => {
+              // Complete authentication reset
+              localStorage.clear();
+              sessionStorage.clear();
+              logout();
+              // Force hard reload to clear all cached state
+              window.location.href = window.location.origin;
+            }}
+            variant="ghost"
+            size="sm"
+            className="text-gray-400 hover:text-white flex items-center gap-2"
+            title="Logout"
+          >
+            <svg
+              width={18}
+              height={18}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+              <polyline points="8,7 3,12 8,17" />
+              <line x1="3" y1="12" x2="15" y2="12" />
+            </svg>
+            Logout
+          </Button>
+          
+          <Button
+            onClick={() => setShowNewClientDialog(true)}
+            style={{ backgroundColor: paintBrainColors.red, color: 'white' }}
+            className="px-4 py-2 text-sm font-semibold hover:opacity-90"
+          >
+            New Client
+          </Button>
+          
+          <Button
+            onClick={() => openWorkCalendar()}
+            style={{ backgroundColor: '#7B4FF2', color: 'white' }}
+            className="flex items-center px-4 py-2 text-sm font-semibold hover:opacity-90"
+          >
+            Schedule
+          </Button>
+        </div>
+
+        <div className="flex justify-center mb-6">
+          <div className="relative w-96">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2" style={{ color: paintBrainColors.orange }} size={20} />
+            <Input
+              placeholder="Search clients"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 py-3 border-2 w-full"
+              style={{ borderColor: paintBrainColors.orange }}
+            />
+          </div>
+        </div>
+
+        {projects.length > 0 && (
           <div className="flex justify-between items-center mb-4">
-            <div className="flex items-center gap-4">
-              <Button
-                onClick={() => {
-                  // Complete authentication reset
-                  localStorage.clear();
-                  sessionStorage.clear();
-                  logout();
-                  // Force hard reload to clear all cached state
-                  window.location.href = window.location.origin;
-                }}
-                variant="ghost"
-                size="sm"
-                className="text-gray-400 hover:text-white flex items-center gap-2"
-                title="Logout"
-              >
-                <svg
-                  width={18}
-                  height={18}
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-                  <polyline points="8,7 3,12 8,17" />
-                  <line x1="3" y1="12" x2="15" y2="12" />
-                </svg>
-              </Button>
-              
-              <h2 className="text-lg">
-                {showArchived ? 
-                  <span className="font-semibold" style={{ color: paintBrainColors.orange }}>Archived Projects</span> : 
-                  <>
-                    <span className="font-bold" style={{ color: paintBrainColors.green }}>{projects.filter((p: any) => p.status !== 'archived').length}</span>
-                    <span className="font-normal" style={{ color: paintBrainColors.orange }}> active project{projects.filter((p: any) => p.status !== 'archived').length === 1 ? '' : 's'}</span>
-                  </>
-                }
-              </h2>
-            </div>
+            <h2 className="text-lg" style={{ color: paintBrainColors.orange }}>
+              {showArchived ? 
+                <span className="font-semibold">Archived Projects</span> : 
+                <>
+                  <span className="font-bold">{projects.filter((p: any) => p.status !== 'archived').length}</span>
+                  <span className="font-normal"> active project{projects.filter((p: any) => p.status !== 'archived').length === 1 ? '' : 's'}</span>
+                </>
+              }
+            </h2>
             <div className="flex items-center gap-3">
               <span className="text-sm font-medium" style={{ color: paintBrainColors.red }}>
                 Active
