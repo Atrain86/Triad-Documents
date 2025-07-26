@@ -292,16 +292,16 @@ export default function GmailIntegration() {
           </ul>
         </div>
 
-        {/* Requirements or Configuration Notice */}
+        {/* OAuth Account Selection Notice */}
         {!gmailStatus.connected && (
           <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 p-4 rounded-lg">
-            <h4 className="font-medium text-amber-900 dark:text-amber-100">OAuth Setup Required for New Users</h4>
+            <h4 className="font-medium text-amber-900 dark:text-amber-100">Important: Gmail Account Selection</h4>
             <p className="text-sm text-amber-700 dark:text-amber-300 mt-2">
-              For other users to connect their Gmail accounts, the OAuth app needs the current domain added to Google Cloud Console authorized redirect URIs.
+              Use <strong>kohlmeister@gmail.com</strong> for OAuth connection. Google blocks the cortespainter@gmail.com account because it owns the OAuth app credentials.
             </p>
             <div className="mt-3 text-xs text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/50 p-2 rounded">
-              <strong>Current domain:</strong> {window.location.origin}/api/gmail/callback<br/>
-              <strong>Status:</strong> Admin emails work via SMTP fallback, OAuth requires Google Cloud Console update
+              <strong>Recommended:</strong> Connect kohlmeister@gmail.com<br/>
+              <strong>Blocked:</strong> cortespainter@gmail.com (OAuth app owner)
             </div>
           </div>
         )}
