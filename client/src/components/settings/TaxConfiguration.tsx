@@ -119,36 +119,36 @@ const TaxConfiguration: React.FC<TaxConfigurationProps> = ({
         return (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <Label htmlFor="gst">GST (%)</Label>
+              <Label htmlFor="gst" className="text-[#DCDCAA] font-medium">GST (%)</Label>
               <Input
                 id="gst"
                 type="number"
                 step="0.01"
                 value={taxConfig.gst}
                 onChange={(e) => setTaxConfig({ ...taxConfig, gst: parseFloat(e.target.value) || 0 })}
-                className="mt-1"
+                className="mt-2 border-yellow-400/30 bg-yellow-900/10 text-yellow-100 focus:border-yellow-400"
               />
             </div>
             <div>
-              <Label htmlFor="pst">PST (%)</Label>
+              <Label htmlFor="pst" className="text-[#DCDCAA] font-medium">PST (%)</Label>
               <Input
                 id="pst"
                 type="number"
                 step="0.01"
                 value={taxConfig.pst}
                 onChange={(e) => setTaxConfig({ ...taxConfig, pst: parseFloat(e.target.value) || 0 })}
-                className="mt-1"
+                className="mt-2 border-yellow-400/30 bg-yellow-900/10 text-yellow-100 focus:border-yellow-400"
               />
             </div>
             <div>
-              <Label htmlFor="hst">HST (%)</Label>
+              <Label htmlFor="hst" className="text-[#DCDCAA] font-medium">HST (%)</Label>
               <Input
                 id="hst"
                 type="number"
                 step="0.01"
                 value={taxConfig.hst}
                 onChange={(e) => setTaxConfig({ ...taxConfig, hst: parseFloat(e.target.value) || 0 })}
-                className="mt-1"
+                className="mt-2 border-yellow-400/30 bg-yellow-900/10 text-yellow-100 focus:border-yellow-400"
               />
             </div>
           </div>
@@ -157,25 +157,25 @@ const TaxConfiguration: React.FC<TaxConfigurationProps> = ({
         return (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="salesTax">Sales Tax (%)</Label>
+              <Label htmlFor="salesTax" className="text-[#DCDCAA] font-medium">Sales Tax (%)</Label>
               <Input
                 id="salesTax"
                 type="number"
                 step="0.01"
                 value={taxConfig.salesTax}
                 onChange={(e) => setTaxConfig({ ...taxConfig, salesTax: parseFloat(e.target.value) || 0 })}
-                className="mt-1"
+                className="mt-2 border-yellow-400/30 bg-yellow-900/10 text-yellow-100 focus:border-yellow-400"
               />
             </div>
             <div>
-              <Label htmlFor="otherTax">Other Tax (%)</Label>
+              <Label htmlFor="otherTax" className="text-[#DCDCAA] font-medium">Other Tax (%)</Label>
               <Input
                 id="otherTax"
                 type="number"
                 step="0.01"
                 value={taxConfig.otherTax}
                 onChange={(e) => setTaxConfig({ ...taxConfig, otherTax: parseFloat(e.target.value) || 0 })}
-                className="mt-1"
+                className="mt-2 border-yellow-400/30 bg-yellow-900/10 text-yellow-100 focus:border-yellow-400"
               />
             </div>
           </div>
@@ -184,25 +184,25 @@ const TaxConfiguration: React.FC<TaxConfigurationProps> = ({
         return (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="vat">VAT (%)</Label>
+              <Label htmlFor="vat" className="text-[#DCDCAA] font-medium">VAT (%)</Label>
               <Input
                 id="vat"
                 type="number"
                 step="0.01"
                 value={taxConfig.vat}
                 onChange={(e) => setTaxConfig({ ...taxConfig, vat: parseFloat(e.target.value) || 0 })}
-                className="mt-1"
+                className="mt-2 border-yellow-400/30 bg-yellow-900/10 text-yellow-100 focus:border-yellow-400"
               />
             </div>
             <div>
-              <Label htmlFor="otherTax">Other Tax (%)</Label>
+              <Label htmlFor="otherTax" className="text-[#DCDCAA] font-medium">Other Tax (%)</Label>
               <Input
                 id="otherTax"
                 type="number"
                 step="0.01"
                 value={taxConfig.otherTax}
                 onChange={(e) => setTaxConfig({ ...taxConfig, otherTax: parseFloat(e.target.value) || 0 })}
-                className="mt-1"
+                className="mt-2 border-yellow-400/30 bg-yellow-900/10 text-yellow-100 focus:border-yellow-400"
               />
             </div>
           </div>
@@ -212,53 +212,77 @@ const TaxConfiguration: React.FC<TaxConfigurationProps> = ({
 
   return (
     <div className="space-y-6">
-      <div className="space-y-4">
-        <div>
-          <Label htmlFor="country">Country/Region</Label>
-          <Select value={taxConfig.country} onValueChange={handleCountryChange}>
-            <SelectTrigger className="mt-1">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="CA">Canada</SelectItem>
-              <SelectItem value="US">United States</SelectItem>
-              <SelectItem value="UK">United Kingdom</SelectItem>
-              <SelectItem value="OTHER">Other/International</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+      {/* Tax Configuration Header */}
+      <div className="text-center space-y-2">
+        <h2 className="text-2xl font-bold text-yellow-400">Tax Configuration</h2>
+        <p className="text-[#DCDCAA] text-sm">
+          Configure tax rates for invoices and estimates across different regions.
+          Settings are saved automatically and applied to all future documents.
+        </p>
+      </div>
 
-        {renderTaxInputs()}
-
-        <div className="pt-4 border-t">
-          <div className="text-sm text-muted-foreground">
-            <p className="mb-2">
-              <strong>Total Tax Rate: {(
-                taxConfig.gst + 
-                taxConfig.pst + 
-                taxConfig.hst + 
-                taxConfig.salesTax + 
-                taxConfig.vat + 
-                taxConfig.otherTax
-              ).toFixed(2)}%</strong>
-            </p>
-            <p>
-              This tax configuration will be automatically applied to all future invoices and estimates.
-            </p>
+      {/* Tax Settings Container with Creative Border */}
+      <div className="relative p-6 rounded-xl border-2 border-yellow-400/50 bg-gradient-to-r from-yellow-900/10 to-yellow-800/5 backdrop-blur-sm">
+        {/* Decorative corner elements */}
+        <div className="absolute top-2 left-2 w-3 h-3 border-l-2 border-t-2 border-yellow-400 rounded-tl-lg"></div>
+        <div className="absolute top-2 right-2 w-3 h-3 border-r-2 border-t-2 border-yellow-400 rounded-tr-lg"></div>
+        <div className="absolute bottom-2 left-2 w-3 h-3 border-l-2 border-b-2 border-yellow-400 rounded-bl-lg"></div>
+        <div className="absolute bottom-2 right-2 w-3 h-3 border-r-2 border-b-2 border-yellow-400 rounded-br-lg"></div>
+        
+        <div className="space-y-6">
+          {/* Country Selection */}
+          <div>
+            <Label htmlFor="country" className="text-lg font-semibold text-yellow-300">Country/Region</Label>
+            <Select value={taxConfig.country} onValueChange={handleCountryChange}>
+              <SelectTrigger className="mt-2 border-yellow-400/30 bg-yellow-900/10">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-gray-900 border-yellow-400/30">
+                <SelectItem value="CA">Canada</SelectItem>
+                <SelectItem value="US">United States</SelectItem>
+                <SelectItem value="UK">United Kingdom</SelectItem>
+                <SelectItem value="OTHER">Other/International</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-        </div>
 
-        {showSaveButton && (
-          <div className="flex justify-end pt-4">
-            <Button
-              onClick={handleSave}
-              style={{ backgroundColor: paintBrainColors.purple, color: 'white' }}
-              className="hover:opacity-90"
-            >
-              Save Tax Configuration
-            </Button>
+          {/* Tax Input Fields */}
+          <div className="space-y-4">
+            <h3 className="text-xl font-bold text-yellow-300">Tax Rates Configuration</h3>
+            {renderTaxInputs()}
           </div>
-        )}
+
+          {/* Tax Summary */}
+          <div className="pt-4 border-t border-yellow-400/30">
+            <div className="bg-yellow-900/20 border border-yellow-400/30 p-4 rounded-lg">
+              <h4 className="text-lg font-semibold text-yellow-300 mb-2">Tax Summary</h4>
+              <p className="text-xl font-bold text-yellow-400 mb-2">
+                Total Tax Rate: {(
+                  taxConfig.gst + 
+                  taxConfig.pst + 
+                  taxConfig.hst + 
+                  taxConfig.salesTax + 
+                  taxConfig.vat + 
+                  taxConfig.otherTax
+                ).toFixed(2)}%
+              </p>
+              <p className="text-sm text-[#DCDCAA]">
+                This tax configuration will be automatically applied to all future invoices and estimates.
+              </p>
+            </div>
+          </div>
+
+          {showSaveButton && (
+            <div className="flex justify-end pt-4">
+              <Button
+                onClick={handleSave}
+                className="bg-[#8B5FBF] hover:bg-[#7B4FAF] text-white border-[#8B5FBF] flex items-center gap-2"
+              >
+                Save Tax Configuration
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
