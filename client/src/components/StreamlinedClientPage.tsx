@@ -138,6 +138,12 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
     setEditDescription(receipt.description || '');
   };
 
+  // Helper function to check if receipt is a PDF or document
+  const isPdfOrDoc = (filename: string) => {
+    const ext = filename.toLowerCase().split('.').pop();
+    return ['pdf', 'doc', 'docx', 'txt'].includes(ext || '');
+  };
+
   const handleSave = () => {
     if (editingReceipt) {
       updateReceiptMutation.mutate({
@@ -273,9 +279,26 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-2">
+                  {/* File type indicator */}
+                  {receipt.filename && isPdfOrDoc(receipt.filename) ? (
+                    <FileText size={16} className="text-red-400" />
+                  ) : receipt.filename ? (
+                    <ImageIcon size={16} className="text-green-400" />
+                  ) : (
+                    <Edit3 size={16} className="text-yellow-400" />
+                  )}
+                  
                   {receipt.filename ? (
                     <button
-                      onClick={() => setViewingReceipt(receipt)}
+                      onClick={() => {
+                        if (receipt.filename && isPdfOrDoc(receipt.filename)) {
+                          // For PDFs and docs, open in new tab
+                          window.open(`/uploads/${receipt.filename}`, '_blank');
+                        } else {
+                          // For images, use the modal viewer
+                          setViewingReceipt(receipt);
+                        }
+                      }}
                       className="text-blue-400 hover:text-blue-300 underline text-sm"
                     >
                       {receipt.vendor} - ${Number(receipt.amount || 0).toFixed(2)}
@@ -284,6 +307,11 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
                     <span className="text-gray-200 text-sm">
                       {receipt.vendor} - ${Number(receipt.amount || 0).toFixed(2)}
                     </span>
+                  )}
+                  
+                  {/* Show edit hint for PDF/doc files with minimal data */}
+                  {receipt.filename && isPdfOrDoc(receipt.filename) && (receipt.vendor === 'PDF Receipt' || receipt.amount === '0') && (
+                    <span className="text-xs text-yellow-400 italic">← Click edit to add details</span>
                   )}
                 </div>
                 {receipt.description && receipt.description.trim() && (

@@ -27,11 +27,25 @@ const receiptsDir = path.join(uploadDir, 'receipts');
 // Helper function to extract vendor name from filename
 function extractVendorFromFilename(filename: string): string {
   const name = path.parse(filename).name;
+  
   // Remove timestamps and random numbers
-  const cleaned = name.replace(/^\d{13}-\d+/, '') // Remove timestamp prefix like "1753495988478-369320617"
-                     .replace(/[-_]/g, ' ') // Replace dashes and underscores with spaces
-                     .trim();
-  return cleaned || 'Unknown Vendor';
+  let cleaned = name.replace(/^\d{13}-\d+/, '') // Remove timestamp prefix like "1753495988478-369320617"
+                   .replace(/[-_]/g, ' ') // Replace dashes and underscores with spaces
+                   .replace(/\d{4,}/g, '') // Remove long number sequences
+                   .replace(/\s+/g, ' ') // Clean up multiple spaces
+                   .trim();
+  
+  // If we get an empty string or very short result, use the file extension as a hint
+  if (!cleaned || cleaned.length < 2) {
+    const ext = path.extname(filename).toLowerCase();
+    if (ext === '.pdf') cleaned = 'PDF Receipt';
+    else if (['.doc', '.docx'].includes(ext)) cleaned = 'Document';
+    else if (['.txt'].includes(ext)) cleaned = 'Text File';
+    else cleaned = 'Unknown Vendor';
+  }
+  
+  // Capitalize first letter of each word
+  return cleaned.replace(/\b\w/g, l => l.toUpperCase());
 }
 
 const upload = multer({
