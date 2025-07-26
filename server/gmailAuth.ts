@@ -107,7 +107,29 @@ export class GmailAuthService {
       return { success: true, email: gmailAddress };
     } catch (error) {
       console.error('Gmail OAuth callback error:', error);
-      return { success: false, error: 'Authentication failed' };
+      
+      // Enhanced error logging for OAuth failures
+      if (error.message) {
+        console.error('OAuth error message:', error.message);
+      }
+      if (error.response?.data) {
+        console.error('OAuth error response:', error.response.data);
+      }
+      if (error.code) {
+        console.error('OAuth error code:', error.code);
+      }
+      
+      // Return more specific error message
+      let errorMessage = 'Authentication failed';
+      if (error.message?.includes('invalid_client')) {
+        errorMessage = 'OAuth client configuration error. Check Google Cloud Console setup.';
+      } else if (error.message?.includes('access_denied')) {
+        errorMessage = 'Access denied. User may need to be added as test user in Google Cloud Console.';
+      } else if (error.message?.includes('invalid_grant')) {
+        errorMessage = 'Invalid authorization code. Please try connecting again.';
+      }
+      
+      return { success: false, error: errorMessage };
     }
   }
 

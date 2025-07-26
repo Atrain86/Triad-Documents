@@ -957,13 +957,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
           </html>
         `);
       } else {
+        console.error('OAuth callback failed with error:', result.error);
         res.status(400).send(`
           <html>
             <head><title>Gmail Connection Failed</title></head>
             <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
               <h2 style="color: #f44336;">❌ Gmail Connection Failed</h2>
-              <p>${result.error}</p>
-              <p>Please try again or contact support.</p>
+              <p><strong>Error:</strong> ${result.error}</p>
+              <div style="background: #f5f5f5; padding: 15px; margin: 20px 0; border-radius: 5px; text-align: left;">
+                <h3>Possible Solutions:</h3>
+                <ul>
+                  <li>Check if your Gmail account is added as a test user in Google Cloud Console</li>
+                  <li>Verify OAuth consent screen is configured properly</li>
+                  <li>Try connecting with a different Gmail account</li>
+                  <li>Contact administrator if issue persists</li>
+                </ul>
+              </div>
+              <p>You can close this window and try again.</p>
             </body>
           </html>
         `);
