@@ -1763,7 +1763,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                               // Create input for direct camera access
                               const input = document.createElement('input');
                               input.type = 'file';
-                              input.accept = 'image/*,.heic,.heif';
+                              input.accept = 'image/*,.heic,.heif,.pdf,.doc,.docx,.txt';
                               input.capture = 'environment';
                               input.multiple = true;
                               input.onchange = handleReceiptUpload;
@@ -1780,7 +1780,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                               // Create input for photo library access only (no camera)
                               const input = document.createElement('input');
                               input.type = 'file';
-                              input.accept = 'image/*,.heic,.heif';
+                              input.accept = 'image/*,.heic,.heif,.pdf,.doc,.docx,.txt';
                               input.multiple = true;
                               // No capture attribute - this forces library selection
                               input.onchange = handleReceiptUpload;

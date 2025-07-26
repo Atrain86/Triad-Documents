@@ -24,6 +24,16 @@ const receiptsDir = path.join(uploadDir, 'receipts');
   }
 });
 
+// Helper function to extract vendor name from filename
+function extractVendorFromFilename(filename: string): string {
+  const name = path.parse(filename).name;
+  // Remove timestamps and random numbers
+  const cleaned = name.replace(/^\d{13}-\d+/, '') // Remove timestamp prefix like "1753495988478-369320617"
+                     .replace(/[-_]/g, ' ') // Replace dashes and underscores with spaces
+                     .trim();
+  return cleaned || 'Unknown Vendor';
+}
+
 const upload = multer({
   storage: multer.diskStorage({
     destination: uploadDir, // Always save to root uploads directory
@@ -346,21 +356,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`Processing receipt file: ${file.filename} for project ${projectId}`);
 
-      // Process with OpenAI Vision API
-      const { extractReceiptWithVision } = await import('./visionReceiptHandler');
-      const fileBuffer = fs.readFileSync(file.path);
-      const visionResult = await extractReceiptWithVision(fileBuffer, file.filename);
+      let receiptData;
+      
+      // Check if file is an image (for Vision API processing)
+      const isImage = file.mimetype.startsWith('image/') || 
+                     file.originalname.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp|heic|heif)$/);
+      
+      if (isImage) {
+        // Process with OpenAI Vision API for images
+        try {
+          const { extractReceiptWithVision } = await import('./visionReceiptHandler');
+          const fileBuffer = fs.readFileSync(file.path);
+          const visionResult = await extractReceiptWithVision(fileBuffer, file.filename);
 
-      const receiptData = {
-        projectId,
-        filename: file.filename,
-        originalName: file.originalname,
-        vendor: visionResult.vendor,
-        amount: visionResult.amount.toString(),
-        description: '',
-        date: visionResult.date ? new Date(visionResult.date) : new Date(),
-        items: visionResult.items
-      };
+          receiptData = {
+            projectId,
+            filename: file.filename,
+            originalName: file.originalname,
+            vendor: visionResult.vendor,
+            amount: visionResult.amount.toString(),
+            description: '',
+            date: visionResult.date ? new Date(visionResult.date) : new Date(),
+            items: visionResult.items,
+            ocrMethod: 'openai_vision',
+            confidence: visionResult.confidence
+          };
+        } catch (visionError) {
+          console.log('Vision API failed, using filename fallback:', visionError);
+          // Fallback to filename parsing for images if Vision API fails
+          receiptData = {
+            projectId,
+            filename: file.filename,
+            originalName: file.originalname,
+            vendor: extractVendorFromFilename(file.originalname),
+            amount: '0',
+            description: `File upload: ${file.originalname}`,
+            date: new Date(),
+            items: [],
+            ocrMethod: 'filename_fallback',
+            confidence: 0.3
+          };
+        }
+      } else {
+        // For non-image files (PDF, DOC, etc.), use filename parsing
+        console.log(`Non-image file detected: ${file.mimetype}, using filename parsing`);
+        receiptData = {
+          projectId,
+          filename: file.filename,
+          originalName: file.originalname,
+          vendor: extractVendorFromFilename(file.originalname),
+          amount: '0',
+          description: `File upload: ${file.originalname}`,
+          date: new Date(),
+          items: [],
+          ocrMethod: 'filename_only',
+          confidence: 0.2
+        };
+      }
 
       const receipt = await storage.createReceipt(receiptData);
       console.log(`Successfully processed receipt: ${file.filename}`);
