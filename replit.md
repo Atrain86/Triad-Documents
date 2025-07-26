@@ -389,13 +389,13 @@ Logo: Custom A-frame house structure with paint brush accent
 - **Multi-file type support**: Enhanced receipt system handles images (full OCR), PDFs (intelligent filename parsing), and manual entries
 - **Server optimization**: Increased body parser limits to 100MB with comprehensive fallback email functionality for large attachments
 
-### July 26, 2025 - Pre-Deployment Status & HTTPS Requirements
-- **Gmail OAuth ready for production**: Enhanced error logging confirms OAuth app configuration is correct, requires HTTPS domain for Google security policies
-- **iPhone camera functionality**: Camera access requires HTTPS in production environment, currently blocked in development by iOS Safari security restrictions
-- **Database user ID synchronization**: Fixed authentication system user ID mismatch (updated to user ID 1) ensuring OAuth callbacks will work in production
-- **Comprehensive error handling**: Added detailed OAuth error logging and user-friendly error messages for troubleshooting
-- **Production-ready features**: All core functionality operational including estimate/invoice generation, PDF creation, email delivery, and receipt processing
-- **Deployment readiness**: Application prepared for HTTPS deployment to unlock OAuth and camera functionality
+### July 26, 2025 - Token Usage Tracking Analysis & Warning System
+- **CRITICAL DISCOVERY**: Identified major discrepancy between displayed token usage ($5.36) and actual OpenAI bills - tracking system only captures receipt OCR operations
+- **Missing API usage tracking**: Current system completely misses AI assistant conversations, code generation, debugging sessions, and other major API operations representing 95%+ of actual costs
+- **Enhanced admin dashboard**: Added prominent red warning banner explaining incomplete tracking and bill discrepancy to AdminDashboard component
+- **Data transparency**: Updated API Usage Analytics section to clearly show limitation - only 16 tracked entries vs. hundreds of dollars in untracked usage
+- **User clarification**: Explained that actual OpenAI bills reflect ALL API usage while internal dashboard shows only receipt processing subset
+- **Creative Settings design**: Successfully implemented three-color palette system (red Gmail, yellow Tax, blue Analytics) with Paint Brain green Connect button
 
 ### July 25, 2025 - EstimateGenerator Restoration & Error Recovery
 - **Critical bug fix**: Resolved missing EstimateGenerator import that was causing application startup failures with "Failed to resolve import" error

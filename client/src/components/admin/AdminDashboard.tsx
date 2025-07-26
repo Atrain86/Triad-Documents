@@ -80,7 +80,33 @@ const AdminDashboard: React.FC<{ onBack: () => void; hideBackButton?: boolean }>
           )}
           <h1 className="text-3xl font-bold">API Usage Analytics</h1>
         </div>
+      </div>
 
+      {/* CRITICAL WARNING ABOUT INCOMPLETE TRACKING */}
+      <div className="mb-6 p-4 rounded-lg bg-red-900/20 border-2 border-red-400/50">
+        <div className="flex items-start gap-3">
+          <div className="p-2 bg-red-500/20 rounded-lg flex-shrink-0">
+            <Brain className="h-6 w-6 text-red-400" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-red-400 mb-2">⚠️ INCOMPLETE TRACKING WARNING</h3>
+            <div className="text-sm text-red-300 space-y-2">
+              <p className="font-medium">This dashboard shows ONLY receipt OCR operations (~$5).</p>
+              <p>
+                <strong>MISSING from tracking:</strong> AI assistant conversations, code generation, 
+                debugging sessions, and other major API usage that likely represents 95%+ of your actual bills.
+              </p>
+              <p className="text-yellow-300">
+                💡 Your actual OpenAI bills reflect ALL API usage, not just what's shown here.
+              </p>
+              <div className="mt-3 pt-3 border-t border-red-400/30">
+                <p className="text-yellow-200 font-medium">
+                  To track your real usage: Add your actual OpenAI bill amounts below to maintain accurate records.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       
       {/* Overview Cards */}
