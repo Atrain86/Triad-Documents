@@ -916,19 +916,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Test endpoint to verify callback URL is accessible
-  app.get('/api/gmail/callback-test', (req, res) => {
-    res.send(`
-      <html>
-        <body style="font-family: Arial; padding: 20px;">
-          <h2>✅ Gmail Callback URL is Working!</h2>
-          <p>If you can see this page, the callback URL is accessible.</p>
-          <p>Current domain: ${req.get('host')}</p>
-          <p>Full URL: ${req.protocol}://${req.get('host')}${req.originalUrl}</p>
-        </body>
-      </html>
-    `);
-  });
 
   app.get('/api/gmail/callback', async (req, res) => {
     try {

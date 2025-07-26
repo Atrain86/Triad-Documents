@@ -229,31 +229,7 @@ export default function GmailIntegration() {
           </div>
         </div>
         
-        {/* Debug Test Button */}
-        <div className="bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800 p-4 rounded-lg">
-          <h4 className="text-sm font-medium text-yellow-900 dark:text-yellow-100 mb-2">OAuth Debug Test</h4>
-          <div className="flex gap-2">
-            <button
-              onClick={() => window.open('/api/gmail/callback-test', '_blank')}
-              className="px-3 py-1 text-xs bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100 rounded"
-            >
-              Test Callback URL
-            </button>
-            <button
-              onClick={async () => {
-                const response = await fetch(`/api/gmail/auth/${user?.id}`);
-                const data = await response.json();
-                console.log('Raw OAuth URL:', data.authUrl);
-                navigator.clipboard.writeText(data.authUrl);
-                alert('OAuth URL copied to clipboard - check console');
-              }}
-              className="px-3 py-1 text-xs bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100 rounded"
-            >
-              Copy OAuth URL
-            </button>
-          </div>
-        </div>
-        
+
         {/* Connection Status */}
         <div className="flex items-center gap-3 p-4 border rounded-lg">
           {gmailStatus.connected ? (
