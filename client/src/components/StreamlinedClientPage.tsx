@@ -1302,10 +1302,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                     )}
                   </div>
                   
-                  {/* Large Expand Indicator - Right Side with 180° Flip */}
-                  <div className={`ml-6 transform transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
+                  {/* Large Expand Indicator - Right Side with 90° Rotation */}
+                  <div className={`ml-6 transform transition-transform ${isExpanded ? 'rotate-90' : ''}`}>
                     <svg width="48" height="48" viewBox="0 0 48 48" fill="currentColor" className="text-gray-400">
-                      <path d="M24 32l-12-12h24l-12 12z"/>
+                      <path d="M32 24l-12-12v24l12-12z"/>
                     </svg>
                   </div>
                 </div>
