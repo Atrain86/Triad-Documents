@@ -219,25 +219,7 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
             )}
           </div>
           
-          {/* Bottom Close Button */}
-          <button
-            onClick={() => setViewingReceipt(null)}
-            className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded-full font-bold"
-            style={{
-              position: 'fixed',
-              bottom: '16px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              backgroundColor: '#ef4444',
-              color: 'white',
-              padding: '12px 24px',
-              borderRadius: '25px',
-              fontWeight: 'bold',
-              zIndex: 999999
-            }}
-          >
-            CLOSE RECEIPT
-          </button>
+
         </div>
       )}
       
