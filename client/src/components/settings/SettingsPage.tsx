@@ -162,7 +162,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
           <div className="flex items-center gap-4">
             <Menu className="h-5 w-5 text-blue-400" />
             <Globe className="h-5 w-5 text-blue-400" />
-            <span className="text-lg font-medium text-blue-400">API Usage Analytics</span>
+            <span className="text-lg font-medium text-blue-400">API Usage</span>
             <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-medium">
               Active
             </div>
