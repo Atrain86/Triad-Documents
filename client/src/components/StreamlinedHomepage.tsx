@@ -699,14 +699,14 @@ function StatusButton({ project, updateStatusMutation }: { project: any; updateS
       </button>
       
       {showDropdown && (
-        <div className="fixed inset-0 z-50 bg-black/20 flex items-center justify-center p-4" 
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4" 
              onClick={() => setShowDropdown(false)}>
-          <div className="bg-card border border-border rounded-lg shadow-xl max-w-sm w-full max-h-80 overflow-y-auto"
+          <div className="bg-black border border-gray-600 rounded-lg shadow-2xl max-w-sm w-full max-h-80 overflow-y-auto"
                onClick={(e) => e.stopPropagation()}>
-            <div className="p-3 border-b border-border">
-              <h3 className="font-medium text-sm">Change Status</h3>
+            <div className="p-3 border-b border-gray-600 bg-gray-900">
+              <h3 className="font-medium text-sm text-white">Change Status</h3>
             </div>
-            <div className="p-2">
+            <div className="p-2 bg-black">
               {statusOptions.map((option) => (
                 <button
                   key={option.value}
@@ -715,8 +715,10 @@ function StatusButton({ project, updateStatusMutation }: { project: any; updateS
                     e.stopPropagation();
                     handleStatusChange(option.value);
                   }}
-                  className={`w-full text-left px-3 py-3 text-sm hover:bg-accent hover:text-accent-foreground transition-colors touch-manipulation rounded-md ${
-                    option.value === project.status ? 'bg-accent' : ''
+                  className={`w-full text-left px-3 py-3 text-sm transition-colors touch-manipulation rounded-md text-white ${
+                    option.value === project.status 
+                      ? 'bg-gray-700 border border-gray-500' 
+                      : 'hover:bg-gray-800'
                   }`}
                   style={{ 
                     WebkitTouchCallout: 'none',
