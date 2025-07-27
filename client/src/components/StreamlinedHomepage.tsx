@@ -627,6 +627,106 @@ function StatusIcon({ status }: { status: string }) {
   );
 }
 
+function StatusButton({ project, updateStatusMutation }: { project: any; updateStatusMutation: any }) {
+  const [showDropdown, setShowDropdown] = useState(false);
+  
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      if (showDropdown) {
+        setShowDropdown(false);
+      }
+    };
+    
+    if (showDropdown) {
+      document.addEventListener('click', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+    }
+    
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [showDropdown]);
+  
+  const statusOptions = [
+    { value: 'in-progress', label: 'In Progress' },
+    { value: 'scheduled', label: 'Scheduled' },
+    { value: 'estimate-sent', label: 'Estimate Sent' },
+    { value: 'awaiting-confirmation', label: 'Awaiting Confirmation' },
+    { value: 'site-visit-needed', label: 'Site Visit Needed' },
+    { value: 'initial-contact', label: 'Initial Contact' },
+    { value: 'follow-up-needed', label: 'Follow-up Needed' },
+    { value: 'on-hold', label: 'On Hold' },
+    { value: 'pending', label: 'Pending' },
+    { value: 'completed', label: 'Completed' },
+    { value: 'cancelled', label: 'Cancelled' },
+    { value: 'archived', label: 'Archived' }
+  ];
+
+  const handleStatusChange = (newStatus: string) => {
+    updateStatusMutation.mutate({ 
+      projectId: project.id, 
+      status: newStatus 
+    });
+    setShowDropdown(false);
+  };
+
+  return (
+    <div className="relative">
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setShowDropdown(!showDropdown);
+        }}
+        className="flex items-center pointer-events-auto bg-card/50 rounded-md px-2 py-1 hover:bg-card/80 transition-colors touch-manipulation"
+        style={{ 
+          WebkitTouchCallout: 'none',
+          WebkitUserSelect: 'none',
+          userSelect: 'none'
+        }}
+      >
+        <StatusIcon status={project.status} />
+        <span 
+          className="text-xs font-medium"
+          style={{ 
+            color: statusConfig[project.status as keyof typeof statusConfig]?.color || paintBrainColors.gray 
+          }}
+        >
+          {statusConfig[project.status as keyof typeof statusConfig]?.label || project.status}
+        </span>
+      </button>
+      
+      {showDropdown && (
+        <div className="absolute top-full right-0 mt-1 bg-card border border-border rounded-md shadow-lg z-50 min-w-48">
+          {statusOptions.map((option) => (
+            <button
+              key={option.value}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleStatusChange(option.value);
+              }}
+              className="w-full text-left px-3 py-2 text-xs hover:bg-accent hover:text-accent-foreground transition-colors touch-manipulation"
+              style={{ 
+                WebkitTouchCallout: 'none',
+                WebkitUserSelect: 'none',
+                userSelect: 'none'
+              }}
+            >
+              <div className="flex items-center">
+                <StatusIcon status={option.value} />
+                <span>{option.label}</span>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ProjectCard({ project, onSelectProject, updateStatusMutation, deleteProjectMutation, handleEmailClient, showDragHandle, setEditingProject, setShowEditDialog }: any) {
   const [touchStartPos, setTouchStartPos] = useState<{ x: number; y: number } | null>(null);
   const [touchStartTime, setTouchStartTime] = useState<number | null>(null);
@@ -798,53 +898,10 @@ function ProjectCard({ project, onSelectProject, updateStatusMutation, deletePro
         </div>
         
         <div className="flex items-center gap-2">
-          <div className="flex items-center relative z-20 pointer-events-auto bg-card/50 rounded-md px-2 py-1 hover:bg-card/80 transition-colors">
-            <StatusIcon status={project.status} />
-            <select
-              value={project.status}
-              onChange={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                updateStatusMutation.mutate({ 
-                  projectId: project.id, 
-                  status: e.target.value 
-                });
-              }}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-              onTouchStart={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-              onTouchEnd={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-              onMouseDown={(e) => {
-                e.stopPropagation();
-              }}
-              className="text-xs font-medium border-none bg-transparent cursor-pointer focus:outline-none relative z-30 min-w-0 pointer-events-auto appearance-none"
-              style={{ 
-                color: statusConfig[project.status as keyof typeof statusConfig]?.color || paintBrainColors.gray,
-                touchAction: 'manipulation'
-              }}
-            >
-              <option value="in-progress">In Progress</option>
-              <option value="scheduled">Scheduled</option>
-              <option value="estimate-sent">Estimate Sent</option>
-              <option value="awaiting-confirmation">Awaiting Confirmation</option>
-              <option value="site-visit-needed">Site Visit Needed</option>
-              <option value="initial-contact">Initial Contact</option>
-              <option value="follow-up-needed">Follow-up Needed</option>
-              <option value="on-hold">On Hold</option>
-              <option value="pending">Pending</option>
-              <option value="completed">Completed</option>
-              <option value="cancelled">Cancelled</option>
-              <option value="archived">Archived</option>
-            </select>
-          </div>
+          <StatusButton 
+            project={project} 
+            updateStatusMutation={updateStatusMutation}
+          />
         </div>
       </div>
       
