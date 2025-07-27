@@ -165,6 +165,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
           <div className="flex items-center gap-3">
             <Menu className="h-5 w-5 text-red-400" />
             <img src="/gmail-logo.png" alt="Gmail" className="h-5 w-5" />
+            <span className="text-sm font-medium text-red-400">Sync Gmail</span>
             {!gmailStatus?.connected && (
               <div
                 onClick={() => {
