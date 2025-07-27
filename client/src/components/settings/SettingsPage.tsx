@@ -164,12 +164,11 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
         <div className="flex items-center justify-between p-4 rounded-lg border-2 border-red-400 bg-gray-900/20">
           <div className="flex items-center gap-3">
             <Menu className="h-5 w-5 text-red-400" />
-            <svg className="h-5 w-5" viewBox="0 0 256 193" xmlns="http://www.w3.org/2000/svg">
-              <path fill="#4285F4" d="M58.182 192.05V93.14L27.507 65.077 0 49.504v125.091c0 9.658 7.825 17.455 17.455 17.455h40.727Z"/>
-              <path fill="#34A853" d="M197.818 192.05h40.727c9.658 0 17.455-7.826 17.455-17.455V49.505l-27.507 15.572-30.675 28.063v98.91Z"/>
-              <path fill="#EA4335" d="M58.182 93.14 54.595 54.81 0 49.504l58.182 53.077v-9.441Z"/>
-              <path fill="#FBBC05" d="M197.818 93.14V54.81l-69.818 49.086-69.818-49.086v38.33l69.818 49.085 69.818-49.085Z"/>
-              <path fill="#EA4335" d="M256 49.504 197.818 54.81l3.587 38.33V49.504L256 49.504Z"/>
+            <svg className="h-5 w-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path fill="#4285F4" d="M22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6zm-2 0l-8 5-8-5h16z"/>
+              <path fill="#EA4335" d="M2 6l8 5v7H4c-1.1 0-2-.9-2-2V6z"/>
+              <path fill="#FBBC05" d="M22 6v10c0 1.1-.9 2-2 2h-6v-7l8-5z"/>
+              <path fill="#34A853" d="M10 11l8-5v10c0 1.1-.9 2-2 2h-6v-7z"/>
             </svg>
             {!gmailStatus?.connected && (
               <div
