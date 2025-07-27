@@ -162,18 +162,18 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
       {/* Gmail Integration Section */}
       <div className="mb-4">
         <div className="flex items-center justify-between p-4 rounded-lg border-2 border-red-400 bg-gray-900/20">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <Menu className="h-5 w-5 text-red-400" />
             <img src="/gmail-logo.png" alt="Gmail" className="h-5 w-5" />
-            <span className="text-sm font-medium text-red-400">Sync Gmail</span>
+            <span className="text-lg font-medium text-red-400">Gmail Integration</span>
             {!gmailStatus?.connected && (
               <div
                 onClick={() => {
                   window.open('/api/gmail/auth/1', '_blank');
                 }}
-                className="bg-green-500 hover:bg-green-600 text-black px-3 py-2 text-xs rounded-full cursor-pointer whitespace-nowrap"
+                className="bg-red-500 hover:bg-red-600 text-white px-3 py-2 text-xs rounded-full cursor-pointer whitespace-nowrap"
               >
-                Connect Gmail
+                Sync Gmail
               </div>
             )}
             <div className="flex items-center gap-2">
