@@ -8,6 +8,89 @@ import TaxConfiguration from './TaxConfiguration';
 import GmailIntegration from './GmailIntegration';
 import { useAuth } from '@/contexts/AuthContext';
 
+interface RecentUsageEntry {
+  id: number;
+  userId: number;
+  operation: string;
+  tokensUsed: number;
+  estimatedCost: number;
+  createdAt: string;
+}
+
+const RecentActivityContent: React.FC = () => {
+  const { data: recentUsage, isLoading: recentUsageLoading } = useQuery<RecentUsageEntry[]>({
+    queryKey: ['/api/admin/token-usage/recent'],
+  });
+
+  const formatNumber = (num: number): string => {
+    return new Intl.NumberFormat('en-US').format(num);
+  };
+
+  const formatCurrency = (amount: number): string => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 4,
+    }).format(amount);
+  };
+
+  const formatDate = (dateString: string): string => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  return (
+    <>
+      {recentUsageLoading ? (
+        <div className="space-y-3">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="animate-pulse bg-transparent p-4 rounded-lg border border-purple-600/30">
+              <div className="flex justify-between items-center">
+                <div className="flex-1">
+                  <div className="h-4 bg-gray-600 rounded mb-2 w-32"></div>
+                  <div className="h-3 bg-gray-600 rounded w-24"></div>
+                </div>
+                <div className="h-4 bg-gray-600 rounded w-16"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : recentUsage && recentUsage.length > 0 ? (
+        <div className="space-y-3">
+          {recentUsage.slice(0, 8).map((entry) => (
+            <div key={entry.id} className="bg-transparent p-4 rounded-lg border border-purple-600/30">
+              <div className="flex justify-between items-center">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="font-medium text-purple-200 capitalize">{entry.operation.replace('_', ' ')}</p>
+                    <span className="text-xs px-2 py-1 bg-purple-500/20 text-black rounded">
+                      {formatNumber(entry.tokensUsed)} tokens
+                    </span>
+                  </div>
+                  <p className="text-sm text-purple-400">{formatDate(entry.createdAt)}</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-semibold text-indigo-300">{formatCurrency(entry.estimatedCost)}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="bg-transparent p-4 rounded-lg border border-purple-600/30">
+          <p className="text-purple-400 text-center">No recent activity</p>
+        </div>
+      )}
+    </>
+  );
+};
+
 interface SettingsPageProps {
   onBack: () => void;
 }
@@ -160,6 +243,30 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
         <div className="p-4 rounded-lg border-2 border-blue-400 bg-gray-900/20">
           <AdminDashboard onBack={onBack} hideBackButton={true} />
         </div>
+      </div>
+
+      {/* Recent Activity Section */}
+      <div className="mb-4">
+        <div 
+          className="flex items-center justify-between p-4 rounded-lg border-2 border-purple-400 bg-gray-900/20 cursor-pointer hover:bg-gray-800/30 transition-colors"
+          onClick={() => toggleSection('activity')}
+        >
+          <div className="flex items-center gap-4">
+            <Menu className="h-5 w-5 text-purple-400" />
+            <span className="text-lg font-medium text-purple-400">Recent Activity</span>
+          </div>
+          <ChevronRight 
+            className={`h-5 w-5 text-purple-400 transition-transform ${
+              expandedSection === 'activity' ? 'rotate-90' : ''
+            }`} 
+          />
+        </div>
+        
+        {expandedSection === 'activity' && (
+          <div className="mt-4 p-6 rounded-lg border border-purple-400/30 bg-gray-900/10">
+            <RecentActivityContent />
+          </div>
+        )}
       </div>
     </div>
   );

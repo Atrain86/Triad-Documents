@@ -102,79 +102,25 @@ const AdminDashboard: React.FC<{ onBack: () => void; hideBackButton?: boolean }>
           </>
         ) : (
           <>
-            <div className="flex items-center gap-4">
-              <Menu className="h-5 w-5 text-blue-400" />
-              <span className="text-lg font-medium text-blue-400">API Usage</span>
-              <div className="bg-emerald-500 text-white px-3 py-1 rounded-full text-sm font-medium">
-                Tokens {formatNumber(totalStats?.totalTokens || 0)}
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-4">
+                <Menu className="h-5 w-5 text-blue-400" />
+                <span className="text-lg font-medium text-blue-400">API Usage</span>
               </div>
-            </div>
-            <div className="bg-emerald-500 text-white px-3 py-1 rounded-full text-sm font-medium">
-              {formatCurrency(totalStats?.totalCost || 0)}
+              <div className="flex items-center gap-4">
+                <div className="bg-green-500 text-black px-3 py-1 rounded-full text-sm font-medium">
+                  Tokens {formatNumber(totalStats?.totalTokens || 0)}
+                </div>
+                <div className="bg-green-500 text-black px-3 py-1 rounded-full text-sm font-medium">
+                  {formatCurrency(totalStats?.totalCost || 0)}
+                </div>
+              </div>
             </div>
           </>
         )}
       </div>
 
-      {/* Recent Activity Container */}
-      <div className="mb-4">
-        <div 
-          className="flex items-center justify-between p-4 rounded-lg border-2 border-indigo-400 bg-gray-900/20 cursor-pointer hover:bg-gray-800/30 transition-colors"
-          onClick={() => toggleSection('activity')}
-        >
-          <h2 className="text-xl font-semibold text-indigo-400">Recent Activity</h2>
-          <ChevronRight 
-            className={`h-5 w-5 text-indigo-400 transition-transform ${
-              expandedSection === 'activity' ? 'rotate-90' : ''
-            }`} 
-          />
-        </div>
-        
-        {expandedSection === 'activity' && (
-          <div className="mt-4 p-6 rounded-lg border border-indigo-400/30 bg-gray-900/10">
-            {recentUsageLoading ? (
-              <div className="space-y-3">
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} className="animate-pulse bg-transparent p-4 rounded-lg border border-purple-600/30">
-                    <div className="flex justify-between items-center">
-                      <div className="flex-1">
-                        <div className="h-4 bg-gray-600 rounded mb-2 w-32"></div>
-                        <div className="h-3 bg-gray-600 rounded w-24"></div>
-                      </div>
-                      <div className="h-4 bg-gray-600 rounded w-16"></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : recentUsage && recentUsage.length > 0 ? (
-              <div className="space-y-3">
-                {recentUsage.slice(0, 8).map((entry) => (
-                  <div key={entry.id} className="bg-transparent p-4 rounded-lg border border-purple-600/30">
-                    <div className="flex justify-between items-center">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <p className="font-medium text-purple-200 capitalize">{entry.operation.replace('_', ' ')}</p>
-                          <span className="text-xs px-2 py-1 bg-purple-500/20 text-purple-300 rounded">
-                            {formatNumber(entry.tokensUsed)} tokens
-                          </span>
-                        </div>
-                        <p className="text-sm text-purple-400">{formatDate(entry.createdAt)}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-semibold text-indigo-300">{formatCurrency(entry.estimatedCost)}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="bg-transparent p-4 rounded-lg border border-purple-600/30">
-                <p className="text-purple-400 text-center">No recent activity</p>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+
 
     </div>
   );
