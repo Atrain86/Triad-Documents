@@ -825,7 +825,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
               originalSize: totalOriginalSize,
               compressedSize: prev.compressedSize,
             }));
-          }
+          },
+          'photo'  // High quality compression for photos
         );
 
         totalCompressedSize = totalCompressedSizeBytes;

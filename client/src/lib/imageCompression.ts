@@ -99,11 +99,27 @@ export function formatFileSize(bytes: number): string {
 
 export async function compressMultipleImages(
   files: File[],
-  progressCallback?: (progress: { currentFile: number; totalFiles: number }) => void
+  progressCallback?: (progress: { currentFile: number; totalFiles: number }) => void,
+  compressionType: 'photo' | 'receipt' = 'photo'
 ): Promise<{ compressedFiles: File[]; totalCompressedSizeBytes: number }> {
   const imageFiles = files.filter(file => file.type.startsWith('image/'));
   const compressedResults: File[] = [];
   let totalCompressedSize = 0;
+  
+  // Different compression settings for photos vs receipts
+  const compressionOptions = compressionType === 'photo' 
+    ? {
+        maxWidth: 2400,    // Higher resolution for photos
+        maxHeight: 1600,   // Better aspect ratio support
+        quality: 0.9,      // Higher quality (90% vs 80%)
+        format: 'jpeg' as const
+      }
+    : {
+        maxWidth: 1920,    // Standard resolution for receipts
+        maxHeight: 1080,   // Optimized for OCR
+        quality: 0.7,      // Lower quality for cost savings
+        format: 'jpeg' as const
+      };
   
   for (let i = 0; i < imageFiles.length; i++) {
     const file = imageFiles[i];
@@ -114,9 +130,11 @@ export async function compressMultipleImages(
     }
     
     try {
-      const result = await compressImage(file);
+      const result = await compressImage(file, compressionOptions);
       compressedResults.push(result.file);
       totalCompressedSize += result.compressedSize;
+      
+      console.log(`${compressionType} compressed ${file.name}: ${formatFileSize(result.originalSize)} → ${formatFileSize(result.compressedSize)} (${result.compressionRatio.toFixed(1)}% reduction)`);
     } catch (error) {
       console.error(`Failed to compress ${file.name}:`, error);
       // If compression fails, use original file
@@ -129,4 +147,19 @@ export async function compressMultipleImages(
     compressedFiles: compressedResults,
     totalCompressedSizeBytes: totalCompressedSize
   };
+}
+
+// New convenience functions for specific use cases
+export async function compressPhotos(
+  files: File[],
+  progressCallback?: (progress: { currentFile: number; totalFiles: number }) => void
+): Promise<{ compressedFiles: File[]; totalCompressedSizeBytes: number }> {
+  return compressMultipleImages(files, progressCallback, 'photo');
+}
+
+export async function compressReceipts(
+  files: File[],
+  progressCallback?: (progress: { currentFile: number; totalFiles: number }) => void
+): Promise<{ compressedFiles: File[]; totalCompressedSizeBytes: number }> {
+  return compressMultipleImages(files, progressCallback, 'receipt');
 }
