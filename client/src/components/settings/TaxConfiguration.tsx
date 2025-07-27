@@ -131,7 +131,7 @@ const TaxConfiguration: React.FC<TaxConfigurationProps> = ({
                     setTaxConfig({ ...taxConfig, gst: parseFloat(value) || 0 });
                   }
                 }}
-                placeholder="5.0"
+                placeholder="5"
                 className="mt-2 border-yellow-400/30 bg-black text-yellow-100 focus:border-yellow-400"
               />
             </div>
@@ -148,7 +148,7 @@ const TaxConfiguration: React.FC<TaxConfigurationProps> = ({
                     setTaxConfig({ ...taxConfig, pst: parseFloat(value) || 0 });
                   }
                 }}
-                placeholder="7.0"
+                placeholder="7"
                 className="mt-2 border-yellow-400/30 bg-black text-yellow-100 focus:border-yellow-400"
               />
             </div>
@@ -165,7 +165,7 @@ const TaxConfiguration: React.FC<TaxConfigurationProps> = ({
                     setTaxConfig({ ...taxConfig, hst: parseFloat(value) || 0 });
                   }
                 }}
-                placeholder="15.0"
+                placeholder="15"
                 className="mt-2 border-yellow-400/30 bg-black text-yellow-100 focus:border-yellow-400"
               />
             </div>
@@ -204,7 +204,7 @@ const TaxConfiguration: React.FC<TaxConfigurationProps> = ({
                     setTaxConfig({ ...taxConfig, otherTax: parseFloat(value) || 0 });
                   }
                 }}
-                placeholder="0.0"
+                placeholder="0"
                 className="mt-2 border-yellow-400/30 bg-black text-yellow-100 focus:border-yellow-400"
               />
             </div>
@@ -243,7 +243,7 @@ const TaxConfiguration: React.FC<TaxConfigurationProps> = ({
                     setTaxConfig({ ...taxConfig, otherTax: parseFloat(value) || 0 });
                   }
                 }}
-                placeholder="0.0"
+                placeholder="0"
                 className="mt-2 border-yellow-400/30 bg-black text-yellow-100 focus:border-yellow-400"
               />
             </div>
@@ -310,12 +310,12 @@ const TaxConfiguration: React.FC<TaxConfigurationProps> = ({
           </div>
 
           {showSaveButton && (
-            <div className="flex justify-end pt-4">
+            <div className="flex justify-start pt-4">
               <Button
                 onClick={handleSave}
-                className="bg-[#8B5FBF] hover:bg-[#7B4FAF] text-white border-[#8B5FBF] flex items-center gap-2"
+                className="bg-[#F44747] hover:bg-[#E33E3E] text-white border-[#F44747] flex items-center gap-2"
               >
-                Save Tax Configuration
+                Save
               </Button>
             </div>
           )}
