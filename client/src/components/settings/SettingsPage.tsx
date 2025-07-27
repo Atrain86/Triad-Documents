@@ -157,8 +157,8 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
 
   return (
     <div className="p-6">
-      {/* Back and Logout buttons only */}
-      <div className="flex justify-between items-start mb-8">
+      {/* Back and Logout buttons in original position */}
+      <div className="flex justify-between items-start mb-20">
         <Button
           onClick={onBack}
           variant="ghost"
@@ -192,8 +192,8 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
         </div>
       </div>
 
-      {/* Settings header moved down */}
-      <div className="flex items-center gap-3 mb-6">
+      {/* Settings header positioned closer to Gmail container */}
+      <div className="flex items-center gap-3 mb-2">
         <Settings className="h-8 w-8 text-purple-400" />
         <h1 className="text-3xl font-bold text-white">Settings</h1>
       </div>
