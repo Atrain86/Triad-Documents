@@ -496,7 +496,7 @@ function NewClientForm({ onSubmit, onCancel, isLoading }: { onSubmit: (data: any
     clientName: '',
     address: '',
     projectType: 'interior',
-    roomCount: 1,
+    roomCount: 0,
     hourlyRate: 60
   });
 
@@ -557,9 +557,10 @@ function NewClientForm({ onSubmit, onCancel, isLoading }: { onSubmit: (data: any
         <Input
           id="roomCount"
           type="number"
-          min="1"
-          value={formData.roomCount}
-          onChange={(e) => setFormData(prev => ({ ...prev, roomCount: parseInt(e.target.value) || 1 }))}
+          min="0"
+          value={formData.roomCount || ''}
+          onChange={(e) => setFormData(prev => ({ ...prev, roomCount: parseInt(e.target.value) || 0 }))}
+          placeholder="Enter number of rooms"
         />
       </div>
 
