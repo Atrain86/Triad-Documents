@@ -103,7 +103,7 @@ const AdminDashboard: React.FC<{ onBack: () => void; hideBackButton?: boolean }>
             <div className="bg-green-600 text-black px-3 py-2 rounded-full text-xs font-medium ml-16">
               Tokens {formatNumber(totalStats?.totalTokens || 0)}
             </div>
-            <div className="bg-green-600 text-black px-3 py-2 rounded-full text-xs font-medium">
+            <div className="bg-green-600 text-black px-3 py-2 rounded-full text-xs font-medium ml-auto">
               {formatCurrency(totalStats?.totalCost || 0)}
             </div>
           </>
