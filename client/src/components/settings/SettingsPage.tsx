@@ -261,6 +261,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
         >
           <div className="flex items-center gap-4">
             <Menu className="h-5 w-5 text-purple-400" />
+            <img src="/recent-activity-icon.png" alt="Recent Activity" className="h-5 w-5" />
             <span className="text-lg font-medium text-purple-400">Recent Activity</span>
           </div>
           <ChevronRight 
