@@ -32,20 +32,10 @@ const paintBrainColors = {
   gray: '#6B7280'
 };
 
-// Calendar function for A-Frame calendar integration
-const openWorkCalendar = (clientProject: Project | null = null, setShowCalendar: (show: boolean) => void) => {
-  if (clientProject) {
-    // Create new calendar event with client details
-    const eventTitle = `${clientProject.clientName} - ${clientProject.projectType}`;
-    const eventLocation = `${clientProject.address}, ${clientProject.clientCity || ''}`;
-    
-    const createEventUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventTitle)}&location=${encodeURIComponent(eventLocation)}&details=${encodeURIComponent(`Client: ${clientProject.clientName}\nProject: ${clientProject.projectType}`)}&cid=6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981@group.calendar.google.com`;
-    
-    window.open(createEventUrl, '_blank');
-  } else {
-    // Open custom dark mode calendar within the app
-    setShowCalendar(true);
-  }
+// Calendar function for A-Frame calendar integration - opens directly to month view
+const openWorkCalendar = (clientProject: Project | null = null, setShowCalendar?: (show: boolean) => void) => {
+  // Always open A-Frame Google Calendar directly to month view
+  window.open('https://calendar.google.com/calendar/u/0/r/month', '_blank');
 };
 
 // Improved file list component

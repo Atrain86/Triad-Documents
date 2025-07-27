@@ -240,8 +240,8 @@ export default function StreamlinedHomepage({
   const displayProjects = sortProjectsByPriority(filteredProjects);
 
   const openWorkCalendar = () => {
-    // Open custom dark mode calendar within the app
-    setShowCalendar(true);
+    // Open A-Frame Google Calendar directly to month view
+    window.open('https://calendar.google.com/calendar/u/0/r/month', '_blank');
   };
 
   if (isLoading) {
