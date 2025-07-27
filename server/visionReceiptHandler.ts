@@ -446,7 +446,7 @@ Return ONLY this JSON format:
 
       return {
         vendor: cleanVendor,
-        amount: 0, // PDFs require manual amount entry
+        amount: parseFloat(parsedData.amount) || 0, // Use extracted amount from OpenAI
         items: parsedData.items || ['PDF requires manual data entry'],
         date: cleanDate,
         confidence: parsedData.confidence || 0.6,
