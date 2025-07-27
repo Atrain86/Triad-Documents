@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { X, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
 import ErrorTooltip from './ui/error-tooltip';
 import { useErrorTooltip } from '@/hooks/useErrorTooltip';
+import '../types/pinch-zoom.d.ts';
 
 interface PhotoCarouselProps {
   photos: Array<{ id: number; filename: string; description?: string | null }>;
@@ -61,7 +62,7 @@ export default function PhotoCarousel({ photos, initialIndex, onClose, onDelete 
     document.body.style.userSelect = '';
     document.body.style.webkitUserSelect = '';
     
-    const threshold = 50; // Reduced threshold for easier swiping
+    const threshold = 100; // Increased threshold to avoid interference with pinch-zoom
     const velocity = Math.abs(dragOffset);
     
     if (velocity > threshold) {
@@ -102,17 +103,38 @@ export default function PhotoCarousel({ photos, initialIndex, onClose, onDelete 
     handleEnd();
   };
 
-  // Touch events
+  // Touch events optimized for pinch-zoom compatibility
   const handleTouchStart = (e: React.TouchEvent) => {
+    const touchCount = e.touches.length;
+    if (touchCount > 1) {
+      // Multi-touch detected - let pinch-zoom handle it
+      setIsDragging(false);
+      setDragOffset(0);
+      return;
+    }
     handleStart(e.touches[0].clientX);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    handleMove(e.touches[0].clientX);
+    const touchCount = e.touches.length;
+    if (touchCount > 1) {
+      // Multi-touch detected - let pinch-zoom handle it
+      setIsDragging(false);
+      return;
+    }
+    
+    // Only prevent default for single touch swipe gestures
+    if (isDragging && touchCount === 1) {
+      e.preventDefault();
+      handleMove(e.touches[0].clientX);
+    }
   };
 
-  const handleTouchEnd = () => {
-    handleEnd();
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    // Only handle end if it was a single touch gesture
+    if (e.changedTouches.length === 1 && isDragging) {
+      handleEnd();
+    }
   };
 
   // Keyboard navigation
@@ -234,7 +256,7 @@ export default function PhotoCarousel({ photos, initialIndex, onClose, onDelete 
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         style={{ 
-          touchAction: 'pan-y pinch-zoom'
+          touchAction: 'none' // Changed to 'none' to allow pinch-zoom to handle all touch events
         }}
       >
         {/* Photo Slider with smooth animations */}
@@ -253,12 +275,29 @@ export default function PhotoCarousel({ photos, initialIndex, onClose, onDelete 
               className="w-full h-full flex-shrink-0 flex items-center justify-center p-4"
             >
               <div className="max-w-full max-h-full flex flex-col items-center">
-                <img
-                  src={`/uploads/${photo.filename}`}
-                  alt={photo.description || `Photo ${index + 1}`}
-                  className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl"
-                  draggable={false}
-                />
+                {/* Pinch-to-zoom wrapper for enhanced mobile experience */}
+                <pinch-zoom 
+                  style={{ 
+                    display: 'block',
+                    width: '100%',
+                    height: 'auto',
+                    maxWidth: '100%',
+                    maxHeight: '80vh',
+                    background: 'transparent',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <img
+                    src={`/uploads/${photo.filename}`}
+                    alt={photo.description || `Photo ${index + 1}`}
+                    className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+                    draggable={false}
+                    style={{
+                      touchAction: 'none',
+                      userSelect: 'none'
+                    } as React.CSSProperties}
+                  />
+                </pinch-zoom>
               </div>
             </div>
           ))}
