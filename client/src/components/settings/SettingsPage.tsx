@@ -262,10 +262,10 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
           onClick={() => setShowGmailPopup(false)}
         >
           <div 
-            className="bg-black text-yellow-400 w-11/12 max-w-xs p-4 rounded-lg shadow-lg border border-gray-600"
+            className="bg-black text-yellow-400 w-11/12 max-w-xs p-3 rounded-lg shadow-lg border border-gray-600"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex justify-end mb-1">
+            <div className="flex justify-end">
               <button
                 onClick={() => setShowGmailPopup(false)}
                 className="text-gray-400 hover:text-white text-xl leading-none"
@@ -273,17 +273,19 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                 ×
               </button>
             </div>
-            <p className="mb-3 leading-relaxed text-sm">
-              <strong>Sync Paint Brain with your Gmail account</strong><br />
-              to send emails directly from your address.
-            </p>
-            <p className="mb-3 text-sm">
-              They'll appear in your Gmail Sent folder.
-            </p>
-            <ul className="pl-4 list-disc text-sm space-y-1">
-              <li>Your Gmail handles security & storage.</li>
-              <li>Full control over your email communications.</li>
-            </ul>
+            <div className="pr-6">
+              <p className="mb-3 leading-relaxed text-sm">
+                <strong>Sync Paint Brain with your Gmail account</strong><br />
+                to send emails directly from your address.
+              </p>
+              <p className="mb-3 text-sm">
+                They'll appear in your Gmail Sent folder.
+              </p>
+              <ul className="pl-4 list-disc text-sm space-y-1">
+                <li>Your Gmail handles security & storage.</li>
+                <li>Full control over your email communications.</li>
+              </ul>
+            </div>
           </div>
         </div>
       )}
