@@ -82,30 +82,6 @@ const AdminDashboard: React.FC<{ onBack: () => void; hideBackButton?: boolean }>
         </div>
       </div>
 
-      {/* LIVE TRACKING STATUS */}
-      <div className="mb-6 p-4 rounded-lg bg-green-900/20 border-2 border-green-400/50">
-        <div className="flex items-start gap-3">
-          <div className="p-2 bg-green-500/20 rounded-lg flex-shrink-0">
-            <Brain className="h-6 w-6 text-green-400" />
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold text-green-400 mb-2">✅ LIVE TRACKING ACTIVE</h3>
-            <div className="text-sm text-green-300 space-y-2">
-              <p className="font-medium">Comprehensive OpenAI usage tracking is now operational.</p>
-              <p>
-                <strong>Currently tracking:</strong> Receipt OCR, text generation, code analysis, 
-                debugging assistance, and all future OpenAI operations within your app.
-              </p>
-              <p className="text-yellow-300">
-                💡 Note: Replit's AI assistant conversations (like this chat) bypass your app and won't appear here.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-
-      
       {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-black/40 p-6 rounded-lg border-2 border-blue-500/30">
