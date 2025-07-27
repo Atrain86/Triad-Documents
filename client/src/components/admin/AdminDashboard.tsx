@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Activity, DollarSign, Users, Eye, Brain, Calendar, ArrowLeft, Zap } from 'lucide-react';
+import { Activity, DollarSign, Users, Eye, Brain, Calendar, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { apiRequest } from '@/lib/queryClient';
 
@@ -26,48 +26,6 @@ interface TokenUsageEntry {
 }
 
 const AdminDashboard: React.FC<{ onBack: () => void; hideBackButton?: boolean }> = ({ onBack, hideBackButton = false }) => {
-  const [testLoading, setTestLoading] = useState(false);
-  const [testResult, setTestResult] = useState<string>('');
-
-  // Test OpenAI operation function
-  const testOpenAIOperation = async (operationType: string) => {
-    setTestLoading(true);
-    setTestResult('');
-    
-    try {
-      const endpoint = `/api/test/openai/${operationType}`;
-      const requestData = {
-        prompt: operationType === 'text-generation' ? 'Generate a professional painting estimate description' : undefined,
-        code: operationType === 'code-analysis' ? 'function calculateCost(rooms) { return rooms * 150; }' : undefined,
-        errorMessage: operationType === 'debugging-help' ? 'React component not updating after state change' : undefined,
-        userId: 1
-      };
-
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestData)
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        setTestResult(`${operationType} test completed! Check usage stats above to see new tracking entry.`);
-        // Refresh the dashboard data automatically
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
-      } else {
-        setTestResult(`Test failed: ${data.error || 'Unknown error'}`);
-      }
-    } catch (error) {
-      setTestResult(`Test error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    } finally {
-      setTestLoading(false);
-    }
-  };
 
   // Fetch overall token usage statistics
   const { data: totalStats, isLoading: totalStatsLoading } = useQuery<TokenUsageStats>({
@@ -124,75 +82,29 @@ const AdminDashboard: React.FC<{ onBack: () => void; hideBackButton?: boolean }>
         </div>
       </div>
 
-      {/* CRITICAL WARNING ABOUT INCOMPLETE TRACKING */}
-      <div className="mb-6 p-4 rounded-lg bg-red-900/20 border-2 border-red-400/50">
+      {/* LIVE TRACKING STATUS */}
+      <div className="mb-6 p-4 rounded-lg bg-green-900/20 border-2 border-green-400/50">
         <div className="flex items-start gap-3">
-          <div className="p-2 bg-red-500/20 rounded-lg flex-shrink-0">
-            <Brain className="h-6 w-6 text-red-400" />
+          <div className="p-2 bg-green-500/20 rounded-lg flex-shrink-0">
+            <Brain className="h-6 w-6 text-green-400" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-red-400 mb-2">⚠️ INCOMPLETE TRACKING WARNING</h3>
-            <div className="text-sm text-red-300 space-y-2">
-              <p className="font-medium">This dashboard shows ONLY receipt OCR operations (~$5).</p>
+            <h3 className="text-lg font-semibold text-green-400 mb-2">✅ LIVE TRACKING ACTIVE</h3>
+            <div className="text-sm text-green-300 space-y-2">
+              <p className="font-medium">Comprehensive OpenAI usage tracking is now operational.</p>
               <p>
-                <strong>MISSING from tracking:</strong> AI assistant conversations, code generation, 
-                debugging sessions, and other major API usage that likely represents 95%+ of your actual bills.
+                <strong>Currently tracking:</strong> Receipt OCR, text generation, code analysis, 
+                debugging assistance, and all future OpenAI operations within your app.
               </p>
               <p className="text-yellow-300">
-                💡 Your actual OpenAI bills reflect ALL API usage, not just what's shown here.
+                💡 Note: Replit's AI assistant conversations (like this chat) bypass your app and won't appear here.
               </p>
-              <div className="mt-3 pt-3 border-t border-red-400/30">
-                <p className="text-yellow-200 font-medium">
-                  Solution: Test the new comprehensive tracking system below to see live usage monitoring.
-                </p>
-              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* LIVE TRACKING TEST SECTION */}
-      <div className="mb-6 p-4 rounded-lg bg-green-900/20 border-2 border-green-400/50">
-        <div className="flex items-start gap-3">
-          <div className="p-2 bg-green-500/20 rounded-lg flex-shrink-0">
-            <Zap className="h-6 w-6 text-green-400" />
-          </div>
-          <div className="flex-1">
-            <h3 className="text-lg font-semibold text-green-400 mb-3">🔴 LIVE TRACKING TEST</h3>
-            <p className="text-sm text-green-300 mb-4">
-              Test the new comprehensive tracking system to see real-time OpenAI usage monitoring.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <button
-                onClick={() => testOpenAIOperation('text-generation')}
-                disabled={testLoading}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm"
-              >
-                {testLoading ? 'Testing...' : 'Test Text Generation'}
-              </button>
-              <button
-                onClick={() => testOpenAIOperation('code-analysis')}
-                disabled={testLoading}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 text-sm"
-              >
-                {testLoading ? 'Testing...' : 'Test Code Analysis'}
-              </button>
-              <button
-                onClick={() => testOpenAIOperation('debugging-help')}
-                disabled={testLoading}
-                className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 text-sm"
-              >
-                {testLoading ? 'Testing...' : 'Test Debugging Help'}
-              </button>
-            </div>
-            {testResult && (
-              <div className="mt-3 p-3 bg-gray-800 rounded-lg">
-                <p className="text-sm text-green-300">✅ {testResult}</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+
       
       {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
