@@ -407,6 +407,13 @@ Logo: Custom A-frame house structure with paint brush accent
 - **Cleaned interface**: Removed test tracking container after successful implementation, leaving clean admin dashboard with live tracking status
 - **System limitation clarity**: Added clear messaging that Replit's AI assistant conversations bypass the application and won't appear in tracking
 
+### July 27, 2025 - Calendar Integration Optimization & Status Selection Enhancement
+- **Isolated A-Frame calendar integration**: Successfully configured calendar buttons to open only A-Frame business calendar (6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981@group.calendar.google.com) without showing personal Allen calendar
+- **Enhanced status selection modal**: Improved StatusButton component with better contrast (dark background, white text) and isolated event handling to prevent navigation conflicts
+- **Fixed status update functionality**: Status changes now work properly without inadvertently navigating to client pages, using proper z-index and event isolation
+- **Calendar URL optimization**: Both homepage Schedule button and client page calendar icons use direct calendar source parameter (`src=`) to display only business calendar with dark mode support
+- **Touch interaction improvements**: Enhanced mobile compatibility with preventDefault() and stopPropagation() for iOS status selection
+
 ### July 25, 2025 - EstimateGenerator Restoration & Error Recovery
 - **Critical bug fix**: Resolved missing EstimateGenerator import that was causing application startup failures with "Failed to resolve import" error
 - **Component restoration**: Completely rebuilt EstimateGenerator.tsx from corrupted backup file that contained mixed HTML/React content
