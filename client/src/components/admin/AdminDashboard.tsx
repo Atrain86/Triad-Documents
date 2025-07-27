@@ -92,123 +92,34 @@ const AdminDashboard: React.FC<{ onBack: () => void; hideBackButton?: boolean }>
         and other AI features. Track token consumption across all users and operations.
       </p>
 
-      {/* Usage Overview Container */}
-      <div className="mb-4">
-        <div 
-          className="flex items-center justify-between p-4 rounded-lg border-2 border-blue-400 bg-gray-900/20 cursor-pointer hover:bg-gray-800/30 transition-colors"
-          onClick={() => toggleSection('overview')}
-        >
-          <h2 className="text-xl font-semibold text-blue-400">Usage Overview</h2>
-          <ChevronRight 
-            className={`h-5 w-5 text-blue-400 transition-transform ${
-              expandedSection === 'overview' ? 'rotate-90' : ''
-            }`} 
-          />
-        </div>
-        
-        {expandedSection === 'overview' && (
-          <div className="mt-4 p-6 rounded-lg border border-blue-400/30 bg-gray-900/10">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-transparent p-3 rounded-lg border border-slate-600/40">
-                {totalStatsLoading ? (
-                  <div className="animate-pulse flex items-center justify-between">
-                    <div className="h-4 bg-gray-600 rounded w-20"></div>
-                    <div className="h-6 bg-gray-600 rounded w-16"></div>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-slate-400">Total Tokens</span>
-                    <span className="text-lg font-bold text-blue-300">
-                      {formatNumber(totalStats?.totalTokens || 0)}
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              <div className="bg-transparent p-3 rounded-lg border border-emerald-600/40">
-                {totalStatsLoading ? (
-                  <div className="animate-pulse flex items-center justify-between">
-                    <div className="h-4 bg-gray-600 rounded w-20"></div>
-                    <div className="h-6 bg-gray-600 rounded w-16"></div>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-emerald-400">Total Cost</span>
-                    <span className="text-lg font-bold text-emerald-300">
-                      {formatCurrency(totalStats?.totalCost || 0)}
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              <div className="bg-transparent p-3 rounded-lg border border-violet-600/40">
-                {userStatsLoading ? (
-                  <div className="animate-pulse flex items-center justify-between">
-                    <div className="h-4 bg-gray-600 rounded w-20"></div>
-                    <div className="h-6 bg-gray-600 rounded w-12"></div>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-violet-400">Active Users</span>
-                    <span className="text-lg font-bold text-violet-300">
-                      {userStats?.length || 0}
-                    </span>
-                  </div>
-                )}
+      {/* Usage Overview - Single Line */}
+      <div className="mb-4 p-4 rounded-lg border-2 border-blue-400 bg-gray-900/20">
+        {totalStatsLoading ? (
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl font-semibold text-blue-400">Usage</h2>
+              <div className="animate-pulse">
+                <div className="h-6 bg-gray-600 rounded w-20"></div>
               </div>
             </div>
+            <div className="animate-pulse">
+              <div className="h-6 bg-gray-600 rounded w-16"></div>
+            </div>
           </div>
-        )}
-      </div>
-
-      {/* User Breakdown Container */}
-      <div className="mb-4">
-        <div 
-          className="flex items-center justify-between p-4 rounded-lg border-2 border-cyan-400 bg-gray-900/20 cursor-pointer hover:bg-gray-800/30 transition-colors"
-          onClick={() => toggleSection('users')}
-        >
-          <h2 className="text-xl font-semibold text-cyan-400">Usage by User</h2>
-          <ChevronRight 
-            className={`h-5 w-5 text-cyan-400 transition-transform ${
-              expandedSection === 'users' ? 'rotate-90' : ''
-            }`} 
-          />
-        </div>
-        
-        {expandedSection === 'users' && (
-          <div className="mt-4 p-6 rounded-lg border border-cyan-400/30 bg-gray-900/10">
-            {userStatsLoading ? (
-              <div className="space-y-3">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="animate-pulse bg-transparent p-4 rounded-lg border border-teal-600/30">
-                    <div className="flex justify-between items-center">
-                      <div className="h-4 bg-gray-600 rounded w-48"></div>
-                      <div className="h-4 bg-gray-600 rounded w-20"></div>
-                    </div>
-                  </div>
-                ))}
+        ) : (
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <h2 className="text-xl font-semibold text-blue-400">Usage</h2>
+              <div className="flex items-center gap-2">
+                <span className="text-slate-400">Tokens</span>
+                <span className="text-lg font-bold text-blue-300">
+                  {formatNumber(totalStats?.totalTokens || 0)}
+                </span>
               </div>
-            ) : userStats && userStats.length > 0 ? (
-              <div className="space-y-3">
-                {userStats.map((user) => (
-                  <div key={user.userId} className="bg-transparent p-4 rounded-lg border border-teal-600/30">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <p className="font-medium text-teal-200">{user.email}</p>
-                        <p className="text-sm text-teal-400">{formatNumber(user.totalTokens)} tokens used</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-semibold text-cyan-300">{formatCurrency(user.totalCost)}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="bg-transparent p-4 rounded-lg border border-teal-600/30">
-                <p className="text-teal-400 text-center">No user data available</p>
-              </div>
-            )}
+            </div>
+            <span className="text-lg font-bold text-emerald-300">
+              {formatCurrency(totalStats?.totalCost || 0)}
+            </span>
           </div>
         )}
       </div>
