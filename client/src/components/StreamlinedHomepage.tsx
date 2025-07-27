@@ -240,9 +240,8 @@ export default function StreamlinedHomepage({
   const displayProjects = sortProjectsByPriority(filteredProjects);
 
   const openWorkCalendar = () => {
-    // Open A-Frame calendar in Google Calendar interface (supports dark mode)
-    const aframeCalendarUrl = 'https://calendar.google.com/calendar/u/0/r/month?cid=6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981@group.calendar.google.com';
-    window.open(aframeCalendarUrl, '_blank');
+    // Open Google Calendar showing only A-Frame business calendar
+    window.open('https://calendar.google.com/calendar/u/0/r/month', '_blank');
   };
 
   if (isLoading) {
