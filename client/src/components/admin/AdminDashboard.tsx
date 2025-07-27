@@ -92,12 +92,14 @@ const AdminDashboard: React.FC<{ onBack: () => void; hideBackButton?: boolean }>
             <div className="flex items-center gap-4">
               <Menu className="h-5 w-5 text-blue-400" />
               <span className="text-lg font-medium text-blue-400">API Usage</span>
+            </div>
+            <div className="flex items-center gap-4">
               <div className="animate-pulse">
                 <div className="h-6 bg-gray-600 rounded w-20"></div>
               </div>
-            </div>
-            <div className="animate-pulse">
-              <div className="h-6 bg-gray-600 rounded w-16"></div>
+              <div className="animate-pulse">
+                <div className="h-6 bg-gray-600 rounded w-16"></div>
+              </div>
             </div>
           </>
         ) : (
@@ -105,6 +107,8 @@ const AdminDashboard: React.FC<{ onBack: () => void; hideBackButton?: boolean }>
             <div className="flex items-center gap-4">
               <Menu className="h-5 w-5 text-blue-400" />
               <span className="text-lg font-medium text-blue-400">API Usage</span>
+            </div>
+            <div className="flex items-center gap-4">
               <div className="bg-green-500 text-black px-3 py-1 rounded-full text-sm font-medium">
                 Tokens {formatNumber(totalStats?.totalTokens || 0)}
               </div>

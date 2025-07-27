@@ -165,7 +165,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
             <Menu className="h-5 w-5 text-red-400" />
             <Mail className="h-5 w-5 text-red-400" />
             <span className="text-lg font-medium text-red-400">Gmail Integration</span>
-            <div className="bg-red-500 text-white px-3 py-1 rounded-full text-sm">
+            <div className="bg-red-500 text-black px-3 py-1 rounded-full text-sm">
               Not Connected
             </div>
           </div>
