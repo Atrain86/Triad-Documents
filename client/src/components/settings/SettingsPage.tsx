@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Settings, DollarSign, Globe, Mail, ChevronRight, Info, Menu, X } from 'lucide-react';
+import { ArrowLeft, Settings, DollarSign, Globe, Mail, ChevronRight, Info, Menu, X, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ReactSortable } from 'react-sortablejs';
 
@@ -122,9 +122,16 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
 
   const [isTaxConfigured, setIsTaxConfigured] = useState(checkTaxConfiguration());
 
+  // Photo compression settings state
+  const [photoCompressionLevel, setPhotoCompressionLevel] = useState(() => {
+    const saved = localStorage.getItem('photoCompressionLevel');
+    return saved || 'medium';
+  });
+
   // Define sortable sections
   const [settingsSections, setSettingsSections] = useState([
     { id: 'gmail', name: 'Gmail Integration', icon: Mail, color: 'red' },
+    { id: 'photo', name: 'Photo Quality', icon: Camera, color: 'orange' },
     { id: 'tax', name: 'Tax Configuration', icon: DollarSign, color: 'yellow' },
     { id: 'api', name: 'API Usage Analytics', icon: Menu, color: 'cyan' },
     { id: 'activity', name: 'Recent Activity', icon: Info, color: 'purple' }
@@ -305,6 +312,120 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                     {expandedSection === 'tax' && (
                       <div className="mt-4 p-6 rounded-lg border border-yellow-400/30 bg-gray-900/10">
                         <TaxConfiguration />
+                      </div>
+                    )}
+                  </div>
+                );
+
+              case 'photo':
+                return (
+                  <div>
+                    <div 
+                      className="flex items-center justify-between p-4 rounded-lg border-2 border-orange-400 bg-gray-900/20 cursor-pointer hover:bg-gray-800/30 transition-colors"
+                      onClick={() => toggleSection('photo')}
+                    >
+                      <div className="flex items-center gap-4">
+                        <Menu className="h-5 w-5 text-orange-400 flex-shrink-0 drag-handle cursor-grab" />
+                        <Camera className="h-5 w-5 text-orange-400" />
+                        <span className="text-lg font-medium text-orange-400">Photo Quality</span>
+                        <div className="px-3 py-2 rounded-full text-xs font-medium bg-orange-500 text-black">
+                          {photoCompressionLevel === 'low' ? 'Low' : 
+                           photoCompressionLevel === 'medium' ? 'Medium' : 'High'}
+                        </div>
+                      </div>
+                      <ChevronRight 
+                        className={`h-5 w-5 text-orange-400 transition-transform ${
+                          expandedSection === 'photo' ? 'rotate-90' : ''
+                        }`} 
+                      />
+                    </div>
+                    
+                    {expandedSection === 'photo' && (
+                      <div className="mt-4 p-6 rounded-lg border border-orange-400/30 bg-gray-900/10">
+                        <div className="space-y-4">
+                          <h3 className="text-lg font-medium text-orange-400 mb-4">Photo Compression Settings</h3>
+                          
+                          <div className="space-y-3">
+                            {/* Low Quality Option */}
+                            <div 
+                              className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                                photoCompressionLevel === 'low' 
+                                  ? 'border-orange-400 bg-orange-400/10' 
+                                  : 'border-gray-600 hover:border-orange-400/50'
+                              }`}
+                              onClick={() => {
+                                setPhotoCompressionLevel('low');
+                                localStorage.setItem('photoCompressionLevel', 'low');
+                              }}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <div className="font-medium text-white">Low Quality</div>
+                                  <div className="text-sm text-gray-400">60% quality • 1200×800 resolution • Saves storage</div>
+                                </div>
+                                <div className={`w-4 h-4 rounded-full border-2 ${
+                                  photoCompressionLevel === 'low' ? 'bg-orange-400 border-orange-400' : 'border-gray-400'
+                                }`} />
+                              </div>
+                            </div>
+
+                            {/* Medium Quality Option */}
+                            <div 
+                              className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                                photoCompressionLevel === 'medium' 
+                                  ? 'border-orange-400 bg-orange-400/10' 
+                                  : 'border-gray-600 hover:border-orange-400/50'
+                              }`}
+                              onClick={() => {
+                                setPhotoCompressionLevel('medium');
+                                localStorage.setItem('photoCompressionLevel', 'medium');
+                              }}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <div className="font-medium text-white">Medium Quality</div>
+                                  <div className="text-sm text-gray-400">80% quality • 1920×1080 resolution • Balanced</div>
+                                </div>
+                                <div className={`w-4 h-4 rounded-full border-2 ${
+                                  photoCompressionLevel === 'medium' ? 'bg-orange-400 border-orange-400' : 'border-gray-400'
+                                }`} />
+                              </div>
+                            </div>
+
+                            {/* High Quality Option - Admin Only */}
+                            <div 
+                              className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                                photoCompressionLevel === 'high' 
+                                  ? 'border-orange-400 bg-orange-400/10' 
+                                  : 'border-gray-600 hover:border-orange-400/50'
+                              }`}
+                              onClick={() => {
+                                setPhotoCompressionLevel('high');
+                                localStorage.setItem('photoCompressionLevel', 'high');
+                              }}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <div className="font-medium text-white flex items-center gap-2">
+                                    High Quality
+                                    <span className="text-xs px-2 py-1 bg-orange-400 text-black rounded-full">ADMIN</span>
+                                  </div>
+                                  <div className="text-sm text-gray-400">90% quality • 2400×1600 resolution • Best detail</div>
+                                </div>
+                                <div className={`w-4 h-4 rounded-full border-2 ${
+                                  photoCompressionLevel === 'high' ? 'bg-orange-400 border-orange-400' : 'border-gray-400'
+                                }`} />
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="mt-4 p-3 bg-gray-800 rounded-lg">
+                            <p className="text-sm text-gray-300">
+                              <span className="font-medium">Note:</span> Receipt processing always uses optimized compression for cost savings. 
+                              This setting only affects photo gallery uploads.
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>

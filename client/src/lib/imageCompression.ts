@@ -108,12 +108,7 @@ export async function compressMultipleImages(
   
   // Different compression settings for photos vs receipts
   const compressionOptions = compressionType === 'photo' 
-    ? {
-        maxWidth: 2400,    // Higher resolution for photos
-        maxHeight: 1600,   // Better aspect ratio support
-        quality: 0.9,      // Higher quality (90% vs 80%)
-        format: 'jpeg' as const
-      }
+    ? getPhotoCompressionSettings()
     : {
         maxWidth: 1920,    // Standard resolution for receipts
         maxHeight: 1080,   // Optimized for OCR
@@ -162,4 +157,34 @@ export async function compressReceipts(
   progressCallback?: (progress: { currentFile: number; totalFiles: number }) => void
 ): Promise<{ compressedFiles: File[]; totalCompressedSizeBytes: number }> {
   return compressMultipleImages(files, progressCallback, 'receipt');
+}
+
+// Get photo compression settings based on user preference
+function getPhotoCompressionSettings(): CompressionOptions {
+  const level = localStorage.getItem('photoCompressionLevel') || 'medium';
+  
+  switch (level) {
+    case 'low':
+      return {
+        maxWidth: 1200,
+        maxHeight: 800,
+        quality: 0.6,
+        format: 'jpeg' as const
+      };
+    case 'high':
+      return {
+        maxWidth: 2400,
+        maxHeight: 1600,
+        quality: 0.9,
+        format: 'jpeg' as const
+      };
+    case 'medium':
+    default:
+      return {
+        maxWidth: 1920,
+        maxHeight: 1080,
+        quality: 0.8,
+        format: 'jpeg' as const
+      };
+  }
 }

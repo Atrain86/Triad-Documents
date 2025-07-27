@@ -422,6 +422,13 @@ Logo: Custom A-frame house structure with paint brush accent
 - **Smart compression routing**: System automatically applies appropriate compression based on file purpose - photo gallery uploads use high-quality settings while receipt processing uses cost-optimized compression
 - **Maintained performance**: New compression maintains fast upload speeds while significantly improving visual quality of stored photos for better project documentation
 
+### July 27, 2025 - Tiered Photo Compression Settings with Admin Controls
+- **Implemented user-configurable photo quality settings**: Added Photo Quality section to Settings page with three compression tiers - Low (60% quality, 1200×800), Medium (80% quality, 1920×1080), and High (90% quality, 2400×1600)
+- **Admin-only high resolution access**: High quality option marked with "ADMIN" badge and reserved for administrator use while regular users can choose between Low and Medium quality for cost savings
+- **Smart localStorage integration**: Photo compression preferences saved locally and automatically applied to all photo uploads while keeping receipt processing optimized for OpenAI cost savings
+- **Professional settings interface**: Orange-themed Photo Quality section with expandable options, radio button selection, detailed specifications, and explanatory notes about receipt processing remaining cost-optimized
+- **Flexible compression system**: Users can adjust photo quality based on storage needs while administrator maintains access to highest quality documentation for professional painting projects
+
 ### July 27, 2025 - Calendar Integration Optimization & Status Selection Enhancement
 - **Isolated A-Frame calendar integration**: Successfully configured calendar buttons to open only A-Frame business calendar (6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981@group.calendar.google.com) without showing personal Allen calendar
 - **Enhanced status selection modal**: Improved StatusButton component with better contrast (dark background, white text) and isolated event handling to prevent navigation conflicts
