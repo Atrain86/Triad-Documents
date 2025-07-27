@@ -65,165 +65,170 @@ const AdminDashboard: React.FC<{ onBack: () => void; hideBackButton?: boolean }>
   };
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-8">
-        <div className="flex items-center gap-4">
-          {!hideBackButton && (
-            <Button
-              onClick={onBack}
-              variant="ghost"
-              size="sm"
-              className="text-gray-400 hover:text-white"
-            >
-              <ArrowLeft size={20} />
-            </Button>
-          )}
-          <h1 className="text-3xl font-bold">API Usage</h1>
-        </div>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center gap-4">
+        {!hideBackButton && (
+          <Button
+            onClick={onBack}
+            variant="ghost"
+            size="sm"
+            className="text-gray-400 hover:text-white"
+          >
+            <ArrowLeft size={20} />
+          </Button>
+        )}
+        <h1 className="text-3xl font-bold text-blue-400">API Usage</h1>
       </div>
 
-      {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-black/40 p-6 rounded-lg border-2 border-blue-500/30">
-          <div className="flex items-center">
-            <div className="p-2 bg-blue-500/20 rounded-lg">
-              <Brain className="h-6 w-6 text-blue-400" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-blue-300">Total Tokens</p>
-              <p className="text-2xl font-bold text-white">
-                {totalStatsLoading ? 'Loading...' : formatNumber(totalStats?.totalTokens || 0)}
-              </p>
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-black/40 p-6 rounded-lg border-2 border-green-500/30">
-          <div className="flex items-center">
-            <div className="p-2 bg-green-500/20 rounded-lg">
-              <DollarSign className="h-6 w-6 text-green-400" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-green-300">Total Cost</p>
-              <p className="text-2xl font-bold text-white">
-                {totalStatsLoading ? 'Loading...' : formatCurrency(totalStats?.totalCost || 0)}
-              </p>
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-black/40 p-6 rounded-lg border-2 border-purple-500/30">
-          <div className="flex items-center">
-            <div className="p-2 bg-purple-500/20 rounded-lg">
-              <Users className="h-6 w-6 text-purple-400" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-purple-300">Active Users</p>
-              <p className="text-2xl font-bold text-white">
-                {userStatsLoading ? 'Loading...' : (userStats?.length || 0)}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Description */}
+      <p className="text-gray-300 text-lg leading-relaxed">
+        Monitor OpenAI API usage and costs for receipt processing, text generation, 
+        and other AI features. Track token consumption across all users and operations.
+      </p>
 
-      {/* User Usage Statistics */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-        <div className="bg-black/40 p-6 rounded-lg border-2 border-orange-500/30">
-          <h2 className="text-xl font-semibold mb-4 flex items-center text-orange-400">
-            <Users className="h-5 w-5 mr-2" />
-            Usage by User
-          </h2>
-          <div className="space-y-4">
-            {userStatsLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-400"></div>
+      {/* Usage Overview Container */}
+      <div className="rounded-lg border-2 border-blue-400 bg-black/20 p-6">
+        <h2 className="text-xl font-semibold text-blue-400 mb-6">Usage Overview</h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-black/40 p-4 rounded-lg border border-blue-500/30">
+            <h3 className="text-sm font-medium text-gray-400 mb-2">Total Tokens</h3>
+            {totalStatsLoading ? (
+              <div className="animate-pulse">
+                <div className="h-8 bg-gray-600 rounded mb-1"></div>
+                <div className="h-3 bg-gray-600 rounded w-20"></div>
               </div>
-            ) : userStats && userStats.length > 0 ? (
-              userStats.map((user) => (
-                <div key={user.userId} className="flex items-center justify-between p-4 bg-black/20 rounded-lg border border-orange-500/30">
+            ) : (
+              <>
+                <p className="text-2xl font-bold text-white">
+                  {formatNumber(totalStats?.totalTokens || 0)}
+                </p>
+                <p className="text-xs text-gray-500">API calls processed</p>
+              </>
+            )}
+          </div>
+
+          <div className="bg-black/40 p-4 rounded-lg border border-blue-500/30">
+            <h3 className="text-sm font-medium text-gray-400 mb-2">Total Cost</h3>
+            {totalStatsLoading ? (
+              <div className="animate-pulse">
+                <div className="h-8 bg-gray-600 rounded mb-1"></div>
+                <div className="h-3 bg-gray-600 rounded w-16"></div>
+              </div>
+            ) : (
+              <>
+                <p className="text-2xl font-bold text-white">
+                  {formatCurrency(totalStats?.totalCost || 0)}
+                </p>
+                <p className="text-xs text-gray-500">Current period</p>
+              </>
+            )}
+          </div>
+
+          <div className="bg-black/40 p-4 rounded-lg border border-blue-500/30">
+            <h3 className="text-sm font-medium text-gray-400 mb-2">Active Users</h3>
+            {userStatsLoading ? (
+              <div className="animate-pulse">
+                <div className="h-8 bg-gray-600 rounded mb-1"></div>
+                <div className="h-3 bg-gray-600 rounded w-24"></div>
+              </div>
+            ) : (
+              <>
+                <p className="text-2xl font-bold text-white">
+                  {userStats?.length || 0}
+                </p>
+                <p className="text-xs text-gray-500">Using AI features</p>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* User Breakdown Container */}
+      <div className="rounded-lg border-2 border-cyan-400 bg-black/20 p-6">
+        <h2 className="text-xl font-semibold text-cyan-400 mb-6">Usage by User</h2>
+        
+        {userStatsLoading ? (
+          <div className="space-y-3">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="animate-pulse bg-black/40 p-4 rounded-lg border border-cyan-500/30">
+                <div className="flex justify-between items-center">
+                  <div className="h-4 bg-gray-600 rounded w-48"></div>
+                  <div className="h-4 bg-gray-600 rounded w-20"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : userStats && userStats.length > 0 ? (
+          <div className="space-y-3">
+            {userStats.map((user) => (
+              <div key={user.userId} className="bg-black/40 p-4 rounded-lg border border-cyan-500/30">
+                <div className="flex justify-between items-center">
                   <div>
                     <p className="font-medium text-white">{user.email}</p>
-                    <p className="text-sm text-orange-300">
-                      {formatNumber(user.totalTokens)} tokens
-                    </p>
+                    <p className="text-sm text-gray-400">{formatNumber(user.totalTokens)} tokens used</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-green-400">
-                      {formatCurrency(user.totalCost)}
-                    </p>
+                    <p className="font-semibold text-cyan-400">{formatCurrency(user.totalCost)}</p>
                   </div>
                 </div>
-              ))
-            ) : (
-              <div className="text-center py-8 text-orange-300">
-                No OpenAI usage data yet
               </div>
-            )}
+            ))}
           </div>
-        </div>
+        ) : (
+          <div className="bg-black/40 p-4 rounded-lg border border-cyan-500/30">
+            <p className="text-gray-400 text-center">No user data available</p>
+          </div>
+        )}
+      </div>
 
-        {/* Recent Activity */}
-        <div className="bg-black/40 p-6 rounded-lg border-2 border-yellow-500/30">
-          <h2 className="text-xl font-semibold mb-4 flex items-center text-yellow-400">
-            <Activity className="h-5 w-5 mr-2" />
-            Recent Activity
-          </h2>
+      {/* Recent Activity Container */}
+      <div className="rounded-lg border-2 border-indigo-400 bg-black/20 p-6">
+        <h2 className="text-xl font-semibold text-indigo-400 mb-6">Recent Activity</h2>
+        
+        {recentUsageLoading ? (
           <div className="space-y-3">
-            {recentUsageLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-400"></div>
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="animate-pulse bg-black/40 p-4 rounded-lg border border-indigo-500/30">
+                <div className="flex justify-between items-center">
+                  <div className="flex-1">
+                    <div className="h-4 bg-gray-600 rounded mb-2 w-32"></div>
+                    <div className="h-3 bg-gray-600 rounded w-24"></div>
+                  </div>
+                  <div className="h-4 bg-gray-600 rounded w-16"></div>
+                </div>
               </div>
-            ) : recentUsage && recentUsage.length > 0 ? (
-              recentUsage.slice(0, 10).map((entry) => (
-                <div key={entry.id} className="flex items-center justify-between p-3 bg-black/20 rounded-lg border border-yellow-500/30">
-                  <div>
-                    <p className="font-medium text-white">{entry.operation}</p>
-                    <p className="text-sm text-yellow-300">
-                      {formatDate(entry.createdAt)}
-                    </p>
+            ))}
+          </div>
+        ) : recentUsage && recentUsage.length > 0 ? (
+          <div className="space-y-3">
+            {recentUsage.slice(0, 8).map((entry) => (
+              <div key={entry.id} className="bg-black/40 p-4 rounded-lg border border-indigo-500/30">
+                <div className="flex justify-between items-center">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="font-medium text-white capitalize">{entry.operation.replace('_', ' ')}</p>
+                      <span className="text-xs px-2 py-1 bg-indigo-500/20 text-indigo-300 rounded">
+                        {formatNumber(entry.tokensUsed)} tokens
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-400">{formatDate(entry.createdAt)}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-medium text-white">
-                      {formatNumber(entry.tokensUsed)} tokens
-                    </p>
-                    <p className="text-xs text-green-400">
-                      {formatCurrency(entry.estimatedCost)}
-                    </p>
+                    <p className="font-semibold text-indigo-400">{formatCurrency(entry.estimatedCost)}</p>
                   </div>
                 </div>
-              ))
-            ) : (
-              <div className="text-center py-8 text-yellow-300">
-                No recent activity
               </div>
-            )}
+            ))}
           </div>
-        </div>
+        ) : (
+          <div className="bg-black/40 p-4 rounded-lg border border-indigo-500/30">
+            <p className="text-gray-400 text-center">No recent activity</p>
+          </div>
+        )}
       </div>
 
-      {/* System Status */}
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-        <h2 className="text-xl font-semibold mb-4">System Status</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex items-center justify-between">
-            <span className="text-gray-600 dark:text-gray-400">JWT Authentication</span>
-            <span className="px-3 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 rounded-full text-sm">Active</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-gray-600 dark:text-gray-400">Role-based Access Control</span>
-            <span className="px-3 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 rounded-full text-sm">Enabled</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-gray-600 dark:text-gray-400">Multi-user Project Isolation</span>
-            <span className="px-3 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 rounded-full text-sm">Protected</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-gray-600 dark:text-gray-400">OpenAI Usage Tracking</span>
-            <span className="px-3 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded-full text-sm">Monitoring</span>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };
