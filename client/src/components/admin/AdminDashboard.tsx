@@ -91,55 +91,52 @@ const AdminDashboard: React.FC<{ onBack: () => void; hideBackButton?: boolean }>
       <div className="rounded-lg border-2 border-blue-400 bg-black/20 p-6">
         <h2 className="text-xl font-semibold text-blue-400 mb-6">Usage Overview</h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-slate-900/60 p-4 rounded-lg border border-slate-600/40">
-            <h3 className="text-sm font-medium text-slate-400 mb-2">Total Tokens</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-slate-900/60 p-3 rounded-lg border border-slate-600/40">
             {totalStatsLoading ? (
-              <div className="animate-pulse">
-                <div className="h-8 bg-gray-600 rounded mb-1"></div>
-                <div className="h-3 bg-gray-600 rounded w-20"></div>
+              <div className="animate-pulse flex items-center justify-between">
+                <div className="h-4 bg-gray-600 rounded w-20"></div>
+                <div className="h-6 bg-gray-600 rounded w-16"></div>
               </div>
             ) : (
-              <>
-                <p className="text-2xl font-bold text-blue-300">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-slate-400">Total Tokens</span>
+                <span className="text-lg font-bold text-blue-300">
                   {formatNumber(totalStats?.totalTokens || 0)}
-                </p>
-                <p className="text-xs text-slate-500">API calls processed</p>
-              </>
+                </span>
+              </div>
             )}
           </div>
 
-          <div className="bg-emerald-950/60 p-4 rounded-lg border border-emerald-600/40">
-            <h3 className="text-sm font-medium text-emerald-400 mb-2">Total Cost</h3>
+          <div className="bg-emerald-950/60 p-3 rounded-lg border border-emerald-600/40">
             {totalStatsLoading ? (
-              <div className="animate-pulse">
-                <div className="h-8 bg-gray-600 rounded mb-1"></div>
-                <div className="h-3 bg-gray-600 rounded w-16"></div>
+              <div className="animate-pulse flex items-center justify-between">
+                <div className="h-4 bg-gray-600 rounded w-20"></div>
+                <div className="h-6 bg-gray-600 rounded w-16"></div>
               </div>
             ) : (
-              <>
-                <p className="text-2xl font-bold text-emerald-300">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-emerald-400">Total Cost</span>
+                <span className="text-lg font-bold text-emerald-300">
                   {formatCurrency(totalStats?.totalCost || 0)}
-                </p>
-                <p className="text-xs text-emerald-500">Current period</p>
-              </>
+                </span>
+              </div>
             )}
           </div>
 
-          <div className="bg-violet-950/60 p-4 rounded-lg border border-violet-600/40">
-            <h3 className="text-sm font-medium text-violet-400 mb-2">Active Users</h3>
+          <div className="bg-violet-950/60 p-3 rounded-lg border border-violet-600/40">
             {userStatsLoading ? (
-              <div className="animate-pulse">
-                <div className="h-8 bg-gray-600 rounded mb-1"></div>
-                <div className="h-3 bg-gray-600 rounded w-24"></div>
+              <div className="animate-pulse flex items-center justify-between">
+                <div className="h-4 bg-gray-600 rounded w-20"></div>
+                <div className="h-6 bg-gray-600 rounded w-12"></div>
               </div>
             ) : (
-              <>
-                <p className="text-2xl font-bold text-violet-300">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-violet-400">Active Users</span>
+                <span className="text-lg font-bold text-violet-300">
                   {userStats?.length || 0}
-                </p>
-                <p className="text-xs text-violet-500">Using AI features</p>
-              </>
+                </span>
+              </div>
             )}
           </div>
         </div>
