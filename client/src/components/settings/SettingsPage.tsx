@@ -163,8 +163,10 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
       <div className="mb-4">
         <div className="flex items-center justify-between p-4 rounded-lg border-2 border-red-400 bg-gray-900/20">
           <div className="flex items-center gap-4">
-            <Menu className="h-5 w-5 text-red-400" />
-            <img src="/gmail-logo.png" alt="Gmail" className="h-5 w-5" />
+            <svg className="h-5 w-5 text-red-400 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z"/>
+            </svg>
+            <img src="/gmail-logo.png" alt="Gmail" className="h-5 w-5 flex-shrink-0" />
             <span className="text-lg font-medium text-red-400 whitespace-nowrap">Gmail Integration</span>
             {!gmailStatus?.connected && (
               <div
