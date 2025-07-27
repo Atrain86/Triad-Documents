@@ -278,12 +278,9 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                 <strong>Sync Paint Brain with your Gmail account</strong><br />
                 to send emails directly from your address.
               </p>
-              <p className="mb-3 text-sm">
-                They'll appear in your Gmail Sent folder.
-              </p>
               <ul className="pl-4 list-disc text-sm space-y-1">
+                <li>They'll appear in your Gmail Sent folder.</li>
                 <li>Your Gmail handles security & storage.</li>
-                <li>Full control over your email communications.</li>
               </ul>
             </div>
           </div>
