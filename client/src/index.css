@@ -80,10 +80,22 @@
     -moz-user-select: none;
     -ms-user-select: none;
     overflow: hidden;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
   }
 
   .photo-zoom-image {
-    transition: transform 0.2s ease-out;
+    will-change: transform;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  /* Smooth hardware acceleration for better performance */
+  .carousel-container {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
     will-change: transform;
   }
 }

@@ -27,6 +27,10 @@ export default function PhotoCarousel({ photos, initialIndex, onClose, onDelete 
   const [initialDistance, setInitialDistance] = useState(0);
   const [initialScale, setInitialScale] = useState(1);
   const [lastTap, setLastTap] = useState(0);
+  const [isPinching, setIsPinching] = useState(false);
+  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const animationFrameRef = useRef<number | null>(null);
 
   const galleryRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -39,10 +43,19 @@ export default function PhotoCarousel({ photos, initialIndex, onClose, onDelete 
     return Math.sqrt(dx * dx + dy * dy);
   };
 
+  const getCenter = (touches: React.TouchList) => {
+    return {
+      x: (touches[0].clientX + touches[1].clientX) / 2,
+      y: (touches[0].clientY + touches[1].clientY) / 2,
+    };
+  };
+
   const resetZoom = () => {
     setScale(1);
     setTranslateX(0);
     setTranslateY(0);
+    setPanOffset({ x: 0, y: 0 });
+    setIsPinching(false);
   };
 
   // Enhanced navigation functions with smooth animations
@@ -127,18 +140,22 @@ export default function PhotoCarousel({ photos, initialIndex, onClose, onDelete 
     handleEnd();
   };
 
-  // Touch events with integrated pinch-to-zoom
+  // Smooth touch events with optimized pinch-to-zoom
   const handleTouchStart = (e: React.TouchEvent) => {
-    e.preventDefault();
     const touchCount = e.touches.length;
     
     if (touchCount === 1) {
-      // Single touch - check for double tap or start drag
+      const touch = e.touches[0];
       const now = Date.now();
+      
+      // Check for double tap
       if (now - lastTap < 300) {
-        // Double tap detected - toggle zoom
+        e.preventDefault();
+        // Double tap - smooth zoom toggle
         if (scale === 1) {
-          setScale(2);
+          setScale(2.5);
+          setTranslateX(0);
+          setTranslateY(0);
         } else {
           resetZoom();
         }
@@ -146,14 +163,22 @@ export default function PhotoCarousel({ photos, initialIndex, onClose, onDelete 
       }
       setLastTap(now);
       
-      // Start drag if not zoomed
-      if (scale === 1) {
-        handleStart(e.touches[0].clientX);
+      if (scale > 1) {
+        // Start panning when zoomed
+        e.preventDefault();
+        setPanStart({ x: touch.clientX, y: touch.clientY });
+        setPanOffset({ x: translateX, y: translateY });
+      } else {
+        // Start navigation drag when not zoomed
+        handleStart(touch.clientX);
       }
     } else if (touchCount === 2) {
-      // Pinch start
+      // Pinch gesture start
+      e.preventDefault();
       setIsDragging(false);
       setDragOffset(0);
+      setIsPinching(true);
+      
       const distance = getDistance(e.touches);
       setInitialDistance(distance);
       setInitialScale(scale);
@@ -161,45 +186,81 @@ export default function PhotoCarousel({ photos, initialIndex, onClose, onDelete 
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    e.preventDefault();
     const touchCount = e.touches.length;
     
-    if (touchCount === 2) {
-      // Pinch zoom
+    // Cancel any pending animation frame
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
+    
+    if (touchCount === 2 && isPinching) {
+      // Smooth pinch zoom with RAF
+      e.preventDefault();
       const distance = getDistance(e.touches);
+      
       if (initialDistance > 0) {
-        const newScale = Math.max(1, Math.min(4, initialScale * (distance / initialDistance)));
-        setScale(newScale);
+        animationFrameRef.current = requestAnimationFrame(() => {
+          const scaleChange = distance / initialDistance;
+          const newScale = Math.max(0.5, Math.min(5, initialScale * scaleChange));
+          setScale(newScale);
+        });
       }
-    } else if (touchCount === 1) {
-      if (scale > 1) {
-        // Pan when zoomed
-        const touch = e.touches[0];
-        const rect = containerRef.current?.getBoundingClientRect();
-        if (rect) {
-          const centerX = rect.left + rect.width / 2;
-          const centerY = rect.top + rect.height / 2;
-          setTranslateX((touch.clientX - centerX) * 0.3);
-          setTranslateY((touch.clientY - centerY) * 0.3);
-        }
-      } else if (isDragging) {
-        // Normal swipe navigation
-        handleMove(e.touches[0].clientX);
-      }
+    } else if (touchCount === 1 && scale > 1) {
+      // Smooth panning when zoomed with RAF
+      e.preventDefault();
+      const touch = e.touches[0];
+      
+      animationFrameRef.current = requestAnimationFrame(() => {
+        const deltaX = (touch.clientX - panStart.x) * 1.0;
+        const deltaY = (touch.clientY - panStart.y) * 1.0;
+        
+        // Apply bounds to prevent panning too far
+        const maxPan = 150 * scale;
+        const newX = Math.max(-maxPan, Math.min(maxPan, panOffset.x + deltaX));
+        const newY = Math.max(-maxPan, Math.min(maxPan, panOffset.y + deltaY));
+        
+        setTranslateX(newX);
+        setTranslateY(newY);
+      });
+    } else if (touchCount === 1 && isDragging && scale === 1) {
+      // Navigation swipe when not zoomed
+      handleMove(e.touches[0].clientX);
     }
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
-    const touchCount = e.touches.length;
+    const remainingTouches = e.touches.length;
     
-    if (touchCount === 0) {
+    // Clean up animation frame
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    
+    if (remainingTouches === 0) {
       // All touches ended
+      setIsPinching(false);
       setInitialDistance(0);
-      setInitialScale(scale);
       
+      // Snap scale to reasonable values with smooth transition
+      if (scale < 1) {
+        setScale(1);
+        setTranslateX(0);
+        setTranslateY(0);
+      } else if (scale > 4) {
+        setScale(4);
+      }
+      
+      // Handle navigation swipe
       if (isDragging && scale === 1) {
         handleEnd();
       }
+    } else if (remainingTouches === 1 && isPinching) {
+      // One finger lifted during pinch - continue with pan
+      setIsPinching(false);
+      const touch = e.touches[0];
+      setPanStart({ x: touch.clientX, y: touch.clientY });
+      setPanOffset({ x: translateX, y: translateY });
     }
   };
 
@@ -217,18 +278,6 @@ export default function PhotoCarousel({ photos, initialIndex, onClose, onDelete 
 
   // Clean up any drag state on component mount/unmount
   useEffect(() => {
-    // Check if pinch-zoom element is available
-    console.log('Checking pinch-zoom availability:', typeof customElements?.get('pinch-zoom'));
-    console.log('customElements defined:', typeof customElements !== 'undefined');
-    
-    // Wait for custom elements to be defined
-    if (typeof customElements !== 'undefined') {
-      customElements.whenDefined('pinch-zoom').then(() => {
-        console.log('pinch-zoom element is now defined');
-      }).catch(err => {
-        console.warn('pinch-zoom element failed to load:', err);
-      });
-    }
     
     return () => {
       // Clean up body styles on unmount
@@ -236,6 +285,11 @@ export default function PhotoCarousel({ photos, initialIndex, onClose, onDelete 
       document.body.style.webkitUserSelect = '';
       setIsDragging(false);
       setDragOffset(0);
+      
+      // Clean up animation frame
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
     };
   }, []);
 
@@ -330,12 +384,14 @@ export default function PhotoCarousel({ photos, initialIndex, onClose, onDelete 
       {/* Photo Container with improved touch/mouse handling */}
       <div
         ref={containerRef}
-        className="w-full h-full flex items-center justify-center overflow-hidden select-none"
+        className="w-full h-full flex items-center justify-center overflow-hidden select-none carousel-container"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         style={{ 
-          touchAction: 'none' // Changed to 'none' to allow pinch-zoom to handle all touch events
+          touchAction: 'none',
+          WebkitTouchCallout: 'none',
+          WebkitUserSelect: 'none'
         }}
       >
         {/* Photo Slider with smooth animations */}
@@ -359,20 +415,23 @@ export default function PhotoCarousel({ photos, initialIndex, onClose, onDelete 
                   overflow: scale > 1 ? 'hidden' : 'visible'
                 }}
               >
-                {/* Custom pinch-to-zoom image with transform */}
+                {/* Custom pinch-to-zoom image with smooth transforms */}
                 <img
                   ref={index === currentIndex ? imageRef : undefined}
                   src={`/uploads/${photo.filename}`}
                   alt={photo.description || `Photo ${index + 1}`}
-                  className="max-w-full max-h-full object-contain rounded-lg shadow-2xl transition-transform duration-200"
+                  className="max-w-full max-h-full object-contain rounded-lg shadow-2xl photo-zoom-image"
                   draggable={false}
                   style={{
                     touchAction: 'none',
                     userSelect: 'none',
+                    WebkitUserSelect: 'none',
+                    WebkitTouchCallout: 'none',
                     transform: index === currentIndex ? 
-                      `scale(${scale}) translate(${translateX}px, ${translateY}px)` : 
-                      'none',
-                    transformOrigin: 'center center'
+                      `scale3d(${scale}, ${scale}, 1) translate3d(${translateX / scale}px, ${translateY / scale}px, 0)` : 
+                      'scale3d(1, 1, 1) translate3d(0, 0, 0)',
+                    transformOrigin: 'center center',
+                    transition: isPinching ? 'none' : 'transform 0.25s cubic-bezier(0.23, 1, 0.32, 1)'
                   } as React.CSSProperties}
                 />
                 
