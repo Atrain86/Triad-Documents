@@ -133,7 +133,10 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
         >
           <div className="flex items-center gap-4">
             <Menu className="h-5 w-5 text-yellow-400" />
-            <DollarSign className="h-5 w-5 text-yellow-400" />
+            <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M6 9H2m4 0a3 3 0 013-3m-3 3v6m0 0a3 3 0 003 3m-3-3H2m10-6h8m-8 0a3 3 0 013-3m-3 3v6m0 0a3 3 0 003 3m-3-3h8" />
+              <line x1="3" y1="3" x2="21" y2="21" strokeWidth="2.5" />
+            </svg>
             <span className="text-lg font-medium text-yellow-400">Tax Configuration</span>
             <div className="bg-yellow-500 text-black px-3 py-1 rounded-full text-sm font-medium">
               Configured
