@@ -322,11 +322,11 @@ export default function StreamlinedHomepage({
             <h2 className="text-lg" style={{ color: paintBrainColors.orange }}>
               {showArchived ? 
                 <>
-                  <span className="font-bold" style={{ color: paintBrainColors.green }}>{projects.filter((p: any) => p.status === 'archived').length}</span>
+                  <span className="font-bold" style={{ color: paintBrainColors.red }}>{projects.filter((p: any) => p.status === 'archived').length}</span>
                   <span className="font-normal"> archived project{projects.filter((p: any) => p.status === 'archived').length === 1 ? '' : 's'}</span>
                 </> : 
                 <>
-                  <span className="font-bold" style={{ color: paintBrainColors.red }}>{projects.filter((p: any) => p.status !== 'archived').length}</span>
+                  <span className="font-bold" style={{ color: paintBrainColors.green }}>{projects.filter((p: any) => p.status !== 'archived').length}</span>
                   <span className="font-normal"> active project{projects.filter((p: any) => p.status !== 'archived').length === 1 ? '' : 's'}</span>
                 </>
               }
