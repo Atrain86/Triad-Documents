@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { X, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
 import ErrorTooltip from './ui/error-tooltip';
 import { useErrorTooltip } from '@/hooks/useErrorTooltip';
-import '../types/pinch-zoom.d.ts';
+
 
 interface PhotoCarouselProps {
   photos: Array<{ id: number; filename: string; description?: string | null }>;
@@ -19,15 +19,38 @@ export default function PhotoCarousel({ photos, initialIndex, onClose, onDelete 
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState(0);
   const [dragOffset, setDragOffset] = useState(0);
+  
+  // Zoom state for pinch-to-zoom functionality
+  const [scale, setScale] = useState(1);
+  const [translateX, setTranslateX] = useState(0);
+  const [translateY, setTranslateY] = useState(0);
+  const [initialDistance, setInitialDistance] = useState(0);
+  const [initialScale, setInitialScale] = useState(1);
+  const [lastTap, setLastTap] = useState(0);
 
   const galleryRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
+
+  // Helper functions for pinch-to-zoom
+  const getDistance = (touches: React.TouchList) => {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
+  const resetZoom = () => {
+    setScale(1);
+    setTranslateX(0);
+    setTranslateY(0);
+  };
 
   // Enhanced navigation functions with smooth animations
   const goToNext = () => {
     if (currentIndex < photos.length - 1) {
       setCurrentIndex(currentIndex + 1);
       setDragOffset(0);
+      resetZoom(); // Reset zoom when changing photos
     }
   };
 
@@ -35,6 +58,7 @@ export default function PhotoCarousel({ photos, initialIndex, onClose, onDelete 
     if (currentIndex > 0) {
       setCurrentIndex(currentIndex - 1);
       setDragOffset(0);
+      resetZoom(); // Reset zoom when changing photos
     }
   };
 
@@ -103,37 +127,79 @@ export default function PhotoCarousel({ photos, initialIndex, onClose, onDelete 
     handleEnd();
   };
 
-  // Touch events optimized for pinch-zoom compatibility
+  // Touch events with integrated pinch-to-zoom
   const handleTouchStart = (e: React.TouchEvent) => {
+    e.preventDefault();
     const touchCount = e.touches.length;
-    if (touchCount > 1) {
-      // Multi-touch detected - let pinch-zoom handle it
+    
+    if (touchCount === 1) {
+      // Single touch - check for double tap or start drag
+      const now = Date.now();
+      if (now - lastTap < 300) {
+        // Double tap detected - toggle zoom
+        if (scale === 1) {
+          setScale(2);
+        } else {
+          resetZoom();
+        }
+        return;
+      }
+      setLastTap(now);
+      
+      // Start drag if not zoomed
+      if (scale === 1) {
+        handleStart(e.touches[0].clientX);
+      }
+    } else if (touchCount === 2) {
+      // Pinch start
       setIsDragging(false);
       setDragOffset(0);
-      return;
+      const distance = getDistance(e.touches);
+      setInitialDistance(distance);
+      setInitialScale(scale);
     }
-    handleStart(e.touches[0].clientX);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
+    e.preventDefault();
     const touchCount = e.touches.length;
-    if (touchCount > 1) {
-      // Multi-touch detected - let pinch-zoom handle it
-      setIsDragging(false);
-      return;
-    }
     
-    // Only prevent default for single touch swipe gestures
-    if (isDragging && touchCount === 1) {
-      e.preventDefault();
-      handleMove(e.touches[0].clientX);
+    if (touchCount === 2) {
+      // Pinch zoom
+      const distance = getDistance(e.touches);
+      if (initialDistance > 0) {
+        const newScale = Math.max(1, Math.min(4, initialScale * (distance / initialDistance)));
+        setScale(newScale);
+      }
+    } else if (touchCount === 1) {
+      if (scale > 1) {
+        // Pan when zoomed
+        const touch = e.touches[0];
+        const rect = containerRef.current?.getBoundingClientRect();
+        if (rect) {
+          const centerX = rect.left + rect.width / 2;
+          const centerY = rect.top + rect.height / 2;
+          setTranslateX((touch.clientX - centerX) * 0.3);
+          setTranslateY((touch.clientY - centerY) * 0.3);
+        }
+      } else if (isDragging) {
+        // Normal swipe navigation
+        handleMove(e.touches[0].clientX);
+      }
     }
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
-    // Only handle end if it was a single touch gesture
-    if (e.changedTouches.length === 1 && isDragging) {
-      handleEnd();
+    const touchCount = e.touches.length;
+    
+    if (touchCount === 0) {
+      // All touches ended
+      setInitialDistance(0);
+      setInitialScale(scale);
+      
+      if (isDragging && scale === 1) {
+        handleEnd();
+      }
     }
   };
 
@@ -151,6 +217,19 @@ export default function PhotoCarousel({ photos, initialIndex, onClose, onDelete 
 
   // Clean up any drag state on component mount/unmount
   useEffect(() => {
+    // Check if pinch-zoom element is available
+    console.log('Checking pinch-zoom availability:', typeof customElements?.get('pinch-zoom'));
+    console.log('customElements defined:', typeof customElements !== 'undefined');
+    
+    // Wait for custom elements to be defined
+    if (typeof customElements !== 'undefined') {
+      customElements.whenDefined('pinch-zoom').then(() => {
+        console.log('pinch-zoom element is now defined');
+      }).catch(err => {
+        console.warn('pinch-zoom element failed to load:', err);
+      });
+    }
+    
     return () => {
       // Clean up body styles on unmount
       document.body.style.userSelect = '';
@@ -274,30 +353,35 @@ export default function PhotoCarousel({ photos, initialIndex, onClose, onDelete 
               key={photo.id}
               className="w-full h-full flex-shrink-0 flex items-center justify-center p-4"
             >
-              <div className="max-w-full max-h-full flex flex-col items-center">
-                {/* Pinch-to-zoom wrapper for enhanced mobile experience */}
-                <pinch-zoom 
-                  style={{ 
-                    display: 'block',
-                    width: '100%',
-                    height: 'auto',
-                    maxWidth: '100%',
-                    maxHeight: '80vh',
-                    background: 'transparent',
-                    overflow: 'hidden'
-                  }}
-                >
-                  <img
-                    src={`/uploads/${photo.filename}`}
-                    alt={photo.description || `Photo ${index + 1}`}
-                    className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
-                    draggable={false}
-                    style={{
-                      touchAction: 'none',
-                      userSelect: 'none'
-                    } as React.CSSProperties}
-                  />
-                </pinch-zoom>
+              <div 
+                className="max-w-full max-h-full flex flex-col items-center"
+                style={{
+                  overflow: scale > 1 ? 'hidden' : 'visible'
+                }}
+              >
+                {/* Custom pinch-to-zoom image with transform */}
+                <img
+                  ref={index === currentIndex ? imageRef : undefined}
+                  src={`/uploads/${photo.filename}`}
+                  alt={photo.description || `Photo ${index + 1}`}
+                  className="max-w-full max-h-full object-contain rounded-lg shadow-2xl transition-transform duration-200"
+                  draggable={false}
+                  style={{
+                    touchAction: 'none',
+                    userSelect: 'none',
+                    transform: index === currentIndex ? 
+                      `scale(${scale}) translate(${translateX}px, ${translateY}px)` : 
+                      'none',
+                    transformOrigin: 'center center'
+                  } as React.CSSProperties}
+                />
+                
+                {/* Zoom indicator for current image */}
+                {index === currentIndex && scale > 1 && (
+                  <div className="absolute top-8 right-8 z-60 text-white text-xs bg-black bg-opacity-50 px-2 py-1 rounded">
+                    {Math.round(scale * 100)}%
+                  </div>
+                )}
               </div>
             </div>
           ))}
