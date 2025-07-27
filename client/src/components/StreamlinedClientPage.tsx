@@ -885,26 +885,49 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   const uploadReceiptsMutation = useMutation({
     mutationFn: async (files: FileList) => {
-      const formData = new FormData();
-      Array.from(files).forEach((file) => {
-        formData.append('receipt', file);
-      });
-
-      const response = await apiRequest(`/api/projects/${projectId}/receipts`, {
-        method: 'POST',
-        body: formData,
-      });
+      console.log('Starting receipt upload with', files.length, 'files');
+      const results = [];
       
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/receipts`] });
-      if (receiptInputRef.current) {
-        receiptInputRef.current.value = '';
+      // Upload files one by one since server expects single file
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        console.log(`Uploading receipt ${i + 1}/${files.length}: ${file.name}`);
+        
+        const formData = new FormData();
+        formData.append('receipt', file);
+
+        const response = await fetch(`/api/projects/${projectId}/receipts`, {
+          method: 'POST',
+          body: formData,
+        });
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Failed to upload ${file.name}: ${errorText}`);
+        }
+        
+        const result = await response.json();
+        results.push(result);
+        console.log(`Successfully uploaded ${file.name}:`, result);
       }
+      
+      return results;
+    },
+    onSuccess: (results) => {
+      console.log('All receipts uploaded successfully:', results);
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/receipts`] });
+      toast({
+        title: "Receipts Uploaded",
+        description: `Successfully uploaded ${results.length} receipt${results.length > 1 ? 's' : ''}`,
+      });
     },
     onError: (error) => {
       console.error('Receipt upload failed:', error);
+      toast({
+        title: "Upload Failed",
+        description: error.message || "Failed to upload receipts. Please try again.",
+        variant: "destructive",
+      });
     },
   });
 
