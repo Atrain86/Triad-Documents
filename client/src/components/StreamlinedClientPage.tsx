@@ -34,8 +34,9 @@ const paintBrainColors = {
 
 // Calendar function for A-Frame calendar integration
 const openWorkCalendar = (clientProject: Project | null = null, setShowCalendar?: (show: boolean) => void) => {
-  // Open Google Calendar showing only A-Frame business calendar
-  window.open('https://calendar.google.com/calendar/u/0/r/month', '_blank');
+  // Open Google Calendar with only A-Frame calendar visible (hides personal calendars)
+  const calendarUrl = 'https://calendar.google.com/calendar/u/0/r/month?tab=mc&pli=1&cid=6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981@group.calendar.google.com';
+  window.open(calendarUrl, '_blank');
 };
 
 // Improved file list component
