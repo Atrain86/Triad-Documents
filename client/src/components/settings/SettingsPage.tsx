@@ -9,6 +9,8 @@ import TaxConfiguration from './TaxConfiguration';
 import GmailIntegration from './GmailIntegration';
 import { useAuth } from '@/contexts/AuthContext';
 
+
+
 interface RecentUsageEntry {
   id: number;
   userId: number;
@@ -240,21 +242,23 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                         <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
                       </svg>
                     </button>
-                    <div className="flex items-center gap-4">
-                      <Menu className="h-5 w-5 text-red-400 flex-shrink-0 drag-handle cursor-grab" />
-                      <img src="/gmail-logo.png" alt="Gmail" className="h-5 w-5 flex-shrink-0" />
-                      <span className="text-lg font-medium text-red-400 whitespace-nowrap">Gmail sync</span>
-                      {!gmailStatus?.connected && (
-                        <div
-                          onClick={() => {
-                            window.open('/api/gmail/auth/1', '_blank');
-                          }}
-                          className="bg-red-500 hover:bg-red-600 text-black px-3 py-2 text-xs rounded-full cursor-pointer whitespace-nowrap"
-                        >
-                          Sync Gmail
-                        </div>
-                      )}
-                      <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <Menu className="h-5 w-5 text-red-400 flex-shrink-0 drag-handle cursor-grab" />
+                        <img src="/gmail-logo.png" alt="Gmail" className="h-5 w-5 flex-shrink-0" />
+                        <span className="text-lg font-medium text-red-400 whitespace-nowrap">Gmail sync</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        {!gmailStatus?.connected && (
+                          <div
+                            onClick={() => {
+                              window.open('/api/gmail/auth/1', '_blank');
+                            }}
+                            className="bg-red-500 hover:bg-red-600 text-black px-3 py-1 text-xs rounded-full cursor-pointer whitespace-nowrap"
+                          >
+                            Sync Gmail
+                          </div>
+                        )}
                         <div 
                           className={`relative w-10 h-5 rounded-full transition-colors cursor-pointer ${
                             gmailStatus?.connected ? 'bg-green-500' : 'bg-red-500'
@@ -434,9 +438,22 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
               case 'api':
                 return (
                   <div className="relative p-4 rounded-lg border-2 border-cyan-400 bg-gray-900/20">
-                    <Menu className="h-5 w-5 text-cyan-400 absolute top-4 left-4 drag-handle cursor-grab z-10" />
-                    <div className="ml-10">
-                      <AdminDashboard onBack={onBack} hideBackButton={true} />
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <Menu className="h-5 w-5 text-cyan-400 flex-shrink-0 drag-handle cursor-grab" />
+                        <svg className="h-5 w-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        <span className="text-lg font-medium text-cyan-400 whitespace-nowrap">API Usage</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="bg-green-600 text-black px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap">
+                          Tokens 103,409
+                        </div>
+                        <div className="bg-green-600 text-black px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap">
+                          $5.43
+                        </div>
+                      </div>
                     </div>
                   </div>
                 );
