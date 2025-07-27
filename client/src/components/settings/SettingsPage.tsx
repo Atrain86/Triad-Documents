@@ -157,22 +157,17 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
 
   return (
     <div className="p-6">
-      <div className="flex justify-between items-start mb-16">
-        <div>
-          <Button
-            onClick={onBack}
-            variant="ghost"
-            size="sm"
-            className="text-gray-400 hover:text-white mb-8"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
-          <div className="flex items-center gap-3">
-            <Settings className="h-8 w-8 text-purple-400" />
-            <h1 className="text-3xl font-bold text-white">Settings</h1>
-          </div>
-        </div>
+      {/* Back and Logout buttons only */}
+      <div className="flex justify-between items-start mb-8">
+        <Button
+          onClick={onBack}
+          variant="ghost"
+          size="sm"
+          className="text-gray-400 hover:text-white"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back
+        </Button>
         
         {/* Logout button with custom SVG */}
         <div className="flex items-center">
@@ -195,6 +190,12 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
           Logout
         </Button>
         </div>
+      </div>
+
+      {/* Settings header moved down */}
+      <div className="flex items-center gap-3 mb-6">
+        <Settings className="h-8 w-8 text-purple-400" />
+        <h1 className="text-3xl font-bold text-white">Settings</h1>
       </div>
 
       {/* Gmail Integration Section */}

@@ -122,10 +122,16 @@ const TaxConfiguration: React.FC<TaxConfigurationProps> = ({
               <Label htmlFor="gst" className="text-[#DCDCAA] font-medium">GST (%)</Label>
               <Input
                 id="gst"
-                type="number"
-                step="0.01"
-                value={taxConfig.gst}
-                onChange={(e) => setTaxConfig({ ...taxConfig, gst: parseFloat(e.target.value) || 0 })}
+                type="text"
+                inputMode="decimal"
+                value={taxConfig.gst === 0 ? '' : taxConfig.gst.toString()}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                    setTaxConfig({ ...taxConfig, gst: parseFloat(value) || 0 });
+                  }
+                }}
+                placeholder="5.0"
                 className="mt-2 border-yellow-400/30 bg-black text-yellow-100 focus:border-yellow-400"
               />
             </div>
@@ -133,10 +139,16 @@ const TaxConfiguration: React.FC<TaxConfigurationProps> = ({
               <Label htmlFor="pst" className="text-[#DCDCAA] font-medium">PST (%)</Label>
               <Input
                 id="pst"
-                type="number"
-                step="0.01"
-                value={taxConfig.pst}
-                onChange={(e) => setTaxConfig({ ...taxConfig, pst: parseFloat(e.target.value) || 0 })}
+                type="text"
+                inputMode="decimal"
+                value={taxConfig.pst === 0 ? '' : taxConfig.pst.toString()}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                    setTaxConfig({ ...taxConfig, pst: parseFloat(value) || 0 });
+                  }
+                }}
+                placeholder="7.0"
                 className="mt-2 border-yellow-400/30 bg-black text-yellow-100 focus:border-yellow-400"
               />
             </div>
@@ -144,10 +156,16 @@ const TaxConfiguration: React.FC<TaxConfigurationProps> = ({
               <Label htmlFor="hst" className="text-[#DCDCAA] font-medium">HST (%)</Label>
               <Input
                 id="hst"
-                type="number"
-                step="0.01"
-                value={taxConfig.hst}
-                onChange={(e) => setTaxConfig({ ...taxConfig, hst: parseFloat(e.target.value) || 0 })}
+                type="text"
+                inputMode="decimal"
+                value={taxConfig.hst === 0 ? '' : taxConfig.hst.toString()}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                    setTaxConfig({ ...taxConfig, hst: parseFloat(value) || 0 });
+                  }
+                }}
+                placeholder="15.0"
                 className="mt-2 border-yellow-400/30 bg-black text-yellow-100 focus:border-yellow-400"
               />
             </div>
@@ -160,10 +178,16 @@ const TaxConfiguration: React.FC<TaxConfigurationProps> = ({
               <Label htmlFor="salesTax" className="text-[#DCDCAA] font-medium">Sales Tax (%)</Label>
               <Input
                 id="salesTax"
-                type="number"
-                step="0.01"
-                value={taxConfig.salesTax}
-                onChange={(e) => setTaxConfig({ ...taxConfig, salesTax: parseFloat(e.target.value) || 0 })}
+                type="text"
+                inputMode="decimal"
+                value={taxConfig.salesTax === 0 ? '' : taxConfig.salesTax.toString()}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                    setTaxConfig({ ...taxConfig, salesTax: parseFloat(value) || 0 });
+                  }
+                }}
+                placeholder="8.5"
                 className="mt-2 border-yellow-400/30 bg-black text-yellow-100 focus:border-yellow-400"
               />
             </div>
@@ -171,10 +195,16 @@ const TaxConfiguration: React.FC<TaxConfigurationProps> = ({
               <Label htmlFor="otherTax" className="text-[#DCDCAA] font-medium">Other Tax (%)</Label>
               <Input
                 id="otherTax"
-                type="number"
-                step="0.01"
-                value={taxConfig.otherTax}
-                onChange={(e) => setTaxConfig({ ...taxConfig, otherTax: parseFloat(e.target.value) || 0 })}
+                type="text"
+                inputMode="decimal"
+                value={taxConfig.otherTax === 0 ? '' : taxConfig.otherTax.toString()}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                    setTaxConfig({ ...taxConfig, otherTax: parseFloat(value) || 0 });
+                  }
+                }}
+                placeholder="0.0"
                 className="mt-2 border-yellow-400/30 bg-black text-yellow-100 focus:border-yellow-400"
               />
             </div>
@@ -187,10 +217,16 @@ const TaxConfiguration: React.FC<TaxConfigurationProps> = ({
               <Label htmlFor="vat" className="text-[#DCDCAA] font-medium">VAT (%)</Label>
               <Input
                 id="vat"
-                type="number"
-                step="0.01"
-                value={taxConfig.vat}
-                onChange={(e) => setTaxConfig({ ...taxConfig, vat: parseFloat(e.target.value) || 0 })}
+                type="text"
+                inputMode="decimal"
+                value={taxConfig.vat === 0 ? '' : taxConfig.vat.toString()}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                    setTaxConfig({ ...taxConfig, vat: parseFloat(value) || 0 });
+                  }
+                }}
+                placeholder="20.0"
                 className="mt-2 border-yellow-400/30 bg-black text-yellow-100 focus:border-yellow-400"
               />
             </div>
@@ -198,10 +234,16 @@ const TaxConfiguration: React.FC<TaxConfigurationProps> = ({
               <Label htmlFor="otherTax" className="text-[#DCDCAA] font-medium">Other Tax (%)</Label>
               <Input
                 id="otherTax"
-                type="number"
-                step="0.01"
-                value={taxConfig.otherTax}
-                onChange={(e) => setTaxConfig({ ...taxConfig, otherTax: parseFloat(e.target.value) || 0 })}
+                type="text"
+                inputMode="decimal"
+                value={taxConfig.otherTax === 0 ? '' : taxConfig.otherTax.toString()}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                    setTaxConfig({ ...taxConfig, otherTax: parseFloat(value) || 0 });
+                  }
+                }}
+                placeholder="0.0"
                 className="mt-2 border-yellow-400/30 bg-black text-yellow-100 focus:border-yellow-400"
               />
             </div>
