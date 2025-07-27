@@ -264,7 +264,7 @@ const TaxConfiguration: React.FC<TaxConfigurationProps> = ({
       </div>
 
       {/* Tax Settings Container */}
-      <div className="relative p-6 rounded-xl border-2 border-yellow-400/50 bg-gradient-to-r from-yellow-900/10 to-yellow-800/5 backdrop-blur-sm">
+      <div className="relative p-6 rounded-xl border-2 border-yellow-400/50 bg-black backdrop-blur-sm">
         
         <div className="space-y-6">
           {/* Country Selection */}
