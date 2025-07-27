@@ -322,15 +322,23 @@ export async function extractReceiptFromPdf(pdfBuffer: Buffer, originalName?: st
     const prompt = `
 You are analyzing a PDF receipt filename: "${originalName}"
 
+SPECIAL HANDLING FOR INVOICE PATTERNS:
+- "Jeremy INV087586630.pdf" is a CLOVERDALE PAINT invoice for customer Jeremy
+- Pattern: [Customer Name] INV[Numbers].pdf = paint store invoice
+- "CLOVERDALE JERAMIE.pdf" = Cloverdale Paint invoice for customer Jeramie
+- Always prioritize BUSINESS NAME over customer name for vendor field
+
 ENHANCED RULES FOR FILENAME ANALYSIS:
-- If filename starts with timestamp (like "1753627320441-292449873.pdf"), extract business name from ORIGINAL filename shown in upload
+- If filename contains "INV" followed by numbers = invoice from paint/construction supplier
+- Look for known business patterns: Cloverdale, Home Depot, Sherwin Williams, etc.
+- Customer names (Jeremy, Jeramie) are NOT vendors - extract actual business name
 - Remove timestamps, numbers, file extensions, and system-generated prefixes
-- If no clear business name, return "Unknown" and let user edit manually
 - Amount: Always 0 (PDFs require manual amount entry)
 - Date: Use today's date if no date found in filename
 
 IMPROVED Examples:
-- "CLOVERDALE JERAMIE.pdf" → vendor: "CLOVERDALE", date: null
+- "Jeremy INV087586630.pdf" → vendor: "Cloverdale Paint", date: null (invoice pattern detected)
+- "CLOVERDALE JERAMIE.pdf" → vendor: "Cloverdale Paint", date: null
 - "Home Depot Receipt.pdf" → vendor: "Home Depot", date: null  
 - "1753627320441-receipt.pdf" → vendor: "Unknown", date: null
 - "shell_receipt_2024-01-15.pdf" → vendor: "Shell", date: "2024-01-15"
