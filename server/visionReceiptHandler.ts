@@ -320,25 +320,28 @@ export async function extractReceiptFromPdf(pdfBuffer: Buffer, originalName?: st
     // We can add PDF conversion later, but for this implementation, we'll use text-based prompt
     
     const prompt = `
-You are analyzing a PDF receipt document. Based on the filename "${originalName}", extract vendor information.
+You are analyzing a PDF receipt filename: "${originalName}"
 
-STRICT RULES:
-- Vendor: Extract business name from filename, remove location numbers, timestamps, and file extensions
-- Amount: Set to 0 (PDFs require manual amount entry)
-- Date: Extract date from filename if present in format YYYY-MM-DD
+ENHANCED RULES FOR FILENAME ANALYSIS:
+- If filename starts with timestamp (like "1753627320441-292449873.pdf"), extract business name from ORIGINAL filename shown in upload
+- Remove timestamps, numbers, file extensions, and system-generated prefixes
+- If no clear business name, return "Unknown" and let user edit manually
+- Amount: Always 0 (PDFs require manual amount entry)
+- Date: Use today's date if no date found in filename
 
-Examples:
+IMPROVED Examples:
+- "CLOVERDALE JERAMIE.pdf" → vendor: "CLOVERDALE", date: null
+- "Home Depot Receipt.pdf" → vendor: "Home Depot", date: null  
+- "1753627320441-receipt.pdf" → vendor: "Unknown", date: null
 - "shell_receipt_2024-01-15.pdf" → vendor: "Shell", date: "2024-01-15"
-- "mcdonalds_jan_15_receipt.pdf" → vendor: "McDonald's", date: null
-- "gas_station_receipt_123.pdf" → vendor: "Gas Station", date: null
 
 Return ONLY this JSON format:
 {
-  "vendor": "extracted business name",
+  "vendor": "extracted business name or Unknown",
   "amount": 0,
   "items": ["PDF requires manual entry"],
   "date": "YYYY-MM-DD or null",
-  "confidence": 0.6
+  "confidence": 0.2
 }
 `;
 

@@ -357,6 +357,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const projectId = parseInt(req.params.projectId);
       const file = req.file;
+      const userId = 1; // Default user ID for tracking
       
       if (!file) {
         // Manual receipt entry
@@ -398,7 +399,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`Processing image receipt with Vision API: ${file.originalname}`);
           const { extractReceiptWithVision } = await import('./visionReceiptHandler');
           const fileBuffer = fs.readFileSync(file.path);
-          const visionResult = await extractReceiptWithVision(fileBuffer, file.filename);
+          const visionResult = await extractReceiptWithVision(fileBuffer, file.originalname, userId);
 
           receiptData = {
             projectId,
@@ -434,7 +435,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`Processing PDF receipt with Vision API: ${file.originalname}`);
           const { extractReceiptFromPdf } = await import('./visionReceiptHandler');
           const fileBuffer = fs.readFileSync(file.path);
-          const visionResult = await extractReceiptFromPdf(fileBuffer, file.filename);
+          const visionResult = await extractReceiptFromPdf(fileBuffer, file.originalname, userId);
 
           receiptData = {
             projectId,
