@@ -164,8 +164,12 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
         <div className="flex items-center justify-between p-4 rounded-lg border-2 border-red-400 bg-gray-900/20">
           <div className="flex items-center gap-3">
             <Menu className="h-5 w-5 text-red-400" />
-            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.907 1.528-1.148C21.69 2.28 24 3.434 24 5.457z" fill="#EA4335"/>
+            <svg className="h-5 w-5" viewBox="0 0 256 193" xmlns="http://www.w3.org/2000/svg">
+              <path fill="#4285F4" d="M58.182 192.05V93.14L27.507 65.077 0 49.504v125.091c0 9.658 7.825 17.455 17.455 17.455h40.727Z"/>
+              <path fill="#34A853" d="M197.818 192.05h40.727c9.658 0 17.455-7.826 17.455-17.455V49.505l-27.507 15.572-30.675 28.063v98.91Z"/>
+              <path fill="#EA4335" d="M58.182 93.14 54.595 54.81 0 49.504l58.182 53.077v-9.441Z"/>
+              <path fill="#FBBC05" d="M197.818 93.14V54.81l-69.818 49.086-69.818-49.086v38.33l69.818 49.085 69.818-49.085Z"/>
+              <path fill="#EA4335" d="M256 49.504 197.818 54.81l3.587 38.33V49.504L256 49.504Z"/>
             </svg>
             {!gmailStatus?.connected && (
               <div
