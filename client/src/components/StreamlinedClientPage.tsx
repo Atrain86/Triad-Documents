@@ -205,11 +205,44 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
           {/* Receipt Content */}
           <div className="flex items-center justify-center h-full p-4">
             {viewingReceipt.filename && isPdfOrDoc(viewingReceipt.filename) ? (
-              <iframe
-                src={`/uploads/${viewingReceipt.filename}`}
-                className="w-full h-full border-none"
-                title={`Receipt from ${viewingReceipt.vendor}`}
-              />
+              <div className="text-center text-white p-8">
+                <FileText size={96} className="mx-auto mb-6 text-red-400" />
+                <h3 className="text-2xl font-bold mb-4">{viewingReceipt.vendor}</h3>
+                <div className="text-lg mb-6">
+                  <p className="mb-2">${viewingReceipt.amount}</p>
+                  <p className="text-gray-300 mb-4">{formatDate(viewingReceipt.date?.toString())}</p>
+                  {viewingReceipt.description && (
+                    <p className="text-sm text-gray-400 mb-6">{viewingReceipt.description}</p>
+                  )}
+                </div>
+                <div className="space-y-3">
+                  <Button
+                    onClick={() => {
+                      // Open PDF in a new tab - this bypasses Brave's iframe blocking
+                      window.open(`/uploads/${viewingReceipt.filename}`, '_blank');
+                    }}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 text-lg"
+                  >
+                    <ExternalLink size={20} className="mr-2" />
+                    Open PDF in New Tab
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      // Download the PDF file directly
+                      const link = document.createElement('a');
+                      link.href = `/uploads/${viewingReceipt.filename}`;
+                      link.download = `${viewingReceipt.vendor}-${viewingReceipt.amount}.pdf`;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    }}
+                    className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-6 text-lg"
+                  >
+                    <Download size={20} className="mr-2" />
+                    Download PDF
+                  </Button>
+                </div>
+              </div>
             ) : (
               <img 
                 src={`/uploads/${viewingReceipt.filename}`} 
@@ -1805,19 +1838,13 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                         <div className="mb-4 grid grid-cols-2 gap-2">
                           <Button
                             onClick={() => {
-                              console.log('Camera button clicked for receipts');
                               // Create input for direct camera access
                               const input = document.createElement('input');
                               input.type = 'file';
                               input.accept = 'image/*,.heic,.heif,.pdf,.doc,.docx,.txt';
                               input.capture = 'environment';
                               input.multiple = true;
-                              input.onchange = (event: any) => {
-                                console.log('Camera file input change event triggered');
-                                console.log('Camera files selected:', event.target.files);
-                                handleReceiptUpload(event);
-                              };
-                              console.log('About to trigger camera file picker dialog');
+                              input.onchange = handleReceiptUpload;
                               input.click();
                             }}
                             className="py-3 text-sm font-semibold text-white flex items-center justify-center hover:opacity-90"
@@ -1828,19 +1855,13 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                           </Button>
                           <Button
                             onClick={() => {
-                              console.log('Upload button clicked for receipts');
                               // Create input for photo library access only (no camera)
                               const input = document.createElement('input');
                               input.type = 'file';
                               input.accept = 'image/*,.heic,.heif,.pdf,.doc,.docx,.txt';
                               input.multiple = true;
                               // No capture attribute - this forces library selection
-                              input.onchange = (event: any) => {
-                                console.log('File input change event triggered');
-                                console.log('Files selected:', event.target.files);
-                                handleReceiptUpload(event);
-                              };
-                              console.log('About to trigger file picker dialog');
+                              input.onchange = handleReceiptUpload;
                               input.click();
                             }}
                             className="py-3 text-sm font-semibold text-white flex items-center justify-center hover:opacity-90"
