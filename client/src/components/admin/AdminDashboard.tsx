@@ -86,31 +86,29 @@ const AdminDashboard: React.FC<{ onBack: () => void; hideBackButton?: boolean }>
       )}
 
       {/* API Usage - Single Line */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <img src="/analytics-icon.png" alt="Analytics" className="h-5 w-5" style={{filter: 'brightness(0) saturate(100%) invert(70%) sepia(50%) saturate(500%) hue-rotate(170deg) brightness(90%) contrast(90%)'}} />
+          <span className="text-lg font-medium text-cyan-400">API Usage</span>
+        </div>
         {totalStatsLoading ? (
-          <>
-            <img src="/analytics-icon.png" alt="Analytics" className="h-5 w-5" style={{filter: 'brightness(0) saturate(100%) invert(70%) sepia(50%) saturate(500%) hue-rotate(170deg) brightness(90%) contrast(90%)'}} />
-            <span className="text-lg font-medium text-cyan-400">API Usage</span>
-            <div className="flex items-center gap-4 ml-auto">
-              <div className="animate-pulse">
-                <div className="h-6 bg-gray-600 rounded w-20"></div>
-              </div>
-              <div className="animate-pulse">
-                <div className="h-6 bg-gray-600 rounded w-16"></div>
-              </div>
+          <div className="flex items-center gap-4">
+            <div className="animate-pulse">
+              <div className="h-6 bg-gray-600 rounded w-20"></div>
             </div>
-          </>
+            <div className="animate-pulse">
+              <div className="h-6 bg-gray-600 rounded w-16"></div>
+            </div>
+          </div>
         ) : (
-          <>
-            <img src="/analytics-icon.png" alt="Analytics" className="h-5 w-5" style={{filter: 'brightness(0) saturate(100%) invert(70%) sepia(50%) saturate(500%) hue-rotate(170deg) brightness(90%) contrast(90%)'}} />
-            <span className="text-lg font-medium text-cyan-400">API Usage</span>
-            <div className="bg-green-600 text-black px-3 py-2 rounded-full text-xs font-medium ml-auto">
+          <div className="flex items-center gap-4">
+            <div className="bg-green-600 text-black px-3 py-2 rounded-full text-xs font-medium">
               Tokens {formatNumber(totalStats?.totalTokens || 0)}
             </div>
             <div className="bg-green-600 text-black px-3 py-2 rounded-full text-xs font-medium">
               {formatCurrency(totalStats?.totalCost || 0)}
             </div>
-          </>
+          </div>
         )}
       </div>
 
