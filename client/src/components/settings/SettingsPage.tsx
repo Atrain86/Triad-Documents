@@ -115,16 +115,16 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
 
   return (
     <div className="p-6">
-      <div className="flex justify-between items-center mb-8">
-        <div className="flex items-center gap-4">
+      <div className="flex justify-between items-start mb-8">
+        <div>
           <Button
             onClick={onBack}
             variant="ghost"
             size="sm"
-            className="text-gray-400 hover:text-white"
+            className="text-gray-400 hover:text-white mb-2"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Dashboard
+            Back
           </Button>
           <div className="flex items-center gap-3">
             <Settings className="h-8 w-8 text-purple-400" />
