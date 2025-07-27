@@ -180,93 +180,113 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
 
   return (
     <>
-      {/* Receipt Viewer Modal */}
+      {/* Receipt Viewer Modal - Mobile-First Design */}
       {viewingReceipt && (
-        <div 
-          className="fixed inset-0 bg-black z-[9999] flex items-center justify-center"
-          style={{ 
-            zIndex: 999999,
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'rgba(0, 0, 0, 0.95)'
-          }}
-        >
-          {/* HUGE EXIT BUTTON - Top Right */}
-          <button
-            onClick={() => {
-              console.log('EXIT BUTTON CLICKED!');
+        <>
+          {/* Full Screen Overlay */}
+          <div 
+            className="fixed inset-0 bg-black"
+            onTouchStart={() => {
+              console.log('TOUCH START ON BACKGROUND!');
               setViewingReceipt(null);
             }}
-            className="fixed top-2 right-2 w-16 h-16 bg-red-600 text-white text-3xl font-bold rounded-full border-4 border-white shadow-2xl hover:bg-red-700"
+            onClick={() => {
+              console.log('CLICK ON BACKGROUND!');
+              setViewingReceipt(null);
+            }}
             style={{ 
-              zIndex: 999999,
               position: 'fixed',
-              top: '8px',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 999999,
+              backgroundColor: '#000000'
+            }}
+          />
+
+          {/* Exit Instructions Bar at Top */}
+          <div 
+            className="fixed top-0 left-0 right-0 bg-red-600 text-white text-center py-3 text-lg font-bold border-b-4 border-white"
+            style={{ 
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              zIndex: 9999999,
+              backgroundColor: '#dc2626',
+              color: 'white',
+              padding: '12px',
+              fontSize: '18px',
+              fontWeight: 'bold'
+            }}
+          >
+            TAP ANYWHERE TO CLOSE RECEIPT
+          </div>
+
+          {/* Giant X Button - Top Right Corner */}
+          <button
+            onTouchStart={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log('TOUCH START ON X BUTTON!');
+              setViewingReceipt(null);
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log('CLICK ON X BUTTON!');
+              setViewingReceipt(null);
+            }}
+            style={{ 
+              position: 'fixed',
+              top: '60px',
               right: '8px',
-              width: '64px',
-              height: '64px',
-              fontSize: '32px',
-              lineHeight: '1'
+              width: '80px',
+              height: '80px',
+              backgroundColor: '#dc2626',
+              color: 'white',
+              border: '4px solid white',
+              borderRadius: '50%',
+              fontSize: '40px',
+              fontWeight: 'bold',
+              zIndex: 9999999,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              touchAction: 'manipulation'
             }}
           >
             ×
           </button>
 
-          {/* HUGE EXIT BUTTON - Bottom Center */}
-          <button
-            onClick={() => {
-              console.log('BOTTOM EXIT BUTTON CLICKED!');
-              setViewingReceipt(null);
-            }}
-            className="fixed bottom-4 left-1/2 transform -translate-x-1/2 px-8 py-4 bg-red-600 text-white text-xl font-bold rounded-full border-4 border-white shadow-2xl hover:bg-red-700"
-            style={{ 
-              zIndex: 999999,
-              position: 'fixed',
-              bottom: '16px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              fontSize: '20px'
-            }}
-          >
-            CLOSE RECEIPT
-          </button>
-
-          {/* Background click to close */}
-          <div 
-            className="absolute inset-0"
-            onClick={() => {
-              console.log('BACKGROUND CLICKED!');
-              setViewingReceipt(null);
-            }}
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              zIndex: 1
-            }}
-          />
-          
           {/* Receipt Image */}
           <div 
-            className="relative z-10 max-w-4xl max-h-full p-4 overflow-auto"
-            style={{ zIndex: 10 }}
+            style={{ 
+              position: 'fixed',
+              top: '120px',
+              left: '10px',
+              right: '10px',
+              bottom: '10px',
+              zIndex: 9999998,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
           >
             <img 
               src={`/uploads/${viewingReceipt.filename}`} 
               alt={`Receipt from ${viewingReceipt.vendor}`}
-              className="w-full h-auto max-w-full rounded-lg shadow-2xl"
               style={{ 
-                maxHeight: 'calc(100vh - 120px)',
-                pointerEvents: 'none'
+                maxWidth: '100%',
+                maxHeight: '100%',
+                objectFit: 'contain',
+                borderRadius: '8px'
               }}
             />
           </div>
-        </div>
+        </>
       )}
       
       <div className="space-y-3">
