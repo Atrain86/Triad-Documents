@@ -221,13 +221,8 @@ const TaxConfiguration: React.FC<TaxConfigurationProps> = ({
         </p>
       </div>
 
-      {/* Tax Settings Container with Creative Border */}
+      {/* Tax Settings Container */}
       <div className="relative p-6 rounded-xl border-2 border-yellow-400/50 bg-gradient-to-r from-yellow-900/10 to-yellow-800/5 backdrop-blur-sm">
-        {/* Decorative corner elements */}
-        <div className="absolute top-2 left-2 w-3 h-3 border-l-2 border-t-2 border-yellow-400 rounded-tl-lg"></div>
-        <div className="absolute top-2 right-2 w-3 h-3 border-r-2 border-t-2 border-yellow-400 rounded-tr-lg"></div>
-        <div className="absolute bottom-2 left-2 w-3 h-3 border-l-2 border-b-2 border-yellow-400 rounded-bl-lg"></div>
-        <div className="absolute bottom-2 right-2 w-3 h-3 border-r-2 border-b-2 border-yellow-400 rounded-br-lg"></div>
         
         <div className="space-y-6">
           {/* Country Selection */}

@@ -271,7 +271,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
             <div className={`px-3 py-2 rounded-full text-xs font-medium ${
               isTaxConfigured 
                 ? 'bg-yellow-500 text-black' 
-                : 'bg-red-500 text-white'
+                : 'bg-red-500 text-black'
             }`}>
               {isTaxConfigured ? 'Configured' : 'Set Up'}
             </div>
