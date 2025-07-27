@@ -665,6 +665,7 @@ function StatusButton({ project, updateStatusMutation }: { project: any; updateS
   ];
 
   const handleStatusChange = (newStatus: string) => {
+    console.log('Status change triggered:', newStatus, 'for project:', project.id);
     updateStatusMutation.mutate({ 
       projectId: project.id, 
       status: newStatus 
@@ -711,9 +712,17 @@ function StatusButton({ project, updateStatusMutation }: { project: any; updateS
                 <button
                   key={option.value}
                   onClick={(e) => {
+                    console.log('Button clicked:', option.value);
                     e.preventDefault();
                     e.stopPropagation();
+                    e.nativeEvent.stopImmediatePropagation();
                     handleStatusChange(option.value);
+                  }}
+                  onTouchEnd={(e) => {
+                    console.log('Touch end triggered:', option.value);
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.nativeEvent.stopImmediatePropagation();
                   }}
                   className={`w-full text-left px-3 py-3 text-sm transition-colors touch-manipulation rounded-md text-white ${
                     option.value === project.status 
@@ -770,7 +779,10 @@ function ProjectCard({ project, onSelectProject, updateStatusMutation, deletePro
         target.closest('button') ||
         target.classList.contains('pointer-events-auto') ||
         target.closest('[class*="z-20"]') ||
-        target.closest('[class*="z-30"]')) {
+        target.closest('[class*="z-30"]') ||
+        target.closest('[class*="z-50"]') ||
+        target.closest('.fixed')) {
+      console.log('Touch blocked on interactive element:', target.tagName, target.className);
       e.stopPropagation();
       return;
     }
