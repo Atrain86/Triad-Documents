@@ -407,6 +407,14 @@ Logo: Custom A-frame house structure with paint brush accent
 - **Cleaned interface**: Removed test tracking container after successful implementation, leaving clean admin dashboard with live tracking status
 - **System limitation clarity**: Added clear messaging that Replit's AI assistant conversations bypass the application and won't appear in tracking
 
+### July 27, 2025 - Receipt Upload System Enhancement & PDF Viewing Optimization
+- **Clarified receipt upload workflow**: Resolved user confusion between "Add Item" button (manual entries) and "Upload"/"Camera" buttons (file uploads) - both systems working perfectly
+- **Fixed receipt data extraction**: Manually corrected Jeremy Cloverdale Paint invoice with accurate data ($129.99, 06/03/25, vendor name) after OpenAI Vision API limitations with complex PDF invoices
+- **Enhanced PDF viewing experience**: Optimized iframe-based PDF viewing to work seamlessly across platforms - mobile users get one-tap full screen viewing, desktop Brave users get new tab opening to bypass browser security restrictions
+- **Cross-platform compatibility**: System now handles browser security differences appropriately - mobile devices show PDFs in modal overlay, desktop browsers open in new tabs when blocked
+- **Receipt processing improvements**: Confirmed upload functionality working for both image receipts (full OCR processing) and PDF receipts (intelligent filename analysis with OpenAI enhancement)
+- **Streamlined user experience**: Removed unnecessary debugging logs and modal complexity, maintaining simple one-click receipt viewing workflow
+
 ### July 27, 2025 - Calendar Integration Optimization & Status Selection Enhancement
 - **Isolated A-Frame calendar integration**: Successfully configured calendar buttons to open only A-Frame business calendar (6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981@group.calendar.google.com) without showing personal Allen calendar
 - **Enhanced status selection modal**: Improved StatusButton component with better contrast (dark background, white text) and isolated event handling to prevent navigation conflicts
