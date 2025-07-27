@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Settings, DollarSign, Globe, Mail, ChevronRight, Info, Menu } from 'lucide-react';
+import { ArrowLeft, Settings, DollarSign, Globe, Mail, ChevronRight, Info, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 import AdminDashboard from '../admin/AdminDashboard';
@@ -98,7 +98,11 @@ interface SettingsPageProps {
 const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
   const { logout } = useAuth();
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
-  const [showGmailBenefits, setShowGmailBenefits] = useState(false);
+  const [showGmailPopup, setShowGmailPopup] = useState(false);
+
+  const { data: gmailStatus } = useQuery<{ connected: boolean }>({
+    queryKey: ['/api/gmail/status/1'],
+  });
 
   const handleLogout = () => {
     // Complete authentication reset
@@ -165,44 +169,30 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
             <Menu className="h-5 w-5 text-red-400" />
             <Mail className="h-5 w-5 text-red-400" />
             <span className="text-lg font-medium text-red-400">Gmail Integration</span>
-            <div className="bg-red-500 text-black px-3 py-1 rounded-full text-sm">
-              Not Connected
+            <div className={`px-3 py-1 rounded-full text-sm text-black ${
+              gmailStatus?.connected ? 'bg-green-500' : 'bg-red-500'
+            }`}>
+              {gmailStatus?.connected ? 'Connected' : 'Not Connected'}
             </div>
           </div>
-          <ChevronRight 
-            className={`h-5 w-5 text-red-400 transition-transform ${
-              expandedSection === 'gmail' ? 'rotate-90' : ''
-            }`} 
-          />
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowGmailPopup(true)}
+              className="cursor-pointer bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-sm hover:bg-blue-600 transition-colors"
+              title="Gmail Integration Info"
+            >
+              i
+            </button>
+            <ChevronRight 
+              className={`h-5 w-5 text-red-400 transition-transform ${
+                expandedSection === 'gmail' ? 'rotate-90' : ''
+              }`} 
+            />
+          </div>
         </div>
         
         {expandedSection === 'gmail' && (
           <div className="mt-4 p-6 rounded-lg border border-red-400/30 bg-gray-900/10">
-            <div className="flex items-center gap-2 mb-4">
-              <h3 className="text-lg font-medium text-white">Gmail Connection Status</h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="p-1 text-gray-400 hover:text-white"
-                onClick={() => setShowGmailBenefits(!showGmailBenefits)}
-              >
-                <Info className="h-4 w-4" />
-              </Button>
-            </div>
-            
-            {showGmailBenefits && (
-              <div className="mb-6 p-4 rounded-lg bg-blue-900/20 border border-blue-400/30">
-                <h4 className="font-medium text-blue-400 mb-2">Benefits of Gmail Integration:</h4>
-                <ul className="text-sm text-gray-300 space-y-1">
-                  <li>• Emails sent from your own Gmail address</li>
-                  <li>• Sent emails appear in your Gmail Sent folder</li>
-                  <li>• Maintains professional email reputation</li>
-                  <li>• No shared account or quota limitations</li>
-                  <li>• Full control over your email communications</li>
-                </ul>
-              </div>
-            )}
-            
             <GmailIntegration />
           </div>
         )}
@@ -268,6 +258,36 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
           </div>
         )}
       </div>
+
+      {/* Gmail Info Popup */}
+      {showGmailPopup && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center"
+          onClick={() => setShowGmailPopup(false)}
+        >
+          <div 
+            className="bg-white text-black w-11/12 max-w-sm p-6 rounded-lg shadow-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-end mb-2">
+              <button
+                onClick={() => setShowGmailPopup(false)}
+                className="text-gray-500 hover:text-gray-700 text-xl"
+              >
+                ×
+              </button>
+            </div>
+            <p className="mb-3 leading-relaxed">
+              <strong>Sync Paint Brain with your Gmail account</strong><br />
+              to send emails directly from your address.<br />
+              They'll appear in your Gmail Sent folder too.
+            </p>
+            <ul className="pl-5 list-disc">
+              <li>Your Gmail handles security & storage.</li>
+            </ul>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
