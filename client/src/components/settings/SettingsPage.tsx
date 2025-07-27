@@ -202,7 +202,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
       </div>
 
       {/* Settings header positioned closer to Gmail container */}
-      <div className="flex items-center gap-3 mb-2">
+      <div className="flex items-center gap-3 mb-6">
         <Settings className="h-8 w-8 text-gray-400" />
       </div>
 
