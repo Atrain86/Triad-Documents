@@ -1328,9 +1328,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                   </div>
                   
                   {/* Large Expand Indicator - Right Side with Left-Pointing Arrow */}
-                  <div className={`ml-6 transform transition-transform ${isExpanded ? 'rotate-90' : 'rotate-180'}`}>
-                    <svg width="48" height="48" viewBox="0 0 48 48" fill="currentColor" style={{ color: getSectionColor(section.id) }}>
-                      <path d="M32 24l-12-12v24l12-12z"/>
+                  <div className={`ml-auto transform transition-transform ${isExpanded ? 'rotate-90' : 'rotate-0'}`}>
+                    <svg width="32" height="32" viewBox="0 0 48 48" fill="currentColor" style={{ color: getSectionColor(section.id) }}>
+                      <path d="M14 16l12 8-12 8z"/>
                     </svg>
                   </div>
                 </div>

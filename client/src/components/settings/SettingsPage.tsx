@@ -243,7 +243,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                     <div className="flex items-center gap-4">
                       <Menu className="h-5 w-5 text-red-400 flex-shrink-0 drag-handle cursor-grab" />
                       <img src="/gmail-logo.png" alt="Gmail" className="h-5 w-5 flex-shrink-0" />
-                      <span className="text-lg font-medium text-red-400 whitespace-nowrap">Gmail Integration</span>
+                      <span className="text-lg font-medium text-red-400 whitespace-nowrap">Gmail sync</span>
                       {!gmailStatus?.connected && (
                         <div
                           onClick={() => {
@@ -304,7 +304,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                       </div>
                       <ChevronRight 
                         className={`h-5 w-5 text-yellow-400 transition-transform ${
-                          expandedSection === 'tax' ? 'rotate-90' : ''
+                          expandedSection === 'tax' ? 'rotate-90' : 'rotate-0'
                         }`} 
                       />
                     </div>
@@ -335,7 +335,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                       </div>
                       <ChevronRight 
                         className={`h-5 w-5 text-orange-400 transition-transform ${
-                          expandedSection === 'photo' ? 'rotate-90' : ''
+                          expandedSection === 'photo' ? 'rotate-90' : 'rotate-0'
                         }`} 
                       />
                     </div>
@@ -457,7 +457,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                       </div>
                       <ChevronRight 
                         className={`h-5 w-5 text-purple-400 transition-transform ${
-                          expandedSection === 'activity' ? 'rotate-90' : ''
+                          expandedSection === 'activity' ? 'rotate-90' : 'rotate-0'
                         }`} 
                       />
                     </div>
