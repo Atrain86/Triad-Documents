@@ -162,7 +162,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
       {/* Gmail Integration Section */}
       <div className="mb-4">
         <div className="flex items-center justify-between p-4 rounded-lg border-2 border-red-400 bg-gray-900/20">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <Menu className="h-5 w-5 text-red-400" />
             <img src="/gmail-logo.png" alt="Gmail" className="h-5 w-5" />
             <span className="text-lg font-medium text-red-400 whitespace-nowrap">Gmail Integration</span>
@@ -196,7 +196,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
               <span className={`text-xs whitespace-nowrap ${
                 gmailStatus?.connected ? 'text-green-400' : 'text-red-400'
               }`}>
-                {gmailStatus?.connected ? 'Connected' : 'Not Connected'}
+                {gmailStatus?.connected ? 'Connected' : 'Disconnected'}
               </span>
             </div>
           </div>
