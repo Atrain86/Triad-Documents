@@ -184,7 +184,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
             onClick={handleLogout}
             variant="outline" 
             size="sm"
-            className="text-red-400 border-red-400 hover:bg-red-400 hover:text-white flex items-center gap-2 bg-transparent"
+            className="text-orange-400 border-orange-400 hover:bg-orange-400 hover:text-white flex items-center gap-2 bg-transparent"
             title="Logout"
           >
           <svg
@@ -290,7 +290,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                         <div className={`px-3 py-2 rounded-full text-xs font-medium ${
                           isTaxConfigured 
                             ? 'bg-yellow-500 text-black' 
-                            : 'bg-green-600 text-black'
+                            : 'bg-red-500 text-black'
                         }`}>
                           {isTaxConfigured ? 'Configured' : 'Set Up'}
                         </div>
