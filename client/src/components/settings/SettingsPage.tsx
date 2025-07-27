@@ -258,27 +258,27 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
       {/* Gmail Info Popup */}
       {showGmailPopup && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center"
+          className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center"
           onClick={() => setShowGmailPopup(false)}
         >
           <div 
-            className="bg-white text-black w-11/12 max-w-sm p-6 rounded-lg shadow-lg"
+            className="bg-black text-white w-11/12 max-w-xs p-4 rounded-lg shadow-lg border border-gray-600"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-end mb-2">
               <button
                 onClick={() => setShowGmailPopup(false)}
-                className="text-gray-500 hover:text-gray-700 text-xl"
+                className="text-gray-400 hover:text-white text-xl leading-none"
               >
                 ×
               </button>
             </div>
-            <p className="mb-3 leading-relaxed">
+            <p className="mb-3 leading-relaxed text-sm">
               <strong>Sync Paint Brain with your Gmail account</strong><br />
               to send emails directly from your address.<br />
               They'll appear in your Gmail Sent folder too.
             </p>
-            <ul className="pl-5 list-disc">
+            <ul className="pl-4 list-disc text-sm">
               <li>Your Gmail handles security & storage.</li>
             </ul>
           </div>
