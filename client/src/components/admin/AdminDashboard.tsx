@@ -105,16 +105,13 @@ const AdminDashboard: React.FC<{ onBack: () => void; hideBackButton?: boolean }>
             <div className="flex items-center gap-4">
               <Menu className="h-5 w-5 text-blue-400" />
               <span className="text-lg font-medium text-blue-400">API Usage</span>
-              <div className="flex items-center gap-2">
-                <span className="text-slate-400">Tokens</span>
-                <span className="text-lg font-bold text-emerald-300">
-                  {formatNumber(totalStats?.totalTokens || 0)}
-                </span>
+              <div className="bg-emerald-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                Tokens {formatNumber(totalStats?.totalTokens || 0)}
               </div>
             </div>
-            <span className="text-lg font-bold text-emerald-300">
+            <div className="bg-emerald-500 text-white px-3 py-1 rounded-full text-sm font-medium">
               {formatCurrency(totalStats?.totalCost || 0)}
-            </span>
+            </div>
           </>
         )}
       </div>
