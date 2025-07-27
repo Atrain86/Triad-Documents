@@ -126,7 +126,7 @@ const TaxConfiguration: React.FC<TaxConfigurationProps> = ({
                 step="0.01"
                 value={taxConfig.gst}
                 onChange={(e) => setTaxConfig({ ...taxConfig, gst: parseFloat(e.target.value) || 0 })}
-                className="mt-2 border-yellow-400/30 bg-yellow-900/10 text-yellow-100 focus:border-yellow-400"
+                className="mt-2 border-yellow-400/30 bg-black text-yellow-100 focus:border-yellow-400"
               />
             </div>
             <div>
@@ -137,7 +137,7 @@ const TaxConfiguration: React.FC<TaxConfigurationProps> = ({
                 step="0.01"
                 value={taxConfig.pst}
                 onChange={(e) => setTaxConfig({ ...taxConfig, pst: parseFloat(e.target.value) || 0 })}
-                className="mt-2 border-yellow-400/30 bg-yellow-900/10 text-yellow-100 focus:border-yellow-400"
+                className="mt-2 border-yellow-400/30 bg-black text-yellow-100 focus:border-yellow-400"
               />
             </div>
             <div>
@@ -148,7 +148,7 @@ const TaxConfiguration: React.FC<TaxConfigurationProps> = ({
                 step="0.01"
                 value={taxConfig.hst}
                 onChange={(e) => setTaxConfig({ ...taxConfig, hst: parseFloat(e.target.value) || 0 })}
-                className="mt-2 border-yellow-400/30 bg-yellow-900/10 text-yellow-100 focus:border-yellow-400"
+                className="mt-2 border-yellow-400/30 bg-black text-yellow-100 focus:border-yellow-400"
               />
             </div>
           </div>
@@ -164,7 +164,7 @@ const TaxConfiguration: React.FC<TaxConfigurationProps> = ({
                 step="0.01"
                 value={taxConfig.salesTax}
                 onChange={(e) => setTaxConfig({ ...taxConfig, salesTax: parseFloat(e.target.value) || 0 })}
-                className="mt-2 border-yellow-400/30 bg-yellow-900/10 text-yellow-100 focus:border-yellow-400"
+                className="mt-2 border-yellow-400/30 bg-black text-yellow-100 focus:border-yellow-400"
               />
             </div>
             <div>
@@ -175,7 +175,7 @@ const TaxConfiguration: React.FC<TaxConfigurationProps> = ({
                 step="0.01"
                 value={taxConfig.otherTax}
                 onChange={(e) => setTaxConfig({ ...taxConfig, otherTax: parseFloat(e.target.value) || 0 })}
-                className="mt-2 border-yellow-400/30 bg-yellow-900/10 text-yellow-100 focus:border-yellow-400"
+                className="mt-2 border-yellow-400/30 bg-black text-yellow-100 focus:border-yellow-400"
               />
             </div>
           </div>
@@ -191,7 +191,7 @@ const TaxConfiguration: React.FC<TaxConfigurationProps> = ({
                 step="0.01"
                 value={taxConfig.vat}
                 onChange={(e) => setTaxConfig({ ...taxConfig, vat: parseFloat(e.target.value) || 0 })}
-                className="mt-2 border-yellow-400/30 bg-yellow-900/10 text-yellow-100 focus:border-yellow-400"
+                className="mt-2 border-yellow-400/30 bg-black text-yellow-100 focus:border-yellow-400"
               />
             </div>
             <div>
@@ -202,7 +202,7 @@ const TaxConfiguration: React.FC<TaxConfigurationProps> = ({
                 step="0.01"
                 value={taxConfig.otherTax}
                 onChange={(e) => setTaxConfig({ ...taxConfig, otherTax: parseFloat(e.target.value) || 0 })}
-                className="mt-2 border-yellow-400/30 bg-yellow-900/10 text-yellow-100 focus:border-yellow-400"
+                className="mt-2 border-yellow-400/30 bg-black text-yellow-100 focus:border-yellow-400"
               />
             </div>
           </div>
@@ -229,10 +229,10 @@ const TaxConfiguration: React.FC<TaxConfigurationProps> = ({
           <div>
             <Label htmlFor="country" className="text-lg font-semibold text-yellow-300">Country/Region</Label>
             <Select value={taxConfig.country} onValueChange={handleCountryChange}>
-              <SelectTrigger className="mt-2 border-yellow-400/30 bg-yellow-900/10">
+              <SelectTrigger className="mt-2 border-yellow-400/30 bg-black">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-gray-900 border-yellow-400/30">
+              <SelectContent className="bg-black border-yellow-400/30">
                 <SelectItem value="CA">Canada</SelectItem>
                 <SelectItem value="US">United States</SelectItem>
                 <SelectItem value="UK">United Kingdom</SelectItem>
