@@ -240,8 +240,8 @@ export default function StreamlinedHomepage({
   const displayProjects = sortProjectsByPriority(filteredProjects);
 
   const openWorkCalendar = () => {
-    // Open ONLY A-Frame calendar (isolated view)
-    const aframeCalendarUrl = 'https://calendar.google.com/calendar/embed?src=6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981%40group.calendar.google.com&ctz=America%2FVancouver&mode=MONTH&showTitle=1&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0&showTz=0&bgcolor=%23000000&color=%23ffffff';
+    // Open A-Frame calendar in Google Calendar interface (supports dark mode)
+    const aframeCalendarUrl = 'https://calendar.google.com/calendar/u/0/r/month?cid=6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981@group.calendar.google.com';
     window.open(aframeCalendarUrl, '_blank');
   };
 
