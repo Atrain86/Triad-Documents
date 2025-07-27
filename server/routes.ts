@@ -1000,7 +1000,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const authUrl = gmailAuthService.generateAuthUrl(userId);
-      res.json({ authUrl });
+      res.redirect(authUrl);
     } catch (error) {
       console.error('Error generating Gmail auth URL:', error);
       res.status(500).json({ error: 'Failed to generate Gmail authentication URL' });
