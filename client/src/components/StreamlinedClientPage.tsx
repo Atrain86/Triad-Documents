@@ -180,116 +180,55 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
 
   return (
     <>
-      {/* Receipt Viewer Modal - Simple & Reliable */}
+      {/* Receipt Viewer Modal */}
       {viewingReceipt && (
-        <div 
-          style={{ 
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.95)',
-            zIndex: 999999,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          {/* Simple Red X Close Button - Top Right */}
-          <button
-            onClick={() => {
-              console.log('SIMPLE CLOSE BUTTON CLICKED!');
-              setViewingReceipt(null);
-            }}
-            onTouchEnd={(e) => {
-              e.preventDefault();
-              console.log('SIMPLE CLOSE BUTTON TOUCHED!');
-              setViewingReceipt(null);
-            }}
-            style={{
-              position: 'absolute',
-              top: '10px',
-              right: '10px',
-              width: '50px',
-              height: '50px',
-              backgroundColor: '#ff0000',
-              color: 'white',
-              border: 'none',
-              borderRadius: '25px',
-              fontSize: '30px',
-              fontWeight: 'bold',
+        <div className="fixed inset-0 bg-black bg-opacity-95 z-50">
+          {/* Close X Button */}
+          <X 
+            className="fixed top-4 right-4 w-12 h-12 text-red-500 cursor-pointer z-50" 
+            onClick={() => setViewingReceipt(null)}
+            style={{ 
+              position: 'fixed',
+              top: '16px', 
+              right: '16px',
+              width: '48px',
+              height: '48px',
+              color: '#ef4444',
               cursor: 'pointer',
-              zIndex: 9999999,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 4px 8px rgba(0,0,0,0.5)',
-              userSelect: 'none',
-              WebkitUserSelect: 'none',
-              WebkitTouchCallout: 'none',
-              WebkitTapHighlightColor: 'transparent'
+              zIndex: 999999,
+              backgroundColor: 'white',
+              borderRadius: '50%',
+              padding: '8px'
             }}
-          >
-            ×
-          </button>
-
-          {/* Receipt Content */}
-          <div
-            style={{
-              maxWidth: '90%',
-              maxHeight: '90%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
+          />
+          
+          {/* Receipt Image */}
+          <div className="flex items-center justify-center h-full p-4">
             <img 
               src={`/uploads/${viewingReceipt.filename}`} 
               alt={`Receipt from ${viewingReceipt.vendor}`}
-              style={{ 
-                maxWidth: '100%',
-                maxHeight: '100%',
-                objectFit: 'contain',
-                borderRadius: '8px',
-                boxShadow: '0 4px 20px rgba(255,255,255,0.1)'
-              }}
+              className="max-w-full max-h-full object-contain"
             />
           </div>
-
-          {/* Bottom Close Button for Extra Reliability */}
+          
+          {/* Bottom Close Button */}
           <button
-            onClick={() => {
-              console.log('BOTTOM CLOSE BUTTON CLICKED!');
-              setViewingReceipt(null);
-            }}
-            onTouchEnd={(e) => {
-              e.preventDefault();
-              console.log('BOTTOM CLOSE BUTTON TOUCHED!');
-              setViewingReceipt(null);
-            }}
+            onClick={() => setViewingReceipt(null)}
+            className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded-full font-bold"
             style={{
-              position: 'absolute',
-              bottom: '20px',
+              position: 'fixed',
+              bottom: '16px',
               left: '50%',
               transform: 'translateX(-50%)',
-              padding: '12px 24px',
-              backgroundColor: '#ff0000',
+              backgroundColor: '#ef4444',
               color: 'white',
-              border: 'none',
+              padding: '12px 24px',
               borderRadius: '25px',
-              fontSize: '16px',
               fontWeight: 'bold',
-              cursor: 'pointer',
-              boxShadow: '0 4px 8px rgba(0,0,0,0.5)',
-              userSelect: 'none',
-              WebkitUserSelect: 'none',
-              WebkitTouchCallout: 'none',
-              WebkitTapHighlightColor: 'transparent'
+              zIndex: 999999
             }}
           >
-            CLOSE
+            CLOSE RECEIPT
           </button>
         </div>
       )}
