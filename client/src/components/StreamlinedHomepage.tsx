@@ -332,14 +332,14 @@ export default function StreamlinedHomepage({
               }
             </h2>
             <div className="flex items-center gap-3">
-              <span className="text-sm font-medium" style={{ color: paintBrainColors.red }}>
+              <span className="text-sm font-medium" style={{ color: paintBrainColors.green }}>
                 Active
               </span>
               <button
                 onClick={() => setShowArchived(!showArchived)}
                 className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none"
                 style={{ 
-                  backgroundColor: showArchived ? paintBrainColors.green : paintBrainColors.red
+                  backgroundColor: showArchived ? paintBrainColors.red : paintBrainColors.green
                 }}
               >
                 <span
@@ -348,7 +348,7 @@ export default function StreamlinedHomepage({
                   }`}
                 />
               </button>
-              <span className="text-sm font-medium" style={{ color: paintBrainColors.green }}>
+              <span className="text-sm font-medium" style={{ color: paintBrainColors.red }}>
                 Archive
               </span>
             </div>
