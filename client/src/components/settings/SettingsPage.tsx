@@ -164,12 +164,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
         <div className="flex items-center justify-between p-4 rounded-lg border-2 border-red-400 bg-gray-900/20">
           <div className="flex items-center gap-3">
             <Menu className="h-5 w-5 text-red-400" />
-            <svg className="h-5 w-5 text-red-400" viewBox="0 0 32 32" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-              <path d="M16.58,19.1068l-12.69-8.0757A3,3,0,0,1,7.1109,5.97l9.31,5.9243L24.78,6.0428A3,3,0,0,1,28.22,10.9579Z" fill="#ea4435"/>
-              <path d="M25.5,5.5h4a0,0,0,0,1,0,0v18a3,3,0,0,1-3,3h0a3,3,0,0,1-3-3V7.5a2,2,0,0,1,2-2Z" fill="#00ac47" transform="translate(53.0001 32.0007) rotate(180)"/>
-              <path d="M29.4562,8.0656c-.0088-.06-.0081-.1213-.0206-.1812-.0606-.2888-.2692-.5283-.5541-.6372a2.9835,2.9835,0,0,0-1.0717-.2009c-.0717-.0041-.1441.0047-.2166.0047h-2.2a.5.5,0,0,0-.5.5v18a2.5,2.5,0,0,0,2.5,2.5h0a2.5,2.5,0,0,0,2.5-2.5V8.5609A.9838.9838,0,0,0,29.4562,8.0656Z" fill="#ffba00"/>
-              <polygon points="12.77 19.67 5.5 15.13 5.5 25.5 12.77 19.67" fill="#00ac47"/>
-            </svg>
+            <img src="/attached_assets/New logo gmail 1_1753588493664.png" alt="Gmail" className="h-5 w-5" />
             {!gmailStatus?.connected && (
               <div
                 onClick={() => {
@@ -180,10 +175,11 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                 Connect Gmail
               </div>
             )}
-            <div className={`px-3 py-2 rounded-full text-xs text-black whitespace-nowrap ${
-              gmailStatus?.connected ? 'bg-green-500' : 'bg-red-500'
-            }`}>
-              {gmailStatus?.connected ? 'Connected' : 'Not Connected'}
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-red-400">Status</span>
+              <div className={`w-3 h-3 rounded-full ${
+                gmailStatus?.connected ? 'bg-green-500' : 'bg-red-500'
+              }`}></div>
             </div>
           </div>
           <button
