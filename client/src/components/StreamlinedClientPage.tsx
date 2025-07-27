@@ -1283,10 +1283,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                             const totalEarnings = totalHours * (project?.hourlyRate || 60);
                             return `${Math.round(totalHours)} hrs • $${totalEarnings.toLocaleString()}`;
                           }
-                          case 'receipts': {
-                            const totalAmount = receipts.reduce((sum, receipt) => sum + parseFloat(receipt.amount), 0);
-                            return `${itemCount} receipt${itemCount !== 1 ? 's' : ''} • $${totalAmount.toLocaleString()}`;
-                          }
+                          case 'receipts': 
+                            return `${itemCount} receipt${itemCount !== 1 ? 's' : ''}`;
                           default: 
                             return itemCount.toString();
                         }
