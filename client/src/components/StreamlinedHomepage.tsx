@@ -628,26 +628,7 @@ function StatusIcon({ status }: { status: string }) {
 }
 
 function StatusButton({ project, updateStatusMutation }: { project: any; updateStatusMutation: any }) {
-  const [showDropdown, setShowDropdown] = useState(false);
-  
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = () => {
-      if (showDropdown) {
-        setShowDropdown(false);
-      }
-    };
-    
-    if (showDropdown) {
-      document.addEventListener('click', handleClickOutside);
-      document.addEventListener('touchstart', handleClickOutside);
-    }
-    
-    return () => {
-      document.removeEventListener('click', handleClickOutside);
-      document.removeEventListener('touchstart', handleClickOutside);
-    };
-  }, [showDropdown]);
+  const [showModal, setShowModal] = useState(false);
   
   const statusOptions = [
     { value: 'in-progress', label: 'In Progress' },
@@ -664,76 +645,88 @@ function StatusButton({ project, updateStatusMutation }: { project: any; updateS
     { value: 'archived', label: 'Archived' }
   ];
 
-  const handleStatusChange = (newStatus: string) => {
-    console.log('Status change triggered:', newStatus, 'for project:', project.id);
-    updateStatusMutation.mutate({ 
-      projectId: project.id, 
-      status: newStatus 
-    });
-    setShowDropdown(false);
+  const handleStatusChange = async (newStatus: string) => {
+    console.log('Changing status to:', newStatus, 'for project:', project.id);
+    
+    setShowModal(false);
+    
+    // Use mutateAsync to wait for completion
+    try {
+      await updateStatusMutation.mutateAsync({ 
+        projectId: project.id, 
+        status: newStatus 
+      });
+      console.log('Status updated successfully');
+    } catch (error) {
+      console.error('Failed to update status:', error);
+    }
   };
 
   return (
-    <div className="relative">
-      <button
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          setShowDropdown(!showDropdown);
-        }}
-        className="flex items-center pointer-events-auto bg-card/50 rounded-md px-2 py-1 hover:bg-card/80 transition-colors touch-manipulation"
-        style={{ 
-          WebkitTouchCallout: 'none',
-          WebkitUserSelect: 'none',
-          userSelect: 'none'
-        }}
-      >
-        <StatusIcon status={project.status} />
-        <span 
-          className="text-xs font-medium"
+    <>
+      {/* Status Button - completely isolated from card events */}
+      <div className="relative z-30">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Opening status modal');
+            setShowModal(true);
+          }}
+          onTouchEnd={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          className="flex items-center pointer-events-auto bg-card/50 rounded-md px-2 py-1 hover:bg-card/80 transition-colors cursor-pointer"
           style={{ 
-            color: statusConfig[project.status as keyof typeof statusConfig]?.color || paintBrainColors.gray 
+            WebkitTouchCallout: 'none',
+            WebkitUserSelect: 'none',
+            userSelect: 'none'
           }}
         >
-          {statusConfig[project.status as keyof typeof statusConfig]?.label || project.status}
-        </span>
-      </button>
-      
-      {showDropdown && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4" 
-             onClick={() => setShowDropdown(false)}>
-          <div className="bg-black border border-gray-600 rounded-lg shadow-2xl max-w-sm w-full max-h-80 overflow-y-auto"
-               onClick={(e) => e.stopPropagation()}>
-            <div className="p-3 border-b border-gray-600 bg-gray-900">
+          <StatusIcon status={project.status} />
+          <span 
+            className="text-xs font-medium"
+            style={{ 
+              color: statusConfig[project.status as keyof typeof statusConfig]?.color || paintBrainColors.gray 
+            }}
+          >
+            {statusConfig[project.status as keyof typeof statusConfig]?.label || project.status}
+          </span>
+        </button>
+      </div>
+
+      {/* Status Selection Modal */}
+      {showModal && (
+        <div 
+          className="fixed inset-0 z-[999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setShowModal(false)}
+        >
+          <div 
+            className="bg-black border border-gray-600 rounded-lg shadow-2xl max-w-sm w-full max-h-80 overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-3 border-b border-gray-600 bg-gray-900 flex justify-between items-center">
               <h3 className="font-medium text-sm text-white">Change Status</h3>
+              <button 
+                onClick={() => setShowModal(false)}
+                className="text-gray-400 hover:text-white text-lg"
+              >
+                ✕
+              </button>
             </div>
-            <div className="p-2 bg-black">
+            <div className="p-2 bg-black space-y-1">
               {statusOptions.map((option) => (
                 <button
                   key={option.value}
-                  onClick={(e) => {
-                    console.log('Button clicked:', option.value);
-                    e.preventDefault();
-                    e.stopPropagation();
-                    e.nativeEvent.stopImmediatePropagation();
-                    handleStatusChange(option.value);
-                  }}
-                  onTouchEnd={(e) => {
-                    console.log('Touch end triggered:', option.value);
-                    e.preventDefault();
-                    e.stopPropagation();
-                    e.nativeEvent.stopImmediatePropagation();
-                  }}
-                  className={`w-full text-left px-3 py-3 text-sm transition-colors touch-manipulation rounded-md text-white ${
+                  type="button"
+                  onClick={() => handleStatusChange(option.value)}
+                  className={`w-full text-left px-3 py-3 text-sm transition-colors rounded-md text-white cursor-pointer ${
                     option.value === project.status 
                       ? 'bg-gray-700 border border-gray-500' 
                       : 'hover:bg-gray-800'
                   }`}
-                  style={{ 
-                    WebkitTouchCallout: 'none',
-                    WebkitUserSelect: 'none',
-                    userSelect: 'none'
-                  }}
                 >
                   <div className="flex items-center">
                     <StatusIcon status={option.value} />
@@ -745,7 +738,7 @@ function StatusButton({ project, updateStatusMutation }: { project: any; updateS
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
 
