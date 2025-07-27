@@ -91,7 +91,7 @@ const AdminDashboard: React.FC<{ onBack: () => void; hideBackButton?: boolean }>
           <>
             <div className="flex items-center gap-4">
               <Menu className="h-5 w-5 text-cyan-400" />
-              <img src="/analytics-icon.png" alt="Analytics" className="h-5 w-5" />
+              <img src="/analytics-icon.png" alt="Analytics" className="h-5 w-5" style={{filter: 'brightness(0) saturate(100%) invert(70%) sepia(50%) saturate(500%) hue-rotate(170deg) brightness(90%) contrast(90%)'}} />
               <span className="text-lg font-medium text-cyan-400">API Usage</span>
             </div>
             <div className="flex items-center gap-4">
@@ -107,7 +107,7 @@ const AdminDashboard: React.FC<{ onBack: () => void; hideBackButton?: boolean }>
           <>
             <div className="flex items-center gap-4">
               <Menu className="h-5 w-5 text-cyan-400" />
-              <img src="/analytics-icon.png" alt="Analytics" className="h-5 w-5" />
+              <img src="/analytics-icon.png" alt="Analytics" className="h-5 w-5" style={{filter: 'brightness(0) saturate(100%) invert(70%) sepia(50%) saturate(500%) hue-rotate(170deg) brightness(90%) contrast(90%)'}} />
               <span className="text-lg font-medium text-cyan-400">API Usage</span>
             </div>
             <div className="flex items-center gap-14">
