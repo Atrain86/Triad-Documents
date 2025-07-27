@@ -205,41 +205,29 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
           {/* Receipt Content */}
           <div className="flex items-center justify-center h-full p-4">
             {viewingReceipt.filename && isPdfOrDoc(viewingReceipt.filename) ? (
-              <div className="text-center text-white p-8">
-                <FileText size={96} className="mx-auto mb-6 text-red-400" />
-                <h3 className="text-2xl font-bold mb-4">{viewingReceipt.vendor}</h3>
-                <div className="text-lg mb-6">
-                  <p className="mb-2">${viewingReceipt.amount}</p>
-                  <p className="text-gray-300 mb-4">{formatDate(viewingReceipt.date?.toString())}</p>
-                  {viewingReceipt.description && (
-                    <p className="text-sm text-gray-400 mb-6">{viewingReceipt.description}</p>
-                  )}
-                </div>
-                <div className="space-y-3">
+              <div className="w-full h-full flex flex-col">
+                <iframe
+                  src={`/uploads/${viewingReceipt.filename}`}
+                  className="w-full h-full border-none"
+                  title={`Receipt from ${viewingReceipt.vendor}`}
+                  onError={() => {
+                    // If iframe fails (Brave blocking), automatically open in new tab
+                    console.log('PDF iframe blocked, opening in new tab');
+                    window.open(`/uploads/${viewingReceipt.filename}`, '_blank');
+                    setViewingReceipt(null); // Close the modal
+                  }}
+                />
+                {/* Fallback button that appears at bottom for Brave users */}
+                <div className="absolute bottom-4 left-4 right-4">
                   <Button
                     onClick={() => {
-                      // Open PDF in a new tab - this bypasses Brave's iframe blocking
                       window.open(`/uploads/${viewingReceipt.filename}`, '_blank');
+                      setViewingReceipt(null);
                     }}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 text-lg"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 text-sm opacity-75 hover:opacity-100"
                   >
-                    <ExternalLink size={20} className="mr-2" />
-                    Open PDF in New Tab
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      // Download the PDF file directly
-                      const link = document.createElement('a');
-                      link.href = `/uploads/${viewingReceipt.filename}`;
-                      link.download = `${viewingReceipt.vendor}-${viewingReceipt.amount}.pdf`;
-                      document.body.appendChild(link);
-                      link.click();
-                      document.body.removeChild(link);
-                    }}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-6 text-lg"
-                  >
-                    <Download size={20} className="mr-2" />
-                    Download PDF
+                    <ExternalLink size={16} className="mr-2" />
+                    Open in New Tab (if PDF not showing)
                   </Button>
                 </div>
               </div>
