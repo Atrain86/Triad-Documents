@@ -1805,6 +1805,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                         <div className="mb-4 grid grid-cols-2 gap-2">
                           <Button
                             onClick={() => {
+                              console.log('Camera button clicked for receipts');
                               // Create input for direct camera access
                               const input = document.createElement('input');
                               input.type = 'file';
@@ -1822,6 +1823,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                           </Button>
                           <Button
                             onClick={() => {
+                              console.log('Upload button clicked for receipts');
                               // Create input for photo library access only (no camera)
                               const input = document.createElement('input');
                               input.type = 'file';
