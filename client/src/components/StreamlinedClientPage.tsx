@@ -1812,7 +1812,12 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                               input.accept = 'image/*,.heic,.heif,.pdf,.doc,.docx,.txt';
                               input.capture = 'environment';
                               input.multiple = true;
-                              input.onchange = handleReceiptUpload;
+                              input.onchange = (event: any) => {
+                                console.log('Camera file input change event triggered');
+                                console.log('Camera files selected:', event.target.files);
+                                handleReceiptUpload(event);
+                              };
+                              console.log('About to trigger camera file picker dialog');
                               input.click();
                             }}
                             className="py-3 text-sm font-semibold text-white flex items-center justify-center hover:opacity-90"
@@ -1830,7 +1835,12 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                               input.accept = 'image/*,.heic,.heif,.pdf,.doc,.docx,.txt';
                               input.multiple = true;
                               // No capture attribute - this forces library selection
-                              input.onchange = handleReceiptUpload;
+                              input.onchange = (event: any) => {
+                                console.log('File input change event triggered');
+                                console.log('Files selected:', event.target.files);
+                                handleReceiptUpload(event);
+                              };
+                              console.log('About to trigger file picker dialog');
                               input.click();
                             }}
                             className="py-3 text-sm font-semibold text-white flex items-center justify-center hover:opacity-90"
