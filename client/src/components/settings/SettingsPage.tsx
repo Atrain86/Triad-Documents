@@ -274,7 +274,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
               </button>
             </div>
             <div className="pr-6 text-center">
-              <p className="mb-3 leading-relaxed text-sm text-justify">
+              <p className="mb-3 leading-relaxed text-sm">
                 Sync Paint Brain with your Gmail account to send emails directly from your address.
               </p>
               <ul className="text-left text-sm space-y-1 list-none">
