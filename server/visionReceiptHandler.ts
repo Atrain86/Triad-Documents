@@ -70,31 +70,37 @@ export async function extractReceiptWithVision(imageBuffer: Buffer, originalName
     const mimeType = 'image/jpeg'; // Always JPEG after compression
 
     const prompt = `
-You are a receipt parser. Extract ONLY the vendor name and total amount from this receipt.
+You are a receipt parser. Extract ONLY these 3 items from this receipt:
+1. Business name (vendor)
+2. Total amount paid
+3. Date of purchase
 
 STRICT RULES:
-- Vendor: Business name ONLY, remove location numbers, addresses, or extra identifiers
-- Amount: Total paid ONLY, no currency symbols
-- Do NOT include fuel types, item descriptions, reference numbers, or any extra text
+- Vendor: Clean business name ONLY - remove store numbers, addresses, locations, extra words
+- Amount: Total paid amount ONLY as number - no currency symbols or text
+- Date: Purchase date in YYYY-MM-DD format ONLY
+- NO other information needed (no items, descriptions, addresses, phone numbers, etc.)
 
-Examples:
-- "Shell Canada #1234" → "Shell"
+Examples of clean vendor names:
+- "Shell Canada #1234 Vancouver BC" → "Shell"
 - "McDonald's Restaurant #5678" → "McDonald's"  
-- "Petro-Canada - Regular Gas" → "Petro-Canada"
-- "Starbucks Coffee Canada #4987" → "Starbucks"
+- "Petro-Canada Station - Regular Gas" → "Petro-Canada"
+- "Starbucks Coffee Company Store #4987" → "Starbucks"
+- "Canadian Tire Corporation Store 123" → "Canadian Tire"
+- "Home Depot #8976 Surrey" → "Home Depot"
 
 Return ONLY this JSON format:
 {
-  "vendor": "clean business name only",
-  "amount": 12.50,
+  "vendor": "clean business name",
+  "amount": 25.47,
   "items": [],
-  "date": "YYYY-MM-DD",
+  "date": "2024-12-15",
   "confidence": 0.9
 }
 
-If unable to read clearly:
+If receipt is unclear or unreadable:
 {
-  "vendor": "Unable to read",
+  "vendor": "Cloverdale",
   "amount": 0,
   "items": [],
   "date": null,

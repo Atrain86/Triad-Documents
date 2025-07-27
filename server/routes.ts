@@ -28,24 +28,36 @@ const receiptsDir = path.join(uploadDir, 'receipts');
 function extractVendorFromFilename(filename: string): string {
   const name = path.parse(filename).name;
   
-  // Remove timestamps and random numbers
+  // Remove timestamps and random numbers, keep only the business name
   let cleaned = name.replace(/^\d{13}-\d+/, '') // Remove timestamp prefix like "1753495988478-369320617"
                    .replace(/[-_]/g, ' ') // Replace dashes and underscores with spaces
-                   .replace(/\d{4,}/g, '') // Remove long number sequences
+                   .replace(/\d{4,}/g, '') // Remove long number sequences (store IDs, etc.)
+                   .replace(/\b(receipt|invoice|bill|pdf|doc|txt)\b/gi, '') // Remove common receipt words
                    .replace(/\s+/g, ' ') // Clean up multiple spaces
                    .trim();
   
-  // If we get an empty string or very short result, use the file extension as a hint
+  // If we get an empty string or very short result, extract from original filename
   if (!cleaned || cleaned.length < 2) {
-    const ext = path.extname(filename).toLowerCase();
-    if (ext === '.pdf') cleaned = 'PDF Receipt';
-    else if (['.doc', '.docx'].includes(ext)) cleaned = 'Document';
-    else if (['.txt'].includes(ext)) cleaned = 'Text File';
-    else cleaned = 'Unknown Vendor';
+    // Try to extract meaningful text from original filename (e.g., "cloverdale_receipt.pdf" → "Cloverdale")
+    cleaned = filename.replace(/\.[^/.]+$/, '') // Remove extension
+                    .replace(/[-_]/g, ' ') // Replace separators with spaces
+                    .replace(/\b(receipt|invoice|bill|scan|document)\b/gi, '') // Remove receipt-related words
+                    .replace(/\d+/g, '') // Remove all numbers
+                    .replace(/\s+/g, ' ') // Clean up spaces
+                    .trim();
+    
+    // If still empty, use descriptive fallback
+    if (!cleaned || cleaned.length < 2) {
+      const ext = path.extname(filename).toLowerCase();
+      if (ext === '.pdf') cleaned = 'PDF Receipt';
+      else if (['.doc', '.docx'].includes(ext)) cleaned = 'Document';
+      else if (['.txt'].includes(ext)) cleaned = 'Text File';
+      else cleaned = 'Unknown Vendor';
+    }
   }
   
-  // Capitalize first letter of each word
-  return cleaned.replace(/\b\w/g, l => l.toUpperCase());
+  // Capitalize properly for business names (e.g., "cloverdale" → "Cloverdale")
+  return cleaned.replace(/\b\w/g, l => l.toUpperCase()).replace(/\s+/g, ' ').trim();
 }
 
 const upload = multer({

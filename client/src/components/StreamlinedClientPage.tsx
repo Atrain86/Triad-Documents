@@ -182,34 +182,53 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
     <>
       {/* Receipt Viewer Modal */}
       {viewingReceipt && (
-        <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center">
-          {/* Close Button */}
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-95 z-50 flex items-center justify-center"
+          onClick={() => setViewingReceipt(null)}
+        >
+          {/* Close Button - Multiple positions for easy access */}
           <button
-            onClick={() => setViewingReceipt(null)}
-            className="absolute top-4 right-4 z-60 p-3 rounded-full bg-black bg-opacity-50 text-white hover:bg-opacity-70 transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30"
+            onClick={(e) => {
+              e.stopPropagation();
+              setViewingReceipt(null);
+            }}
+            className="fixed top-4 right-4 z-[9999] p-4 rounded-full bg-red-600 text-white hover:bg-red-700 transition-all duration-200 shadow-2xl border-2 border-white"
             type="button"
-            style={{ zIndex: 9999 }}
+            style={{ 
+              zIndex: 9999,
+              minWidth: '56px',
+              minHeight: '56px',
+              fontSize: '24px',
+              fontWeight: 'bold'
+            }}
           >
-            <X className="w-8 h-8" />
+            ×
+          </button>
+
+          {/* Second close button at bottom for mobile */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setViewingReceipt(null);
+            }}
+            className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-[9999] px-6 py-3 rounded-full bg-red-600 text-white hover:bg-red-700 transition-all duration-200 shadow-2xl border-2 border-white text-lg font-bold"
+            type="button"
+          >
+            Close Receipt
           </button>
           
-
-          
           {/* Receipt Content */}
-          <div className="max-w-4xl max-h-full p-4 overflow-auto">
+          <div 
+            className="max-w-4xl max-h-full p-4 overflow-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <img 
               src={`/uploads/${viewingReceipt.filename}`} 
               alt={`Receipt from ${viewingReceipt.vendor}`}
               className="w-full h-auto max-w-full rounded-lg shadow-2xl"
-              style={{ maxHeight: 'calc(100vh - 100px)' }}
+              style={{ maxHeight: 'calc(100vh - 120px)' }}
             />
           </div>
-          
-          {/* Click background to close */}
-          <div 
-            className="absolute inset-0 -z-10"
-            onClick={() => setViewingReceipt(null)}
-          />
         </div>
       )}
       
