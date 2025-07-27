@@ -175,7 +175,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                 onClick={() => {
                   window.open('/api/gmail/auth/1', '_blank');
                 }}
-                className="bg-green-500 hover:bg-green-600 text-black px-3 py-1 text-sm ml-2"
+                className="bg-green-500 hover:bg-green-600 text-black px-3 py-1 text-xs ml-2 h-auto"
               >
                 Connect Gmail
               </Button>
