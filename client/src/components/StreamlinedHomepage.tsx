@@ -240,8 +240,9 @@ export default function StreamlinedHomepage({
   const displayProjects = sortProjectsByPriority(filteredProjects);
 
   const openWorkCalendar = () => {
-    // Open Google Calendar with only A-Frame calendar visible (hides personal calendars)
-    const calendarUrl = 'https://calendar.google.com/calendar/u/0/r/month?tab=mc&pli=1&cid=6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981@group.calendar.google.com';
+    // Open ONLY the A-Frame calendar directly
+    const aFrameCalendarId = '6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981@group.calendar.google.com';
+    const calendarUrl = `https://calendar.google.com/calendar/u/0/r/month?src=${encodeURIComponent(aFrameCalendarId)}`;
     window.open(calendarUrl, '_blank');
   };
 
