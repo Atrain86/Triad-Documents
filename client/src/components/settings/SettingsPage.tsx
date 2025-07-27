@@ -161,43 +161,37 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
 
       {/* Gmail Integration Section */}
       <div className="mb-4">
-        <div 
-          className="flex items-center justify-between p-4 rounded-lg border-2 border-red-400 bg-gray-900/20 cursor-pointer hover:bg-gray-800/30 transition-colors"
-          onClick={() => toggleSection('gmail')}
-        >
+        <div className="flex items-center justify-between p-4 rounded-lg border-2 border-red-400 bg-gray-900/20">
           <div className="flex items-center gap-4">
             <Menu className="h-5 w-5 text-red-400" />
-            <span className="text-lg font-medium text-red-400">Gmail</span>
+            <span className="text-lg font-medium text-red-400">Gmail Integration</span>
             <div className={`px-3 py-1 rounded-full text-sm text-black ${
               gmailStatus?.connected ? 'bg-green-500' : 'bg-red-500'
             }`}>
               {gmailStatus?.connected ? 'Connected' : 'Not Connected'}
             </div>
+            {!gmailStatus?.connected && (
+              <Button
+                onClick={() => {
+                  window.open('/api/gmail/auth/1', '_blank');
+                }}
+                className="bg-green-500 hover:bg-green-600 text-black px-3 py-1 text-sm"
+              >
+                Connect Gmail
+              </Button>
+            )}
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowGmailPopup(true);
-              }}
-              className="cursor-pointer bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-sm hover:bg-blue-600 transition-colors"
-              title="Gmail Integration Info"
-            >
-              i
-            </button>
-            <ChevronRight 
-              className={`h-5 w-5 text-red-400 transition-transform ${
-                expandedSection === 'gmail' ? 'rotate-90' : ''
-              }`} 
-            />
-          </div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowGmailPopup(true);
+            }}
+            className="cursor-pointer bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-sm hover:bg-blue-600 transition-colors"
+            title="Gmail Integration Info"
+          >
+            i
+          </button>
         </div>
-        
-        {expandedSection === 'gmail' && (
-          <div className="mt-4 p-6 rounded-lg border border-red-400/30 bg-gray-900/10">
-            <GmailIntegration />
-          </div>
-        )}
       </div>
 
       {/* Tax Configuration Section */}
