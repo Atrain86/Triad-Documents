@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Settings, DollarSign, Globe, Mail, ChevronRight, Info, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -103,6 +103,44 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
   const { data: gmailStatus } = useQuery<{ connected: boolean }>({
     queryKey: ['/api/gmail/status/1'],
   });
+
+  // Check if tax configuration is properly set up
+  const checkTaxConfiguration = () => {
+    try {
+      const saved = localStorage.getItem('taxConfiguration');
+      if (!saved) return false;
+      
+      const config = JSON.parse(saved);
+      // Check if any tax rate is greater than 0
+      return config.gst > 0 || config.pst > 0 || config.hst > 0 || 
+             config.salesTax > 0 || config.vat > 0 || config.otherTax > 0;
+    } catch {
+      return false;
+    }
+  };
+
+  const [isTaxConfigured, setIsTaxConfigured] = useState(checkTaxConfiguration());
+
+  // Re-check tax configuration when component mounts or localStorage changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setIsTaxConfigured(checkTaxConfiguration());
+    };
+
+    // Check on mount
+    setIsTaxConfigured(checkTaxConfiguration());
+
+    // Listen for storage changes
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also check periodically in case localStorage is updated by same tab
+    const interval = setInterval(handleStorageChange, 1000);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
+    };
+  }, [expandedSection]); // Re-check when sections expand/collapse
 
   const handleLogout = () => {
     // Complete authentication reset
@@ -230,8 +268,12 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
               <path d="M6.177687 752.921613h121.032322s74.637758-82.702418 155.318128-100.85788h344.932294c27.734612 0 50.419219 22.695863 50.419219 50.428428 0 27.734612-22.684606 50.428429-50.419219 50.428429H480.32055c-18.306911 0-33.279898 14.984243-33.279898 33.279898 0 18.285422 14.963777 33.32083 33.279898 33.279897l257.414206-0.497325 195.862462-159.727546c21.923268-17.880193 54.359963-15.08555 72.453004 6.67399 17.980477 21.63879 15.054851 54.46127-6.67399 72.431515L715.761346 972.788744H6.177687v-219.867131zM567.412943 472.954807c65.879298-10.961634 100.368741-53.516761 100.368741-104.585778 0-63.056002-49.727465-85.497062-94.598329-102.472655-35.769597-13.33877-69.121126-22.44106-69.121125-47.288931 0-19.414126 14.548315-32.751873 44.871887-32.751873 25.469017 0 49.107343 12.130247 73.366814 29.104817l40.015286-53.962921c-24.360779-18.143183-55.364848-35.829972-94.903274-40.594476V58.34164c0-3.921302-3.211128-7.131407-7.13243-7.131407h-49.381588c-3.911068 0-7.121174 3.210105-7.121174 7.131407v65.859855c-51.688116 13.044058-83.394172 50.347588-83.394172 99.252316 0 56.391222 49.727465 82.469105 92.770708 98.834809 35.778806 13.948659 70.948747 25.469017 70.948747 50.935987 0 21.222305-15.157181 35.769597-49.117576 35.769597-31.533117 0-60.637934-13.33877-90.952297-36.988352l-40.625174 55.791566c26.422737 22.095183 63.492953 39.233481 100.368741 45.410145v64.620634c0 3.921302 3.210105 7.121174 7.121173 7.121173H560.27949c3.921302 0 7.13243-3.199872 7.13243-7.121173v-64.87339z" fill="currentColor" />
             </svg>
             <span className="text-lg font-medium text-yellow-400">Tax Configuration</span>
-            <div className="bg-yellow-500 text-black px-3 py-2 rounded-full text-xs font-medium">
-              Configured
+            <div className={`px-3 py-2 rounded-full text-xs font-medium ${
+              isTaxConfigured 
+                ? 'bg-yellow-500 text-black' 
+                : 'bg-red-500 text-white'
+            }`}>
+              {isTaxConfigured ? 'Configured' : 'Set Up'}
             </div>
           </div>
           <ChevronRight 
