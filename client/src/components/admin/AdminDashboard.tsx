@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Activity, DollarSign, Users, Eye, Brain, Calendar, ArrowLeft } from 'lucide-react';
+import { Activity, DollarSign, Users, Eye, Brain, Calendar, ArrowLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { apiRequest } from '@/lib/queryClient';
 
@@ -26,6 +26,11 @@ interface TokenUsageEntry {
 }
 
 const AdminDashboard: React.FC<{ onBack: () => void; hideBackButton?: boolean }> = ({ onBack, hideBackButton = false }) => {
+  const [expandedSection, setExpandedSection] = useState<string | null>('overview');
+
+  const toggleSection = (section: string) => {
+    setExpandedSection(expandedSection === section ? null : section);
+  };
 
   // Fetch overall token usage statistics
   const { data: totalStats, isLoading: totalStatsLoading } = useQuery<TokenUsageStats>({
@@ -88,140 +93,182 @@ const AdminDashboard: React.FC<{ onBack: () => void; hideBackButton?: boolean }>
       </p>
 
       {/* Usage Overview Container */}
-      <div className="rounded-lg border-2 border-blue-400 bg-black/20 p-6">
-        <h2 className="text-xl font-semibold text-blue-400 mb-6">Usage Overview</h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-slate-900/60 p-3 rounded-lg border border-slate-600/40">
-            {totalStatsLoading ? (
-              <div className="animate-pulse flex items-center justify-between">
-                <div className="h-4 bg-gray-600 rounded w-20"></div>
-                <div className="h-6 bg-gray-600 rounded w-16"></div>
-              </div>
-            ) : (
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-slate-400">Total Tokens</span>
-                <span className="text-lg font-bold text-blue-300">
-                  {formatNumber(totalStats?.totalTokens || 0)}
-                </span>
-              </div>
-            )}
-          </div>
-
-          <div className="bg-emerald-950/60 p-3 rounded-lg border border-emerald-600/40">
-            {totalStatsLoading ? (
-              <div className="animate-pulse flex items-center justify-between">
-                <div className="h-4 bg-gray-600 rounded w-20"></div>
-                <div className="h-6 bg-gray-600 rounded w-16"></div>
-              </div>
-            ) : (
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-emerald-400">Total Cost</span>
-                <span className="text-lg font-bold text-emerald-300">
-                  {formatCurrency(totalStats?.totalCost || 0)}
-                </span>
-              </div>
-            )}
-          </div>
-
-          <div className="bg-violet-950/60 p-3 rounded-lg border border-violet-600/40">
-            {userStatsLoading ? (
-              <div className="animate-pulse flex items-center justify-between">
-                <div className="h-4 bg-gray-600 rounded w-20"></div>
-                <div className="h-6 bg-gray-600 rounded w-12"></div>
-              </div>
-            ) : (
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-violet-400">Active Users</span>
-                <span className="text-lg font-bold text-violet-300">
-                  {userStats?.length || 0}
-                </span>
-              </div>
-            )}
-          </div>
+      <div className="mb-4">
+        <div 
+          className="flex items-center justify-between p-4 rounded-lg border-2 border-blue-400 bg-gray-900/20 cursor-pointer hover:bg-gray-800/30 transition-colors"
+          onClick={() => toggleSection('overview')}
+        >
+          <h2 className="text-xl font-semibold text-blue-400">Usage Overview</h2>
+          <ChevronRight 
+            className={`h-5 w-5 text-blue-400 transition-transform ${
+              expandedSection === 'overview' ? 'rotate-90' : ''
+            }`} 
+          />
         </div>
+        
+        {expandedSection === 'overview' && (
+          <div className="mt-4 p-6 rounded-lg border border-blue-400/30 bg-gray-900/10">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-transparent p-3 rounded-lg border border-slate-600/40">
+                {totalStatsLoading ? (
+                  <div className="animate-pulse flex items-center justify-between">
+                    <div className="h-4 bg-gray-600 rounded w-20"></div>
+                    <div className="h-6 bg-gray-600 rounded w-16"></div>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-slate-400">Total Tokens</span>
+                    <span className="text-lg font-bold text-blue-300">
+                      {formatNumber(totalStats?.totalTokens || 0)}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="bg-transparent p-3 rounded-lg border border-emerald-600/40">
+                {totalStatsLoading ? (
+                  <div className="animate-pulse flex items-center justify-between">
+                    <div className="h-4 bg-gray-600 rounded w-20"></div>
+                    <div className="h-6 bg-gray-600 rounded w-16"></div>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-emerald-400">Total Cost</span>
+                    <span className="text-lg font-bold text-emerald-300">
+                      {formatCurrency(totalStats?.totalCost || 0)}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="bg-transparent p-3 rounded-lg border border-violet-600/40">
+                {userStatsLoading ? (
+                  <div className="animate-pulse flex items-center justify-between">
+                    <div className="h-4 bg-gray-600 rounded w-20"></div>
+                    <div className="h-6 bg-gray-600 rounded w-12"></div>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-violet-400">Active Users</span>
+                    <span className="text-lg font-bold text-violet-300">
+                      {userStats?.length || 0}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* User Breakdown Container */}
-      <div className="rounded-lg border-2 border-cyan-400 bg-black/20 p-6">
-        <h2 className="text-xl font-semibold text-cyan-400 mb-6">Usage by User</h2>
+      <div className="mb-4">
+        <div 
+          className="flex items-center justify-between p-4 rounded-lg border-2 border-cyan-400 bg-gray-900/20 cursor-pointer hover:bg-gray-800/30 transition-colors"
+          onClick={() => toggleSection('users')}
+        >
+          <h2 className="text-xl font-semibold text-cyan-400">Usage by User</h2>
+          <ChevronRight 
+            className={`h-5 w-5 text-cyan-400 transition-transform ${
+              expandedSection === 'users' ? 'rotate-90' : ''
+            }`} 
+          />
+        </div>
         
-        {userStatsLoading ? (
-          <div className="space-y-3">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="animate-pulse bg-teal-950/50 p-4 rounded-lg border border-teal-600/30">
-                <div className="flex justify-between items-center">
-                  <div className="h-4 bg-gray-600 rounded w-48"></div>
-                  <div className="h-4 bg-gray-600 rounded w-20"></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : userStats && userStats.length > 0 ? (
-          <div className="space-y-3">
-            {userStats.map((user) => (
-              <div key={user.userId} className="bg-teal-950/50 p-4 rounded-lg border border-teal-600/30">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="font-medium text-teal-200">{user.email}</p>
-                    <p className="text-sm text-teal-400">{formatNumber(user.totalTokens)} tokens used</p>
+        {expandedSection === 'users' && (
+          <div className="mt-4 p-6 rounded-lg border border-cyan-400/30 bg-gray-900/10">
+            {userStatsLoading ? (
+              <div className="space-y-3">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="animate-pulse bg-transparent p-4 rounded-lg border border-teal-600/30">
+                    <div className="flex justify-between items-center">
+                      <div className="h-4 bg-gray-600 rounded w-48"></div>
+                      <div className="h-4 bg-gray-600 rounded w-20"></div>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-cyan-300">{formatCurrency(user.totalCost)}</p>
-                  </div>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="bg-teal-950/50 p-4 rounded-lg border border-teal-600/30">
-            <p className="text-teal-400 text-center">No user data available</p>
+            ) : userStats && userStats.length > 0 ? (
+              <div className="space-y-3">
+                {userStats.map((user) => (
+                  <div key={user.userId} className="bg-transparent p-4 rounded-lg border border-teal-600/30">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="font-medium text-teal-200">{user.email}</p>
+                        <p className="text-sm text-teal-400">{formatNumber(user.totalTokens)} tokens used</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-cyan-300">{formatCurrency(user.totalCost)}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-transparent p-4 rounded-lg border border-teal-600/30">
+                <p className="text-teal-400 text-center">No user data available</p>
+              </div>
+            )}
           </div>
         )}
       </div>
 
       {/* Recent Activity Container */}
-      <div className="rounded-lg border-2 border-indigo-400 bg-black/20 p-6">
-        <h2 className="text-xl font-semibold text-indigo-400 mb-6">Recent Activity</h2>
+      <div className="mb-4">
+        <div 
+          className="flex items-center justify-between p-4 rounded-lg border-2 border-indigo-400 bg-gray-900/20 cursor-pointer hover:bg-gray-800/30 transition-colors"
+          onClick={() => toggleSection('activity')}
+        >
+          <h2 className="text-xl font-semibold text-indigo-400">Recent Activity</h2>
+          <ChevronRight 
+            className={`h-5 w-5 text-indigo-400 transition-transform ${
+              expandedSection === 'activity' ? 'rotate-90' : ''
+            }`} 
+          />
+        </div>
         
-        {recentUsageLoading ? (
-          <div className="space-y-3">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="animate-pulse bg-purple-950/50 p-4 rounded-lg border border-purple-600/30">
-                <div className="flex justify-between items-center">
-                  <div className="flex-1">
-                    <div className="h-4 bg-gray-600 rounded mb-2 w-32"></div>
-                    <div className="h-3 bg-gray-600 rounded w-24"></div>
-                  </div>
-                  <div className="h-4 bg-gray-600 rounded w-16"></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : recentUsage && recentUsage.length > 0 ? (
-          <div className="space-y-3">
-            {recentUsage.slice(0, 8).map((entry) => (
-              <div key={entry.id} className="bg-purple-950/50 p-4 rounded-lg border border-purple-600/30">
-                <div className="flex justify-between items-center">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="font-medium text-purple-200 capitalize">{entry.operation.replace('_', ' ')}</p>
-                      <span className="text-xs px-2 py-1 bg-purple-500/20 text-purple-300 rounded">
-                        {formatNumber(entry.tokensUsed)} tokens
-                      </span>
+        {expandedSection === 'activity' && (
+          <div className="mt-4 p-6 rounded-lg border border-indigo-400/30 bg-gray-900/10">
+            {recentUsageLoading ? (
+              <div className="space-y-3">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="animate-pulse bg-transparent p-4 rounded-lg border border-purple-600/30">
+                    <div className="flex justify-between items-center">
+                      <div className="flex-1">
+                        <div className="h-4 bg-gray-600 rounded mb-2 w-32"></div>
+                        <div className="h-3 bg-gray-600 rounded w-24"></div>
+                      </div>
+                      <div className="h-4 bg-gray-600 rounded w-16"></div>
                     </div>
-                    <p className="text-sm text-purple-400">{formatDate(entry.createdAt)}</p>
                   </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-indigo-300">{formatCurrency(entry.estimatedCost)}</p>
-                  </div>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="bg-purple-950/50 p-4 rounded-lg border border-purple-600/30">
-            <p className="text-purple-400 text-center">No recent activity</p>
+            ) : recentUsage && recentUsage.length > 0 ? (
+              <div className="space-y-3">
+                {recentUsage.slice(0, 8).map((entry) => (
+                  <div key={entry.id} className="bg-transparent p-4 rounded-lg border border-purple-600/30">
+                    <div className="flex justify-between items-center">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="font-medium text-purple-200 capitalize">{entry.operation.replace('_', ' ')}</p>
+                          <span className="text-xs px-2 py-1 bg-purple-500/20 text-purple-300 rounded">
+                            {formatNumber(entry.tokensUsed)} tokens
+                          </span>
+                        </div>
+                        <p className="text-sm text-purple-400">{formatDate(entry.createdAt)}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-indigo-300">{formatCurrency(entry.estimatedCost)}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-transparent p-4 rounded-lg border border-purple-600/30">
+                <p className="text-purple-400 text-center">No recent activity</p>
+              </div>
+            )}
           </div>
         )}
       </div>
