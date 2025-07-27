@@ -205,32 +205,11 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
           {/* Receipt Content */}
           <div className="flex items-center justify-center h-full p-4">
             {viewingReceipt.filename && isPdfOrDoc(viewingReceipt.filename) ? (
-              <div className="w-full h-full flex flex-col">
-                <iframe
-                  src={`/uploads/${viewingReceipt.filename}`}
-                  className="w-full h-full border-none"
-                  title={`Receipt from ${viewingReceipt.vendor}`}
-                  onError={() => {
-                    // If iframe fails (Brave blocking), automatically open in new tab
-                    console.log('PDF iframe blocked, opening in new tab');
-                    window.open(`/uploads/${viewingReceipt.filename}`, '_blank');
-                    setViewingReceipt(null); // Close the modal
-                  }}
-                />
-                {/* Fallback button that appears at bottom for Brave users */}
-                <div className="absolute bottom-4 left-4 right-4">
-                  <Button
-                    onClick={() => {
-                      window.open(`/uploads/${viewingReceipt.filename}`, '_blank');
-                      setViewingReceipt(null);
-                    }}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 text-sm opacity-75 hover:opacity-100"
-                  >
-                    <ExternalLink size={16} className="mr-2" />
-                    Open in New Tab (if PDF not showing)
-                  </Button>
-                </div>
-              </div>
+              <iframe
+                src={`/uploads/${viewingReceipt.filename}`}
+                className="w-full h-full border-none"
+                title={`Receipt from ${viewingReceipt.vendor}`}
+              />
             ) : (
               <img 
                 src={`/uploads/${viewingReceipt.filename}`} 
