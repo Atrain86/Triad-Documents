@@ -162,10 +162,10 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
       {/* Gmail Integration Section */}
       <div className="mb-4">
         <div className="flex items-center justify-between p-4 rounded-lg border-2 border-red-400 bg-gray-900/20">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <Menu className="h-5 w-5 text-red-400" />
             <img src="/gmail-logo.png" alt="Gmail" className="h-5 w-5" />
-            <span className="text-lg font-medium text-red-400">Gmail Integration</span>
+            <span className="text-lg font-medium text-red-400 whitespace-nowrap">Gmail Integration</span>
             {!gmailStatus?.connected && (
               <div
                 onClick={() => {
@@ -176,30 +176,28 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                 Sync Gmail
               </div>
             )}
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
+              <div 
+                className={`relative w-10 h-5 rounded-full transition-colors cursor-pointer ${
+                  gmailStatus?.connected ? 'bg-green-500' : 'bg-red-500'
+                }`}
+                onClick={() => {
+                  if (!gmailStatus?.connected) {
+                    window.open('/api/gmail/auth/1', '_blank');
+                  }
+                }}
+              >
                 <div 
-                  className={`relative w-10 h-5 rounded-full transition-colors cursor-pointer ${
-                    gmailStatus?.connected ? 'bg-green-500' : 'bg-red-500'
+                  className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-transform ${
+                    gmailStatus?.connected ? 'translate-x-5' : 'translate-x-0.5'
                   }`}
-                  onClick={() => {
-                    if (!gmailStatus?.connected) {
-                      window.open('/api/gmail/auth/1', '_blank');
-                    }
-                  }}
-                >
-                  <div 
-                    className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-transform ${
-                      gmailStatus?.connected ? 'translate-x-5' : 'translate-x-0.5'
-                    }`}
-                  ></div>
-                </div>
-                <span className={`text-xs ${
-                  gmailStatus?.connected ? 'text-green-400' : 'text-red-400'
-                }`}>
-                  {gmailStatus?.connected ? 'Connected' : 'Not Connected'}
-                </span>
+                ></div>
               </div>
+              <span className={`text-xs whitespace-nowrap ${
+                gmailStatus?.connected ? 'text-green-400' : 'text-red-400'
+              }`}>
+                {gmailStatus?.connected ? 'Connected' : 'Not Connected'}
+              </span>
             </div>
           </div>
           <button
