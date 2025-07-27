@@ -312,11 +312,11 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
 
               case 'api':
                 return (
-                  <div className="p-4 rounded-lg border-2 border-cyan-400 bg-gray-900/20">
-                    <div className="flex items-center mb-4">
-                      <Menu className="h-5 w-5 text-cyan-400 mr-4 drag-handle cursor-grab" />
+                  <div className="relative p-4 rounded-lg border-2 border-cyan-400 bg-gray-900/20">
+                    <Menu className="h-5 w-5 text-cyan-400 absolute top-4 left-4 drag-handle cursor-grab z-10" />
+                    <div className="ml-10">
+                      <AdminDashboard onBack={onBack} hideBackButton={true} />
                     </div>
-                    <AdminDashboard onBack={onBack} hideBackButton={true} />
                   </div>
                 );
 
