@@ -619,7 +619,7 @@ function StatusIcon({ status }: { status: string }) {
 
   return (
     <div 
-      className="w-4 h-4 rounded-full mr-2 flex-shrink-0"
+      className="w-3 h-3 rounded-full mr-2 flex-shrink-0 pointer-events-none"
       style={{ backgroundColor: color }}
       title={status}
     />
@@ -797,7 +797,7 @@ function ProjectCard({ project, onSelectProject, updateStatusMutation, deletePro
         </div>
         
         <div className="flex items-center gap-2">
-          <div className="flex items-center relative z-20">
+          <div className="flex items-center relative z-20 pointer-events-auto bg-card/50 rounded-md px-2 py-1 hover:bg-card/80 transition-colors">
             <StatusIcon status={project.status} />
             <select
               value={project.status}
@@ -824,7 +824,7 @@ function ProjectCard({ project, onSelectProject, updateStatusMutation, deletePro
               onMouseDown={(e) => {
                 e.stopPropagation();
               }}
-              className="text-sm font-medium border-none bg-transparent cursor-pointer focus:outline-none relative z-30 min-w-0 pointer-events-auto"
+              className="text-xs font-medium border-none bg-transparent cursor-pointer focus:outline-none relative z-30 min-w-0 pointer-events-auto appearance-none"
               style={{ 
                 color: statusConfig[project.status as keyof typeof statusConfig]?.color || paintBrainColors.gray,
                 touchAction: 'manipulation'
