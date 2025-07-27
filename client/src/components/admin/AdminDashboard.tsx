@@ -90,9 +90,9 @@ const AdminDashboard: React.FC<{ onBack: () => void; hideBackButton?: boolean }>
         {totalStatsLoading ? (
           <>
             <div className="flex items-center gap-4">
-              <Menu className="h-5 w-5 text-blue-400" />
+              <Menu className="h-5 w-5 text-cyan-400" />
               <img src="/analytics-icon.png" alt="Analytics" className="h-5 w-5" />
-              <span className="text-lg font-medium text-blue-400">API Usage</span>
+              <span className="text-lg font-medium text-cyan-400">API Usage</span>
             </div>
             <div className="flex items-center gap-4">
               <div className="animate-pulse">
@@ -106,9 +106,9 @@ const AdminDashboard: React.FC<{ onBack: () => void; hideBackButton?: boolean }>
         ) : (
           <>
             <div className="flex items-center gap-4">
-              <Menu className="h-5 w-5 text-blue-400" />
+              <Menu className="h-5 w-5 text-cyan-400" />
               <img src="/analytics-icon.png" alt="Analytics" className="h-5 w-5" />
-              <span className="text-lg font-medium text-blue-400">API Usage</span>
+              <span className="text-lg font-medium text-cyan-400">API Usage</span>
             </div>
             <div className="flex items-center gap-14">
               <div className="bg-green-500 text-black px-3 py-2 rounded-full text-xs font-medium">

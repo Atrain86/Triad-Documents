@@ -293,7 +293,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
 
       {/* API Usage Section */}
       <div className="mb-4">
-        <div className="p-4 rounded-lg border-2 border-blue-400 bg-gray-900/20">
+        <div className="p-4 rounded-lg border-2 border-cyan-400 bg-gray-900/20">
           <AdminDashboard onBack={onBack} hideBackButton={true} />
         </div>
       </div>
