@@ -72,8 +72,8 @@ const AdminDashboard: React.FC<{ onBack: () => void; hideBackButton?: boolean }>
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        {!hideBackButton && (
+      {!hideBackButton && (
+        <div className="flex items-center gap-4 mb-6">
           <Button
             onClick={onBack}
             variant="ghost"
@@ -82,22 +82,14 @@ const AdminDashboard: React.FC<{ onBack: () => void; hideBackButton?: boolean }>
           >
             <ArrowLeft size={20} />
           </Button>
-        )}
-        <h1 className="text-3xl font-bold text-blue-400">API Usage</h1>
-      </div>
-
-      {/* Description */}
-      <p className="text-gray-300 text-lg leading-relaxed">
-        Monitor OpenAI API usage and costs for receipt processing, text generation, 
-        and other AI features. Track token consumption across all users and operations.
-      </p>
+        </div>
+      )}
 
       {/* Usage Overview - Single Line */}
-      <div className="mb-4 p-4 rounded-lg border-2 border-blue-400 bg-gray-900/20">
+      <div className="mb-4 p-4 rounded-lg border border-blue-400/30 bg-gray-900/10">
         {totalStatsLoading ? (
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <h2 className="text-xl font-semibold text-blue-400">Usage</h2>
               <div className="animate-pulse">
                 <div className="h-6 bg-gray-600 rounded w-20"></div>
               </div>
@@ -109,7 +101,6 @@ const AdminDashboard: React.FC<{ onBack: () => void; hideBackButton?: boolean }>
         ) : (
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <h2 className="text-xl font-semibold text-blue-400">Usage</h2>
               <div className="flex items-center gap-2">
                 <span className="text-slate-400">Tokens</span>
                 <span className="text-lg font-bold text-blue-300">
