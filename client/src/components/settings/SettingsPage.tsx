@@ -194,8 +194,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
 
       {/* Settings header positioned closer to Gmail container */}
       <div className="flex items-center gap-3 mb-2">
-        <Settings className="h-8 w-8 text-purple-400" />
-        <h1 className="text-3xl font-bold text-white">Settings</h1>
+        <Settings className="h-8 w-8 text-gray-400" />
       </div>
 
       {/* Gmail Integration Section */}
