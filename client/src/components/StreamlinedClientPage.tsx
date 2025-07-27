@@ -180,96 +180,66 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
 
   return (
     <>
-      {/* Receipt Viewer Modal - Mobile-First Design */}
+      {/* Receipt Viewer Modal - Simple & Reliable */}
       {viewingReceipt && (
-        <>
-          {/* Full Screen Overlay */}
-          <div 
-            className="fixed inset-0 bg-black"
-            onTouchStart={() => {
-              console.log('TOUCH START ON BACKGROUND!');
-              setViewingReceipt(null);
-            }}
-            onClick={() => {
-              console.log('CLICK ON BACKGROUND!');
-              setViewingReceipt(null);
-            }}
-            style={{ 
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              zIndex: 999999,
-              backgroundColor: '#000000'
-            }}
-          />
-
-          {/* Exit Instructions Bar at Top */}
-          <div 
-            className="fixed top-0 left-0 right-0 bg-red-600 text-white text-center py-3 text-lg font-bold border-b-4 border-white"
-            style={{ 
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              zIndex: 9999999,
-              backgroundColor: '#dc2626',
-              color: 'white',
-              padding: '12px',
-              fontSize: '18px',
-              fontWeight: 'bold'
-            }}
-          >
-            TAP ANYWHERE TO CLOSE RECEIPT
-          </div>
-
-          {/* Giant X Button - Top Right Corner */}
+        <div 
+          style={{ 
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.95)',
+            zIndex: 999999,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          {/* Simple Red X Close Button - Top Right */}
           <button
-            onTouchStart={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              console.log('TOUCH START ON X BUTTON!');
+            onClick={() => {
+              console.log('SIMPLE CLOSE BUTTON CLICKED!');
               setViewingReceipt(null);
             }}
-            onClick={(e) => {
+            onTouchEnd={(e) => {
               e.preventDefault();
-              e.stopPropagation();
-              console.log('CLICK ON X BUTTON!');
+              console.log('SIMPLE CLOSE BUTTON TOUCHED!');
               setViewingReceipt(null);
             }}
-            style={{ 
-              position: 'fixed',
-              top: '60px',
-              right: '8px',
-              width: '80px',
-              height: '80px',
-              backgroundColor: '#dc2626',
+            style={{
+              position: 'absolute',
+              top: '10px',
+              right: '10px',
+              width: '50px',
+              height: '50px',
+              backgroundColor: '#ff0000',
               color: 'white',
-              border: '4px solid white',
-              borderRadius: '50%',
-              fontSize: '40px',
+              border: 'none',
+              borderRadius: '25px',
+              fontSize: '30px',
               fontWeight: 'bold',
+              cursor: 'pointer',
               zIndex: 9999999,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              cursor: 'pointer',
-              touchAction: 'manipulation'
+              boxShadow: '0 4px 8px rgba(0,0,0,0.5)',
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
+              WebkitTouchCallout: 'none',
+              WebkitTapHighlightColor: 'transparent'
             }}
           >
             ×
           </button>
 
-          {/* Receipt Image */}
-          <div 
-            style={{ 
-              position: 'fixed',
-              top: '120px',
-              left: '10px',
-              right: '10px',
-              bottom: '10px',
-              zIndex: 9999998,
+          {/* Receipt Content */}
+          <div
+            style={{
+              maxWidth: '90%',
+              maxHeight: '90%',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'
@@ -282,11 +252,46 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
                 maxWidth: '100%',
                 maxHeight: '100%',
                 objectFit: 'contain',
-                borderRadius: '8px'
+                borderRadius: '8px',
+                boxShadow: '0 4px 20px rgba(255,255,255,0.1)'
               }}
             />
           </div>
-        </>
+
+          {/* Bottom Close Button for Extra Reliability */}
+          <button
+            onClick={() => {
+              console.log('BOTTOM CLOSE BUTTON CLICKED!');
+              setViewingReceipt(null);
+            }}
+            onTouchEnd={(e) => {
+              e.preventDefault();
+              console.log('BOTTOM CLOSE BUTTON TOUCHED!');
+              setViewingReceipt(null);
+            }}
+            style={{
+              position: 'absolute',
+              bottom: '20px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              padding: '12px 24px',
+              backgroundColor: '#ff0000',
+              color: 'white',
+              border: 'none',
+              borderRadius: '25px',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              boxShadow: '0 4px 8px rgba(0,0,0,0.5)',
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
+              WebkitTouchCallout: 'none',
+              WebkitTapHighlightColor: 'transparent'
+            }}
+          >
+            CLOSE
+          </button>
+        </div>
       )}
       
       <div className="space-y-3">
