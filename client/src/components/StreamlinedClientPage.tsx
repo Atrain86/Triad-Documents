@@ -34,10 +34,8 @@ const paintBrainColors = {
 
 // Calendar function for A-Frame calendar integration
 const openWorkCalendar = (clientProject: Project | null = null, setShowCalendar?: (show: boolean) => void) => {
-  // Open calendar with A-Frame calendar as primary focus
-  const aFrameCalendarId = '6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981@group.calendar.google.com';
-  const calendarUrl = `https://calendar.google.com/calendar/u/0/r/month/${encodeURIComponent(aFrameCalendarId)}`;
-  window.open(calendarUrl, '_blank');
+  // Open Google Calendar in month view - you can manually uncheck ALAN and MAIN 1 calendars in sidebar
+  window.open('https://calendar.google.com/calendar/u/0/r/month', '_blank');
 };
 
 // Improved file list component
