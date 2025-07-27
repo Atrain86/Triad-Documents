@@ -171,16 +171,35 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                 onClick={() => {
                   window.open('/api/gmail/auth/1', '_blank');
                 }}
-                className="bg-red-500 hover:bg-red-600 text-white px-3 py-2 text-xs rounded-full cursor-pointer whitespace-nowrap"
+                className="bg-red-500 hover:bg-red-600 text-black px-3 py-2 text-xs rounded-full cursor-pointer whitespace-nowrap"
               >
                 Sync Gmail
               </div>
             )}
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-red-400">Status</span>
-              <div className={`w-3 h-3 rounded-full ${
-                gmailStatus?.connected ? 'bg-green-500' : 'bg-red-500'
-              }`}></div>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <div 
+                  className={`relative w-10 h-5 rounded-full transition-colors cursor-pointer ${
+                    gmailStatus?.connected ? 'bg-green-500' : 'bg-red-500'
+                  }`}
+                  onClick={() => {
+                    if (!gmailStatus?.connected) {
+                      window.open('/api/gmail/auth/1', '_blank');
+                    }
+                  }}
+                >
+                  <div 
+                    className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-transform ${
+                      gmailStatus?.connected ? 'translate-x-5' : 'translate-x-0.5'
+                    }`}
+                  ></div>
+                </div>
+                <span className={`text-xs ${
+                  gmailStatus?.connected ? 'text-green-400' : 'text-red-400'
+                }`}>
+                  {gmailStatus?.connected ? 'Connected' : 'Not Connected'}
+                </span>
+              </div>
             </div>
           </div>
           <button
