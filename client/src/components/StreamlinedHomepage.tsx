@@ -699,28 +699,39 @@ function StatusButton({ project, updateStatusMutation }: { project: any; updateS
       </button>
       
       {showDropdown && (
-        <div className="absolute top-full right-0 mt-1 bg-card border border-border rounded-md shadow-lg z-50 min-w-48">
-          {statusOptions.map((option) => (
-            <button
-              key={option.value}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                handleStatusChange(option.value);
-              }}
-              className="w-full text-left px-3 py-2 text-xs hover:bg-accent hover:text-accent-foreground transition-colors touch-manipulation"
-              style={{ 
-                WebkitTouchCallout: 'none',
-                WebkitUserSelect: 'none',
-                userSelect: 'none'
-              }}
-            >
-              <div className="flex items-center">
-                <StatusIcon status={option.value} />
-                <span>{option.label}</span>
-              </div>
-            </button>
-          ))}
+        <div className="fixed inset-0 z-50 bg-black/20 flex items-center justify-center p-4" 
+             onClick={() => setShowDropdown(false)}>
+          <div className="bg-card border border-border rounded-lg shadow-xl max-w-sm w-full max-h-80 overflow-y-auto"
+               onClick={(e) => e.stopPropagation()}>
+            <div className="p-3 border-b border-border">
+              <h3 className="font-medium text-sm">Change Status</h3>
+            </div>
+            <div className="p-2">
+              {statusOptions.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleStatusChange(option.value);
+                  }}
+                  className={`w-full text-left px-3 py-3 text-sm hover:bg-accent hover:text-accent-foreground transition-colors touch-manipulation rounded-md ${
+                    option.value === project.status ? 'bg-accent' : ''
+                  }`}
+                  style={{ 
+                    WebkitTouchCallout: 'none',
+                    WebkitUserSelect: 'none',
+                    userSelect: 'none'
+                  }}
+                >
+                  <div className="flex items-center">
+                    <StatusIcon status={option.value} />
+                    <span>{option.label}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </div>
