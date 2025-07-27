@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Activity, DollarSign, Users, Eye, Brain, Calendar, ArrowLeft, ChevronRight } from 'lucide-react';
+import { Activity, DollarSign, Users, Eye, Brain, Calendar, ArrowLeft, ChevronRight, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { apiRequest } from '@/lib/queryClient';
 
@@ -85,11 +85,13 @@ const AdminDashboard: React.FC<{ onBack: () => void; hideBackButton?: boolean }>
         </div>
       )}
 
-      {/* Usage Overview - Single Line */}
-      <div className="mb-4 p-4 rounded-lg border border-blue-400/30 bg-gray-900/10">
+      {/* API Usage - Single Line */}
+      <div className="flex items-center justify-between">
         {totalStatsLoading ? (
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+          <>
+            <div className="flex items-center gap-4">
+              <Menu className="h-5 w-5 text-blue-400" />
+              <span className="text-lg font-medium text-blue-400">API Usage</span>
               <div className="animate-pulse">
                 <div className="h-6 bg-gray-600 rounded w-20"></div>
               </div>
@@ -97,13 +99,15 @@ const AdminDashboard: React.FC<{ onBack: () => void; hideBackButton?: boolean }>
             <div className="animate-pulse">
               <div className="h-6 bg-gray-600 rounded w-16"></div>
             </div>
-          </div>
+          </>
         ) : (
-          <div className="flex items-center justify-between">
+          <>
             <div className="flex items-center gap-4">
+              <Menu className="h-5 w-5 text-blue-400" />
+              <span className="text-lg font-medium text-blue-400">API Usage</span>
               <div className="flex items-center gap-2">
                 <span className="text-slate-400">Tokens</span>
-                <span className="text-lg font-bold text-blue-300">
+                <span className="text-lg font-bold text-emerald-300">
                   {formatNumber(totalStats?.totalTokens || 0)}
                 </span>
               </div>
@@ -111,7 +115,7 @@ const AdminDashboard: React.FC<{ onBack: () => void; hideBackButton?: boolean }>
             <span className="text-lg font-bold text-emerald-300">
               {formatCurrency(totalStats?.totalCost || 0)}
             </span>
-          </div>
+          </>
         )}
       </div>
 

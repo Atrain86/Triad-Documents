@@ -156,32 +156,11 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
         )}
       </div>
 
-      {/* API Usage Analytics Section */}
+      {/* API Usage Section */}
       <div className="mb-4">
-        <div 
-          className="flex items-center justify-between p-4 rounded-lg border-2 border-blue-400 bg-gray-900/20 cursor-pointer hover:bg-gray-800/30 transition-colors"
-          onClick={() => toggleSection('admin')}
-        >
-          <div className="flex items-center gap-4">
-            <Menu className="h-5 w-5 text-blue-400" />
-            <Globe className="h-5 w-5 text-blue-400" />
-            <span className="text-lg font-medium text-blue-400">API Usage</span>
-            <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm">
-              Active
-            </div>
-          </div>
-          <ChevronRight 
-            className={`h-5 w-5 text-blue-400 transition-transform ${
-              expandedSection === 'admin' ? 'rotate-90' : ''
-            }`} 
-          />
+        <div className="p-4 rounded-lg border-2 border-blue-400 bg-gray-900/20">
+          <AdminDashboard onBack={onBack} hideBackButton={true} />
         </div>
-        
-        {expandedSection === 'admin' && (
-          <div className="mt-4 p-6 rounded-lg border border-blue-400/30 bg-gray-900/10">
-            <AdminDashboard onBack={onBack} hideBackButton={true} />
-          </div>
-        )}
       </div>
     </div>
   );
