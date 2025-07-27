@@ -291,7 +291,7 @@ const TaxConfiguration: React.FC<TaxConfigurationProps> = ({
 
           {/* Tax Summary */}
           <div className="pt-4 border-t border-yellow-400/30">
-            <div className="bg-yellow-900/20 border border-yellow-400/30 p-4 rounded-lg">
+            <div className="bg-black border border-yellow-400/30 p-4 rounded-lg">
               <h4 className="text-lg font-semibold text-yellow-300 mb-2">Tax Summary</h4>
               <p className="text-xl font-bold text-yellow-400 mb-2">
                 Total Tax Rate: {(
