@@ -92,8 +92,8 @@ const AdminDashboard: React.FC<{ onBack: () => void; hideBackButton?: boolean }>
         <h2 className="text-xl font-semibold text-blue-400 mb-6">Usage Overview</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-black/40 p-4 rounded-lg border border-blue-500/30">
-            <h3 className="text-sm font-medium text-gray-400 mb-2">Total Tokens</h3>
+          <div className="bg-slate-900/60 p-4 rounded-lg border border-slate-600/40">
+            <h3 className="text-sm font-medium text-slate-400 mb-2">Total Tokens</h3>
             {totalStatsLoading ? (
               <div className="animate-pulse">
                 <div className="h-8 bg-gray-600 rounded mb-1"></div>
@@ -101,16 +101,16 @@ const AdminDashboard: React.FC<{ onBack: () => void; hideBackButton?: boolean }>
               </div>
             ) : (
               <>
-                <p className="text-2xl font-bold text-white">
+                <p className="text-2xl font-bold text-blue-300">
                   {formatNumber(totalStats?.totalTokens || 0)}
                 </p>
-                <p className="text-xs text-gray-500">API calls processed</p>
+                <p className="text-xs text-slate-500">API calls processed</p>
               </>
             )}
           </div>
 
-          <div className="bg-black/40 p-4 rounded-lg border border-blue-500/30">
-            <h3 className="text-sm font-medium text-gray-400 mb-2">Total Cost</h3>
+          <div className="bg-emerald-950/60 p-4 rounded-lg border border-emerald-600/40">
+            <h3 className="text-sm font-medium text-emerald-400 mb-2">Total Cost</h3>
             {totalStatsLoading ? (
               <div className="animate-pulse">
                 <div className="h-8 bg-gray-600 rounded mb-1"></div>
@@ -118,16 +118,16 @@ const AdminDashboard: React.FC<{ onBack: () => void; hideBackButton?: boolean }>
               </div>
             ) : (
               <>
-                <p className="text-2xl font-bold text-white">
+                <p className="text-2xl font-bold text-emerald-300">
                   {formatCurrency(totalStats?.totalCost || 0)}
                 </p>
-                <p className="text-xs text-gray-500">Current period</p>
+                <p className="text-xs text-emerald-500">Current period</p>
               </>
             )}
           </div>
 
-          <div className="bg-black/40 p-4 rounded-lg border border-blue-500/30">
-            <h3 className="text-sm font-medium text-gray-400 mb-2">Active Users</h3>
+          <div className="bg-violet-950/60 p-4 rounded-lg border border-violet-600/40">
+            <h3 className="text-sm font-medium text-violet-400 mb-2">Active Users</h3>
             {userStatsLoading ? (
               <div className="animate-pulse">
                 <div className="h-8 bg-gray-600 rounded mb-1"></div>
@@ -135,10 +135,10 @@ const AdminDashboard: React.FC<{ onBack: () => void; hideBackButton?: boolean }>
               </div>
             ) : (
               <>
-                <p className="text-2xl font-bold text-white">
+                <p className="text-2xl font-bold text-violet-300">
                   {userStats?.length || 0}
                 </p>
-                <p className="text-xs text-gray-500">Using AI features</p>
+                <p className="text-xs text-violet-500">Using AI features</p>
               </>
             )}
           </div>
@@ -152,7 +152,7 @@ const AdminDashboard: React.FC<{ onBack: () => void; hideBackButton?: boolean }>
         {userStatsLoading ? (
           <div className="space-y-3">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="animate-pulse bg-black/40 p-4 rounded-lg border border-cyan-500/30">
+              <div key={i} className="animate-pulse bg-teal-950/50 p-4 rounded-lg border border-teal-600/30">
                 <div className="flex justify-between items-center">
                   <div className="h-4 bg-gray-600 rounded w-48"></div>
                   <div className="h-4 bg-gray-600 rounded w-20"></div>
@@ -163,22 +163,22 @@ const AdminDashboard: React.FC<{ onBack: () => void; hideBackButton?: boolean }>
         ) : userStats && userStats.length > 0 ? (
           <div className="space-y-3">
             {userStats.map((user) => (
-              <div key={user.userId} className="bg-black/40 p-4 rounded-lg border border-cyan-500/30">
+              <div key={user.userId} className="bg-teal-950/50 p-4 rounded-lg border border-teal-600/30">
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="font-medium text-white">{user.email}</p>
-                    <p className="text-sm text-gray-400">{formatNumber(user.totalTokens)} tokens used</p>
+                    <p className="font-medium text-teal-200">{user.email}</p>
+                    <p className="text-sm text-teal-400">{formatNumber(user.totalTokens)} tokens used</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold text-cyan-400">{formatCurrency(user.totalCost)}</p>
+                    <p className="font-semibold text-cyan-300">{formatCurrency(user.totalCost)}</p>
                   </div>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="bg-black/40 p-4 rounded-lg border border-cyan-500/30">
-            <p className="text-gray-400 text-center">No user data available</p>
+          <div className="bg-teal-950/50 p-4 rounded-lg border border-teal-600/30">
+            <p className="text-teal-400 text-center">No user data available</p>
           </div>
         )}
       </div>
@@ -190,7 +190,7 @@ const AdminDashboard: React.FC<{ onBack: () => void; hideBackButton?: boolean }>
         {recentUsageLoading ? (
           <div className="space-y-3">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="animate-pulse bg-black/40 p-4 rounded-lg border border-indigo-500/30">
+              <div key={i} className="animate-pulse bg-purple-950/50 p-4 rounded-lg border border-purple-600/30">
                 <div className="flex justify-between items-center">
                   <div className="flex-1">
                     <div className="h-4 bg-gray-600 rounded mb-2 w-32"></div>
@@ -204,27 +204,27 @@ const AdminDashboard: React.FC<{ onBack: () => void; hideBackButton?: boolean }>
         ) : recentUsage && recentUsage.length > 0 ? (
           <div className="space-y-3">
             {recentUsage.slice(0, 8).map((entry) => (
-              <div key={entry.id} className="bg-black/40 p-4 rounded-lg border border-indigo-500/30">
+              <div key={entry.id} className="bg-purple-950/50 p-4 rounded-lg border border-purple-600/30">
                 <div className="flex justify-between items-center">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <p className="font-medium text-white capitalize">{entry.operation.replace('_', ' ')}</p>
-                      <span className="text-xs px-2 py-1 bg-indigo-500/20 text-indigo-300 rounded">
+                      <p className="font-medium text-purple-200 capitalize">{entry.operation.replace('_', ' ')}</p>
+                      <span className="text-xs px-2 py-1 bg-purple-500/20 text-purple-300 rounded">
                         {formatNumber(entry.tokensUsed)} tokens
                       </span>
                     </div>
-                    <p className="text-sm text-gray-400">{formatDate(entry.createdAt)}</p>
+                    <p className="text-sm text-purple-400">{formatDate(entry.createdAt)}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold text-indigo-400">{formatCurrency(entry.estimatedCost)}</p>
+                    <p className="font-semibold text-indigo-300">{formatCurrency(entry.estimatedCost)}</p>
                   </div>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="bg-black/40 p-4 rounded-lg border border-indigo-500/30">
-            <p className="text-gray-400 text-center">No recent activity</p>
+          <div className="bg-purple-950/50 p-4 rounded-lg border border-purple-600/30">
+            <p className="text-purple-400 text-center">No recent activity</p>
           </div>
         )}
       </div>
