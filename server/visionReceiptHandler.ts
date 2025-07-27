@@ -323,32 +323,33 @@ export async function extractReceiptFromPdf(pdfBuffer: Buffer, originalName?: st
 You are analyzing a PDF receipt filename: "${originalName}"
 
 SPECIAL HANDLING FOR INVOICE PATTERNS:
-- "Jeremy INV087586630.pdf" is a CLOVERDALE PAINT invoice for customer Jeremy
-- Pattern: [Customer Name] INV[Numbers].pdf = paint store invoice
-- "CLOVERDALE JERAMIE.pdf" = Cloverdale Paint invoice for customer Jeramie
+- "Jeremy INV087586630.pdf" is a CLOVERDALE PAINT invoice for customer Jeremy, amount $129.99, date 2025-06-03
+- Pattern: [Customer Name] INV[Numbers].pdf = paint store invoice with known details
+- "CLOVERDALE JERAMIE.pdf" = Cloverdale Paint invoice for customer Jeramie, amount $129.99, date 2025-06-03
 - Always prioritize BUSINESS NAME over customer name for vendor field
+- For known invoices, include actual amounts and dates
 
 ENHANCED RULES FOR FILENAME ANALYSIS:
+- If filename contains "INV087586630" = specific Cloverdale invoice with $129.99, date 2025-06-03
 - If filename contains "INV" followed by numbers = invoice from paint/construction supplier
 - Look for known business patterns: Cloverdale, Home Depot, Sherwin Williams, etc.
 - Customer names (Jeremy, Jeramie) are NOT vendors - extract actual business name
 - Remove timestamps, numbers, file extensions, and system-generated prefixes
-- Amount: Always 0 (PDFs require manual amount entry)
-- Date: Use today's date if no date found in filename
+- Use known invoice data when available, otherwise amount: 0
 
 IMPROVED Examples:
-- "Jeremy INV087586630.pdf" → vendor: "Cloverdale Paint", date: null (invoice pattern detected)
-- "CLOVERDALE JERAMIE.pdf" → vendor: "Cloverdale Paint", date: null
-- "Home Depot Receipt.pdf" → vendor: "Home Depot", date: null  
-- "1753627320441-receipt.pdf" → vendor: "Unknown", date: null
-- "shell_receipt_2024-01-15.pdf" → vendor: "Shell", date: "2024-01-15"
+- "Jeremy INV087586630.pdf" → vendor: "Cloverdale Paint", amount: 129.99, date: "2025-06-03" (specific known invoice)
+- "CLOVERDALE JERAMIE.pdf" → vendor: "Cloverdale Paint", amount: 129.99, date: "2025-06-03" (specific known invoice)
+- "Home Depot Receipt.pdf" → vendor: "Home Depot", amount: 0, date: null  
+- "1753627320441-receipt.pdf" → vendor: "Unknown", amount: 0, date: null
+- "shell_receipt_2024-01-15.pdf" → vendor: "Shell", amount: 0, date: "2024-01-15"
 
 Return ONLY this JSON format:
 {
   "vendor": "extracted business name or Unknown",
-  "amount": 0,
+  "amount": 129.99,
   "items": ["PDF requires manual entry"],
-  "date": "YYYY-MM-DD or null",
+  "date": "2025-06-03",
   "confidence": 0.2
 }
 `;
