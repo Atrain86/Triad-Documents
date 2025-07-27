@@ -202,13 +202,21 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
             }}
           />
           
-          {/* Receipt Image */}
+          {/* Receipt Content */}
           <div className="flex items-center justify-center h-full p-4">
-            <img 
-              src={`/uploads/${viewingReceipt.filename}`} 
-              alt={`Receipt from ${viewingReceipt.vendor}`}
-              className="max-w-full max-h-full object-contain"
-            />
+            {viewingReceipt.filename && isPdfOrDoc(viewingReceipt.filename) ? (
+              <iframe
+                src={`/uploads/${viewingReceipt.filename}`}
+                className="w-full h-full border-none"
+                title={`Receipt from ${viewingReceipt.vendor}`}
+              />
+            ) : (
+              <img 
+                src={`/uploads/${viewingReceipt.filename}`} 
+                alt={`Receipt from ${viewingReceipt.vendor}`}
+                className="max-w-full max-h-full object-contain"
+              />
+            )}
           </div>
           
           {/* Bottom Close Button */}
@@ -301,13 +309,8 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
                   {receipt.filename ? (
                     <button
                       onClick={() => {
-                        if (receipt.filename && isPdfOrDoc(receipt.filename)) {
-                          // For PDFs and docs, open in new tab
-                          window.open(`/uploads/${receipt.filename}`, '_blank');
-                        } else {
-                          // For images, use the modal viewer
-                          setViewingReceipt(receipt);
-                        }
+                        console.log('Setting viewing receipt:', receipt);
+                        setViewingReceipt(receipt);
                       }}
                       className="text-blue-400 hover:text-blue-300 underline text-sm"
                     >
