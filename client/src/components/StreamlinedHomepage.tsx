@@ -230,6 +230,12 @@ export default function StreamlinedHomepage({
       project.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       project.projectType?.toLowerCase().includes(searchTerm.toLowerCase());
     
+    // If there's a search term, show all matching projects regardless of archive status
+    if (searchTerm !== '') {
+      return matchesSearch;
+    }
+    
+    // If no search term, filter by archive status as normal
     const matchesArchive = showArchived ? 
       project.status === 'archived' : 
       project.status !== 'archived';
