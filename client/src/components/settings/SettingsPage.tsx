@@ -228,60 +228,75 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
             switch(section.id) {
               case 'gmail':
                 return (
-                  <div className="relative p-4 rounded-lg border-2 border-red-400 bg-gray-900/20">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setShowGmailPopup(true);
-                      }}
-                      className="absolute top-2 right-2 cursor-pointer hover:opacity-80 transition-opacity"
-                      title="Gmail Integration Info"
+                  <div>
+                    <div 
+                      className="flex items-center justify-between p-4 rounded-lg border-2 border-red-400 bg-gray-900/20 cursor-pointer hover:bg-gray-800/30 transition-colors"
+                      onClick={() => toggleSection('gmail')}
                     >
-                      <svg className="w-4 h-4 text-red-400" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
-                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                        <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
-                      </svg>
-                    </button>
-                    <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
                         <Menu className="h-5 w-5 text-red-400 flex-shrink-0 drag-handle cursor-grab" />
                         <img src="/gmail-logo.png" alt="Gmail" className="h-5 w-5 flex-shrink-0" />
                         <span className="text-lg font-medium text-red-400 whitespace-nowrap">Gmail sync</span>
                       </div>
-                      <div className="flex items-center gap-3">
-                        {!gmailStatus?.connected && (
-                          <div
-                            onClick={() => {
-                              window.open('/api/gmail/auth/1', '_blank');
-                            }}
-                            className="bg-red-500 hover:bg-red-600 text-black px-3 py-1 text-xs rounded-full cursor-pointer whitespace-nowrap"
-                          >
-                            Sync Gmail
-                          </div>
-                        )}
-                        <div 
-                          className={`relative w-10 h-5 rounded-full transition-colors cursor-pointer ${
-                            gmailStatus?.connected ? 'bg-green-500' : 'bg-red-500'
-                          }`}
-                          onClick={() => {
-                            if (!gmailStatus?.connected) {
-                              window.open('/api/gmail/auth/1', '_blank');
-                            }
-                          }}
-                        >
-                          <div 
-                            className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-transform ${
-                              gmailStatus?.connected ? 'translate-x-5' : 'translate-x-0.5'
-                            }`}
-                          ></div>
-                        </div>
-                        <span className={`text-xs whitespace-nowrap ${
-                          gmailStatus?.connected ? 'text-green-400' : 'text-red-400'
-                        }`}>
-                          {gmailStatus?.connected ? 'Connected' : 'Disconnected'}
-                        </span>
-                      </div>
+                      <ChevronRight 
+                        className={`h-5 w-5 text-red-400 transition-transform ${
+                          expandedSection === 'gmail' ? 'rotate-90' : 'rotate-0'
+                        }`} 
+                      />
                     </div>
+                    
+                    {expandedSection === 'gmail' && (
+                      <div className="mt-4 p-4 rounded-lg border border-red-400/30 bg-gray-900/10">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            {!gmailStatus?.connected && (
+                              <div
+                                onClick={() => {
+                                  window.open('/api/gmail/auth/1', '_blank');
+                                }}
+                                className="bg-red-500 hover:bg-red-600 text-black px-3 py-1 text-xs rounded-full cursor-pointer whitespace-nowrap"
+                              >
+                                Sync Gmail
+                              </div>
+                            )}
+                            <div 
+                              className={`relative w-10 h-5 rounded-full transition-colors cursor-pointer ${
+                                gmailStatus?.connected ? 'bg-green-500' : 'bg-red-500'
+                              }`}
+                              onClick={() => {
+                                if (!gmailStatus?.connected) {
+                                  window.open('/api/gmail/auth/1', '_blank');
+                                }
+                              }}
+                            >
+                              <div 
+                                className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-transform ${
+                                  gmailStatus?.connected ? 'translate-x-5' : 'translate-x-0.5'
+                                }`}
+                              ></div>
+                            </div>
+                            <span className={`text-xs whitespace-nowrap ${
+                              gmailStatus?.connected ? 'text-green-400' : 'text-red-400'
+                            }`}>
+                              {gmailStatus?.connected ? 'Connected' : 'Disconnected'}
+                            </span>
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowGmailPopup(true);
+                            }}
+                            className="cursor-pointer hover:opacity-80 transition-opacity"
+                            title="Gmail Integration Info"
+                          >
+                            <svg className="w-4 h-4 text-red-400" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                              <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                              <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
 
@@ -297,7 +312,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                         <svg className="h-5 w-5 text-yellow-400" style={{verticalAlign: 'middle', fill: 'currentColor', overflow: 'hidden'}} viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
                           <path d="M6.177687 752.921613h121.032322s74.637758-82.702418 155.318128-100.85788h344.932294c27.734612 0 50.419219 22.695863 50.419219 50.428428 0 27.734612-22.684606 50.428429-50.419219 50.428429H480.32055c-18.306911 0-33.279898 14.984243-33.279898 33.279898 0 18.285422 14.963777 33.32083 33.279898 33.279897l257.414206-0.497325 195.862462-159.727546c21.923268-17.880193 54.359963-15.08555 72.453004 6.67399 17.980477 21.63879 15.054851 54.46127-6.67399 72.431515L715.761346 972.788744H6.177687v-219.867131zM567.412943 472.954807c65.879298-10.961634 100.368741-53.516761 100.368741-104.585778 0-63.056002-49.727465-85.497062-94.598329-102.472655-35.769597-13.33877-69.121126-22.44106-69.121125-47.288931 0-19.414126 14.548315-32.751873 44.871887-32.751873 25.469017 0 49.107343 12.130247 73.366814 29.104817l40.015286-53.962921c-24.360779-18.143183-55.364848-35.829972-94.903274-40.594476V58.34164c0-3.921302-3.211128-7.131407-7.13243-7.131407h-49.381588c-3.911068 0-7.121174 3.210105-7.121174 7.131407v65.859855c-51.688116 13.044058-83.394172 50.347588-83.394172 99.252316 0 56.391222 49.727465 82.469105 92.770708 98.834809 35.778806 13.948659 70.948747 25.469017 70.948747 50.935987 0 21.222305-15.157181 35.769597-49.117576 35.769597-31.533117 0-60.637934-13.33877-90.952297-36.988352l-40.625174 55.791566c26.422737 22.095183 63.492953 39.233481 100.368741 45.410145v64.620634c0 3.921302 3.210105 7.121174 7.121173 7.121173H560.27949c3.921302 0 7.13243-3.199872 7.13243-7.121173v-64.87339z" fill="currentColor" />
                         </svg>
-                        <span className="text-lg font-medium text-yellow-400">Tax Configuration</span>
+                        <span className="text-lg font-medium text-yellow-400">Taxes</span>
                         <div className={`px-3 py-2 rounded-full text-xs font-medium ${
                           isTaxConfigured 
                             ? 'bg-yellow-500 text-black' 
@@ -437,7 +452,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
 
               case 'api':
                 return (
-                  <div className="relative p-4 rounded-lg border-2 border-cyan-400 bg-gray-900/20">
+                  <div className="p-4 rounded-lg border-2 border-cyan-400 bg-gray-900/20">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
                         <Menu className="h-5 w-5 text-cyan-400 flex-shrink-0 drag-handle cursor-grab" />
@@ -446,11 +461,11 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                         </svg>
                         <span className="text-lg font-medium text-cyan-400 whitespace-nowrap">API Usage</span>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <div className="bg-green-600 text-black px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap">
-                          Tokens 103,409
+                      <div className="flex items-center gap-2">
+                        <div className="bg-green-600 text-black px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap">
+                          103,409 Tokens
                         </div>
-                        <div className="bg-green-600 text-black px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap">
+                        <div className="bg-green-600 text-black px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap">
                           $5.43
                         </div>
                       </div>
