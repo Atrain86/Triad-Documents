@@ -277,9 +277,9 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
           ) : (
             // View mode
             <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  {/* File type indicator */}
+              <div className="flex items-start gap-3 flex-1">
+                {/* File type indicator */}
+                <div className="flex-shrink-0 mt-0.5">
                   {receipt.filename && isPdfOrDoc(receipt.filename) ? (
                     <FileText size={16} className="text-red-400" />
                   ) : receipt.filename ? (
@@ -287,21 +287,32 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
                   ) : (
                     <Edit3 size={16} className="text-yellow-400" />
                   )}
-                  
+                </div>
+                
+                {/* Vendor, date and description aligned */}
+                <div className="flex-1 min-w-0">
                   {receipt.filename ? (
                     <button
                       onClick={() => {
                         console.log('Setting viewing receipt:', receipt);
                         setViewingReceipt(receipt);
                       }}
-                      className="text-blue-400 hover:text-blue-300 underline text-sm"
+                      className="text-blue-400 hover:text-blue-300 underline text-sm block text-left"
                     >
                       {receipt.vendor} - ${Number(receipt.amount || 0).toFixed(2)}
                     </button>
                   ) : (
-                    <span className="text-gray-200 text-sm">
+                    <div className="text-gray-200 text-sm">
                       {receipt.vendor} - ${Number(receipt.amount || 0).toFixed(2)}
-                    </span>
+                    </div>
+                  )}
+                  
+                  {receipt.date && (
+                    <p className="text-xs mt-1" style={{ color: paintBrainColors.orange }}>{formatDate(String(receipt.date))}</p>
+                  )}
+                  
+                  {receipt.description && receipt.description.trim() && (
+                    <p className="text-xs text-gray-400 mt-1">{receipt.description}</p>
                   )}
                   
                   {/* Show edit hint for PDF/doc files with minimal data */}
@@ -309,12 +320,6 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
                     <span className="text-xs text-yellow-400 italic">← Click edit to add details</span>
                   )}
                 </div>
-                {receipt.description && receipt.description.trim() && (
-                  <p className="text-xs text-gray-400 mt-1">{receipt.description}</p>
-                )}
-                {receipt.date && (
-                  <p className="text-xs" style={{ color: paintBrainColors.orange }}>{formatDate(String(receipt.date))}</p>
-                )}
               </div>
               <div className="flex items-center gap-2">
                 <button
