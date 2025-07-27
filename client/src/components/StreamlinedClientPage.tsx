@@ -183,50 +183,87 @@ function SimpleFilesList({ projectId }: { projectId: number }) {
       {/* Receipt Viewer Modal */}
       {viewingReceipt && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-95 z-50 flex items-center justify-center"
-          onClick={() => setViewingReceipt(null)}
+          className="fixed inset-0 bg-black z-[9999] flex items-center justify-center"
+          style={{ 
+            zIndex: 999999,
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.95)'
+          }}
         >
-          {/* Close Button - Multiple positions for easy access */}
+          {/* HUGE EXIT BUTTON - Top Right */}
           <button
-            onClick={(e) => {
-              e.stopPropagation();
+            onClick={() => {
+              console.log('EXIT BUTTON CLICKED!');
               setViewingReceipt(null);
             }}
-            className="fixed top-4 right-4 z-[9999] p-4 rounded-full bg-red-600 text-white hover:bg-red-700 transition-all duration-200 shadow-2xl border-2 border-white"
-            type="button"
+            className="fixed top-2 right-2 w-16 h-16 bg-red-600 text-white text-3xl font-bold rounded-full border-4 border-white shadow-2xl hover:bg-red-700"
             style={{ 
-              zIndex: 9999,
-              minWidth: '56px',
-              minHeight: '56px',
-              fontSize: '24px',
-              fontWeight: 'bold'
+              zIndex: 999999,
+              position: 'fixed',
+              top: '8px',
+              right: '8px',
+              width: '64px',
+              height: '64px',
+              fontSize: '32px',
+              lineHeight: '1'
             }}
           >
             ×
           </button>
 
-          {/* Second close button at bottom for mobile */}
+          {/* HUGE EXIT BUTTON - Bottom Center */}
           <button
-            onClick={(e) => {
-              e.stopPropagation();
+            onClick={() => {
+              console.log('BOTTOM EXIT BUTTON CLICKED!');
               setViewingReceipt(null);
             }}
-            className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-[9999] px-6 py-3 rounded-full bg-red-600 text-white hover:bg-red-700 transition-all duration-200 shadow-2xl border-2 border-white text-lg font-bold"
-            type="button"
+            className="fixed bottom-4 left-1/2 transform -translate-x-1/2 px-8 py-4 bg-red-600 text-white text-xl font-bold rounded-full border-4 border-white shadow-2xl hover:bg-red-700"
+            style={{ 
+              zIndex: 999999,
+              position: 'fixed',
+              bottom: '16px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              fontSize: '20px'
+            }}
           >
-            Close Receipt
+            CLOSE RECEIPT
           </button>
-          
-          {/* Receipt Content */}
+
+          {/* Background click to close */}
           <div 
-            className="max-w-4xl max-h-full p-4 overflow-auto"
-            onClick={(e) => e.stopPropagation()}
+            className="absolute inset-0"
+            onClick={() => {
+              console.log('BACKGROUND CLICKED!');
+              setViewingReceipt(null);
+            }}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              zIndex: 1
+            }}
+          />
+          
+          {/* Receipt Image */}
+          <div 
+            className="relative z-10 max-w-4xl max-h-full p-4 overflow-auto"
+            style={{ zIndex: 10 }}
           >
             <img 
               src={`/uploads/${viewingReceipt.filename}`} 
               alt={`Receipt from ${viewingReceipt.vendor}`}
               className="w-full h-auto max-w-full rounded-lg shadow-2xl"
-              style={{ maxHeight: 'calc(100vh - 120px)' }}
+              style={{ 
+                maxHeight: 'calc(100vh - 120px)',
+                pointerEvents: 'none'
+              }}
             />
           </div>
         </div>
