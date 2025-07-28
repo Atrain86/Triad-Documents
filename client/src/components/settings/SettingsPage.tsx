@@ -133,10 +133,17 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
     return saved || 'medium';
   });
 
+  // Timezone settings state
+  const [selectedTimezone, setSelectedTimezone] = useState(() => {
+    const saved = localStorage.getItem('selectedTimezone');
+    return saved || 'eastern';
+  });
+
   // Define sortable sections
   const [settingsSections, setSettingsSections] = useState([
     { id: 'gmail', name: 'Gmail Integration', icon: Mail, color: 'red' },
     { id: 'photo', name: 'Photo Quality', icon: Camera, color: 'orange' },
+    { id: 'timezone', name: 'Time Zone', icon: Globe, color: 'green' },
     { id: 'tax', name: 'Tax Configuration', icon: DollarSign, color: 'yellow' },
     { id: 'api', name: 'API Usage Analytics', icon: Menu, color: 'cyan' }
   ]);
@@ -291,6 +298,117 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                               <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
                             </svg>
                           </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+
+              case 'timezone':
+                return (
+                  <div>
+                    <div 
+                      className="flex items-center justify-between p-4 rounded-lg border-2 border-green-400 bg-gray-900/20 cursor-pointer hover:bg-gray-800/30 transition-colors"
+                      onClick={() => toggleSection('timezone')}
+                    >
+                      <div className="flex items-center gap-4">
+                        <Menu className="h-5 w-5 text-green-400 flex-shrink-0 drag-handle cursor-grab" />
+                        <Globe className="h-5 w-5 text-green-400" />
+                        <span className="text-lg font-medium text-green-400">Time Zone</span>
+                        <div className="px-3 py-2 rounded-full text-xs font-medium bg-green-500 text-black">
+                          {selectedTimezone === 'eastern' ? 'Eastern' : 
+                           selectedTimezone === 'central' ? 'Central' : 'Pacific'}
+                        </div>
+                      </div>
+                      <ChevronRight 
+                        className={`h-5 w-5 text-green-400 transition-transform ${
+                          expandedSection === 'timezone' ? 'rotate-90' : 'rotate-180'
+                        }`} 
+                      />
+                    </div>
+                    
+                    {expandedSection === 'timezone' && (
+                      <div className="mt-4 p-6 rounded-lg border border-green-400/30 bg-gray-900/10">
+                        <div className="space-y-4">
+                          <h3 className="text-lg font-medium text-green-400 mb-4">North American Time Zones</h3>
+                          
+                          <div className="space-y-3">
+                            {/* Eastern Time Zone */}
+                            <div 
+                              className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                                selectedTimezone === 'eastern' 
+                                  ? 'border-green-400 bg-green-400/10' 
+                                  : 'border-gray-600 hover:border-green-400/50'
+                              }`}
+                              onClick={() => {
+                                setSelectedTimezone('eastern');
+                                localStorage.setItem('selectedTimezone', 'eastern');
+                              }}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <div className="font-medium text-white">Eastern Time (ET)</div>
+                                  <div className="text-sm text-gray-400">UTC-5 (Standard) / UTC-4 (Daylight)</div>
+                                </div>
+                                <div className={`w-4 h-4 rounded-full border-2 ${
+                                  selectedTimezone === 'eastern' ? 'bg-green-400 border-green-400' : 'border-gray-400'
+                                }`} />
+                              </div>
+                            </div>
+
+                            {/* Central Time Zone */}
+                            <div 
+                              className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                                selectedTimezone === 'central' 
+                                  ? 'border-green-400 bg-green-400/10' 
+                                  : 'border-gray-600 hover:border-green-400/50'
+                              }`}
+                              onClick={() => {
+                                setSelectedTimezone('central');
+                                localStorage.setItem('selectedTimezone', 'central');
+                              }}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <div className="font-medium text-white">Central Time (CT)</div>
+                                  <div className="text-sm text-gray-400">UTC-6 (Standard) / UTC-5 (Daylight)</div>
+                                </div>
+                                <div className={`w-4 h-4 rounded-full border-2 ${
+                                  selectedTimezone === 'central' ? 'bg-green-400 border-green-400' : 'border-gray-400'
+                                }`} />
+                              </div>
+                            </div>
+
+                            {/* Pacific Time Zone */}
+                            <div 
+                              className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                                selectedTimezone === 'pacific' 
+                                  ? 'border-green-400 bg-green-400/10' 
+                                  : 'border-gray-600 hover:border-green-400/50'
+                              }`}
+                              onClick={() => {
+                                setSelectedTimezone('pacific');
+                                localStorage.setItem('selectedTimezone', 'pacific');
+                              }}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <div className="font-medium text-white">Pacific Time (PT)</div>
+                                  <div className="text-sm text-gray-400">UTC-8 (Standard) / UTC-7 (Daylight)</div>
+                                </div>
+                                <div className={`w-4 h-4 rounded-full border-2 ${
+                                  selectedTimezone === 'pacific' ? 'bg-green-400 border-green-400' : 'border-gray-400'
+                                }`} />
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="mt-4 p-3 bg-gray-800/50 rounded-lg">
+                            <p className="text-sm text-gray-400">
+                              <strong className="text-green-400">Note:</strong> This setting affects how dates and times are displayed throughout the application. 
+                              The selected timezone will be used for all date calculations and displays.
+                            </p>
+                          </div>
                         </div>
                       </div>
                     )}
