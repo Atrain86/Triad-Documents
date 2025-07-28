@@ -38,8 +38,12 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
   const [projectTitle, setProjectTitle] = useState(savedData.projectTitle || '');
   const [estimateDate, setEstimateDate] = useState(() => {
-    // Always use current date as default, regardless of saved data
-    return new Date().toISOString().split('T')[0];
+    // Always use current date as default, using local timezone
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   });
   const [showCalendar, setShowCalendar] = useState(false);
 
