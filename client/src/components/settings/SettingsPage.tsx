@@ -242,7 +242,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                       </div>
                       <ChevronRight 
                         className={`h-5 w-5 text-red-400 transition-transform ${
-                          expandedSection === 'gmail' ? 'rotate-90' : 'rotate-0'
+                          expandedSection === 'gmail' ? 'rotate-90' : 'rotate-180'
                         }`} 
                       />
                     </div>
@@ -320,7 +320,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                       </div>
                       <ChevronRight 
                         className={`h-5 w-5 text-yellow-400 transition-transform ${
-                          expandedSection === 'tax' ? 'rotate-90' : 'rotate-0'
+                          expandedSection === 'tax' ? 'rotate-90' : 'rotate-180'
                         }`} 
                       />
                     </div>
@@ -352,7 +352,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                       </div>
                       <ChevronRight 
                         className={`h-5 w-5 text-orange-400 transition-transform ${
-                          expandedSection === 'photo' ? 'rotate-90' : 'rotate-0'
+                          expandedSection === 'photo' ? 'rotate-90' : 'rotate-180'
                         }`} 
                       />
                     </div>
