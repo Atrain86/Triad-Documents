@@ -54,6 +54,8 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
   // Additional services
   const [additionalServices, setAdditionalServices] = useState(savedData.additionalServices || [
+    { name: 'Pressure Washing', hours: '', rate: 60 },
+    { name: 'Drywall Repair', hours: '', rate: 60 },
     { name: 'Wood Reconditioning', hours: '', rate: 60 }
   ]);
 
@@ -136,6 +138,18 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   const removeLabor = (index: number) => {
     if (additionalLabor.length > 1) {
       setAdditionalLabor(additionalLabor.filter((_: any, i: number) => i !== index));
+    }
+  };
+
+  // Add new additional service
+  const addAdditionalService = () => {
+    setAdditionalServices([...additionalServices, { name: '', hours: '', rate: 60 }]);
+  };
+
+  // Remove additional service
+  const removeAdditionalService = (index: number) => {
+    if (additionalServices.length > 1) {
+      setAdditionalServices(additionalServices.filter((_: any, i: number) => i !== index));
     }
   };
 
@@ -287,6 +301,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                       type="number"
                       inputMode="decimal"
                       step="0.5"
+                      min="0"
                       value={stage.hours}
                       onChange={(e) => updateWorkStage(index, 'hours', e.target.value)}
                       placeholder="0"
@@ -297,6 +312,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     <label className="block text-sm font-medium mb-2">Rate/Hour</label>
                     <Input
                       type="number"
+                      min="0"
                       value={stage.rate}
                       onChange={(e) => updateWorkStage(index, 'rate', e.target.value)}
                       className="bg-gray-700 border-gray-600 text-white"
@@ -326,6 +342,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     type="number"
                     inputMode="decimal"
                     step="0.01"
+                    min="0"
                     value={paintCosts.pricePerGallon}
                     onChange={(e) => setPaintCosts((prev: any) => ({ ...prev, pricePerGallon: e.target.value }))}
                     placeholder="0.00"
@@ -338,6 +355,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     type="number"
                     inputMode="decimal"
                     step="0.25"
+                    min="0"
                     value={paintCosts.gallons}
                     onChange={(e) => setPaintCosts((prev: any) => ({ ...prev, gallons: e.target.value }))}
                     placeholder="0"
@@ -398,6 +416,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                       type="number"
                       inputMode="decimal"
                       step="0.5"
+                      min="0"
                       value={member.hours}
                       onChange={(e) => updateAdditionalLabor(index, 'hours', e.target.value)}
                       placeholder="0"
@@ -408,6 +427,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     <label className="block text-sm font-medium mb-2">Rate/Hour</label>
                     <Input
                       type="number"
+                      min="0"
                       value={member.rate}
                       onChange={(e) => updateAdditionalLabor(index, 'rate', e.target.value)}
                       placeholder="0"
@@ -439,14 +459,28 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
           {/* Additional Services */}
           <Card className="bg-gray-900 border-gray-700">
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-[#DCDCAA]">Additional Services</CardTitle>
+              <Button
+                onClick={addAdditionalService}
+                size="sm"
+                className="bg-[#DCDCAA] hover:bg-[#C7C594] text-black"
+              >
+                <Plus className="w-4 h-4 mr-1" />
+                + Services
+              </Button>
             </CardHeader>
             <CardContent className="space-y-4">
               {additionalServices.map((service: any, index: number) => (
-                <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-800 rounded-lg">
+                <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-800 rounded-lg border border-[#DCDCAA]">
                   <div>
-                    <label className="block text-sm font-medium mb-2">{service.name}</label>
+                    <label className="block text-sm font-medium mb-2">Service Name</label>
+                    <Input
+                      value={service.name}
+                      onChange={(e) => updateAdditionalService(index, 'name', e.target.value)}
+                      placeholder="Enter service name"
+                      className="bg-gray-700 border-gray-600 text-white"
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-2">Hours</label>
@@ -454,6 +488,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                       type="number"
                       inputMode="decimal"
                       step="0.5"
+                      min="0"
                       value={service.hours}
                       onChange={(e) => updateAdditionalService(index, 'hours', e.target.value)}
                       placeholder="0"
@@ -464,17 +499,31 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     <label className="block text-sm font-medium mb-2">Rate/Hour</label>
                     <Input
                       type="number"
+                      min="0"
                       value={service.rate}
                       onChange={(e) => updateAdditionalService(index, 'rate', e.target.value)}
+                      placeholder="0"
                       className="bg-gray-700 border-gray-600 text-white"
                     />
                   </div>
-                  <div className="md:col-span-3 text-right text-[#6A9955] font-semibold">
-                    Total: ${((parseFloat(service.hours) || 0) * (parseFloat(service.rate.toString()) || 0)).toFixed(2)}
+                  <div className="flex flex-col justify-between">
+                    <div className="text-right text-[#6A9955] font-semibold mb-2">
+                      Total: ${((parseFloat(service.hours) || 0) * (parseFloat(service.rate.toString()) || 0)).toFixed(2)}
+                    </div>
+                    {additionalServices.length > 1 && (
+                      <Button
+                        onClick={() => removeAdditionalService(index)}
+                        size="sm"
+                        variant="destructive"
+                        className="ml-auto"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
                   </div>
                 </div>
               ))}
-              <div className="text-right text-lg font-semibold text-[#6A9955]">
+              <div className="text-right text-lg font-semibold text-[#DCDCAA]">
                 Additional Services: ${additionalServicesSubtotal.toFixed(2)}
               </div>
             </CardContent>
