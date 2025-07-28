@@ -268,7 +268,7 @@ export default function StreamlinedHomepage({
               onClick={onAccessSettings}
               variant="ghost"
               size="sm"
-              className="text-gray-400 hover:text-white"
+              className="text-cyan-400 hover:text-cyan-300"
               title="Settings"
             >
               <Settings size={18} />
