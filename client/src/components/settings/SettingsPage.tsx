@@ -642,8 +642,8 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                         <span className="text-lg font-medium text-cyan-400 whitespace-nowrap">API Usage</span>
                       </div>
                       
-                      <div className="flex-1 flex justify-center items-center">
-                        <div className="text-cyan-400 text-xl font-semibold">
+                      <div className="flex-1 flex justify-end items-center pr-4">
+                        <div className="text-cyan-400 text-lg font-medium">
                           $5.43
                         </div>
                       </div>
