@@ -174,18 +174,11 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
     return saved || 'eastern';
   });
 
-  // Pay rate settings state
-  const [hourlyRate, setHourlyRate] = useState(() => {
-    const saved = localStorage.getItem('hourlyRate');
-    return saved ? parseFloat(saved) : 60;
-  });
-
   // Define sortable sections
   const [settingsSections, setSettingsSections] = useState([
     { id: 'gmail', name: 'Gmail Integration', icon: Mail, color: 'red' },
     { id: 'photo', name: 'Photo Quality', icon: Camera, color: 'orange' },
     { id: 'timezone', name: 'Time Zone', icon: Globe, color: 'green' },
-    { id: 'payrate', name: 'Pay Rate', icon: DollarSign, color: 'purple' },
     { id: 'tax', name: 'Tax Configuration', icon: DollarSign, color: 'yellow' },
     { id: 'api', name: 'API Usage Analytics', icon: Menu, color: 'cyan' }
   ]);
@@ -449,89 +442,6 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                             <p className="text-sm text-gray-400">
                               <strong className="text-green-400">Note:</strong> This setting affects how dates and times are displayed throughout the application. 
                               The selected timezone will be used for all date calculations and displays.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-
-              case 'payrate':
-                return (
-                  <div>
-                    <div 
-                      className="flex items-center justify-between p-4 rounded-lg border-2 border-purple-400 bg-gray-900/20 cursor-pointer hover:bg-gray-800/30 transition-colors"
-                      onClick={() => toggleSection('payrate')}
-                    >
-                      <div className="flex items-center gap-4">
-                        <Menu className="h-5 w-5 text-purple-400 flex-shrink-0 drag-handle cursor-grab" />
-                        <DollarSign className="h-5 w-5 text-purple-400" />
-                        <span className="text-lg font-medium text-purple-400">Pay Rate</span>
-                        <div className="px-3 py-2 rounded-full text-xs font-medium bg-purple-500 text-black">
-                          ${hourlyRate}/hr
-                        </div>
-                      </div>
-                      <ChevronRight 
-                        className={`h-5 w-5 text-purple-400 transition-transform ${
-                          expandedSection === 'payrate' ? 'rotate-90' : 'rotate-180'
-                        }`} 
-                      />
-                    </div>
-                    
-                    {expandedSection === 'payrate' && (
-                      <div className="mt-4 p-6 rounded-lg border border-purple-400/30 bg-gray-900/10">
-                        <div className="space-y-4">
-                          <h3 className="text-lg font-medium text-purple-400 mb-4">Hourly Rate Configuration</h3>
-                          
-                          <div className="space-y-4">
-                            <div>
-                              <label className="block text-sm font-medium text-purple-300 mb-2">
-                                Your Hourly Rate (CAD)
-                              </label>
-                              <div className="flex items-center gap-3">
-                                <span className="text-purple-400 text-lg">$</span>
-                                <input
-                                  type="number"
-                                  min="0"
-                                  step="0.50"
-                                  value={hourlyRate}
-                                  onChange={(e) => {
-                                    const newRate = parseFloat(e.target.value) || 0;
-                                    setHourlyRate(newRate);
-                                    localStorage.setItem('hourlyRate', newRate.toString());
-                                  }}
-                                  className="flex-1 px-3 py-2 bg-gray-800 border border-purple-400/30 rounded-lg text-white focus:border-purple-400 focus:outline-none focus:ring-1 focus:ring-purple-400"
-                                  placeholder="60.00"
-                                />
-                                <span className="text-purple-400 text-sm">/hour</span>
-                              </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                              {[50, 60, 75, 85].map((rate) => (
-                                <button
-                                  key={rate}
-                                  onClick={() => {
-                                    setHourlyRate(rate);
-                                    localStorage.setItem('hourlyRate', rate.toString());
-                                  }}
-                                  className={`p-2 rounded-lg border text-sm transition-colors ${
-                                    hourlyRate === rate
-                                      ? 'border-purple-400 bg-purple-400/10 text-purple-300'
-                                      : 'border-gray-600 hover:border-purple-400/50 text-gray-300'
-                                  }`}
-                                >
-                                  ${rate}/hr
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-
-                          <div className="mt-4 p-3 bg-gray-800/50 rounded-lg">
-                            <p className="text-sm text-gray-400">
-                              <strong className="text-purple-400">Note:</strong> This rate will be used throughout the app for estimates, invoices, and daily hours calculations. 
-                              You can adjust it anytime based on different job types or skill levels.
                             </p>
                           </div>
                         </div>
