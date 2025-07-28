@@ -7,11 +7,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useMutation } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
-import { Download, Mail, Plus, Trash2 } from 'lucide-react';
+import { Download, Mail, Plus, Trash2, Calendar } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { apiRequest } from '@/lib/queryClient';
 import type { Project } from '@shared/schema';
+import PaintBrainCalendar from '@/components/PaintBrainCalendar';
 
 interface EstimateGeneratorProps {
   project: Project;
@@ -37,6 +38,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
   const [projectTitle, setProjectTitle] = useState(savedData.projectTitle || '');
   const [estimateDate, setEstimateDate] = useState(savedData.estimateDate || new Date().toISOString().split('T')[0]);
+  const [showCalendar, setShowCalendar] = useState(false);
 
   // Work stages state with localStorage persistence
   const [workStages, setWorkStages] = useState(savedData.workStages || [
@@ -282,12 +284,30 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-2">Date</label>
-                  <Input
-                    type="date"
-                    value={estimateDate}
-                    onChange={(e) => setEstimateDate(e.target.value)}
-                    className="bg-gray-800 border-[#8B5FBF] text-white"
-                  />
+                  <div className="relative">
+                    <Button
+                      type="button"
+                      onClick={() => setShowCalendar(!showCalendar)}
+                      className="w-full bg-gray-800 border-[#8B5FBF] text-white hover:bg-gray-700 justify-start"
+                      variant="outline"
+                    >
+                      <Calendar className="w-4 h-4 mr-2" />
+                      {estimateDate ? new Date(estimateDate).toLocaleDateString() : 'Select date'}
+                    </Button>
+                    
+                    {showCalendar && (
+                      <div className="absolute top-full left-0 z-50 mt-1 bg-black border border-gray-700 rounded-lg shadow-lg">
+                        <PaintBrainCalendar
+                          selectedDate={estimateDate}
+                          onDateSelect={(date: string) => {
+                            setEstimateDate(date);
+                            setShowCalendar(false);
+                          }}
+                          maxDate={undefined}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </CardContent>
