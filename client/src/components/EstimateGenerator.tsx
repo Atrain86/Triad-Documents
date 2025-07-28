@@ -37,24 +37,23 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     }
   };
 
-  // Clear any old date data from localStorage on component mount
+  // Force clear all estimate form data and ensure fresh date on component mount
   useEffect(() => {
-    const clearOldDateData = () => {
-      try {
-        const saved = localStorage.getItem('estimateFormData');
-        if (saved) {
-          const data = JSON.parse(saved);
-          if (data.estimateDate) {
-            delete data.estimateDate;
-            localStorage.setItem('estimateFormData', JSON.stringify(data));
-          }
-        }
-      } catch (error) {
-        console.log('Error cleaning old date data:', error);
-      }
-    };
-    clearOldDateData();
-  }, []);
+    if (isOpen) {
+      // Clear all localStorage data to prevent old date persistence
+      localStorage.removeItem('estimateFormData');
+      
+      // Force reset estimate date to current date
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      const currentDate = `${year}-${month}-${day}`;
+      
+      setEstimateDate(currentDate);
+      console.log('Forced current date update:', currentDate);
+    }
+  }, [isOpen]);
 
   const savedData = loadSavedData();
 
