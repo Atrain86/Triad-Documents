@@ -446,20 +446,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           {/* Paint & Materials */}
           <Card className="bg-gray-900 border-gray-700">
             <CardHeader className="flex flex-row items-center justify-between cursor-pointer" onClick={() => toggleSection('materials')}>
-              <div className="flex items-center gap-4">
-                <CardTitle className="text-[#D4A574]">Paint & Materials</CardTitle>
-                <Button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    addCustomSupply();
-                  }}
-                  size="sm"
-                  className="bg-[#D4A574] hover:bg-[#C19660] text-black px-3 py-1"
-                >
-                  <Plus className="w-4 h-4 mr-1" />
-                  Supplies
-                </Button>
-              </div>
+              <CardTitle className="text-[#D4A574]">Paint & Materials</CardTitle>
               {collapsedSections.materials ? (
                 <ChevronLeft className="w-5 h-5 text-gray-400" />
               ) : (
@@ -468,6 +455,14 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             </CardHeader>
             {!collapsedSections.materials && (
             <CardContent className="space-y-4">
+              <Button
+                onClick={addCustomSupply}
+                size="sm"
+                className="bg-[#D4A574] hover:bg-[#C19660] text-black px-3 py-1"
+              >
+                <Plus className="w-4 h-4 mr-1" />
+                Supplies
+              </Button>
               {/* Paint Costs Section */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-800 rounded-lg border border-[#D4A574]">
                 <div>
@@ -584,20 +579,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           {/* Additional Labor (Crew Members) */}
           <Card className="bg-gray-900 border-gray-700">
             <CardHeader className="flex flex-row items-center justify-between cursor-pointer" onClick={() => toggleSection('additionalLabor')}>
-              <div className="flex items-center gap-4">
-                <CardTitle className="text-[#4ECDC4]">Additional Labor</CardTitle>
-                <Button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    addLabor();
-                  }}
-                  size="sm"
-                  className="bg-[#4ECDC4] hover:bg-[#3EB8B8] text-black"
-                >
-                  <Plus className="w-4 h-4 mr-1" />
-                  Add Crew
-                </Button>
-              </div>
+              <CardTitle className="text-[#4ECDC4]">Additional Labor</CardTitle>
               {collapsedSections.additionalLabor ? (
                 <ChevronLeft className="w-5 h-5 text-gray-400" />
               ) : (
@@ -606,6 +588,14 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             </CardHeader>
             {!collapsedSections.additionalLabor && (
             <CardContent className="space-y-4">
+              <Button
+                onClick={addLabor}
+                size="sm"
+                className="bg-[#4ECDC4] hover:bg-[#3EB8B8] text-black"
+              >
+                <Plus className="w-4 h-4 mr-1" />
+                Add Crew
+              </Button>
               {additionalLabor.map((member: any, index: number) => (
                 <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-800 rounded-lg border border-[#4ECDC4]">
                   <div>
@@ -668,20 +658,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           {/* Additional Services */}
           <Card className="bg-gray-900 border-gray-700">
             <CardHeader className="flex flex-row items-center justify-between cursor-pointer" onClick={() => toggleSection('additionalServices')}>
-              <div className="flex items-center gap-4">
-                <CardTitle className="text-[#DCDCAA]">Additional Services</CardTitle>
-                <Button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    addAdditionalService();
-                  }}
-                  size="sm"
-                  className="bg-[#DCDCAA] hover:bg-[#C7C594] text-black px-3 py-1"
-                >
-                  <Plus className="w-5 h-5 mr-1" />
-                  Services
-                </Button>
-              </div>
+              <CardTitle className="text-[#DCDCAA]">Additional Services</CardTitle>
               {collapsedSections.additionalServices ? (
                 <ChevronLeft className="w-5 h-5 text-gray-400" />
               ) : (
@@ -690,6 +667,14 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             </CardHeader>
             {!collapsedSections.additionalServices && (
             <CardContent className="space-y-4">
+              <Button
+                onClick={addAdditionalService}
+                size="sm"
+                className="bg-[#DCDCAA] hover:bg-[#C7C594] text-black px-3 py-1"
+              >
+                <Plus className="w-5 h-5 mr-1" />
+                Services
+              </Button>
               {additionalServices.map((service: any, index: number) => (
                 <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-800 rounded-lg border border-[#DCDCAA]">
                   <div>
