@@ -54,7 +54,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
   // Additional services
   const [additionalServices, setAdditionalServices] = useState(savedData.additionalServices || [
-    { name: 'Power Washing', hours: '', rate: 60 },
+    { name: 'Pressure Washing', hours: '', rate: 60 },
     { name: 'Drywall Repair', hours: '', rate: 60 },
     { name: 'Wood Reconditioning', hours: '', rate: 60 }
   ]);
