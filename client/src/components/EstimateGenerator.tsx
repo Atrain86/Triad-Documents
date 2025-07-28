@@ -103,6 +103,11 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     { name: '', hours: '', rate: '' }
   ]);
 
+  // Custom supplies state
+  const [customSupplies, setCustomSupplies] = useState(savedData.customSupplies || [
+    { name: '', quantity: '', pricePerUnit: '' }
+  ]);
+
   // Toggle state for action buttons
   const [actionMode, setActionMode] = useState<'download' | 'email'>('email');
 
@@ -113,11 +118,12 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       // Exclude estimateDate from saving to ensure current date is always used
       workStages,
       paintCosts,
+      customSupplies,
       additionalServices,
       additionalLabor
     };
     localStorage.setItem('estimateFormData', JSON.stringify(formData));
-  }, [projectTitle, workStages, paintCosts, additionalServices, additionalLabor]);
+  }, [projectTitle, workStages, paintCosts, customSupplies, additionalServices, additionalLabor]);
 
   // Load global tax configuration from localStorage
   const getGlobalTaxConfig = () => {
@@ -173,6 +179,25 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     setAdditionalLabor([...additionalLabor, { name: '', hours: '', rate: '' }]);
   };
 
+  // Update custom supply
+  const updateCustomSupply = (index: number, field: string, value: string) => {
+    const updated = [...customSupplies];
+    updated[index] = { ...updated[index], [field]: value };
+    setCustomSupplies(updated);
+  };
+
+  // Add new custom supply
+  const addCustomSupply = () => {
+    setCustomSupplies([...customSupplies, { name: '', quantity: '', pricePerUnit: '' }]);
+  };
+
+  // Remove custom supply
+  const removeCustomSupply = (index: number) => {
+    if (customSupplies.length > 1) {
+      setCustomSupplies(customSupplies.filter((_: any, i: number) => i !== index));
+    }
+  };
+
   // Remove crew member
   const removeLabor = (index: number) => {
     if (additionalLabor.length > 1) {
@@ -215,7 +240,13 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                        (parseFloat(paintCosts.gallons) || 0) * 
                        (parseFloat(paintCosts.coats) || 1);
 
-  const subtotal = laborSubtotal + additionalServicesSubtotal + additionalLaborSubtotal + paintSubtotal;
+  const customSuppliesSubtotal = customSupplies.reduce((total: number, supply: any) => {
+    return total + ((parseFloat(supply.quantity) || 0) * (parseFloat(supply.pricePerUnit) || 0));
+  }, 0);
+
+  const paintAndMaterialsSubtotal = paintSubtotal + customSuppliesSubtotal;
+
+  const subtotal = laborSubtotal + additionalServicesSubtotal + additionalLaborSubtotal + paintAndMaterialsSubtotal;
   const taxAmount = subtotal * (taxConfig.gst + taxConfig.pst + taxConfig.hst + taxConfig.salesTax + taxConfig.vat + taxConfig.otherTax) / 100;
   const grandTotal = subtotal + taxAmount;
 
@@ -391,11 +422,20 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
           {/* Paint & Materials */}
           <Card className="bg-gray-900 border-gray-700">
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-[#D4A574]">Paint & Materials</CardTitle>
+              <Button
+                onClick={addCustomSupply}
+                size="sm"
+                className="bg-[#D4A574] hover:bg-[#C19660] text-black px-3 py-1"
+              >
+                <Plus className="w-4 h-4 mr-1" />
+                Supplies
+              </Button>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-800 rounded-lg">
+              {/* Paint Costs Section */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-800 rounded-lg border border-[#D4A574]">
                 <div>
                   <label className="block text-sm font-medium mb-2">Price per Gallon</label>
                   <Input
@@ -441,6 +481,67 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                 <div className="md:col-span-3 text-right text-[#6A9955] font-semibold">
                   Paint Total: ${paintSubtotal.toFixed(2)}
                 </div>
+              </div>
+
+              {/* Custom Supplies Section */}
+              {customSupplies.map((supply: any, index: number) => (
+                <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-800 rounded-lg border border-[#D4A574]">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Supply Item</label>
+                    <Input
+                      value={supply.name}
+                      onChange={(e) => updateCustomSupply(index, 'name', e.target.value)}
+                      placeholder="Enter item name"
+                      className="bg-gray-700 border-[#D4A574] text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Quantity</label>
+                    <Input
+                      type="number"
+                      inputMode="decimal"
+                      step="0.1"
+                      min="0"
+                      value={supply.quantity}
+                      onChange={(e) => updateCustomSupply(index, 'quantity', e.target.value)}
+                      placeholder="0"
+                      className="bg-gray-700 border-[#D4A574] text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Price per Unit</label>
+                    <Input
+                      type="number"
+                      inputMode="decimal"
+                      step="0.01"
+                      min="0"
+                      value={supply.pricePerUnit}
+                      onChange={(e) => updateCustomSupply(index, 'pricePerUnit', e.target.value)}
+                      placeholder="0.00"
+                      className="bg-gray-700 border-[#D4A574] text-white"
+                    />
+                  </div>
+                  <div className="flex flex-col justify-between">
+                    <div className="text-right text-[#6A9955] font-semibold mb-2">
+                      Total: ${((parseFloat(supply.quantity) || 0) * (parseFloat(supply.pricePerUnit) || 0)).toFixed(2)}
+                    </div>
+                    {customSupplies.length > 1 && (
+                      <Button
+                        onClick={() => removeCustomSupply(index)}
+                        size="sm"
+                        variant="destructive"
+                        className="ml-auto"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
+
+              {/* Total Materials Section */}
+              <div className="text-right text-lg font-semibold text-[#D4A574]">
+                Total Materials: ${paintAndMaterialsSubtotal.toFixed(2)}
               </div>
             </CardContent>
           </Card>
@@ -605,10 +706,10 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                   <span>${additionalLaborSubtotal.toFixed(2)}</span>
                 </div>
               )}
-              {paintSubtotal > 0 && (
+              {paintAndMaterialsSubtotal > 0 && (
                 <div className="flex justify-between">
                   <span>Paint & Materials:</span>
-                  <span>${paintSubtotal.toFixed(2)}</span>
+                  <span>${paintAndMaterialsSubtotal.toFixed(2)}</span>
                 </div>
               )}
               {additionalServicesSubtotal > 0 && (
@@ -709,14 +810,25 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           )}
 
           {/* Paint & Materials Section */}
-          {paintSubtotal > 0 && (
+          {paintAndMaterialsSubtotal > 0 && (
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-[#D4A574] mb-4 border-b border-[#D4A574] pb-2">
                 Paint & Materials
               </h3>
-              <div className="flex justify-between mb-2">
-                <span>Paint ({paintCosts.gallons} gallons @ ${paintCosts.pricePerGallon}/gal, {paintCosts.coats} coats)</span>
-                <span>${paintSubtotal.toFixed(2)}</span>
+              {paintSubtotal > 0 && (
+                <div className="flex justify-between mb-2">
+                  <span>Paint ({paintCosts.gallons} gallons @ ${paintCosts.pricePerGallon}/gal, {paintCosts.coats} coats)</span>
+                  <span>${paintSubtotal.toFixed(2)}</span>
+                </div>
+              )}
+              {customSupplies.filter((supply: any) => parseFloat(supply.quantity) > 0 && parseFloat(supply.pricePerUnit) > 0).map((supply: any, index: number) => (
+                <div key={index} className="flex justify-between mb-2">
+                  <span>{supply.name} ({supply.quantity} units @ ${supply.pricePerUnit}/unit)</span>
+                  <span>${((parseFloat(supply.quantity) || 0) * (parseFloat(supply.pricePerUnit) || 0)).toFixed(2)}</span>
+                </div>
+              ))}
+              <div className="text-right font-semibold text-[#6A9955] mt-2">
+                Materials Subtotal: ${paintAndMaterialsSubtotal.toFixed(2)}
               </div>
             </div>
           )}
