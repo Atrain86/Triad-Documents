@@ -37,6 +37,25 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     }
   };
 
+  // Clear any old date data from localStorage on component mount
+  useEffect(() => {
+    const clearOldDateData = () => {
+      try {
+        const saved = localStorage.getItem('estimateFormData');
+        if (saved) {
+          const data = JSON.parse(saved);
+          if (data.estimateDate) {
+            delete data.estimateDate;
+            localStorage.setItem('estimateFormData', JSON.stringify(data));
+          }
+        }
+      } catch (error) {
+        console.log('Error cleaning old date data:', error);
+      }
+    };
+    clearOldDateData();
+  }, []);
+
   const savedData = loadSavedData();
 
   const [projectTitle, setProjectTitle] = useState(savedData.projectTitle || '');
@@ -88,18 +107,18 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   // Toggle state for action buttons
   const [actionMode, setActionMode] = useState<'download' | 'email'>('email');
 
-  // Save form data to localStorage whenever state changes
+  // Save form data to localStorage whenever state changes (excluding date)
   useEffect(() => {
     const formData = {
       projectTitle,
-      estimateDate,
+      // Exclude estimateDate from saving to ensure current date is always used
       workStages,
       paintCosts,
       additionalServices,
       additionalLabor
     };
     localStorage.setItem('estimateFormData', JSON.stringify(formData));
-  }, [projectTitle, estimateDate, workStages, paintCosts, additionalServices, additionalLabor]);
+  }, [projectTitle, workStages, paintCosts, additionalServices, additionalLabor]);
 
   // Load global tax configuration from localStorage
   const getGlobalTaxConfig = () => {
