@@ -478,7 +478,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                 return (
                   <div>
                     <div 
-                      className="flex items-center justify-between p-4 rounded-lg border-2 border-cyan-400 bg-gray-900/20 cursor-pointer hover:bg-gray-800/30 transition-colors"
+                      className="flex items-center p-4 rounded-lg border-2 border-cyan-400 bg-gray-900/20 cursor-pointer hover:bg-gray-800/30 transition-colors"
                       onClick={() => toggleSection('api')}
                     >
                       <div className="flex items-center gap-4">
@@ -488,13 +488,17 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                         </svg>
                         <span className="text-lg font-medium text-cyan-400 whitespace-nowrap">API Usage</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <div className="bg-green-600 text-black px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap">
+                      
+                      <div className="flex-1 flex justify-center items-center gap-6">
+                        <div className="text-cyan-400 text-xl font-semibold">
                           103,409 Tokens
                         </div>
-                        <div className="bg-green-600 text-black px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap">
+                        <div className="text-cyan-400 text-xl font-semibold">
                           $5.43
                         </div>
+                      </div>
+                      
+                      <div className="flex items-center">
                         <ChevronRight 
                           className={`h-5 w-5 text-cyan-400 transition-transform ${
                             expandedSection === 'api' ? 'rotate-90' : 'rotate-0'
