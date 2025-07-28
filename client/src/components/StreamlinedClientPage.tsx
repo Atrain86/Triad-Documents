@@ -1315,7 +1315,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                           case 'dailyHours': {
                             const totalHours = dailyHours.reduce((sum, entry) => sum + (typeof entry.hours === 'number' ? entry.hours : parseFloat(entry.hours) || 0), 0);
                             const totalEarnings = totalHours * (project?.hourlyRate || 60);
-                            return `${Math.round(totalHours)} hrs • $${totalEarnings.toLocaleString()}`;
+                            return `${totalHours.toFixed(1)} hrs • $${totalEarnings.toLocaleString()}`;
                           }
                           case 'receipts': 
                             return `${itemCount} receipt${itemCount !== 1 ? 's' : ''}`;
