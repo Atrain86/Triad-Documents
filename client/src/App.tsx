@@ -42,10 +42,9 @@ function AppContent() {
     );
   }
 
-  // Temporarily bypass authentication for direct app access
-  // if (!user) {
-  //   return <LoginForm />;
-  // }
+  if (!user) {
+    return <LoginForm />;
+  }
 
   return (
     <div className="min-h-screen bg-background">

@@ -260,14 +260,9 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                               </div>
                             )}
                             <div 
-                              className={`relative w-10 h-5 rounded-full transition-colors cursor-pointer ${
-                                gmailStatus?.connected ? 'bg-green-500' : 'bg-red-500'
+                              className={`relative w-10 h-5 rounded-full transition-colors ${
+                                gmailStatus?.connected ? 'bg-green-500 cursor-default' : 'bg-red-500 cursor-not-allowed'
                               }`}
-                              onClick={() => {
-                                if (!gmailStatus?.connected) {
-                                  window.open('/api/gmail/auth/1', '_blank');
-                                }
-                              }}
                             >
                               <div 
                                 className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-transform ${
