@@ -43,9 +43,15 @@ const RecentActivityContent: React.FC = () => {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
     });
+  };
+
+  const cleanOperationName = (operation: string): string => {
+    return operation
+      .replace('_', ' ')
+      .replace(/receipt/gi, '')
+      .replace(/\s+/g, ' ')
+      .trim();
   };
 
   return (
@@ -53,7 +59,7 @@ const RecentActivityContent: React.FC = () => {
       {recentUsageLoading ? (
         <div className="space-y-3">
           {[...Array(5)].map((_, i) => (
-            <div key={i} className="animate-pulse bg-transparent p-4 rounded-lg border border-purple-600/30">
+            <div key={i} className="animate-pulse bg-transparent p-4 rounded-lg border border-cyan-600/30">
               <div className="flex justify-between items-center">
                 <div className="flex-1">
                   <div className="h-4 bg-gray-600 rounded mb-2 w-32"></div>
@@ -67,27 +73,24 @@ const RecentActivityContent: React.FC = () => {
       ) : recentUsage && recentUsage.length > 0 ? (
         <div className="space-y-3">
           {recentUsage.slice(0, 8).map((entry) => (
-            <div key={entry.id} className="bg-transparent p-4 rounded-lg border border-purple-600/30">
+            <div key={entry.id} className="bg-transparent p-4 rounded-lg border border-cyan-600/30">
               <div className="flex justify-between items-center">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <p className="font-medium text-purple-200 capitalize">{entry.operation.replace('_', ' ')}</p>
-                    <span className="text-xs px-2 py-1 bg-purple-500/20 text-black rounded">
-                      {formatNumber(entry.tokensUsed)} tokens
-                    </span>
+                    <p className="font-medium text-cyan-200 capitalize">{cleanOperationName(entry.operation)}</p>
                   </div>
-                  <p className="text-sm text-purple-400">{formatDate(entry.createdAt)}</p>
+                  <p className="text-sm text-cyan-400">{formatDate(entry.createdAt)}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold text-indigo-300">{formatCurrency(entry.estimatedCost)}</p>
+                  <p className="font-semibold text-cyan-300">{formatCurrency(entry.estimatedCost)}</p>
                 </div>
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <div className="bg-transparent p-4 rounded-lg border border-purple-600/30">
-          <p className="text-purple-400 text-center">No recent activity</p>
+        <div className="bg-transparent p-4 rounded-lg border border-cyan-600/30">
+          <p className="text-cyan-400 text-center">No recent activity</p>
         </div>
       )}
     </>
@@ -135,8 +138,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
     { id: 'gmail', name: 'Gmail Integration', icon: Mail, color: 'red' },
     { id: 'photo', name: 'Photo Quality', icon: Camera, color: 'orange' },
     { id: 'tax', name: 'Tax Configuration', icon: DollarSign, color: 'yellow' },
-    { id: 'api', name: 'API Usage Analytics', icon: Menu, color: 'cyan' },
-    { id: 'activity', name: 'Recent Activity', icon: Info, color: 'purple' }
+    { id: 'api', name: 'API Usage Analytics', icon: Menu, color: 'cyan' }
   ]);
 
   // Re-check tax configuration when component mounts or localStorage changes
@@ -474,8 +476,11 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
 
               case 'api':
                 return (
-                  <div className="p-4 rounded-lg border-2 border-cyan-400 bg-gray-900/20">
-                    <div className="flex items-center justify-between">
+                  <div>
+                    <div 
+                      className="flex items-center justify-between p-4 rounded-lg border-2 border-cyan-400 bg-gray-900/20 cursor-pointer hover:bg-gray-800/30 transition-colors"
+                      onClick={() => toggleSection('api')}
+                    >
                       <div className="flex items-center gap-4">
                         <Menu className="h-5 w-5 text-cyan-400 flex-shrink-0 drag-handle cursor-grab" />
                         <svg className="h-5 w-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -490,39 +495,23 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                         <div className="bg-green-600 text-black px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap">
                           $5.43
                         </div>
+                        <ChevronRight 
+                          className={`h-5 w-5 text-cyan-400 transition-transform ${
+                            expandedSection === 'api' ? 'rotate-90' : 'rotate-0'
+                          }`} 
+                        />
                       </div>
-                    </div>
-                  </div>
-                );
-
-              case 'activity':
-                return (
-                  <div>
-                    <div 
-                      className="flex items-center justify-between p-4 rounded-lg border-2 border-purple-400 bg-gray-900/20 cursor-pointer hover:bg-gray-800/30 transition-colors"
-                      onClick={() => toggleSection('activity')}
-                    >
-                      <div className="flex items-center gap-4">
-                        <Menu className="h-5 w-5 text-purple-400 flex-shrink-0 drag-handle cursor-grab" />
-                        <svg className="h-5 w-5 text-purple-400" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/>
-                        </svg>
-                        <span className="text-lg font-medium text-purple-400">Recent Activity</span>
-                      </div>
-                      <ChevronRight 
-                        className={`h-5 w-5 text-purple-400 transition-transform ${
-                          expandedSection === 'activity' ? 'rotate-90' : 'rotate-0'
-                        }`} 
-                      />
                     </div>
                     
-                    {expandedSection === 'activity' && (
-                      <div className="mt-4 p-6 rounded-lg border border-purple-400/30 bg-gray-900/10">
+                    {expandedSection === 'api' && (
+                      <div className="mt-4 p-6 rounded-lg border border-cyan-400/30 bg-gray-900/10">
                         <RecentActivityContent />
                       </div>
                     )}
                   </div>
                 );
+
+
 
               default:
                 return null;
