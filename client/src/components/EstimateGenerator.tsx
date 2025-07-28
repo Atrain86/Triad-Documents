@@ -28,7 +28,10 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   const loadSavedData = () => {
     try {
       const saved = localStorage.getItem('estimateFormData');
-      return saved ? JSON.parse(saved) : {};
+      const data = saved ? JSON.parse(saved) : {};
+      // Always exclude the date from saved data to ensure current date is used
+      delete data.estimateDate;
+      return data;
     } catch {
       return {};
     }
