@@ -42,9 +42,10 @@ function AppContent() {
     );
   }
 
-  if (!user) {
-    return <LoginForm />;
-  }
+  // Temporarily bypass authentication for direct app access
+  // if (!user) {
+  //   return <LoginForm />;
+  // }
 
   return (
     <div className="min-h-screen bg-background">
@@ -52,7 +53,7 @@ function AppContent() {
         {currentView === "home" && (
           <StreamlinedHomepage 
             onSelectProject={handleSelectProject}
-            onAccessSettings={user?.role === 'admin' ? handleAccessSettings : undefined}
+            onAccessSettings={handleAccessSettings}
           />
         )}
 
