@@ -52,12 +52,21 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     coats: '2'
   });
 
-  // Additional services
-  const [additionalServices, setAdditionalServices] = useState(savedData.additionalServices || [
-    { name: 'Pressure Washing', hours: '', rate: 60 },
+  // Additional services - Always show 3 default services
+  const getDefaultAdditionalServices = () => [
+    { name: 'Power Washing', hours: '', rate: 60 },
     { name: 'Drywall Repair', hours: '', rate: 60 },
     { name: 'Wood Reconditioning', hours: '', rate: 60 }
-  ]);
+  ];
+
+  const [additionalServices, setAdditionalServices] = useState(() => {
+    // ALWAYS ensure we have exactly the 3 default services first
+    const defaults = getDefaultAdditionalServices();
+    
+    // For now, let's always reset to defaults to fix the issue
+    // TODO: Later we can add logic to preserve user-added services beyond the defaults
+    return defaults;
+  });
 
   // Additional labor (crew members) - This was missing!
   const [additionalLabor, setAdditionalLabor] = useState(savedData.additionalLabor || [
@@ -146,9 +155,9 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     setAdditionalServices([...additionalServices, { name: '', hours: '', rate: 60 }]);
   };
 
-  // Remove additional service
+  // Remove additional service (protect the first 3 default services)
   const removeAdditionalService = (index: number) => {
-    if (additionalServices.length > 1) {
+    if (additionalServices.length > 3 && index >= 3) {
       setAdditionalServices(additionalServices.filter((_: any, i: number) => i !== index));
     }
   };
@@ -510,7 +519,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     <div className="text-right text-[#6A9955] font-semibold mb-2">
                       Total: ${((parseFloat(service.hours) || 0) * (parseFloat(service.rate.toString()) || 0)).toFixed(2)}
                     </div>
-                    {additionalServices.length > 1 && (
+                    {index >= 3 && (
                       <Button
                         onClick={() => removeAdditionalService(index)}
                         size="sm"
