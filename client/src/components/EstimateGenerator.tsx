@@ -37,7 +37,10 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   const savedData = loadSavedData();
 
   const [projectTitle, setProjectTitle] = useState(savedData.projectTitle || '');
-  const [estimateDate, setEstimateDate] = useState(savedData.estimateDate || new Date().toISOString().split('T')[0]);
+  const [estimateDate, setEstimateDate] = useState(() => {
+    // Always use current date as default, regardless of saved data
+    return new Date().toISOString().split('T')[0];
+  });
   const [showCalendar, setShowCalendar] = useState(false);
 
   // Work stages state with localStorage persistence
