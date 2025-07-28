@@ -1003,7 +1003,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Gmail OAuth2 Routes
+  // Gmail OAuth2 Routes - TEMPORARILY DISABLED
+  /*
   app.get('/api/gmail/auth/:userId', async (req, res) => {
     try {
       const { userId } = req.params;
@@ -1019,8 +1020,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: 'Failed to generate Gmail authentication URL' });
     }
   });
+  */
 
 
+  // TEMPORARILY DISABLED - Gmail OAuth callback
+  /*
   app.get('/api/gmail/callback', async (req, res) => {
     try {
       const { code, state: userId, error } = req.query;
@@ -1087,52 +1091,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).send('❌ Gmail authentication failed');
     }
   });
+  */
 
+  // TEMPORARILY DISABLED - Gmail status check
   app.get('/api/gmail/status/:userId', async (req, res) => {
-    try {
-      const { userId } = req.params;
-      const isConnected = await gmailAuthService.isGmailConnected(parseInt(userId));
-      
-      if (isConnected) {
-        const [user] = await db.select({ gmailEmail: users.gmailEmail })
-          .from(users)
-          .where(eq(users.id, parseInt(userId)));
-        
-        res.json({ connected: true, gmailAddress: user?.gmailEmail });
-      } else {
-        res.json({ connected: false });
-      }
-    } catch (error) {
-      console.error('Error checking Gmail status:', error);
-      res.status(500).json({ error: 'Failed to check Gmail connection status' });
-    }
+    // Always return disconnected to prevent OAuth triggers
+    res.json({ connected: false });
   });
 
+  // TEMPORARILY DISABLED - Gmail send
   app.post('/api/gmail/send', async (req, res) => {
-    try {
-      const { userId, to, subject, message, htmlMessage, attachments } = req.body;
-
-      if (!userId || !to || !subject || !message) {
-        return res.status(400).json({ error: 'Missing required fields' });
-      }
-
-      const result = await gmailAuthService.sendEmail(parseInt(userId), {
-        to,
-        subject,
-        message,
-        htmlMessage,
-        attachments
-      });
-
-      if (result.success) {
-        res.json({ success: true, messageId: result.messageId });
-      } else {
-        res.status(400).json({ error: result.error });
-      }
-    } catch (error) {
-      console.error('Error sending Gmail:', error);
-      res.status(500).json({ error: 'Failed to send email via Gmail' });
-    }
+    res.status(503).json({ error: 'Gmail OAuth temporarily disabled' });
   });
 
   app.delete('/api/gmail/disconnect/:userId', async (req, res) => {
