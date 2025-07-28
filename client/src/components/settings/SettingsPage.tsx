@@ -344,7 +344,8 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                         <span className="text-lg font-medium text-orange-400">Photo Quality</span>
                         <div className="px-3 py-2 rounded-full text-xs font-medium bg-orange-500 text-black">
                           {photoCompressionLevel === 'low' ? 'Low' : 
-                           photoCompressionLevel === 'medium' ? 'Medium' : 'High'}
+                           photoCompressionLevel === 'medium' ? 'Medium' : 
+                           photoCompressionLevel === 'original' ? 'Original' : 'High'}
                         </div>
                       </div>
                       <ChevronRight 
