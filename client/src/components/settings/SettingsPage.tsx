@@ -25,6 +25,10 @@ const RecentActivityContent: React.FC = () => {
     queryKey: ['/api/admin/token-usage/recent'],
   });
 
+  const { data: totalStats, isLoading: totalStatsLoading } = useQuery<{ totalTokens: number; totalCost: number }>({
+    queryKey: ['/api/admin/token-usage/total'],
+  });
+
   const formatNumber = (num: number): string => {
     return new Intl.NumberFormat('en-US').format(num);
   };
@@ -56,43 +60,74 @@ const RecentActivityContent: React.FC = () => {
 
   return (
     <>
-      {recentUsageLoading ? (
-        <div className="space-y-3">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="animate-pulse bg-transparent p-4 rounded-lg border border-cyan-600/30">
-              <div className="flex justify-between items-center">
-                <div className="flex-1">
-                  <div className="h-4 bg-gray-600 rounded mb-2 w-32"></div>
-                  <div className="h-3 bg-gray-600 rounded w-24"></div>
-                </div>
-                <div className="h-4 bg-gray-600 rounded w-16"></div>
+      {/* Total Token Usage Summary */}
+      <div className="mb-6 p-4 rounded-lg border border-cyan-400/50 bg-cyan-400/5">
+        <div className="flex justify-between items-center">
+          {totalStatsLoading ? (
+            <>
+              <div className="animate-pulse">
+                <div className="h-5 bg-gray-600 rounded w-32 mb-1"></div>
+                <div className="h-4 bg-gray-600 rounded w-24"></div>
               </div>
-            </div>
-          ))}
+              <div className="animate-pulse">
+                <div className="h-6 bg-gray-600 rounded w-20"></div>
+              </div>
+            </>
+          ) : (
+            <>
+              <div>
+                <p className="font-semibold text-cyan-200">Total Usage</p>
+                <p className="text-sm text-cyan-400">{formatNumber(totalStats?.totalTokens || 0)} tokens</p>
+              </div>
+              <div className="text-right">
+                <p className="text-xl font-bold text-cyan-300">{formatCurrency(totalStats?.totalCost || 0)}</p>
+              </div>
+            </>
+          )}
         </div>
-      ) : recentUsage && recentUsage.length > 0 ? (
-        <div className="space-y-3">
-          {recentUsage.slice(0, 8).map((entry) => (
-            <div key={entry.id} className="bg-transparent p-4 rounded-lg border border-cyan-600/30">
-              <div className="flex justify-between items-center">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <p className="font-medium text-cyan-200 capitalize">{cleanOperationName(entry.operation)}</p>
+      </div>
+
+      {/* Recent Activity History */}
+      <div>
+        <h4 className="text-cyan-300 font-medium mb-3">Recent Activity</h4>
+        {recentUsageLoading ? (
+          <div className="space-y-3">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="animate-pulse bg-transparent p-4 rounded-lg border border-cyan-600/30">
+                <div className="flex justify-between items-center">
+                  <div className="flex-1">
+                    <div className="h-4 bg-gray-600 rounded mb-2 w-32"></div>
+                    <div className="h-3 bg-gray-600 rounded w-24"></div>
                   </div>
-                  <p className="text-sm text-cyan-400">{formatDate(entry.createdAt)}</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold text-cyan-300">{formatCurrency(entry.estimatedCost)}</p>
+                  <div className="h-4 bg-gray-600 rounded w-16"></div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="bg-transparent p-4 rounded-lg border border-cyan-600/30">
-          <p className="text-cyan-400 text-center">No recent activity</p>
-        </div>
-      )}
+            ))}
+          </div>
+        ) : recentUsage && recentUsage.length > 0 ? (
+          <div className="space-y-3">
+            {recentUsage.slice(0, 8).map((entry) => (
+              <div key={entry.id} className="bg-transparent p-4 rounded-lg border border-cyan-600/30">
+                <div className="flex justify-between items-center">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="font-medium text-cyan-200 capitalize">{cleanOperationName(entry.operation)}</p>
+                    </div>
+                    <p className="text-sm text-cyan-400">{formatDate(entry.createdAt)}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold text-cyan-300">{formatCurrency(entry.estimatedCost)}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="bg-transparent p-4 rounded-lg border border-cyan-600/30">
+            <p className="text-cyan-400 text-center">No recent activity</p>
+          </div>
+        )}
+      </div>
     </>
   );
 };
@@ -607,10 +642,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                         <span className="text-lg font-medium text-cyan-400 whitespace-nowrap">API Usage</span>
                       </div>
                       
-                      <div className="flex-1 flex justify-center items-center gap-6">
-                        <div className="text-cyan-400 text-xl font-semibold">
-                          103,409 Tokens
-                        </div>
+                      <div className="flex-1 flex justify-center items-center">
                         <div className="text-cyan-400 text-xl font-semibold">
                           $5.43
                         </div>
