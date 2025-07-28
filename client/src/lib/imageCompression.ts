@@ -125,11 +125,18 @@ export async function compressMultipleImages(
     }
     
     try {
-      const result = await compressImage(file, compressionOptions);
-      compressedResults.push(result.file);
-      totalCompressedSize += result.compressedSize;
-      
-      console.log(`${compressionType} compressed ${file.name}: ${formatFileSize(result.originalSize)} → ${formatFileSize(result.compressedSize)} (${result.compressionRatio.toFixed(1)}% reduction)`);
+      // If original quality is selected for photos, skip compression
+      if (compressionType === 'photo' && compressionOptions === null) {
+        compressedResults.push(file);
+        totalCompressedSize += file.size;
+        console.log(`Photo using original quality: ${file.name} (${formatFileSize(file.size)})`);
+      } else {
+        const result = await compressImage(file, compressionOptions!);
+        compressedResults.push(result.file);
+        totalCompressedSize += result.compressedSize;
+        
+        console.log(`${compressionType} compressed ${file.name}: ${formatFileSize(result.originalSize)} → ${formatFileSize(result.compressedSize)} (${result.compressionRatio.toFixed(1)}% reduction)`);
+      }
     } catch (error) {
       console.error(`Failed to compress ${file.name}:`, error);
       // If compression fails, use original file
@@ -160,7 +167,7 @@ export async function compressReceipts(
 }
 
 // Get photo compression settings based on user preference
-function getPhotoCompressionSettings(): CompressionOptions {
+function getPhotoCompressionSettings(): CompressionOptions | null {
   const level = localStorage.getItem('photoCompressionLevel') || 'medium';
   
   switch (level) {
@@ -178,6 +185,8 @@ function getPhotoCompressionSettings(): CompressionOptions {
         quality: 0.9,
         format: 'jpeg' as const
       };
+    case 'original':
+      return null; // No compression - use original file
     case 'medium':
     default:
       return {

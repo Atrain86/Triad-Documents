@@ -431,6 +431,32 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                 }`} />
                               </div>
                             </div>
+
+                            {/* Original Quality Option - Admin Only */}
+                            <div 
+                              className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                                photoCompressionLevel === 'original' 
+                                  ? 'border-orange-400 bg-orange-400/10' 
+                                  : 'border-gray-600 hover:border-orange-400/50'
+                              }`}
+                              onClick={() => {
+                                setPhotoCompressionLevel('original');
+                                localStorage.setItem('photoCompressionLevel', 'original');
+                              }}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <div className="font-medium text-white flex items-center gap-2">
+                                    Original Quality
+                                    <span className="text-xs px-2 py-1 bg-orange-400 text-black rounded-full">ADMIN</span>
+                                  </div>
+                                  <div className="text-sm text-gray-400">No compression • Full resolution • Original file size</div>
+                                </div>
+                                <div className={`w-4 h-4 rounded-full border-2 ${
+                                  photoCompressionLevel === 'original' ? 'bg-orange-400 border-orange-400' : 'border-gray-400'
+                                }`} />
+                              </div>
+                            </div>
                           </div>
 
                           <div className="mt-4 p-3 bg-gray-800 rounded-lg">
