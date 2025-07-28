@@ -501,7 +501,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                       <div className="flex items-center">
                         <ChevronRight 
                           className={`h-5 w-5 text-cyan-400 transition-transform ${
-                            expandedSection === 'api' ? 'rotate-90' : 'rotate-0'
+                            expandedSection === 'api' ? 'rotate-90' : 'rotate-180'
                           }`} 
                         />
                       </div>
