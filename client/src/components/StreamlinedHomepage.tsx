@@ -324,22 +324,10 @@ export default function StreamlinedHomepage({
         </div>
 
         {projects.length > 0 && (
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg" style={{ color: paintBrainColors.orange }}>
-              {showArchived ? 
-                <>
-                  <span className="font-bold" style={{ color: paintBrainColors.red }}>{projects.filter((p: any) => p.status === 'archived').length}</span>
-                  <span className="font-normal"> archived project{projects.filter((p: any) => p.status === 'archived').length === 1 ? '' : 's'}</span>
-                </> : 
-                <>
-                  <span className="font-bold" style={{ color: paintBrainColors.green }}>{projects.filter((p: any) => p.status !== 'archived').length}</span>
-                  <span className="font-normal"> active project{projects.filter((p: any) => p.status !== 'archived').length === 1 ? '' : 's'}</span>
-                </>
-              }
-            </h2>
+          <div className="flex justify-center items-center mb-6">
             <div className="flex items-center gap-3">
               <span className="text-sm font-medium" style={{ color: paintBrainColors.green }}>
-                Active
+                {projects.filter((p: any) => p.status !== 'archived').length} Active
               </span>
               <button
                 onClick={() => setShowArchived(!showArchived)}
@@ -355,7 +343,7 @@ export default function StreamlinedHomepage({
                 />
               </button>
               <span className="text-sm font-medium" style={{ color: paintBrainColors.red }}>
-                Archive
+                {projects.filter((p: any) => p.status === 'archived').length} Archive
               </span>
             </div>
           </div>
