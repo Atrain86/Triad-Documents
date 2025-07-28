@@ -320,7 +320,10 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                       variant="outline"
                     >
                       <Calendar className="w-4 h-4 mr-2" />
-                      {estimateDate ? new Date(estimateDate).toLocaleDateString() : 'Select date'}
+                      {estimateDate ? (() => {
+                        const [year, month, day] = estimateDate.split('-');
+                        return `${month}/${day}/${year}`;
+                      })() : 'Select date'}
                     </Button>
                     
                     {showCalendar && (
