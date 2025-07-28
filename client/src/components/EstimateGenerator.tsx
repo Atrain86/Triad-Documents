@@ -54,7 +54,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
   // Additional services
   const [additionalServices, setAdditionalServices] = useState(savedData.additionalServices || [
-    { name: 'Pressure Washing', hours: '', rate: 60 },
+    { name: 'Power Washing', hours: '', rate: 60 },
     { name: 'Drywall Repair', hours: '', rate: 60 },
     { name: 'Wood Reconditioning', hours: '', rate: 60 }
   ]);
@@ -268,7 +268,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     value={projectTitle}
                     onChange={(e) => setProjectTitle(e.target.value)}
                     placeholder="Enter project title"
-                    className="bg-gray-800 border-gray-600 text-white"
+                    className="bg-gray-800 border-[#8B5FBF] text-white"
                   />
                 </div>
                 <div>
@@ -277,7 +277,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     type="date"
                     value={estimateDate}
                     onChange={(e) => setEstimateDate(e.target.value)}
-                    className="bg-gray-800 border-gray-600 text-white"
+                    className="bg-gray-800 border-[#8B5FBF] text-white"
                   />
                 </div>
               </div>
@@ -305,7 +305,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                       value={stage.hours}
                       onChange={(e) => updateWorkStage(index, 'hours', e.target.value)}
                       placeholder="0"
-                      className="bg-gray-700 border-gray-600 text-white"
+                      className="bg-gray-700 border-[#E53E3E] text-white"
                     />
                   </div>
                   <div>
@@ -315,7 +315,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                       min="0"
                       value={stage.rate}
                       onChange={(e) => updateWorkStage(index, 'rate', e.target.value)}
-                      className="bg-gray-700 border-gray-600 text-white"
+                      className="bg-gray-700 border-[#E53E3E] text-white"
                     />
                   </div>
                   <div className="md:col-span-3 text-right text-[#6A9955] font-semibold">
@@ -346,7 +346,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     value={paintCosts.pricePerGallon}
                     onChange={(e) => setPaintCosts((prev: any) => ({ ...prev, pricePerGallon: e.target.value }))}
                     placeholder="0.00"
-                    className="bg-gray-700 border-gray-600 text-white"
+                    className="bg-gray-700 border-[#D4A574] text-white"
                   />
                 </div>
                 <div>
@@ -359,7 +359,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     value={paintCosts.gallons}
                     onChange={(e) => setPaintCosts((prev: any) => ({ ...prev, gallons: e.target.value }))}
                     placeholder="0"
-                    className="bg-gray-700 border-gray-600 text-white"
+                    className="bg-gray-700 border-[#D4A574] text-white"
                   />
                 </div>
                 <div>
@@ -368,7 +368,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     value={paintCosts.coats} 
                     onValueChange={(value) => setPaintCosts((prev: any) => ({ ...prev, coats: value }))}
                   >
-                    <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                    <SelectTrigger className="bg-gray-700 border-[#D4A574] text-white">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-gray-800 border-gray-600">
@@ -407,7 +407,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                       value={member.name}
                       onChange={(e) => updateAdditionalLabor(index, 'name', e.target.value)}
                       placeholder="Enter name"
-                      className="bg-gray-700 border-gray-600 text-white"
+                      className="bg-gray-700 border-[#4ECDC4] text-white"
                     />
                   </div>
                   <div>
@@ -420,7 +420,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                       value={member.hours}
                       onChange={(e) => updateAdditionalLabor(index, 'hours', e.target.value)}
                       placeholder="0"
-                      className="bg-gray-700 border-gray-600 text-white"
+                      className="bg-gray-700 border-[#4ECDC4] text-white"
                     />
                   </div>
                   <div>
@@ -431,7 +431,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                       value={member.rate}
                       onChange={(e) => updateAdditionalLabor(index, 'rate', e.target.value)}
                       placeholder="0"
-                      className="bg-gray-700 border-gray-600 text-white"
+                      className="bg-gray-700 border-[#4ECDC4] text-white"
                     />
                   </div>
                   <div className="flex flex-col justify-between">
@@ -464,10 +464,10 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
               <Button
                 onClick={addAdditionalService}
                 size="sm"
-                className="bg-[#DCDCAA] hover:bg-[#C7C594] text-black"
+                className="bg-[#DCDCAA] hover:bg-[#C7C594] text-black px-3 py-1"
               >
-                <Plus className="w-4 h-4 mr-1" />
-                + Services
+                <Plus className="w-5 h-5 mr-1" />
+                Services
               </Button>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -479,7 +479,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                       value={service.name}
                       onChange={(e) => updateAdditionalService(index, 'name', e.target.value)}
                       placeholder="Enter service name"
-                      className="bg-gray-700 border-gray-600 text-white"
+                      className="bg-gray-700 border-[#DCDCAA] text-white"
                     />
                   </div>
                   <div>
@@ -492,7 +492,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                       value={service.hours}
                       onChange={(e) => updateAdditionalService(index, 'hours', e.target.value)}
                       placeholder="0"
-                      className="bg-gray-700 border-gray-600 text-white"
+                      className="bg-gray-700 border-[#DCDCAA] text-white"
                     />
                   </div>
                   <div>
@@ -503,7 +503,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                       value={service.rate}
                       onChange={(e) => updateAdditionalService(index, 'rate', e.target.value)}
                       placeholder="0"
-                      className="bg-gray-700 border-gray-600 text-white"
+                      className="bg-gray-700 border-[#DCDCAA] text-white"
                     />
                   </div>
                   <div className="flex flex-col justify-between">
