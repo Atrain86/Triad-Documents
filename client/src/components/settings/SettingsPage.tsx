@@ -224,10 +224,13 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
 
   // Logo scaling helper functions
   const updateLogoScale = (newScale: number) => {
-    // Clamp scale between 25% and 200%
-    const clampedScale = Math.max(25, Math.min(200, newScale));
+    // Clamp scale between 25% and 400%
+    const clampedScale = Math.max(25, Math.min(400, newScale));
     setLogoScale(clampedScale);
     localStorage.setItem('logoScale', clampedScale.toString());
+    
+    // Dispatch custom event to notify other components
+    window.dispatchEvent(new CustomEvent('logoScaleChanged', { detail: clampedScale }));
   };
 
   const increaseLogoScale = () => {
@@ -605,7 +608,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                       </span>
                                       <button
                                         onClick={increaseLogoScale}
-                                        disabled={logoScale >= 200}
+                                        disabled={logoScale >= 400}
                                         className="w-6 h-6 rounded-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
                                         title="Increase size (5%)"
                                       >

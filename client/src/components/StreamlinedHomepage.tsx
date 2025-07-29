@@ -62,6 +62,32 @@ export default function StreamlinedHomepage({
   const { toast } = useToast();
   const { logout } = useAuth();
 
+  // Logo scaling state
+  const [logoScale, setLogoScale] = useState(() => {
+    const saved = localStorage.getItem('logoScale');
+    return saved ? parseInt(saved) : 100;
+  });
+
+  // Listen for logo scale changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const saved = localStorage.getItem('logoScale');
+      setLogoScale(saved ? parseInt(saved) : 100);
+    };
+
+    const handleLogoScaleChange = (event: CustomEvent) => {
+      setLogoScale(event.detail);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('logoScaleChanged', handleLogoScaleChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('logoScaleChanged', handleLogoScaleChange as EventListener);
+    };
+  }, []);
+
   // Check for first login and show tax setup modal
   useEffect(() => {
     const taxSetupCompleted = localStorage.getItem('taxSetupCompleted');
@@ -288,6 +314,7 @@ export default function StreamlinedHomepage({
             src={currentLogo?.url || "/aframe-logo.png"} 
             alt="Business Logo" 
             className="h-32 w-auto object-contain"
+            style={{ transform: `scale(${logoScale / 100})` }}
           />
         </div>
 
