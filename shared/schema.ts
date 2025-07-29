@@ -125,6 +125,16 @@ export const logoLibrary = pgTable("logo_library", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const userLogos = pgTable("user_logos", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  logoType: text("logo_type").notNull(), // 'homepage', 'invoice', 'estimate', 'business'
+  logoUrl: text("logo_url").notNull(), // Path to uploaded logo file
+  logoOriginalName: text("logo_original_name").notNull(), // Original filename
+  isActive: text("is_active").default("true"),
+  uploadedAt: timestamp("uploaded_at").defaultNow().notNull(),
+});
+
 
 
 export const insertProjectSchema = createInsertSchema(projects).omit({
@@ -197,6 +207,11 @@ export const insertLogoLibrarySchema = createInsertSchema(logoLibrary).omit({
   createdAt: true,
 });
 
+export const insertUserLogosSchema = createInsertSchema(userLogos).omit({
+  id: true,
+  uploadedAt: true,
+});
+
 export type InsertProject = z.infer<typeof insertProjectSchema>;
 export type Project = typeof projects.$inferSelect;
 export type InsertPhoto = z.infer<typeof insertPhotoSchema>;
@@ -211,3 +226,5 @@ export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertLogoLibrary = z.infer<typeof insertLogoLibrarySchema>;
 export type LogoLibrary = typeof logoLibrary.$inferSelect;
+export type InsertUserLogos = z.infer<typeof insertUserLogosSchema>;
+export type UserLogos = typeof userLogos.$inferSelect;

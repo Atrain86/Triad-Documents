@@ -6,19 +6,22 @@ import {
   toolsChecklist,
   tokenUsage,
   users,
+  userLogos,
   type Project, 
   type Photo, 
   type Receipt, 
   type DailyHours,
   type ToolsChecklist,
+  type UserLogos,
   type InsertProject, 
   type InsertPhoto, 
   type InsertReceipt, 
   type InsertDailyHours,
-  type InsertToolsChecklist 
+  type InsertToolsChecklist,
+  type InsertUserLogos
 } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 
 export interface IStorage {
   // Projects
@@ -72,6 +75,13 @@ export interface IStorage {
     success: boolean;
     errorMessage?: string;
   }): Promise<void>;
+
+  // User Logos
+  getUserLogos(userId: number): Promise<UserLogos[]>;
+  getUserLogoByType(userId: number, logoType: string): Promise<UserLogos | undefined>;
+  createUserLogo(logo: InsertUserLogos): Promise<UserLogos>;
+  updateUserLogo(id: number, logo: Partial<InsertUserLogos>): Promise<UserLogos | undefined>;
+  deleteUserLogo(id: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -280,6 +290,48 @@ export class DatabaseStorage implements IStorage {
       console.error('Failed to log token usage:', error);
       throw error;
     }
+  }
+
+  // User Logos
+  async getUserLogos(userId: number): Promise<UserLogos[]> {
+    const result = await db.select().from(userLogos).where(eq(userLogos.userId, userId));
+    return result;
+  }
+
+  async getUserLogoByType(userId: number, logoType: string): Promise<UserLogos | undefined> {
+    const [logo] = await db
+      .select()
+      .from(userLogos)
+      .where(
+        and(
+          eq(userLogos.userId, userId),
+          eq(userLogos.logoType, logoType),
+          eq(userLogos.isActive, 'true')
+        )
+      );
+    return logo || undefined;
+  }
+
+  async createUserLogo(insertLogo: InsertUserLogos): Promise<UserLogos> {
+    const [logo] = await db
+      .insert(userLogos)
+      .values(insertLogo)
+      .returning();
+    return logo;
+  }
+
+  async updateUserLogo(id: number, updates: Partial<InsertUserLogos>): Promise<UserLogos | undefined> {
+    const [logo] = await db
+      .update(userLogos)
+      .set(updates)
+      .where(eq(userLogos.id, id))
+      .returning();
+    return logo || undefined;
+  }
+
+  async deleteUserLogo(id: number): Promise<boolean> {
+    const result = await db.delete(userLogos).where(eq(userLogos.id, id));
+    return (result.rowCount || 0) > 0;
   }
 }
 

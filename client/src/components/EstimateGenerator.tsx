@@ -25,11 +25,20 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   const printRef = useRef<HTMLDivElement>(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Get current user's logo
-  const { data: currentLogo } = useQuery({
-    queryKey: [`/api/users/1/logo`],
+  // Get business logo for estimates (A-Frame logo)
+  const { data: businessLogo } = useQuery({
+    queryKey: [`/api/users/1/logos/business`],
     select: (data: any) => data?.logo || null
   });
+
+  // Fallback to regular logo if no business-specific logo is set
+  const { data: fallbackLogo } = useQuery({
+    queryKey: [`/api/users/1/logo`],
+    select: (data: any) => data?.logo || null,
+    enabled: !businessLogo
+  });
+
+  const currentLogo = businessLogo || fallbackLogo;
 
   // Load saved form data from localStorage
   const loadSavedData = () => {

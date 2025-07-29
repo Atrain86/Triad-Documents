@@ -1525,6 +1525,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // New contextual logo management routes
+  
+  // Get logos by context type for a user
+  app.get('/api/users/:userId/logos/:logoType', async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const logoType = req.params.logoType; // 'homepage', 'invoice', 'estimate', 'business'
+      
+      const logo = await storage.getUserLogoByType(userId, logoType);
+      
+      if (!logo) {
+        return res.json({ logo: null });
+      }
+
+      res.json({
+        logo: {
+          id: logo.id,
+          url: logo.logoUrl,
+          originalName: logo.logoOriginalName,
+          logoType: logo.logoType,
+          uploadedAt: logo.uploadedAt
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching contextual logo:', error);
+      res.status(500).json({ error: 'Failed to fetch logo' });
+    }
+  });
+
+  // Set contextual logo from library
+  app.post('/api/users/:userId/logos/:logoType/select', async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const logoType = req.params.logoType;
+      const { logoId } = req.body;
+      
+      if (!logoId) {
+        return res.status(400).json({ error: 'Logo ID is required' });
+      }
+
+      // Get logo from library
+      const [selectedLogo] = await db.select()
+        .from(logoLibrary)
+        .where(eq(logoLibrary.id, logoId));
+
+      if (!selectedLogo) {
+        return res.status(404).json({ error: 'Logo not found in library' });
+      }
+
+      // Check if user already has a logo for this context
+      const existingLogo = await storage.getUserLogoByType(userId, logoType);
+      
+      if (existingLogo) {
+        // Update existing entry
+        await storage.updateUserLogo(existingLogo.id, {
+          logoUrl: selectedLogo.filename,
+          logoOriginalName: selectedLogo.originalName,
+          isActive: 'true'
+        });
+      } else {
+        // Create new entry
+        await storage.createUserLogo({
+          userId,
+          logoType,
+          logoUrl: selectedLogo.filename,
+          logoOriginalName: selectedLogo.originalName,
+          isActive: 'true'
+        });
+      }
+
+      res.json({ 
+        success: true, 
+        logoUrl: selectedLogo.filename,
+        logoType
+      });
+    } catch (error) {
+      console.error('Error setting contextual logo:', error);
+      res.status(500).json({ error: 'Failed to set contextual logo' });
+    }
+  });
+
   // Delete logo from library (admin only)
   app.delete('/api/logo-library/:logoId', async (req, res) => {
     try {

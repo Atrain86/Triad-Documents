@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Settings, DollarSign, Globe, Mail, ChevronRight, Info, Menu, X, Camera, FileText, Upload, Trash2, Plus, Minus } from 'lucide-react';
+import { ArrowLeft, Settings, DollarSign, Globe, Mail, ChevronRight, Info, Menu, X, Camera, FileText, Upload, Trash2, Plus, Minus, Building2, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ReactSortable } from 'react-sortablejs';
@@ -197,6 +197,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
   const [settingsSections, setSettingsSections] = useState([
     { id: 'gmail', name: 'Gmail Integration', icon: Mail, color: 'red' },
     { id: 'logo', name: 'Business Logo', icon: Settings, color: 'blue' },
+    { id: 'contextual-logos', name: 'Contextual Logos', icon: Building2, color: 'indigo' },
     { id: 'photo', name: 'Photo Quality', icon: Camera, color: 'orange' },
     { id: 'timezone', name: 'Time Zone', icon: Globe, color: 'green' },
     { id: 'invoice', name: 'Invoice Numbering', icon: FileText, color: 'purple' },
@@ -794,6 +795,65 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                   </div>
                 );
 
+              case 'contextual-logos':
+                return (
+                  <div>
+                    <div 
+                      className="flex items-center justify-between p-4 rounded-lg border-2 border-indigo-400 bg-gray-900/20 cursor-pointer hover:bg-gray-800/30 transition-colors"
+                      onClick={() => toggleSection('contextual-logos')}
+                    >
+                      <div className="flex items-center gap-4">
+                        <Menu className="h-5 w-5 text-indigo-400 flex-shrink-0 drag-handle cursor-grab" />
+                        <Building2 className="h-5 w-5 text-indigo-400" />
+                        <span className="text-lg font-medium text-indigo-400">Contextual Logos</span>
+                        <div className="px-3 py-2 rounded-full text-xs font-medium bg-indigo-500 text-white">
+                          PRO
+                        </div>
+                      </div>
+                      <ChevronRight 
+                        className={`h-5 w-5 text-indigo-400 transition-transform ${
+                          expandedSection === 'contextual-logos' ? 'rotate-90' : 'rotate-180'
+                        }`} 
+                      />
+                    </div>
+                    
+                    {expandedSection === 'contextual-logos' && (
+                      <div className="mt-4 p-6 rounded-lg border border-indigo-400/30 bg-gray-900/10">
+                        <div className="space-y-6">
+                          <h3 className="text-lg font-medium text-indigo-400 mb-4">Set Different Logos for Different Contexts</h3>
+                          
+                          {/* Homepage Logo */}
+                          <div className="space-y-3">
+                            <h4 className="text-white font-medium flex items-center gap-2">
+                              <Home className="h-4 w-4" />
+                              Homepage & Sign-in Logo
+                            </h4>
+                            <p className="text-sm text-gray-400">Logo shown on homepage and login screen</p>
+                            <ContextualLogoSelector logoType="homepage" />
+                          </div>
+
+                          {/* Business Logo */}
+                          <div className="space-y-3">
+                            <h4 className="text-white font-medium flex items-center gap-2">
+                              <Building2 className="h-4 w-4" />
+                              Business Documents Logo
+                            </h4>
+                            <p className="text-sm text-gray-400">Logo used for invoices and estimates</p>
+                            <ContextualLogoSelector logoType="business" />
+                          </div>
+
+                          <div className="mt-4 p-3 bg-gray-800 rounded-lg">
+                            <p className="text-sm text-gray-300">
+                              <span className="font-medium">Pro Feature:</span> Set different logos for different parts of your app. 
+                              Use your Paint Brain logo for the homepage and A-Frame logo for professional documents.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+
               case 'timezone':
                 return (
                   <div>
@@ -1265,6 +1325,110 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
               </ul>
             </div>
           </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Contextual Logo Selector Component
+interface ContextualLogoSelectorProps {
+  logoType: string;
+}
+
+const ContextualLogoSelector: React.FC<ContextualLogoSelectorProps> = ({ logoType }) => {
+  const queryClient = useQueryClient();
+  
+  // Get current contextual logo
+  const { data: contextualLogo } = useQuery({
+    queryKey: [`/api/users/1/logos/${logoType}`],
+    select: (data: any) => data?.logo || null
+  });
+
+  // Get logo library
+  const { data: logoLibrary = [] } = useQuery<any[]>({
+    queryKey: ['/api/logo-library'],
+  });
+
+  // Mutation to set contextual logo
+  const setContextualLogoMutation = useMutation({
+    mutationFn: async (logoId: number) => {
+      return apiRequest(`/api/users/1/logos/${logoType}/select`, {
+        method: 'POST',
+        body: JSON.stringify({ logoId })
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/users/1/logos/${logoType}`] });
+    }
+  });
+
+  return (
+    <div className="space-y-4">
+      {/* Current Logo Display */}
+      {contextualLogo && (
+        <div className="p-3 bg-gray-800 rounded-lg border border-gray-600">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-gradient-to-br from-gray-700 to-gray-800 rounded border">
+              <img 
+                src={contextualLogo.url} 
+                alt={contextualLogo.originalName} 
+                className="w-full h-full object-contain rounded"
+              />
+            </div>
+            <div>
+              <div className="text-sm font-medium text-white">Current Logo</div>
+              <div className="text-xs text-gray-400">{contextualLogo.originalName}</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Logo Selection Grid */}
+      <div>
+        <h5 className="text-sm font-medium text-gray-300 mb-3">Select from Library</h5>
+        <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto">
+          {logoLibrary.map((logo: any) => (
+            <button
+              key={logo.id}
+              onClick={() => setContextualLogoMutation.mutate(logo.id)}
+              disabled={setContextualLogoMutation.isPending}
+              className={`p-2 rounded border transition-colors ${
+                contextualLogo?.url === logo.filename
+                  ? 'border-indigo-400 bg-indigo-400/10'
+                  : 'border-gray-600 hover:border-indigo-400/50 bg-gray-800/50'
+              }`}
+            >
+              <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded p-1 mb-1 border border-gray-700">
+                <img 
+                  src={logo.filename} 
+                  alt={logo.name} 
+                  className="w-full h-8 object-contain"
+                />
+              </div>
+              <span className="text-xs text-gray-400 truncate block">{logo.originalName}</span>
+            </button>
+          ))}
+          
+          {logoLibrary.length === 0 && (
+            <div className="col-span-3 text-center py-8 text-gray-400 text-sm">
+              No logos available. Upload some logos to the library first.
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Status Messages */}
+      {setContextualLogoMutation.isPending && (
+        <div className="flex items-center gap-3 p-3 bg-indigo-500/10 border border-indigo-400/30 rounded-lg">
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-400"></div>
+          <span className="text-indigo-400 text-sm">Setting {logoType} logo...</span>
+        </div>
+      )}
+
+      {setContextualLogoMutation.isError && (
+        <div className="p-3 bg-red-500/10 border border-red-400/30 rounded-lg">
+          <p className="text-red-400 text-sm">Failed to set logo. Please try again.</p>
         </div>
       )}
     </div>

@@ -101,11 +101,20 @@ export default function StreamlinedHomepage({
     select: (data: any[]) => data || []
   });
 
-  // Get current user's logo
-  const { data: currentLogo } = useQuery({
-    queryKey: [`/api/users/1/logo`],
+  // Get homepage logo (Paint Brain logo)
+  const { data: homepageLogo } = useQuery({
+    queryKey: [`/api/users/1/logos/homepage`],
     select: (data: any) => data?.logo || null
   });
+
+  // Fallback to regular logo if no homepage-specific logo is set
+  const { data: fallbackLogo } = useQuery({
+    queryKey: [`/api/users/1/logo`],
+    select: (data: any) => data?.logo || null,
+    enabled: !homepageLogo
+  });
+
+  const currentLogo = homepageLogo || fallbackLogo;
 
   const deleteProjectMutation = useMutation({
     mutationFn: async (projectId: number) => {
