@@ -1489,12 +1489,12 @@ ${emailMessage}`;
     {/* Email Composition Dialog */}
     {showEmailDialog && (
       <Dialog open={showEmailDialog} onOpenChange={setShowEmailDialog}>
-        <DialogContent className="max-w-2xl bg-gray-900 text-white border-gray-700 z-[9999]">
-          <DialogHeader>
+        <DialogContent className="max-w-2xl max-h-[85vh] bg-gray-900 text-white border-gray-700 z-[9999] overflow-hidden flex flex-col">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle className="text-white text-lg font-semibold">Send Invoice Email</DialogTitle>
           </DialogHeader>
         
-          <div className="space-y-4">
+          <div className="space-y-4 flex-1 overflow-y-auto pr-2">
             {/* Email Details */}
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -1554,8 +1554,10 @@ ${emailMessage}`;
               </label>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex justify-end space-x-3 pt-4">
+            </div>
+            
+            {/* Action Buttons - Sticky at bottom */}
+            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-700 flex-shrink-0 bg-gray-900">
               <Button
                 onClick={() => setShowEmailDialog(false)}
                 variant="outline"
@@ -1582,7 +1584,6 @@ ${emailMessage}`;
                 )}
               </Button>
             </div>
-          </div>
         </DialogContent>
       </Dialog>
     )}
