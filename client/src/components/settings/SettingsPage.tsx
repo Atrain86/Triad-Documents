@@ -259,11 +259,10 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
 
   // Logo library upload mutation (adds to library)
   const logoLibraryUploadMutation = useMutation({
-    mutationFn: async (data: { file: File; name: string; skipBackgroundRemoval?: boolean }) => {
+    mutationFn: async (data: { file: File; name: string }) => {
       const formData = new FormData();
       formData.append('logo', data.file);
       formData.append('name', data.name);
-      formData.append('skipBackgroundRemoval', (data.skipBackgroundRemoval || false).toString());
       const response = await fetch('/api/logo-library', {
         method: 'POST',
         body: formData
@@ -347,14 +346,11 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
       return;
     }
 
-    // Check if user wants to skip background removal
-    const skipBackgroundRemoval = (document.getElementById('skip-background-removal') as HTMLInputElement)?.checked || false;
-    
     // Generate a clean name from filename (remove extension)
     const cleanName = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
     
     // Upload to library
-    logoLibraryUploadMutation.mutate({ file, name: cleanName, skipBackgroundRemoval });
+    logoLibraryUploadMutation.mutate({ file, name: cleanName });
     
     // Clear the input
     event.target.value = '';
@@ -641,17 +637,6 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                 <span className="text-sm text-gray-400">
                                   JPG, PNG, or SVG • Max 5MB • PNG files automatically have white backgrounds removed
                                 </span>
-                                <div className="mt-2">
-                                  <label className="flex items-center gap-2 text-sm text-gray-300">
-                                    <input
-                                      type="checkbox"
-                                      defaultChecked={false}
-                                      className="rounded"
-                                      id="skip-background-removal"
-                                    />
-                                    Skip automatic background removal for PNG files
-                                  </label>
-                                </div>
                               </div>
                             </div>
 
@@ -669,7 +654,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                       disabled={logoSelectMutation.isPending}
                                       className="w-full p-3 rounded-lg border border-gray-600 hover:border-blue-400 transition-colors bg-gray-800/50"
                                     >
-                                      <div className="bg-white rounded p-2 mb-2">
+                                      <div className="bg-black rounded p-2 mb-2">
                                         <img 
                                           src={logo.filename} 
                                           alt={logo.name} 
