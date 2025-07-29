@@ -308,9 +308,15 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                          (parseFloat(travelCosts.trips) || 0) * 
                          (parseFloat(travelCosts.ratePerKm) || 0);
   
-  const subtotalBeforeTax = laborSubtotal + additionalServicesSubtotal + additionalLaborSubtotal + paintAndMaterialsSubtotal + travelSubtotal;
+  // Calculate taxable vs non-taxable amounts
+  // Only labor, additional services, and travel should be taxed
+  // Materials (paint & supplies) already include taxes when purchased - no double taxation
+  const taxableAmount = laborSubtotal + additionalServicesSubtotal + additionalLaborSubtotal + travelSubtotal;
+  const nonTaxableAmount = paintAndMaterialsSubtotal; // Materials already include taxes
+  
+  const subtotalBeforeTax = taxableAmount + nonTaxableAmount;
   const taxRate = (taxConfig.gst + taxConfig.pst + taxConfig.hst + taxConfig.salesTax + taxConfig.vat + taxConfig.otherTax) / 100;
-  const taxAmount = subtotalBeforeTax * taxRate;
+  const taxAmount = taxableAmount * taxRate; // Only apply tax to taxable portion
   const grandTotal = subtotalBeforeTax + taxAmount;
 
   // Legacy calculations for backward compatibility
@@ -497,7 +503,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     <!-- Paint & Materials -->
     <div class="mb-8">
       <div class="bg-orange-500 text-white px-4 py-2 mb-4">
-        <h2 class="text-lg font-bold">Paint & Materials</h2>
+        <h2 class="text-lg font-bold">Paint & Materials (incl. taxes)</h2>
       </div>
       <table class="w-full bg-gray-800 rounded-lg overflow-hidden">
         <thead class="bg-gray-700">
@@ -509,11 +515,14 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
         <tbody>
           ${materialsHTML.join('')}
           <tr class="bg-gray-700">
-            <td class="py-2 px-4 font-semibold">Materials Subtotal</td>
+            <td class="py-2 px-4 font-semibold">Materials Subtotal (incl. taxes)</td>
             <td class="py-2 px-4 text-right font-bold text-green-400">$${materialsSubtotal.toFixed(2)}</td>
           </tr>
         </tbody>
       </table>
+      <div class="text-xs text-gray-400 mt-2 px-4">
+        <p>* Materials already include taxes paid at purchase - no additional tax applied</p>
+      </div>
     </div>
     ` : ''}
 
@@ -533,13 +542,25 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     <div class="flex justify-end mt-10">
       <div class="w-96">
         <div class="bg-gray-800 p-4 rounded-lg">
+          ${taxableAmount > 0 ? `
           <div class="flex justify-between mb-2">
+            <span>Taxable Services:</span>
+            <span>$${taxableAmount.toFixed(2)}</span>
+          </div>
+          ` : ''}
+          ${nonTaxableAmount > 0 ? `
+          <div class="flex justify-between mb-2">
+            <span>Materials (incl. taxes):</span>
+            <span>$${nonTaxableAmount.toFixed(2)}</span>
+          </div>
+          ` : ''}
+          <div class="flex justify-between mb-2 border-t border-gray-600 pt-2">
             <span>Subtotal:</span>
             <span>$${subtotalBeforeTax.toFixed(2)}</span>
           </div>
-          ${taxRate > 0 ? `
+          ${taxRate > 0 && taxableAmount > 0 ? `
           <div class="flex justify-between mb-2">
-            <span>Tax (${(taxRate * 100).toFixed(1)}%):</span>
+            <span>Tax (${(taxRate * 100).toFixed(1)}% on services only):</span>
             <span>$${taxAmount.toFixed(2)}</span>
           </div>
           ` : ''}
