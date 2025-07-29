@@ -1979,16 +1979,6 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
               style={{ color: '#FFFFFF' }}
             />
           </div>
-          
-          {/* Dynamic Label */}
-          <div className="text-center">
-            <span 
-              className="text-lg font-medium"
-              style={{ color: actionMode === 'estimate' ? paintBrainColors.purple : paintBrainColors.green }}
-            >
-              {actionMode === 'estimate' ? 'Estimate' : 'Invoice'}
-            </span>
-          </div>
         </div>
 
         {/* Action Button */}
@@ -2001,7 +1991,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                 setShowInvoiceGenerator(true);
               }
             }}
-            className="py-3 px-8 text-sm font-semibold text-white hover:opacity-90 max-w-xs"
+            className="py-3 px-6 text-sm font-semibold text-white hover:opacity-90"
             style={{ backgroundColor: actionMode === 'estimate' ? paintBrainColors.purple : paintBrainColors.green }}
           >
           {actionMode === 'estimate' ? (
