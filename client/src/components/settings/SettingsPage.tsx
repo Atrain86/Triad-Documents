@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Settings, DollarSign, Globe, Mail, ChevronRight, Info, Menu, X, Camera, FileText, Upload, Trash2 } from 'lucide-react';
+import { ArrowLeft, Settings, DollarSign, Globe, Mail, ChevronRight, Info, Menu, X, Camera, FileText, Upload, Trash2, Plus, Minus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ReactSortable } from 'react-sortablejs';
@@ -215,6 +215,28 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
   const [logoUploading, setLogoUploading] = useState(false);
   const [logoMessage, setLogoMessage] = useState('');
   const [backgroundProcessing, setBackgroundProcessing] = useState(false);
+  
+  // Logo scaling state (stored as percentage, default 100%)
+  const [logoScale, setLogoScale] = useState(() => {
+    const saved = localStorage.getItem('logoScale');
+    return saved ? parseInt(saved) : 100;
+  });
+
+  // Logo scaling helper functions
+  const updateLogoScale = (newScale: number) => {
+    // Clamp scale between 25% and 200%
+    const clampedScale = Math.max(25, Math.min(200, newScale));
+    setLogoScale(clampedScale);
+    localStorage.setItem('logoScale', clampedScale.toString());
+  };
+
+  const increaseLogoScale = () => {
+    updateLogoScale(logoScale + 5);
+  };
+
+  const decreaseLogoScale = () => {
+    updateLogoScale(logoScale - 5);
+  };
 
   // Load invoice numbering settings from localStorage
   useEffect(() => {
@@ -561,12 +583,35 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                               <div className="p-4 rounded-lg bg-gray-800/50 border">
                                 <h4 className="text-white font-medium mb-3">Current Logo</h4>
                                 <div className="flex items-start gap-4">
-                                  <div className="logo-preview-container bg-[#1a1a1a] border-2 border-[#444] rounded-lg p-4 flex items-center justify-center min-w-[200px] min-h-[100px]">
+                                  <div className="logo-preview-container bg-[#1a1a1a] border-2 border-[#444] rounded-lg p-4 flex flex-col items-center justify-center min-w-[200px] min-h-[100px]">
                                     <img 
                                       src={currentLogo.url} 
                                       alt="Business Logo" 
                                       className="max-w-full max-h-[80px] object-contain"
+                                      style={{ transform: `scale(${logoScale / 100})` }}
                                     />
+                                    {/* Logo Scale Controls */}
+                                    <div className="flex items-center gap-2 mt-3">
+                                      <button
+                                        onClick={decreaseLogoScale}
+                                        disabled={logoScale <= 25}
+                                        className="w-6 h-6 rounded-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
+                                        title="Decrease size (5%)"
+                                      >
+                                        <Minus className="h-3 w-3" />
+                                      </button>
+                                      <span className="text-xs text-gray-400 min-w-[40px] text-center">
+                                        {logoScale}%
+                                      </span>
+                                      <button
+                                        onClick={increaseLogoScale}
+                                        disabled={logoScale >= 200}
+                                        className="w-6 h-6 rounded-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
+                                        title="Increase size (5%)"
+                                      >
+                                        <Plus className="h-3 w-3" />
+                                      </button>
+                                    </div>
                                   </div>
                                   <div className="flex-1 space-y-2">
                                     <p className="text-gray-300 text-sm">
