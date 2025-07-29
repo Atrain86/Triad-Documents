@@ -808,7 +808,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
               ) : (
                 <>
                   <Download className="w-8 h-8 text-[#8B5FBF]" />
-                  <span className="text-[#8B5FBF] text-xl font-bold">Download</span>
+                  <span className="text-[#8B5FBF] text-xl font-bold">PDF</span>
                 </>
               )}
             </div>
