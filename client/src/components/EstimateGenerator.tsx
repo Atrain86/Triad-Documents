@@ -23,6 +23,7 @@ interface EstimateGeneratorProps {
 export default function EstimateGenerator({ project, isOpen, onClose }: EstimateGeneratorProps) {
   const { toast } = useToast();
   const printRef = useRef<HTMLDivElement>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Load saved form data from localStorage
   const loadSavedData = () => {
@@ -37,23 +38,16 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     }
   };
 
-  // Force clear all estimate form data and ensure fresh date on component mount
+  // Initialize form data when dialog opens (run only once per open)
   useEffect(() => {
-    if (isOpen) {
-      // Clear all localStorage data to prevent old date persistence
+    if (isOpen && !isInitialized) {
+      // Clear localStorage to ensure fresh start
       localStorage.removeItem('estimateFormData');
-      
-      // Force reset estimate date to current date
-      const today = new Date();
-      const year = today.getFullYear();
-      const month = String(today.getMonth() + 1).padStart(2, '0');
-      const day = String(today.getDate()).padStart(2, '0');
-      const currentDate = `${year}-${month}-${day}`;
-      
-      setEstimateDate(currentDate);
-      console.log('Forced current date update:', currentDate);
+      setIsInitialized(true);
+    } else if (!isOpen) {
+      setIsInitialized(false);
     }
-  }, [isOpen]);
+  }, [isOpen, isInitialized]);
 
   const savedData = loadSavedData();
 
@@ -331,9 +325,20 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     }
   };
 
+  // Don't render content until initialized to prevent jitter
+  if (!isInitialized && isOpen) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-4xl max-h-[90vh] h-[90vh] overflow-hidden bg-black text-white flex items-center justify-center">
+          <div className="text-[#8B5FBF]">Loading...</div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-black text-white">
+      <DialogContent className="max-w-4xl max-h-[90vh] h-[90vh] overflow-y-auto bg-black text-white">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-[#8B5FBF]">
             Generate Estimate - {project.clientName}
