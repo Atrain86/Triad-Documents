@@ -31,20 +31,20 @@ export default function InvoiceGenerator({
   const { toast } = useToast();
   const { user } = useAuth();
 
-  // Get business logo for invoices (A-Frame logo)
-  const { data: businessLogo } = useQuery({
-    queryKey: [`/api/users/1/logos/business`],
+  // Get invoice/email-specific logo
+  const { data: invoiceLogo } = useQuery({
+    queryKey: [`/api/users/1/logos/emails`],
     select: (data: any) => data?.logo || null
   });
 
-  // Fallback to regular logo if no business-specific logo is set
+  // Fallback to regular logo if no invoice-specific logo is set
   const { data: fallbackLogo } = useQuery({
     queryKey: [`/api/users/1/logo`],
     select: (data: any) => data?.logo || null,
-    enabled: !businessLogo
+    enabled: !invoiceLogo
   });
 
-  const currentLogo = businessLogo || fallbackLogo;
+  const currentLogo = invoiceLogo || fallbackLogo;
 
   // Logo visibility settings
   const [logoVisibility, setLogoVisibility] = useState(() => {
