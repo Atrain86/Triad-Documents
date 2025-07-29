@@ -3,7 +3,7 @@ import express from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
-import { insertProjectSchema, insertPhotoSchema, insertReceiptSchema, insertDailyHoursSchema, updateDailyHoursSchema, insertToolsChecklistSchema, insertUserSchema, projects, photos, receipts, dailyHours, toolsChecklist, users, tokenUsage } from "@shared/schema";
+import { insertProjectSchema, insertPhotoSchema, insertReceiptSchema, insertDailyHoursSchema, updateDailyHoursSchema, insertToolsChecklistSchema, insertUserSchema, insertLogoLibrarySchema, projects, photos, receipts, dailyHours, toolsChecklist, users, tokenUsage, logoLibrary } from "@shared/schema";
 import { sql, eq, desc } from "drizzle-orm";
 import { hashPassword, verifyPassword, generateToken, verifyToken } from "./auth";
 import { sendInvoiceEmailWithReceipts, sendEstimateEmail } from "./email";
@@ -1320,6 +1320,131 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error setting demo logo:', error);
       res.status(500).json({ error: 'Failed to set demo logo' });
+    }
+  });
+
+  // Logo Library API Routes
+  
+  // Get all logos in library
+  app.get('/api/logo-library', async (req, res) => {
+    try {
+      const logos = await db.select().from(logoLibrary).orderBy(desc(logoLibrary.createdAt));
+      res.json(logos);
+    } catch (error) {
+      console.error('Error fetching logo library:', error);
+      res.status(500).json({ error: 'Failed to fetch logo library' });
+    }
+  });
+
+  // Add logo to library (upload)
+  app.post('/api/logo-library', upload.single('logo'), async (req, res) => {
+    try {
+      const logoFile = req.file;
+      const { name } = req.body; // Custom name for the logo
+      
+      if (!logoFile) {
+        return res.status(400).json({ error: 'No logo file provided' });
+      }
+
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/svg+xml'];
+      if (!allowedTypes.includes(logoFile.mimetype)) {
+        fs.unlinkSync(logoFile.path); // Delete uploaded file
+        return res.status(400).json({ error: 'Invalid file type. Only JPG, PNG, and SVG files are allowed.' });
+      }
+
+      // Validate file size (5MB max)
+      if (logoFile.size > 5 * 1024 * 1024) {
+        fs.unlinkSync(logoFile.path); // Delete uploaded file
+        return res.status(400).json({ error: 'File too large. Maximum size is 5MB.' });
+      }
+
+      // Add to logo library
+      const [libraryEntry] = await db.insert(logoLibrary).values({
+        name: name || logoFile.originalname.replace(/\.[^/.]+$/, ''), // Remove extension for name
+        filename: `uploads/${logoFile.filename}`,
+        originalName: logoFile.originalname,
+        isDemo: 'false',
+        uploadedBy: 1 // Current user (hardcoded for now)
+      }).returning();
+
+      res.json({ 
+        success: true, 
+        logo: libraryEntry
+      });
+    } catch (error) {
+      console.error('Error adding logo to library:', error);
+      res.status(500).json({ error: 'Failed to add logo to library' });
+    }
+  });
+
+  // Set user's selected logo from library
+  app.post('/api/users/:userId/logo/select', async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { logoId } = req.body;
+      
+      if (!logoId) {
+        return res.status(400).json({ error: 'Logo ID is required' });
+      }
+
+      // Get logo from library
+      const [selectedLogo] = await db.select()
+        .from(logoLibrary)
+        .where(eq(logoLibrary.id, logoId));
+
+      if (!selectedLogo) {
+        return res.status(404).json({ error: 'Logo not found in library' });
+      }
+
+      // Update user with selected logo
+      await db.update(users)
+        .set({ 
+          logoUrl: selectedLogo.filename,
+          logoOriginalName: selectedLogo.originalName,
+          logoUploadedAt: new Date()
+        })
+        .where(eq(users.id, parseInt(userId)));
+
+      res.json({ 
+        success: true, 
+        logoUrl: selectedLogo.filename
+      });
+    } catch (error) {
+      console.error('Error selecting logo:', error);
+      res.status(500).json({ error: 'Failed to select logo' });
+    }
+  });
+
+  // Delete logo from library (admin only)
+  app.delete('/api/logo-library/:logoId', async (req, res) => {
+    try {
+      const { logoId } = req.params;
+      
+      // Get logo info before deleting
+      const [logo] = await db.select()
+        .from(logoLibrary)
+        .where(eq(logoLibrary.id, parseInt(logoId)));
+
+      if (!logo) {
+        return res.status(404).json({ error: 'Logo not found' });
+      }
+
+      // Delete file if it's not a demo logo
+      if (logo.isDemo === 'false' && logo.filename.startsWith('uploads/')) {
+        const logoPath = path.join(process.cwd(), logo.filename);
+        if (fs.existsSync(logoPath)) {
+          fs.unlinkSync(logoPath);
+        }
+      }
+
+      // Remove from library
+      await db.delete(logoLibrary).where(eq(logoLibrary.id, parseInt(logoId)));
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting logo from library:', error);
+      res.status(500).json({ error: 'Failed to delete logo' });
     }
   });
 

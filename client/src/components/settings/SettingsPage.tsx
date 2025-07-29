@@ -152,6 +152,16 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
     queryKey: [`/api/users/1/logo`]
   });
 
+  // Fetch logo library
+  const { data: logoLibrary = [] } = useQuery({
+    queryKey: ['/api/logo-library'],
+    queryFn: async () => {
+      const response = await fetch('/api/logo-library');
+      if (!response.ok) throw new Error('Failed to fetch logo library');
+      return response.json();
+    }
+  });
+
   const queryClient = useQueryClient();
 
   // Check if tax configuration is properly set up
@@ -215,7 +225,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
 
   // Update logo state when data changes
   useEffect(() => {
-    if (logoData?.logo) {
+    if (logoData && 'logo' in logoData && logoData.logo) {
       setCurrentLogo(logoData.logo);
     } else {
       setCurrentLogo(null);
@@ -246,24 +256,25 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
     setTimeout(() => setConfirmationMessage(''), 5000);
   };
 
-  // Logo upload mutation
-  const logoUploadMutation = useMutation({
-    mutationFn: async (file: File) => {
+  // Logo library upload mutation (adds to library)
+  const logoLibraryUploadMutation = useMutation({
+    mutationFn: async (data: { file: File; name: string }) => {
       const formData = new FormData();
-      formData.append('logo', file);
-      const response = await fetch('/api/users/1/logo', {
+      formData.append('logo', data.file);
+      formData.append('name', data.name);
+      const response = await fetch('/api/logo-library', {
         method: 'POST',
         body: formData
       });
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Upload failed');
+        throw new Error(error.error || 'Failed to add logo to library');
       }
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/users/1/logo`] });
-      setLogoMessage('Logo uploaded successfully!');
+      queryClient.invalidateQueries({ queryKey: ['/api/logo-library'] });
+      setLogoMessage('Logo added to library successfully!');
       setTimeout(() => setLogoMessage(''), 3000);
     },
     onError: (error: Error) => {
@@ -272,20 +283,40 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
     }
   });
 
-  // Logo delete mutation
-  const logoDeleteMutation = useMutation({
-    mutationFn: async () => {
-      const response = await fetch('/api/users/1/logo', {
+  // Logo selection mutation (select from library)
+  const logoSelectMutation = useMutation({
+    mutationFn: async (logoId: number) => {
+      return apiRequest(`/api/users/1/logo/select`, {
+        method: 'POST',
+        body: { logoId }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/users/1/logo`] });
+      setLogoMessage('Logo selected successfully!');
+      setTimeout(() => setLogoMessage(''), 3000);
+    },
+    onError: (error: Error) => {
+      setLogoMessage(error.message);
+      setTimeout(() => setLogoMessage(''), 5000);
+    }
+  });
+
+  // Logo delete from library mutation (admin only)
+  const logoLibraryDeleteMutation = useMutation({
+    mutationFn: async (logoId: number) => {
+      const response = await fetch(`/api/logo-library/${logoId}`, {
         method: 'DELETE'
       });
       if (!response.ok) {
-        throw new Error('Failed to remove logo');
+        throw new Error('Failed to delete logo from library');
       }
       return response.json();
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/logo-library'] });
       queryClient.invalidateQueries({ queryKey: [`/api/users/1/logo`] });
-      setLogoMessage('Logo removed successfully');
+      setLogoMessage('Logo removed from library');
       setTimeout(() => setLogoMessage(''), 3000);
     },
     onError: (error: Error) => {
@@ -294,27 +325,8 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
     }
   });
 
-  // Demo logo mutation
-  const demoLogoMutation = useMutation({
-    mutationFn: async (demoLogoPath: string) => {
-      return apiRequest(`/api/users/1/logo/demo`, {
-        method: 'POST',
-        body: { demoLogoPath }
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/users/1/logo`] });
-      setLogoMessage('Demo logo applied successfully!');
-      setTimeout(() => setLogoMessage(''), 3000);
-    },
-    onError: (error: Error) => {
-      setLogoMessage(error.message);
-      setTimeout(() => setLogoMessage(''), 5000);
-    }
-  });
-
-  // Handle logo upload
-  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle logo upload to library
+  const handleLogoLibraryUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -333,12 +345,26 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
       return;
     }
 
-    logoUploadMutation.mutate(file);
+    // Generate a clean name from filename (remove extension)
+    const cleanName = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+    
+    // Upload to library
+    logoLibraryUploadMutation.mutate({ file, name: cleanName });
+    
+    // Clear the input
+    event.target.value = '';
   };
 
-  // Handle demo logo selection
-  const handleDemoLogoSelect = (demoLogoPath: string) => {
-    demoLogoMutation.mutate(demoLogoPath);
+  // Handle logo selection from library
+  const handleLogoSelect = (logoId: number) => {
+    logoSelectMutation.mutate(logoId);
+  };
+
+  // Handle logo deletion from library
+  const handleLogoDelete = (logoId: number) => {
+    if (confirm('Are you sure you want to delete this logo from the library?')) {
+      logoLibraryDeleteMutation.mutate(logoId);
+    }
   };
 
   // Re-check tax configuration when component mounts or localStorage changes
@@ -526,7 +552,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                     {expandedSection === 'logo' && (
                       <div className="mt-4 p-6 rounded-lg border border-blue-400/30 bg-gray-900/10">
                         <div className="space-y-6">
-                          <h3 className="text-lg font-medium text-blue-400 mb-4">Upload Business Logo</h3>
+                          <h3 className="text-lg font-medium text-blue-400 mb-4">Business Logo Library</h3>
                           
                           {/* Current Logo Display */}
                           {currentLogo && (
@@ -548,42 +574,32 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                     <p className="text-gray-300 text-sm">
                                       <strong>Uploaded:</strong> {new Date(currentLogo.uploadedAt).toLocaleDateString()}
                                     </p>
-                                    <Button
-                                      onClick={() => logoDeleteMutation.mutate()}
-                                      disabled={logoDeleteMutation.isPending}
-                                      variant="outline"
-                                      size="sm"
-                                      className="text-red-400 border-red-400 hover:bg-red-400/10"
-                                    >
-                                      <Trash2 className="h-4 w-4 mr-2" />
-                                      {logoDeleteMutation.isPending ? 'Removing...' : 'Remove Logo'}
-                                    </Button>
                                   </div>
                                 </div>
                               </div>
                             </div>
                           )}
 
-                          {/* Upload Section */}
+                          {/* Upload to Library Section */}
                           <div className="space-y-4">
                             <div>
                               <label className="block text-sm font-medium text-gray-300 mb-2">
-                                {currentLogo ? 'Replace Logo' : 'Upload Logo'}
+                                Add Logo to Library
                               </label>
                               <div className="flex items-center gap-4">
                                 <input
                                   type="file"
                                   accept="image/jpeg,image/png,image/svg+xml"
-                                  onChange={handleLogoUpload}
+                                  onChange={handleLogoLibraryUpload}
                                   className="hidden"
-                                  id="logo-upload"
+                                  id="logo-library-upload"
                                 />
                                 <label
-                                  htmlFor="logo-upload"
+                                  htmlFor="logo-library-upload"
                                   className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg cursor-pointer transition-colors"
                                 >
                                   <Upload className="h-4 w-4" />
-                                  Choose File
+                                  Upload to Library
                                 </label>
                                 <span className="text-sm text-gray-400">
                                   JPG, PNG, or SVG • Max 5MB
@@ -591,72 +607,50 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                               </div>
                             </div>
 
-                            {/* Demo Logo Selection - Admin Only */}
+                            {/* Logo Library - Administrator Section */}
                             <div className="space-y-3">
                               <h4 className="text-white font-medium flex items-center gap-2">
-                                Demo Logos
-                                <span className="text-xs px-2 py-1 bg-blue-400 text-black rounded-full">ADMIN</span>
+                                Logo Library
+                                <span className="text-xs px-2 py-1 bg-blue-400 text-black rounded-full">ADMINISTRATOR</span>
                               </h4>
-                              <div className="grid grid-cols-2 gap-3">
-                                <button
-                                  onClick={() => handleDemoLogoSelect('/demo-logos/a-frame-logo.png')}
-                                  disabled={demoLogoMutation.isPending}
-                                  className="p-3 rounded-lg border border-gray-600 hover:border-blue-400 transition-colors bg-gray-800/50"
-                                >
-                                  <div className="bg-white rounded p-2 mb-2">
-                                    <img 
-                                      src="/aframe-logo.png" 
-                                      alt="A-Frame Logo" 
-                                      className="w-full h-12 object-contain"
-                                    />
+                              <div className="grid grid-cols-2 gap-3 max-h-64 overflow-y-auto">
+                                {logoLibrary.map((logo: any) => (
+                                  <div key={logo.id} className="relative group">
+                                    <button
+                                      onClick={() => handleLogoSelect(logo.id)}
+                                      disabled={logoSelectMutation.isPending}
+                                      className="w-full p-3 rounded-lg border border-gray-600 hover:border-blue-400 transition-colors bg-gray-800/50"
+                                    >
+                                      <div className="bg-white rounded p-2 mb-2">
+                                        <img 
+                                          src={logo.filename} 
+                                          alt={logo.name} 
+                                          className="w-full h-12 object-contain"
+                                        />
+                                      </div>
+                                      <span className="text-xs text-gray-300">{logo.name}</span>
+                                    </button>
+                                    
+                                    {/* Delete button for uploaded logos */}
+                                    {logo.is_demo === 'false' && (
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleLogoDelete(logo.id);
+                                        }}
+                                        className="absolute top-1 right-1 p-1 bg-red-500 hover:bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                      >
+                                        <Trash2 className="h-3 w-3" />
+                                      </button>
+                                    )}
                                   </div>
-                                  <span className="text-xs text-gray-300">A-Frame Painting</span>
-                                </button>
+                                ))}
                                 
-                                <button
-                                  onClick={() => handleDemoLogoSelect('/demo-logos/sherwin-williams.svg')}
-                                  disabled={demoLogoMutation.isPending}
-                                  className="p-3 rounded-lg border border-gray-600 hover:border-blue-400 transition-colors bg-gray-800/50"
-                                >
-                                  <div className="bg-white rounded p-2 mb-2">
-                                    <img 
-                                      src="/demo-logos/sherwin-williams.svg" 
-                                      alt="Sherwin Williams" 
-                                      className="w-full h-12 object-contain"
-                                    />
+                                {logoLibrary.length === 0 && (
+                                  <div className="col-span-2 text-center py-8 text-gray-400">
+                                    No logos in library. Upload some logos to get started.
                                   </div>
-                                  <span className="text-xs text-gray-300">Sherwin Williams</span>
-                                </button>
-                                
-                                <button
-                                  onClick={() => handleDemoLogoSelect('/demo-logos/dulux.svg')}
-                                  disabled={demoLogoMutation.isPending}
-                                  className="p-3 rounded-lg border border-gray-600 hover:border-blue-400 transition-colors bg-gray-800/50"
-                                >
-                                  <div className="bg-white rounded p-2 mb-2">
-                                    <img 
-                                      src="/demo-logos/dulux.svg" 
-                                      alt="Dulux" 
-                                      className="w-full h-12 object-contain"
-                                    />
-                                  </div>
-                                  <span className="text-xs text-gray-300">Dulux</span>
-                                </button>
-                                
-                                <button
-                                  onClick={() => handleDemoLogoSelect('/demo-logos/paint-brain.png')}
-                                  disabled={demoLogoMutation.isPending}
-                                  className="p-3 rounded-lg border border-gray-600 hover:border-blue-400 transition-colors bg-gray-800/50"
-                                >
-                                  <div className="bg-white rounded p-2 mb-2">
-                                    <img 
-                                      src="/paint-brain-logo.png" 
-                                      alt="Paint Brain" 
-                                      className="w-full h-12 object-contain"
-                                    />
-                                  </div>
-                                  <span className="text-xs text-gray-300">Paint Brain</span>
-                                </button>
+                                )}
                               </div>
                             </div>
 
@@ -678,18 +672,26 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                             )}
 
                             {/* Upload Progress */}
-                            {logoUploadMutation.isPending && (
+                            {logoLibraryUploadMutation.isPending && (
                               <div className="flex items-center gap-3 p-3 bg-blue-500/10 border border-blue-400/30 rounded-lg">
                                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-400"></div>
-                                <span className="text-blue-400 text-sm">Uploading logo...</span>
+                                <span className="text-blue-400 text-sm">Adding logo to library...</span>
+                              </div>
+                            )}
+
+                            {/* Selection Progress */}
+                            {logoSelectMutation.isPending && (
+                              <div className="flex items-center gap-3 p-3 bg-blue-500/10 border border-blue-400/30 rounded-lg">
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-400"></div>
+                                <span className="text-blue-400 text-sm">Selecting logo...</span>
                               </div>
                             )}
                           </div>
 
                           <div className="mt-4 p-3 bg-gray-800 rounded-lg">
                             <p className="text-sm text-gray-300">
-                              <span className="font-medium">Note:</span> Your business logo will appear on invoices and estimates. 
-                              For best results, use a transparent background logo or SVG format.
+                              <span className="font-medium">How it works:</span> Upload logos to your library, then select one to use for invoices and estimates. 
+                              Click any logo in the library to make it your active business logo.
                             </p>
                           </div>
                         </div>

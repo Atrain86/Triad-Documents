@@ -115,6 +115,16 @@ export const sessions = pgTable("sessions", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const logoLibrary = pgTable("logo_library", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  filename: text("filename").notNull(),
+  originalName: text("original_name").notNull(),
+  isDemo: text("is_demo").default("false"), // "true" for demo logos, "false" for uploaded
+  uploadedBy: integer("uploaded_by"), // user ID who uploaded it
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 
 
 export const insertProjectSchema = createInsertSchema(projects).omit({
@@ -182,6 +192,11 @@ export const insertUserSchema = createInsertSchema(users).omit({
   createdAt: true,
 });
 
+export const insertLogoLibrarySchema = createInsertSchema(logoLibrary).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type InsertProject = z.infer<typeof insertProjectSchema>;
 export type Project = typeof projects.$inferSelect;
 export type InsertPhoto = z.infer<typeof insertPhotoSchema>;
@@ -194,3 +209,5 @@ export type InsertToolsChecklist = z.infer<typeof insertToolsChecklistSchema>;
 export type ToolsChecklist = typeof toolsChecklist.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+export type InsertLogoLibrary = z.infer<typeof insertLogoLibrarySchema>;
+export type LogoLibrary = typeof logoLibrary.$inferSelect;
