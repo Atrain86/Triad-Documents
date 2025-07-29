@@ -1258,7 +1258,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             }
             
             // Update section names for better display and get appropriate color
-            const sectionName = section.id === 'photos' ? 'Photo Gallery' : 
+            const sectionName = section.id === 'photos' ? 'Photos' : 
                                 section.id === 'dailyHours' ? 'Hours' :
                                 section.id === 'receipts' ? 'Expenses' : section.name;
             const getSectionColor = (sectionId: string) => {
@@ -1283,7 +1283,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                   className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-750 transition-colors min-h-[56px]"
                   onClick={() => toggleSection(section.id)}
                 >
-                  <div className="flex items-center gap-3 min-h-[32px]">
+                  <div className="flex items-center gap-4 min-h-[32px]">
                     {/* Mac-style Reorder Icon - Left Side */}
                     <div className="drag-handle cursor-move p-1 hover:opacity-80 flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
                       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style={{ color: getSectionColor(section.id) }}>
@@ -1303,9 +1303,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                     
                     {/* Enhanced Data Status Badge */}
                     {itemCount > 0 && (
-                      <div className="flex items-center">
+                      <div className="flex items-center ml-3">
                         <span 
-                          className="text-white text-xs px-4 py-1 rounded-full font-medium whitespace-nowrap ml-2"
+                          className="text-white text-xs px-3 py-1 rounded-full font-medium whitespace-nowrap"
                           style={{ 
                             backgroundColor: getSectionColor(section.id),
                             textShadow: '0 1px 2px rgba(0, 0, 0, 0.8)'
