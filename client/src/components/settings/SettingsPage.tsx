@@ -224,8 +224,10 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
 
   // Logo scaling helper functions
   const updateLogoScale = (newScale: number) => {
+    console.log('updateLogoScale called with:', newScale);
     // Clamp scale between 25% and 400%
     const clampedScale = Math.max(25, Math.min(400, newScale));
+    console.log('clamped scale:', clampedScale);
     setLogoScale(clampedScale);
     localStorage.setItem('logoScale', clampedScale.toString());
     
@@ -234,10 +236,12 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
   };
 
   const increaseLogoScale = () => {
+    console.log('Increase clicked, current scale:', logoScale, 'new scale:', logoScale + 5);
     updateLogoScale(logoScale + 5);
   };
 
   const decreaseLogoScale = () => {
+    console.log('Decrease clicked, current scale:', logoScale, 'new scale:', logoScale - 5);
     updateLogoScale(logoScale - 5);
   };
 
