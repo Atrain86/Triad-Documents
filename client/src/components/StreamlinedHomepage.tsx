@@ -75,6 +75,12 @@ export default function StreamlinedHomepage({
     select: (data: any[]) => data || []
   });
 
+  // Get current user's logo
+  const { data: currentLogo } = useQuery({
+    queryKey: [`/api/users/1/logo`],
+    select: (data: any) => data?.logo || null
+  });
+
   const deleteProjectMutation = useMutation({
     mutationFn: async (projectId: number) => {
       const response = await fetch(`/api/projects/${projectId}`, { method: 'DELETE' });
@@ -279,8 +285,8 @@ export default function StreamlinedHomepage({
         {/* Centered logo */}
         <div className="flex justify-center mb-6">
           <img 
-            src="/aframe-logo.png" 
-            alt="A-Frame Painting" 
+            src={currentLogo?.url || "/aframe-logo.png"} 
+            alt="Business Logo" 
             className="h-32 w-auto object-contain"
           />
         </div>

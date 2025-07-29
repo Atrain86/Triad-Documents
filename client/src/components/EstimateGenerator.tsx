@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { Download, Mail, Plus, Trash2, Calendar, ChevronDown, ChevronLeft } from 'lucide-react';
 import html2canvas from 'html2canvas';
@@ -24,6 +24,12 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   const { toast } = useToast();
   const printRef = useRef<HTMLDivElement>(null);
   const [isInitialized, setIsInitialized] = useState(false);
+
+  // Get current user's logo
+  const { data: currentLogo } = useQuery({
+    queryKey: [`/api/users/1/logo`],
+    select: (data: any) => data?.logo || null
+  });
 
   // Load saved form data from localStorage
   const loadSavedData = () => {
@@ -848,8 +854,8 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
         >
           <div className="text-center mb-8">
             <img 
-              src="/aframe-logo.png" 
-              alt="A-Frame Painting" 
+              src={currentLogo?.url || "/aframe-logo.png"} 
+              alt="Business Logo" 
               className="mx-auto mb-4 h-16"
             />
             <h1 className="text-3xl font-bold text-[#8B5FBF]">ESTIMATE</h1>

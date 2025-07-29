@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import type { Project, Receipt, DailyHours } from '@shared/schema';
 
 interface InvoiceGeneratorProps {
@@ -30,6 +30,13 @@ export default function InvoiceGenerator({
 
   const { toast } = useToast();
   const { user } = useAuth();
+
+  // Get current user's logo
+  const { data: currentLogo } = useQuery({
+    queryKey: [`/api/users/1/logo`],
+    select: (data: any) => data?.logo || null
+  });
+
   const [isSending, setIsSending] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
@@ -80,7 +87,7 @@ cortespainter@gmail.com`;
     businessCity: 'Manson\'s Landing, BC',
     businessPostal: 'V0P1K0',
     businessEmail: 'cortespainter@gmail.com',
-    businessLogo: '/aframe-logo.png', // A-Frame Painting logo
+    businessLogo: currentLogo?.url || '/aframe-logo.png', // Dynamic business logo
     
     // Client info (populated from project)
     clientName: project.clientName || '',
