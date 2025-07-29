@@ -140,6 +140,13 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     { name: '', quantity: '', pricePerUnit: '' }
   ]);
 
+  // Travel costs state
+  const [travelCosts, setTravelCosts] = useState(savedData.travelCosts || {
+    distance: '',
+    trips: '',
+    ratePerKm: ''
+  });
+
   // Toggle state for action buttons - default to email (left side)
   const [actionMode, setActionMode] = useState<'email' | 'download'>('email');
 
@@ -168,10 +175,11 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       paintCosts,
       customSupplies,
       additionalServices,
-      additionalLabor
+      additionalLabor,
+      travelCosts
     };
     localStorage.setItem('estimateFormData', JSON.stringify(formData));
-  }, [projectTitle, workStages, paintCosts, customSupplies, additionalServices, additionalLabor]);
+  }, [projectTitle, workStages, paintCosts, customSupplies, additionalServices, additionalLabor, travelCosts]);
 
   // Load global tax configuration from localStorage
   const getGlobalTaxConfig = () => {
@@ -294,9 +302,19 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
   const paintAndMaterialsSubtotal = paintSubtotal + customSuppliesSubtotal;
 
+  // Add missing variables for HTML template
+  const materialsSubtotal = paintAndMaterialsSubtotal;
+  const travelSubtotal = (parseFloat(travelCosts.distance) || 0) * 
+                         (parseFloat(travelCosts.trips) || 0) * 
+                         (parseFloat(travelCosts.ratePerKm) || 0);
+  
+  const subtotalBeforeTax = laborSubtotal + additionalServicesSubtotal + additionalLaborSubtotal + paintAndMaterialsSubtotal + travelSubtotal;
+  const taxRate = (taxConfig.gst + taxConfig.pst + taxConfig.hst + taxConfig.salesTax + taxConfig.vat + taxConfig.otherTax) / 100;
+  const taxAmount = subtotalBeforeTax * taxRate;
+  const grandTotal = subtotalBeforeTax + taxAmount;
+
+  // Legacy calculations for backward compatibility
   const subtotal = laborSubtotal + additionalServicesSubtotal + additionalLaborSubtotal + paintAndMaterialsSubtotal;
-  const taxAmount = subtotal * (taxConfig.gst + taxConfig.pst + taxConfig.hst + taxConfig.salesTax + taxConfig.vat + taxConfig.otherTax) / 100;
-  const grandTotal = subtotal + taxAmount;
 
   // Email mutation
   const emailMutation = useMutation({
@@ -397,10 +415,10 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     }
     
     customSupplies.filter((supply: any) => (parseFloat(supply.quantity) || 0) > 0).forEach((supply: any) => {
-      const total = (parseFloat(supply.quantity) || 0) * (parseFloat(supply.unitPrice) || 0);
+      const total = (parseFloat(supply.quantity) || 0) * (parseFloat(supply.pricePerUnit) || 0);
       materialsHTML.push(`
         <tr>
-          <td class="py-2 px-4 border-b border-gray-700">${supply.name} (${supply.quantity} × $${supply.unitPrice})</td>
+          <td class="py-2 px-4 border-b border-gray-700">${supply.name} (${supply.quantity} × $${supply.pricePerUnit})</td>
           <td class="py-2 px-4 border-b border-gray-700 text-right font-semibold">$${total.toFixed(2)}</td>
         </tr>
       `);
