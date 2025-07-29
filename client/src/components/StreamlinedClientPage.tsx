@@ -1940,44 +1940,31 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           <div className="relative bg-gray-700 rounded-full p-1 flex items-center w-64">
             {/* Slider Background */}
             <div 
-              className="absolute h-10 w-28 rounded-full transition-all duration-300 ease-in-out z-10"
+              className="absolute h-10 rounded-full transition-all duration-300 ease-in-out z-10"
               style={{
                 backgroundColor: actionMode === 'estimate' ? paintBrainColors.purple : paintBrainColors.green,
-                transform: actionMode === 'estimate' ? 'translateX(4px)' : 'translateX(124px)'
+                width: '128px',
+                left: actionMode === 'estimate' ? '4px' : '128px'
               }}
             />
             
-            {/* Estimate Icon */}
-            <Calculator 
-              className={`absolute left-3 h-5 w-5 transition-opacity duration-200 z-20 ${
-                actionMode === 'estimate' ? 'text-white opacity-100' : 'text-white opacity-60'
-              }`} 
-              style={{ color: '#FFFFFF' }}
-            />
-            
-            {/* Toggle Buttons */}
+            {/* Toggle Buttons with Icons */}
             <div className="relative flex w-full z-30">
               <button
                 onClick={() => setActionMode('estimate')}
-                className="flex-1 h-10 flex items-center justify-center text-sm font-medium text-white transition-all duration-200"
+                className="flex-1 h-10 flex items-center justify-center text-sm font-medium text-white transition-all duration-200 gap-2"
               >
+                <Calculator className="h-4 w-4" />
                 Estimate
               </button>
               <button
                 onClick={() => setActionMode('invoice')}
-                className="flex-1 h-10 flex items-center justify-center text-sm font-medium text-white transition-all duration-200"
+                className="flex-1 h-10 flex items-center justify-center text-sm font-medium text-white transition-all duration-200 gap-2"
               >
+                <FileText className="h-4 w-4" />
                 Invoice
               </button>
             </div>
-            
-            {/* Invoice Icon */}
-            <FileText 
-              className={`absolute right-3 h-5 w-5 transition-opacity duration-200 z-20 ${
-                actionMode === 'invoice' ? 'text-white opacity-100' : 'text-white opacity-60'
-              }`} 
-              style={{ color: '#FFFFFF' }}
-            />
           </div>
         </div>
 
