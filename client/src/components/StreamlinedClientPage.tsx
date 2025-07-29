@@ -439,6 +439,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   // ⚠️ FIX: State variable for temporal dead zone error
   const [totalCompressedSizeBytes, setTotalCompressedSizeBytes] = useState(0);
 
+  // Action mode state for generate buttons toggle
+  const [actionMode, setActionMode] = useState<'estimate' | 'invoice'>('estimate');
+
   // API queries
   const { data: project } = useQuery<Project>({
     queryKey: [`/api/projects/${projectId}`],
@@ -1930,23 +1933,87 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         </div>
       </div>
 
-      {/* Generate Buttons */}
-      <div className="grid grid-cols-2 gap-4">
+      {/* Generate Buttons with Toggle */}
+      <div className="space-y-4">
+        {/* Toggle Switch */}
+        <div className="flex flex-col items-center space-y-3">
+          <div className="relative bg-gray-700 rounded-full p-1 flex items-center w-64">
+            {/* Estimate Icon */}
+            <Calculator 
+              className={`absolute left-3 h-5 w-5 transition-opacity duration-200 ${
+                actionMode === 'estimate' ? 'text-white opacity-100' : 'text-white opacity-60'
+              }`} 
+              style={{ color: '#FFFFFF' }}
+            />
+            
+            {/* Slider Background */}
+            <div 
+              className="absolute h-10 w-28 rounded-full transition-all duration-300 ease-in-out"
+              style={{
+                backgroundColor: actionMode === 'estimate' ? paintBrainColors.purple : paintBrainColors.green,
+                transform: actionMode === 'estimate' ? 'translateX(4px)' : 'translateX(124px)'
+              }}
+            />
+            
+            {/* Toggle Buttons */}
+            <div className="relative flex w-full">
+              <button
+                onClick={() => setActionMode('estimate')}
+                className="flex-1 h-10 flex items-center justify-center text-sm font-medium text-white transition-all duration-200 relative z-10"
+              >
+                Estimate
+              </button>
+              <button
+                onClick={() => setActionMode('invoice')}
+                className="flex-1 h-10 flex items-center justify-center text-sm font-medium text-white transition-all duration-200 relative z-10"
+              >
+                Invoice
+              </button>
+            </div>
+            
+            {/* Invoice Icon */}
+            <FileText 
+              className={`absolute right-3 h-5 w-5 transition-opacity duration-200 ${
+                actionMode === 'invoice' ? 'text-white opacity-100' : 'text-white opacity-60'
+              }`} 
+              style={{ color: '#FFFFFF' }}
+            />
+          </div>
+          
+          {/* Dynamic Label */}
+          <div className="text-center">
+            <span 
+              className="text-lg font-medium"
+              style={{ color: actionMode === 'estimate' ? paintBrainColors.purple : paintBrainColors.green }}
+            >
+              Generate {actionMode === 'estimate' ? 'Estimate' : 'Invoice'}
+            </span>
+          </div>
+        </div>
+
+        {/* Action Button */}
         <Button
-          onClick={() => setShowEstimateGenerator(true)}
-          className="py-3 text-sm font-semibold text-white flex items-center justify-center hover:opacity-90"
-          style={{ backgroundColor: paintBrainColors.purple }}
+          onClick={() => {
+            if (actionMode === 'estimate') {
+              setShowEstimateGenerator(true);
+            } else {
+              setShowInvoiceGenerator(true);
+            }
+          }}
+          className="w-full py-3 text-sm font-semibold text-white hover:opacity-90"
+          style={{ backgroundColor: actionMode === 'estimate' ? paintBrainColors.purple : paintBrainColors.green }}
         >
-          <Calculator size={18} className="mr-2" />
-          Generate Estimate
-        </Button>
-        <Button
-          onClick={() => setShowInvoiceGenerator(true)}
-          className="py-3 text-sm font-semibold text-white hover:opacity-90"
-          style={{ backgroundColor: paintBrainColors.green }}
-        >
-          <FileText size={18} className="mr-2" />
-          Generate Invoice
+          {actionMode === 'estimate' ? (
+            <>
+              <Calculator size={18} className="mr-2" />
+              Generate Estimate
+            </>
+          ) : (
+            <>
+              <FileText size={18} className="mr-2" />
+              Generate Invoice
+            </>
+          )}
         </Button>
       </div>
 
