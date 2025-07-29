@@ -664,7 +664,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Basic email validation
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(recipientEmail)) {
-        return res.status(400).json({ error: 'Invalid email address format' });
+        console.error('Invalid email format for estimate:', recipientEmail);
+        return res.status(400).json({ 
+          success: false, 
+          error: `Invalid email format: "${recipientEmail}". Email addresses cannot contain spaces or special characters.` 
+        });
       }
 
       // Convert base64 PDF to buffer

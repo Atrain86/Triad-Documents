@@ -390,7 +390,7 @@ cortespainter@gmail.com`;
 
   console.log('Received PDF buffer, size:', pdfBuffer.length, 'bytes');
 
-  return sendEmail({
+  return sendEmailWithSendGrid({
     to: recipientEmail,
     subject,
     text,
