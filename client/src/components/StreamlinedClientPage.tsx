@@ -1280,12 +1280,12 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
               >
                 {/* Section Header */}
                 <div 
-                  className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-750 transition-colors"
+                  className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-750 transition-colors min-h-[56px]"
                   onClick={() => toggleSection(section.id)}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 min-h-[32px]">
                     {/* Mac-style Reorder Icon - Left Side */}
-                    <div className="drag-handle cursor-move p-1 hover:opacity-80" onClick={(e) => e.stopPropagation()}>
+                    <div className="drag-handle cursor-move p-1 hover:opacity-80 flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
                       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style={{ color: getSectionColor(section.id) }}>
                         <rect y="2" width="16" height="1.5" rx="0.75"/>
                         <rect y="5.5" width="16" height="1.5" rx="0.75"/>
@@ -1294,18 +1294,23 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                       </svg>
                     </div>
                     
-                    <IconComponent size={20} style={{ color: getSectionColor(section.id) }} />
-                    <span className="font-medium" style={{ color: getSectionColor(section.id) }}>{sectionName}</span>
+                    <div className="flex items-center">
+                      <IconComponent size={20} style={{ color: getSectionColor(section.id) }} />
+                    </div>
+                    <div className="flex items-center">
+                      <span className="font-medium" style={{ color: getSectionColor(section.id) }}>{sectionName}</span>
+                    </div>
                     
                     {/* Enhanced Data Status Badge */}
                     {itemCount > 0 && (
-                      <span 
-                        className="text-white text-xs px-4 py-1 rounded-full font-medium whitespace-nowrap ml-2"
-                        style={{ 
-                          backgroundColor: getSectionColor(section.id),
-                          textShadow: '0 1px 2px rgba(0, 0, 0, 0.8)'
-                        }}
-                      >
+                      <div className="flex items-center">
+                        <span 
+                          className="text-white text-xs px-4 py-1 rounded-full font-medium whitespace-nowrap ml-2"
+                          style={{ 
+                            backgroundColor: getSectionColor(section.id),
+                            textShadow: '0 1px 2px rgba(0, 0, 0, 0.8)'
+                          }}
+                        >
                       {(() => {
                         switch(section.id) {
                           case 'photos': 
@@ -1323,7 +1328,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                             return itemCount.toString();
                         }
                       })()}
-                      </span>
+                        </span>
+                      </div>
                     )}
                   </div>
                   
