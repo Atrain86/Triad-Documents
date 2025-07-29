@@ -644,6 +644,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/send-estimate-email', async (req, res) => {
     try {
       console.log('=== ESTIMATE EMAIL REQUEST START ===');
+      console.log('Raw body type:', typeof req.body);
+      console.log('Raw body length:', JSON.stringify(req.body).length);
+      
       const { recipientEmail, clientName, estimateNumber, projectTitle, totalAmount, customMessage, pdfData } = req.body;
       
       // Debug: Log what we received

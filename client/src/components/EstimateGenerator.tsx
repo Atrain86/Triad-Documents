@@ -269,18 +269,40 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   // Email mutation
   const emailMutation = useMutation({
     mutationFn: async (pdfData: string) => {
-      return apiRequest('/api/send-estimate-email', {
-        method: 'POST',
-        body: JSON.stringify({
-          recipientEmail: project.clientEmail,
-          clientName: project.clientName,
-          estimateNumber: `EST-${Date.now()}`, 
-          projectTitle: projectTitle || `${project.projectType} Project`,
-          totalAmount: grandTotal.toFixed(2),
-          customMessage: '', // Can be added later if needed
-          pdfData: pdfData
-        })
+      console.log('Sending estimate email with data:', {
+        recipientEmail: project.clientEmail,
+        clientName: project.clientName,
+        pdfSize: pdfData.length
       });
+      
+      try {
+        const response = await fetch('/api/send-estimate-email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            recipientEmail: project.clientEmail,
+            clientName: project.clientName,
+            estimateNumber: `EST-${Date.now()}`, 
+            projectTitle: projectTitle || `${project.projectType} Project`,
+            totalAmount: grandTotal.toFixed(2),
+            customMessage: '', // Can be added later if needed
+            pdfData: pdfData
+          })
+        });
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Email response error:', response.status, errorText);
+          throw new Error(`HTTP ${response.status}: ${errorText}`);
+        }
+        
+        return await response.json();
+      } catch (error) {
+        console.error('Email request failed:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       toast({
