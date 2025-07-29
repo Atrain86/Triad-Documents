@@ -272,11 +272,13 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       return apiRequest('/api/send-estimate-email', {
         method: 'POST',
         body: JSON.stringify({
-          to: project.clientEmail,
+          recipientEmail: project.clientEmail,
           clientName: project.clientName,
+          estimateNumber: `EST-${Date.now()}`, 
           projectTitle: projectTitle || `${project.projectType} Project`,
-          pdfData: pdfData,
-          grandTotal: grandTotal
+          totalAmount: grandTotal.toFixed(2),
+          customMessage: '', // Can be added later if needed
+          pdfData: pdfData
         })
       });
     },
@@ -302,21 +304,22 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
     try {
       const canvas = await html2canvas(printRef.current, {
-        scale: 2,
+        scale: 1, // Reduced from 2 to minimize file size
         useCORS: true,
         backgroundColor: '#000000',
         logging: false
       });
 
-      const imgData = canvas.toDataURL('image/png');
+      const imgData = canvas.toDataURL('image/jpeg', 0.8); // Use JPEG with 80% quality for smaller size
       const pdf = new jsPDF();
       const imgWidth = 210;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
 
       if (sendEmail) {
         const pdfBase64 = pdf.output('datauristring').split(',')[1];
+        console.log('Generated PDF size (base64):', pdfBase64.length, 'characters');
         emailMutation.mutate(pdfBase64);
       } else {
         pdf.save(`estimate-${project.clientName.replace(/\s+/g, '-')}.pdf`);

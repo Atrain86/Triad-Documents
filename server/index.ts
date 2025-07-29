@@ -40,12 +40,27 @@ app.use((req, res, next) => {
   try {
     const server = await registerRoutes(app);
 
-    app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+    app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
       const status = err.status || err.statusCode || 500;
       const message = err.message || "Internal Server Error";
 
-      // Log the error but don't throw it to prevent server crash
-      console.error('Server error:', err);
+      // Enhanced error logging for email route issues
+      console.error('=== SERVER ERROR ===');
+      console.error('URL:', req.url);
+      console.error('Method:', req.method);
+      console.error('Error type:', err.type);
+      console.error('Error message:', err.message);
+      console.error('Full error:', err);
+      
+      // Special handling for body parser errors
+      if (err.type === 'entity.parse.failed') {
+        console.error('Body parser failed - request too large or malformed');
+        return res.status(413).json({ 
+          error: 'Request too large or malformed data',
+          details: 'PDF data may be corrupted or too large'
+        });
+      }
+      
       res.status(status).json({ message });
     });
 

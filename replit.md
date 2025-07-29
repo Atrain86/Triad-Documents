@@ -483,6 +483,14 @@ Logo: Custom A-frame house structure with paint brush accent
 - **Clear user guidance**: Email validation now provides specific error messages explaining proper email format requirements
 - **System fully operational**: User confirmed test worked successfully - both estimate and invoice emails now sending reliably
 
+### July 29, 2025 - Estimate Email System Fix & PDF Optimization
+- **Fixed parameter mismatch**: Corrected EstimateGenerator frontend to send `recipientEmail` instead of `to` to match server API expectations
+- **Added missing parameters**: Updated estimate email request to include all required fields (estimateNumber, totalAmount, customMessage) that server route expects
+- **PDF size optimization**: Reduced html2canvas scale from 2 to 1 and switched from PNG to JPEG (80% quality) to minimize email attachment size
+- **Enhanced error handling**: Added comprehensive logging and error catching for body parser failures and malformed requests
+- **Request body validation**: Added detailed server-side logging to identify and debug large request body issues
+- **Email system debugging**: Implemented step-by-step request tracking to isolate the root cause of estimate email failures
+
 ### July 27, 2025 - Calendar Integration Optimization & Status Selection Enhancement
 - **Isolated A-Frame calendar integration**: Successfully configured calendar buttons to open only A-Frame business calendar (6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981@group.calendar.google.com) without showing personal Allen calendar
 - **Enhanced status selection modal**: Improved StatusButton component with better contrast (dark background, white text) and isolated event handling to prevent navigation conflicts
