@@ -93,7 +93,7 @@ export async function makeBackgroundTransparent(inputPath: string, outputPath: s
     // Second pass: flood fill from edge white pixels to remove large white background areas
     const visited = new Array(width * height).fill(false);
     
-    function floodFill(startX: number, startY: number) {
+    const floodFill = (startX: number, startY: number) => {
       const stack = [[startX, startY]];
       
       while (stack.length > 0) {
@@ -120,7 +120,7 @@ export async function makeBackgroundTransparent(inputPath: string, outputPath: s
         // Add neighbors to stack
         stack.push([x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]);
       }
-    }
+    };
     
     // Start flood fill from all edge white pixels
     for (let x = 0; x < width; x++) {

@@ -226,8 +226,8 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
 
   // Update logo state when data changes
   useEffect(() => {
-    if (logoData && 'logo' in logoData && logoData.logo) {
-      setCurrentLogo(logoData.logo);
+    if (logoData && typeof logoData === 'object' && 'logo' in logoData && logoData.logo) {
+      setCurrentLogo(logoData.logo as { url: string; originalName: string; uploadedAt: string });
     } else {
       setCurrentLogo(null);
     }
@@ -259,10 +259,11 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
 
   // Logo library upload mutation (adds to library)
   const logoLibraryUploadMutation = useMutation({
-    mutationFn: async (data: { file: File; name: string }) => {
+    mutationFn: async (data: { file: File; name: string; skipBackgroundRemoval?: boolean }) => {
       const formData = new FormData();
       formData.append('logo', data.file);
       formData.append('name', data.name);
+      formData.append('skipBackgroundRemoval', (data.skipBackgroundRemoval || false).toString());
       const response = await fetch('/api/logo-library', {
         method: 'POST',
         body: formData
@@ -346,11 +347,14 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
       return;
     }
 
+    // Check if user wants to skip background removal
+    const skipBackgroundRemoval = (document.getElementById('skip-background-removal') as HTMLInputElement)?.checked || false;
+    
     // Generate a clean name from filename (remove extension)
     const cleanName = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
     
     // Upload to library
-    logoLibraryUploadMutation.mutate({ file, name: cleanName });
+    logoLibraryUploadMutation.mutate({ file, name: cleanName, skipBackgroundRemoval });
     
     // Clear the input
     event.target.value = '';
@@ -582,8 +586,10 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                           onClick={async () => {
                                             setBackgroundProcessing(true);
                                             try {
-                                              const response = await apiRequest('/api/users/1/logo/remove-background', 'POST');
-                                              if (response.success) {
+                                              const response = await apiRequest('/api/users/1/logo/remove-background', {
+                                                method: 'POST'
+                                              });
+                                              if ((response as any)?.success) {
                                                 setLogoMessage('Background removed successfully!');
                                                 queryClient.invalidateQueries({ queryKey: ['/api/users/1/logo'] });
                                                 setTimeout(() => setLogoMessage(''), 3000);
@@ -633,8 +639,19 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                   Upload to Library
                                 </label>
                                 <span className="text-sm text-gray-400">
-                                  JPG, PNG, or SVG • Max 5MB
+                                  JPG, PNG, or SVG • Max 5MB • PNG files automatically have white backgrounds removed
                                 </span>
+                                <div className="mt-2">
+                                  <label className="flex items-center gap-2 text-sm text-gray-300">
+                                    <input
+                                      type="checkbox"
+                                      defaultChecked={false}
+                                      className="rounded"
+                                      id="skip-background-removal"
+                                    />
+                                    Skip automatic background removal for PNG files
+                                  </label>
+                                </div>
                               </div>
                             </div>
 

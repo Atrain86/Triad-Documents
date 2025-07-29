@@ -1419,7 +1419,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/logo-library', upload.single('logo'), async (req, res) => {
     try {
       const logoFile = req.file;
-      const { name } = req.body; // Custom name for the logo
+      const { name, skipBackgroundRemoval } = req.body; // Custom name for the logo and background removal option
       
       if (!logoFile) {
         return res.status(400).json({ error: 'No logo file provided' });
@@ -1440,8 +1440,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       let logoFilename = `uploads/${logoFile.filename}`;
 
-      // Process PNG files to remove white backgrounds
-      if (logoFile.mimetype === 'image/png') {
+      // Process PNG files to remove white backgrounds (unless user explicitly skipped it)
+      const shouldSkipBackgroundRemoval = skipBackgroundRemoval === 'true';
+      if (logoFile.mimetype === 'image/png' && !shouldSkipBackgroundRemoval) {
         try {
           const originalPath = logoFile.path;
           const processedFilename = `processed_${logoFile.filename}`;
@@ -1458,6 +1459,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.warn(`Failed to process PNG background removal for library logo ${logoFile.originalname}:`, error);
           // Continue with original file if processing fails
         }
+      } else if (shouldSkipBackgroundRemoval) {
+        console.log(`Skipped background removal for ${logoFile.originalname} as requested by user`);
       }
 
       // Add to logo library
