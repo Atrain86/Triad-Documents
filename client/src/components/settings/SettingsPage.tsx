@@ -214,6 +214,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
   const [currentLogo, setCurrentLogo] = useState<{url: string, originalName: string, uploadedAt: string} | null>(null);
   const [logoUploading, setLogoUploading] = useState(false);
   const [logoMessage, setLogoMessage] = useState('');
+  const [backgroundProcessing, setBackgroundProcessing] = useState(false);
 
   // Load invoice numbering settings from localStorage
   useEffect(() => {
@@ -574,6 +575,36 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                     <p className="text-gray-300 text-sm">
                                       <strong>Uploaded:</strong> {new Date(currentLogo.uploadedAt).toLocaleDateString()}
                                     </p>
+                                    {/* Background Removal Button */}
+                                    {currentLogo.originalName?.toLowerCase().includes('.png') && (
+                                      <div className="pt-2">
+                                        <Button
+                                          onClick={async () => {
+                                            setBackgroundProcessing(true);
+                                            try {
+                                              const response = await apiRequest('/api/users/1/logo/remove-background', 'POST');
+                                              if (response.success) {
+                                                setLogoMessage('Background removed successfully!');
+                                                queryClient.invalidateQueries({ queryKey: ['/api/users/1/logo'] });
+                                                setTimeout(() => setLogoMessage(''), 3000);
+                                              }
+                                            } catch (error) {
+                                              setLogoMessage('Failed to remove background. Please try again.');
+                                              setTimeout(() => setLogoMessage(''), 3000);
+                                            }
+                                            setBackgroundProcessing(false);
+                                          }}
+                                          disabled={backgroundProcessing}
+                                          size="sm"
+                                          className="bg-blue-600 hover:bg-blue-700 text-white"
+                                        >
+                                          {backgroundProcessing ? 'Processing...' : 'Remove Background'}
+                                        </Button>
+                                        <p className="text-xs text-gray-400 mt-1">
+                                          Removes white backgrounds from PNG files
+                                        </p>
+                                      </div>
+                                    )}
                                   </div>
                                 </div>
                               </div>

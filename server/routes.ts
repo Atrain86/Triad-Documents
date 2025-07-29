@@ -11,6 +11,7 @@ import { gmailAuthService } from "./gmailAuth";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { makeBackgroundTransparent } from "./imageProcessing";
 
 // Configure multer for file uploads
 const uploadDir = path.join(process.cwd(), 'uploads');
@@ -1186,7 +1187,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      const logoUrl = `uploads/${logoFile.filename}`;
+      let logoUrl = `uploads/${logoFile.filename}`;
+
+      // Process PNG files to remove white backgrounds
+      if (logoFile.mimetype === 'image/png') {
+        try {
+          const originalPath = logoFile.path;
+          const processedFilename = `processed_${logoFile.filename}`;
+          const processedPath = path.join(uploadDir, processedFilename);
+          
+          await makeBackgroundTransparent(originalPath, processedPath);
+          
+          // Delete original file and use processed version
+          fs.unlinkSync(originalPath);
+          logoUrl = `uploads/${processedFilename}`;
+          
+          console.log(`Processed PNG logo: removed white background from ${logoFile.originalname}`);
+        } catch (error) {
+          console.warn(`Failed to process PNG background removal for ${logoFile.originalname}:`, error);
+          // Continue with original file if processing fails
+        }
+      }
 
       // Update user with new logo information
       await db.update(users)
@@ -1271,6 +1292,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error removing logo:', error);
       res.status(500).json({ error: 'Failed to remove logo' });
+    }
+  });
+
+  // Process existing logo to remove white background
+  app.post('/api/users/:userId/logo/remove-background', async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      
+      const [user] = await db.select({
+        logoUrl: users.logoUrl,
+        logoOriginalName: users.logoOriginalName
+      }).from(users).where(eq(users.id, userId));
+
+      if (!user?.logoUrl) {
+        return res.status(404).json({ error: 'No logo found' });
+      }
+
+      const currentLogoPath = path.join(process.cwd(), user.logoUrl);
+      
+      if (!fs.existsSync(currentLogoPath)) {
+        return res.status(404).json({ error: 'Logo file not found' });
+      }
+
+      // Check if it's a PNG file (we can only process PNG for transparency)
+      if (!user.logoOriginalName?.toLowerCase().includes('.png') && !user.logoUrl.includes('.png')) {
+        return res.status(400).json({ error: 'Background removal only works with PNG files' });
+      }
+
+      try {
+        const processedFilename = `processed_${Date.now()}_${path.basename(user.logoUrl)}`;
+        const processedPath = path.join(uploadDir, processedFilename);
+        
+        await makeBackgroundTransparent(currentLogoPath, processedPath);
+        
+        // Delete old logo file
+        fs.unlinkSync(currentLogoPath);
+        
+        const newLogoUrl = `uploads/${processedFilename}`;
+        
+        // Update user with processed logo
+        await db.update(users)
+          .set({ logoUrl: newLogoUrl })
+          .where(eq(users.id, userId));
+        
+        res.json({ 
+          success: true, 
+          message: 'Background removed successfully',
+          newLogoUrl: newLogoUrl
+        });
+        
+        console.log(`Successfully removed white background from existing logo: ${user.logoOriginalName}`);
+      } catch (error) {
+        console.error('Error processing logo background removal:', error);
+        res.status(500).json({ error: 'Failed to process logo background removal' });
+      }
+    } catch (error) {
+      console.error('Error processing logo:', error);
+      res.status(500).json({ error: 'Failed to process logo' });
     }
   });
 
@@ -1359,10 +1438,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'File too large. Maximum size is 5MB.' });
       }
 
+      let logoFilename = `uploads/${logoFile.filename}`;
+
+      // Process PNG files to remove white backgrounds
+      if (logoFile.mimetype === 'image/png') {
+        try {
+          const originalPath = logoFile.path;
+          const processedFilename = `processed_${logoFile.filename}`;
+          const processedPath = path.join(uploadDir, processedFilename);
+          
+          await makeBackgroundTransparent(originalPath, processedPath);
+          
+          // Delete original file and use processed version
+          fs.unlinkSync(originalPath);
+          logoFilename = `uploads/${processedFilename}`;
+          
+          console.log(`Processed PNG logo for library: removed white background from ${logoFile.originalname}`);
+        } catch (error) {
+          console.warn(`Failed to process PNG background removal for library logo ${logoFile.originalname}:`, error);
+          // Continue with original file if processing fails
+        }
+      }
+
       // Add to logo library
       const [libraryEntry] = await db.insert(logoLibrary).values({
         name: name || logoFile.originalname.replace(/\.[^/.]+$/, ''), // Remove extension for name
-        filename: `uploads/${logoFile.filename}`,
+        filename: logoFilename,
         originalName: logoFile.originalname,
         isDemo: 'false',
         uploadedBy: 1 // Current user (hardcoded for now)
