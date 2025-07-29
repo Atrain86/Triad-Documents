@@ -50,20 +50,23 @@ export async function makeBackgroundTransparent(inputPath: string, outputPath: s
         const g = pixelArray[dataIndex + 1];
         const b = pixelArray[dataIndex + 2];
         
-        // Check if pixel is near white/light colors
-        if (r > 240 && g > 240 && b > 240) {
-          // Check if it's on the edge or has white neighbors (likely background)
+        // Only remove very light backgrounds, preserve white text by being more selective
+        if (r > 250 && g > 250 && b > 250) {
+          // Check if it's on the edge (definitely background)
           const isEdge = x === 0 || x === width - 1 || y === 0 || y === height - 1;
           
           if (isEdge) {
             shouldBeTransparent[pixelIndex] = true;
           } else {
-            // Check surrounding pixels - if most neighbors are also white, it's likely background
-            let whiteNeighbors = 0;
+            // For interior pixels, check if this is part of a large uniform white area (background)
+            // rather than text. Text typically has edges and variations.
+            let uniformWhiteNeighbors = 0;
             let totalNeighbors = 0;
+            let hasColoredNeighbor = false;
             
-            for (let dy = -1; dy <= 1; dy++) {
-              for (let dx = -1; dx <= 1; dx++) {
+            // Check a larger area to determine if this is background or text
+            for (let dy = -2; dy <= 2; dy++) {
+              for (let dx = -2; dx <= 2; dx++) {
                 const nx = x + dx;
                 const ny = y + dy;
                 
