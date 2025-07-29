@@ -754,6 +754,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         receiptCount: receiptFilenames?.length || 0,
         hasCustomMessage: !!customMessage
       });
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(recipientEmail)) {
+        console.error('Invalid email format:', recipientEmail);
+        return res.status(400).json({ 
+          success: false, 
+          error: `Invalid email format: "${recipientEmail}". Email addresses cannot contain spaces or special characters.` 
+        });
+      }
       
       if (!recipientEmail || !clientName || !invoiceNumber || !pdfData) {
         return res.status(400).json({ 

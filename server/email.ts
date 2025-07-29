@@ -75,6 +75,11 @@ export async function sendEmailWithSendGrid(options: EmailOptions): Promise<bool
     return true;
   } catch (error) {
     console.error("SendGrid email failed:", error);
+    console.error("SendGrid error details:", {
+      message: (error as Error).message,
+      code: (error as any).code,
+      response: (error as any).response
+    });
     console.log("Falling back to nodemailer");
     return sendEmail(options);
   }
@@ -119,6 +124,12 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
     return true;
   } catch (error) {
     console.error("Email sending failed:", error);
+    console.error("Error details:", {
+      message: (error as Error).message,
+      code: (error as any).code,
+      response: (error as any).response,
+      responseCode: (error as any).responseCode
+    });
     return false;
   }
 }
