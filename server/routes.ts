@@ -1151,6 +1151,178 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Logo upload and management routes
+  app.post('/api/users/:userId/logo', upload.single('logo'), async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const logoFile = req.file;
+
+      if (!logoFile) {
+        return res.status(400).json({ error: 'No logo file provided' });
+      }
+
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/svg+xml'];
+      if (!allowedTypes.includes(logoFile.mimetype)) {
+        fs.unlinkSync(logoFile.path); // Delete uploaded file
+        return res.status(400).json({ error: 'Invalid file type. Only JPG, PNG, and SVG files are allowed.' });
+      }
+
+      // Validate file size (5MB max)
+      if (logoFile.size > 5 * 1024 * 1024) {
+        fs.unlinkSync(logoFile.path); // Delete uploaded file
+        return res.status(400).json({ error: 'File too large. Maximum size is 5MB.' });
+      }
+
+      // Check if user already has a logo and delete it
+      const [existingUser] = await db.select({ logoUrl: users.logoUrl })
+        .from(users)
+        .where(eq(users.id, userId));
+
+      if (existingUser?.logoUrl) {
+        const oldLogoPath = path.join(process.cwd(), existingUser.logoUrl);
+        if (fs.existsSync(oldLogoPath)) {
+          fs.unlinkSync(oldLogoPath);
+        }
+      }
+
+      const logoUrl = `uploads/${logoFile.filename}`;
+
+      // Update user with new logo information
+      await db.update(users)
+        .set({
+          logoUrl,
+          logoOriginalName: logoFile.originalname,
+          logoUploadedAt: new Date()
+        })
+        .where(eq(users.id, userId));
+
+      res.json({
+        success: true,
+        logoUrl,
+        originalName: logoFile.originalname
+      });
+    } catch (error) {
+      console.error('Logo upload error:', error);
+      // Clean up uploaded file if there was an error
+      if (req.file && fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+      res.status(500).json({ error: 'Failed to upload logo' });
+    }
+  });
+
+  app.get('/api/users/:userId/logo', async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      
+      const [user] = await db.select({
+        logoUrl: users.logoUrl,
+        logoOriginalName: users.logoOriginalName,
+        logoUploadedAt: users.logoUploadedAt
+      })
+      .from(users)
+      .where(eq(users.id, userId));
+
+      if (!user?.logoUrl) {
+        return res.json({ logo: null });
+      }
+
+      res.json({
+        logo: {
+          url: user.logoUrl,
+          originalName: user.logoOriginalName,
+          uploadedAt: user.logoUploadedAt
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching user logo:', error);
+      res.status(500).json({ error: 'Failed to fetch logo' });
+    }
+  });
+
+  app.delete('/api/users/:userId/logo', async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      
+      // Get current logo info
+      const [user] = await db.select({ logoUrl: users.logoUrl })
+        .from(users)
+        .where(eq(users.id, userId));
+
+      if (user?.logoUrl) {
+        // Delete the logo file
+        const logoPath = path.join(process.cwd(), user.logoUrl);
+        if (fs.existsSync(logoPath)) {
+          fs.unlinkSync(logoPath);
+        }
+
+        // Update database to remove logo references
+        await db.update(users)
+          .set({
+            logoUrl: null,
+            logoOriginalName: null,
+            logoUploadedAt: null
+          })
+          .where(eq(users.id, userId));
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error removing logo:', error);
+      res.status(500).json({ error: 'Failed to remove logo' });
+    }
+  });
+
+  app.post('/api/users/:userId/logo/demo', async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const { demoLogoPath } = req.body;
+
+      if (!demoLogoPath) {
+        return res.status(400).json({ error: 'Demo logo path is required' });
+      }
+
+      // Validate that user is admin (you may want to add proper role checking)
+      const [user] = await db.select({ role: users.role })
+        .from(users)
+        .where(eq(users.id, userId));
+
+      if (user?.role !== 'admin') {
+        return res.status(403).json({ error: 'Admin access required for demo logos' });
+      }
+
+      // Remove existing logo if any
+      const [existingUser] = await db.select({ logoUrl: users.logoUrl })
+        .from(users)
+        .where(eq(users.id, userId));
+
+      if (existingUser?.logoUrl && !existingUser.logoUrl.startsWith('demo-logos/')) {
+        const oldLogoPath = path.join(process.cwd(), existingUser.logoUrl);
+        if (fs.existsSync(oldLogoPath)) {
+          fs.unlinkSync(oldLogoPath);
+        }
+      }
+
+      // Set demo logo
+      await db.update(users)
+        .set({
+          logoUrl: demoLogoPath,
+          logoOriginalName: path.basename(demoLogoPath),
+          logoUploadedAt: new Date()
+        })
+        .where(eq(users.id, userId));
+
+      res.json({
+        success: true,
+        logoUrl: demoLogoPath
+      });
+    } catch (error) {
+      console.error('Error setting demo logo:', error);
+      res.status(500).json({ error: 'Failed to set demo logo' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

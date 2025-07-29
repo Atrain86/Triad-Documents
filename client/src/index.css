@@ -420,3 +420,22 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   -o-user-drag: none;
   user-drag: none;
 }
+
+/* Logo preview container styling */
+.logo-preview-container {
+  background-color: #1a1a1a;
+  border: 2px solid #444;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 200px;
+  min-height: 100px;
+}
+
+.logo-preview-container img {
+  max-width: 100%;
+  max-height: 80px;
+  object-fit: contain;
+}

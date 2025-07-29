@@ -13,6 +13,9 @@ export const users = pgTable("users", {
   gmailEmail: text("gmail_email"),
   gmailRefreshToken: text("gmail_refresh_token"),
   gmailConnectedAt: timestamp("gmail_connected_at"),
+  logoUrl: text("logo_url"), // Path to uploaded logo file
+  logoOriginalName: text("logo_original_name"), // Original filename
+  logoUploadedAt: timestamp("logo_uploaded_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   lastLoginAt: timestamp("last_login_at"),
 });

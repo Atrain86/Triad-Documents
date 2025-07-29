@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Settings, DollarSign, Globe, Mail, ChevronRight, Info, Menu, X, Camera, FileText } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { ArrowLeft, Settings, DollarSign, Globe, Mail, ChevronRight, Info, Menu, X, Camera, FileText, Upload, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ReactSortable } from 'react-sortablejs';
+import { apiRequest } from '@/lib/queryClient';
 
 import AdminDashboard from '../admin/AdminDashboard';
 import TaxConfiguration from './TaxConfiguration';
@@ -146,6 +147,13 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
     queryKey: ['/api/gmail/status/1'],
   });
 
+  // Fetch current user's logo
+  const { data: logoData } = useQuery({
+    queryKey: [`/api/users/1/logo`]
+  });
+
+  const queryClient = useQueryClient();
+
   // Check if tax configuration is properly set up
   const checkTaxConfiguration = () => {
     try {
@@ -178,6 +186,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
   // Define sortable sections
   const [settingsSections, setSettingsSections] = useState([
     { id: 'gmail', name: 'Gmail Integration', icon: Mail, color: 'red' },
+    { id: 'logo', name: 'Business Logo', icon: Settings, color: 'blue' },
     { id: 'photo', name: 'Photo Quality', icon: Camera, color: 'orange' },
     { id: 'timezone', name: 'Time Zone', icon: Globe, color: 'green' },
     { id: 'invoice', name: 'Invoice Numbering', icon: FileText, color: 'purple' },
@@ -191,6 +200,11 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
   const [manualInvoiceInput, setManualInvoiceInput] = useState('');
   const [confirmationMessage, setConfirmationMessage] = useState('');
 
+  // Logo upload state
+  const [currentLogo, setCurrentLogo] = useState<{url: string, originalName: string, uploadedAt: string} | null>(null);
+  const [logoUploading, setLogoUploading] = useState(false);
+  const [logoMessage, setLogoMessage] = useState('');
+
   // Load invoice numbering settings from localStorage
   useEffect(() => {
     const savedMode = localStorage.getItem('invoiceNumberingMode') as 'automatic' | 'manual' || 'automatic';
@@ -198,6 +212,15 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
     setInvoiceMode(savedMode);
     setNextInvoiceNumber(savedNext);
   }, []);
+
+  // Update logo state when data changes
+  useEffect(() => {
+    if (logoData?.logo) {
+      setCurrentLogo(logoData.logo);
+    } else {
+      setCurrentLogo(null);
+    }
+  }, [logoData]);
 
   // Save invoice numbering settings to localStorage
   const saveInvoiceSettings = (mode: 'automatic' | 'manual', nextNumber: number) => {
@@ -221,6 +244,101 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
     setConfirmationMessage(`Starting at Invoice #${inputNumber.toString().padStart(3, '0')} — next invoice will be #${nextNumber.toString().padStart(3, '0')}`);
     setManualInvoiceInput('');
     setTimeout(() => setConfirmationMessage(''), 5000);
+  };
+
+  // Logo upload mutation
+  const logoUploadMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('logo', file);
+      const response = await fetch('/api/users/1/logo', {
+        method: 'POST',
+        body: formData
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Upload failed');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/users/1/logo`] });
+      setLogoMessage('Logo uploaded successfully!');
+      setTimeout(() => setLogoMessage(''), 3000);
+    },
+    onError: (error: Error) => {
+      setLogoMessage(error.message);
+      setTimeout(() => setLogoMessage(''), 5000);
+    }
+  });
+
+  // Logo delete mutation
+  const logoDeleteMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch('/api/users/1/logo', {
+        method: 'DELETE'
+      });
+      if (!response.ok) {
+        throw new Error('Failed to remove logo');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/users/1/logo`] });
+      setLogoMessage('Logo removed successfully');
+      setTimeout(() => setLogoMessage(''), 3000);
+    },
+    onError: (error: Error) => {
+      setLogoMessage(error.message);
+      setTimeout(() => setLogoMessage(''), 5000);
+    }
+  });
+
+  // Demo logo mutation
+  const demoLogoMutation = useMutation({
+    mutationFn: async (demoLogoPath: string) => {
+      return apiRequest(`/api/users/1/logo/demo`, {
+        method: 'POST',
+        body: { demoLogoPath }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/users/1/logo`] });
+      setLogoMessage('Demo logo applied successfully!');
+      setTimeout(() => setLogoMessage(''), 3000);
+    },
+    onError: (error: Error) => {
+      setLogoMessage(error.message);
+      setTimeout(() => setLogoMessage(''), 5000);
+    }
+  });
+
+  // Handle logo upload
+  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/svg+xml'];
+    if (!allowedTypes.includes(file.type)) {
+      setLogoMessage('Invalid file type. Only JPG, PNG, and SVG files are allowed.');
+      setTimeout(() => setLogoMessage(''), 5000);
+      return;
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      setLogoMessage('File too large. Maximum size is 5MB.');
+      setTimeout(() => setLogoMessage(''), 5000);
+      return;
+    }
+
+    logoUploadMutation.mutate(file);
+  };
+
+  // Handle demo logo selection
+  const handleDemoLogoSelect = (demoLogoPath: string) => {
+    demoLogoMutation.mutate(demoLogoPath);
   };
 
   // Re-check tax configuration when component mounts or localStorage changes
@@ -373,6 +491,207 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                               <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
                             </svg>
                           </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+
+              case 'logo':
+                return (
+                  <div>
+                    <div 
+                      className="flex items-center justify-between p-4 rounded-lg border-2 border-blue-400 bg-gray-900/20 cursor-pointer hover:bg-gray-800/30 transition-colors"
+                      onClick={() => toggleSection('logo')}
+                    >
+                      <div className="flex items-center gap-4">
+                        <Menu className="h-5 w-5 text-blue-400 flex-shrink-0 drag-handle cursor-grab" />
+                        <Settings className="h-5 w-5 text-blue-400" />
+                        <span className="text-lg font-medium text-blue-400">Business Logo</span>
+                        <div className={`px-3 py-2 rounded-full text-xs font-medium ${
+                          currentLogo 
+                            ? 'bg-blue-500 text-black' 
+                            : 'bg-gray-500 text-black'
+                        }`}>
+                          {currentLogo ? 'Set' : 'None'}
+                        </div>
+                      </div>
+                      <ChevronRight 
+                        className={`h-5 w-5 text-blue-400 transition-transform ${
+                          expandedSection === 'logo' ? 'rotate-90' : 'rotate-180'
+                        }`} 
+                      />
+                    </div>
+                    
+                    {expandedSection === 'logo' && (
+                      <div className="mt-4 p-6 rounded-lg border border-blue-400/30 bg-gray-900/10">
+                        <div className="space-y-6">
+                          <h3 className="text-lg font-medium text-blue-400 mb-4">Upload Business Logo</h3>
+                          
+                          {/* Current Logo Display */}
+                          {currentLogo && (
+                            <div className="space-y-4">
+                              <div className="p-4 rounded-lg bg-gray-800/50 border">
+                                <h4 className="text-white font-medium mb-3">Current Logo</h4>
+                                <div className="flex items-start gap-4">
+                                  <div className="logo-preview-container bg-[#1a1a1a] border-2 border-[#444] rounded-lg p-4 flex items-center justify-center min-w-[200px] min-h-[100px]">
+                                    <img 
+                                      src={currentLogo.url} 
+                                      alt="Business Logo" 
+                                      className="max-w-full max-h-[80px] object-contain"
+                                    />
+                                  </div>
+                                  <div className="flex-1 space-y-2">
+                                    <p className="text-gray-300 text-sm">
+                                      <strong>File:</strong> {currentLogo.originalName}
+                                    </p>
+                                    <p className="text-gray-300 text-sm">
+                                      <strong>Uploaded:</strong> {new Date(currentLogo.uploadedAt).toLocaleDateString()}
+                                    </p>
+                                    <Button
+                                      onClick={() => logoDeleteMutation.mutate()}
+                                      disabled={logoDeleteMutation.isPending}
+                                      variant="outline"
+                                      size="sm"
+                                      className="text-red-400 border-red-400 hover:bg-red-400/10"
+                                    >
+                                      <Trash2 className="h-4 w-4 mr-2" />
+                                      {logoDeleteMutation.isPending ? 'Removing...' : 'Remove Logo'}
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Upload Section */}
+                          <div className="space-y-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                {currentLogo ? 'Replace Logo' : 'Upload Logo'}
+                              </label>
+                              <div className="flex items-center gap-4">
+                                <input
+                                  type="file"
+                                  accept="image/jpeg,image/png,image/svg+xml"
+                                  onChange={handleLogoUpload}
+                                  className="hidden"
+                                  id="logo-upload"
+                                />
+                                <label
+                                  htmlFor="logo-upload"
+                                  className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg cursor-pointer transition-colors"
+                                >
+                                  <Upload className="h-4 w-4" />
+                                  Choose File
+                                </label>
+                                <span className="text-sm text-gray-400">
+                                  JPG, PNG, or SVG • Max 5MB
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Demo Logo Selection - Admin Only */}
+                            <div className="space-y-3">
+                              <h4 className="text-white font-medium flex items-center gap-2">
+                                Demo Logos
+                                <span className="text-xs px-2 py-1 bg-blue-400 text-black rounded-full">ADMIN</span>
+                              </h4>
+                              <div className="grid grid-cols-2 gap-3">
+                                <button
+                                  onClick={() => handleDemoLogoSelect('/demo-logos/a-frame-logo.png')}
+                                  disabled={demoLogoMutation.isPending}
+                                  className="p-3 rounded-lg border border-gray-600 hover:border-blue-400 transition-colors bg-gray-800/50"
+                                >
+                                  <div className="bg-white rounded p-2 mb-2">
+                                    <img 
+                                      src="/aframe-logo.png" 
+                                      alt="A-Frame Logo" 
+                                      className="w-full h-12 object-contain"
+                                    />
+                                  </div>
+                                  <span className="text-xs text-gray-300">A-Frame Painting</span>
+                                </button>
+                                
+                                <button
+                                  onClick={() => handleDemoLogoSelect('/demo-logos/sherwin-williams.svg')}
+                                  disabled={demoLogoMutation.isPending}
+                                  className="p-3 rounded-lg border border-gray-600 hover:border-blue-400 transition-colors bg-gray-800/50"
+                                >
+                                  <div className="bg-white rounded p-2 mb-2">
+                                    <img 
+                                      src="/demo-logos/sherwin-williams.svg" 
+                                      alt="Sherwin Williams" 
+                                      className="w-full h-12 object-contain"
+                                    />
+                                  </div>
+                                  <span className="text-xs text-gray-300">Sherwin Williams</span>
+                                </button>
+                                
+                                <button
+                                  onClick={() => handleDemoLogoSelect('/demo-logos/dulux.svg')}
+                                  disabled={demoLogoMutation.isPending}
+                                  className="p-3 rounded-lg border border-gray-600 hover:border-blue-400 transition-colors bg-gray-800/50"
+                                >
+                                  <div className="bg-white rounded p-2 mb-2">
+                                    <img 
+                                      src="/demo-logos/dulux.svg" 
+                                      alt="Dulux" 
+                                      className="w-full h-12 object-contain"
+                                    />
+                                  </div>
+                                  <span className="text-xs text-gray-300">Dulux</span>
+                                </button>
+                                
+                                <button
+                                  onClick={() => handleDemoLogoSelect('/demo-logos/paint-brain.png')}
+                                  disabled={demoLogoMutation.isPending}
+                                  className="p-3 rounded-lg border border-gray-600 hover:border-blue-400 transition-colors bg-gray-800/50"
+                                >
+                                  <div className="bg-white rounded p-2 mb-2">
+                                    <img 
+                                      src="/paint-brain-logo.png" 
+                                      alt="Paint Brain" 
+                                      className="w-full h-12 object-contain"
+                                    />
+                                  </div>
+                                  <span className="text-xs text-gray-300">Paint Brain</span>
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* Status Message */}
+                            {logoMessage && (
+                              <div className={`p-3 rounded-lg ${
+                                logoMessage.includes('successfully') || logoMessage.includes('removed')
+                                  ? 'bg-green-500/10 border border-green-400/30'
+                                  : 'bg-red-500/10 border border-red-400/30'
+                              }`}>
+                                <p className={`text-sm ${
+                                  logoMessage.includes('successfully') || logoMessage.includes('removed')
+                                    ? 'text-green-400'
+                                    : 'text-red-400'
+                                }`}>
+                                  {logoMessage}
+                                </p>
+                              </div>
+                            )}
+
+                            {/* Upload Progress */}
+                            {logoUploadMutation.isPending && (
+                              <div className="flex items-center gap-3 p-3 bg-blue-500/10 border border-blue-400/30 rounded-lg">
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-400"></div>
+                                <span className="text-blue-400 text-sm">Uploading logo...</span>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="mt-4 p-3 bg-gray-800 rounded-lg">
+                            <p className="text-sm text-gray-300">
+                              <span className="font-medium">Note:</span> Your business logo will appear on invoices and estimates. 
+                              For best results, use a transparent background logo or SVG format.
+                            </p>
+                          </div>
                         </div>
                       </div>
                     )}
