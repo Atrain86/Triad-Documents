@@ -456,6 +456,7 @@ Logo: Custom A-frame house structure with paint brush accent
 - **Cleaned hours input interface**: Removed default 3.5 hours value and all placeholder examples from hours input fields for cleaner, distraction-free data entry
 - **Enhanced status bubble alignment**: Fixed vertical centering of status badges with minimum height constraints and individual flex containers for consistent alignment regardless of content size
 - **Improved EstimateGenerator UX**: Set all sections (Services & Labor, Paint & Materials, Additional Labor, Additional Services) to collapsed by default for cleaner, more focused interface
+- **Enhanced EstimateGenerator action toggle**: Replaced separate Download PDF and Send Email buttons with elegant toggle interface using Paint Brain colors - purple (#8B5FBF) for Download PDF and orange (#EA580C) for Send Email with unified action button
 
 ### July 27, 2025 - Calendar Integration Optimization & Status Selection Enhancement
 - **Isolated A-Frame calendar integration**: Successfully configured calendar buttons to open only A-Frame business calendar (6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981@group.calendar.google.com) without showing personal Allen calendar

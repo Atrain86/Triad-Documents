@@ -780,21 +780,54 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           </Card>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          {/* Action Mode Toggle */}
+          <div className="flex flex-col items-center gap-4 mb-4">
+            <div className="flex rounded-lg border border-gray-600 overflow-hidden">
+              <button
+                onClick={() => setActionMode('download')}
+                className={`px-6 py-3 flex items-center gap-2 font-medium transition-colors ${
+                  actionMode === 'download'
+                    ? 'bg-[#8B5FBF] text-white'
+                    : 'bg-gray-800 text-gray-400 hover:text-white'
+                }`}
+              >
+                <Download className="w-4 h-4" />
+                Download PDF
+              </button>
+              <button
+                onClick={() => setActionMode('email')}
+                className={`px-6 py-3 flex items-center gap-2 font-medium transition-colors ${
+                  actionMode === 'email'
+                    ? 'bg-[#EA580C] text-white'
+                    : 'bg-gray-800 text-gray-400 hover:text-white'
+                }`}
+              >
+                <Mail className="w-4 h-4" />
+                Send Email
+              </button>
+            </div>
+            
+            {/* Execute Action Button */}
             <Button
-              onClick={() => generatePDF(false)}
-              className="bg-[#8B5FBF] hover:bg-[#7A4FAF] text-white"
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Download PDF
-            </Button>
-            <Button
-              onClick={() => generatePDF(true)}
+              onClick={() => generatePDF(actionMode === 'email')}
               disabled={emailMutation.isPending}
-              className="bg-[#6A9955] hover:bg-[#5A8245] text-white"
+              className={`px-8 py-3 text-white font-semibold ${
+                actionMode === 'download'
+                  ? 'bg-[#8B5FBF] hover:bg-[#7A4FAF]'
+                  : 'bg-[#EA580C] hover:bg-[#D97706]'
+              }`}
             >
-              <Mail className="w-4 h-4 mr-2" />
-              {emailMutation.isPending ? 'Sending...' : 'Send Email'}
+              {actionMode === 'download' ? (
+                <>
+                  <Download className="w-4 h-4 mr-2" />
+                  Generate PDF
+                </>
+              ) : (
+                <>
+                  <Mail className="w-4 h-4 mr-2" />
+                  {emailMutation.isPending ? 'Sending...' : 'Send Estimate'}
+                </>
+              )}
             </Button>
           </div>
         </div>
