@@ -540,7 +540,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                             ? 'bg-blue-500 text-black' 
                             : 'bg-gray-500 text-black'
                         }`}>
-                          {currentLogo ? 'Set' : 'None'}
+                          {currentLogo ? 'Active' : 'None'}
                         </div>
                       </div>
                       <ChevronRight 
@@ -553,7 +553,10 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                     {expandedSection === 'logo' && (
                       <div className="mt-4 p-6 rounded-lg border border-blue-400/30 bg-gray-900/10">
                         <div className="space-y-6">
-                          <h3 className="text-lg font-medium text-blue-400 mb-4">Business Logo Library</h3>
+                          <h3 className="text-lg font-medium text-blue-400 mb-4 flex items-center gap-2">
+                            Business Logo Library
+                            <span className="text-xs px-2 py-1 bg-purple-500 text-white rounded-full">PRO</span>
+                          </h3>
                           
                           {/* Current Logo Display */}
                           {currentLogo && (
@@ -572,9 +575,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                     <p className="text-gray-300 text-sm">
                                       <strong>File:</strong> {currentLogo.originalName}
                                     </p>
-                                    <p className="text-gray-300 text-sm">
-                                      <strong>Uploaded:</strong> {new Date(currentLogo.uploadedAt).toLocaleDateString()}
-                                    </p>
+
                                     {/* Background Removal Button */}
                                     {currentLogo.originalName?.toLowerCase().includes('.png') && (
                                       <div className="pt-2">
@@ -632,19 +633,19 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                   className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg cursor-pointer transition-colors"
                                 >
                                   <Upload className="h-4 w-4" />
-                                  Upload Logo
+                                  Logo
                                 </label>
                                 <span className="text-sm text-gray-400">
-                                  JPG, PNG, or SVG • Max 5MB • Original files preserved
+                                  Max 5MB
                                 </span>
                               </div>
                             </div>
 
-                            {/* Logo Library - Administrator Section */}
+                            {/* Logo Library - Pro Section */}
                             <div className="space-y-3">
                               <h4 className="text-white font-medium flex items-center gap-2">
                                 Logo Library
-                                <span className="text-xs px-2 py-1 bg-blue-400 text-black rounded-full">ADMINISTRATOR</span>
+                                <span className="text-xs px-2 py-1 bg-purple-500 text-white rounded-full">PRO</span>
                               </h4>
                               <div className="grid grid-cols-2 gap-3 max-h-64 overflow-y-auto">
                                 {logoLibrary.map((logo: any) => (
@@ -661,7 +662,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                           className="w-full h-12 object-contain"
                                         />
                                       </div>
-                                      <span className="text-xs text-gray-300">{logo.name}</span>
+                                      <span className="text-xs text-gray-300">{logo.originalName}</span>
                                     </button>
                                     
                                     {/* Delete button for uploaded logos */}
@@ -1067,7 +1068,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                               </div>
                             </div>
 
-                            {/* High Quality Option - Admin Only */}
+                            {/* High Quality Option - Pro Only */}
                             <div 
                               className={`p-3 rounded-lg border cursor-pointer transition-colors ${
                                 photoCompressionLevel === 'high' 
@@ -1083,7 +1084,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                 <div>
                                   <div className="font-medium text-white flex items-center gap-2">
                                     High Quality
-                                    <span className="text-xs px-2 py-1 bg-orange-400 text-black rounded-full">ADMIN</span>
+                                    <span className="text-xs px-2 py-1 bg-purple-500 text-white rounded-full">PRO</span>
                                   </div>
                                   <div className="text-sm text-gray-400">90% quality • 2400×1600 resolution • Best detail</div>
                                 </div>
@@ -1093,7 +1094,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                               </div>
                             </div>
 
-                            {/* Original Quality Option - Admin Only */}
+                            {/* Original Quality Option - Pro Only */}
                             <div 
                               className={`p-3 rounded-lg border cursor-pointer transition-colors ${
                                 photoCompressionLevel === 'original' 
@@ -1109,7 +1110,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                 <div>
                                   <div className="font-medium text-white flex items-center gap-2">
                                     Original Quality
-                                    <span className="text-xs px-2 py-1 bg-orange-400 text-black rounded-full">ADMIN</span>
+                                    <span className="text-xs px-2 py-1 bg-purple-500 text-white rounded-full">PRO</span>
                                   </div>
                                   <div className="text-sm text-gray-400">No compression • Full resolution • Original file size</div>
                                 </div>
