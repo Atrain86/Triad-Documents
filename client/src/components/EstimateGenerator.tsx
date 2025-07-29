@@ -779,46 +779,38 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             </CardContent>
           </Card>
 
-          {/* Action Toggle - Clickable with Labels */}
-          <div className="flex flex-col items-center gap-6 mb-6 p-6 bg-black rounded-lg border border-gray-600">
-            <div className="flex items-center gap-6">
-              {/* Send Email Option */}
-              <div 
-                className="flex flex-col items-center gap-2 cursor-pointer"
-                onClick={() => {
-                  setActionMode('email');
-                  generatePDF(true);
-                }}
-              >
-                <Mail className="w-8 h-8 text-[#EA580C]" />
-                <span className="text-[#EA580C] text-lg font-bold">Send Email</span>
-              </div>
-              
-              {/* Toggle Switch */}
-              <button
-                onClick={() => setActionMode(actionMode === 'email' ? 'download' : 'email')}
-                className={`relative inline-flex h-10 w-20 items-center rounded-full transition-colors duration-200 focus:outline-none ${
-                  actionMode === 'email' ? 'bg-[#EA580C]' : 'bg-[#8B5FBF]'
+          {/* Action Toggle with Dynamic Label */}
+          <div className="flex flex-col items-center gap-4 mb-6 p-6 bg-black rounded-lg border border-gray-600">
+            {/* Toggle Switch */}
+            <button
+              onClick={() => setActionMode(actionMode === 'email' ? 'download' : 'email')}
+              className={`relative inline-flex h-10 w-20 items-center rounded-full transition-colors duration-200 focus:outline-none ${
+                actionMode === 'email' ? 'bg-[#EA580C]' : 'bg-[#8B5FBF]'
+              }`}
+            >
+              <span
+                className={`inline-block h-8 w-8 transform rounded-full bg-white transition-transform duration-200 ${
+                  actionMode === 'email' ? 'translate-x-1' : 'translate-x-11'
                 }`}
-              >
-                <span
-                  className={`inline-block h-8 w-8 transform rounded-full bg-white transition-transform duration-200 ${
-                    actionMode === 'email' ? 'translate-x-1' : 'translate-x-11'
-                  }`}
-                />
-              </button>
-              
-              {/* Download PDF Option */}
-              <div 
-                className="flex flex-col items-center gap-2 cursor-pointer"
-                onClick={() => {
-                  setActionMode('download');
-                  generatePDF(false);
-                }}
-              >
-                <Download className="w-8 h-8 text-[#8B5FBF]" />
-                <span className="text-[#8B5FBF] text-lg font-bold">Download PDF</span>
-              </div>
+              />
+            </button>
+            
+            {/* Dynamic Action Label */}
+            <div 
+              className="flex items-center gap-3 cursor-pointer"
+              onClick={() => generatePDF(actionMode === 'email')}
+            >
+              {actionMode === 'email' ? (
+                <>
+                  <Mail className="w-8 h-8 text-[#EA580C]" />
+                  <span className="text-[#EA580C] text-xl font-bold">Send</span>
+                </>
+              ) : (
+                <>
+                  <Download className="w-8 h-8 text-[#8B5FBF]" />
+                  <span className="text-[#8B5FBF] text-xl font-bold">Download</span>
+                </>
+              )}
             </div>
             
             {/* Status Text */}
