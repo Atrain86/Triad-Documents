@@ -454,6 +454,8 @@ Logo: Custom A-frame house structure with paint brush accent
 - **Real-time rate updates**: Hourly rate changes now immediately reflect in both status badges and detailed hours summary sections
 - **Fixed hours calculation display**: Resolved rounding discrepancy where status badge used Math.round() (7.5→8 hrs) while summary showed exact hours (7.5) - now both show precise values with .toFixed(1)
 - **Cleaned hours input interface**: Removed default 3.5 hours value and all placeholder examples from hours input fields for cleaner, distraction-free data entry
+- **Enhanced status bubble alignment**: Fixed vertical centering of status badges with minimum height constraints and individual flex containers for consistent alignment regardless of content size
+- **Improved EstimateGenerator UX**: Set all sections (Services & Labor, Paint & Materials, Additional Labor, Additional Services) to collapsed by default for cleaner, more focused interface
 
 ### July 27, 2025 - Calendar Integration Optimization & Status Selection Enhancement
 - **Isolated A-Frame calendar integration**: Successfully configured calendar buttons to open only A-Frame business calendar (6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981@group.calendar.google.com) without showing personal Allen calendar

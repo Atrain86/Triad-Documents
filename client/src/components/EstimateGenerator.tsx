@@ -111,12 +111,12 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   // Toggle state for action buttons
   const [actionMode, setActionMode] = useState<'download' | 'email'>('email');
 
-  // Collapsible sections state
+  // Collapsible sections state - Default all sections to collapsed
   const [collapsedSections, setCollapsedSections] = useState({
-    services: false,
-    materials: false,
-    additionalLabor: false,
-    additionalServices: false
+    services: true,
+    materials: true,
+    additionalLabor: true,
+    additionalServices: true
   });
 
   // Toggle section collapsed state
