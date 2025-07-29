@@ -309,20 +309,7 @@ export default function StreamlinedHomepage({
           </Button>
         </div>
 
-        {/* Search container */}
-        <div className="flex justify-center mb-6">
-          <div className="relative w-96">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2" style={{ color: paintBrainColors.orange }} size={20} />
-            <Input
-              placeholder="Search clients"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 py-3 border-2 w-full"
-              style={{ borderColor: paintBrainColors.orange }}
-            />
-          </div>
-        </div>
-
+        {/* Active/Archive Toggle */}
         {projects.length > 0 && (
           <div className="flex justify-center items-center mb-6">
             <div className="flex items-center gap-3">
@@ -348,6 +335,20 @@ export default function StreamlinedHomepage({
             </div>
           </div>
         )}
+
+        {/* Search container */}
+        <div className="flex justify-center mb-6">
+          <div className="relative w-96">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2" style={{ color: paintBrainColors.orange }} size={20} />
+            <Input
+              placeholder="Search clients"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 py-3 border-2 w-full"
+              style={{ borderColor: paintBrainColors.orange }}
+            />
+          </div>
+        </div>
 
         <div className="space-y-4">
           {displayProjects.length === 0 ? (
