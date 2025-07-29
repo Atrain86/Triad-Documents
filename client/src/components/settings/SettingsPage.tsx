@@ -193,6 +193,16 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
     return saved || 'eastern';
   });
 
+  // Logo visibility settings state
+  const [logoVisibility, setLogoVisibility] = useState(() => {
+    const saved = localStorage.getItem('logoVisibility');
+    return saved ? JSON.parse(saved) : {
+      homepage: true,
+      estimates: true,
+      emails: true
+    };
+  });
+
   // Define sortable sections
   const [settingsSections, setSettingsSections] = useState([
     { id: 'gmail', name: 'Gmail Integration', icon: Mail, color: 'red' },
@@ -240,6 +250,16 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
 
   const decreaseLogoScale = () => {
     updateLogoScale(logoScale - 5);
+  };
+
+  // Logo visibility toggle function
+  const toggleLogoVisibility = (context: 'homepage' | 'estimates' | 'emails') => {
+    const newVisibility = {
+      ...logoVisibility,
+      [context]: !logoVisibility[context]
+    };
+    setLogoVisibility(newVisibility);
+    localStorage.setItem('logoVisibility', JSON.stringify(newVisibility));
   };
 
   // Load invoice numbering settings from localStorage
@@ -421,6 +441,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
     const logoScale = localStorage.getItem('logoScale');
     const invoiceNumberingMode = localStorage.getItem('invoiceNumberingMode');
     const nextInvoiceNumber = localStorage.getItem('nextInvoiceNumber');
+    const logoVisibility = localStorage.getItem('logoVisibility');
     
     // Complete authentication reset
     localStorage.clear();
@@ -431,6 +452,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
     if (logoScale) localStorage.setItem('logoScale', logoScale);
     if (invoiceNumberingMode) localStorage.setItem('invoiceNumberingMode', invoiceNumberingMode);
     if (nextInvoiceNumber) localStorage.setItem('nextInvoiceNumber', nextInvoiceNumber);
+    if (logoVisibility) localStorage.setItem('logoVisibility', logoVisibility);
     
     logout();
     // Force hard reload to clear all cached state
@@ -820,32 +842,83 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                     {expandedSection === 'contextual-logos' && (
                       <div className="mt-4 p-6 rounded-lg border border-indigo-400/30 bg-gray-900/10">
                         <div className="space-y-6">
-                          <h3 className="text-lg font-medium text-indigo-400 mb-4">Set Different Logos for Different Contexts</h3>
+                          <h3 className="text-lg font-medium text-indigo-400 mb-4">Choose Where Logo Appears</h3>
                           
-                          {/* Homepage Logo */}
-                          <div className="space-y-3">
-                            <h4 className="text-white font-medium flex items-center gap-2">
-                              <Home className="h-4 w-4" />
-                              Homepage & Sign-in Logo
-                            </h4>
-                            <p className="text-sm text-gray-400">Logo shown on homepage and login screen</p>
-                            <ContextualLogoSelector logoType="homepage" />
-                          </div>
+                          <div className="space-y-4">
+                            {/* Homepage Option */}
+                            <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg border border-gray-700">
+                              <div className="flex items-center gap-3">
+                                <Home className="h-5 w-5 text-blue-400" />
+                                <div>
+                                  <h4 className="text-white font-medium">Homepage</h4>
+                                  <p className="text-sm text-gray-400">Main page and sign-in screen</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  id="logo-homepage"
+                                  className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
+                                  checked={logoVisibility.homepage}
+                                  onChange={() => toggleLogoVisibility('homepage')}
+                                />
+                                <label htmlFor="logo-homepage" className="text-sm font-medium text-gray-300">
+                                  Show Logo
+                                </label>
+                              </div>
+                            </div>
 
-                          {/* Business Logo */}
-                          <div className="space-y-3">
-                            <h4 className="text-white font-medium flex items-center gap-2">
-                              <Building2 className="h-4 w-4" />
-                              Business Documents Logo
-                            </h4>
-                            <p className="text-sm text-gray-400">Logo used for invoices and estimates</p>
-                            <ContextualLogoSelector logoType="business" />
+                            {/* Estimates Option */}
+                            <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg border border-gray-700">
+                              <div className="flex items-center gap-3">
+                                <FileText className="h-5 w-5 text-purple-400" />
+                                <div>
+                                  <h4 className="text-white font-medium">Estimates</h4>
+                                  <p className="text-sm text-gray-400">PDF estimates and quotes</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  id="logo-estimates"
+                                  className="w-4 h-4 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500"
+                                  checked={logoVisibility.estimates}
+                                  onChange={() => toggleLogoVisibility('estimates')}
+                                />
+                                <label htmlFor="logo-estimates" className="text-sm font-medium text-gray-300">
+                                  Show Logo
+                                </label>
+                              </div>
+                            </div>
+
+                            {/* Emails Option */}
+                            <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg border border-gray-700">
+                              <div className="flex items-center gap-3">
+                                <Mail className="h-5 w-5 text-green-400" />
+                                <div>
+                                  <h4 className="text-white font-medium">Emails</h4>
+                                  <p className="text-sm text-gray-400">Email signatures and headers</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  id="logo-emails"
+                                  className="w-4 h-4 text-green-600 bg-gray-700 border-gray-600 rounded focus:ring-green-500"
+                                  checked={logoVisibility.emails}
+                                  onChange={() => toggleLogoVisibility('emails')}
+                                />
+                                <label htmlFor="logo-emails" className="text-sm font-medium text-gray-300">
+                                  Show Logo
+                                </label>
+                              </div>
+                            </div>
                           </div>
 
                           <div className="mt-4 p-3 bg-gray-800 rounded-lg">
                             <p className="text-sm text-gray-300">
-                              <span className="font-medium">Pro Feature:</span> Set different logos for different parts of your app. 
-                              Use your Paint Brain logo for the homepage and A-Frame logo for professional documents.
+                              <span className="font-medium">Pro Feature:</span> Control exactly where your logo appears. 
+                              Turn off logo display for specific contexts while keeping it in others.
                             </p>
                           </div>
                         </div>

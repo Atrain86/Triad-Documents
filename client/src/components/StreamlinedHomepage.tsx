@@ -96,6 +96,19 @@ export default function StreamlinedHomepage({
     }
   }, []);
 
+  // Listen for logo visibility changes
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      const saved = localStorage.getItem('logoVisibility');
+      if (saved) {
+        setLogoVisibility(JSON.parse(saved));
+      }
+    };
+
+    window.addEventListener('storage', handleVisibilityChange);
+    return () => window.removeEventListener('storage', handleVisibilityChange);
+  }, []);
+
   const { data: projects = [], isLoading } = useQuery({
     queryKey: ['/api/projects'],
     select: (data: any[]) => data || []
@@ -115,6 +128,16 @@ export default function StreamlinedHomepage({
   });
 
   const currentLogo = homepageLogo || fallbackLogo;
+
+  // Logo visibility settings
+  const [logoVisibility, setLogoVisibility] = useState(() => {
+    const saved = localStorage.getItem('logoVisibility');
+    return saved ? JSON.parse(saved) : {
+      homepage: true,
+      estimates: true,
+      emails: true
+    };
+  });
 
   const deleteProjectMutation = useMutation({
     mutationFn: async (projectId: number) => {
@@ -318,14 +341,16 @@ export default function StreamlinedHomepage({
         </div>
         
         {/* Centered logo */}
-        <div className="flex justify-center mb-6">
-          <img 
-            src={currentLogo?.url || "/aframe-logo.png"} 
-            alt="Business Logo" 
-            className="h-32 w-auto object-contain"
-            style={{ transform: `scale(${logoScale / 100})` }}
-          />
-        </div>
+        {logoVisibility.homepage && (
+          <div className="flex justify-center mb-6">
+            <img 
+              src={currentLogo?.url || "/aframe-logo.png"} 
+              alt="Business Logo" 
+              className="h-32 w-auto object-contain"
+              style={{ transform: `scale(${logoScale / 100})` }}
+            />
+          </div>
+        )}
 
         <div 
           className="h-1 w-full mb-8"

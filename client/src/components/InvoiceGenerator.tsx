@@ -46,6 +46,16 @@ export default function InvoiceGenerator({
 
   const currentLogo = businessLogo || fallbackLogo;
 
+  // Logo visibility settings
+  const [logoVisibility, setLogoVisibility] = useState(() => {
+    const saved = localStorage.getItem('logoVisibility');
+    return saved ? JSON.parse(saved) : {
+      homepage: true,
+      estimates: true,
+      emails: true
+    };
+  });
+
   const [isSending, setIsSending] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
@@ -71,6 +81,19 @@ cortespainter@gmail.com`;
     
     setEmailMessage(defaultMessage);
   }, [project.clientName]);
+
+  // Listen for logo visibility changes
+  React.useEffect(() => {
+    const handleVisibilityChange = () => {
+      const saved = localStorage.getItem('logoVisibility');
+      if (saved) {
+        setLogoVisibility(JSON.parse(saved));
+      }
+    };
+
+    window.addEventListener('storage', handleVisibilityChange);
+    return () => window.removeEventListener('storage', handleVisibilityChange);
+  }, []);
   
   // Get next invoice number from localStorage
   const getNextInvoiceNumber = () => {
@@ -1299,13 +1322,15 @@ ${emailMessage}`;
             {/* Header Section */}
             <div className="mb-8">
               {/* Logo Only */}
-              <div className="flex justify-center">
-                <img 
-                  src={invoiceData.businessLogo} 
-                  alt="A-Frame Painting Logo" 
-                  className="h-24 w-auto"
-                />
-              </div>
+              {logoVisibility.emails && (
+                <div className="flex justify-center">
+                  <img 
+                    src={invoiceData.businessLogo} 
+                    alt="A-Frame Painting Logo" 
+                    className="h-24 w-auto"
+                  />
+                </div>
+              )}
             </div>
 
             {/* Invoice Title and Info */}

@@ -40,6 +40,16 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
   const currentLogo = businessLogo || fallbackLogo;
 
+  // Logo visibility settings
+  const [logoVisibility, setLogoVisibility] = useState(() => {
+    const saved = localStorage.getItem('logoVisibility');
+    return saved ? JSON.parse(saved) : {
+      homepage: true,
+      estimates: true,
+      emails: true
+    };
+  });
+
   // Load saved form data from localStorage
   const loadSavedData = () => {
     try {
@@ -63,6 +73,19 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       setIsInitialized(false);
     }
   }, [isOpen, isInitialized]);
+
+  // Listen for logo visibility changes
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      const saved = localStorage.getItem('logoVisibility');
+      if (saved) {
+        setLogoVisibility(JSON.parse(saved));
+      }
+    };
+
+    window.addEventListener('storage', handleVisibilityChange);
+    return () => window.removeEventListener('storage', handleVisibilityChange);
+  }, []);
 
   const savedData = loadSavedData();
 
@@ -287,7 +310,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       try {
         // Use FormData to avoid JSON stringification issues with large base64 data
         const formData = new FormData();
-        formData.append('recipientEmail', project.clientEmail);
+        formData.append('recipientEmail', project.clientEmail || '');
         formData.append('clientName', project.clientName);
         formData.append('estimateNumber', `EST-${Date.now()}`);
         formData.append('projectTitle', projectTitle || `${project.projectType} Project`);
@@ -886,11 +909,13 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           style={{ fontFamily: 'Arial, sans-serif' }}
         >
           <div className="text-center mb-8">
-            <img 
-              src={currentLogo?.url || "/aframe-logo.png"} 
-              alt="Business Logo" 
-              className="mx-auto mb-4 h-16"
-            />
+            {logoVisibility.estimates && (
+              <img 
+                src={currentLogo?.url || "/aframe-logo.png"} 
+                alt="Business Logo" 
+                className="mx-auto mb-4 h-16"
+              />
+            )}
             <h1 className="text-3xl font-bold text-[#8B5FBF]">ESTIMATE</h1>
           </div>
 
