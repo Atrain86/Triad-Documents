@@ -224,10 +224,8 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
 
   // Logo scaling helper functions
   const updateLogoScale = (newScale: number) => {
-    console.log('updateLogoScale called with:', newScale);
-    // Clamp scale between 25% and 400%
-    const clampedScale = Math.max(25, Math.min(400, newScale));
-    console.log('clamped scale:', clampedScale);
+    // Clamp scale between 25% and 300%
+    const clampedScale = Math.max(25, Math.min(300, newScale));
     setLogoScale(clampedScale);
     localStorage.setItem('logoScale', clampedScale.toString());
     
@@ -236,12 +234,10 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
   };
 
   const increaseLogoScale = () => {
-    console.log('Increase clicked, current scale:', logoScale, 'new scale:', logoScale + 5);
     updateLogoScale(logoScale + 5);
   };
 
   const decreaseLogoScale = () => {
-    console.log('Decrease clicked, current scale:', logoScale, 'new scale:', logoScale - 5);
     updateLogoScale(logoScale - 5);
   };
 
@@ -589,75 +585,79 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                             <div className="space-y-4">
                               <div className="p-4 rounded-lg bg-gray-800/50 border">
                                 <h4 className="text-white font-medium mb-3">Current Logo</h4>
-                                <div className="flex items-start gap-4">
-                                  <div className="logo-preview-container bg-[#1a1a1a] border-2 border-[#444] rounded-lg p-4 flex flex-col items-center justify-center min-w-[200px] min-h-[100px]">
+                                
+                                {/* Large Preview Container */}
+                                <div className="logo-preview-container bg-[#1a1a1a] border-2 border-[#444] rounded-lg p-6 flex flex-col items-center justify-center w-full min-h-[200px] mb-4">
+                                  <div className="flex items-center justify-center flex-1 min-h-[120px]">
                                     <img 
                                       src={currentLogo.url} 
                                       alt="Business Logo" 
-                                      className="max-w-full max-h-[80px] object-contain"
+                                      className="max-w-full max-h-[120px] object-contain"
                                       style={{ transform: `scale(${logoScale / 100})` }}
                                     />
-                                    {/* Logo Scale Controls */}
-                                    <div className="flex items-center gap-2 mt-3">
-                                      <button
-                                        onClick={decreaseLogoScale}
-                                        disabled={logoScale <= 25}
-                                        className="w-6 h-6 rounded-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
-                                        title="Decrease size (5%)"
-                                      >
-                                        <Minus className="h-3 w-3" />
-                                      </button>
-                                      <span className="text-xs text-gray-400 min-w-[40px] text-center">
-                                        {logoScale}%
-                                      </span>
-                                      <button
-                                        onClick={increaseLogoScale}
-                                        disabled={logoScale >= 400}
-                                        className="w-6 h-6 rounded-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
-                                        title="Increase size (5%)"
-                                      >
-                                        <Plus className="h-3 w-3" />
-                                      </button>
-                                    </div>
                                   </div>
-                                  <div className="flex-1 space-y-2">
-                                    <p className="text-gray-300 text-sm">
-                                      <strong>File:</strong> {currentLogo.originalName}
-                                    </p>
+                                  {/* Logo Scale Controls */}
+                                  <div className="flex items-center gap-2 mt-4">
+                                    <button
+                                      onClick={decreaseLogoScale}
+                                      disabled={logoScale <= 25}
+                                      className="w-8 h-8 rounded-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
+                                      title="Decrease size (5%)"
+                                    >
+                                      <Minus className="h-4 w-4" />
+                                    </button>
+                                    <span className="text-sm text-gray-300 min-w-[50px] text-center font-medium">
+                                      {logoScale}%
+                                    </span>
+                                    <button
+                                      onClick={increaseLogoScale}
+                                      disabled={logoScale >= 300}
+                                      className="w-8 h-8 rounded-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
+                                      title="Increase size (5%)"
+                                    >
+                                      <Plus className="h-4 w-4" />
+                                    </button>
+                                  </div>
+                                </div>
 
-                                    {/* Background Removal Button */}
-                                    {currentLogo.originalName?.toLowerCase().includes('.png') && (
-                                      <div className="pt-2">
-                                        <Button
-                                          onClick={async () => {
-                                            setBackgroundProcessing(true);
-                                            try {
-                                              const response = await apiRequest('/api/users/1/logo/remove-background', {
-                                                method: 'POST'
-                                              });
-                                              if ((response as any)?.success) {
-                                                setLogoMessage('Background removed successfully!');
-                                                queryClient.invalidateQueries({ queryKey: ['/api/users/1/logo'] });
-                                                setTimeout(() => setLogoMessage(''), 3000);
-                                              }
-                                            } catch (error) {
-                                              setLogoMessage('Failed to remove background. Please try again.');
+                                {/* Logo Information Below Preview */}
+                                <div className="space-y-3">
+                                  <p className="text-gray-300 text-sm">
+                                    <strong>File:</strong> {currentLogo.originalName}
+                                  </p>
+
+                                  {/* Background Removal Button */}
+                                  {currentLogo.originalName?.toLowerCase().includes('.png') && (
+                                    <div>
+                                      <Button
+                                        onClick={async () => {
+                                          setBackgroundProcessing(true);
+                                          try {
+                                            const response = await apiRequest('/api/users/1/logo/remove-background', {
+                                              method: 'POST'
+                                            });
+                                            if ((response as any)?.success) {
+                                              setLogoMessage('Background removed successfully!');
+                                              queryClient.invalidateQueries({ queryKey: ['/api/users/1/logo'] });
                                               setTimeout(() => setLogoMessage(''), 3000);
                                             }
-                                            setBackgroundProcessing(false);
-                                          }}
-                                          disabled={backgroundProcessing}
-                                          size="sm"
-                                          className="bg-blue-600 hover:bg-blue-700 text-white"
-                                        >
-                                          {backgroundProcessing ? 'Processing...' : 'Remove Background'}
-                                        </Button>
-                                        <p className="text-xs text-gray-400 mt-1">
-                                          Removes white backgrounds from PNG files
-                                        </p>
-                                      </div>
-                                    )}
-                                  </div>
+                                          } catch (error) {
+                                            setLogoMessage('Failed to remove background. Please try again.');
+                                            setTimeout(() => setLogoMessage(''), 3000);
+                                          }
+                                          setBackgroundProcessing(false);
+                                        }}
+                                        disabled={backgroundProcessing}
+                                        size="sm"
+                                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                                      >
+                                        {backgroundProcessing ? 'Processing...' : 'Remove Background'}
+                                      </Button>
+                                      <p className="text-xs text-gray-400 mt-1">
+                                        Removes white backgrounds from PNG files
+                                      </p>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             </div>
