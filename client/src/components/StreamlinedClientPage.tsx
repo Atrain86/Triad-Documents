@@ -1937,19 +1937,19 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       <div className="space-y-4">
         {/* Toggle Switch */}
         <div className="flex justify-center">
-          <div className="relative bg-gray-700 rounded-full p-1 flex items-center w-32">
+          <div className="relative bg-gray-700 rounded-full p-1 flex items-center w-64">
             {/* Slider Background */}
             <div 
-              className="absolute h-8 w-14 rounded-full transition-all duration-300 ease-in-out z-10"
+              className="absolute h-10 w-28 rounded-full transition-all duration-300 ease-in-out z-10"
               style={{
                 backgroundColor: actionMode === 'estimate' ? paintBrainColors.purple : paintBrainColors.green,
-                transform: actionMode === 'estimate' ? 'translateX(2px)' : 'translateX(58px)'
+                transform: actionMode === 'estimate' ? 'translateX(4px)' : 'translateX(124px)'
               }}
             />
             
             {/* Estimate Icon */}
             <Calculator 
-              className={`absolute left-2 h-4 w-4 transition-opacity duration-200 z-20 ${
+              className={`absolute left-3 h-5 w-5 transition-opacity duration-200 z-20 ${
                 actionMode === 'estimate' ? 'text-white opacity-100' : 'text-white opacity-60'
               }`} 
               style={{ color: '#FFFFFF' }}
@@ -1959,19 +1959,21 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             <div className="relative flex w-full z-30">
               <button
                 onClick={() => setActionMode('estimate')}
-                className="flex-1 h-8 flex items-center justify-center transition-all duration-200"
+                className="flex-1 h-10 flex items-center justify-center text-sm font-medium text-white transition-all duration-200"
               >
+                Estimate
               </button>
               <button
                 onClick={() => setActionMode('invoice')}
-                className="flex-1 h-8 flex items-center justify-center transition-all duration-200"
+                className="flex-1 h-10 flex items-center justify-center text-sm font-medium text-white transition-all duration-200"
               >
+                Invoice
               </button>
             </div>
             
             {/* Invoice Icon */}
             <FileText 
-              className={`absolute right-2 h-4 w-4 transition-opacity duration-200 z-20 ${
+              className={`absolute right-3 h-5 w-5 transition-opacity duration-200 z-20 ${
                 actionMode === 'invoice' ? 'text-white opacity-100' : 'text-white opacity-60'
               }`} 
               style={{ color: '#FFFFFF' }}
@@ -1992,17 +1994,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             className="py-3 px-4 text-sm font-semibold text-white hover:opacity-90"
             style={{ backgroundColor: actionMode === 'estimate' ? paintBrainColors.purple : paintBrainColors.green }}
           >
-          {actionMode === 'estimate' ? (
-            <>
-              <Calculator size={18} className="mr-2" />
-              Generate Estimate
-            </>
-          ) : (
-            <>
-              <FileText size={18} className="mr-2" />
-              Generate Invoice
-            </>
-          )}
+          Generate
           </Button>
         </div>
       </div>
