@@ -1591,7 +1591,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                     handleAddHours();
                                   }
                                 }}
-                                placeholder="3.5"
+                                placeholder=""
                                 className="w-full px-3 py-2 text-sm border border-gray-600 rounded-lg bg-gray-800 text-gray-200 focus:border-green-500 focus:ring-1 focus:ring-green-500"
                               />
                             </div>
@@ -1668,13 +1668,13 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                             setEditHours(value);
                                           }
                                         }}
-                                        placeholder="Hours (e.g., 3.5)"
+                                        placeholder=""
                                         className="text-sm bg-gray-700 border-gray-600 text-gray-200"
                                       />
                                       <Input
                                         value={editDescription}
                                         onChange={(e) => setEditDescription(e.target.value)}
-                                        placeholder="Work description"
+                                        placeholder=""
                                         className="text-sm bg-gray-700 border-gray-600 text-gray-200"
                                       />
                                     </div>
