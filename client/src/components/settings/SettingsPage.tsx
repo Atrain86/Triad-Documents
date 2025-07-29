@@ -632,7 +632,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                   className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg cursor-pointer transition-colors"
                                 >
                                   <Upload className="h-4 w-4" />
-                                  Upload to Library
+                                  Upload Logo
                                 </label>
                                 <span className="text-sm text-gray-400">
                                   JPG, PNG, or SVG • Max 5MB • Original files preserved
@@ -665,7 +665,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                     </button>
                                     
                                     {/* Delete button for uploaded logos */}
-                                    {logo.is_demo === 'false' && (
+                                    {logo.isDemo === 'false' && (
                                       <button
                                         onClick={(e) => {
                                           e.stopPropagation();
