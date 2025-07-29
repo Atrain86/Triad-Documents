@@ -162,6 +162,15 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
     }
   });
 
+  // Fetch estimate and invoice logos
+  const { data: estimateLogoData } = useQuery({
+    queryKey: [`/api/users/1/logos/estimates`]
+  });
+
+  const { data: invoiceLogoData } = useQuery({
+    queryKey: [`/api/users/1/logos/emails`]
+  });
+
   const queryClient = useQueryClient();
 
   // Check if tax configuration is properly set up
@@ -206,8 +215,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
   // Define sortable sections
   const [settingsSections, setSettingsSections] = useState([
     { id: 'gmail', name: 'Gmail Integration', icon: Mail, color: 'red' },
-    { id: 'logo', name: 'Business Logo', icon: Settings, color: 'blue' },
-    { id: 'contextual-logos', name: 'Contextual Logos', icon: Building2, color: 'indigo' },
+    { id: 'logo', name: 'Logo', icon: Settings, color: 'blue' },
     { id: 'photo', name: 'Photo Quality', icon: Camera, color: 'orange' },
     { id: 'timezone', name: 'Time Zone', icon: Globe, color: 'green' },
     { id: 'invoice', name: 'Invoice Numbering', icon: FileText, color: 'purple' },
@@ -226,6 +234,10 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
   const [logoUploading, setLogoUploading] = useState(false);
   const [logoMessage, setLogoMessage] = useState('');
   const [backgroundProcessing, setBackgroundProcessing] = useState(false);
+  
+  // Estimate and invoice logo states
+  const [estimateLogo, setEstimateLogo] = useState<{ url: string; originalName: string } | null>(null);
+  const [invoiceLogo, setInvoiceLogo] = useState<{ url: string; originalName: string } | null>(null);
   
   // Logo scaling state (stored as percentage, default 100%)
   const [logoScale, setLogoScale] = useState(() => {
@@ -278,6 +290,23 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
       setCurrentLogo(null);
     }
   }, [logoData]);
+
+  // Update estimate and invoice logo states when data changes
+  useEffect(() => {
+    if (estimateLogoData && typeof estimateLogoData === 'object' && 'logo' in estimateLogoData && estimateLogoData.logo) {
+      setEstimateLogo(estimateLogoData.logo as { url: string; originalName: string });
+    } else {
+      setEstimateLogo(null);
+    }
+  }, [estimateLogoData]);
+
+  useEffect(() => {
+    if (invoiceLogoData && typeof invoiceLogoData === 'object' && 'logo' in invoiceLogoData && invoiceLogoData.logo) {
+      setInvoiceLogo(invoiceLogoData.logo as { url: string; originalName: string });
+    } else {
+      setInvoiceLogo(null);
+    }
+  }, [invoiceLogoData]);
 
   // Save invoice numbering settings to localStorage
   const saveInvoiceSettings = (mode: 'automatic' | 'manual', nextNumber: number) => {
@@ -372,6 +401,43 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
     }
   });
 
+  // Mutations for estimate and invoice logo selection
+  const estimateLogoSelectMutation = useMutation({
+    mutationFn: async (logoId: number) => {
+      return apiRequest('/api/users/1/logos/estimates/select', {
+        method: 'POST',
+        body: { logoId }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/users/1/logos/estimates`] });
+      setLogoMessage('Estimate logo updated successfully');
+      setTimeout(() => setLogoMessage(''), 3000);
+    },
+    onError: (error: Error) => {
+      setLogoMessage(`Failed to update estimate logo: ${error.message}`);
+      setTimeout(() => setLogoMessage(''), 5000);
+    }
+  });
+
+  const invoiceLogoSelectMutation = useMutation({
+    mutationFn: async (logoId: number) => {
+      return apiRequest('/api/users/1/logos/emails/select', {
+        method: 'POST',
+        body: { logoId }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/users/1/logos/emails`] });
+      setLogoMessage('Invoice logo updated successfully');
+      setTimeout(() => setLogoMessage(''), 3000);
+    },
+    onError: (error: Error) => {
+      setLogoMessage(`Failed to update invoice logo: ${error.message}`);
+      setTimeout(() => setLogoMessage(''), 5000);
+    }
+  });
+
   // Handle logo upload to library
   const handleLogoLibraryUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -412,6 +478,15 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
     if (confirm('Are you sure you want to delete this logo from the library?')) {
       logoLibraryDeleteMutation.mutate(logoId);
     }
+  };
+
+  // Handle estimate and invoice logo selection
+  const handleEstimateLogoSelect = (logoId: number) => {
+    estimateLogoSelectMutation.mutate(logoId);
+  };
+
+  const handleInvoiceLogoSelect = (logoId: number) => {
+    invoiceLogoSelectMutation.mutate(logoId);
   };
 
   // Re-check tax configuration when component mounts or localStorage changes
@@ -595,7 +670,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                       <div className="flex items-center gap-4">
                         <Menu className="h-5 w-5 text-blue-400 flex-shrink-0 drag-handle cursor-grab" />
                         <Settings className="h-5 w-5 text-blue-400" />
-                        <span className="text-lg font-medium text-blue-400">Business Logo</span>
+                        <span className="text-lg font-medium text-blue-400">Logo</span>
                         <div className={`px-3 py-2 rounded-full text-xs font-medium ${
                           currentLogo 
                             ? 'bg-purple-500 text-white' 
@@ -803,122 +878,90 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                 <span className="text-blue-400 text-sm">Selecting logo...</span>
                               </div>
                             )}
+
+                            {/* Estimate Logo Selection Progress */}
+                            {estimateLogoSelectMutation.isPending && (
+                              <div className="flex items-center gap-3 p-3 bg-purple-500/10 border border-purple-400/30 rounded-lg">
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-400"></div>
+                                <span className="text-purple-400 text-sm">Selecting estimate logo...</span>
+                              </div>
+                            )}
+
+                            {/* Invoice Logo Selection Progress */}
+                            {invoiceLogoSelectMutation.isPending && (
+                              <div className="flex items-center gap-3 p-3 bg-green-500/10 border border-green-400/30 rounded-lg">
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-400"></div>
+                                <span className="text-green-400 text-sm">Selecting invoice logo...</span>
+                              </div>
+                            )}
                           </div>
 
-                          <div className="mt-4 p-3 bg-gray-800 rounded-lg">
-                            <p className="text-sm text-gray-300">
-                              <span className="font-medium">How it works:</span> Upload logos to your library, then select one to use for invoices and estimates. 
-                              Click any logo in the library to make it your active business logo.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-
-              case 'contextual-logos':
-                return (
-                  <div>
-                    <div 
-                      className="flex items-center justify-between p-4 rounded-lg border-2 border-indigo-400 bg-gray-900/20 cursor-pointer hover:bg-gray-800/30 transition-colors"
-                      onClick={() => toggleSection('contextual-logos')}
-                    >
-                      <div className="flex items-center gap-4">
-                        <Menu className="h-5 w-5 text-indigo-400 flex-shrink-0 drag-handle cursor-grab" />
-                        <Building2 className="h-5 w-5 text-indigo-400" />
-                        <span className="text-lg font-medium text-indigo-400">Contextual Logos</span>
-                        <div className="px-3 py-2 rounded-full text-xs font-medium bg-indigo-500 text-white">
-                          PRO
-                        </div>
-                      </div>
-                      <ChevronRight 
-                        className={`h-5 w-5 text-indigo-400 transition-transform ${
-                          expandedSection === 'contextual-logos' ? 'rotate-90' : 'rotate-180'
-                        }`} 
-                      />
-                    </div>
-                    
-                    {expandedSection === 'contextual-logos' && (
-                      <div className="mt-4 p-6 rounded-lg border border-indigo-400/30 bg-gray-900/10">
-                        <div className="space-y-6">
-                          <h3 className="text-lg font-medium text-indigo-400 mb-4">Choose Where Logo Appears</h3>
-                          
-                          <div className="space-y-4">
-                            {/* Homepage Option */}
-                            <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg border border-gray-700">
-                              <div className="flex items-center gap-3">
-                                <Home className="h-5 w-5 text-blue-400" />
-                                <div>
-                                  <h4 className="text-white font-medium">Homepage</h4>
-                                  <p className="text-sm text-gray-400">Main page and sign-in screen</p>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="checkbox"
-                                  id="logo-homepage"
-                                  className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
-                                  checked={logoVisibility.homepage}
-                                  onChange={() => toggleLogoVisibility('homepage')}
-                                />
-                                <label htmlFor="logo-homepage" className="text-sm font-medium text-gray-300">
-                                  Show Logo
-                                </label>
-                              </div>
-                            </div>
-
-                            {/* Estimates Option */}
-                            <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg border border-gray-700">
+                          {/* Estimate & Invoice Logo Selection */}
+                          <div className="space-y-4 pt-4 border-t border-gray-700">
+                            <h4 className="text-white font-medium">Document Logos</h4>
+                            
+                            {/* Estimate Logo Selection */}
+                            <div className="space-y-3">
                               <div className="flex items-center gap-3">
                                 <FileText className="h-5 w-5 text-purple-400" />
-                                <div>
-                                  <h4 className="text-white font-medium">Estimates</h4>
-                                  <p className="text-sm text-gray-400">PDF estimates and quotes</p>
-                                </div>
+                                <span className="text-white font-medium">Estimates</span>
                               </div>
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="checkbox"
-                                  id="logo-estimates"
-                                  className="w-4 h-4 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500"
-                                  checked={logoVisibility.estimates}
-                                  onChange={() => toggleLogoVisibility('estimates')}
-                                />
-                                <label htmlFor="logo-estimates" className="text-sm font-medium text-gray-300">
-                                  Show Logo
-                                </label>
+                              <div className="grid grid-cols-3 gap-2 pl-8">
+                                {logoLibrary.map((logo: any) => (
+                                  <button
+                                    key={logo.id}
+                                    onClick={() => handleEstimateLogoSelect(logo.id)}
+                                    disabled={estimateLogoSelectMutation.isPending}
+                                    className={`p-2 rounded border transition-colors ${
+                                      estimateLogo?.url === logo.filename
+                                        ? 'border-purple-400 bg-purple-400/10'
+                                        : 'border-gray-600 hover:border-purple-400 bg-gray-800/50'
+                                    }`}
+                                  >
+                                    <img 
+                                      src={logo.filename} 
+                                      alt={logo.name} 
+                                      className="w-full h-8 object-contain"
+                                    />
+                                    <span className="text-xs text-gray-300 block mt-1 truncate">{logo.originalName}</span>
+                                  </button>
+                                ))}
                               </div>
                             </div>
 
-                            {/* Emails Option */}
-                            <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg border border-gray-700">
+                            {/* Invoice Logo Selection */}
+                            <div className="space-y-3">
                               <div className="flex items-center gap-3">
                                 <Mail className="h-5 w-5 text-green-400" />
-                                <div>
-                                  <h4 className="text-white font-medium">Emails</h4>
-                                  <p className="text-sm text-gray-400">Email signatures and headers</p>
-                                </div>
+                                <span className="text-white font-medium">Invoices</span>
                               </div>
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="checkbox"
-                                  id="logo-emails"
-                                  className="w-4 h-4 text-green-600 bg-gray-700 border-gray-600 rounded focus:ring-green-500"
-                                  checked={logoVisibility.emails}
-                                  onChange={() => toggleLogoVisibility('emails')}
-                                />
-                                <label htmlFor="logo-emails" className="text-sm font-medium text-gray-300">
-                                  Show Logo
-                                </label>
+                              <div className="grid grid-cols-3 gap-2 pl-8">
+                                {logoLibrary.map((logo: any) => (
+                                  <button
+                                    key={logo.id}
+                                    onClick={() => handleInvoiceLogoSelect(logo.id)}
+                                    disabled={invoiceLogoSelectMutation.isPending}
+                                    className={`p-2 rounded border transition-colors ${
+                                      invoiceLogo?.url === logo.filename
+                                        ? 'border-green-400 bg-green-400/10'
+                                        : 'border-gray-600 hover:border-green-400 bg-gray-800/50'
+                                    }`}
+                                  >
+                                    <img 
+                                      src={logo.filename} 
+                                      alt={logo.name} 
+                                      className="w-full h-8 object-contain"
+                                    />
+                                    <span className="text-xs text-gray-300 block mt-1 truncate">{logo.originalName}</span>
+                                  </button>
+                                ))}
                               </div>
                             </div>
                           </div>
 
                           <div className="mt-4 p-3 bg-gray-800 rounded-lg">
                             <p className="text-sm text-gray-300">
-                              <span className="font-medium">Pro Feature:</span> Control exactly where your logo appears. 
-                              Turn off logo display for specific contexts while keeping it in others.
+                              <span className="font-medium">How it works:</span> Select your homepage logo from the library above, then choose specific logos for estimates and invoices below.
                             </p>
                           </div>
                         </div>
@@ -926,6 +969,8 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                     )}
                   </div>
                 );
+
+
 
               case 'timezone':
                 return (
