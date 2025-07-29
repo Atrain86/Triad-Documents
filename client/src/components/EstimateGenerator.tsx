@@ -276,20 +276,19 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       });
       
       try {
+        // Use FormData to avoid JSON stringification issues with large base64 data
+        const formData = new FormData();
+        formData.append('recipientEmail', project.clientEmail);
+        formData.append('clientName', project.clientName);
+        formData.append('estimateNumber', `EST-${Date.now()}`);
+        formData.append('projectTitle', projectTitle || `${project.projectType} Project`);
+        formData.append('totalAmount', grandTotal.toFixed(2));
+        formData.append('customMessage', '');
+        formData.append('pdfData', pdfData);
+        
         const response = await fetch('/api/send-estimate-email', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            recipientEmail: project.clientEmail,
-            clientName: project.clientName,
-            estimateNumber: `EST-${Date.now()}`, 
-            projectTitle: projectTitle || `${project.projectType} Project`,
-            totalAmount: grandTotal.toFixed(2),
-            customMessage: '', // Can be added later if needed
-            pdfData: pdfData
-          })
+          body: formData
         });
         
         if (!response.ok) {

@@ -641,11 +641,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/send-estimate-email', async (req, res) => {
+  app.post('/api/send-estimate-email', upload.none(), async (req, res) => {
     try {
       console.log('=== ESTIMATE EMAIL REQUEST START ===');
-      console.log('Raw body type:', typeof req.body);
-      console.log('Raw body length:', JSON.stringify(req.body).length);
+      console.log('Request content-type:', req.headers['content-type']);
+      console.log('Form fields received:', Object.keys(req.body));
       
       const { recipientEmail, clientName, estimateNumber, projectTitle, totalAmount, customMessage, pdfData } = req.body;
       
