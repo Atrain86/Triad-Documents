@@ -553,10 +553,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                     {expandedSection === 'logo' && (
                       <div className="mt-4 p-6 rounded-lg border border-blue-400/30 bg-gray-900/10">
                         <div className="space-y-6">
-                          <h3 className="text-lg font-medium text-blue-400 mb-4 flex items-center gap-2">
-                            Business Logo Library
-                            <span className="text-xs px-2 py-1 bg-purple-500 text-white rounded-full">PRO</span>
-                          </h3>
+                          <h3 className="text-lg font-medium text-blue-400 mb-4">Business Logo Library</h3>
                           
                           {/* Current Logo Display */}
                           {currentLogo && (
@@ -643,10 +640,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
 
                             {/* Logo Library - Pro Section */}
                             <div className="space-y-3">
-                              <h4 className="text-white font-medium flex items-center gap-2">
-                                Logo Library
-                                <span className="text-xs px-2 py-1 bg-purple-500 text-white rounded-full">PRO</span>
-                              </h4>
+                              <h4 className="text-white font-medium">Logo Library</h4>
                               <div className="grid grid-cols-2 gap-3 max-h-64 overflow-y-auto">
                                 {logoLibrary.map((logo: any) => (
                                   <div key={logo.id} className="relative group">
@@ -1082,10 +1076,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                             >
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <div className="font-medium text-white flex items-center gap-2">
-                                    High Quality
-                                    <span className="text-xs px-2 py-1 bg-purple-500 text-white rounded-full">PRO</span>
-                                  </div>
+                                  <div className="font-medium text-white">High Quality</div>
                                   <div className="text-sm text-gray-400">90% quality • 2400×1600 resolution • Best detail</div>
                                 </div>
                                 <div className={`w-4 h-4 rounded-full border-2 ${
@@ -1108,10 +1099,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                             >
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <div className="font-medium text-white flex items-center gap-2">
-                                    Original Quality
-                                    <span className="text-xs px-2 py-1 bg-purple-500 text-white rounded-full">PRO</span>
-                                  </div>
+                                  <div className="font-medium text-white">Original Quality</div>
                                   <div className="text-sm text-gray-400">No compression • Full resolution • Original file size</div>
                                 </div>
                                 <div className={`w-4 h-4 rounded-full border-2 ${
