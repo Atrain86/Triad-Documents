@@ -108,8 +108,8 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     { name: '', quantity: '', pricePerUnit: '' }
   ]);
 
-  // Toggle state for action buttons
-  const [actionMode, setActionMode] = useState<'download' | 'email'>('email');
+  // Toggle state for action buttons - default to email (left side)
+  const [actionMode, setActionMode] = useState<'email' | 'download'>('email');
 
   // Collapsible sections state - Default all sections to collapsed
   const [collapsedSections, setCollapsedSections] = useState({
@@ -779,32 +779,24 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             </CardContent>
           </Card>
 
-          {/* Action Buttons */}
-          {/* Action Mode Toggle */}
+          {/* Action Toggle and Button */}
           <div className="flex flex-col items-center gap-4 mb-4">
-            <div className="flex rounded-lg border border-gray-600 overflow-hidden">
+            {/* Toggle Switch with Icons */}
+            <div className="flex items-center gap-3">
+              <Mail className="w-5 h-5 text-[#EA580C]" />
               <button
-                onClick={() => setActionMode('download')}
-                className={`px-6 py-3 flex items-center gap-2 font-medium transition-colors ${
-                  actionMode === 'download'
-                    ? 'bg-[#8B5FBF] text-white'
-                    : 'bg-gray-800 text-gray-400 hover:text-white'
+                onClick={() => setActionMode(actionMode === 'email' ? 'download' : 'email')}
+                className={`relative inline-flex h-8 w-16 items-center rounded-full transition-colors duration-200 focus:outline-none ${
+                  actionMode === 'email' ? 'bg-[#EA580C]' : 'bg-[#8B5FBF]'
                 }`}
               >
-                <Download className="w-4 h-4" />
-                Download PDF
+                <span
+                  className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform duration-200 ${
+                    actionMode === 'email' ? 'translate-x-1' : 'translate-x-9'
+                  }`}
+                />
               </button>
-              <button
-                onClick={() => setActionMode('email')}
-                className={`px-6 py-3 flex items-center gap-2 font-medium transition-colors ${
-                  actionMode === 'email'
-                    ? 'bg-[#EA580C] text-white'
-                    : 'bg-gray-800 text-gray-400 hover:text-white'
-                }`}
-              >
-                <Mail className="w-4 h-4" />
-                Send Email
-              </button>
+              <Download className="w-5 h-5 text-[#8B5FBF]" />
             </div>
             
             {/* Execute Action Button */}
@@ -812,20 +804,20 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
               onClick={() => generatePDF(actionMode === 'email')}
               disabled={emailMutation.isPending}
               className={`px-8 py-3 text-white font-semibold ${
-                actionMode === 'download'
-                  ? 'bg-[#8B5FBF] hover:bg-[#7A4FAF]'
-                  : 'bg-[#EA580C] hover:bg-[#D97706]'
+                actionMode === 'email'
+                  ? 'bg-[#EA580C] hover:bg-[#D97706]'
+                  : 'bg-[#8B5FBF] hover:bg-[#7A4FAF]'
               }`}
             >
-              {actionMode === 'download' ? (
-                <>
-                  <Download className="w-4 h-4 mr-2" />
-                  Generate PDF
-                </>
-              ) : (
+              {actionMode === 'email' ? (
                 <>
                   <Mail className="w-4 h-4 mr-2" />
                   {emailMutation.isPending ? 'Sending...' : 'Send Estimate'}
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4 mr-2" />
+                  Generate PDF
                 </>
               )}
             </Button>
