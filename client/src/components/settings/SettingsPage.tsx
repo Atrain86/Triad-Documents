@@ -537,10 +537,10 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                         <span className="text-lg font-medium text-blue-400">Business Logo</span>
                         <div className={`px-3 py-2 rounded-full text-xs font-medium ${
                           currentLogo 
-                            ? 'bg-blue-500 text-black' 
+                            ? 'bg-purple-500 text-white' 
                             : 'bg-gray-500 text-black'
                         }`}>
-                          {currentLogo ? 'Active' : 'None'}
+                          {currentLogo ? 'PRO' : 'None'}
                         </div>
                       </div>
                       <ChevronRight 
