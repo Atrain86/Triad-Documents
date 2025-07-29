@@ -440,7 +440,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
   const [totalCompressedSizeBytes, setTotalCompressedSizeBytes] = useState(0);
 
   // Action mode state for generate buttons toggle
-  const [actionMode, setActionMode] = useState<'estimate' | 'invoice'>('estimate');
+  const [actionMode, setActionMode] = useState<'estimate' | 'invoice'>('invoice');
 
   // API queries
   const { data: project } = useQuery<Project>({
@@ -1942,27 +1942,27 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             <div 
               className="absolute h-10 rounded-full transition-all duration-300 ease-in-out z-10"
               style={{
-                backgroundColor: actionMode === 'estimate' ? paintBrainColors.purple : paintBrainColors.green,
+                backgroundColor: actionMode === 'invoice' ? paintBrainColors.green : paintBrainColors.purple,
                 width: '128px',
-                left: actionMode === 'estimate' ? '4px' : '128px'
+                left: actionMode === 'invoice' ? '4px' : '128px'
               }}
             />
             
             {/* Toggle Buttons with Icons */}
             <div className="relative flex w-full z-30">
               <button
-                onClick={() => setActionMode('estimate')}
-                className="flex-1 h-10 flex items-center justify-center text-sm font-medium text-white transition-all duration-200 gap-2"
-              >
-                <Calculator className="h-4 w-4" />
-                Estimate
-              </button>
-              <button
                 onClick={() => setActionMode('invoice')}
                 className="flex-1 h-10 flex items-center justify-center text-sm font-medium text-white transition-all duration-200 gap-2"
               >
                 <FileText className="h-4 w-4" />
                 Invoice
+              </button>
+              <button
+                onClick={() => setActionMode('estimate')}
+                className="flex-1 h-10 flex items-center justify-center text-sm font-medium text-white transition-all duration-200 gap-2"
+              >
+                <Calculator className="h-4 w-4" />
+                Estimate
               </button>
             </div>
           </div>
