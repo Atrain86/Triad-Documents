@@ -338,12 +338,24 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] h-[90vh] overflow-y-auto bg-black text-white">
+      <DialogContent className="max-w-4xl max-h-[90vh] h-[90vh] overflow-y-auto bg-black text-white [&>button]:hidden">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-[#8B5FBF]">
             Generate Estimate - {project.clientName}
           </DialogTitle>
         </DialogHeader>
+
+        {/* Custom Close Button - positioned above first container */}
+        <div className="flex justify-end -mt-2 mb-4">
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-white transition-colors p-2 rounded-md hover:bg-gray-800"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
 
         <div className="space-y-6">
           {/* Estimate Details */}
