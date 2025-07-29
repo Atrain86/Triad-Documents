@@ -1440,25 +1440,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       let logoFilename = `uploads/${logoFile.filename}`;
 
-      // Process PNG files to remove white backgrounds
-      if (logoFile.mimetype === 'image/png') {
-        try {
-          const originalPath = logoFile.path;
-          const processedFilename = `processed_${logoFile.filename}`;
-          const processedPath = path.join(uploadDir, processedFilename);
-          
-          await makeBackgroundTransparent(originalPath, processedPath);
-          
-          // Delete original file and use processed version
-          fs.unlinkSync(originalPath);
-          logoFilename = `uploads/${processedFilename}`;
-          
-          console.log(`Processed PNG logo for library: removed white background from ${logoFile.originalname}`);
-        } catch (error) {
-          console.warn(`Failed to process PNG background removal for library logo ${logoFile.originalname}:`, error);
-          // Continue with original file if processing fails
-        }
-      }
+      // Keep original PNG files without background removal for logo library
+      // Background removal was causing white text to be lost
+      console.log(`Added original PNG logo to library: ${logoFile.originalname}`);
 
       // Add to logo library
       const [libraryEntry] = await db.insert(logoLibrary).values({

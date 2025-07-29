@@ -635,7 +635,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                   Upload to Library
                                 </label>
                                 <span className="text-sm text-gray-400">
-                                  JPG, PNG, or SVG • Max 5MB • PNG files automatically have white backgrounds removed
+                                  JPG, PNG, or SVG • Max 5MB • Original files preserved
                                 </span>
                               </div>
                             </div>
@@ -654,7 +654,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                       disabled={logoSelectMutation.isPending}
                                       className="w-full p-3 rounded-lg border border-gray-600 hover:border-blue-400 transition-colors bg-gray-800/50"
                                     >
-                                      <div className="bg-black rounded p-2 mb-2">
+                                      <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded p-2 mb-2 border border-gray-700">
                                         <img 
                                           src={logo.filename} 
                                           alt={logo.name} 
