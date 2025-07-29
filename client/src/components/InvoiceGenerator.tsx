@@ -51,8 +51,7 @@ Thank you for your business!
 
 Best regards,
 A-Frame Painting
-cortespainter@gmail.com
-884 Hayes Rd, Manson's Landing, BC V0P1K0`;
+cortespainter@gmail.com`;
     
     setEmailMessage(defaultMessage);
   }, [project.clientName]);
