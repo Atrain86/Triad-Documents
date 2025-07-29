@@ -352,30 +352,258 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     }
   });
 
+  const generateProfessionalHTML = () => {
+    const logoUrl = currentLogo?.url || '/paint-brain-logo.png';
+    
+    // Generate services & labor section
+    const servicesHTML = workStages.filter((stage: any) => (parseFloat(stage.hours) || 0) > 0).map((stage: any) => {
+      const hours = parseFloat(stage.hours) || 0;
+      const rate = parseFloat(stage.rate) || 0;
+      const total = hours * rate;
+      return `
+        <tr>
+          <td class="py-2 px-4 border-b border-gray-700">${stage.name}</td>
+          <td class="py-2 px-4 border-b border-gray-700 text-center">${hours}h</td>
+          <td class="py-2 px-4 border-b border-gray-700 text-center">$${rate}/hr</td>
+          <td class="py-2 px-4 border-b border-gray-700 text-right font-semibold">$${total.toFixed(2)}</td>
+        </tr>
+      `;
+    }).join('');
+
+    // Generate additional labor section
+    const additionalLaborHTML = additionalLabor.filter((labor: any) => (parseFloat(labor.hours) || 0) > 0).map((labor: any) => {
+      const hours = parseFloat(labor.hours) || 0;
+      const rate = parseFloat(labor.rate) || 0;
+      const total = hours * rate;
+      return `
+        <tr>
+          <td class="py-2 px-4 border-b border-gray-700">${labor.name || 'Additional Worker'}</td>
+          <td class="py-2 px-4 border-b border-gray-700 text-center">${hours}h</td>
+          <td class="py-2 px-4 border-b border-gray-700 text-center">$${rate}/hr</td>
+          <td class="py-2 px-4 border-b border-gray-700 text-right font-semibold">$${total.toFixed(2)}</td>
+        </tr>
+      `;
+    }).join('');
+
+    // Generate materials section
+    const materialsHTML = [];
+    if (paintSubtotal > 0) {
+      materialsHTML.push(`
+        <tr>
+          <td class="py-2 px-4 border-b border-gray-700">Paint (${paintCosts.gallons} gal × ${paintCosts.coats} coats)</td>
+          <td class="py-2 px-4 border-b border-gray-700 text-right font-semibold">$${paintSubtotal.toFixed(2)}</td>
+        </tr>
+      `);
+    }
+    
+    customSupplies.filter((supply: any) => (parseFloat(supply.quantity) || 0) > 0).forEach((supply: any) => {
+      const total = (parseFloat(supply.quantity) || 0) * (parseFloat(supply.unitPrice) || 0);
+      materialsHTML.push(`
+        <tr>
+          <td class="py-2 px-4 border-b border-gray-700">${supply.name} (${supply.quantity} × $${supply.unitPrice})</td>
+          <td class="py-2 px-4 border-b border-gray-700 text-right font-semibold">$${total.toFixed(2)}</td>
+        </tr>
+      `);
+    });
+
+    return `
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Estimate PDF</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @media print {
+        body { -webkit-print-color-adjust: exact; }
+      }
+    </style>
+  </head>
+  <body class="bg-black text-white font-sans p-8">
+    <!-- Logo and Title -->
+    <div class="flex flex-col items-center mb-8">
+      <div class="h-16 mb-4 flex items-center justify-center">
+        <img src="${logoUrl}" alt="Logo" class="h-16 object-contain" />
+      </div>
+      <h1 class="text-orange-500 text-3xl font-bold">ESTIMATE</h1>
+    </div>
+
+    <!-- Client & Company Info -->
+    <div class="flex justify-between text-sm mb-10">
+      <div>
+        <p class="text-gray-300 font-semibold mb-2">Estimate For:</p>
+        <p class="font-semibold">${project.clientName}</p>
+        <p>${project.address}</p>
+        <p>${project.clientCity || ''}, ${project.clientPostal || ''}</p>
+        ${project.clientPhone ? `<p>${project.clientPhone}</p>` : ''}
+        ${project.clientEmail ? `<p>${project.clientEmail}</p>` : ''}
+      </div>
+      <div class="text-right">
+        <p class="text-gray-300 font-semibold mb-2">From:</p>
+        <p class="font-semibold">A-Frame Painting</p>
+        <p>884 Hayes Rd</p>
+        <p>Manson's Landing, BC</p>
+        <p>cortespainter@gmail.com</p>
+      </div>
+    </div>
+
+    ${servicesHTML || additionalLaborHTML ? `
+    <!-- Services & Labor -->
+    <div class="mb-8">
+      <div class="bg-red-600 text-white px-4 py-2 mb-4">
+        <h2 class="text-lg font-bold">Services & Labor</h2>
+      </div>
+      <table class="w-full bg-gray-800 rounded-lg overflow-hidden">
+        <thead class="bg-gray-700">
+          <tr>
+            <th class="py-2 px-4 text-left">Service</th>
+            <th class="py-2 px-4 text-center">Hours</th>
+            <th class="py-2 px-4 text-center">Rate</th>
+            <th class="py-2 px-4 text-right">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${servicesHTML}
+          ${additionalLaborHTML}
+          <tr class="bg-gray-700">
+            <td colspan="3" class="py-2 px-4 font-semibold">Labor Subtotal</td>
+            <td class="py-2 px-4 text-right font-bold text-green-400">$${laborSubtotal.toFixed(2)}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    ` : ''}
+
+    ${materialsHTML.length > 0 ? `
+    <!-- Paint & Materials -->
+    <div class="mb-8">
+      <div class="bg-orange-500 text-white px-4 py-2 mb-4">
+        <h2 class="text-lg font-bold">Paint & Materials</h2>
+      </div>
+      <table class="w-full bg-gray-800 rounded-lg overflow-hidden">
+        <thead class="bg-gray-700">
+          <tr>
+            <th class="py-2 px-4 text-left">Item</th>
+            <th class="py-2 px-4 text-right">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${materialsHTML.join('')}
+          <tr class="bg-gray-700">
+            <td class="py-2 px-4 font-semibold">Materials Subtotal</td>
+            <td class="py-2 px-4 text-right font-bold text-green-400">$${materialsSubtotal.toFixed(2)}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    ` : ''}
+
+    ${travelSubtotal > 0 ? `
+    <!-- Travel Costs -->
+    <div class="mb-8">
+      <div class="bg-red-500 text-white px-4 py-2 mb-4">
+        <h2 class="text-lg font-bold">Travel Costs</h2>
+      </div>
+      <div class="bg-gray-800 p-4 rounded-lg">
+        <p>${travelCosts.distance}km × ${travelCosts.trips} trips × $${travelCosts.ratePerKm}/km = $${travelSubtotal.toFixed(2)}</p>
+      </div>
+    </div>
+    ` : ''}
+
+    <!-- Total -->
+    <div class="flex justify-end mt-10">
+      <div class="w-96">
+        <div class="bg-gray-800 p-4 rounded-lg">
+          <div class="flex justify-between mb-2">
+            <span>Subtotal:</span>
+            <span>$${subtotalBeforeTax.toFixed(2)}</span>
+          </div>
+          ${taxRate > 0 ? `
+          <div class="flex justify-between mb-2">
+            <span>Tax (${(taxRate * 100).toFixed(1)}%):</span>
+            <span>$${taxAmount.toFixed(2)}</span>
+          </div>
+          ` : ''}
+          <div class="border-t border-gray-600 pt-2 mt-2">
+            <div class="flex justify-between bg-green-600 text-white px-4 py-3 rounded font-bold text-xl">
+              <span>Grand Total:</span>
+              <span>$${grandTotal.toFixed(2)}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="text-center text-gray-400 text-sm mt-8">
+      <p>This estimate is valid for 30 days. Thank you for considering A-Frame Painting!</p>
+    </div>
+  </body>
+</html>`;
+  };
+
   const generatePDF = async (sendEmail = false) => {
-    if (!printRef.current) return;
-
     try {
-      const canvas = await html2canvas(printRef.current, {
-        scale: 1, // Reduced from 2 to minimize file size
-        useCORS: true,
-        backgroundColor: '#000000',
-        logging: false
-      });
-
-      const imgData = canvas.toDataURL('image/jpeg', 0.8); // Use JPEG with 80% quality for smaller size
-      const pdf = new jsPDF();
-      const imgWidth = 210;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
-
+      const htmlContent = generateProfessionalHTML();
+      
       if (sendEmail) {
-        const pdfBase64 = pdf.output('datauristring').split(',')[1];
-        console.log('Generated PDF size (base64):', pdfBase64.length, 'characters');
-        emailMutation.mutate(pdfBase64);
+        // For email, we still need to convert to PDF and send as base64
+        const printWindow = window.open('', '_blank', 'width=800,height=600');
+        if (!printWindow) {
+          throw new Error('Could not open print window. Please allow popups.');
+        }
+        
+        printWindow.document.write(htmlContent);
+        printWindow.document.close();
+        
+        // Wait for content to load, then capture as PDF
+        setTimeout(async () => {
+          try {
+            const canvas = await html2canvas(printWindow.document.body, {
+              scale: 1,
+              useCORS: true,
+              backgroundColor: '#000000',
+              logging: false
+            });
+
+            const imgData = canvas.toDataURL('image/jpeg', 0.8);
+            const pdf = new jsPDF();
+            const imgWidth = 210;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+            pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+            
+            const pdfBase64 = pdf.output('datauristring').split(',')[1];
+            console.log('Generated PDF size (base64):', pdfBase64.length, 'characters');
+            
+            printWindow.close();
+            emailMutation.mutate(pdfBase64);
+          } catch (error) {
+            printWindow.close();
+            throw error;
+          }
+        }, 1000);
       } else {
-        pdf.save(`estimate-${project.clientName.replace(/\s+/g, '-')}.pdf`);
+        // For download, open the HTML in a new window for printing
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) {
+          throw new Error('Could not open print window. Please allow popups.');
+        }
+        
+        printWindow.document.write(htmlContent);
+        printWindow.document.close();
+        
+        printWindow.onload = () => {
+          setTimeout(() => {
+            printWindow.print();
+          }, 500);
+        };
+        
+        toast({
+          title: "Success",
+          description: "Estimate PDF opened for download",
+        });
       }
     } catch (error) {
       toast({
