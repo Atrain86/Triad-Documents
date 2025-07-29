@@ -346,8 +346,8 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           </DialogTitle>
         </DialogHeader>
 
-        {/* Custom Close Button - aligned left with container below, very close */}
-        <div className="flex justify-start mb-1">
+        {/* Custom Close Button - aligned right with container below, very close */}
+        <div className="flex justify-end mb-1">
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-white transition-colors p-2 rounded-md hover:bg-gray-800"
