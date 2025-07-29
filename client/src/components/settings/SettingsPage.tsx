@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Settings, DollarSign, Globe, Mail, ChevronRight, Info, Menu, X, Camera } from 'lucide-react';
+import { ArrowLeft, Settings, DollarSign, Globe, Mail, ChevronRight, Info, Menu, X, Camera, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { ReactSortable } from 'react-sortablejs';
 
 import AdminDashboard from '../admin/AdminDashboard';
@@ -179,9 +180,48 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
     { id: 'gmail', name: 'Gmail Integration', icon: Mail, color: 'red' },
     { id: 'photo', name: 'Photo Quality', icon: Camera, color: 'orange' },
     { id: 'timezone', name: 'Time Zone', icon: Globe, color: 'green' },
+    { id: 'invoice', name: 'Invoice Numbering', icon: FileText, color: 'purple' },
     { id: 'tax', name: 'Tax Configuration', icon: DollarSign, color: 'yellow' },
     { id: 'api', name: 'API Usage Analytics', icon: Menu, color: 'cyan' }
   ]);
+
+  // Invoice numbering state
+  const [invoiceMode, setInvoiceMode] = useState<'automatic' | 'manual'>('automatic');
+  const [nextInvoiceNumber, setNextInvoiceNumber] = useState(1);
+  const [manualInvoiceInput, setManualInvoiceInput] = useState('');
+  const [confirmationMessage, setConfirmationMessage] = useState('');
+
+  // Load invoice numbering settings from localStorage
+  useEffect(() => {
+    const savedMode = localStorage.getItem('invoiceNumberingMode') as 'automatic' | 'manual' || 'automatic';
+    const savedNext = parseInt(localStorage.getItem('nextInvoiceNumber') || '1');
+    setInvoiceMode(savedMode);
+    setNextInvoiceNumber(savedNext);
+  }, []);
+
+  // Save invoice numbering settings to localStorage
+  const saveInvoiceSettings = (mode: 'automatic' | 'manual', nextNumber: number) => {
+    localStorage.setItem('invoiceNumberingMode', mode);
+    localStorage.setItem('nextInvoiceNumber', nextNumber.toString());
+    setInvoiceMode(mode);
+    setNextInvoiceNumber(nextNumber);
+  };
+
+  // Handle manual starting point submission
+  const handleManualStartingPoint = () => {
+    const inputNumber = parseInt(manualInvoiceInput);
+    if (isNaN(inputNumber) || inputNumber < 1) {
+      setConfirmationMessage('Please enter a valid invoice number (1 or higher)');
+      setTimeout(() => setConfirmationMessage(''), 3000);
+      return;
+    }
+    
+    const nextNumber = inputNumber + 1;
+    saveInvoiceSettings('automatic', nextNumber);
+    setConfirmationMessage(`Starting at Invoice #${inputNumber.toString().padStart(3, '0')} — next invoice will be #${nextNumber.toString().padStart(3, '0')}`);
+    setManualInvoiceInput('');
+    setTimeout(() => setConfirmationMessage(''), 5000);
+  };
 
   // Re-check tax configuration when component mounts or localStorage changes
   useEffect(() => {
@@ -442,6 +482,116 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                             <p className="text-sm text-gray-400">
                               <strong className="text-green-400">Note:</strong> This setting affects how dates and times are displayed throughout the application. 
                               The selected timezone will be used for all date calculations and displays.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+
+              case 'invoice':
+                return (
+                  <div>
+                    <div 
+                      className="flex items-center justify-between p-4 rounded-lg border-2 border-purple-400 bg-gray-900/20 cursor-pointer hover:bg-gray-800/30 transition-colors"
+                      onClick={() => toggleSection('invoice')}
+                    >
+                      <div className="flex items-center gap-4">
+                        <Menu className="h-5 w-5 text-purple-400 flex-shrink-0 drag-handle cursor-grab" />
+                        <FileText className="h-5 w-5 text-purple-400" />
+                        <span className="text-lg font-medium text-purple-400">Invoice Numbering</span>
+                        <div className="px-3 py-2 rounded-full text-xs font-medium bg-purple-500 text-black">
+                          Next: {nextInvoiceNumber.toString().padStart(3, '0')}
+                        </div>
+                      </div>
+                      <ChevronRight 
+                        className={`h-5 w-5 text-purple-400 transition-transform ${
+                          expandedSection === 'invoice' ? 'rotate-90' : 'rotate-180'
+                        }`} 
+                      />
+                    </div>
+                    
+                    {expandedSection === 'invoice' && (
+                      <div className="mt-4 p-6 rounded-lg border border-purple-400/30 bg-gray-900/10">
+                        <div className="space-y-6">
+                          <h3 className="text-lg font-medium text-purple-400 mb-4">Invoice Numbering Settings</h3>
+                          
+                          {/* Automatic Invoice Numbering Option */}
+                          <div 
+                            className={`p-4 rounded-lg border cursor-pointer transition-colors ${
+                              invoiceMode === 'automatic' 
+                                ? 'border-purple-400 bg-purple-400/10' 
+                                : 'border-gray-600 hover:border-purple-400/50'
+                            }`}
+                            onClick={() => setInvoiceMode('automatic')}
+                          >
+                            <div className="flex items-center justify-between mb-3">
+                              <div>
+                                <div className="font-medium text-white flex items-center gap-2">
+                                  Automatic Invoice Numbering
+                                  <span className="text-xs px-2 py-1 bg-purple-400 text-black rounded-full">DEFAULT</span>
+                                </div>
+                                <div className="text-sm text-gray-400 mt-1">App will automatically assign the next invoice number</div>
+                              </div>
+                              <div className={`w-4 h-4 rounded-full border-2 ${
+                                invoiceMode === 'automatic' ? 'bg-purple-400 border-purple-400' : 'border-gray-400'
+                              }`} />
+                            </div>
+                            
+                            {invoiceMode === 'automatic' && (
+                              <div className="mt-3 p-3 bg-gray-800/50 rounded-lg">
+                                <p className="text-sm text-purple-400 font-medium">
+                                  Next Invoice Number: {nextInvoiceNumber.toString().padStart(3, '0')}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Manual Starting Point Option */}
+                          <div className="space-y-4">
+                            <div className="font-medium text-white">Manual Starting Point</div>
+                            <div className="flex gap-3 items-end">
+                              <div className="flex-1">
+                                <label className="block text-sm text-gray-400 mb-2">
+                                  Enter the next invoice number to use
+                                </label>
+                                <Input
+                                  type="number"
+                                  min="1"
+                                  value={manualInvoiceInput}
+                                  onChange={(e) => setManualInvoiceInput(e.target.value)}
+                                  placeholder="e.g., 346"
+                                  className="bg-gray-800 border-gray-600 text-white"
+                                />
+                              </div>
+                              <Button
+                                onClick={handleManualStartingPoint}
+                                disabled={!manualInvoiceInput || parseInt(manualInvoiceInput) < 1}
+                                className="bg-purple-500 hover:bg-purple-600 text-white"
+                              >
+                                Set
+                              </Button>
+                            </div>
+                            
+                            {confirmationMessage && (
+                              <div className={`p-3 rounded-lg ${
+                                confirmationMessage.includes('valid') 
+                                  ? 'bg-red-500/10 border border-red-400/30' 
+                                  : 'bg-green-500/10 border border-green-400/30'
+                              }`}>
+                                <p className={`text-sm ${
+                                  confirmationMessage.includes('valid') ? 'text-red-400' : 'text-green-400'
+                                }`}>
+                                  {confirmationMessage}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="mt-4 p-3 bg-gray-800/50 rounded-lg">
+                            <p className="text-sm text-gray-400">
+                              <strong className="text-purple-400">Note:</strong> Once set, all new invoices will automatically increment the stored number by 1 unless you change it again in settings.
                             </p>
                           </div>
                         </div>

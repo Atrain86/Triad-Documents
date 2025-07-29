@@ -320,7 +320,7 @@ export default function StreamlinedHomepage({
                 onClick={() => setShowArchived(!showArchived)}
                 className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none"
                 style={{ 
-                  backgroundColor: showArchived ? '#7B4FF2' : paintBrainColors.green
+                  backgroundColor: showArchived ? '#7B4FF2' : '#7B4FF2'
                 }}
               >
                 <span

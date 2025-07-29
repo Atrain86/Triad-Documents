@@ -458,6 +458,15 @@ Logo: Custom A-frame house structure with paint brush accent
 - **Improved EstimateGenerator UX**: Set all sections (Services & Labor, Paint & Materials, Additional Labor, Additional Services) to collapsed by default for cleaner, more focused interface
 - **Enhanced EstimateGenerator action toggle**: Replaced separate Download PDF and Send Email buttons with elegant toggle interface using Paint Brain colors - purple (#8B5FBF) for Download PDF and orange (#EA580C) for Send Email with unified action button
 
+### July 29, 2025 - Invoice Numbering Settings & Homepage Visual Consistency
+- **Implemented comprehensive Invoice Numbering Settings**: Added complete invoice numbering management system in Settings page with automatic and manual modes, localStorage persistence, and visual "Next: 001" display badge
+- **Smart invoice number integration**: Modified InvoiceGenerator to automatically use stored invoice numbers from settings, with automatic incrementing after successful PDF generation or email sending
+- **Professional settings interface**: Created purple-themed Invoice Numbering section (#8B5FBF) with toggle between automatic numbering and manual starting point input, comprehensive validation, and user feedback
+- **Real-time next number tracking**: Settings display shows current next invoice number with automatic updates, enabling users to see and manage their invoice numbering sequence
+- **Archive toggle color consistency**: Updated homepage archive toggle to match Schedule button purple color (#7B4FF2) for unified visual design across interface elements
+- **Auto-increment functionality**: Both PDF download and email sending (via Gmail OAuth and SendGrid fallback) now automatically increment the next invoice number, ensuring sequential numbering without gaps
+- **Flexible manual override**: Users can set custom starting points (e.g., 346) to align with existing business numbering systems, with immediate feedback and validation
+
 ### July 27, 2025 - Calendar Integration Optimization & Status Selection Enhancement
 - **Isolated A-Frame calendar integration**: Successfully configured calendar buttons to open only A-Frame business calendar (6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981@group.calendar.google.com) without showing personal Allen calendar
 - **Enhanced status selection modal**: Improved StatusButton component with better contrast (dark background, white text) and isolated event handling to prevent navigation conflicts

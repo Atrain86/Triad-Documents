@@ -56,8 +56,22 @@ cortespainter@gmail.com`;
     setEmailMessage(defaultMessage);
   }, [project.clientName]);
   
+  // Get next invoice number from localStorage
+  const getNextInvoiceNumber = () => {
+    const nextNumber = parseInt(localStorage.getItem('nextInvoiceNumber') || '1');
+    return nextNumber;
+  };
+
+  // Increment and save next invoice number
+  const incrementInvoiceNumber = () => {
+    const currentNumber = getNextInvoiceNumber();
+    const nextNumber = currentNumber + 1;
+    localStorage.setItem('nextInvoiceNumber', nextNumber.toString());
+    return currentNumber;
+  };
+
   const [invoiceData, setInvoiceData] = useState({
-    invoiceNumber: 101,
+    invoiceNumber: getNextInvoiceNumber(),
     date: new Date().toISOString().split('T')[0],
     
     // Business info (your details)
@@ -294,8 +308,11 @@ cortespainter@gmail.com`;
         }
       }
 
-      const filename = `Invoice-${invoiceData.invoiceNumber}-${project.clientName || 'Client'}.pdf`;
+      const filename = `Invoice-${invoiceData.invoiceNumber.toString().padStart(3, '0')}-${project.clientName || 'Client'}.pdf`;
       pdf.save(filename);
+      
+      // Increment invoice number for next invoice
+      incrementInvoiceNumber();
       
       toast({
         title: "PDF Generated!",
@@ -509,6 +526,9 @@ cortespainter@gmail.com`;
         // Trigger SendGrid email sending
         sendViaSendGrid();
       } else {
+        // Increment invoice number for next invoice
+        incrementInvoiceNumber();
+        
         toast({
           title: "Email sent successfully!",
           description: "The invoice has been sent from your Gmail account.",
@@ -707,6 +727,9 @@ cortespainter@gmail.com
         throw new Error(error.error || 'Failed to send email');
       }
 
+      // Increment invoice number for next invoice
+      incrementInvoiceNumber();
+      
       toast({
         title: "Email Sent Successfully!",
         description: `Invoice sent to ${invoiceData.clientEmail}`,
