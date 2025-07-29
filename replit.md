@@ -467,6 +467,13 @@ Logo: Custom A-frame house structure with paint brush accent
 - **Auto-increment functionality**: Both PDF download and email sending (via Gmail OAuth and SendGrid fallback) now automatically increment the next invoice number, ensuring sequential numbering without gaps
 - **Flexible manual override**: Users can set custom starting points (e.g., 346) to align with existing business numbering systems, with immediate feedback and validation
 
+### July 29, 2025 - Logo Scaling Enhancement & Tax Setup Persistence Fix
+- **Enhanced logo scaling maximum to 300%**: Updated logo scaling system from 400% maximum to 300% as requested for more practical usage range
+- **Redesigned mobile-friendly logo preview**: Completely rebuilt logo preview layout with larger container (200px min-height), moved all information below preview instead of cramped right-side layout, increased image max-height to 120px, and larger touch-friendly control buttons
+- **Fixed persistent tax setup modal issue**: Resolved problem where tax configuration popup appeared on every login by preserving `taxSetupCompleted` flag during logout process, ensuring first-time setup experience only occurs once per user
+- **Improved logout data preservation**: Enhanced logout function to preserve critical user preferences (tax setup status, logo scale, invoice numbering settings) while still clearing authentication data for security
+- **Real-time logo scaling updates**: Maintained cross-component logo scaling communication using custom events for immediate visual feedback between settings and homepage
+
 ### July 27, 2025 - Calendar Integration Optimization & Status Selection Enhancement
 - **Isolated A-Frame calendar integration**: Successfully configured calendar buttons to open only A-Frame business calendar (6b990af5658408422c42677572f2ef19740096a1608165f15f59135db4f2a981@group.calendar.google.com) without showing personal Allen calendar
 - **Enhanced status selection modal**: Improved StatusButton component with better contrast (dark background, white text) and isolated event handling to prevent navigation conflicts

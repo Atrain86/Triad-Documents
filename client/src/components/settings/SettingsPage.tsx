@@ -415,9 +415,22 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
   }, [expandedSection]); // Re-check when sections expand/collapse
 
   const handleLogout = () => {
+    // Preserve important user preferences before clearing
+    const taxSetupCompleted = localStorage.getItem('taxSetupCompleted');
+    const logoScale = localStorage.getItem('logoScale');
+    const invoiceNumberingMode = localStorage.getItem('invoiceNumberingMode');
+    const nextInvoiceNumber = localStorage.getItem('nextInvoiceNumber');
+    
     // Complete authentication reset
     localStorage.clear();
     sessionStorage.clear();
+    
+    // Restore preserved preferences
+    if (taxSetupCompleted) localStorage.setItem('taxSetupCompleted', taxSetupCompleted);
+    if (logoScale) localStorage.setItem('logoScale', logoScale);
+    if (invoiceNumberingMode) localStorage.setItem('invoiceNumberingMode', invoiceNumberingMode);
+    if (nextInvoiceNumber) localStorage.setItem('nextInvoiceNumber', nextInvoiceNumber);
+    
     logout();
     // Force hard reload to clear all cached state
     window.location.href = window.location.origin;
