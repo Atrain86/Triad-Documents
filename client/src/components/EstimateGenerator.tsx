@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -280,44 +280,52 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     return sum + (hours * rate);
   }, 0);
 
-  const additionalServicesSubtotal = additionalServices.reduce((sum: number, service: any) => {
-    const hours = parseFloat(service.hours) || 0;
-    const rate = parseFloat(service.rate.toString()) || 0;
-    return sum + (hours * rate);
-  }, 0);
+  const additionalServicesSubtotal = useMemo(() => {
+    return additionalServices.reduce((sum: number, service: any) => {
+      const hours = parseFloat(service.hours) || 0;
+      const rate = parseFloat(service.rate.toString()) || 0;
+      return sum + (hours * rate);
+    }, 0);
+  }, [additionalServices]);
 
-  const additionalLaborSubtotal = additionalLabor.reduce((sum: number, member: any) => {
-    const hours = parseFloat(member.hours) || 0;
-    const rate = parseFloat(member.rate.toString()) || 0;
-    return sum + (hours * rate);
-  }, 0);
+  const additionalLaborSubtotal = useMemo(() => {
+    return additionalLabor.reduce((sum: number, member: any) => {
+      const hours = parseFloat(member.hours) || 0;
+      const rate = parseFloat(member.rate.toString()) || 0;
+      return sum + (hours * rate);
+    }, 0);
+  }, [additionalLabor]);
 
-  const paintSubtotal = (parseFloat(paintCosts.pricePerGallon) || 0) * 
-                       (parseFloat(paintCosts.gallons) || 0) * 
-                       (parseFloat(paintCosts.coats) || 1);
+  const paintSubtotal = useMemo(() => {
+    return (parseFloat(paintCosts.pricePerGallon) || 0) * 
+           (parseFloat(paintCosts.gallons) || 0) * 
+           (parseFloat(paintCosts.coats) || 1);
+  }, [paintCosts]);
 
-  const customSuppliesSubtotal = customSupplies.reduce((total: number, supply: any) => {
-    return total + ((parseFloat(supply.quantity) || 0) * (parseFloat(supply.pricePerUnit) || 0));
-  }, 0);
+  const customSuppliesSubtotal = useMemo(() => {
+    return customSupplies.reduce((total: number, supply: any) => {
+      return total + ((parseFloat(supply.quantity) || 0) * (parseFloat(supply.pricePerUnit) || 0));
+    }, 0);
+  }, [customSupplies]);
 
-  const paintAndMaterialsSubtotal = paintSubtotal + customSuppliesSubtotal;
+  const paintAndMaterialsSubtotal = useMemo(() => paintSubtotal + customSuppliesSubtotal, [paintSubtotal, customSuppliesSubtotal]);
 
   // Add missing variables for HTML template
   const materialsSubtotal = paintAndMaterialsSubtotal;
-  const travelSubtotal = (parseFloat(travelCosts.distance) || 0) * 
-                         (parseFloat(travelCosts.trips) || 0) * 
-                         (parseFloat(travelCosts.ratePerKm) || 0);
+  const travelSubtotal = useMemo(() => {
+    return (parseFloat(travelCosts.distance) || 0) * 
+           (parseFloat(travelCosts.trips) || 0) * 
+           (parseFloat(travelCosts.ratePerKm) || 0);
+  }, [travelCosts]);
   
-  // Calculate taxable vs non-taxable amounts
-  // Only labor, additional services, and travel should be taxed
-  // Materials (paint & supplies) already include taxes when purchased - no double taxation
-  const taxableAmount = laborSubtotal + additionalServicesSubtotal + additionalLaborSubtotal + travelSubtotal;
+  // Calculate taxable vs non-taxable amounts - memoized for performance
+  const taxableAmount = useMemo(() => laborSubtotal + additionalServicesSubtotal + additionalLaborSubtotal + travelSubtotal, [laborSubtotal, additionalServicesSubtotal, additionalLaborSubtotal, travelSubtotal]);
   const nonTaxableAmount = paintAndMaterialsSubtotal; // Materials already include taxes
   
-  const subtotalBeforeTax = taxableAmount + nonTaxableAmount;
-  const taxRate = (taxConfig.gst + taxConfig.pst + taxConfig.hst + taxConfig.salesTax + taxConfig.vat + taxConfig.otherTax) / 100;
-  const taxAmount = taxableAmount * taxRate; // Only apply tax to taxable portion
-  const grandTotal = subtotalBeforeTax + taxAmount;
+  const subtotalBeforeTax = useMemo(() => taxableAmount + nonTaxableAmount, [taxableAmount, nonTaxableAmount]);
+  const taxRate = useMemo(() => (taxConfig.gst + taxConfig.pst + taxConfig.hst + taxConfig.salesTax + taxConfig.vat + taxConfig.otherTax) / 100, [taxConfig]);
+  const taxAmount = useMemo(() => taxableAmount * taxRate, [taxableAmount, taxRate]);
+  const grandTotal = useMemo(() => subtotalBeforeTax + taxAmount, [subtotalBeforeTax, taxAmount]);
 
   // Legacy calculations for backward compatibility
   const subtotal = laborSubtotal + additionalServicesSubtotal + additionalLaborSubtotal + paintAndMaterialsSubtotal;
@@ -595,7 +603,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
         iframe.style.left = '-9999px';
         iframe.style.top = '-9999px';
         iframe.style.width = '800px';
-        iframe.style.height = '1200px';
+        iframe.style.height = '2000px'; // Increased height to prevent truncation
         document.body.appendChild(iframe);
 
         if (!iframe.contentDocument) {
@@ -798,6 +806,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                       min="0"
                       value={stage.hours}
                       onChange={(e) => updateWorkStage(index, 'hours', e.target.value)}
+                      onBlur={(e) => updateWorkStage(index, 'hours', e.target.value)}
                       placeholder="0"
                       className="bg-gray-700 border-[#E53E3E] text-white"
                     />
