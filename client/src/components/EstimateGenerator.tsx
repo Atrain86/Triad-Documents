@@ -150,12 +150,12 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   // Toggle state for action buttons - default to email (left side)
   const [actionMode, setActionMode] = useState<'email' | 'download'>('email');
 
-  // Collapsible sections state - Default all sections to collapsed
+  // Collapsible sections state - Default all sections to EXPANDED to prevent layout shifts
   const [collapsedSections, setCollapsedSections] = useState({
-    services: true,
-    materials: true,
-    additionalLabor: true,
-    additionalServices: true
+    services: false,
+    materials: false,
+    additionalLabor: false,
+    additionalServices: false
   });
 
   // Toggle section collapsed state
@@ -729,7 +729,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           </button>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4" style={{ transform: 'translateZ(0)' }}>
           {/* Estimate Details */}
           <Card className="bg-gray-900 border-gray-700">
             <CardHeader>
@@ -743,7 +743,8 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     value={projectTitle}
                     onChange={(e) => setProjectTitle(e.target.value)}
                     placeholder="Enter project title"
-                    className="bg-gray-800 border-[#8B5FBF] text-white"
+                    className="bg-gray-800 border-[#8B5FBF] text-white transform-gpu will-change-contents"
+                    style={{ minHeight: '40px' }}
                   />
                 </div>
                 <div>
@@ -781,7 +782,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           </Card>
 
           {/* Services & Labor */}
-          <Card className="bg-gray-900 border-gray-700">
+          <Card className="bg-gray-900 border-gray-700 transform-gpu will-change-contents">
             <CardHeader className="flex flex-row items-center justify-between cursor-pointer" onClick={() => toggleSection('services')}>
               <CardTitle className="text-[#E53E3E]">Services & Labor</CardTitle>
               {collapsedSections.services ? (
@@ -806,9 +807,9 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                       min="0"
                       value={stage.hours}
                       onChange={(e) => updateWorkStage(index, 'hours', e.target.value)}
-                      onBlur={(e) => updateWorkStage(index, 'hours', e.target.value)}
                       placeholder="0"
-                      className="bg-gray-700 border-[#E53E3E] text-white"
+                      className="bg-gray-700 border-[#E53E3E] text-white transform-gpu will-change-contents"
+                      style={{ minHeight: '40px' }}
                     />
                   </div>
                   <div>
@@ -834,7 +835,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           </Card>
 
           {/* Paint & Materials */}
-          <Card className="bg-gray-900 border-gray-700">
+          <Card className="bg-gray-900 border-gray-700 transform-gpu will-change-contents">
             <CardHeader className="flex flex-row items-center justify-between cursor-pointer" onClick={() => toggleSection('materials')}>
               <CardTitle className="text-[#D4A574]">Paint & Materials</CardTitle>
               {collapsedSections.materials ? (
@@ -967,7 +968,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           </Card>
 
           {/* Additional Labor (Crew Members) */}
-          <Card className="bg-gray-900 border-gray-700">
+          <Card className="bg-gray-900 border-gray-700 transform-gpu will-change-contents">
             <CardHeader className="flex flex-row items-center justify-between cursor-pointer" onClick={() => toggleSection('additionalLabor')}>
               <CardTitle className="text-[#4ECDC4]">Additional Labor</CardTitle>
               {collapsedSections.additionalLabor ? (
@@ -1046,7 +1047,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           </Card>
 
           {/* Additional Services */}
-          <Card className="bg-gray-900 border-gray-700">
+          <Card className="bg-gray-900 border-gray-700 transform-gpu will-change-contents">
             <CardHeader className="flex flex-row items-center justify-between cursor-pointer" onClick={() => toggleSection('additionalServices')}>
               <CardTitle className="text-[#DCDCAA]">Additional Services</CardTitle>
               {collapsedSections.additionalServices ? (
