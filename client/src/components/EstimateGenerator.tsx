@@ -734,6 +734,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     placeholder="Enter project title"
                     className="bg-gray-800 border-[#8B5FBF] text-white"
                     style={{ minHeight: '40px' }}
+
                   />
                 </div>
                 <div>

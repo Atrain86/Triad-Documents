@@ -440,4 +440,12 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   object-fit: contain;
 }
 
+/* Prevent jittery mobile viewport behavior - minimal fix */
+@media (max-width: 768px) {
+  input:focus, textarea:focus, select:focus {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+}
+
 
