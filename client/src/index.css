@@ -440,28 +440,4 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   object-fit: contain;
 }
 
-/* Anti-jitter CSS for EstimateGenerator - Forces GPU acceleration and prevents layout recalculations */
-.estimate-generator-content {
-  transform: translateZ(0) !important;
-  backface-visibility: hidden !important;
-  perspective: 1000px !important;
-  will-change: auto !important;
-  contain: layout style !important;
-}
 
-.estimate-generator-content *,
-.estimate-generator-content input,
-.estimate-generator-content textarea,
-.estimate-generator-content select,
-.estimate-generator-content button {
-  transform: translateZ(0) !important;
-  backface-visibility: hidden !important;
-  will-change: auto !important;
-  contain: layout style !important;
-}
-
-.estimate-generator-content .card,
-.estimate-generator-content .grid {
-  contain: layout style paint !important;
-  transform: translateZ(0) !important;
-}

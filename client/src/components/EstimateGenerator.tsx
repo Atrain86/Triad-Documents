@@ -718,7 +718,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           </button>
         </div>
 
-        <div className="space-y-4 estimate-generator-content">
+        <div className="space-y-4">
           {/* Estimate Details */}
           <Card className="bg-gray-900 border-gray-700">
             <CardHeader>
