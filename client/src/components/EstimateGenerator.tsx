@@ -584,10 +584,11 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
   const generatePDF = async (sendEmail = false) => {
     try {
+      console.log('Starting PDF generation, sendEmail:', sendEmail);
       const htmlContent = generateProfessionalHTML();
       
       if (sendEmail) {
-        // For email, we still need to convert to PDF and send as base64
+        // For email, convert to PDF and send as base64
         const printWindow = window.open('', '_blank', 'width=800,height=600');
         if (!printWindow) {
           throw new Error('Could not open print window. Please allow popups.');
@@ -596,14 +597,17 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
         printWindow.document.write(htmlContent);
         printWindow.document.close();
         
-        // Wait for content to load, then capture as PDF
+        // Wait for content and Tailwind to load
         setTimeout(async () => {
           try {
+            console.log('Capturing PDF for email...');
             const canvas = await html2canvas(printWindow.document.body, {
               scale: 1,
               useCORS: true,
               backgroundColor: '#000000',
-              logging: false
+              logging: false,
+              width: 800,
+              height: printWindow.document.body.scrollHeight
             });
 
             const imgData = canvas.toDataURL('image/jpeg', 0.8);
@@ -614,43 +618,58 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
             
             const pdfBase64 = pdf.output('datauristring').split(',')[1];
-            console.log('Generated PDF size (base64):', pdfBase64.length, 'characters');
+            console.log('Generated PDF for email, size:', pdfBase64.length, 'characters');
             
             printWindow.close();
             emailMutation.mutate(pdfBase64);
           } catch (error) {
+            console.error('Email PDF generation error:', error);
             printWindow.close();
             throw error;
           }
-        }, 1000);
+        }, 2000); // Increased wait time for Tailwind to load
       } else {
-        // For download, open the HTML in a new window for printing
-        const printWindow = window.open('', '_blank');
+        // For download, create proper PDF with better handling
+        console.log('Opening PDF preview window...');
+        const printWindow = window.open('', '_blank', 'width=800,height=900');
         if (!printWindow) {
-          throw new Error('Could not open print window. Please allow popups.');
+          toast({
+            title: "Popup Blocked",
+            description: "Please allow popups and try again",
+            variant: "destructive"
+          });
+          return;
         }
         
         printWindow.document.write(htmlContent);
         printWindow.document.close();
         
-        printWindow.onload = () => {
-          setTimeout(() => {
-            printWindow.print();
-          }, 500);
+        // Wait for all resources to load before showing print dialog
+        const waitForLoad = () => {
+          if (printWindow.document.readyState === 'complete') {
+            setTimeout(() => {
+              console.log('Opening print dialog...');
+              printWindow.print();
+            }, 1000);
+          } else {
+            setTimeout(waitForLoad, 100);
+          }
         };
         
+        waitForLoad();
+        
         toast({
-          title: "Success",
-          description: "Estimate PDF opened for download",
+          title: "PDF Ready",
+          description: "Print dialog opened. Use 'Save as PDF' in print options.",
         });
       }
     } catch (error) {
+      console.error('PDF generation error:', error);
       toast({
-        title: "Error",
-        description: "Failed to generate PDF. Please try again.",
+        title: "PDF Error",
+        description: error instanceof Error ? error.message : "Failed to generate PDF. Please try again.",
         variant: "destructive"
       });
-      console.error('PDF generation error:', error);
     }
   };
 
