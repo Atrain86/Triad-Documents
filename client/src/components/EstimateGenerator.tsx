@@ -150,21 +150,8 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   // Toggle state for action buttons - default to email (left side)
   const [actionMode, setActionMode] = useState<'email' | 'download'>('email');
 
-  // Collapsible sections state - Default all sections to EXPANDED to prevent layout shifts
-  const [collapsedSections, setCollapsedSections] = useState({
-    services: false,
-    materials: false,
-    additionalLabor: false,
-    additionalServices: false
-  });
-
-  // Toggle section collapsed state
-  const toggleSection = (sectionKey: string) => {
-    setCollapsedSections(prev => ({
-      ...prev,
-      [sectionKey]: !prev[sectionKey as keyof typeof prev]
-    }));
-  };
+  // Remove collapsible sections entirely to eliminate layout shifts
+  // All sections will be permanently visible for stable UI
 
   // Save form data to localStorage whenever state changes (excluding date)
   useEffect(() => {
@@ -783,15 +770,9 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
           {/* Services & Labor */}
           <Card className="bg-gray-900 border-gray-700 transform-gpu will-change-contents">
-            <CardHeader className="flex flex-row items-center justify-between cursor-pointer" onClick={() => toggleSection('services')}>
+            <CardHeader>
               <CardTitle className="text-[#E53E3E]">Services & Labor</CardTitle>
-              {collapsedSections.services ? (
-                <ChevronLeft className="w-5 h-5 text-gray-400" />
-              ) : (
-                <ChevronDown className="w-5 h-5 text-gray-400" />
-              )}
             </CardHeader>
-            {!collapsedSections.services && (
             <CardContent className="space-y-4">
               {workStages.map((stage: any, index: number) => (
                 <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-800 rounded-lg">
@@ -831,20 +812,13 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                 Labor Subtotal: ${laborSubtotal.toFixed(2)}
               </div>
             </CardContent>
-            )}
           </Card>
 
           {/* Paint & Materials */}
           <Card className="bg-gray-900 border-gray-700 transform-gpu will-change-contents">
-            <CardHeader className="flex flex-row items-center justify-between cursor-pointer" onClick={() => toggleSection('materials')}>
+            <CardHeader>
               <CardTitle className="text-[#D4A574]">Paint & Materials</CardTitle>
-              {collapsedSections.materials ? (
-                <ChevronLeft className="w-5 h-5 text-gray-400" />
-              ) : (
-                <ChevronDown className="w-5 h-5 text-gray-400" />
-              )}
             </CardHeader>
-            {!collapsedSections.materials && (
             <CardContent className="space-y-4">
               <Button
                 onClick={addCustomSupply}
@@ -964,20 +938,13 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                 Total Materials: ${paintAndMaterialsSubtotal.toFixed(2)}
               </div>
             </CardContent>
-            )}
           </Card>
 
           {/* Additional Labor (Crew Members) */}
           <Card className="bg-gray-900 border-gray-700 transform-gpu will-change-contents">
-            <CardHeader className="flex flex-row items-center justify-between cursor-pointer" onClick={() => toggleSection('additionalLabor')}>
+            <CardHeader>
               <CardTitle className="text-[#4ECDC4]">Additional Labor</CardTitle>
-              {collapsedSections.additionalLabor ? (
-                <ChevronLeft className="w-5 h-5 text-gray-400" />
-              ) : (
-                <ChevronDown className="w-5 h-5 text-gray-400" />
-              )}
             </CardHeader>
-            {!collapsedSections.additionalLabor && (
             <CardContent className="space-y-4">
               <Button
                 onClick={addLabor}
@@ -1043,20 +1010,13 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                 Additional Labor Total: ${additionalLaborSubtotal.toFixed(2)}
               </div>
             </CardContent>
-            )}
           </Card>
 
           {/* Additional Services */}
           <Card className="bg-gray-900 border-gray-700 transform-gpu will-change-contents">
-            <CardHeader className="flex flex-row items-center justify-between cursor-pointer" onClick={() => toggleSection('additionalServices')}>
+            <CardHeader>
               <CardTitle className="text-[#DCDCAA]">Additional Services</CardTitle>
-              {collapsedSections.additionalServices ? (
-                <ChevronLeft className="w-5 h-5 text-gray-400" />
-              ) : (
-                <ChevronDown className="w-5 h-5 text-gray-400" />
-              )}
             </CardHeader>
-            {!collapsedSections.additionalServices && (
             <CardContent className="space-y-4">
               <Button
                 onClick={addAdditionalService}
@@ -1122,7 +1082,6 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                 Additional Services: ${additionalServicesSubtotal.toFixed(2)}
               </div>
             </CardContent>
-            )}
           </Card>
 
           {/* Summary */}
