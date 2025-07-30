@@ -588,26 +588,39 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       const htmlContent = generateProfessionalHTML();
       
       if (sendEmail) {
-        // For email, convert to PDF and send as base64
-        const printWindow = window.open('', '_blank', 'width=800,height=600');
-        if (!printWindow) {
-          throw new Error('Could not open print window. Please allow popups.');
+        // For email, create a hidden iframe to avoid popup issues
+        console.log('Creating hidden iframe for PDF generation...');
+        const iframe = document.createElement('iframe');
+        iframe.style.position = 'absolute';
+        iframe.style.left = '-9999px';
+        iframe.style.top = '-9999px';
+        iframe.style.width = '800px';
+        iframe.style.height = '1200px';
+        document.body.appendChild(iframe);
+
+        if (!iframe.contentDocument) {
+          document.body.removeChild(iframe);
+          throw new Error('Could not create PDF iframe.');
         }
-        
-        printWindow.document.write(htmlContent);
-        printWindow.document.close();
-        
+
+        iframe.contentDocument.write(htmlContent);
+        iframe.contentDocument.close();
+
         // Wait for content and Tailwind to load
         setTimeout(async () => {
           try {
-            console.log('Capturing PDF for email...');
-            const canvas = await html2canvas(printWindow.document.body, {
+            console.log('Capturing PDF for email from iframe...');
+            if (!iframe.contentDocument) {
+              throw new Error('Iframe document not available');
+            }
+
+            const canvas = await html2canvas(iframe.contentDocument.body, {
               scale: 1,
               useCORS: true,
               backgroundColor: '#000000',
               logging: false,
               width: 800,
-              height: printWindow.document.body.scrollHeight
+              height: iframe.contentDocument.body.scrollHeight
             });
 
             const imgData = canvas.toDataURL('image/jpeg', 0.8);
@@ -620,14 +633,16 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             const pdfBase64 = pdf.output('datauristring').split(',')[1];
             console.log('Generated PDF for email, size:', pdfBase64.length, 'characters');
             
-            printWindow.close();
+            document.body.removeChild(iframe);
             emailMutation.mutate(pdfBase64);
           } catch (error) {
             console.error('Email PDF generation error:', error);
-            printWindow.close();
+            if (iframe.parentNode) {
+              document.body.removeChild(iframe);
+            }
             throw error;
           }
-        }, 2000); // Increased wait time for Tailwind to load
+        }, 3000); // Increased wait time for better reliability
       } else {
         // For download, create proper PDF with better handling
         console.log('Opening PDF preview window...');
