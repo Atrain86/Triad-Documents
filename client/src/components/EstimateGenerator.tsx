@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback, memo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -196,69 +196,64 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
   const taxConfig = getGlobalTaxConfig();
 
-  // Update work stage
-  const updateWorkStage = (index: number, field: string, value: string) => {
-    const updated = [...workStages];
-    updated[index] = { ...updated[index], [field]: value };
-    setWorkStages(updated);
-  };
+  // Stabilized event handlers using useCallback to prevent re-renders
+  const updateWorkStage = useCallback((index: number, field: string, value: string) => {
+    setWorkStages(prev => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
+  }, []);
 
-  // Update additional service
-  const updateAdditionalService = (index: number, field: string, value: string) => {
-    const updated = [...additionalServices];
-    updated[index] = { ...updated[index], [field]: value };
-    setAdditionalServices(updated);
-  };
+  const updateAdditionalService = useCallback((index: number, field: string, value: string) => {
+    setAdditionalServices(prev => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
+  }, []);
 
-  // Update additional labor (crew member)
-  const updateAdditionalLabor = (index: number, field: string, value: string) => {
-    const updated = [...additionalLabor];
-    updated[index] = { ...updated[index], [field]: value };
-    setAdditionalLabor(updated);
-  };
+  const updateAdditionalLabor = useCallback((index: number, field: string, value: string) => {
+    setAdditionalLabor(prev => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
+  }, []);
 
-  // Add new crew member
-  const addLabor = () => {
-    setAdditionalLabor([...additionalLabor, { name: '', hours: '', rate: '' }]);
-  };
+  const addLabor = useCallback(() => {
+    setAdditionalLabor(prev => [...prev, { name: '', hours: '', rate: '' }]);
+  }, []);
 
-  // Update custom supply
-  const updateCustomSupply = (index: number, field: string, value: string) => {
-    const updated = [...customSupplies];
-    updated[index] = { ...updated[index], [field]: value };
-    setCustomSupplies(updated);
-  };
+  const updateCustomSupply = useCallback((index: number, field: string, value: string) => {
+    setCustomSupplies(prev => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
+  }, []);
 
-  // Add new custom supply
-  const addCustomSupply = () => {
-    setCustomSupplies([...customSupplies, { name: '', quantity: '', pricePerUnit: '' }]);
-  };
+  const addCustomSupply = useCallback(() => {
+    setCustomSupplies(prev => [...prev, { name: '', quantity: '', pricePerUnit: '' }]);
+  }, []);
 
-  // Remove custom supply
-  const removeCustomSupply = (index: number) => {
-    if (customSupplies.length > 1) {
-      setCustomSupplies(customSupplies.filter((_: any, i: number) => i !== index));
+  const removeCustomSupply = useCallback((index: number) => {
+    setCustomSupplies(prev => prev.length > 1 ? prev.filter((_, i) => i !== index) : prev);
+  }, []);
+
+  const removeLabor = useCallback((index: number) => {
+    setAdditionalLabor(prev => prev.length > 1 ? prev.filter((_, i) => i !== index) : prev);
+  }, []);
+
+  const addAdditionalService = useCallback(() => {
+    setAdditionalServices(prev => [...prev, { name: '', hours: '', rate: 60 }]);
+  }, []);
+
+  const removeAdditionalService = useCallback((index: number) => {
+    if (index >= 3) {
+      setAdditionalServices(prev => prev.filter((_, i) => i !== index));
     }
-  };
-
-  // Remove crew member
-  const removeLabor = (index: number) => {
-    if (additionalLabor.length > 1) {
-      setAdditionalLabor(additionalLabor.filter((_: any, i: number) => i !== index));
-    }
-  };
-
-  // Add new additional service
-  const addAdditionalService = () => {
-    setAdditionalServices([...additionalServices, { name: '', hours: '', rate: 60 }]);
-  };
-
-  // Remove additional service (protect the first 3 default services)
-  const removeAdditionalService = (index: number) => {
-    if (additionalServices.length > 3 && index >= 3) {
-      setAdditionalServices(additionalServices.filter((_: any, i: number) => i !== index));
-    }
-  };
+  }, []);
 
   // Calculate totals
   const laborSubtotal = workStages.reduce((sum: number, stage: any) => {
@@ -696,7 +691,14 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] h-[90vh] overflow-y-auto bg-black text-white [&>button]:hidden">
+      <DialogContent className="max-w-4xl max-h-[90vh] h-[90vh] overflow-y-auto bg-black text-white [&>button]:hidden" 
+        style={{ 
+          transform: 'translateZ(0)', 
+          willChange: 'auto',
+          contain: 'layout style paint',
+          backfaceVisibility: 'hidden',
+          perspective: '1000px'
+        }}>
         <DialogHeader className="pb-1">
           <DialogTitle className="text-xl font-bold text-[#8B5FBF] text-center">
             <div>Generate Estimate</div>
@@ -716,7 +718,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           </button>
         </div>
 
-        <div className="space-y-4" style={{ transform: 'translateZ(0)' }}>
+        <div className="space-y-4 estimate-generator-content">
           {/* Estimate Details */}
           <Card className="bg-gray-900 border-gray-700">
             <CardHeader>
@@ -730,7 +732,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     value={projectTitle}
                     onChange={(e) => setProjectTitle(e.target.value)}
                     placeholder="Enter project title"
-                    className="bg-gray-800 border-[#8B5FBF] text-white transform-gpu will-change-contents"
+                    className="bg-gray-800 border-[#8B5FBF] text-white"
                     style={{ minHeight: '40px' }}
                   />
                 </div>
