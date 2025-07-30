@@ -272,16 +272,45 @@ cortespainter@gmail.com`;
       // Wait for rendering
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      // Capture the invoice preview
+      // Ensure element has proper dimensions
+      if (invoiceRef.current.scrollHeight === 0) {
+        throw new Error('Invoice element has no height - not rendered properly');
+      }
+
+      console.log('Invoice element dimensions:', {
+        scrollHeight: invoiceRef.current.scrollHeight,
+        offsetHeight: invoiceRef.current.offsetHeight,
+        clientHeight: invoiceRef.current.clientHeight
+      });
+
+      // Capture the invoice preview with better error handling
       const canvas = await html2canvas(invoiceRef.current, {
-        scale: 2,
+        scale: 1.5, // Reduced scale for better performance
         backgroundColor: '#000000',
         useCORS: true,
         allowTaint: true,
-        logging: false,
+        logging: true, // Enable logging for debugging
         width: 794,
-        height: invoiceRef.current.scrollHeight
+        height: Math.max(invoiceRef.current.scrollHeight, 800),
+        onclone: (clonedDoc) => {
+          console.log('Cloning document for PDF generation');
+          const clonedElement = clonedDoc.querySelector('[data-invoice-ref]') as HTMLElement;
+          if (clonedElement) {
+            clonedElement.style.display = 'block';
+            clonedElement.style.visibility = 'visible';
+            clonedElement.style.opacity = '1';
+          }
+        }
       });
+
+      console.log('Canvas captured successfully:', {
+        width: canvas.width,
+        height: canvas.height
+      });
+
+      if (canvas.width === 0 || canvas.height === 0) {
+        throw new Error('Canvas has invalid dimensions');
+      }
 
       // Restore original styling
       invoiceRef.current.style.display = originalDisplay;
