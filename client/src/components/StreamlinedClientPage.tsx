@@ -1322,8 +1322,8 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                             return `${itemCount} tool${itemCount !== 1 ? 's' : ''}`;
                           case 'dailyHours': {
                             const totalHours = dailyHours.reduce((sum, entry) => sum + (typeof entry.hours === 'number' ? entry.hours : parseFloat(entry.hours) || 0), 0);
-                            const totalEarnings = totalHours * (project?.hourlyRate || 60);
-                            return `${totalHours.toFixed(1)} hrs • $${totalEarnings.toLocaleString()}`;
+                            const totalEarnings = dailyHours.reduce((sum, h) => sum + ((typeof h.hours === 'number' ? h.hours : parseFloat(h.hours) || 0) * (h.hourlyRate || project?.hourlyRate || 60)), 0);
+                            return `${totalHours % 1 === 0 ? totalHours : totalHours.toFixed(1)} hrs • $${totalEarnings.toLocaleString()}`;
                           }
                           case 'receipts': 
                             return `${itemCount} receipt${itemCount !== 1 ? 's' : ''}`;
