@@ -1464,7 +1464,7 @@ ${emailMessage}`;
             <div className="flex justify-between items-center mb-8 pb-4 border-b border-gray-600">
               <div>
                 <h2 className="text-4xl font-bold" style={{ color: paintBrainColors.primary }}>Invoice</h2>
-                <p className="text-gray-400 mt-1">Professional Painting Services</p>
+
               </div>
               <div className="text-right">
                 <div className="text-sm text-gray-300">
