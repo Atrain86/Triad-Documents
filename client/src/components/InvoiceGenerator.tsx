@@ -1034,11 +1034,20 @@ ${emailMessage}`;
         </DialogHeader>
         <div className="flex flex-col">
           {/* Header */}
-          <div className="flex items-center justify-center p-6 border-b" style={{ backgroundColor: darkTheme.headerBg, borderColor: darkTheme.border }}>
+          <div className="flex items-center justify-between p-6 border-b" style={{ backgroundColor: darkTheme.headerBg, borderColor: darkTheme.border }}>
+            <div></div> {/* Spacer for centering */}
             <div className="text-center">
               <h1 className="text-2xl font-bold" style={{ color: darkTheme.text }}>Invoice Generator</h1>
               <p style={{ color: darkTheme.textSecondary }}>Professional painting services</p>
             </div>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={onClose}
+              className="text-gray-400 hover:text-white hover:bg-gray-700"
+            >
+              <X className="h-5 w-5" />
+            </Button>
           </div>
 
           <div className="p-6 space-y-6" style={{ backgroundColor: darkTheme.background }}>
@@ -1061,20 +1070,20 @@ ${emailMessage}`;
                     onFocus={(e) => {
                       // Prevent text selection on focus - use setTimeout to override browser default
                       setTimeout(() => {
-                        e.target.setSelectionRange(0, 0);
+                        (e.target as HTMLInputElement).setSelectionRange(0, 0);
                       }, 0);
                     }}
                     onMouseUp={(e) => {
                       // Prevent text selection on mouse/touch interaction
                       e.preventDefault();
                       setTimeout(() => {
-                        e.target.setSelectionRange(0, 0);
+                        (e.target as HTMLInputElement).setSelectionRange(0, 0);
                       }, 0);
                     }}
                     onTouchStart={(e) => {
                       // Prevent text selection on touch devices
                       setTimeout(() => {
-                        e.target.setSelectionRange(0, 0);
+                        (e.target as HTMLInputElement).setSelectionRange(0, 0);
                       }, 0);
                     }}
                   />
@@ -1383,58 +1392,55 @@ ${emailMessage}`;
                 placeholder="Payment instructions, additional notes, etc."
               />
             </div>
-            {/* Action Buttons */}
-            <div className="flex flex-wrap gap-4 pt-6 border-t justify-between items-end" style={{ borderColor: darkTheme.border }}>
-              <Button variant="outline" onClick={onClose} className="flex-1">Cancel</Button>
-              
-              {/* Action Toggle with Dynamic Label - Matching EstimateGenerator */}
-              <div className="flex flex-col items-center gap-4 p-6 bg-black rounded-lg border border-gray-600">
-                {/* Toggle Switch */}
-                <button
-                  onClick={() => setActionMode(actionMode === 'email' ? 'download' : 'email')}
-                  className={`relative inline-flex h-10 w-20 items-center rounded-full transition-colors duration-200 focus:outline-none ${
-                    actionMode === 'email' ? 'bg-[#EA580C]' : 'bg-[#8B5FBF]'
+            {/* Action Toggle with Dynamic Label - Matching EstimateGenerator */}
+            <div className="flex flex-col items-center gap-4 mb-6 p-6 bg-black rounded-lg border border-gray-600" style={{ 
+              borderColor: actionMode === 'email' ? '#EA580C' : '#8B5FBF' 
+            }}>
+              {/* Toggle Switch */}
+              <button
+                onClick={() => setActionMode(actionMode === 'email' ? 'download' : 'email')}
+                className={`relative inline-flex h-10 w-20 items-center rounded-full transition-colors duration-200 focus:outline-none ${
+                  actionMode === 'email' ? 'bg-[#EA580C]' : 'bg-[#8B5FBF]'
+                }`}
+              >
+                <span
+                  className={`inline-block h-8 w-8 transform rounded-full bg-white transition-transform duration-200 ${
+                    actionMode === 'email' ? 'translate-x-1' : 'translate-x-11'
                   }`}
-                >
-                  <span
-                    className={`inline-block h-8 w-8 transform rounded-full bg-white transition-transform duration-200 ${
-                      actionMode === 'email' ? 'translate-x-1' : 'translate-x-11'
-                    }`}
-                  />
-                </button>
-                
-                {/* Dynamic Action Label */}
-                <div 
-                  className="flex items-center gap-3 cursor-pointer"
-                  onClick={() => {
-                    if (actionMode === 'email') {
-                      console.log('Send Invoice button clicked - opening email dialog');
-                      setShowEmailDialog(true);
-                    } else {
-                      generatePDF();
-                    }
-                  }}
-                >
-                  {actionMode === 'email' ? (
-                    <>
-                      <Mail className="w-8 h-8 text-[#EA580C]" />
-                      <span className="text-[#EA580C] text-xl font-bold">Send</span>
-                    </>
-                  ) : (
-                    <>
-                      <Download className="w-8 h-8 text-[#8B5FBF]" />
-                      <span className="text-[#8B5FBF] text-xl font-bold">PDF</span>
-                    </>
-                  )}
-                </div>
-                
-                {/* Status Text */}
-                {isSending && (
-                  <div className="text-[#EA580C] text-sm font-medium">
-                    Sending invoice...
-                  </div>
+                />
+              </button>
+              
+              {/* Dynamic Action Label */}
+              <div 
+                className="flex items-center gap-3 cursor-pointer"
+                onClick={() => {
+                  if (actionMode === 'email') {
+                    console.log('Send Invoice button clicked - opening email dialog');
+                    setShowEmailDialog(true);
+                  } else {
+                    generatePDF();
+                  }
+                }}
+              >
+                {actionMode === 'email' ? (
+                  <>
+                    <Mail className="w-8 h-8 text-[#EA580C]" />
+                    <span className="text-[#EA580C] text-xl font-bold">Send</span>
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-8 h-8 text-[#8B5FBF]" />
+                    <span className="text-[#8B5FBF] text-xl font-bold">PDF</span>
+                  </>
                 )}
               </div>
+              
+              {/* Status Text */}
+              {isSending && (
+                <div className="text-[#EA580C] text-sm font-medium">
+                  Sending invoice...
+                </div>
+              )}
             </div>
           </div>
         </div>
