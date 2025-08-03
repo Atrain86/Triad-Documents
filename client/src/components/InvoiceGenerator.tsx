@@ -1007,8 +1007,7 @@ ${emailMessage}`;
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto scroll-smooth" style={{ backgroundColor: darkTheme.background, minHeight: 0 }}>
-            <div className="p-6 space-y-6" style={{ minHeight: '60vh' }}>
+          <div className="flex-1 overflow-y-auto scroll-smooth p-6 space-y-6" style={{ backgroundColor: darkTheme.background }}>
               {/* Business & Invoice Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: paintBrainColors.red, backgroundColor: darkTheme.cardBg }}>
@@ -1327,7 +1326,6 @@ ${emailMessage}`;
                 rows={3}
                 placeholder="Payment instructions, additional notes, etc."
               />
-            </div>
             </div>
           </div>
           
