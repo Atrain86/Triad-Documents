@@ -342,11 +342,11 @@ export default function StreamlinedHomepage({
         
         {/* Centered logo */}
         {logoVisibility.homepage && (
-          <div className="flex justify-center mb-6">
+          <div className="flex justify-center mb-8 -mt-2">
             <img 
               src={currentLogo?.url || "/aframe-logo.png"} 
               alt="Business Logo" 
-              className="h-16 w-auto object-contain"
+              className="h-14 w-auto object-contain"
               style={{ transform: `scale(${logoScale / 100})` }}
             />
           </div>
