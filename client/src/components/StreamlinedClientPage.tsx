@@ -1919,16 +1919,15 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
           })}
         </ReactSortable>
         
-        <div className="mt-4 text-white flex justify-center">
-          <span className="text-sm flex items-center gap-1" style={{ color: paintBrainColors.green }}>
-            Drag 
+        <div className="mt-4 text-white flex justify-start">
+          <span className="text-sm flex items-center gap-1" style={{ color: paintBrainColors.yellow }}>
             <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" style={{ color: paintBrainColors.yellow }}>
               <rect y="2" width="16" height="1.5" rx="0.75"/>
               <rect y="5.5" width="16" height="1.5" rx="0.75"/>
               <rect y="9" width="16" height="1.5" rx="0.75"/>
               <rect y="12.5" width="16" height="1.5" rx="0.75"/>
             </svg>
-            to re-order
+            Drag to re-order
           </span>
         </div>
       </div>
