@@ -63,6 +63,10 @@ export default function InvoiceGenerator({
   const [emailMessage, setEmailMessage] = useState('');
   const [actionMode, setActionMode] = useState<'download' | 'email'>('email');
   
+  // Material markup state for invoice
+  const [materialMarkupEnabled, setMaterialMarkupEnabled] = useState(false);
+  const [materialMarkupPercentage, setMaterialMarkupPercentage] = useState('');
+  
   // Initialize email message
   React.useEffect(() => {
     const firstName = (invoiceData.clientName || project.clientName).split(' ')[0];
@@ -211,14 +215,22 @@ cortespainter@gmail.com`;
     setInvoiceData({ ...invoiceData, lineItems: newLineItems });
   };
 
+  // Helper function to calculate material costs with markup
+  const calculateMaterialCost = () => {
+    const baseMaterialCost = receipts
+      .filter(receipt => invoiceData.selectedReceipts.has(receipt.id))
+      .reduce((sum, receipt) => sum + parseFloat(receipt.amount), 0);
+    
+    return materialMarkupEnabled && materialMarkupPercentage 
+      ? baseMaterialCost * (1 + (parseFloat(materialMarkupPercentage) / 100))
+      : baseMaterialCost;
+  };
+
   const calculateSubtotal = () => {
     // Calculate labor total from daily hours
     const laborTotal = dailyHours.reduce((sum, hourEntry) => sum + (hourEntry.hours * (project.hourlyRate || 60)), 0);
-    // Calculate materials total from selected receipts
-    const selectedReceiptsTotal = receipts
-      .filter(receipt => invoiceData.selectedReceipts.has(receipt.id))
-      .reduce((sum, receipt) => sum + parseFloat(receipt.amount), 0);
-    return laborTotal + invoiceData.suppliesCost + selectedReceiptsTotal;
+    const materialCost = calculateMaterialCost();
+    return laborTotal + invoiceData.suppliesCost + materialCost;
   };
 
   const calculateGST = () => {
@@ -1049,17 +1061,56 @@ ${emailMessage}`;
                       className="bg-gray-900 border-gray-700 text-white"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Additional Supplies Cost</label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={invoiceData.suppliesCost === 0 ? '' : invoiceData.suppliesCost}
-                      onChange={(e) => setInvoiceData({...invoiceData, suppliesCost: parseFloat(e.target.value) || 0})}
-                      className="bg-gray-900 border-gray-700 text-white"
-                      placeholder="0.00"
-                    />
+                  {/* Material Markup Control */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 rounded-lg border" style={{ borderColor: darkTheme.border }}>
+                      <div className="flex items-center space-x-3">
+                        <label className="text-sm font-medium" style={{ color: darkTheme.text }}>Material Markup</label>
+                        <div className="relative inline-block w-12 h-6">
+                          <input
+                            type="checkbox"
+                            id="invoice-material-markup-toggle"
+                            checked={materialMarkupEnabled}
+                            onChange={(e) => setMaterialMarkupEnabled(e.target.checked)}
+                            className="sr-only"
+                          />
+                          <label 
+                            htmlFor="invoice-material-markup-toggle" 
+                            className={`block w-12 h-6 rounded-full cursor-pointer transition-colors ${
+                              materialMarkupEnabled ? 'bg-[#6A9955]' : 'bg-gray-600'
+                            }`}
+                          >
+                            <span 
+                              className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
+                                materialMarkupEnabled ? 'translate-x-6' : 'translate-x-0'
+                              }`}
+                            />
+                          </label>
+                        </div>
+                        <span className="text-xs" style={{ color: darkTheme.textSecondary }}>
+                          {materialMarkupEnabled ? 'Markup' : 'No Markup'}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {materialMarkupEnabled && (
+                      <div>
+                        <label className="block text-sm font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Markup Percentage</label>
+                        <div className="relative">
+                          <Input
+                            type="number"
+                            value={materialMarkupPercentage}
+                            onChange={(e) => setMaterialMarkupPercentage(e.target.value)}
+                            placeholder="Enter markup %"
+                            className="bg-gray-900 border-gray-700 text-white pr-8"
+                            min="0"
+                            max="100"
+                            step="0.1"
+                          />
+                          <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">%</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1241,8 +1292,10 @@ ${emailMessage}`;
                 )}
                 {receipts.filter(receipt => invoiceData.selectedReceipts.has(receipt.id)).length > 0 && (
                   <div className="flex justify-between py-2 border-b" style={{ borderColor: darkTheme.border }}>
-                    <span className="font-medium" style={{ color: darkTheme.text }}>Materials (incl. taxes):</span>
-                    <span className="font-semibold" style={{ color: darkTheme.text }}>${receipts.filter(receipt => invoiceData.selectedReceipts.has(receipt.id)).reduce((sum, receipt) => sum + (Number(receipt.amount) || 0), 0).toFixed(2)}</span>
+                    <span className="font-medium" style={{ color: darkTheme.text }}>
+                      Materials {materialMarkupEnabled && materialMarkupPercentage ? `(+${materialMarkupPercentage}% markup)` : '(incl. taxes)'}:
+                    </span>
+                    <span className="font-semibold" style={{ color: darkTheme.text }}>${calculateMaterialCost().toFixed(2)}</span>
                   </div>
                 )}
                 <div className="flex justify-between py-2 border-b" style={{ borderColor: darkTheme.border }}>
@@ -1458,8 +1511,7 @@ ${emailMessage}`;
                         <td className="px-6 py-3 text-center text-gray-300">-</td>
                         <td className="px-6 py-3 text-gray-300">Materials and supplies (see receipts)</td>
                         <td className="px-6 py-3 text-right font-semibold text-white">
-                          ${receipts.filter(receipt => invoiceData.selectedReceipts.has(receipt.id))
-                            .reduce((sum, receipt) => sum + (Number(receipt.amount) || 0), 0).toFixed(2)}
+                          ${calculateMaterialCost().toFixed(2)}
                         </td>
                       </tr>
                     )}

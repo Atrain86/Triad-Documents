@@ -166,6 +166,10 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   // Toggle state for action buttons - default to email (left side)
   const [actionMode, setActionMode] = useState<'email' | 'download'>('email');
 
+  // Material markup state
+  const [materialMarkupEnabled, setMaterialMarkupEnabled] = useState(savedData.materialMarkupEnabled || false);
+  const [materialMarkupPercentage, setMaterialMarkupPercentage] = useState(savedData.materialMarkupPercentage || '');
+
   // Remove collapsible sections entirely to eliminate layout shifts
   // All sections will be permanently visible for stable UI
 
@@ -179,10 +183,12 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       customSupplies,
       additionalServices,
       additionalLabor,
-      travelCosts
+      travelCosts,
+      materialMarkupEnabled,
+      materialMarkupPercentage
     };
     localStorage.setItem('estimateFormData', JSON.stringify(formData));
-  }, [projectTitle, workStages, paintCosts, customSupplies, additionalServices, additionalLabor, travelCosts]);
+  }, [projectTitle, workStages, paintCosts, customSupplies, additionalServices, additionalLabor, travelCosts, materialMarkupEnabled, materialMarkupPercentage]);
 
   // Load global tax configuration from localStorage
   const getGlobalTaxConfig = () => {
@@ -306,7 +312,14 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     }, 0);
   }, [customSupplies]);
 
-  const paintAndMaterialsSubtotal = useMemo(() => paintSubtotal + customSuppliesSubtotal, [paintSubtotal, customSuppliesSubtotal]);
+  const paintAndMaterialsSubtotal = useMemo(() => {
+    const baseMaterialCost = paintSubtotal + customSuppliesSubtotal;
+    if (materialMarkupEnabled && materialMarkupPercentage) {
+      const markupMultiplier = 1 + (parseFloat(materialMarkupPercentage) / 100);
+      return baseMaterialCost * markupMultiplier;
+    }
+    return baseMaterialCost;
+  }, [paintSubtotal, customSuppliesSubtotal, materialMarkupEnabled, materialMarkupPercentage]);
 
   // Add missing variables for HTML template
   const materialsSubtotal = paintAndMaterialsSubtotal;
@@ -776,6 +789,58 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     )}
                   </div>
                 </div>
+              </div>
+              
+              {/* Material Markup Control */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div className="flex items-center justify-between p-3 rounded-lg border border-gray-600">
+                  <div className="flex items-center space-x-3">
+                    <label className="text-sm font-medium text-white">Material Markup</label>
+                    <div className="relative inline-block w-12 h-6">
+                      <input
+                        type="checkbox"
+                        id="material-markup-toggle"
+                        checked={materialMarkupEnabled}
+                        onChange={(e) => setMaterialMarkupEnabled(e.target.checked)}
+                        className="sr-only"
+                      />
+                      <label 
+                        htmlFor="material-markup-toggle" 
+                        className={`block w-12 h-6 rounded-full cursor-pointer transition-colors ${
+                          materialMarkupEnabled ? 'bg-[#8B5FBF]' : 'bg-gray-600'
+                        }`}
+                      >
+                        <span 
+                          className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
+                            materialMarkupEnabled ? 'translate-x-6' : 'translate-x-0'
+                          }`}
+                        />
+                      </label>
+                    </div>
+                    <span className="text-xs text-gray-400">
+                      {materialMarkupEnabled ? 'Markup' : 'No Markup'}
+                    </span>
+                  </div>
+                </div>
+                
+                {materialMarkupEnabled && (
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Markup Percentage</label>
+                    <div className="relative">
+                      <Input
+                        type="number"
+                        value={materialMarkupPercentage}
+                        onChange={(e) => setMaterialMarkupPercentage(e.target.value)}
+                        placeholder="Enter markup %"
+                        className="bg-gray-800 border-[#8B5FBF] text-white pr-8"
+                        min="0"
+                        max="100"
+                        step="0.1"
+                      />
+                      <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">%</span>
+                    </div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
