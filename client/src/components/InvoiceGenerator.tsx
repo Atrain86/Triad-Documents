@@ -67,6 +67,9 @@ export default function InvoiceGenerator({
   const [materialMarkupEnabled, setMaterialMarkupEnabled] = useState(false);
   const [materialMarkupPercentage, setMaterialMarkupPercentage] = useState('');
   
+  // Ref for the first input to prevent auto-selection
+  const firstInputRef = React.useRef<HTMLInputElement>(null);
+  
   // Initialize email message
   React.useEffect(() => {
     const firstName = (invoiceData.clientName || project.clientName).split(' ')[0];
@@ -98,6 +101,19 @@ cortespainter@gmail.com`;
     window.addEventListener('storage', handleVisibilityChange);
     return () => window.removeEventListener('storage', handleVisibilityChange);
   }, []);
+
+  // Prevent text auto-selection when dialog opens
+  React.useEffect(() => {
+    if (isOpen && firstInputRef.current) {
+      // Clear any existing selection and move cursor to end
+      setTimeout(() => {
+        if (firstInputRef.current) {
+          firstInputRef.current.blur();
+          firstInputRef.current.setSelectionRange(0, 0);
+        }
+      }, 100);
+    }
+  }, [isOpen]);
 
 
   
@@ -1029,6 +1045,7 @@ ${emailMessage}`;
                 </h2>
                 <div className="space-y-2">
                   <Input
+                    ref={firstInputRef}
                     value={invoiceData.businessName}
                     onChange={(e) => setInvoiceData({...invoiceData, businessName: e.target.value})}
                     className="bg-gray-800 border-[#E03E3E] text-white"
