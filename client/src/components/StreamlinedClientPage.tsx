@@ -1782,7 +1782,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                         </div>
 
                         {/* Hours Summary at Bottom - Always reserve space */}
-                        <div className="mt-4" style={{ marginRight: '48px' }}>
+                        <div className="mt-4" style={{ marginRight: '40px' }}>
                           {dailyHours.length > 0 ? (
                             <div className="p-3 bg-green-900/20 rounded-lg border border-green-700">
                               <span className="font-semibold text-green-300 text-sm">
