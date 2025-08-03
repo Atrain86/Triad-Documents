@@ -63,7 +63,7 @@ export default function InvoiceGenerator({
   const [emailMessage, setEmailMessage] = useState('');
   const [actionMode, setActionMode] = useState<'download' | 'email'>('email');
   
-  // Material markup state for invoice (simple initialization)
+  // Material markup state for invoice
   const [materialMarkupEnabled, setMaterialMarkupEnabled] = useState(false);
   const [materialMarkupPercentage, setMaterialMarkupPercentage] = useState('');
   
@@ -99,50 +99,7 @@ cortespainter@gmail.com`;
     return () => window.removeEventListener('storage', handleVisibilityChange);
   }, []);
 
-  // Simple memory system - load saved inputs after component mounts
-  React.useEffect(() => {
-    try {
-      const saved = localStorage.getItem('lastInvoiceInputs');
-      if (saved) {
-        const lastInputs = JSON.parse(saved);
-        setInvoiceData(prev => ({
-          ...prev,
-          businessName: lastInputs.businessName || prev.businessName,
-          businessAddress: lastInputs.businessAddress || prev.businessAddress,
-          businessCity: lastInputs.businessCity || prev.businessCity,
-          businessPostal: lastInputs.businessPostal || prev.businessPostal,
-          businessEmail: lastInputs.businessEmail || prev.businessEmail,
-          notes: lastInputs.notes || prev.notes,
-          gstRate: lastInputs.gstRate || prev.gstRate
-        }));
-        setMaterialMarkupEnabled(lastInputs.materialMarkupEnabled || false);
-        setMaterialMarkupPercentage(lastInputs.materialMarkupPercentage || '');
-      }
-    } catch (error) {
-      console.log('Could not load saved invoice inputs:', error);
-    }
-  }, []);
 
-  // Save inputs when they change (after initial load)
-  React.useEffect(() => {
-    if (invoiceData.businessName !== 'A-Frame Painting' || invoiceData.businessAddress !== '884 Hayes Rd') {
-      // Only save if user has made changes
-      const inputsToSave = {
-        businessName: invoiceData.businessName,
-        businessAddress: invoiceData.businessAddress,
-        businessCity: invoiceData.businessCity,
-        businessPostal: invoiceData.businessPostal,
-        businessEmail: invoiceData.businessEmail,
-        notes: invoiceData.notes,
-        gstRate: invoiceData.gstRate,
-        materialMarkupEnabled,
-        materialMarkupPercentage
-      };
-      localStorage.setItem('lastInvoiceInputs', JSON.stringify(inputsToSave));
-    }
-  }, [invoiceData.businessName, invoiceData.businessAddress, invoiceData.businessCity, 
-      invoiceData.businessPostal, invoiceData.businessEmail, invoiceData.notes, 
-      invoiceData.gstRate, materialMarkupEnabled, materialMarkupPercentage]);
   
   // Get next invoice number from localStorage
   const getNextInvoiceNumber = () => {
