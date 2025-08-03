@@ -1949,7 +1949,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
               style={{
                 backgroundColor: actionMode === 'invoice' ? '#EA580C' : paintBrainColors.purple,
                 width: '124px',
-                left: actionMode === 'invoice' ? '6px' : '134px'
+                left: actionMode === 'invoice' ? '6px' : '126px'
               }}
             />
             
