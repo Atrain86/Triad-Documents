@@ -346,7 +346,7 @@ export default function StreamlinedHomepage({
             <img 
               src={currentLogo?.url || "/aframe-logo.png"} 
               alt="Business Logo" 
-              className="h-24 w-auto object-contain"
+              className="h-16 w-auto object-contain"
               style={{ transform: `scale(${logoScale / 100})` }}
             />
           </div>
