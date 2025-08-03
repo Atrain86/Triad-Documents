@@ -1010,8 +1010,8 @@ ${emailMessage}`;
           <div className="flex-1 p-6 space-y-6" style={{ backgroundColor: darkTheme.background }}>
             {/* Business & Invoice Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.green }}>
+              <div className="p-4 rounded-lg border-l-4 space-y-4" style={{ borderLeftColor: '#DC2626', backgroundColor: darkTheme.cardBg }}>
+                <h2 className="text-xl font-semibold flex items-center" style={{ color: '#DC2626' }}>
                   <User className="mr-2 h-5 w-5" />
                   Business Information
                 </h2>
@@ -1037,8 +1037,8 @@ ${emailMessage}`;
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.green }}>
+              <div className="p-4 rounded-lg border-l-4 space-y-4" style={{ borderLeftColor: '#EAB308', backgroundColor: darkTheme.cardBg }}>
+                <h2 className="text-xl font-semibold flex items-center" style={{ color: '#EAB308' }}>
                   <Calendar className="mr-2 h-5 w-5" />
                   Invoice Details
                 </h2>
@@ -1119,8 +1119,8 @@ ${emailMessage}`;
             </div>
 
             {/* Client Information */}
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.green }}>
+            <div className="p-4 rounded-lg border-l-4 space-y-4" style={{ borderLeftColor: '#22C55E', backgroundColor: darkTheme.cardBg }}>
+              <h2 className="text-xl font-semibold flex items-center" style={{ color: '#22C55E' }}>
                 <MapPin className="mr-2 h-5 w-5" />
                 Client Information
               </h2>
@@ -1181,8 +1181,8 @@ ${emailMessage}`;
             </div>
 
             {/* Services & Labor - Daily Hours Layout */}
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold" style={{ color: paintBrainColors.green }}>Services & Labor</h2>
+            <div className="p-4 rounded-lg border-l-4 space-y-4" style={{ borderLeftColor: '#3B82F6', backgroundColor: darkTheme.cardBg }}>
+              <h2 className="text-xl font-semibold" style={{ color: '#3B82F6' }}>Services & Labor</h2>
               
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse" style={{ borderColor: darkTheme.border }}>
@@ -1229,8 +1229,8 @@ ${emailMessage}`;
 
             {/* Receipt Attachment Option */}
             {receipts.length > 0 && (
-              <div className="p-4 rounded-lg" style={{ backgroundColor: darkTheme.cardBg }}>
-                <h3 className="text-sm font-medium mb-3" style={{ color: paintBrainColors.green }}>Receipts & Materials</h3>
+              <div className="p-4 rounded-lg border-l-4" style={{ borderLeftColor: '#8B5CF6', backgroundColor: darkTheme.cardBg }}>
+                <h3 className="text-xl font-semibold mb-3" style={{ color: '#8B5CF6' }}>Receipts & Materials</h3>
                 
                 {/* Display receipt items with OCR data */}
                 <div className="space-y-3 mb-4">
