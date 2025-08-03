@@ -1942,7 +1942,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
             <div 
               className="absolute h-10 rounded-full transition-all duration-300 ease-in-out z-10"
               style={{
-                backgroundColor: actionMode === 'invoice' ? paintBrainColors.green : paintBrainColors.purple,
+                backgroundColor: actionMode === 'invoice' ? '#EA580C' : paintBrainColors.purple,
                 width: '128px',
                 left: actionMode === 'invoice' ? '4px' : '128px'
               }}
