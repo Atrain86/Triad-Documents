@@ -1291,7 +1291,7 @@ ${emailMessage}`;
                 {/* Display receipt items with OCR data */}
                 <div className="space-y-3 mb-4">
                   {receipts.map((receipt) => (
-                    <div key={receipt.id} className="border rounded p-2" style={{ borderColor: darkTheme.border }}>
+                    <div key={receipt.id} className="border rounded p-2" style={{ borderColor: '#D4A574' }}>
                       <div className="flex justify-between items-center text-sm mb-1">
                         <span className="font-medium" style={{ color: darkTheme.text }}>{receipt.vendor}</span>
                         <span className="font-semibold" style={{ color: darkTheme.text }}>${receipt.amount}</span>
