@@ -63,6 +63,28 @@ export default function InvoiceGenerator({
   const [emailMessage, setEmailMessage] = useState('');
   const [actionMode, setActionMode] = useState<'download' | 'email'>('email');
   
+  // Memory system functions (defined early to avoid hoisting issues)
+  const getLastInvoiceInputs = () => {
+    const saved = localStorage.getItem('lastInvoiceInputs');
+    return saved ? JSON.parse(saved) : null;
+  };
+
+  const saveInvoiceInputs = (data: any) => {
+    // Save only the form inputs, not project-specific data
+    const inputsToSave = {
+      businessName: data.businessName,
+      businessAddress: data.businessAddress,
+      businessCity: data.businessCity,
+      businessPostal: data.businessPostal,
+      businessEmail: data.businessEmail,
+      notes: data.notes,
+      gstRate: data.gstRate,
+      materialMarkupEnabled,
+      materialMarkupPercentage
+    };
+    localStorage.setItem('lastInvoiceInputs', JSON.stringify(inputsToSave));
+  };
+
   // Material markup state for invoice (use saved values)
   const [materialMarkupEnabled, setMaterialMarkupEnabled] = useState(() => {
     const lastInputs = getLastInvoiceInputs();
@@ -128,27 +150,7 @@ cortespainter@gmail.com`;
     return currentNumber;
   };
 
-  // Memory system for remembering last inputs
-  const getLastInvoiceInputs = () => {
-    const saved = localStorage.getItem('lastInvoiceInputs');
-    return saved ? JSON.parse(saved) : null;
-  };
 
-  const saveInvoiceInputs = (data: any) => {
-    // Save only the form inputs, not project-specific data
-    const inputsToSave = {
-      businessName: data.businessName,
-      businessAddress: data.businessAddress,
-      businessCity: data.businessCity,
-      businessPostal: data.businessPostal,
-      businessEmail: data.businessEmail,
-      notes: data.notes,
-      gstRate: data.gstRate,
-      materialMarkupEnabled,
-      materialMarkupPercentage
-    };
-    localStorage.setItem('lastInvoiceInputs', JSON.stringify(inputsToSave));
-  };
 
   const [invoiceData, setInvoiceData] = useState(() => {
     const lastInputs = getLastInvoiceInputs();
