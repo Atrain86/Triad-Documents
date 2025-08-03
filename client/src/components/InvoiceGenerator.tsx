@@ -1229,8 +1229,8 @@ ${emailMessage}`;
 
             {/* Receipt Attachment Option */}
             {receipts.length > 0 && (
-              <div className="p-4 rounded-lg border" style={{ borderColor: paintBrainColors.purple, backgroundColor: darkTheme.cardBg }}>
-                <h3 className="text-xl font-semibold mb-3" style={{ color: paintBrainColors.purple }}>Receipts & Materials</h3>
+              <div className="p-4 rounded-lg border" style={{ borderColor: '#D4A574', backgroundColor: darkTheme.cardBg }}>
+                <h3 className="text-xl font-semibold mb-3" style={{ color: '#D4A574' }}>Receipts & Materials</h3>
                 
                 {/* Display receipt items with OCR data */}
                 <div className="space-y-3 mb-4">
