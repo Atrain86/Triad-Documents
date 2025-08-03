@@ -1641,7 +1641,7 @@ ${emailMessage}`;
                   type="email"
                   value={invoiceData.clientEmail}
                   onChange={(e) => setInvoiceData({ ...invoiceData, clientEmail: e.target.value })}
-                  className="bg-gray-800 border-gray-600 text-white"
+                  className="bg-gray-800 border-[#5050FF] text-white"
                 />
               </div>
               <div>
@@ -1652,7 +1652,7 @@ ${emailMessage}`;
                   type="text"
                   value={`Invoice #${invoiceData.invoiceNumber} - A-Frame Painting`}
                   readOnly
-                  className="bg-gray-800 border-gray-600 text-white"
+                  className="bg-gray-800 border-[#5050FF] text-white"
                 />
               </div>
             </div>
@@ -1666,7 +1666,7 @@ ${emailMessage}`;
                 value={emailMessage}
                 onChange={(e) => setEmailMessage(e.target.value)}
                 rows={12}
-                className="w-full font-mono text-sm bg-gray-800 border-gray-600 text-white"
+                className="w-full font-mono text-sm bg-gray-800 border-[#5050FF] text-white"
                 placeholder="Customize your email message..."
               />
             </div>
