@@ -1152,7 +1152,7 @@ ${emailMessage}`;
                             />
                           </label>
                         </div>
-                        <span className="text-xs" style={{ color: darkTheme.textSecondary }}>
+                        <span className="text-xs" style={{ color: materialMarkupEnabled ? '#E53E3E' : darkTheme.textSecondary }}>
                           Markup
                         </span>
                       </div>
@@ -1167,7 +1167,7 @@ ${emailMessage}`;
                             value={materialMarkupPercentage}
                             onChange={(e) => setMaterialMarkupPercentage(e.target.value)}
                             placeholder="Enter markup %"
-                            className="bg-gray-800 border-[#E53E3E] text-white pr-8"
+                            className="bg-gray-800 border-[#ECC94B] text-white pr-8"
                             min="0"
                             max="100"
                             step="0.1"

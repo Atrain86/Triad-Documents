@@ -814,7 +814,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                         />
                       </label>
                     </div>
-                    <span className="text-xs text-gray-400">
+                    <span className={`text-xs ${materialMarkupEnabled ? 'text-red-500' : 'text-gray-400'}`}>
                       Markup
                     </span>
                   </div>
