@@ -21,6 +21,7 @@ Logo sizing: Homepage logo should use h-14 size with -mt-2 and mb-8 spacing. All
 - **Build Tool**: Vite for fast development and optimized builds
 - **Form Handling**: React Hook Form with Zod validation
 - **Mobile Responsiveness**: Optimized for iPhone and other mobile devices with responsive layouts and touch-friendly controls.
+  - Note: Invoice generator scrolling behavior may appear different in Replit's preview window vs. full URL launch due to iframe constraints. Full URL provides the intended smooth experience.
 
 ### Backend Architecture
 - **Runtime**: Node.js with Express.js server framework
