@@ -100,12 +100,13 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   });
   const [showCalendar, setShowCalendar] = useState(false);
   
-  // Collapsible sections state
+  // Collapsible sections state - start collapsed for cleaner look
   const [expandedSections, setExpandedSections] = useState({
-    servicesLabor: true,
-    paintMaterials: true,
-    additionalServices: true,
-    travel: true
+    servicesLabor: false,
+    paintMaterials: false,
+    additionalLabor: false,
+    additionalServices: false,
+    travel: false
   });
 
   const toggleSection = (section: keyof typeof expandedSections) => {
@@ -983,10 +984,21 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
           {/* Additional Labor (Crew Members) */}
           <Card className="bg-gray-900 border-gray-700 transform-gpu will-change-contents">
-            <CardHeader>
-              <CardTitle className="text-[#4ECDC4]">Additional Labor</CardTitle>
+            <CardHeader 
+              className="cursor-pointer hover:bg-gray-800 transition-colors"
+              onClick={() => toggleSection('additionalLabor')}
+            >
+              <CardTitle className="text-[#4ECDC4] flex items-center justify-between">
+                Additional Labor
+                {expandedSections.additionalLabor ? (
+                  <ChevronDown className="w-5 h-5 text-[#4ECDC4]" />
+                ) : (
+                  <ChevronLeft className="w-5 h-5 text-[#4ECDC4]" />
+                )}
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            {expandedSections.additionalLabor && (
+              <CardContent className="space-y-4">
               <Button
                 onClick={addLabor}
                 size="sm"
@@ -1017,6 +1029,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                       onChange={(e) => updateAdditionalLabor(index, 'hours', e.target.value)}
                       placeholder="0"
                       className="bg-gray-700 border-[#4ECDC4] text-white"
+                      onWheel={(e) => e.currentTarget.blur()}
                     />
                   </div>
                   <div>
@@ -1028,6 +1041,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                       onChange={(e) => updateAdditionalLabor(index, 'rate', e.target.value)}
                       placeholder="0"
                       className="bg-gray-700 border-[#4ECDC4] text-white"
+                      onWheel={(e) => e.currentTarget.blur()}
                     />
                   </div>
                   <div className="flex flex-col justify-between">
@@ -1047,18 +1061,30 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                   </div>
                 </div>
               ))}
-              <div className="text-right text-lg font-semibold text-[#4ECDC4]">
-                Additional Labor Total: ${additionalLaborSubtotal.toFixed(2)}
-              </div>
-            </CardContent>
+                <div className="text-right text-lg font-semibold text-[#4ECDC4]">
+                  Additional Labor Total: ${additionalLaborSubtotal.toFixed(2)}
+                </div>
+              </CardContent>
+            )}
           </Card>
 
           {/* Additional Services */}
           <Card className="bg-gray-900 border-gray-700 transform-gpu will-change-contents">
-            <CardHeader>
-              <CardTitle className="text-[#DCDCAA]">Additional Services</CardTitle>
+            <CardHeader 
+              className="cursor-pointer hover:bg-gray-800 transition-colors"
+              onClick={() => toggleSection('additionalServices')}
+            >
+              <CardTitle className="text-[#DCDCAA] flex items-center justify-between">
+                Additional Services
+                {expandedSections.additionalServices ? (
+                  <ChevronDown className="w-5 h-5 text-[#DCDCAA]" />
+                ) : (
+                  <ChevronLeft className="w-5 h-5 text-[#DCDCAA]" />
+                )}
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            {expandedSections.additionalServices && (
+              <CardContent className="space-y-4">
               <Button
                 onClick={addAdditionalService}
                 size="sm"
@@ -1089,6 +1115,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                       onChange={(e) => updateAdditionalService(index, 'hours', e.target.value)}
                       placeholder="0"
                       className="bg-gray-700 border-[#DCDCAA] text-white"
+                      onWheel={(e) => e.currentTarget.blur()}
                     />
                   </div>
                   <div>
@@ -1100,6 +1127,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                       onChange={(e) => updateAdditionalService(index, 'rate', e.target.value)}
                       placeholder="0"
                       className="bg-gray-700 border-[#DCDCAA] text-white"
+                      onWheel={(e) => e.currentTarget.blur()}
                     />
                   </div>
                   <div className="flex flex-col justify-between">
@@ -1119,10 +1147,11 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                   </div>
                 </div>
               ))}
-              <div className="text-right text-lg font-semibold text-[#DCDCAA]">
-                Additional Services: ${additionalServicesSubtotal.toFixed(2)}
-              </div>
-            </CardContent>
+                <div className="text-right text-lg font-semibold text-[#DCDCAA]">
+                  Additional Services: ${additionalServicesSubtotal.toFixed(2)}
+                </div>
+              </CardContent>
+            )}
           </Card>
 
           {/* Summary */}
