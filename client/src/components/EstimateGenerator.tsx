@@ -790,7 +790,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
               
               {/* Material Markup Control */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                <div className="flex items-center justify-between p-3 rounded-lg border border-gray-600">
+                <div className="flex items-center justify-between p-3 rounded-lg border border-[#E53E3E]">
                   <div className="flex items-center space-x-3">
                     <span className="text-xs text-gray-400">
                       No Markup
