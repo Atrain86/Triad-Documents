@@ -1114,7 +1114,7 @@ ${emailMessage}`;
                       type="number"
                       value={invoiceData.invoiceNumber}
                       onChange={(e) => setInvoiceData({...invoiceData, invoiceNumber: parseInt(e.target.value)})}
-                      className="bg-gray-800 border-[#FFEE32] text-white"
+                      className="bg-gray-800 border-[#ECC94B] text-white"
                     />
                   </div>
                   <div>
@@ -1123,12 +1123,12 @@ ${emailMessage}`;
                       type="date"
                       value={invoiceData.date}
                       onChange={(e) => setInvoiceData({...invoiceData, date: e.target.value})}
-                      className="bg-gray-800 border-[#FFEE32] text-white"
+                      className="bg-gray-800 border-[#ECC94B] text-white"
                     />
                   </div>
                   {/* Material Markup Control */}
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 rounded-lg border" style={{ borderColor: darkTheme.border }}>
+                    <div className="flex items-center justify-between p-3 rounded-lg border" style={{ borderColor: '#ECC94B' }}>
                       <div className="flex items-center space-x-3">
                         <span className="text-xs" style={{ color: darkTheme.textSecondary }}>
                           No Markup
@@ -1144,7 +1144,7 @@ ${emailMessage}`;
                           <label 
                             htmlFor="invoice-material-markup-toggle" 
                             className={`block w-12 h-6 rounded-full cursor-pointer transition-colors ${
-                              materialMarkupEnabled ? 'bg-[#6A9955]' : 'bg-gray-600'
+                              materialMarkupEnabled ? 'bg-[#8B5FBF]' : 'bg-gray-600'
                             }`}
                           >
                             <span 
@@ -1169,7 +1169,7 @@ ${emailMessage}`;
                             value={materialMarkupPercentage}
                             onChange={(e) => setMaterialMarkupPercentage(e.target.value)}
                             placeholder="Enter markup %"
-                            className="bg-gray-800 border-[#FFEE32] text-white pr-8"
+                            className="bg-gray-800 border-[#ECC94B] text-white pr-8"
                             min="0"
                             max="100"
                             step="0.1"
@@ -1227,8 +1227,8 @@ ${emailMessage}`;
             </div>
 
             {/* Email Message */}
-            <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: '#5050FF', backgroundColor: darkTheme.cardBg }}>
-              <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.blue }}>
+            <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: '#3182CE', backgroundColor: darkTheme.cardBg }}>
+              <h2 className="text-xl font-semibold flex items-center" style={{ color: '#3182CE' }}>
                 <Send className="mr-2 h-5 w-5" />
                 Email Message
               </h2>
@@ -1239,30 +1239,30 @@ ${emailMessage}`;
                 <Textarea
                   value={invoiceData.emailMessage}
                   onChange={(e) => setInvoiceData({...invoiceData, emailMessage: e.target.value})}
-                  className="bg-gray-800 border-[#5050FF] text-white min-h-20"
+                  className="bg-gray-800 border-[#3182CE] text-white min-h-20"
                   placeholder="Enter your custom message..."
                 />
               </div>
             </div>
 
             {/* Services & Labor - Daily Hours Layout */}
-            <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: paintBrainColors.green, backgroundColor: darkTheme.cardBg }}>
-              <h2 className="text-xl font-semibold" style={{ color: paintBrainColors.green }}>Services & Labor</h2>
+            <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: '#3182CE', backgroundColor: darkTheme.cardBg }}>
+              <h2 className="text-xl font-semibold" style={{ color: '#3182CE' }}>Services & Labor</h2>
               
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse" style={{ borderColor: darkTheme.border }}>
                   <thead>
                     <tr style={{ backgroundColor: darkTheme.inputBg }}>
-                      <th className="border p-3 text-left" style={{ borderColor: paintBrainColors.green, color: paintBrainColors.green }}>Date</th>
-                      <th className="border p-3 text-left" style={{ borderColor: paintBrainColors.green, color: paintBrainColors.green }}>Description</th>
-                      <th className="border p-3 text-center" style={{ borderColor: paintBrainColors.green, color: paintBrainColors.green }}>Hours</th>
-                      <th className="border p-3 text-right" style={{ borderColor: paintBrainColors.green, color: paintBrainColors.green }}>Total</th>
+                      <th className="border p-3 text-left" style={{ borderColor: '#3182CE', color: '#3182CE' }}>Date</th>
+                      <th className="border p-3 text-left" style={{ borderColor: '#3182CE', color: '#3182CE' }}>Description</th>
+                      <th className="border p-3 text-center" style={{ borderColor: '#3182CE', color: '#3182CE' }}>Hours</th>
+                      <th className="border p-3 text-right" style={{ borderColor: '#3182CE', color: '#3182CE' }}>Total</th>
                     </tr>
                   </thead>
                   <tbody>
                     {dailyHours.map((hourEntry, index) => (
                       <tr key={index}>
-                        <td className="border p-3" style={{ borderColor: paintBrainColors.green, color: darkTheme.text }}>
+                        <td className="border p-3" style={{ borderColor: '#3182CE', color: darkTheme.text }}>
                           {(() => {
                             // Parse date string directly to avoid timezone conversion
                             const dateStr = hourEntry.date.toString();
@@ -1276,13 +1276,13 @@ ${emailMessage}`;
                             });
                           })()}
                         </td>
-                        <td className="border p-3" style={{ borderColor: paintBrainColors.green, color: darkTheme.text }}>
+                        <td className="border p-3" style={{ borderColor: '#3182CE', color: darkTheme.text }}>
                           {hourEntry.description || 'Painting'}
                         </td>
-                        <td className="border p-3 text-center" style={{ borderColor: paintBrainColors.green, color: darkTheme.text }}>
+                        <td className="border p-3 text-center" style={{ borderColor: '#3182CE', color: darkTheme.text }}>
                           {hourEntry.hours}
                         </td>
-                        <td className="border p-3 text-right font-semibold" style={{ borderColor: paintBrainColors.green, color: darkTheme.text }}>
+                        <td className="border p-3 text-right font-semibold" style={{ borderColor: '#3182CE', color: darkTheme.text }}>
                           ${(hourEntry.hours * (project.hourlyRate || 60)).toFixed(2)}
                         </td>
                       </tr>
@@ -1294,13 +1294,13 @@ ${emailMessage}`;
 
             {/* Receipt Attachment Option */}
             {receipts.length > 0 && (
-              <div className="p-4 rounded-lg border" style={{ borderColor: '#D4A574', backgroundColor: darkTheme.cardBg }}>
-                <h3 className="text-xl font-semibold mb-3" style={{ color: '#D4A574' }}>Receipts & Materials</h3>
+              <div className="p-4 rounded-lg border" style={{ borderColor: '#8B5FBF', backgroundColor: darkTheme.cardBg }}>
+                <h3 className="text-xl font-semibold mb-3" style={{ color: '#8B5FBF' }}>Receipts & Materials</h3>
                 
                 {/* Display receipt items with OCR data */}
                 <div className="space-y-3 mb-4">
                   {receipts.map((receipt) => (
-                    <div key={receipt.id} className="border rounded p-2" style={{ borderColor: '#D4A574' }}>
+                    <div key={receipt.id} className="border rounded p-2" style={{ borderColor: '#8B5FBF' }}>
                       <div className="flex justify-between items-center text-sm mb-1">
                         <span className="font-medium" style={{ color: darkTheme.text }}>{receipt.vendor}</span>
                         <span className="font-semibold" style={{ color: darkTheme.text }}>${receipt.amount}</span>
@@ -1633,7 +1633,7 @@ ${emailMessage}`;
                   type="email"
                   value={invoiceData.clientEmail}
                   onChange={(e) => setInvoiceData({ ...invoiceData, clientEmail: e.target.value })}
-                  className="bg-gray-800 border-[#5050FF] text-white"
+                  className="bg-gray-800 border-[#3182CE] text-white"
                 />
               </div>
               <div>
@@ -1644,7 +1644,7 @@ ${emailMessage}`;
                   type="text"
                   value={`Invoice #${invoiceData.invoiceNumber} - A-Frame Painting`}
                   readOnly
-                  className="bg-gray-800 border-[#5050FF] text-white"
+                  className="bg-gray-800 border-[#3182CE] text-white"
                 />
               </div>
             </div>
@@ -1658,7 +1658,7 @@ ${emailMessage}`;
                 value={emailMessage}
                 onChange={(e) => setEmailMessage(e.target.value)}
                 rows={12}
-                className="w-full font-mono text-sm bg-gray-800 border-[#5050FF] text-white"
+                className="w-full font-mono text-sm bg-gray-800 border-[#3182CE] text-white"
                 placeholder="Customize your email message..."
               />
             </div>
