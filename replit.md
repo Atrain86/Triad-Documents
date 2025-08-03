@@ -8,6 +8,7 @@ Preferred communication style: Simple, everyday language.
 Brand name: A-Frame Painting
 Theme preference: Dark mode by default
 Logo: Custom A-frame house structure with paint brush accent
+Logo sizing: Homepage logo should use h-14 size with -mt-2 and mb-8 spacing. All logos in library should maintain this same size standard to avoid visual conflicts when switching between logos.
 
 ## System Architecture
 
