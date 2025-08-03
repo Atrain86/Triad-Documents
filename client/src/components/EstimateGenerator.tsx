@@ -1267,7 +1267,9 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           </Card>
 
           {/* Action Toggle with Dynamic Label */}
-          <div className="flex flex-col items-center gap-4 mb-6 p-6 bg-black rounded-lg border border-gray-600">
+          <div className="flex flex-col items-center gap-4 mb-6 p-6 bg-black rounded-lg border border-gray-600" style={{ 
+            borderColor: actionMode === 'email' ? '#EA580C' : '#8B5FBF' 
+          }}>
             {/* Toggle Switch */}
             <button
               onClick={() => setActionMode(actionMode === 'email' ? 'download' : 'email')}
