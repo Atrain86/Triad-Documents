@@ -63,13 +63,21 @@ export default function InvoiceGenerator({
   const [emailMessage, setEmailMessage] = useState('');
   const [actionMode, setActionMode] = useState<'download' | 'email'>('email');
   
-  // Memory system functions (defined early to avoid hoisting issues)
+  // Memory system functions (defined early)
   const getLastInvoiceInputs = () => {
     const saved = localStorage.getItem('lastInvoiceInputs');
     return saved ? JSON.parse(saved) : null;
   };
 
-  const saveInvoiceInputs = (data: any) => {
+  // Get saved inputs once at the start
+  const savedInputs = getLastInvoiceInputs();
+  
+  // Material markup state for invoice (use saved values)
+  const [materialMarkupEnabled, setMaterialMarkupEnabled] = useState(savedInputs?.materialMarkupEnabled || false);
+  const [materialMarkupPercentage, setMaterialMarkupPercentage] = useState(savedInputs?.materialMarkupPercentage || '');
+
+  // Save function that can access current state
+  const saveInvoiceInputs = (data: any, markupEnabled: boolean, markupPercentage: string) => {
     // Save only the form inputs, not project-specific data
     const inputsToSave = {
       businessName: data.businessName,
@@ -79,21 +87,11 @@ export default function InvoiceGenerator({
       businessEmail: data.businessEmail,
       notes: data.notes,
       gstRate: data.gstRate,
-      materialMarkupEnabled,
-      materialMarkupPercentage
+      materialMarkupEnabled: markupEnabled,
+      materialMarkupPercentage: markupPercentage
     };
     localStorage.setItem('lastInvoiceInputs', JSON.stringify(inputsToSave));
   };
-
-  // Material markup state for invoice (use saved values)
-  const [materialMarkupEnabled, setMaterialMarkupEnabled] = useState(() => {
-    const lastInputs = getLastInvoiceInputs();
-    return lastInputs?.materialMarkupEnabled || false;
-  });
-  const [materialMarkupPercentage, setMaterialMarkupPercentage] = useState(() => {
-    const lastInputs = getLastInvoiceInputs();
-    return lastInputs?.materialMarkupPercentage || '';
-  });
   
   // Initialize email message
   React.useEffect(() => {
@@ -130,7 +128,7 @@ cortespainter@gmail.com`;
   // Save inputs whenever they change
   React.useEffect(() => {
     if (invoiceData.businessName) { // Only save if there's actual data
-      saveInvoiceInputs(invoiceData);
+      saveInvoiceInputs(invoiceData, materialMarkupEnabled, materialMarkupPercentage);
     }
   }, [invoiceData.businessName, invoiceData.businessAddress, invoiceData.businessCity, 
       invoiceData.businessPostal, invoiceData.businessEmail, invoiceData.notes, 
@@ -153,17 +151,16 @@ cortespainter@gmail.com`;
 
 
   const [invoiceData, setInvoiceData] = useState(() => {
-    const lastInputs = getLastInvoiceInputs();
     return {
       invoiceNumber: getNextInvoiceNumber(),
       date: new Date().toISOString().split('T')[0],
       
       // Business info (use saved values if available)
-      businessName: lastInputs?.businessName || 'A-Frame Painting',
-      businessAddress: lastInputs?.businessAddress || '884 Hayes Rd',
-      businessCity: lastInputs?.businessCity || 'Manson\'s Landing, BC',
-      businessPostal: lastInputs?.businessPostal || 'V0P1K0',
-      businessEmail: lastInputs?.businessEmail || 'cortespainter@gmail.com',
+      businessName: savedInputs?.businessName || 'A-Frame Painting',
+      businessAddress: savedInputs?.businessAddress || '884 Hayes Rd',
+      businessCity: savedInputs?.businessCity || 'Manson\'s Landing, BC',
+      businessPostal: savedInputs?.businessPostal || 'V0P1K0',
+      businessEmail: savedInputs?.businessEmail || 'cortespainter@gmail.com',
       businessLogo: currentLogo?.url || '/aframe-logo.png', // Dynamic business logo
     
     // Client info (populated from project)
@@ -190,9 +187,9 @@ cortespainter@gmail.com`;
     }],
       
       // Notes and payment (use saved values if available)
-      notes: lastInputs?.notes || 'Please send e-transfer to cortespainter@gmail.com',
+      notes: savedInputs?.notes || 'Please send e-transfer to cortespainter@gmail.com',
       emailMessage: 'Please find attached your invoice for painting services.',
-      gstRate: lastInputs?.gstRate || 0.05, // 5% GST on labor services only
+      gstRate: savedInputs?.gstRate || 0.05, // 5% GST on labor services only
       suppliesCost: 0,
       selectedReceipts: new Set<number>()
     };
@@ -808,7 +805,7 @@ cortespainter@gmail.com
     }
 
     // Save current inputs before sending
-    saveInvoiceInputs(invoiceData);
+    saveInvoiceInputs(invoiceData, materialMarkupEnabled, materialMarkupPercentage);
 
     try {
       // Show preparing message
