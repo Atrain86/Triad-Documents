@@ -63,9 +63,15 @@ export default function InvoiceGenerator({
   const [emailMessage, setEmailMessage] = useState('');
   const [actionMode, setActionMode] = useState<'download' | 'email'>('email');
   
-  // Material markup state for invoice
-  const [materialMarkupEnabled, setMaterialMarkupEnabled] = useState(false);
-  const [materialMarkupPercentage, setMaterialMarkupPercentage] = useState('');
+  // Material markup state for invoice (use saved values)
+  const [materialMarkupEnabled, setMaterialMarkupEnabled] = useState(() => {
+    const lastInputs = getLastInvoiceInputs();
+    return lastInputs?.materialMarkupEnabled || false;
+  });
+  const [materialMarkupPercentage, setMaterialMarkupPercentage] = useState(() => {
+    const lastInputs = getLastInvoiceInputs();
+    return lastInputs?.materialMarkupPercentage || '';
+  });
   
   // Initialize email message
   React.useEffect(() => {
@@ -98,6 +104,15 @@ cortespainter@gmail.com`;
     window.addEventListener('storage', handleVisibilityChange);
     return () => window.removeEventListener('storage', handleVisibilityChange);
   }, []);
+
+  // Save inputs whenever they change
+  React.useEffect(() => {
+    if (invoiceData.businessName) { // Only save if there's actual data
+      saveInvoiceInputs(invoiceData);
+    }
+  }, [invoiceData.businessName, invoiceData.businessAddress, invoiceData.businessCity, 
+      invoiceData.businessPostal, invoiceData.businessEmail, invoiceData.notes, 
+      invoiceData.gstRate, materialMarkupEnabled, materialMarkupPercentage]);
   
   // Get next invoice number from localStorage
   const getNextInvoiceNumber = () => {
@@ -113,17 +128,41 @@ cortespainter@gmail.com`;
     return currentNumber;
   };
 
-  const [invoiceData, setInvoiceData] = useState({
-    invoiceNumber: getNextInvoiceNumber(),
-    date: new Date().toISOString().split('T')[0],
-    
-    // Business info (your details)
-    businessName: 'A-Frame Painting',
-    businessAddress: '884 Hayes Rd',
-    businessCity: 'Manson\'s Landing, BC',
-    businessPostal: 'V0P1K0',
-    businessEmail: 'cortespainter@gmail.com',
-    businessLogo: currentLogo?.url || '/aframe-logo.png', // Dynamic business logo
+  // Memory system for remembering last inputs
+  const getLastInvoiceInputs = () => {
+    const saved = localStorage.getItem('lastInvoiceInputs');
+    return saved ? JSON.parse(saved) : null;
+  };
+
+  const saveInvoiceInputs = (data: any) => {
+    // Save only the form inputs, not project-specific data
+    const inputsToSave = {
+      businessName: data.businessName,
+      businessAddress: data.businessAddress,
+      businessCity: data.businessCity,
+      businessPostal: data.businessPostal,
+      businessEmail: data.businessEmail,
+      notes: data.notes,
+      gstRate: data.gstRate,
+      materialMarkupEnabled,
+      materialMarkupPercentage
+    };
+    localStorage.setItem('lastInvoiceInputs', JSON.stringify(inputsToSave));
+  };
+
+  const [invoiceData, setInvoiceData] = useState(() => {
+    const lastInputs = getLastInvoiceInputs();
+    return {
+      invoiceNumber: getNextInvoiceNumber(),
+      date: new Date().toISOString().split('T')[0],
+      
+      // Business info (use saved values if available)
+      businessName: lastInputs?.businessName || 'A-Frame Painting',
+      businessAddress: lastInputs?.businessAddress || '884 Hayes Rd',
+      businessCity: lastInputs?.businessCity || 'Manson\'s Landing, BC',
+      businessPostal: lastInputs?.businessPostal || 'V0P1K0',
+      businessEmail: lastInputs?.businessEmail || 'cortespainter@gmail.com',
+      businessLogo: currentLogo?.url || '/aframe-logo.png', // Dynamic business logo
     
     // Client info (populated from project)
     clientName: project.clientName || '',
@@ -147,13 +186,14 @@ cortespainter@gmail.com`;
       detail: '',
       total: 0
     }],
-    
-    // Notes and payment
-    notes: 'Please send e-transfer to cortespainter@gmail.com',
-    emailMessage: 'Please find attached your invoice for painting services.',
-    gstRate: 0.05, // 5% GST on labor services only
-    suppliesCost: 0,
-    selectedReceipts: new Set<number>()
+      
+      // Notes and payment (use saved values if available)
+      notes: lastInputs?.notes || 'Please send e-transfer to cortespainter@gmail.com',
+      emailMessage: 'Please find attached your invoice for painting services.',
+      gstRate: lastInputs?.gstRate || 0.05, // 5% GST on labor services only
+      suppliesCost: 0,
+      selectedReceipts: new Set<number>()
+    };
   });
 
   // Paint Brain colors for invoice generator
@@ -165,7 +205,11 @@ cortespainter@gmail.com`;
     danger: '#ef4444',         // Red for delete actions
     background: '#0f172a',     // Dark navy background
     text: '#f1f5f9',          // Light text
-    textLight: '#94a3b8'      // Muted text
+    textLight: '#94a3b8',      // Muted text
+    red: '#E03E3E',           // Paint Brain red
+    yellow: '#F1C40F',        // Paint Brain yellow
+    blue: '#3498DB',          // Paint Brain blue
+    purple: '#8B5FBF'         // Paint Brain purple
   };
 
   // Dark mode colors for the app interface - black enough to hide logo borders
@@ -761,6 +805,9 @@ cortespainter@gmail.com
       return;
     }
 
+    // Save current inputs before sending
+    saveInvoiceInputs(invoiceData);
+
     try {
       // Show preparing message
       toast({
@@ -1021,6 +1068,7 @@ ${emailMessage}`;
                     onChange={(e) => setInvoiceData({...invoiceData, businessName: e.target.value})}
                     className="bg-gray-800 border-[#E03E3E] text-white"
                     placeholder="Business Name"
+                    autoFocus={false}
                   />
                   <Input
                     value={invoiceData.businessAddress}
