@@ -368,6 +368,8 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
       });
     },
     onSuccess: () => {
+      // Reset logo scale to 100% when switching logos
+      updateLogoScale(100);
       queryClient.invalidateQueries({ queryKey: [`/api/users/1/logo`] });
       setLogoMessage('Logo selected successfully!');
       setTimeout(() => setLogoMessage(''), 3000);
