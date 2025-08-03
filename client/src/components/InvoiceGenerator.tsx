@@ -1162,7 +1162,7 @@ ${emailMessage}`;
             </div>
 
             {/* Email Message */}
-            <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: paintBrainColors.blue, backgroundColor: darkTheme.cardBg }}>
+            <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: '#5050FF', backgroundColor: darkTheme.cardBg }}>
               <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.blue }}>
                 <Send className="mr-2 h-5 w-5" />
                 Email Message
