@@ -72,6 +72,21 @@
     @apply antialiased bg-background text-foreground;
   }
 
+  /* Smooth scrolling improvements */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  * {
+    scroll-behavior: smooth;
+  }
+  
+  /* Reduce scrolling jitter in dialogs */
+  [data-radix-scroll-area-viewport] {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
   /* Hide number input spinners/arrows */
   input[type="number"]::-webkit-outer-spin-button,
   input[type="number"]::-webkit-inner-spin-button {
