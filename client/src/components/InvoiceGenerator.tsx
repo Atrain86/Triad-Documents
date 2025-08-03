@@ -993,21 +993,21 @@ ${emailMessage}`;
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto p-0 scroll-smooth" style={{ backgroundColor: darkTheme.background, scrollBehavior: 'smooth' }}>
+      <DialogContent className="max-w-7xl h-[90vh] overflow-hidden p-0" style={{ backgroundColor: darkTheme.background }}>
         <DialogHeader className="sr-only">
           <DialogTitle>Invoice Generator</DialogTitle>
           <DialogDescription>Create and send professional painting service invoices</DialogDescription>
         </DialogHeader>
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-center p-6 border-b" style={{ backgroundColor: darkTheme.headerBg, borderColor: darkTheme.border }}>
+          <div className="flex-shrink-0 flex items-center justify-center p-6 border-b" style={{ backgroundColor: darkTheme.headerBg, borderColor: darkTheme.border }}>
             <div className="text-center">
               <h1 className="text-2xl font-bold" style={{ color: darkTheme.text }}>Invoice Generator</h1>
               <p style={{ color: darkTheme.textSecondary }}>Professional painting services</p>
             </div>
           </div>
 
-          <div className="flex-1 p-6 space-y-6" style={{ backgroundColor: darkTheme.background }}>
+          <div className="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth" style={{ backgroundColor: darkTheme.background }}>
             {/* Business & Invoice Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: paintBrainColors.red, backgroundColor: darkTheme.cardBg }}>
@@ -1330,8 +1330,11 @@ ${emailMessage}`;
 
 
 
-            {/* Action Buttons */}
-            <div className="flex flex-wrap gap-4 pt-6 border-t justify-between items-end" style={{ borderColor: darkTheme.border }}>
+          </div>
+          
+          {/* Fixed Footer with Action Buttons */}
+          <div className="flex-shrink-0 p-6 border-t" style={{ backgroundColor: darkTheme.background, borderColor: darkTheme.border }}>
+            <div className="flex flex-wrap gap-4 justify-between items-end">
               <Button variant="outline" onClick={onClose} className="flex-1">Cancel</Button>
               <div className="flex flex-col items-center gap-2">
                 {/* Toggle Switch - positioned over send email button */}

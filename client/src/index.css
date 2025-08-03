@@ -86,6 +86,27 @@
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
   }
+  
+  /* Prevent mobile viewport shifts on input focus */
+  input, textarea, select {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: text;
+    user-select: text;
+  }
+  
+  /* Stabilize dialog content during input interactions */
+  [data-radix-dialog-content] {
+    will-change: auto;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
+  
+  /* Smooth focus transitions */
+  input:focus, textarea:focus, select:focus {
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
 
   /* Hide number input spinners/arrows */
   input[type="number"]::-webkit-outer-spin-button,
