@@ -1937,14 +1937,19 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       <div className="space-y-4">
         {/* Toggle Switch */}
         <div className="flex justify-center">
-          <div className="relative bg-gray-700 rounded-full p-1 flex items-center w-64">
+          <div 
+            className="relative bg-gray-700 rounded-full p-1 flex items-center w-64 border-2 transition-colors duration-300"
+            style={{
+              borderColor: actionMode === 'invoice' ? '#EA580C' : paintBrainColors.purple
+            }}
+          >
             {/* Slider Background */}
             <div 
               className="absolute h-10 rounded-full transition-all duration-300 ease-in-out z-10"
               style={{
                 backgroundColor: actionMode === 'invoice' ? '#EA580C' : paintBrainColors.purple,
-                width: '128px',
-                left: actionMode === 'invoice' ? '4px' : '128px'
+                width: '124px',
+                left: actionMode === 'invoice' ? '6px' : '134px'
               }}
             />
             
@@ -1979,7 +1984,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
               }
             }}
             className="py-3 px-4 text-sm font-semibold text-white hover:opacity-90"
-            style={{ backgroundColor: actionMode === 'estimate' ? paintBrainColors.purple : paintBrainColors.green }}
+            style={{ backgroundColor: actionMode === 'estimate' ? paintBrainColors.purple : '#EA580C' }}
           >
           Generate
           </Button>
