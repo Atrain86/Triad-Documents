@@ -795,7 +795,9 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                 <div className="flex items-center justify-between p-3 rounded-lg border border-gray-600">
                   <div className="flex items-center space-x-3">
-                    <label className="text-sm font-medium text-white">Material Markup</label>
+                    <span className="text-xs text-gray-400">
+                      No Markup
+                    </span>
                     <div className="relative inline-block w-12 h-6">
                       <input
                         type="checkbox"
@@ -818,7 +820,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                       </label>
                     </div>
                     <span className="text-xs text-gray-400">
-                      {materialMarkupEnabled ? 'Markup' : 'No Markup'}
+                      Markup
                     </span>
                   </div>
                 </div>

@@ -1065,7 +1065,9 @@ ${emailMessage}`;
                   <div className="space-y-3">
                     <div className="flex items-center justify-between p-3 rounded-lg border" style={{ borderColor: darkTheme.border }}>
                       <div className="flex items-center space-x-3">
-                        <label className="text-sm font-medium" style={{ color: darkTheme.text }}>Material Markup</label>
+                        <span className="text-xs" style={{ color: darkTheme.textSecondary }}>
+                          No Markup
+                        </span>
                         <div className="relative inline-block w-12 h-6">
                           <input
                             type="checkbox"
@@ -1088,7 +1090,7 @@ ${emailMessage}`;
                           </label>
                         </div>
                         <span className="text-xs" style={{ color: darkTheme.textSecondary }}>
-                          {materialMarkupEnabled ? 'Markup' : 'No Markup'}
+                          Markup
                         </span>
                       </div>
                     </div>
