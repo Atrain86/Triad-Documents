@@ -1783,10 +1783,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
                         {/* Hours Summary at Bottom */}
                         {dailyHours.length > 0 && (
-                          <div className="mt-4 p-3 bg-green-900/20 rounded-lg border border-green-700 ml-2">
+                          <div className="mt-4 p-3 bg-green-900/20 rounded-lg border border-green-700 mr-4">
                             <div className="flex items-center justify-between">
                               <span className="font-semibold text-green-300 text-sm">
-                                {Math.round(dailyHours.reduce((sum, h) => sum + (typeof h.hours === 'number' ? h.hours : parseFloat(h.hours) || 0), 0))} hrs • ${(dailyHours.reduce((sum, h) => sum + ((typeof h.hours === 'number' ? h.hours : parseFloat(h.hours) || 0) * (project?.hourlyRate || 60)), 0)).toLocaleString()}
+                                {Math.round(dailyHours.reduce((sum, h) => sum + (typeof h.hours === 'number' ? h.hours : parseFloat(h.hours) || 0), 0))} hrs • ${(dailyHours.reduce((sum, h) => sum + ((typeof h.hours === 'number' ? h.hours : parseFloat(h.hours) || 0) * (h.hourlyRate || project?.hourlyRate || 60)), 0)).toLocaleString()}
                               </span>
                             </div>
                           </div>
