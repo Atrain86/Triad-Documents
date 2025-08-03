@@ -104,14 +104,19 @@ cortespainter@gmail.com`;
 
   // Prevent text auto-selection when dialog opens
   React.useEffect(() => {
-    if (isOpen && firstInputRef.current) {
-      // Clear any existing selection and move cursor to end
-      setTimeout(() => {
-        if (firstInputRef.current) {
-          firstInputRef.current.blur();
-          firstInputRef.current.setSelectionRange(0, 0);
-        }
-      }, 100);
+    if (isOpen) {
+      // Use multiple timeouts to ensure we catch all auto-selection attempts
+      const timeouts = [50, 150, 300].map(delay => 
+        setTimeout(() => {
+          if (firstInputRef.current) {
+            firstInputRef.current.setSelectionRange(0, 0);
+            // Also remove focus to prevent keyboard from auto-selecting
+            firstInputRef.current.blur();
+          }
+        }, delay)
+      );
+      
+      return () => timeouts.forEach(clearTimeout);
     }
   }, [isOpen]);
 
@@ -1051,6 +1056,25 @@ ${emailMessage}`;
                     className="bg-gray-800 border-[#E03E3E] text-white"
                     placeholder="Business Name"
                     autoFocus={false}
+                    onFocus={(e) => {
+                      // Prevent text selection on focus - use setTimeout to override browser default
+                      setTimeout(() => {
+                        e.target.setSelectionRange(0, 0);
+                      }, 0);
+                    }}
+                    onMouseUp={(e) => {
+                      // Prevent text selection on mouse/touch interaction
+                      e.preventDefault();
+                      setTimeout(() => {
+                        e.target.setSelectionRange(0, 0);
+                      }, 0);
+                    }}
+                    onTouchStart={(e) => {
+                      // Prevent text selection on touch devices
+                      setTimeout(() => {
+                        e.target.setSelectionRange(0, 0);
+                      }, 0);
+                    }}
                   />
                   <Input
                     value={invoiceData.businessAddress}
