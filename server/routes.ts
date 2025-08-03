@@ -6,7 +6,7 @@ import { db } from "./db";
 import { insertProjectSchema, insertPhotoSchema, insertReceiptSchema, insertDailyHoursSchema, updateDailyHoursSchema, insertToolsChecklistSchema, insertUserSchema, insertLogoLibrarySchema, projects, photos, receipts, dailyHours, toolsChecklist, users, tokenUsage, logoLibrary } from "@shared/schema";
 import { sql, eq, desc } from "drizzle-orm";
 import { hashPassword, verifyPassword, generateToken, verifyToken } from "./auth";
-import { sendInvoiceEmailWithReceipts, sendEstimateEmail } from "./email";
+import { sendInvoiceEmailWithReceipts, sendEstimateEmail, testEmailConnection, sendEmail } from "./email";
 import { gmailAuthService } from "./gmailAuth";
 import multer from "multer";
 import path from "path";
@@ -734,6 +734,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
 
+
+  // Test email connection endpoint
+  app.get('/api/test-email-connection', async (req, res) => {
+    try {
+      console.log('Testing Gmail SMTP connection...');
+      const isConnected = await testEmailConnection();
+      
+      if (isConnected) {
+        res.json({ success: true, message: 'Gmail SMTP connection verified successfully' });
+      } else {
+        res.status(500).json({ success: false, error: 'Gmail SMTP connection failed' });
+      }
+    } catch (error) {
+      console.error('Error testing email connection:', error);
+      res.status(500).json({ success: false, error: 'Failed to test email connection' });
+    }
+  });
+
+  // Send test email endpoint
+  app.post('/api/send-test-email', async (req, res) => {
+    try {
+      const { to } = req.body;
+      
+      if (!to) {
+        return res.status(400).json({ error: 'Recipient email is required' });
+      }
+
+      // Send a simple test email
+      const emailSent = await sendEmail({
+        to,
+        subject: 'Test Email from A-Frame Painting System',
+        text: 'This is a test email to verify the email system is working correctly.',
+        html: `
+          <h2>Test Email</h2>
+          <p>This is a test email to verify the A-Frame Painting email system is working correctly.</p>
+          <p>If you receive this email, the system is functioning properly.</p>
+          <p>Sent at: ${new Date().toLocaleString()}</p>
+        `
+      });
+      
+      if (emailSent) {
+        res.json({ success: true, message: 'Test email sent successfully' });
+      } else {
+        res.status(500).json({ success: false, error: 'Failed to send test email' });
+      }
+    } catch (error) {
+      console.error('Error sending test email:', error);
+      res.status(500).json({ success: false, error: 'Failed to send test email' });
+    }
+  });
 
   // Basic email route for simple communication
   app.post('/api/send-basic-email', async (req, res) => {

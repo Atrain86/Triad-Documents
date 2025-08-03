@@ -18,8 +18,27 @@ const createTransporter = () => {
       user: process.env.GMAIL_EMAIL,
       pass: process.env.GMAIL_APP_PASSWORD,
     },
+    // Add explicit configuration for better reliability
+    secure: true,
+    port: 465,
+    logger: true,
+    debug: false
   });
 };
+
+// Test Gmail SMTP connection
+export async function testEmailConnection(): Promise<boolean> {
+  try {
+    const transporter = createTransporter();
+    console.log("Testing Gmail SMTP connection...");
+    await transporter.verify();
+    console.log("✅ Gmail SMTP connection verified successfully");
+    return true;
+  } catch (error) {
+    console.error("❌ Gmail SMTP connection failed:", error);
+    return false;
+  }
+}
 
 interface EmailOptions {
   to: string;
@@ -119,8 +138,22 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
     console.log("Email info:", {
       messageId: info.messageId,
       accepted: info.accepted,
-      rejected: info.rejected
+      rejected: info.rejected,
+      envelope: info.envelope
     });
+
+    // Check if email was actually accepted
+    if (info.rejected && info.rejected.length > 0) {
+      console.error("Email was rejected by server:", info.rejected);
+      return false;
+    }
+
+    if (!info.accepted || info.accepted.length === 0) {
+      console.error("Email was not accepted by server");
+      return false;
+    }
+
+    console.log("✅ Email successfully delivered to mail server");
     return true;
   } catch (error) {
     console.error("Email sending failed:", error);
@@ -390,7 +423,8 @@ cortespainter@gmail.com`;
 
   console.log('Received PDF buffer, size:', pdfBuffer.length, 'bytes');
 
-  return sendEmailWithSendGrid({
+  // Use direct nodemailer instead of SendGrid for better reliability
+  return sendEmail({
     to: recipientEmail,
     subject,
     text,
