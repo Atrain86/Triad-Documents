@@ -1783,19 +1783,11 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
                         {/* Hours Summary at Bottom */}
                         {dailyHours.length > 0 && (
-                          <div className="mt-4 p-4 bg-green-900/20 rounded-lg border border-green-700">
-                            <div className="flex items-center justify-between mb-3">
-                              <span className="text-2xl font-bold text-green-300">${project?.hourlyRate || 60}/hr</span>
-                            </div>
-                            <div className="pt-2 border-t border-green-700">
-                              <div className="flex items-center justify-between w-full">
-                                <span className="font-semibold text-green-300 text-sm sm:text-base">
-                                  {dailyHours.reduce((sum, h) => sum + (typeof h.hours === 'number' ? h.hours : parseFloat(h.hours) || 0), 0).toFixed(1)} hours
-                                </span>
-                                <span className="text-sm sm:text-base text-green-400 font-bold">
-                                  ${(dailyHours.reduce((sum, h) => sum + ((typeof h.hours === 'number' ? h.hours : parseFloat(h.hours) || 0) * (project?.hourlyRate || 60)), 0)).toLocaleString()}
-                                </span>
-                              </div>
+                          <div className="mt-4 p-3 bg-green-900/20 rounded-lg border border-green-700 ml-2">
+                            <div className="flex items-center justify-between">
+                              <span className="font-semibold text-green-300 text-sm">
+                                {Math.round(dailyHours.reduce((sum, h) => sum + (typeof h.hours === 'number' ? h.hours : parseFloat(h.hours) || 0), 0))} hrs • ${(dailyHours.reduce((sum, h) => sum + ((typeof h.hours === 'number' ? h.hours : parseFloat(h.hours) || 0) * (project?.hourlyRate || 60)), 0)).toLocaleString()}
+                              </span>
                             </div>
                           </div>
                         )}
