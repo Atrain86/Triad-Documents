@@ -1386,67 +1386,53 @@ ${emailMessage}`;
             {/* Action Buttons */}
             <div className="flex flex-wrap gap-4 pt-6 border-t justify-between items-end" style={{ borderColor: darkTheme.border }}>
               <Button variant="outline" onClick={onClose} className="flex-1">Cancel</Button>
-              <div className="flex flex-col items-center gap-2">
-                {/* Toggle Switch - positioned over send email button */}
-                <div className="relative inline-flex items-center">
-                  <button
-                    onClick={() => setActionMode(actionMode === 'email' ? 'download' : 'email')}
-                    className={`relative inline-flex h-10 w-20 items-center rounded-full transition-colors duration-200 focus:outline-none ${
-                      actionMode === 'email' ? 'bg-[#569CD6]' : 'bg-[#6A9955]'
+              
+              {/* Action Toggle with Dynamic Label - Matching EstimateGenerator */}
+              <div className="flex flex-col items-center gap-4 p-6 bg-black rounded-lg border border-gray-600">
+                {/* Toggle Switch */}
+                <button
+                  onClick={() => setActionMode(actionMode === 'email' ? 'download' : 'email')}
+                  className={`relative inline-flex h-10 w-20 items-center rounded-full transition-colors duration-200 focus:outline-none ${
+                    actionMode === 'email' ? 'bg-[#EA580C]' : 'bg-[#8B5FBF]'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-8 w-8 transform rounded-full bg-white transition-transform duration-200 ${
+                      actionMode === 'email' ? 'translate-x-1' : 'translate-x-11'
                     }`}
-                  >
-                    <span
-                      className={`inline-block h-8 w-8 transform rounded-full bg-white transition-transform duration-200 ${
-                        actionMode === 'email' ? 'translate-x-1' : 'translate-x-11'
-                      }`}
-                    />
-                    <Send 
-                      className={`absolute left-2 h-4 w-4 transition-opacity duration-200 ${
-                        actionMode === 'email' ? 'text-white opacity-100' : 'text-white opacity-60'
-                      }`} 
-                      style={{ color: '#FFFFFF' }}
-                    />
-                    <Download 
-                      className={`absolute right-2 h-4 w-4 transition-opacity duration-200 ${
-                        actionMode === 'download' ? 'text-white opacity-100' : 'text-white opacity-60'
-                      }`} 
-                      style={{ color: '#FFFFFF' }}
-                    />
-                  </button>
-                </div>
+                  />
+                </button>
                 
-                {/* Action Button */}
-                {actionMode === 'email' ? (
-                  <Button 
-                    onClick={() => {
+                {/* Dynamic Action Label */}
+                <div 
+                  className="flex items-center gap-3 cursor-pointer"
+                  onClick={() => {
+                    if (actionMode === 'email') {
                       console.log('Send Invoice button clicked - opening email dialog');
                       setShowEmailDialog(true);
-                    }}
-                    disabled={!invoiceData.clientEmail}
-                    className="text-white hover:opacity-90 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                    style={{ backgroundColor: invoiceData.clientEmail ? '#569CD6' : '#9ca3af' }}
-                  >
-                    {isSending ? (
-                      <>
-                        <div className="mr-2 h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Sending...
-                      </>
-                    ) : (
-                      <>
-                        <Send className="mr-2 h-5 w-5" />
-                        Send Email
-                      </>
-                    )}
-                  </Button>
-                ) : (
-                  <Button 
-                    onClick={generatePDF} 
-                    className="text-white hover:opacity-90"
-                    style={{ backgroundColor: '#6A9955' }}
-                  >
-                    <Download className="mr-2 h-5 w-5" />
-                    Download PDF
-                  </Button>
+                    } else {
+                      generatePDF();
+                    }
+                  }}
+                >
+                  {actionMode === 'email' ? (
+                    <>
+                      <Mail className="w-8 h-8 text-[#EA580C]" />
+                      <span className="text-[#EA580C] text-xl font-bold">Send</span>
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-8 h-8 text-[#8B5FBF]" />
+                      <span className="text-[#8B5FBF] text-xl font-bold">PDF</span>
+                    </>
+                  )}
+                </div>
+                
+                {/* Status Text */}
+                {isSending && (
+                  <div className="text-[#EA580C] text-sm font-medium">
+                    Sending invoice...
+                  </div>
                 )}
               </div>
             </div>
