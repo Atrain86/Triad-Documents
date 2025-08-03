@@ -99,6 +99,21 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     return `${year}-${month}-${day}`;
   });
   const [showCalendar, setShowCalendar] = useState(false);
+  
+  // Collapsible sections state
+  const [expandedSections, setExpandedSections] = useState({
+    servicesLabor: true,
+    paintMaterials: true,
+    additionalServices: true,
+    travel: true
+  });
+
+  const toggleSection = (section: keyof typeof expandedSections) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
 
   // Work stages state with localStorage persistence
   const [workStages, setWorkStages] = useState(savedData.workStages || [
@@ -766,56 +781,81 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
           {/* Services & Labor */}
           <Card className="bg-gray-900 border-gray-700 transform-gpu will-change-contents">
-            <CardHeader>
-              <CardTitle className="text-[#E53E3E]">Services & Labor</CardTitle>
+            <CardHeader 
+              className="cursor-pointer hover:bg-gray-800 transition-colors"
+              onClick={() => toggleSection('servicesLabor')}
+            >
+              <CardTitle className="text-[#E53E3E] flex items-center justify-between">
+                Services & Labor
+                {expandedSections.servicesLabor ? (
+                  <ChevronDown className="w-5 h-5 text-[#E53E3E]" />
+                ) : (
+                  <ChevronLeft className="w-5 h-5 text-[#E53E3E]" />
+                )}
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {workStages.map((stage: any, index: number) => (
-                <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-800 rounded-lg">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">{stage.name}</label>
+            {expandedSections.servicesLabor && (
+              <CardContent className="space-y-4">
+                {workStages.map((stage: any, index: number) => (
+                  <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-800 rounded-lg">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">{stage.name}</label>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Hours</label>
+                      <Input
+                        type="number"
+                        inputMode="decimal"
+                        step="0.5"
+                        min="0"
+                        value={stage.hours}
+                        onChange={(e) => updateWorkStage(index, 'hours', e.target.value)}
+                        placeholder="0"
+                        className="bg-gray-700 border-[#E53E3E] text-white transform-gpu will-change-contents"
+                        style={{ minHeight: '40px' }}
+                        onWheel={(e) => e.currentTarget.blur()}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Rate/Hour</label>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={stage.rate}
+                        onChange={(e) => updateWorkStage(index, 'rate', e.target.value)}
+                        className="bg-gray-700 border-[#E53E3E] text-white"
+                        onWheel={(e) => e.currentTarget.blur()}
+                      />
+                    </div>
+                    <div className="md:col-span-3 text-right text-[#6A9955] font-semibold">
+                      Total: ${((parseFloat(stage.hours) || 0) * (parseFloat(stage.rate.toString()) || 0)).toFixed(2)}
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Hours</label>
-                    <Input
-                      type="number"
-                      inputMode="decimal"
-                      step="0.5"
-                      min="0"
-                      value={stage.hours}
-                      onChange={(e) => updateWorkStage(index, 'hours', e.target.value)}
-                      placeholder="0"
-                      className="bg-gray-700 border-[#E53E3E] text-white transform-gpu will-change-contents"
-                      style={{ minHeight: '40px' }}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Rate/Hour</label>
-                    <Input
-                      type="number"
-                      min="0"
-                      value={stage.rate}
-                      onChange={(e) => updateWorkStage(index, 'rate', e.target.value)}
-                      className="bg-gray-700 border-[#E53E3E] text-white"
-                    />
-                  </div>
-                  <div className="md:col-span-3 text-right text-[#6A9955] font-semibold">
-                    Total: ${((parseFloat(stage.hours) || 0) * (parseFloat(stage.rate.toString()) || 0)).toFixed(2)}
-                  </div>
+                ))}
+                <div className="text-right text-lg font-semibold text-[#6A9955]">
+                  Labor Subtotal: ${laborSubtotal.toFixed(2)}
                 </div>
-              ))}
-              <div className="text-right text-lg font-semibold text-[#6A9955]">
-                Labor Subtotal: ${laborSubtotal.toFixed(2)}
-              </div>
-            </CardContent>
+              </CardContent>
+            )}
           </Card>
 
           {/* Paint & Materials */}
           <Card className="bg-gray-900 border-gray-700 transform-gpu will-change-contents">
-            <CardHeader>
-              <CardTitle className="text-[#D4A574]">Paint & Materials</CardTitle>
+            <CardHeader 
+              className="cursor-pointer hover:bg-gray-800 transition-colors"
+              onClick={() => toggleSection('paintMaterials')}
+            >
+              <CardTitle className="text-[#D4A574] flex items-center justify-between">
+                Paint & Materials
+                {expandedSections.paintMaterials ? (
+                  <ChevronDown className="w-5 h-5 text-[#D4A574]" />
+                ) : (
+                  <ChevronLeft className="w-5 h-5 text-[#D4A574]" />
+                )}
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            {expandedSections.paintMaterials && (
+              <CardContent className="space-y-4">
               <Button
                 onClick={addCustomSupply}
                 size="sm"
@@ -837,6 +877,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     onChange={(e) => setPaintCosts((prev: any) => ({ ...prev, pricePerGallon: e.target.value }))}
                     placeholder="0.00"
                     className="bg-gray-700 border-[#D4A574] text-white"
+                    onWheel={(e) => e.currentTarget.blur()}
                   />
                 </div>
                 <div>
@@ -850,6 +891,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     onChange={(e) => setPaintCosts((prev: any) => ({ ...prev, gallons: e.target.value }))}
                     placeholder="0"
                     className="bg-gray-700 border-[#D4A574] text-white"
+                    onWheel={(e) => e.currentTarget.blur()}
                   />
                 </div>
                 <div>
@@ -896,6 +938,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                       onChange={(e) => updateCustomSupply(index, 'quantity', e.target.value)}
                       placeholder="0"
                       className="bg-gray-700 border-[#D4A574] text-white"
+                      onWheel={(e) => e.currentTarget.blur()}
                     />
                   </div>
                   <div>
@@ -909,6 +952,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                       onChange={(e) => updateCustomSupply(index, 'pricePerUnit', e.target.value)}
                       placeholder="0.00"
                       className="bg-gray-700 border-[#D4A574] text-white"
+                      onWheel={(e) => e.currentTarget.blur()}
                     />
                   </div>
                   <div className="flex flex-col justify-between">
@@ -930,10 +974,11 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
               ))}
 
               {/* Total Materials Section */}
-              <div className="text-right text-lg font-semibold text-[#D4A574]">
-                Total Materials: ${paintAndMaterialsSubtotal.toFixed(2)}
-              </div>
-            </CardContent>
+                <div className="text-right text-lg font-semibold text-[#D4A574]">
+                  Total Materials: ${paintAndMaterialsSubtotal.toFixed(2)}
+                </div>
+              </CardContent>
+            )}
           </Card>
 
           {/* Additional Labor (Crew Members) */}
