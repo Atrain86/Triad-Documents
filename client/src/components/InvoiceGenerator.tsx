@@ -105,18 +105,19 @@ cortespainter@gmail.com`;
   // Prevent text auto-selection when dialog opens
   React.useEffect(() => {
     if (isOpen) {
-      // Use multiple timeouts to ensure we catch all auto-selection attempts
-      const timeouts = [50, 150, 300].map(delay => 
-        setTimeout(() => {
-          if (firstInputRef.current) {
-            firstInputRef.current.setSelectionRange(0, 0);
-            // Also remove focus to prevent keyboard from auto-selecting
-            firstInputRef.current.blur();
-          }
-        }, delay)
-      );
+      // Immediate prevention without delay
+      if (firstInputRef.current) {
+        firstInputRef.current.setSelectionRange(0, 0);
+        firstInputRef.current.blur();
+      }
       
-      return () => timeouts.forEach(clearTimeout);
+      // Also use requestAnimationFrame for immediate DOM update
+      requestAnimationFrame(() => {
+        if (firstInputRef.current) {
+          firstInputRef.current.setSelectionRange(0, 0);
+          firstInputRef.current.blur();
+        }
+      });
     }
   }, [isOpen]);
 
@@ -1056,6 +1057,7 @@ ${emailMessage}`;
                     className="bg-gray-800 border-[#E03E3E] text-white"
                     placeholder="Business Name"
                     autoFocus={false}
+                    style={{ userSelect: 'text' }} // Allow selection after user interaction
                     onFocus={(e) => {
                       // Prevent text selection on focus - use setTimeout to override browser default
                       setTimeout(() => {
