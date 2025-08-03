@@ -102,6 +102,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   
   // Collapsible sections state - start collapsed for cleaner look
   const [expandedSections, setExpandedSections] = useState({
+    estimateDetails: false,
     servicesLabor: false,
     paintMaterials: false,
     additionalLabor: false,
@@ -740,10 +741,21 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
         <div className="space-y-4">
           {/* Estimate Details */}
           <Card className="bg-gray-900 border-[#E53E3E]">
-            <CardHeader>
-              <CardTitle className="text-[#E53E3E]">Estimate Details</CardTitle>
+            <CardHeader 
+              className="cursor-pointer hover:bg-gray-800 transition-colors"
+              onClick={() => toggleSection('estimateDetails')}
+            >
+              <CardTitle className="text-[#E53E3E] flex items-center justify-between">
+                Estimate Details
+                {expandedSections.estimateDetails ? (
+                  <ChevronDown className="w-5 h-5 text-[#E53E3E]" />
+                ) : (
+                  <ChevronLeft className="w-5 h-5 text-[#E53E3E]" />
+                )}
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            {expandedSections.estimateDetails && (
+              <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">Project Title</label>
@@ -839,7 +851,8 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                   </div>
                 )}
               </div>
-            </CardContent>
+              </CardContent>
+            )}
           </Card>
 
           {/* Services & Labor */}
