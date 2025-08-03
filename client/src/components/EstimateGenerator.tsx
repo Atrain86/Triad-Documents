@@ -742,9 +742,9 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
         <div className="space-y-4">
           {/* Estimate Details */}
-          <Card className="bg-gray-900 border-gray-700">
+          <Card className="bg-gray-900 border-[#E53E3E]">
             <CardHeader>
-              <CardTitle className="text-[#8B5FBF]">Estimate Details</CardTitle>
+              <CardTitle className="text-[#E53E3E]">Estimate Details</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -848,17 +848,17 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           </Card>
 
           {/* Services & Labor */}
-          <Card className="bg-gray-900 border-gray-700 transform-gpu will-change-contents">
+          <Card className="bg-gray-900 border-[#ECC94B] transform-gpu will-change-contents">
             <CardHeader 
               className="cursor-pointer hover:bg-gray-800 transition-colors"
               onClick={() => toggleSection('servicesLabor')}
             >
-              <CardTitle className="text-[#E53E3E] flex items-center justify-between">
+              <CardTitle className="text-[#ECC94B] flex items-center justify-between">
                 Services & Labor
                 {expandedSections.servicesLabor ? (
-                  <ChevronDown className="w-5 h-5 text-[#E53E3E]" />
+                  <ChevronDown className="w-5 h-5 text-[#ECC94B]" />
                 ) : (
-                  <ChevronLeft className="w-5 h-5 text-[#E53E3E]" />
+                  <ChevronLeft className="w-5 h-5 text-[#ECC94B]" />
                 )}
               </CardTitle>
             </CardHeader>
@@ -879,7 +879,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                         value={stage.hours}
                         onChange={(e) => updateWorkStage(index, 'hours', e.target.value)}
                         placeholder="0"
-                        className="bg-gray-700 border-[#E53E3E] text-white transform-gpu will-change-contents"
+                        className="bg-gray-700 border-[#ECC94B] text-white transform-gpu will-change-contents"
                         style={{ minHeight: '40px' }}
                         onWheel={(e) => e.currentTarget.blur()}
                       />
@@ -891,7 +891,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                         min="0"
                         value={stage.rate}
                         onChange={(e) => updateWorkStage(index, 'rate', e.target.value)}
-                        className="bg-gray-700 border-[#E53E3E] text-white"
+                        className="bg-gray-700 border-[#ECC94B] text-white"
                         onWheel={(e) => e.currentTarget.blur()}
                       />
                     </div>
@@ -908,17 +908,17 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           </Card>
 
           {/* Paint & Materials */}
-          <Card className="bg-gray-900 border-gray-700 transform-gpu will-change-contents">
+          <Card className="bg-gray-900 border-[#6A9955] transform-gpu will-change-contents">
             <CardHeader 
               className="cursor-pointer hover:bg-gray-800 transition-colors"
               onClick={() => toggleSection('paintMaterials')}
             >
-              <CardTitle className="text-[#D4A574] flex items-center justify-between">
+              <CardTitle className="text-[#6A9955] flex items-center justify-between">
                 Paint & Materials
                 {expandedSections.paintMaterials ? (
-                  <ChevronDown className="w-5 h-5 text-[#D4A574]" />
+                  <ChevronDown className="w-5 h-5 text-[#6A9955]" />
                 ) : (
-                  <ChevronLeft className="w-5 h-5 text-[#D4A574]" />
+                  <ChevronLeft className="w-5 h-5 text-[#6A9955]" />
                 )}
               </CardTitle>
             </CardHeader>
@@ -927,13 +927,13 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
               <Button
                 onClick={addCustomSupply}
                 size="sm"
-                className="bg-[#D4A574] hover:bg-[#C19660] text-black px-3 py-1"
+                className="bg-[#6A9955] hover:bg-[#5A8447] text-white px-3 py-1"
               >
                 <Plus className="w-4 h-4 mr-1" />
                 Supplies
               </Button>
               {/* Paint Costs Section */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-800 rounded-lg border border-[#D4A574]">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-800 rounded-lg border border-[#6A9955]">
                 <div>
                   <label className="block text-sm font-medium mb-2">Price per Gallon</label>
                   <Input
@@ -944,7 +944,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     value={paintCosts.pricePerGallon}
                     onChange={(e) => setPaintCosts((prev: any) => ({ ...prev, pricePerGallon: e.target.value }))}
                     placeholder="0.00"
-                    className="bg-gray-700 border-[#D4A574] text-white"
+                    className="bg-gray-700 border-[#6A9955] text-white"
                     onWheel={(e) => e.currentTarget.blur()}
                   />
                 </div>
@@ -958,7 +958,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     value={paintCosts.gallons}
                     onChange={(e) => setPaintCosts((prev: any) => ({ ...prev, gallons: e.target.value }))}
                     placeholder="0"
-                    className="bg-gray-700 border-[#D4A574] text-white"
+                    className="bg-gray-700 border-[#6A9955] text-white"
                     onWheel={(e) => e.currentTarget.blur()}
                   />
                 </div>
@@ -968,7 +968,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     value={paintCosts.coats} 
                     onValueChange={(value) => setPaintCosts((prev: any) => ({ ...prev, coats: value }))}
                   >
-                    <SelectTrigger className="bg-gray-700 border-[#D4A574] text-white">
+                    <SelectTrigger className="bg-gray-700 border-[#6A9955] text-white">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-gray-800 border-gray-600">
@@ -1042,7 +1042,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
               ))}
 
               {/* Total Materials Section */}
-                <div className="text-right text-lg font-semibold text-[#D4A574]">
+                <div className="text-right text-lg font-semibold text-[#6A9955]">
                   Total Materials: ${paintAndMaterialsSubtotal.toFixed(2)}
                 </div>
               </CardContent>
@@ -1050,17 +1050,17 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           </Card>
 
           {/* Additional Labor (Crew Members) */}
-          <Card className="bg-gray-900 border-gray-700 transform-gpu will-change-contents">
+          <Card className="bg-gray-900 border-[#3182CE] transform-gpu will-change-contents">
             <CardHeader 
               className="cursor-pointer hover:bg-gray-800 transition-colors"
               onClick={() => toggleSection('additionalLabor')}
             >
-              <CardTitle className="text-[#4ECDC4] flex items-center justify-between">
+              <CardTitle className="text-[#3182CE] flex items-center justify-between">
                 Additional Labor
                 {expandedSections.additionalLabor ? (
-                  <ChevronDown className="w-5 h-5 text-[#4ECDC4]" />
+                  <ChevronDown className="w-5 h-5 text-[#3182CE]" />
                 ) : (
-                  <ChevronLeft className="w-5 h-5 text-[#4ECDC4]" />
+                  <ChevronLeft className="w-5 h-5 text-[#3182CE]" />
                 )}
               </CardTitle>
             </CardHeader>
@@ -1069,20 +1069,20 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
               <Button
                 onClick={addLabor}
                 size="sm"
-                className="bg-[#4ECDC4] hover:bg-[#3EB8B8] text-black"
+                className="bg-[#3182CE] hover:bg-[#2C6CB8] text-white"
               >
                 <Plus className="w-4 h-4 mr-1" />
                 Add Crew
               </Button>
               {additionalLabor.map((member: any, index: number) => (
-                <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-800 rounded-lg border border-[#4ECDC4]">
+                <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-800 rounded-lg border border-[#3182CE]">
                   <div>
                     <label className="block text-sm font-medium mb-2">Crew Member Name</label>
                     <Input
                       value={member.name}
                       onChange={(e) => updateAdditionalLabor(index, 'name', e.target.value)}
                       placeholder="Enter name"
-                      className="bg-gray-700 border-[#4ECDC4] text-white"
+                      className="bg-gray-700 border-[#3182CE] text-white"
                     />
                   </div>
                   <div>
@@ -1095,7 +1095,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                       value={member.hours}
                       onChange={(e) => updateAdditionalLabor(index, 'hours', e.target.value)}
                       placeholder="0"
-                      className="bg-gray-700 border-[#4ECDC4] text-white"
+                      className="bg-gray-700 border-[#3182CE] text-white"
                       onWheel={(e) => e.currentTarget.blur()}
                     />
                   </div>
@@ -1107,7 +1107,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                       value={member.rate}
                       onChange={(e) => updateAdditionalLabor(index, 'rate', e.target.value)}
                       placeholder="0"
-                      className="bg-gray-700 border-[#4ECDC4] text-white"
+                      className="bg-gray-700 border-[#3182CE] text-white"
                       onWheel={(e) => e.currentTarget.blur()}
                     />
                   </div>
@@ -1128,7 +1128,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                   </div>
                 </div>
               ))}
-                <div className="text-right text-lg font-semibold text-[#4ECDC4]">
+                <div className="text-right text-lg font-semibold text-[#3182CE]">
                   Additional Labor Total: ${additionalLaborSubtotal.toFixed(2)}
                 </div>
               </CardContent>
@@ -1136,17 +1136,17 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           </Card>
 
           {/* Additional Services */}
-          <Card className="bg-gray-900 border-gray-700 transform-gpu will-change-contents">
+          <Card className="bg-gray-900 border-[#8B5FBF] transform-gpu will-change-contents">
             <CardHeader 
               className="cursor-pointer hover:bg-gray-800 transition-colors"
               onClick={() => toggleSection('additionalServices')}
             >
-              <CardTitle className="text-[#DCDCAA] flex items-center justify-between">
+              <CardTitle className="text-[#8B5FBF] flex items-center justify-between">
                 Additional Services
                 {expandedSections.additionalServices ? (
-                  <ChevronDown className="w-5 h-5 text-[#DCDCAA]" />
+                  <ChevronDown className="w-5 h-5 text-[#8B5FBF]" />
                 ) : (
-                  <ChevronLeft className="w-5 h-5 text-[#DCDCAA]" />
+                  <ChevronLeft className="w-5 h-5 text-[#8B5FBF]" />
                 )}
               </CardTitle>
             </CardHeader>
@@ -1155,20 +1155,20 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
               <Button
                 onClick={addAdditionalService}
                 size="sm"
-                className="bg-[#DCDCAA] hover:bg-[#C7C594] text-black px-3 py-1"
+                className="bg-[#8B5FBF] hover:bg-[#7A54A8] text-white px-3 py-1"
               >
                 <Plus className="w-5 h-5 mr-1" />
                 Services
               </Button>
               {additionalServices.map((service: any, index: number) => (
-                <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-800 rounded-lg border border-[#DCDCAA]">
+                <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-800 rounded-lg border border-[#8B5FBF]">
                   <div>
                     <label className="block text-sm font-medium mb-2">Service Name</label>
                     <Input
                       value={service.name}
                       onChange={(e) => updateAdditionalService(index, 'name', e.target.value)}
                       placeholder="Enter service name"
-                      className="bg-gray-700 border-[#DCDCAA] text-white"
+                      className="bg-gray-700 border-[#8B5FBF] text-white"
                     />
                   </div>
                   <div>
@@ -1181,7 +1181,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                       value={service.hours}
                       onChange={(e) => updateAdditionalService(index, 'hours', e.target.value)}
                       placeholder="0"
-                      className="bg-gray-700 border-[#DCDCAA] text-white"
+                      className="bg-gray-700 border-[#8B5FBF] text-white"
                       onWheel={(e) => e.currentTarget.blur()}
                     />
                   </div>
@@ -1193,7 +1193,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                       value={service.rate}
                       onChange={(e) => updateAdditionalService(index, 'rate', e.target.value)}
                       placeholder="0"
-                      className="bg-gray-700 border-[#DCDCAA] text-white"
+                      className="bg-gray-700 border-[#8B5FBF] text-white"
                       onWheel={(e) => e.currentTarget.blur()}
                     />
                   </div>
@@ -1214,7 +1214,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                   </div>
                 </div>
               ))}
-                <div className="text-right text-lg font-semibold text-[#DCDCAA]">
+                <div className="text-right text-lg font-semibold text-[#8B5FBF]">
                   Additional Services: ${additionalServicesSubtotal.toFixed(2)}
                 </div>
               </CardContent>
