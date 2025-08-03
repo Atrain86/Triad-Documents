@@ -722,10 +722,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="w-[95vw] max-w-4xl max-h-[90vh] h-[90vh] overflow-y-auto bg-black text-white [&>button]:hidden">
         <DialogHeader className="pb-1">
-          <DialogTitle className="text-xl font-bold text-[#8B5FBF] text-center">
-            <div>Generate Estimate</div>
-            <div className="text-lg mt-1">{project.clientName}</div>
-          </DialogTitle>
+          <DialogTitle className="sr-only">Generate Estimate</DialogTitle>
         </DialogHeader>
 
         {/* Custom Close Button - aligned right with container below, very close */}
@@ -754,7 +751,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     value={projectTitle}
                     onChange={(e) => setProjectTitle(e.target.value)}
                     placeholder="Enter project title"
-                    className="bg-gray-800 border-[#8B5FBF] text-white"
+                    className="bg-gray-800 border-[#E53E3E] text-white"
                     style={{ minHeight: '40px' }}
 
                   />
@@ -765,7 +762,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     <Button
                       type="button"
                       onClick={() => setShowCalendar(!showCalendar)}
-                      className="w-full bg-gray-800 border-[#8B5FBF] text-white hover:bg-gray-700 justify-start"
+                      className="w-full bg-gray-800 border-[#E53E3E] text-white hover:bg-gray-700 justify-start"
                       variant="outline"
                     >
                       <Calendar className="w-4 h-4 mr-2" />
@@ -834,7 +831,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                         value={materialMarkupPercentage}
                         onChange={(e) => setMaterialMarkupPercentage(e.target.value)}
                         placeholder="Enter markup %"
-                        className="bg-gray-800 border-[#8B5FBF] text-white pr-8"
+                        className="bg-gray-800 border-[#E53E3E] text-white pr-8"
                         min="0"
                         max="100"
                         step="0.1"
