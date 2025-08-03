@@ -1029,7 +1029,7 @@ ${emailMessage}`;
       <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto p-0" style={{ backgroundColor: darkTheme.background }}>
         <DialogHeader className="sr-only">
-          <DialogTitle>Invoice Generator</DialogTitle>
+          <DialogTitle>Invoice</DialogTitle>
           <DialogDescription>Create and send professional painting service invoices</DialogDescription>
         </DialogHeader>
         <div className="flex flex-col">
@@ -1037,8 +1037,8 @@ ${emailMessage}`;
           <div className="flex items-center justify-between p-6 border-b" style={{ backgroundColor: darkTheme.headerBg, borderColor: darkTheme.border }}>
             <div></div> {/* Spacer for centering */}
             <div className="text-center">
-              <h1 className="text-2xl font-bold" style={{ color: darkTheme.text }}>Invoice Generator</h1>
-              <p style={{ color: darkTheme.textSecondary }}>Professional painting services</p>
+
+
             </div>
             <Button 
               variant="ghost" 
