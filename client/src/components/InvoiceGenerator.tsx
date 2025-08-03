@@ -1143,9 +1143,7 @@ ${emailMessage}`;
                           />
                           <label 
                             htmlFor="invoice-material-markup-toggle" 
-                            className={`block w-12 h-6 rounded-full cursor-pointer transition-colors ${
-                              materialMarkupEnabled ? 'bg-[#8B5FBF]' : 'bg-gray-600'
-                            }`}
+                            className="block w-12 h-6 rounded-full cursor-pointer transition-colors bg-gray-600"
                           >
                             <span 
                               className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
@@ -1169,7 +1167,7 @@ ${emailMessage}`;
                             value={materialMarkupPercentage}
                             onChange={(e) => setMaterialMarkupPercentage(e.target.value)}
                             placeholder="Enter markup %"
-                            className="bg-gray-800 border-[#ECC94B] text-white pr-8"
+                            className="bg-gray-800 border-[#E53E3E] text-white pr-8"
                             min="0"
                             max="100"
                             step="0.1"

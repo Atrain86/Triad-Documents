@@ -805,9 +805,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                       />
                       <label 
                         htmlFor="material-markup-toggle" 
-                        className={`block w-12 h-6 rounded-full cursor-pointer transition-colors ${
-                          materialMarkupEnabled ? 'bg-[#8B5FBF]' : 'bg-gray-600'
-                        }`}
+                        className="block w-12 h-6 rounded-full cursor-pointer transition-colors bg-gray-600"
                       >
                         <span 
                           className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
