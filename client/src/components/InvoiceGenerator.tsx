@@ -63,35 +63,9 @@ export default function InvoiceGenerator({
   const [emailMessage, setEmailMessage] = useState('');
   const [actionMode, setActionMode] = useState<'download' | 'email'>('email');
   
-  // Memory system functions (defined early)
-  const getLastInvoiceInputs = () => {
-    const saved = localStorage.getItem('lastInvoiceInputs');
-    return saved ? JSON.parse(saved) : null;
-  };
-
-  // Get saved inputs once at the start
-  const savedInputs = getLastInvoiceInputs();
-  
-  // Material markup state for invoice (use saved values)
-  const [materialMarkupEnabled, setMaterialMarkupEnabled] = useState(savedInputs?.materialMarkupEnabled || false);
-  const [materialMarkupPercentage, setMaterialMarkupPercentage] = useState(savedInputs?.materialMarkupPercentage || '');
-
-  // Save function that can access current state
-  const saveInvoiceInputs = (data: any, markupEnabled: boolean, markupPercentage: string) => {
-    // Save only the form inputs, not project-specific data
-    const inputsToSave = {
-      businessName: data.businessName,
-      businessAddress: data.businessAddress,
-      businessCity: data.businessCity,
-      businessPostal: data.businessPostal,
-      businessEmail: data.businessEmail,
-      notes: data.notes,
-      gstRate: data.gstRate,
-      materialMarkupEnabled: markupEnabled,
-      materialMarkupPercentage: markupPercentage
-    };
-    localStorage.setItem('lastInvoiceInputs', JSON.stringify(inputsToSave));
-  };
+  // Material markup state for invoice (simple initialization)
+  const [materialMarkupEnabled, setMaterialMarkupEnabled] = useState(false);
+  const [materialMarkupPercentage, setMaterialMarkupPercentage] = useState('');
   
   // Initialize email message
   React.useEffect(() => {
@@ -125,10 +99,46 @@ cortespainter@gmail.com`;
     return () => window.removeEventListener('storage', handleVisibilityChange);
   }, []);
 
-  // Save inputs whenever they change
+  // Simple memory system - load saved inputs after component mounts
   React.useEffect(() => {
-    if (invoiceData.businessName) { // Only save if there's actual data
-      saveInvoiceInputs(invoiceData, materialMarkupEnabled, materialMarkupPercentage);
+    try {
+      const saved = localStorage.getItem('lastInvoiceInputs');
+      if (saved) {
+        const lastInputs = JSON.parse(saved);
+        setInvoiceData(prev => ({
+          ...prev,
+          businessName: lastInputs.businessName || prev.businessName,
+          businessAddress: lastInputs.businessAddress || prev.businessAddress,
+          businessCity: lastInputs.businessCity || prev.businessCity,
+          businessPostal: lastInputs.businessPostal || prev.businessPostal,
+          businessEmail: lastInputs.businessEmail || prev.businessEmail,
+          notes: lastInputs.notes || prev.notes,
+          gstRate: lastInputs.gstRate || prev.gstRate
+        }));
+        setMaterialMarkupEnabled(lastInputs.materialMarkupEnabled || false);
+        setMaterialMarkupPercentage(lastInputs.materialMarkupPercentage || '');
+      }
+    } catch (error) {
+      console.log('Could not load saved invoice inputs:', error);
+    }
+  }, []);
+
+  // Save inputs when they change (after initial load)
+  React.useEffect(() => {
+    if (invoiceData.businessName !== 'A-Frame Painting' || invoiceData.businessAddress !== '884 Hayes Rd') {
+      // Only save if user has made changes
+      const inputsToSave = {
+        businessName: invoiceData.businessName,
+        businessAddress: invoiceData.businessAddress,
+        businessCity: invoiceData.businessCity,
+        businessPostal: invoiceData.businessPostal,
+        businessEmail: invoiceData.businessEmail,
+        notes: invoiceData.notes,
+        gstRate: invoiceData.gstRate,
+        materialMarkupEnabled,
+        materialMarkupPercentage
+      };
+      localStorage.setItem('lastInvoiceInputs', JSON.stringify(inputsToSave));
     }
   }, [invoiceData.businessName, invoiceData.businessAddress, invoiceData.businessCity, 
       invoiceData.businessPostal, invoiceData.businessEmail, invoiceData.notes, 
@@ -155,12 +165,12 @@ cortespainter@gmail.com`;
       invoiceNumber: getNextInvoiceNumber(),
       date: new Date().toISOString().split('T')[0],
       
-      // Business info (use saved values if available)
-      businessName: savedInputs?.businessName || 'A-Frame Painting',
-      businessAddress: savedInputs?.businessAddress || '884 Hayes Rd',
-      businessCity: savedInputs?.businessCity || 'Manson\'s Landing, BC',
-      businessPostal: savedInputs?.businessPostal || 'V0P1K0',
-      businessEmail: savedInputs?.businessEmail || 'cortespainter@gmail.com',
+      // Business info (default values)
+      businessName: 'A-Frame Painting',
+      businessAddress: '884 Hayes Rd',
+      businessCity: 'Manson\'s Landing, BC',
+      businessPostal: 'V0P1K0',
+      businessEmail: 'cortespainter@gmail.com',
       businessLogo: currentLogo?.url || '/aframe-logo.png', // Dynamic business logo
     
     // Client info (populated from project)
@@ -186,10 +196,10 @@ cortespainter@gmail.com`;
       total: 0
     }],
       
-      // Notes and payment (use saved values if available)
-      notes: savedInputs?.notes || 'Please send e-transfer to cortespainter@gmail.com',
+      // Notes and payment (default values)
+      notes: 'Please send e-transfer to cortespainter@gmail.com',
       emailMessage: 'Please find attached your invoice for painting services.',
-      gstRate: savedInputs?.gstRate || 0.05, // 5% GST on labor services only
+      gstRate: 0.05, // 5% GST on labor services only
       suppliesCost: 0,
       selectedReceipts: new Set<number>()
     };
@@ -804,8 +814,7 @@ cortespainter@gmail.com
       return;
     }
 
-    // Save current inputs before sending
-    saveInvoiceInputs(invoiceData, materialMarkupEnabled, materialMarkupPercentage);
+
 
     try {
       // Show preparing message
