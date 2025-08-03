@@ -1019,19 +1019,19 @@ ${emailMessage}`;
                   <Input
                     value={invoiceData.businessName}
                     onChange={(e) => setInvoiceData({...invoiceData, businessName: e.target.value})}
-                    className="bg-gray-900 border-gray-700 text-white"
+                    className="bg-gray-800 border-[#DC2626] text-white"
                     placeholder="Business Name"
                   />
                   <Input
                     value={invoiceData.businessAddress}
                     onChange={(e) => setInvoiceData({...invoiceData, businessAddress: e.target.value})}
-                    className="bg-gray-900 border-gray-700 text-white"
+                    className="bg-gray-800 border-[#DC2626] text-white"  
                     placeholder="Address"
                   />
                   <Input
                     value={invoiceData.businessEmail}
                     onChange={(e) => setInvoiceData({...invoiceData, businessEmail: e.target.value})}
-                    className="bg-gray-900 border-gray-700 text-white"
+                    className="bg-gray-800 border-[#DC2626] text-white"
                     placeholder="Email"
                   />
                 </div>
@@ -1049,7 +1049,7 @@ ${emailMessage}`;
                       type="number"
                       value={invoiceData.invoiceNumber}
                       onChange={(e) => setInvoiceData({...invoiceData, invoiceNumber: parseInt(e.target.value)})}
-                      className="bg-gray-900 border-gray-700 text-white"
+                      className="bg-gray-800 border-[#EAB308] text-white"
                     />
                   </div>
                   <div>
@@ -1058,7 +1058,7 @@ ${emailMessage}`;
                       type="date"
                       value={invoiceData.date}
                       onChange={(e) => setInvoiceData({...invoiceData, date: e.target.value})}
-                      className="bg-gray-900 border-gray-700 text-white"
+                      className="bg-gray-800 border-[#EAB308] text-white"
                     />
                   </div>
                   {/* Material Markup Control */}
@@ -1104,7 +1104,7 @@ ${emailMessage}`;
                             value={materialMarkupPercentage}
                             onChange={(e) => setMaterialMarkupPercentage(e.target.value)}
                             placeholder="Enter markup %"
-                            className="bg-gray-900 border-gray-700 text-white pr-8"
+                            className="bg-gray-800 border-[#EAB308] text-white pr-8"
                             min="0"
                             max="100"
                             step="0.1"
@@ -1128,33 +1128,33 @@ ${emailMessage}`;
                 <Input
                   value={invoiceData.clientName}
                   onChange={(e) => setInvoiceData({...invoiceData, clientName: e.target.value})}
-                  className="bg-gray-900 border-gray-700 text-white"
+                  className="bg-gray-800 border-[#22C55E] text-white"
                   placeholder="Client Name"
                 />
                 <Input
                   type="email"
                   value={invoiceData.clientEmail}
                   onChange={(e) => setInvoiceData({...invoiceData, clientEmail: e.target.value})}
-                  className="bg-gray-900 border-gray-700 text-white"
+                  className="bg-gray-800 border-[#22C55E] text-white"
                   placeholder="Client Email"
                 />
                 <Input
                   value={invoiceData.clientAddress}
                   onChange={(e) => setInvoiceData({...invoiceData, clientAddress: e.target.value})}
-                  className="bg-gray-900 border-gray-700 text-white"
+                  className="bg-gray-800 border-[#22C55E] text-white"
                   placeholder="Client Address"
                 />
                 <div className="grid grid-cols-2 gap-2">
                   <Input
                     value={invoiceData.clientCity}
                     onChange={(e) => setInvoiceData({...invoiceData, clientCity: e.target.value})}
-                    className="bg-gray-900 border-gray-700 text-white"
+                    className="bg-gray-800 border-[#22C55E] text-white"
                     placeholder="City, Province"
                   />
                   <Input
                     value={invoiceData.clientPostal}
                     onChange={(e) => setInvoiceData({...invoiceData, clientPostal: e.target.value})}
-                    className="bg-gray-900 border-gray-700 text-white"
+                    className="bg-gray-800 border-[#22C55E] text-white"
                     placeholder="Postal Code"
                   />
                 </div>
@@ -1162,8 +1162,8 @@ ${emailMessage}`;
             </div>
 
             {/* Email Message */}
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.green }}>
+            <div className="p-4 rounded-lg border-l-4 space-y-4" style={{ borderLeftColor: '#06B6D4', backgroundColor: darkTheme.cardBg }}>
+              <h2 className="text-xl font-semibold flex items-center" style={{ color: '#06B6D4' }}>
                 <Send className="mr-2 h-5 w-5" />
                 Email Message
               </h2>
@@ -1174,7 +1174,7 @@ ${emailMessage}`;
                 <Textarea
                   value={invoiceData.emailMessage}
                   onChange={(e) => setInvoiceData({...invoiceData, emailMessage: e.target.value})}
-                  className="bg-gray-900 border-gray-700 text-white min-h-20"
+                  className="bg-gray-800 border-[#06B6D4] text-white min-h-20"
                   placeholder="Enter your custom message..."
                 />
               </div>
@@ -1317,12 +1317,12 @@ ${emailMessage}`;
             </div>
 
             {/* Notes */}
-            <div className="space-y-2">
-              <label className="block text-sm font-medium" style={{ color: darkTheme.textSecondary }}>Notes & Payment Instructions</label>
+            <div className="p-4 rounded-lg border-l-4 space-y-2" style={{ borderLeftColor: '#A855F7', backgroundColor: darkTheme.cardBg }}>
+              <label className="block text-sm font-medium" style={{ color: '#A855F7' }}>Notes & Payment Instructions</label>
               <Textarea
                 value={invoiceData.notes}
                 onChange={(e) => setInvoiceData({...invoiceData, notes: e.target.value})}
-                className="bg-gray-900 border-gray-700 text-white"
+                className="bg-gray-800 border-[#A855F7] text-white"
                 rows={3}
                 placeholder="Payment instructions, additional notes, etc."
               />
