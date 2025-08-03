@@ -1010,8 +1010,8 @@ ${emailMessage}`;
           <div className="flex-1 p-6 space-y-6" style={{ backgroundColor: darkTheme.background }}>
             {/* Business & Invoice Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="p-4 rounded-lg border-l-4 space-y-4" style={{ borderLeftColor: '#DC2626', backgroundColor: darkTheme.cardBg }}>
-                <h2 className="text-xl font-semibold flex items-center" style={{ color: '#DC2626' }}>
+              <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: paintBrainColors.red, backgroundColor: darkTheme.cardBg }}>
+                <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.red }}>
                   <User className="mr-2 h-5 w-5" />
                   Business Information
                 </h2>
@@ -1019,26 +1019,26 @@ ${emailMessage}`;
                   <Input
                     value={invoiceData.businessName}
                     onChange={(e) => setInvoiceData({...invoiceData, businessName: e.target.value})}
-                    className="bg-gray-800 border-[#DC2626] text-white"
+                    className="bg-gray-800 border-[#E03E3E] text-white"
                     placeholder="Business Name"
                   />
                   <Input
                     value={invoiceData.businessAddress}
                     onChange={(e) => setInvoiceData({...invoiceData, businessAddress: e.target.value})}
-                    className="bg-gray-800 border-[#DC2626] text-white"  
+                    className="bg-gray-800 border-[#E03E3E] text-white"  
                     placeholder="Address"
                   />
                   <Input
                     value={invoiceData.businessEmail}
                     onChange={(e) => setInvoiceData({...invoiceData, businessEmail: e.target.value})}
-                    className="bg-gray-800 border-[#DC2626] text-white"
+                    className="bg-gray-800 border-[#E03E3E] text-white"
                     placeholder="Email"
                   />
                 </div>
               </div>
 
-              <div className="p-4 rounded-lg border-l-4 space-y-4" style={{ borderLeftColor: '#EAB308', backgroundColor: darkTheme.cardBg }}>
-                <h2 className="text-xl font-semibold flex items-center" style={{ color: '#EAB308' }}>
+              <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: paintBrainColors.yellow, backgroundColor: darkTheme.cardBg }}>
+                <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.yellow }}>
                   <Calendar className="mr-2 h-5 w-5" />
                   Invoice Details
                 </h2>
@@ -1049,7 +1049,7 @@ ${emailMessage}`;
                       type="number"
                       value={invoiceData.invoiceNumber}
                       onChange={(e) => setInvoiceData({...invoiceData, invoiceNumber: parseInt(e.target.value)})}
-                      className="bg-gray-800 border-[#EAB308] text-white"
+                      className="bg-gray-800 border-[#FFEE32] text-white"
                     />
                   </div>
                   <div>
@@ -1058,7 +1058,7 @@ ${emailMessage}`;
                       type="date"
                       value={invoiceData.date}
                       onChange={(e) => setInvoiceData({...invoiceData, date: e.target.value})}
-                      className="bg-gray-800 border-[#EAB308] text-white"
+                      className="bg-gray-800 border-[#FFEE32] text-white"
                     />
                   </div>
                   {/* Material Markup Control */}
@@ -1104,7 +1104,7 @@ ${emailMessage}`;
                             value={materialMarkupPercentage}
                             onChange={(e) => setMaterialMarkupPercentage(e.target.value)}
                             placeholder="Enter markup %"
-                            className="bg-gray-800 border-[#EAB308] text-white pr-8"
+                            className="bg-gray-800 border-[#FFEE32] text-white pr-8"
                             min="0"
                             max="100"
                             step="0.1"
@@ -1119,8 +1119,8 @@ ${emailMessage}`;
             </div>
 
             {/* Client Information */}
-            <div className="p-4 rounded-lg border-l-4 space-y-4" style={{ borderLeftColor: '#22C55E', backgroundColor: darkTheme.cardBg }}>
-              <h2 className="text-xl font-semibold flex items-center" style={{ color: '#22C55E' }}>
+            <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: paintBrainColors.green, backgroundColor: darkTheme.cardBg }}>
+              <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.green }}>
                 <MapPin className="mr-2 h-5 w-5" />
                 Client Information
               </h2>
@@ -1128,33 +1128,33 @@ ${emailMessage}`;
                 <Input
                   value={invoiceData.clientName}
                   onChange={(e) => setInvoiceData({...invoiceData, clientName: e.target.value})}
-                  className="bg-gray-800 border-[#22C55E] text-white"
+                  className="bg-gray-800 border-[#6A9955] text-white"
                   placeholder="Client Name"
                 />
                 <Input
                   type="email"
                   value={invoiceData.clientEmail}
                   onChange={(e) => setInvoiceData({...invoiceData, clientEmail: e.target.value})}
-                  className="bg-gray-800 border-[#22C55E] text-white"
+                  className="bg-gray-800 border-[#6A9955] text-white"
                   placeholder="Client Email"
                 />
                 <Input
                   value={invoiceData.clientAddress}
                   onChange={(e) => setInvoiceData({...invoiceData, clientAddress: e.target.value})}
-                  className="bg-gray-800 border-[#22C55E] text-white"
+                  className="bg-gray-800 border-[#6A9955] text-white"
                   placeholder="Client Address"
                 />
                 <div className="grid grid-cols-2 gap-2">
                   <Input
                     value={invoiceData.clientCity}
                     onChange={(e) => setInvoiceData({...invoiceData, clientCity: e.target.value})}
-                    className="bg-gray-800 border-[#22C55E] text-white"
+                    className="bg-gray-800 border-[#6A9955] text-white"
                     placeholder="City, Province"
                   />
                   <Input
                     value={invoiceData.clientPostal}
                     onChange={(e) => setInvoiceData({...invoiceData, clientPostal: e.target.value})}
-                    className="bg-gray-800 border-[#22C55E] text-white"
+                    className="bg-gray-800 border-[#6A9955] text-white"
                     placeholder="Postal Code"
                   />
                 </div>
@@ -1162,8 +1162,8 @@ ${emailMessage}`;
             </div>
 
             {/* Email Message */}
-            <div className="p-4 rounded-lg border-l-4 space-y-4" style={{ borderLeftColor: '#06B6D4', backgroundColor: darkTheme.cardBg }}>
-              <h2 className="text-xl font-semibold flex items-center" style={{ color: '#06B6D4' }}>
+            <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: paintBrainColors.blue, backgroundColor: darkTheme.cardBg }}>
+              <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.blue }}>
                 <Send className="mr-2 h-5 w-5" />
                 Email Message
               </h2>
@@ -1174,15 +1174,15 @@ ${emailMessage}`;
                 <Textarea
                   value={invoiceData.emailMessage}
                   onChange={(e) => setInvoiceData({...invoiceData, emailMessage: e.target.value})}
-                  className="bg-gray-800 border-[#06B6D4] text-white min-h-20"
+                  className="bg-gray-800 border-[#5050FF] text-white min-h-20"
                   placeholder="Enter your custom message..."
                 />
               </div>
             </div>
 
             {/* Services & Labor - Daily Hours Layout */}
-            <div className="p-4 rounded-lg border-l-4 space-y-4" style={{ borderLeftColor: '#3B82F6', backgroundColor: darkTheme.cardBg }}>
-              <h2 className="text-xl font-semibold" style={{ color: '#3B82F6' }}>Services & Labor</h2>
+            <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: paintBrainColors.green, backgroundColor: darkTheme.cardBg }}>
+              <h2 className="text-xl font-semibold" style={{ color: paintBrainColors.green }}>Services & Labor</h2>
               
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse" style={{ borderColor: darkTheme.border }}>
@@ -1229,8 +1229,8 @@ ${emailMessage}`;
 
             {/* Receipt Attachment Option */}
             {receipts.length > 0 && (
-              <div className="p-4 rounded-lg border-l-4" style={{ borderLeftColor: '#8B5CF6', backgroundColor: darkTheme.cardBg }}>
-                <h3 className="text-xl font-semibold mb-3" style={{ color: '#8B5CF6' }}>Receipts & Materials</h3>
+              <div className="p-4 rounded-lg border" style={{ borderColor: paintBrainColors.purple, backgroundColor: darkTheme.cardBg }}>
+                <h3 className="text-xl font-semibold mb-3" style={{ color: paintBrainColors.purple }}>Receipts & Materials</h3>
                 
                 {/* Display receipt items with OCR data */}
                 <div className="space-y-3 mb-4">
@@ -1317,12 +1317,12 @@ ${emailMessage}`;
             </div>
 
             {/* Notes */}
-            <div className="p-4 rounded-lg border-l-4 space-y-2" style={{ borderLeftColor: '#A855F7', backgroundColor: darkTheme.cardBg }}>
-              <label className="block text-sm font-medium" style={{ color: '#A855F7' }}>Notes & Payment Instructions</label>
+            <div className="p-4 rounded-lg border space-y-2" style={{ borderColor: paintBrainColors.purple, backgroundColor: darkTheme.cardBg }}>
+              <label className="block text-sm font-medium" style={{ color: paintBrainColors.purple }}>Notes & Payment Instructions</label>
               <Textarea
                 value={invoiceData.notes}
                 onChange={(e) => setInvoiceData({...invoiceData, notes: e.target.value})}
-                className="bg-gray-800 border-[#A855F7] text-white"
+                className="bg-gray-800 border-[#8B5FBF] text-white"
                 rows={3}
                 placeholder="Payment instructions, additional notes, etc."
               />
