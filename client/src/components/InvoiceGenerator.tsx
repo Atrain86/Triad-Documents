@@ -993,7 +993,7 @@ ${emailMessage}`;
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-7xl h-[90vh] overflow-hidden p-0" style={{ backgroundColor: darkTheme.background }}>
+      <DialogContent className="max-w-7xl h-[90vh] overflow-hidden p-0" style={{ backgroundColor: darkTheme.background, minHeight: '80vh', contain: 'layout style paint' }}>
         <DialogHeader className="sr-only">
           <DialogTitle>Invoice Generator</DialogTitle>
           <DialogDescription>Create and send professional painting service invoices</DialogDescription>
@@ -1007,8 +1007,9 @@ ${emailMessage}`;
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth" style={{ backgroundColor: darkTheme.background }}>
-            {/* Business & Invoice Info */}
+          <div className="flex-1 overflow-y-auto scroll-smooth" style={{ backgroundColor: darkTheme.background, minHeight: 0 }}>
+            <div className="p-6 space-y-6" style={{ minHeight: '60vh' }}>
+              {/* Business & Invoice Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: paintBrainColors.red, backgroundColor: darkTheme.cardBg }}>
                 <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.red }}>
@@ -1327,9 +1328,7 @@ ${emailMessage}`;
                 placeholder="Payment instructions, additional notes, etc."
               />
             </div>
-
-
-
+            </div>
           </div>
           
           {/* Fixed Footer with Action Buttons */}
