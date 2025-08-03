@@ -1781,18 +1781,24 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                           )}
                         </div>
 
-                        {/* Hours Summary at Bottom */}
-                        {dailyHours.length > 0 && (
-                          <div className="mt-4 p-3 bg-green-900/20 rounded-lg border border-green-700" style={{ marginRight: '48px' }}>
-                            <span className="font-semibold text-green-300 text-sm">
-                              {(() => {
-                                const totalHours = dailyHours.reduce((sum, h) => sum + (typeof h.hours === 'number' ? h.hours : parseFloat(h.hours) || 0), 0);
-                                const totalCost = dailyHours.reduce((sum, h) => sum + ((typeof h.hours === 'number' ? h.hours : parseFloat(h.hours) || 0) * (h.hourlyRate || project?.hourlyRate || 60)), 0);
-                                return `${totalHours % 1 === 0 ? totalHours : totalHours.toFixed(1)} hrs • $${totalCost.toLocaleString()}`;
-                              })()}
-                            </span>
-                          </div>
-                        )}
+                        {/* Hours Summary at Bottom - Always reserve space */}
+                        <div className="mt-4" style={{ marginRight: '48px' }}>
+                          {dailyHours.length > 0 ? (
+                            <div className="p-3 bg-green-900/20 rounded-lg border border-green-700">
+                              <span className="font-semibold text-green-300 text-sm">
+                                {(() => {
+                                  const totalHours = dailyHours.reduce((sum, h) => sum + (typeof h.hours === 'number' ? h.hours : parseFloat(h.hours) || 0), 0);
+                                  const totalCost = dailyHours.reduce((sum, h) => sum + ((typeof h.hours === 'number' ? h.hours : parseFloat(h.hours) || 0) * (h.hourlyRate || project?.hourlyRate || 60)), 0);
+                                  return `${totalHours % 1 === 0 ? totalHours : totalHours.toFixed(1)} hrs • $${totalCost.toLocaleString()}`;
+                                })()}
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="p-3 opacity-0 pointer-events-none">
+                              <span className="font-semibold text-green-300 text-sm">0 hrs • $0</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )}
 
