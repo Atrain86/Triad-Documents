@@ -656,7 +656,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
         iframe.style.left = '-9999px';
         iframe.style.top = '-9999px';
         iframe.style.width = '800px';
-        iframe.style.height = '2000px'; // Increased height to prevent truncation
+        iframe.style.height = '4000px'; // Much larger height to accommodate long estimates
         document.body.appendChild(iframe);
 
         if (!iframe.contentDocument) {
@@ -687,9 +687,51 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             const imgData = canvas.toDataURL('image/jpeg', 0.8);
             const pdf = new jsPDF();
             const imgWidth = 210;
+            const pageHeight = 297; // A4 page height in mm
             const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            
+            console.log('PDF content dimensions:', { 
+              canvasHeight: canvas.height, 
+              imgHeight: imgHeight, 
+              pageHeight: pageHeight, 
+              needsMultiplePages: imgHeight > pageHeight 
+            });
 
-            pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+            // If content fits on one page, add it normally
+            if (imgHeight <= pageHeight) {
+              pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+            } else {
+              // Multi-page handling: split the image across multiple pages
+              let position = 0;
+              let pageNumber = 0;
+              
+              while (position < imgHeight) {
+                if (pageNumber > 0) {
+                  pdf.addPage();
+                }
+                
+                console.log(`Adding page ${pageNumber + 1}, position: ${position}, remaining: ${imgHeight - position}`);
+                
+                // Calculate how much content fits on this page
+                const remainingHeight = imgHeight - position;
+                const pageContentHeight = Math.min(pageHeight, remainingHeight);
+                
+                // Add the portion of the image that fits on this page
+                pdf.addImage(
+                  imgData, 
+                  'JPEG', 
+                  0, 
+                  -position, // Negative position to show the right part of the image
+                  imgWidth, 
+                  imgHeight
+                );
+                
+                position += pageHeight;
+                pageNumber++;
+              }
+              
+              console.log(`Generated multi-page PDF with ${pageNumber} pages`);
+            }
             
             const pdfBase64 = pdf.output('datauristring').split(',')[1];
             console.log('Generated PDF for email, size:', pdfBase64.length, 'characters');
