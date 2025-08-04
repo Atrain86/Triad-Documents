@@ -1560,8 +1560,8 @@ ${emailMessage}`;
               <h1 className="text-3xl font-bold text-[#8B5FBF] mb-6">INVOICE</h1>
             </div>
 
-            <div className="grid grid-cols-2 gap-8 mb-8">
-              <div>
+            <div className="flex justify-between mb-8">
+              <div className="w-1/2 pr-4">
                 <h3 className="text-lg font-semibold text-[#8B5FBF] mb-2">To:</h3>
                 <p>{invoiceData.clientName}</p>
                 <p>{invoiceData.clientAddress}</p>
@@ -1569,7 +1569,7 @@ ${emailMessage}`;
                 {invoiceData.clientPhone && <p>{invoiceData.clientPhone}</p>}
                 {invoiceData.clientEmail && <p>{invoiceData.clientEmail}</p>}
               </div>
-              <div>
+              <div className="w-1/2 pl-4">
                 <h3 className="text-lg font-semibold text-[#8B5FBF] mb-2">From:</h3>
                 <p>{invoiceData.businessName}</p>
                 <p>{invoiceData.businessAddress}</p>
