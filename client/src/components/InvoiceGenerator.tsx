@@ -1418,6 +1418,17 @@ ${emailMessage}`;
                 placeholder="Payment instructions, additional notes, etc."
               />
             </div>
+            {/* DEBUG: Test increment button */}
+            <button 
+              onClick={() => {
+                console.log('DEBUG: Test increment button clicked');
+                incrementInvoiceNumber();
+              }}
+              className="bg-red-600 text-white px-4 py-2 rounded mb-4"
+            >
+              TEST: Increment Invoice Number
+            </button>
+
             {/* Action Toggle with Dynamic Label - Matching EstimateGenerator */}
             <div className="flex flex-col items-center gap-4 mb-6 p-6 bg-black rounded-lg border border-gray-600" style={{ 
               borderColor: actionMode === 'email' ? '#EA580C' : '#8B5FBF' 
