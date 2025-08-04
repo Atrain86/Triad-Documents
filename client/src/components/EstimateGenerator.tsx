@@ -701,36 +701,52 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             if (imgHeight <= pageHeight) {
               pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
             } else {
-              // Multi-page handling: split the image across multiple pages
+              // Multi-page handling: create separate canvases for each page
               let position = 0;
               let pageNumber = 0;
+              
+              // Calculate how many pixels per mm for proper scaling
+              const pixelsPerMm = canvas.height / imgHeight;
+              const pageHeightPx = pageHeight * pixelsPerMm;
               
               while (position < imgHeight) {
                 if (pageNumber > 0) {
                   pdf.addPage();
                 }
                 
-                console.log(`Adding page ${pageNumber + 1}, position: ${position}, remaining: ${imgHeight - position}`);
+                console.log(`Adding page ${pageNumber + 1}, position: ${position}mm, remaining: ${imgHeight - position}mm`);
                 
-                // Calculate how much content fits on this page
-                const remainingHeight = imgHeight - position;
-                const pageContentHeight = Math.min(pageHeight, remainingHeight);
+                // Calculate the portion of canvas for this page
+                const startY = position * pixelsPerMm;
+                const endY = Math.min(startY + pageHeightPx, canvas.height);
+                const pageCanvasHeight = endY - startY;
                 
-                // Add the portion of the image that fits on this page
-                pdf.addImage(
-                  imgData, 
-                  'JPEG', 
-                  0, 
-                  -position, // Negative position to show the right part of the image
-                  imgWidth, 
-                  imgHeight
-                );
+                // Create a canvas for just this page's content
+                const pageCanvas = document.createElement('canvas');
+                pageCanvas.width = canvas.width;
+                pageCanvas.height = pageCanvasHeight;
+                const pageCtx = pageCanvas.getContext('2d');
+                
+                if (pageCtx) {
+                  // Copy the relevant portion of the original canvas
+                  pageCtx.drawImage(
+                    canvas,
+                    0, startY, canvas.width, pageCanvasHeight, // Source area
+                    0, 0, canvas.width, pageCanvasHeight      // Destination area
+                  );
+                  
+                  // Convert page canvas to image and add to PDF
+                  const pageImgData = pageCanvas.toDataURL('image/jpeg', 0.8);
+                  const pageImgHeight = (pageCanvasHeight * imgWidth) / canvas.width;
+                  
+                  pdf.addImage(pageImgData, 'JPEG', 0, 0, imgWidth, pageImgHeight);
+                }
                 
                 position += pageHeight;
                 pageNumber++;
               }
               
-              console.log(`Generated multi-page PDF with ${pageNumber} pages`);
+              console.log(`Generated multi-page PDF with ${pageNumber} pages using canvas slicing`);
             }
             
             const pdfBase64 = pdf.output('datauristring').split(',')[1];
