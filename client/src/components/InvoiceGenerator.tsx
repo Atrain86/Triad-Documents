@@ -521,11 +521,11 @@ cortespainter@gmail.com`;
         throw new Error('Invoice preview not properly rendered');
       }
 
-      // Calculate canvas height
+      // Calculate canvas height with extra padding to prevent cutoff
       const elementHeight = Math.max(
-        invoiceRef.current.scrollHeight,
-        invoiceRef.current.offsetHeight,
-        1200 // Minimum height
+        invoiceRef.current.scrollHeight + 100, // Add padding to prevent cutoff
+        invoiceRef.current.offsetHeight + 100,
+        1400 // Increased minimum height for more content
       );
       
       console.log('Capturing canvas with height:', elementHeight);
@@ -1539,7 +1539,7 @@ ${emailMessage}`;
         </div>
 
         {/* Invoice Preview (for PDF generation) */}
-        <div ref={invoiceRef} data-invoice-ref className="fixed -top-[9999px] -left-[9999px] w-[794px] opacity-0 pointer-events-none print:static print:opacity-100 print:pointer-events-auto print:block print:max-w-none" style={{ backgroundColor: '#000000', color: '#fff', minHeight: '1600px' }}>
+        <div ref={invoiceRef} data-invoice-ref className="fixed -top-[9999px] -left-[9999px] w-[794px] opacity-0 pointer-events-none print:static print:opacity-100 print:pointer-events-auto print:block print:max-w-none" style={{ backgroundColor: '#000000', color: '#fff', minHeight: 'auto', paddingBottom: '40px' }}>
           <div className="p-8">
             {/* Header Section */}
             <div className="mb-8">
