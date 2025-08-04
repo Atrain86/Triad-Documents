@@ -492,7 +492,7 @@ cortespainter@gmail.com`;
         transform: invoiceRef.current.style.transform
       };
       
-      // Make element visible and properly positioned for capture
+      // Make element visible and properly positioned for capture with forced large height
       invoiceRef.current.style.display = 'block';
       invoiceRef.current.style.visibility = 'visible';
       invoiceRef.current.style.position = 'absolute';
@@ -502,6 +502,10 @@ cortespainter@gmail.com`;
       invoiceRef.current.style.pointerEvents = 'auto';
       invoiceRef.current.style.zIndex = '9999';
       invoiceRef.current.style.width = '794px';
+      invoiceRef.current.style.height = '3500px'; // Force very large height
+      invoiceRef.current.style.minHeight = '3500px';
+      invoiceRef.current.style.maxHeight = 'none';
+      invoiceRef.current.style.overflow = 'visible';
       invoiceRef.current.style.transform = 'none';
       
       // Wait for rendering and images to load
@@ -528,8 +532,8 @@ cortespainter@gmail.com`;
         invoiceRef.current.clientHeight
       );
       
-      // Use aggressive height calculation - multiply by 2 and add substantial padding
-      const elementHeight = Math.max(baseHeight * 2, 2500); // Minimum 2500px height
+      // Force canvas to capture the full 3500px height
+      const elementHeight = 3500;
       
       console.log('Invoice element dimensions:', {
         scrollHeight: invoiceRef.current.scrollHeight,
