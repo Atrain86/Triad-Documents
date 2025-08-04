@@ -1426,11 +1426,20 @@ ${emailMessage}`;
             <button 
               onClick={() => {
                 console.log('DEBUG: Test increment button clicked');
-                incrementInvoiceNumber();
+                const current = localStorage.getItem('nextInvoiceNumber') || '346';
+                console.log('Current localStorage value:', current);
+                const next = (parseInt(current) + 1).toString();
+                console.log('Setting to:', next);
+                localStorage.setItem('nextInvoiceNumber', next);
+                console.log('New localStorage value:', localStorage.getItem('nextInvoiceNumber'));
+                // Force UI update
+                setInvoiceData(prev => ({...prev, invoiceNumber: parseInt(next)}));
+                console.log('UI should update to show:', next);
               }}
               className="bg-red-600 text-white px-4 py-2 rounded mb-4"
+              style={{zIndex: 9999, position: 'relative'}}
             >
-              TEST: Increment Invoice Number
+              TEST: Increment Invoice Number (Current: {invoiceData.invoiceNumber})
             </button>
 
             {/* Action Toggle with Dynamic Label - Matching EstimateGenerator */}
