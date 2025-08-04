@@ -989,6 +989,10 @@ cortespainter@gmail.com
               throw new Error(error.error || 'Failed to send via Gmail OAuth');
             }
             
+            // Increment invoice number for next invoice
+            console.log('Gmail OAuth email sent - incrementing invoice number');
+            incrementInvoiceNumber();
+            
             toast({
               title: "Email Sent via Gmail!",
               description: `Invoice sent from your Gmail account (${gmailStatus.gmailAddress}) to ${invoiceData.clientEmail}`,
@@ -1014,6 +1018,10 @@ cortespainter@gmail.com
               throw new Error(error.error || 'Failed to send email');
             }
 
+            // Increment invoice number for next invoice
+            console.log('Server SMTP email sent - incrementing invoice number');
+            incrementInvoiceNumber();
+            
             toast({
               title: "Email Sent via Server!",
               description: `Invoice sent to ${invoiceData.clientEmail} (Connect Gmail in Settings for personal account sending)`,
@@ -1422,26 +1430,6 @@ ${emailMessage}`;
                 placeholder="Payment instructions, additional notes, etc."
               />
             </div>
-            {/* DEBUG: Test increment button */}
-            <button 
-              onClick={() => {
-                console.log('DEBUG: Test increment button clicked');
-                const current = localStorage.getItem('nextInvoiceNumber') || '346';
-                console.log('Current localStorage value:', current);
-                const next = (parseInt(current) + 1).toString();
-                console.log('Setting to:', next);
-                localStorage.setItem('nextInvoiceNumber', next);
-                console.log('New localStorage value:', localStorage.getItem('nextInvoiceNumber'));
-                // Force UI update
-                setInvoiceData(prev => ({...prev, invoiceNumber: parseInt(next)}));
-                console.log('UI should update to show:', next);
-              }}
-              className="bg-red-600 text-white px-4 py-2 rounded mb-4"
-              style={{zIndex: 9999, position: 'relative'}}
-            >
-              TEST: Increment Invoice Number (Current: {invoiceData.invoiceNumber})
-            </button>
-
             {/* Action Toggle with Dynamic Label - Matching EstimateGenerator */}
             <div className="flex flex-col items-center gap-4 mb-6 p-6 bg-black rounded-lg border border-gray-600" style={{ 
               borderColor: actionMode === 'email' ? '#EA580C' : '#8B5FBF' 
