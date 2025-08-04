@@ -105,8 +105,14 @@ cortespainter@gmail.com`;
   // Prevent text auto-selection when dialog opens and refresh invoice number
   React.useEffect(() => {
     if (isOpen) {
+      // If localStorage is empty, set a default starting value
+      if (!localStorage.getItem('nextInvoiceNumber')) {
+        localStorage.setItem('nextInvoiceNumber', '346');
+        console.log('Set default invoice number to 346');
+      }
+      
       // Force fresh read from localStorage and update invoice number
-      const freshInvoiceNumber = parseInt(localStorage.getItem('nextInvoiceNumber') || '1');
+      const freshInvoiceNumber = parseInt(localStorage.getItem('nextInvoiceNumber') || '346');
       console.log('Invoice Generator opened - localStorage value:', localStorage.getItem('nextInvoiceNumber'));
       console.log('Parsed invoice number:', freshInvoiceNumber);
       
