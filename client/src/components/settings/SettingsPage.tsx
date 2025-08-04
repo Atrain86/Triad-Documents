@@ -325,9 +325,13 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
       return;
     }
     
-    const nextNumber = inputNumber + 1;
-    saveInvoiceSettings('automatic', nextNumber);
-    setConfirmationMessage(`Starting at Invoice #${inputNumber.toString().padStart(3, '0')} — next invoice will be #${nextNumber.toString().padStart(3, '0')}`);
+    console.log('Setting manual starting point:', inputNumber);
+    localStorage.setItem('nextInvoiceNumber', inputNumber.toString());
+    console.log('Saved to localStorage:', localStorage.getItem('nextInvoiceNumber'));
+    
+    setInvoiceMode('automatic');
+    setNextInvoiceNumber(inputNumber);
+    setConfirmationMessage(`Invoice numbering set to start at #${inputNumber.toString().padStart(3, '0')}`);
     setManualInvoiceInput('');
     setTimeout(() => setConfirmationMessage(''), 5000);
   };
