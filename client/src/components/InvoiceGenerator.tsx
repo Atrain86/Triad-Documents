@@ -1555,9 +1555,15 @@ ${emailMessage}`;
               )}
             </div>
 
-            {/* Invoice Title and Info */}
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-[#8B5FBF] mb-6">INVOICE</h1>
+            {/* Invoice Title and Info - Aligned left with invoice details on right */}
+            <div className="flex justify-between items-start mb-8">
+              <div>
+                <h1 className="text-3xl font-bold text-[#8B5FBF]">INVOICE</h1>
+              </div>
+              <div className="text-right">
+                <p><strong>Invoice #:</strong> {invoiceData.invoiceNumber}</p>
+                <p><strong>Date:</strong> {invoiceData.date}</p>
+              </div>
             </div>
 
             <div className="flex justify-between mb-8">
@@ -1576,11 +1582,6 @@ ${emailMessage}`;
                 <p>{invoiceData.businessCity}</p>
                 <p>{invoiceData.businessEmail}</p>
               </div>
-            </div>
-
-            <div className="mb-6">
-              <p><strong>Invoice #:</strong> {invoiceData.invoiceNumber}</p>
-              <p><strong>Date:</strong> {invoiceData.date}</p>
             </div>
 
             {/* Services & Labor Section - Red Color (matching estimate) */}
