@@ -658,18 +658,19 @@ cortespainter@gmail.com`;
       
       return response.json();
     },
-    onSuccess: (result: any) => {
+    onSuccess: async (result: any) => {
       if (result?.useSendGrid) {
-        // Trigger SendGrid email sending
-        sendViaSendGrid();
+        // Trigger SendGrid email sending (this will handle its own increment)
+        console.log('Gmail not connected - falling back to SendGrid');
+        await sendViaSendGrid();
       } else {
-        // Email sent successfully - increment invoice number
-        console.log('Email sent successfully - incrementing invoice number');
+        // Email sent successfully via Gmail - increment invoice number
+        console.log('Gmail email sent successfully - incrementing invoice number');
         incrementInvoiceNumber();
         
         toast({
           title: "Email sent successfully!",
-          description: "The invoice has been sent successfully.",
+          description: "The invoice has been sent from your Gmail account.",
         });
         // Auto-close dialog after 2 seconds
         setTimeout(() => {
