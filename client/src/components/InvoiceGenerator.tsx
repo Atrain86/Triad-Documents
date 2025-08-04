@@ -521,12 +521,22 @@ cortespainter@gmail.com`;
         throw new Error('Invoice preview not properly rendered');
       }
 
-      // Calculate canvas height with extra padding to prevent cutoff
-      const elementHeight = Math.max(
-        invoiceRef.current.scrollHeight + 200, // Increased padding to prevent cutoff
-        invoiceRef.current.offsetHeight + 200,
-        1600 // Increased minimum height for table content
+      // Calculate dynamic canvas height based on actual content
+      const baseHeight = Math.max(
+        invoiceRef.current.scrollHeight,
+        invoiceRef.current.offsetHeight
       );
+      
+      // Add dynamic padding based on content length - more content = more padding
+      const contentSections = [
+        dailyHours.length > 0, // Services & Labor
+        (receipts.filter(r => invoiceData.selectedReceipts.has(r.id)).length > 0 || invoiceData.suppliesCost > 0), // Materials
+        true, // Summary (always present)
+        invoiceData.notes && invoiceData.notes.length > 0 // Notes
+      ].filter(Boolean).length;
+      
+      const dynamicPadding = Math.max(300, contentSections * 150); // 150px per section + 300px base
+      const elementHeight = baseHeight + dynamicPadding;
       
       console.log('Capturing canvas with height:', elementHeight);
       
