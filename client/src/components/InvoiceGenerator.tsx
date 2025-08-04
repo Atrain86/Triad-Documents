@@ -145,11 +145,19 @@ cortespainter@gmail.com`;
     return nextNumber;
   };
 
-  // Increment and save next invoice number
+  // Increment and save next invoice number, update display
   const incrementInvoiceNumber = () => {
     const currentNumber = getNextInvoiceNumber();
     const nextNumber = currentNumber + 1;
     localStorage.setItem('nextInvoiceNumber', nextNumber.toString());
+    console.log('Invoice number incremented from', currentNumber, 'to', nextNumber);
+    
+    // Update the displayed invoice number for next time
+    setInvoiceData(prev => ({
+      ...prev,
+      invoiceNumber: nextNumber
+    }));
+    
     return currentNumber;
   };
 
