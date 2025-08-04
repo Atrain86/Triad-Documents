@@ -663,13 +663,13 @@ cortespainter@gmail.com`;
         // Trigger SendGrid email sending
         sendViaSendGrid();
       } else {
-        // Increment invoice number for next invoice
-        console.log('Gmail email sent - incrementing invoice number');
+        // Email sent successfully - increment invoice number
+        console.log('Email sent successfully - incrementing invoice number');
         incrementInvoiceNumber();
         
         toast({
           title: "Email sent successfully!",
-          description: "The invoice has been sent from your Gmail account.",
+          description: "The invoice has been sent successfully.",
         });
         // Auto-close dialog after 2 seconds
         setTimeout(() => {
