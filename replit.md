@@ -41,7 +41,7 @@ Logo sizing: Homepage logo should use h-14 size with -mt-2 and mb-8 spacing. All
 - **Photo Management**: Upload, organization, and display of project photos with quality compression options.
 - **Receipt Tracking**: Upload and management of expense receipts with OCR processing via OpenAI Vision API.
 - **Time Tracking**: Logging daily hours with descriptions, integrated into invoicing.
-- **Estimation & Invoicing**: Dynamic estimate generation with detailed breakdowns (labor, materials, travel, tax), and professional PDF invoice generation.
+- **Estimation & Invoicing**: Dynamic estimate generation with detailed breakdowns (labor, materials, travel, tax), and professional PDF invoice generation with unified Paint Brain color scheme design consistency.
 - **Authentication**: JWT-based system with role-based access control (admin/user) and persistent sessions.
 - **Settings**: Centralized configuration for tax, logo scaling, invoice numbering, and photo compression quality.
 - **Calendar Integration**: Direct integration with a dedicated Google Calendar for scheduling.

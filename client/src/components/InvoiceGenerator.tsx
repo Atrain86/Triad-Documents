@@ -583,8 +583,60 @@ cortespainter@gmail.com`;
       console.log('Canvas dimensions:', canvas.width, 'x', canvas.height);
       console.log('Image data length:', imageData.length);
 
-      // Add main invoice page
-      pdf.addImage(imageData, 'JPEG', 0, 0, imgWidth, imgHeight);
+      // Handle multi-page content like estimates
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      
+      // If content fits on one page, add it normally
+      if (imgHeight <= pageHeight) {
+        pdf.addImage(imageData, 'JPEG', 0, 0, imgWidth, imgHeight);
+      } else {
+        // Multi-page handling: create separate canvases for each page
+        let position = 0;
+        let pageNumber = 0;
+        
+        // Calculate how many pixels per mm for proper scaling
+        const pixelsPerMm = canvas.height / imgHeight;
+        const pageHeightPx = pageHeight * pixelsPerMm;
+        
+        while (position < imgHeight) {
+          if (pageNumber > 0) {
+            pdf.addPage();
+          }
+          
+          console.log(`Adding invoice page ${pageNumber + 1}, position: ${position}mm, remaining: ${imgHeight - position}mm`);
+          
+          // Calculate the portion of canvas for this page
+          const startY = position * pixelsPerMm;
+          const endY = Math.min(startY + pageHeightPx, canvas.height);
+          const pageCanvasHeight = endY - startY;
+          
+          // Create a canvas for just this page's content
+          const pageCanvas = document.createElement('canvas');
+          pageCanvas.width = canvas.width;
+          pageCanvas.height = pageCanvasHeight;
+          const pageCtx = pageCanvas.getContext('2d');
+          
+          if (pageCtx) {
+            // Copy the relevant portion of the original canvas
+            pageCtx.drawImage(
+              canvas,
+              0, startY, canvas.width, pageCanvasHeight, // Source area
+              0, 0, canvas.width, pageCanvasHeight      // Destination area
+            );
+            
+            // Convert page canvas to image and add to PDF
+            const pageImgData = pageCanvas.toDataURL('image/jpeg', 0.8);
+            const pageImgHeight = (pageCanvasHeight * imgWidth) / canvas.width;
+            
+            pdf.addImage(pageImgData, 'JPEG', 0, 0, imgWidth, pageImgHeight);
+          }
+          
+          position += pageHeight;
+          pageNumber++;
+        }
+        
+        console.log(`Generated multi-page invoice PDF with ${pageNumber} pages using canvas slicing`);
+      }
       
       // Log PDF info for debugging
       console.log('PDF pages:', pdf.getNumberOfPages());
@@ -1504,150 +1556,127 @@ ${emailMessage}`;
             </div>
 
             {/* Invoice Title and Info */}
-            <div className="flex justify-between items-center mb-8 pb-4 border-b border-gray-600">
-              <div>
-                <h2 className="text-4xl font-bold" style={{ color: paintBrainColors.primary }}>Invoice</h2>
-
-              </div>
-              <div className="text-right">
-                <div className="text-sm text-gray-300">
-                  <p><span className="text-gray-500">Invoice #:</span> <span className="font-semibold">#{invoiceData.invoiceNumber}</span></p>
-                  <p><span className="text-gray-500">Date:</span> <span className="font-semibold">{invoiceData.date}</span></p>
-                </div>
-              </div>
-            </div>
-
-            {/* Client Info */}
-            <div className="mb-8">
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold text-[#8B5FBF] mb-4">INVOICE</h1>
               <div className="grid grid-cols-2 gap-8">
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Bill To</h3>
-                  <div className="text-white">
-                    <p className="font-semibold text-lg">{invoiceData.clientName}</p>
-                    <p className="text-gray-300">{invoiceData.clientAddress}</p>
-                    <p className="text-gray-300">{invoiceData.clientCity} {invoiceData.clientPostal}</p>
-                    {invoiceData.clientPhone && <p className="text-gray-300">{invoiceData.clientPhone}</p>}
-                    {invoiceData.clientEmail && <p className="text-gray-300">{invoiceData.clientEmail}</p>}
-                  </div>
+                  <h3 className="text-lg font-semibold text-[#8B5FBF] mb-2">From:</h3>
+                  <p>{invoiceData.businessName}</p>
+                  <p>{invoiceData.businessAddress}</p>
+                  <p>{invoiceData.businessCity}</p>
+                  <p>{invoiceData.businessEmail}</p>
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">From</h3>
-                  <div className="text-white">
-                    <p className="font-semibold text-lg">{invoiceData.businessName}</p>
-                    <p className="text-gray-300">{invoiceData.businessAddress}</p>
-                    <p className="text-gray-300">{invoiceData.businessCity}</p>
-                    <p className="text-gray-300">{invoiceData.businessEmail}</p>
+                  <h3 className="text-lg font-semibold text-[#8B5FBF] mb-2">To:</h3>
+                  <p>{invoiceData.clientName}</p>
+                  <p>{invoiceData.clientAddress}</p>
+                  <p>{invoiceData.clientCity} {invoiceData.clientPostal}</p>
+                  {invoiceData.clientPhone && <p>{invoiceData.clientPhone}</p>}
+                  {invoiceData.clientEmail && <p>{invoiceData.clientEmail}</p>}
+                </div>
+              </div>
+              <div className="mt-6">
+                <p><strong>Invoice #:</strong> {invoiceData.invoiceNumber}</p>
+                <p><strong>Date:</strong> {invoiceData.date}</p>
+              </div>
+            </div>
+
+            {/* Services & Labor Section - Red Color (matching estimate) */}
+            {dailyHours.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-[#E53E3E] mb-4 border-b border-[#E53E3E] pb-2">
+                  Services & Labor
+                </h3>
+                {dailyHours.map((hourEntry, index) => (
+                  <div key={index} className="flex justify-between mb-2">
+                    <span>
+                      {(() => {
+                        const dateStr = hourEntry.date.toString();
+                        const datePart = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr.split(' ')[0];
+                        const [year, month, day] = datePart.split('-').map(Number);
+                        const localDate = new Date(year, month - 1, day);
+                        return localDate.toLocaleDateString('en-US', { 
+                          weekday: 'short', 
+                          month: 'short', 
+                          day: 'numeric' 
+                        });
+                      })()}: {hourEntry.description || 'Painting'} ({hourEntry.hours} hrs @ ${project.hourlyRate || 60}/hr)
+                    </span>
+                    <span>${(hourEntry.hours * (project.hourlyRate || 60)).toFixed(2)}</span>
                   </div>
+                ))}
+                <div className="text-right font-semibold text-[#6A9955] mt-2">
+                  Labor Subtotal: ${dailyHours.reduce((sum, hourEntry) => sum + (hourEntry.hours * (project.hourlyRate || 60)), 0).toFixed(2)}
+                </div>
+              </div>
+            )}
+
+            {/* Materials & Supplies Section - Yellow Color (matching estimate) */}
+            {(receipts.filter(receipt => invoiceData.selectedReceipts.has(receipt.id)).length > 0 || invoiceData.suppliesCost > 0) && (
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-[#ECC94B] mb-4 border-b border-[#ECC94B] pb-2">
+                  Materials & Supplies
+                </h3>
+                {receipts.filter(receipt => invoiceData.selectedReceipts.has(receipt.id)).map((receipt, index) => (
+                  <div key={index} className="flex justify-between mb-2">
+                    <span>{receipt.vendor || 'Materials'}: {receipt.description || receipt.items}</span>
+                    <span>${(Number(receipt.amount) || 0).toFixed(2)}</span>
+                  </div>
+                ))}
+                {invoiceData.suppliesCost > 0 && (
+                  <div className="flex justify-between mb-2">
+                    <span>Additional Supplies</span>
+                    <span>${invoiceData.suppliesCost.toFixed(2)}</span>
+                  </div>
+                )}
+                <div className="text-right font-semibold text-[#6A9955] mt-2">
+                  Materials Subtotal: ${(calculateMaterialCost() + invoiceData.suppliesCost).toFixed(2)}
+                </div>
+              </div>
+            )}
+
+            {/* Summary Section - Blue Color (matching estimate) */}
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-[#3182CE] mb-4 border-b border-[#3182CE] pb-2">
+                Summary
+              </h3>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span>Labor Subtotal:</span>
+                  <span>${dailyHours.reduce((sum, hourEntry) => sum + (hourEntry.hours * (project.hourlyRate || 60)), 0).toFixed(2)}</span>
+                </div>
+                {(calculateMaterialCost() + invoiceData.suppliesCost) > 0 && (
+                  <div className="flex justify-between">
+                    <span>Materials & Supplies:</span>
+                    <span>${(calculateMaterialCost() + invoiceData.suppliesCost).toFixed(2)}</span>
+                  </div>
+                )}
+                <hr className="border-gray-600" />
+                <div className="flex justify-between">
+                  <span>Subtotal:</span>
+                  <span>${calculateSubtotal().toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>GST (5%):</span>
+                  <span>${calculateGST().toFixed(2)}</span>
+                </div>
+                <hr className="border-gray-600" />
+                <div className="flex justify-between text-xl font-bold text-[#6A9955]">
+                  <span>Total Amount:</span>
+                  <span>${calculateTotal().toFixed(2)}</span>
                 </div>
               </div>
             </div>
 
-            {/* Daily Hours - Detailed Work Description */}
-            <div className="mb-8">
-              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Daily Work Log</h3>
-              <div className="overflow-hidden rounded-lg border border-gray-600">
-                <table className="w-full">
-                  <thead style={{ backgroundColor: '#2d3748' }}>
-                    <tr>
-                      <th className="px-6 py-1 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Date</th>
-                      <th className="px-6 py-1 text-center text-xs font-semibold text-gray-300 uppercase tracking-wider">Hours</th>
-                      <th className="px-6 py-1 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Work Description</th>
-                      <th className="px-6 py-1 text-right text-xs font-semibold text-gray-300 uppercase tracking-wider">Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {dailyHours.map((hourEntry, index) => (
-                      <tr key={index} className={index % 2 === 0 ? '' : 'bg-gray-800'}>
-                        <td className="px-6 py-1">
-                          <div className="flex items-center">
-                            <div className="w-2 h-2 rounded-full mr-3" style={{ backgroundColor: paintBrainColors.accent }}></div>
-                            <span className="font-medium text-white">
-                              {(() => {
-                              // Parse date string directly to avoid timezone conversion
-                              const dateStr = hourEntry.date.toString();
-                              const datePart = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr.split(' ')[0];
-                              const [year, month, day] = datePart.split('-').map(Number);
-                              const localDate = new Date(year, month - 1, day);
-                              return localDate.toLocaleDateString('en-US', { 
-                                weekday: 'short', 
-                                month: 'short', 
-                                day: 'numeric' 
-                              });
-                            })()}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-1 text-center text-gray-300">{hourEntry.hours}hr</td>
-                        <td className="px-6 py-1 text-gray-300">
-                          {hourEntry.description || 'Painting'}
-                        </td>
-                        <td className="px-6 py-1 text-right font-semibold text-white">
-                          ${(hourEntry.hours * (project.hourlyRate || 60)).toFixed(2)}
-                        </td>
-                      </tr>
-                    ))}
-                    
-                    {/* Supplies - simplified single line (receipt details in attachments) */}
-                    {receipts.filter(receipt => invoiceData.selectedReceipts.has(receipt.id)).length > 0 && (
-                      <tr>
-                        <td className="px-6 py-3">
-                          <div className="flex items-center">
-                            <div className="w-2 h-2 rounded-full mr-3" style={{ backgroundColor: paintBrainColors.primary }}></div>
-                            <span className="font-medium text-white">Supplies</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-3 text-center text-gray-300">-</td>
-                        <td className="px-6 py-3 text-gray-300">Materials and supplies (see receipts)</td>
-                        <td className="px-6 py-3 text-right font-semibold text-white">
-                          ${calculateMaterialCost().toFixed(2)}
-                        </td>
-                      </tr>
-                    )}
-
-                    {/* Additional supplies */}
-                    {invoiceData.suppliesCost > 0 && (
-                      <tr>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center">
-                            <div className="w-2 h-2 rounded-full mr-3" style={{ backgroundColor: paintBrainColors.primary }}></div>
-                            <span className="font-medium text-white">Additional Supplies</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-center text-gray-300">-</td>
-                        <td className="px-6 py-4 text-gray-300">Additional materials and supplies</td>
-                        <td className="px-6 py-4 text-right font-semibold text-white">${invoiceData.suppliesCost.toFixed(2)}</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+            {/* Notes Section (if any) */}
+            {invoiceData.notes && (
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-[#8B5FBF] mb-4 border-b border-[#8B5FBF] pb-2">
+                  Notes & Payment Instructions
+                </h3>
+                <p className="whitespace-pre-line">{invoiceData.notes}</p>
               </div>
-            </div>
-
-            {/* Totals Section */}
-            <div className="flex justify-end mb-8">
-              <div className="w-80">
-                <div className="p-6 rounded-lg" style={{ backgroundColor: '#2d3748' }}>
-                  <div className="space-y-3">
-                    <div className="flex justify-between text-gray-300">
-                      <span>Subtotal</span>
-                      <span className="font-semibold">${calculateSubtotal().toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between text-gray-300">
-                      <span>GST (5%)</span>
-                      <span className="font-semibold">${calculateGST().toFixed(2)}</span>
-                    </div>
-
-                    <div className="border-t border-gray-600 pt-3">
-                      <div className="flex justify-center">
-                        <div className="px-6 py-3 rounded-lg text-center text-xl font-bold text-white" style={{ backgroundColor: '#059669', minWidth: '200px' }}>
-                          Total: ${calculateTotal().toFixed(2)}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            )}
 
 
           </div>
