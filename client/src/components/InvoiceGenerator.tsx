@@ -523,9 +523,9 @@ cortespainter@gmail.com`;
 
       // Calculate canvas height with extra padding to prevent cutoff
       const elementHeight = Math.max(
-        invoiceRef.current.scrollHeight + 100, // Add padding to prevent cutoff
-        invoiceRef.current.offsetHeight + 100,
-        1400 // Increased minimum height for more content
+        invoiceRef.current.scrollHeight + 200, // Increased padding to prevent cutoff
+        invoiceRef.current.offsetHeight + 200,
+        1600 // Increased minimum height for table content
       );
       
       console.log('Capturing canvas with height:', elementHeight);
