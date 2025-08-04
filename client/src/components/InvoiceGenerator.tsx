@@ -521,27 +521,22 @@ cortespainter@gmail.com`;
         throw new Error('Invoice preview not properly rendered');
       }
 
-      // Calculate dynamic canvas height based on actual content
+      // Force a very large canvas height to ensure all content is captured
       const baseHeight = Math.max(
         invoiceRef.current.scrollHeight,
-        invoiceRef.current.offsetHeight
+        invoiceRef.current.offsetHeight,
+        invoiceRef.current.clientHeight
       );
       
-      // Add generous dynamic padding to ensure all content is captured
-      const contentRows = dailyHours.length + receipts.filter(r => invoiceData.selectedReceipts.has(r.id)).length;
-      const hasNotes = invoiceData.notes && invoiceData.notes.length > 0;
-      const notesLength = hasNotes ? invoiceData.notes.length : 0;
+      // Use aggressive height calculation - multiply by 2 and add substantial padding
+      const elementHeight = Math.max(baseHeight * 2, 2500); // Minimum 2500px height
       
-      // Calculate substantial padding based on content
-      const basePadding = 500; // Large base padding
-      const rowPadding = contentRows * 80; // 80px per data row
-      const notesPadding = Math.min(notesLength * 2, 400); // Up to 400px for notes
-      const sectionPadding = 200; // Additional section spacing
-      
-      const totalPadding = basePadding + rowPadding + notesPadding + sectionPadding;
-      const elementHeight = baseHeight + totalPadding;
-      
-      console.log('Capturing canvas with height:', elementHeight);
+      console.log('Invoice element dimensions:', {
+        scrollHeight: invoiceRef.current.scrollHeight,
+        offsetHeight: invoiceRef.current.offsetHeight,
+        clientHeight: invoiceRef.current.clientHeight,
+        calculatedHeight: elementHeight
+      });
       
       // Capture the element using html2canvas
       const canvas = await html2canvas(invoiceRef.current, {
