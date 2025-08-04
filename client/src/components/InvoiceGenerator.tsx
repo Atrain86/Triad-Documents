@@ -102,9 +102,15 @@ cortespainter@gmail.com`;
     return () => window.removeEventListener('storage', handleVisibilityChange);
   }, []);
 
-  // Prevent text auto-selection when dialog opens
+  // Prevent text auto-selection when dialog opens and refresh invoice number
   React.useEffect(() => {
     if (isOpen) {
+      // Update invoice number from localStorage when dialog opens
+      setInvoiceData(prev => ({
+        ...prev,
+        invoiceNumber: getNextInvoiceNumber()
+      }));
+      
       // Immediate prevention without delay
       if (firstInputRef.current) {
         firstInputRef.current.setSelectionRange(0, 0);
