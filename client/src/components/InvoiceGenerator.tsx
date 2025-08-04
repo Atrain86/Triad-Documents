@@ -448,6 +448,7 @@ cortespainter@gmail.com`;
       pdf.save(filename);
       
       // Increment invoice number for next invoice
+      console.log('PDF download completed - incrementing invoice number');
       incrementInvoiceNumber();
       
       toast({
@@ -663,6 +664,7 @@ cortespainter@gmail.com`;
         sendViaSendGrid();
       } else {
         // Increment invoice number for next invoice
+        console.log('Gmail email sent - incrementing invoice number');
         incrementInvoiceNumber();
         
         toast({
@@ -866,6 +868,7 @@ cortespainter@gmail.com
       }
 
       // Increment invoice number for next invoice
+      console.log('SendGrid email sent - incrementing invoice number');
       incrementInvoiceNumber();
       
       toast({
