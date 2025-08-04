@@ -527,16 +527,19 @@ cortespainter@gmail.com`;
         invoiceRef.current.offsetHeight
       );
       
-      // Add dynamic padding based on content length - more content = more padding
-      const contentSections = [
-        dailyHours.length > 0, // Services & Labor
-        (receipts.filter(r => invoiceData.selectedReceipts.has(r.id)).length > 0 || invoiceData.suppliesCost > 0), // Materials
-        true, // Summary (always present)
-        invoiceData.notes && invoiceData.notes.length > 0 // Notes
-      ].filter(Boolean).length;
+      // Add generous dynamic padding to ensure all content is captured
+      const contentRows = dailyHours.length + receipts.filter(r => invoiceData.selectedReceipts.has(r.id)).length;
+      const hasNotes = invoiceData.notes && invoiceData.notes.length > 0;
+      const notesLength = hasNotes ? invoiceData.notes.length : 0;
       
-      const dynamicPadding = Math.max(300, contentSections * 150); // 150px per section + 300px base
-      const elementHeight = baseHeight + dynamicPadding;
+      // Calculate substantial padding based on content
+      const basePadding = 500; // Large base padding
+      const rowPadding = contentRows * 80; // 80px per data row
+      const notesPadding = Math.min(notesLength * 2, 400); // Up to 400px for notes
+      const sectionPadding = 200; // Additional section spacing
+      
+      const totalPadding = basePadding + rowPadding + notesPadding + sectionPadding;
+      const elementHeight = baseHeight + totalPadding;
       
       console.log('Capturing canvas with height:', elementHeight);
       
