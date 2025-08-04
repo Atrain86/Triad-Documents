@@ -147,9 +147,13 @@ cortespainter@gmail.com`;
 
   // Increment and save next invoice number, update display
   const incrementInvoiceNumber = () => {
+    console.log('incrementInvoiceNumber function called');
     const currentNumber = getNextInvoiceNumber();
+    console.log('Current number from localStorage:', currentNumber);
     const nextNumber = currentNumber + 1;
+    console.log('Setting next number to:', nextNumber);
     localStorage.setItem('nextInvoiceNumber', nextNumber.toString());
+    console.log('localStorage updated. Stored value:', localStorage.getItem('nextInvoiceNumber'));
     console.log('Invoice number incremented from', currentNumber, 'to', nextNumber);
     
     // Update the displayed invoice number for next time
