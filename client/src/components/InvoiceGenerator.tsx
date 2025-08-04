@@ -1169,6 +1169,9 @@ ${emailMessage}`;
                   {/* Material Markup Control */}
                   <div className="space-y-3">
                     <div className="flex items-center justify-between p-3 rounded-lg border" style={{ borderColor: '#ECC94B' }}>
+                      <span className="text-sm font-medium" style={{ color: darkTheme.textPrimary }}>
+                        Supplies
+                      </span>
                       <div className="flex items-center space-x-3">
                         <span className="text-xs" style={{ color: darkTheme.textSecondary }}>
                           No Markup
