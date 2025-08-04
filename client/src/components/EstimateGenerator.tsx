@@ -429,6 +429,21 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       `;
     }).join('');
 
+    // Generate additional services section
+    const additionalServicesHTML = additionalServices.filter((service: any) => (parseFloat(service.hours) || 0) > 0).map((service: any) => {
+      const hours = parseFloat(service.hours) || 0;
+      const rate = parseFloat(service.rate) || 0;
+      const total = hours * rate;
+      return `
+        <tr>
+          <td class="py-2 px-4 border-b border-gray-700">${service.name}</td>
+          <td class="py-2 px-4 border-b border-gray-700 text-center">${hours}h</td>
+          <td class="py-2 px-4 border-b border-gray-700 text-center">$${rate}/hr</td>
+          <td class="py-2 px-4 border-b border-gray-700 text-right font-semibold">$${total.toFixed(2)}</td>
+        </tr>
+      `;
+    }).join('');
+
     // Generate materials section
     const materialsHTML = [];
     if (paintSubtotal > 0) {
@@ -543,6 +558,32 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       <div class="text-xs text-gray-400 mt-2 px-4">
         <p>* Materials already include taxes paid at purchase - no additional tax applied</p>
       </div>
+    </div>
+    ` : ''}
+
+    ${additionalServicesHTML ? `
+    <!-- Additional Services -->
+    <div class="mb-8">
+      <div class="bg-purple-600 text-white px-4 py-2 mb-4">
+        <h2 class="text-lg font-bold">Additional Services</h2>
+      </div>
+      <table class="w-full bg-gray-800 rounded-lg overflow-hidden">
+        <thead class="bg-gray-700">
+          <tr>
+            <th class="py-2 px-4 text-left">Service</th>
+            <th class="py-2 px-4 text-center">Hours</th>
+            <th class="py-2 px-4 text-center">Rate</th>
+            <th class="py-2 px-4 text-right">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${additionalServicesHTML}
+          <tr class="bg-gray-700">
+            <td colspan="3" class="py-2 px-4 font-semibold">Additional Services Subtotal</td>
+            <td class="py-2 px-4 text-right font-bold text-green-400">$${additionalServicesSubtotal.toFixed(2)}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
     ` : ''}
 
