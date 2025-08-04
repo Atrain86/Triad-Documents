@@ -1557,28 +1557,30 @@ ${emailMessage}`;
 
             {/* Invoice Title and Info */}
             <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-[#8B5FBF] mb-4">INVOICE</h1>
-              <div className="grid grid-cols-2 gap-8">
-                <div>
-                  <h3 className="text-lg font-semibold text-[#8B5FBF] mb-2">From:</h3>
-                  <p>{invoiceData.businessName}</p>
-                  <p>{invoiceData.businessAddress}</p>
-                  <p>{invoiceData.businessCity}</p>
-                  <p>{invoiceData.businessEmail}</p>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-[#8B5FBF] mb-2">To:</h3>
-                  <p>{invoiceData.clientName}</p>
-                  <p>{invoiceData.clientAddress}</p>
-                  <p>{invoiceData.clientCity} {invoiceData.clientPostal}</p>
-                  {invoiceData.clientPhone && <p>{invoiceData.clientPhone}</p>}
-                  {invoiceData.clientEmail && <p>{invoiceData.clientEmail}</p>}
-                </div>
+              <h1 className="text-3xl font-bold text-[#8B5FBF] mb-6">INVOICE</h1>
+            </div>
+
+            <div className="grid grid-cols-2 gap-8 mb-8">
+              <div>
+                <h3 className="text-lg font-semibold text-[#8B5FBF] mb-2">From:</h3>
+                <p>{invoiceData.businessName}</p>
+                <p>{invoiceData.businessAddress}</p>
+                <p>{invoiceData.businessCity}</p>
+                <p>{invoiceData.businessEmail}</p>
               </div>
-              <div className="mt-6">
-                <p><strong>Invoice #:</strong> {invoiceData.invoiceNumber}</p>
-                <p><strong>Date:</strong> {invoiceData.date}</p>
+              <div>
+                <h3 className="text-lg font-semibold text-[#8B5FBF] mb-2">To:</h3>
+                <p>{invoiceData.clientName}</p>
+                <p>{invoiceData.clientAddress}</p>
+                <p>{invoiceData.clientCity} {invoiceData.clientPostal}</p>
+                {invoiceData.clientPhone && <p>{invoiceData.clientPhone}</p>}
+                {invoiceData.clientEmail && <p>{invoiceData.clientEmail}</p>}
               </div>
+            </div>
+
+            <div className="mb-6">
+              <p><strong>Invoice #:</strong> {invoiceData.invoiceNumber}</p>
+              <p><strong>Date:</strong> {invoiceData.date}</p>
             </div>
 
             {/* Services & Labor Section - Red Color (matching estimate) */}
