@@ -508,8 +508,26 @@ cortespainter@gmail.com`;
       invoiceRef.current.style.overflow = 'visible';
       invoiceRef.current.style.transform = 'none';
       
-      // Wait for rendering and images to load
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Force all child elements to expand and remove height constraints
+      const allElements = invoiceRef.current.querySelectorAll('*');
+      allElements.forEach((el: any) => {
+        if (el.style) {
+          el.style.maxHeight = 'none';
+          el.style.height = 'auto';
+          el.style.overflow = 'visible';
+          el.style.whiteSpace = 'normal';
+        }
+      });
+
+      // Wait longer for rendering and force multiple reflows
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Force reflow by accessing layout properties
+      invoiceRef.current.scrollTop = 0;
+      invoiceRef.current.scrollHeight;
+      invoiceRef.current.offsetHeight;
+      
+      await new Promise(resolve => setTimeout(resolve, 500));
       
       console.log('Element dimensions:', {
         scrollHeight: invoiceRef.current.scrollHeight,
