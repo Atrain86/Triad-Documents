@@ -1562,19 +1562,19 @@ ${emailMessage}`;
 
             <div className="grid grid-cols-2 gap-8 mb-8">
               <div>
-                <h3 className="text-lg font-semibold text-[#8B5FBF] mb-2">From:</h3>
-                <p>{invoiceData.businessName}</p>
-                <p>{invoiceData.businessAddress}</p>
-                <p>{invoiceData.businessCity}</p>
-                <p>{invoiceData.businessEmail}</p>
-              </div>
-              <div>
                 <h3 className="text-lg font-semibold text-[#8B5FBF] mb-2">To:</h3>
                 <p>{invoiceData.clientName}</p>
                 <p>{invoiceData.clientAddress}</p>
                 <p>{invoiceData.clientCity} {invoiceData.clientPostal}</p>
                 {invoiceData.clientPhone && <p>{invoiceData.clientPhone}</p>}
                 {invoiceData.clientEmail && <p>{invoiceData.clientEmail}</p>}
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-[#8B5FBF] mb-2">From:</h3>
+                <p>{invoiceData.businessName}</p>
+                <p>{invoiceData.businessAddress}</p>
+                <p>{invoiceData.businessCity}</p>
+                <p>{invoiceData.businessEmail}</p>
               </div>
             </div>
 
