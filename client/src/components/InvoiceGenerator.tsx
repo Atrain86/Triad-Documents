@@ -1685,7 +1685,7 @@ ${emailMessage}`;
                     src={invoiceData.businessLogo} 
                     alt="A-Frame Painting Logo" 
                     className="w-auto"
-                    style={{ height: '20px', maxHeight: '20px' }}
+                    style={{ height: '12px !important', maxHeight: '12px !important', width: 'auto !important', transform: 'scale(1)' }}
                   />
                 </div>
               )}
