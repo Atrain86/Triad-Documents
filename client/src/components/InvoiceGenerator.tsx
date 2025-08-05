@@ -330,19 +330,60 @@ cortespainter@gmail.com`;
     });
 
     try {
-      // Temporarily show the invoice preview element for capture
-      const originalDisplay = invoiceRef.current.style.display;
-      const originalVisibility = invoiceRef.current.style.visibility;
+      // Store original styles
+      const originalStyles = {
+        display: invoiceRef.current.style.display,
+        visibility: invoiceRef.current.style.visibility,
+        position: invoiceRef.current.style.position,
+        top: invoiceRef.current.style.top,
+        left: invoiceRef.current.style.left,
+        opacity: invoiceRef.current.style.opacity,
+        pointerEvents: invoiceRef.current.style.pointerEvents,
+        zIndex: invoiceRef.current.style.zIndex,
+        width: invoiceRef.current.style.width,
+        height: invoiceRef.current.style.height,
+        minHeight: invoiceRef.current.style.minHeight,
+        maxHeight: invoiceRef.current.style.maxHeight,
+        overflow: invoiceRef.current.style.overflow,
+        transform: invoiceRef.current.style.transform
+      };
       
+      // Make element visible and properly positioned for capture with forced large height
       invoiceRef.current.style.display = 'block';
       invoiceRef.current.style.visibility = 'visible';
       invoiceRef.current.style.position = 'absolute';
-      invoiceRef.current.style.top = '-9999px';
-      invoiceRef.current.style.left = '-9999px';
-      invoiceRef.current.style.width = '794px'; // A4 width in pixels
+      invoiceRef.current.style.top = '0px';
+      invoiceRef.current.style.left = '0px';
+      invoiceRef.current.style.opacity = '1';
+      invoiceRef.current.style.pointerEvents = 'auto';
+      invoiceRef.current.style.zIndex = '9999';
+      invoiceRef.current.style.width = '794px';
+      invoiceRef.current.style.height = '2000px'; // Force large height like email version
+      invoiceRef.current.style.minHeight = '2000px';
+      invoiceRef.current.style.maxHeight = 'none';
+      invoiceRef.current.style.overflow = 'visible';
+      invoiceRef.current.style.transform = 'none';
       
-      // Wait for rendering
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Force all child elements to expand and remove height constraints
+      const allElements = invoiceRef.current.querySelectorAll('*');
+      allElements.forEach((el: any) => {
+        if (el.style) {
+          el.style.maxHeight = 'none';
+          el.style.height = 'auto';
+          el.style.overflow = 'visible';
+          el.style.whiteSpace = 'normal';
+        }
+      });
+
+      // Wait longer for rendering and force multiple reflows
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Force reflow by accessing layout properties
+      invoiceRef.current.scrollTop = 0;
+      invoiceRef.current.scrollHeight;
+      invoiceRef.current.offsetHeight;
+      
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       // Ensure element has proper dimensions
       if (invoiceRef.current.scrollHeight === 0) {
@@ -355,22 +396,31 @@ cortespainter@gmail.com`;
         clientHeight: invoiceRef.current.clientHeight
       });
 
-      // Capture the invoice preview with better error handling
+      // Use optimized canvas height for 2-page PDF
+      const elementHeight = 2000;
+
+      // Capture the invoice preview with forced height like email version
       const canvas = await html2canvas(invoiceRef.current, {
-        scale: 1.5, // Reduced scale for better performance
+        scale: 1.5,
         backgroundColor: '#000000',
         useCORS: true,
         allowTaint: true,
-        logging: true, // Enable logging for debugging
+        logging: true,
         width: 794,
-        height: Math.max(invoiceRef.current.scrollHeight, 800),
+        height: elementHeight,
+        windowWidth: 794,
+        windowHeight: elementHeight,
+        removeContainer: false,
         onclone: (clonedDoc) => {
           console.log('Cloning document for PDF generation');
           const clonedElement = clonedDoc.querySelector('[data-invoice-ref]') as HTMLElement;
           if (clonedElement) {
-            clonedElement.style.display = 'block';
-            clonedElement.style.visibility = 'visible';
+            clonedElement.style.position = 'static';
             clonedElement.style.opacity = '1';
+            clonedElement.style.visibility = 'visible';
+            clonedElement.style.transform = 'none';
+            clonedElement.style.width = '794px';
+            clonedElement.style.display = 'block';
           }
         }
       });
@@ -385,12 +435,7 @@ cortespainter@gmail.com`;
       }
 
       // Restore original styling
-      invoiceRef.current.style.display = originalDisplay;
-      invoiceRef.current.style.visibility = originalVisibility;
-      invoiceRef.current.style.position = '';
-      invoiceRef.current.style.top = '';
-      invoiceRef.current.style.left = '';
-      invoiceRef.current.style.width = '';
+      Object.assign(invoiceRef.current.style, originalStyles);
 
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
@@ -400,8 +445,68 @@ cortespainter@gmail.com`;
       const imgWidth = pdfWidth;
       const imgHeight = (canvas.height * pdfWidth) / canvas.width;
       
-      // Add main invoice page
-      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
+      // Convert canvas to JPEG with quality setting for smaller file size
+      const imageData = canvas.toDataURL('image/jpeg', 0.7);
+      if (!imageData || imageData === 'data:,' || imageData.length < 100) {
+        throw new Error('Failed to generate valid image data from canvas');
+      }
+      
+      // Handle multi-page content like email version
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      
+      // If content fits on one page, add it normally
+      if (imgHeight <= pageHeight) {
+        pdf.addImage(imageData, 'JPEG', 0, 0, imgWidth, imgHeight);
+      } else {
+        // Multi-page handling: create separate canvases for each page
+        let position = 0;
+        let pageNumber = 0;
+        
+        // Calculate how many pixels per mm for proper scaling
+        const pixelsPerMm = canvas.height / imgHeight;
+        const pageHeightInPixels = pageHeight * pixelsPerMm;
+        
+        while (position < imgHeight) {
+          if (pageNumber > 0) {
+            pdf.addPage();
+          }
+          
+          const remainingHeight = imgHeight - position;
+          const currentPageHeight = Math.min(pageHeight, remainingHeight);
+          
+          console.log(`Adding invoice page ${pageNumber + 1}, position: ${position}mm, remaining: ${remainingHeight}mm`);
+          
+          // Create a separate canvas for this page
+          const pageCanvas = document.createElement('canvas');
+          const pageCtx = pageCanvas.getContext('2d');
+          pageCanvas.width = canvas.width;
+          pageCanvas.height = Math.floor(pageHeightInPixels);
+          
+          if (pageCtx) {
+            // Fill with black background to eliminate white space
+            pageCtx.fillStyle = '#000000';
+            pageCtx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+            
+            // Copy the portion of the original canvas for this page
+            const sourceY = Math.floor(position * pixelsPerMm);
+            const sourceHeight = Math.min(pageHeightInPixels, canvas.height - sourceY);
+            
+            pageCtx.drawImage(
+              canvas,
+              0, sourceY, canvas.width, sourceHeight,
+              0, 0, pageCanvas.width, sourceHeight
+            );
+            
+            const pageImageData = pageCanvas.toDataURL('image/jpeg', 0.7);
+            pdf.addImage(pageImageData, 'JPEG', 0, 0, pdfWidth, currentPageHeight);
+          }
+          
+          position += pageHeight;
+          pageNumber++;
+        }
+        
+        console.log(`Generated multi-page invoice PDF with ${pageNumber} pages using canvas slicing`);
+      }
 
       // Add selected receipt attachments (only image files, not PDFs)
       if (invoiceData.selectedReceipts.size > 0) {
