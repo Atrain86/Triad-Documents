@@ -368,11 +368,7 @@ export async function sendEstimateEmail(
 Thank you for considering A-Frame Painting. Please find attached your detailed estimate.
 
 Please review the attached detailed estimate and let me know if you have any questions.
-${customMessageSection}================================
-TOTAL ESTIMATE: $${totalAmount}
-================================
-
-IMPORTANT NOTE: This is an estimate, not a final quote. Final costs may vary based on actual conditions discovered during the project. If the job scope changes significantly (exceeding 20% of this estimate), we will discuss options with you before proceeding.
+${customMessageSection}IMPORTANT NOTE: This is an estimate, not a final quote. Final costs may vary based on actual conditions discovered during the project. If the job scope changes significantly (exceeding 20% of this estimate), we will discuss options with you before proceeding.
 
 ESTIMATE VALIDITY: This estimate is valid for 30 days from today's date
 
@@ -398,10 +394,6 @@ cortespainter@gmail.com`;
         <h3 style="color: #EA580C; margin-top: 0; font-size: 16px;">Personal Message:</h3>
         <p style="margin: 0; font-style: italic; color: #333; line-height: 1.5;">${customMessage}</p>
       </div>` : ''}
-      
-      <div style="background-color: #ea580c; color: white; padding: 20px; border-radius: 8px; margin: 25px 0; text-align: center;">
-        <h2 style="margin: 0; font-size: 24px;">Total Estimate: $${totalAmount}</h2>
-      </div>
       
       <div style="background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
         <p style="margin: 0; color: #856404; font-size: 14px;"><strong>Important Note:</strong> This is an estimate, not a final quote. Final costs may vary based on actual conditions discovered during the project. If the job scope changes significantly (exceeding 20% of this estimate), we will discuss options with you before proceeding.</p>
