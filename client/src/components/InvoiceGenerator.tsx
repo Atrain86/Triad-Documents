@@ -502,8 +502,8 @@ cortespainter@gmail.com`;
       invoiceRef.current.style.pointerEvents = 'auto';
       invoiceRef.current.style.zIndex = '9999';
       invoiceRef.current.style.width = '794px';
-      invoiceRef.current.style.height = '3500px'; // Force very large height
-      invoiceRef.current.style.minHeight = '3500px';
+      invoiceRef.current.style.height = '2000px'; // Optimized for 2-page PDF
+      invoiceRef.current.style.minHeight = '2000px';
       invoiceRef.current.style.maxHeight = 'none';
       invoiceRef.current.style.overflow = 'visible';
       invoiceRef.current.style.transform = 'none';
@@ -550,8 +550,8 @@ cortespainter@gmail.com`;
         invoiceRef.current.clientHeight
       );
       
-      // Force canvas to capture the full 3500px height
-      const elementHeight = 3500;
+      // Optimized canvas height for 2-page PDF
+      const elementHeight = 2000;
       
       console.log('Invoice element dimensions:', {
         scrollHeight: invoiceRef.current.scrollHeight,
