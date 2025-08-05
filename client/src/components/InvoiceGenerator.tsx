@@ -1684,7 +1684,7 @@ ${emailMessage}`;
                   <img 
                     src={invoiceData.businessLogo} 
                     alt="A-Frame Painting Logo" 
-                    className="h-24 w-auto"
+                    className="h-14 w-auto"
                   />
                 </div>
               )}
