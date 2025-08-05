@@ -1610,12 +1610,12 @@ ${emailMessage}`;
             </div>
 
             {/* Notes */}
-            <div className="p-4 rounded-lg border space-y-2" style={{ borderColor: paintBrainColors.purple, backgroundColor: darkTheme.cardBg }}>
-              <label className="block text-sm font-medium" style={{ color: paintBrainColors.purple }}>Notes & Payment Instructions</label>
+            <div className="p-4 rounded-lg border space-y-2" style={{ borderColor: '#EA580C', backgroundColor: darkTheme.cardBg }}>
+              <label className="block text-sm font-medium" style={{ color: '#EA580C' }}>Notes & Payment Instructions</label>
               <Textarea
                 value={invoiceData.notes}
                 onChange={(e) => setInvoiceData({...invoiceData, notes: e.target.value})}
-                className="bg-gray-800 border-[#8B5FBF] text-white"
+                className="bg-gray-800 border-[#EA580C] text-white"
                 rows={3}
                 placeholder="Payment instructions, additional notes, etc."
               />
@@ -1811,7 +1811,7 @@ ${emailMessage}`;
 
             {/* Summary Section - Table format matching estimate */}
             <div className="mb-6">
-              <div className="p-4 rounded-lg" style={{ backgroundColor: '#8B5FBF' }}>
+              <div className="p-4 rounded-lg" style={{ backgroundColor: '#3182CE' }}>
                 <h3 className="text-lg font-semibold text-white">Additional Services</h3>
               </div>
               <div className="rounded-lg border-2" style={{ borderColor: '#4A5568', backgroundColor: '#2D3748' }}>
