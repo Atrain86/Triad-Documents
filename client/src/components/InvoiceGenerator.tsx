@@ -1682,10 +1682,20 @@ ${emailMessage}`;
               {logoVisibility.emails && (
                 <div className="flex justify-center">
                   <img 
-                    src={invoiceData.businessLogo} 
+                    src={`${invoiceData.businessLogo}?v=${Date.now()}`} 
                     alt="A-Frame Painting Logo" 
                     className="w-auto"
-                    style={{ height: '12px !important', maxHeight: '12px !important', width: 'auto !important', transform: 'scale(1)' }}
+                    style={{ 
+                      height: '6px !important', 
+                      maxHeight: '6px !important', 
+                      width: 'auto !important', 
+                      minHeight: '6px !important',
+                      maxWidth: '60px !important',
+                      fontSize: '6px !important',
+                      transform: 'scale(0.3) !important',
+                      display: 'block !important',
+                      objectFit: 'contain !important'
+                    }}
                   />
                 </div>
               )}
