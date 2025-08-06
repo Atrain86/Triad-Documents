@@ -1694,22 +1694,11 @@ ${emailMessage}`;
             <div className="mb-8">
               {/* Logo Only */}
               {logoVisibility.emails && (
-                <div className="flex justify-center">
+                <div className="flex justify-center mb-4">
                   <img 
                     src={`${invoiceData.businessLogo}?v=${Date.now()}`} 
                     alt="A-Frame Painting Logo" 
-                    className="w-auto"
-                    style={{ 
-                      height: '6px !important', 
-                      maxHeight: '6px !important', 
-                      width: 'auto !important', 
-                      minHeight: '6px !important',
-                      maxWidth: '60px !important',
-                      fontSize: '6px !important',
-                      transform: 'scale(0.3) !important',
-                      display: 'block !important',
-                      objectFit: 'contain !important'
-                    }}
+                    className="h-16 w-auto object-contain"
                   />
                 </div>
               )}
