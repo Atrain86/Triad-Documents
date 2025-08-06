@@ -384,6 +384,9 @@ export default function StreamlinedHomepage({
 
 
 
+        {/* Additional spacing below logo */}
+        <div className="mb-16"></div>
+
         {/* Centered New Client and Schedule buttons */}
         <div className="flex justify-center gap-4 mb-6">
           <div className="flex items-center gap-2">

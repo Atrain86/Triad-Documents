@@ -835,21 +835,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                     </button>
                                   </div>
                                   
-                                  {/* NUCLEAR TEST BUTTON */}
-                                  <div className="absolute top-4 right-4">
-                                    <button
-                                      onClick={() => {
-                                        console.log('NUCLEAR 500% TEST');
-                                        setLogoScale(500);
-                                        localStorage.clear();
-                                        localStorage.setItem('logoScale', '500');
-                                        window.dispatchEvent(new CustomEvent('logoScaleChanged', { detail: 500 }));
-                                      }}
-                                      className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 text-xs rounded"
-                                    >
-                                      Test 500%
-                                    </button>
-                                  </div>
+
                                   
 
 
