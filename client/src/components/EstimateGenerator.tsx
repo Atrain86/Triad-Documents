@@ -1429,7 +1429,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
               <img 
                 src={currentLogo?.url || "/aframe-logo.png"} 
                 alt="Business Logo" 
-                className="mx-auto mb-4 h-16"
+                className="mx-auto mb-4 h-8"
               />
             )}
             <h1 className="text-3xl font-bold text-[#8B5FBF]">ESTIMATE</h1>
