@@ -9,6 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { ClientPageHints, HelpIcon } from './HintSystem';
 
 import { compressMultipleImages, formatFileSize } from '@/lib/imageCompression';
 import type { Project, Photo, Receipt, ToolsChecklist, DailyHours } from '@shared/schema';
@@ -1349,9 +1350,10 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                   <div className="border-t border-gray-600 p-4 bg-gray-900">
                     {section.id === 'photos' && (
                       <div>
-                        {/* Photo Upload Options */}
-                        <div className="mb-4 grid grid-cols-2 gap-2">
-                          <Button
+                        {/* Photo Upload Options with Help */}
+                        <div className="mb-4 flex items-center justify-between">
+                          <div className="grid grid-cols-2 gap-2 flex-1">
+                            <Button
                             onClick={() => {
                               // Create input for direct camera access
                               const input = document.createElement('input');
@@ -2212,6 +2214,9 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
         }}
         project={project}
       />
+
+      {/* Client Page Hint System */}
+      <ClientPageHints />
     </div>
   );
 }

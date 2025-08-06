@@ -11,6 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import ClientPhone from './ClientPhone';
 import DarkModeCalendar from './DarkModeCalendar';
 import TaxSetupModal from './settings/TaxSetupModal';
+import { HomepageHints, HelpIcon } from './HintSystem';
 
 // Paint Brain Color Palette
 const paintBrainColors = {
@@ -359,13 +360,16 @@ export default function StreamlinedHomepage({
 
         {/* Centered New Client and Schedule buttons */}
         <div className="flex justify-center gap-4 mb-6">
-          <Button
-            onClick={() => setShowNewClientDialog(true)}
-            style={{ backgroundColor: paintBrainColors.red, color: 'white' }}
-            className="px-4 py-2 text-sm font-semibold hover:opacity-90"
-          >
-            New Client
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => setShowNewClientDialog(true)}
+              style={{ backgroundColor: paintBrainColors.red, color: 'white' }}
+              className="px-4 py-2 text-sm font-semibold hover:opacity-90"
+            >
+              New Client
+            </Button>
+            <HelpIcon hintId="homepage-new-client" position="bottom" />
+          </div>
           
           <Button
             onClick={() => openWorkCalendar()}
@@ -399,6 +403,7 @@ export default function StreamlinedHomepage({
               <span className="text-sm font-medium" style={{ color: '#7B4FF2' }}>
                 {projects.filter((p: any) => p.status === 'archived').length} Archive
               </span>
+              <HelpIcon hintId="homepage-archive-toggle" position="right" />
             </div>
           </div>
         )}
@@ -411,9 +416,12 @@ export default function StreamlinedHomepage({
               placeholder="Search clients"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 py-3 border-2 w-full"
+              className="pl-10 pr-10 py-3 border-2 w-full"
               style={{ borderColor: paintBrainColors.orange }}
             />
+            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+              <HelpIcon hintId="homepage-search" position="left" />
+            </div>
           </div>
         </div>
 
@@ -549,6 +557,9 @@ export default function StreamlinedHomepage({
           onClose={() => setShowTaxSetup(false)}
         />
       </div>
+
+      {/* Homepage Hint System */}
+      <HomepageHints />
     </div>
   );
 }
