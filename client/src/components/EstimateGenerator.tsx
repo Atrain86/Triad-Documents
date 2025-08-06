@@ -506,56 +506,87 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       </div>
     </div>
 
-    ${servicesHTML || additionalLaborHTML ? `
+    ${servicesHTML ? `
     <!-- Services & Labor -->
     <div class="mb-8">
-      <div class="bg-red-600 text-white px-4 py-2 mb-4">
+      <div style="background-color: #E53E3E;" class="text-white px-4 py-3 rounded-t-lg">
         <h2 class="text-lg font-bold">Services & Labor</h2>
       </div>
-      <table class="w-full bg-gray-800 rounded-lg overflow-hidden">
-        <thead class="bg-gray-700">
-          <tr>
-            <th class="py-2 px-4 text-left">Service</th>
-            <th class="py-2 px-4 text-center">Hours</th>
-            <th class="py-2 px-4 text-center">Rate</th>
-            <th class="py-2 px-4 text-right">Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${servicesHTML}
-          ${additionalLaborHTML}
-          <tr class="bg-gray-700">
-            <td colspan="3" class="py-2 px-4 font-semibold">Labor Subtotal</td>
-            <td class="py-2 px-4 text-right font-bold text-green-400">$${laborSubtotal.toFixed(2)}</td>
-          </tr>
-        </tbody>
-      </table>
+      <div style="background-color: #2D3748; border: 2px solid #E53E3E; border-top: none;" class="rounded-b-lg p-4">
+        <table class="w-full">
+          <thead>
+            <tr style="border-bottom: 2px solid #E53E3E;">
+              <th class="py-2 px-4 text-left text-white">Service</th>
+              <th class="py-2 px-4 text-center text-white">Hours</th>
+              <th class="py-2 px-4 text-center text-white">Rate</th>
+              <th class="py-2 px-4 text-right text-white">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${servicesHTML}
+            <tr style="border-top: 2px solid #E53E3E;">
+              <td colspan="3" class="py-2 px-4 font-semibold text-white">Services Subtotal</td>
+              <td class="py-2 px-4 text-right font-bold text-green-400">$${workStages.filter((stage: any) => (parseFloat(stage.hours) || 0) > 0).reduce((total: number, stage: any) => total + ((parseFloat(stage.hours) || 0) * (parseFloat(stage.rate) || 0)), 0).toFixed(2)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    ` : ''}
+
+    ${additionalLaborHTML ? `
+    <!-- Additional Labor -->
+    <div class="mb-8">
+      <div style="background-color: #38A169;" class="text-white px-4 py-3 rounded-t-lg">
+        <h2 class="text-lg font-bold">Additional Labor</h2>
+      </div>
+      <div style="background-color: #2D3748; border: 2px solid #38A169; border-top: none;" class="rounded-b-lg p-4">
+        <table class="w-full">
+          <thead>
+            <tr style="border-bottom: 2px solid #38A169;">
+              <th class="py-2 px-4 text-left text-white">Worker</th>
+              <th class="py-2 px-4 text-center text-white">Hours</th>
+              <th class="py-2 px-4 text-center text-white">Rate</th>
+              <th class="py-2 px-4 text-right text-white">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${additionalLaborHTML}
+            <tr style="border-top: 2px solid #38A169;">
+              <td colspan="3" class="py-2 px-4 font-semibold text-white">Additional Labor Subtotal</td>
+              <td class="py-2 px-4 text-right font-bold text-green-400">$${additionalLabor.filter((labor: any) => (parseFloat(labor.hours) || 0) > 0).reduce((total: number, labor: any) => total + ((parseFloat(labor.hours) || 0) * (parseFloat(labor.rate) || 0)), 0).toFixed(2)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
     ` : ''}
 
     ${materialsHTML.length > 0 ? `
     <!-- Paint & Materials -->
     <div class="mb-8">
-      <div class="bg-orange-500 text-white px-4 py-2 mb-4">
+      <div style="background-color: #ECC94B;" class="text-white px-4 py-3 rounded-t-lg">
         <h2 class="text-lg font-bold">Paint & Materials (incl. taxes)</h2>
       </div>
-      <table class="w-full bg-gray-800 rounded-lg overflow-hidden">
-        <thead class="bg-gray-700">
-          <tr>
-            <th class="py-2 px-4 text-left">Item</th>
-            <th class="py-2 px-4 text-right">Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${materialsHTML.join('')}
-          <tr class="bg-gray-700">
-            <td class="py-2 px-4 font-semibold">Materials Subtotal (incl. taxes)</td>
-            <td class="py-2 px-4 text-right font-bold text-green-400">$${materialsSubtotal.toFixed(2)}</td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="text-xs text-gray-400 mt-2 px-4">
-        <p>* Materials already include taxes paid at purchase - no additional tax applied</p>
+      <div style="background-color: #2D3748; border: 2px solid #ECC94B; border-top: none;" class="rounded-b-lg p-4">
+        <table class="w-full">
+          <thead>
+            <tr style="border-bottom: 2px solid #ECC94B;">
+              <th class="py-2 px-4 text-left text-white">Item</th>
+              <th class="py-2 px-4 text-right text-white">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${materialsHTML.join('')}
+            <tr style="border-top: 2px solid #ECC94B;">
+              <td class="py-2 px-4 font-semibold text-white">Materials Subtotal (incl. taxes)</td>
+              <td class="py-2 px-4 text-right font-bold text-green-400">$${materialsSubtotal.toFixed(2)}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="text-xs text-gray-400 mt-2">
+          <p>* Materials already include taxes paid at purchase - no additional tax applied</p>
+        </div>
       </div>
     </div>
     ` : ''}
@@ -563,26 +594,28 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     ${additionalServicesHTML ? `
     <!-- Additional Services -->
     <div class="mb-8">
-      <div class="bg-purple-600 text-white px-4 py-2 mb-4">
+      <div style="background-color: #3182CE;" class="text-white px-4 py-3 rounded-t-lg">
         <h2 class="text-lg font-bold">Additional Services</h2>
       </div>
-      <table class="w-full bg-gray-800 rounded-lg overflow-hidden">
-        <thead class="bg-gray-700">
-          <tr>
-            <th class="py-2 px-4 text-left">Service</th>
-            <th class="py-2 px-4 text-center">Hours</th>
-            <th class="py-2 px-4 text-center">Rate</th>
-            <th class="py-2 px-4 text-right">Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${additionalServicesHTML}
-          <tr class="bg-gray-700">
-            <td colspan="3" class="py-2 px-4 font-semibold">Additional Services Subtotal</td>
-            <td class="py-2 px-4 text-right font-bold text-green-400">$${additionalServicesSubtotal.toFixed(2)}</td>
-          </tr>
-        </tbody>
-      </table>
+      <div style="background-color: #2D3748; border: 2px solid #3182CE; border-top: none;" class="rounded-b-lg p-4">
+        <table class="w-full">
+          <thead>
+            <tr style="border-bottom: 2px solid #3182CE;">
+              <th class="py-2 px-4 text-left text-white">Service</th>
+              <th class="py-2 px-4 text-center text-white">Hours</th>
+              <th class="py-2 px-4 text-center text-white">Rate</th>
+              <th class="py-2 px-4 text-right text-white">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${additionalServicesHTML}
+            <tr style="border-top: 2px solid #3182CE;">
+              <td colspan="3" class="py-2 px-4 font-semibold text-white">Additional Services Subtotal</td>
+              <td class="py-2 px-4 text-right font-bold text-green-400">$${additionalServicesSubtotal.toFixed(2)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
     ` : ''}
 
@@ -598,38 +631,37 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     </div>
     ` : ''}
 
-    <!-- Total -->
-    <div class="flex justify-end mt-10">
-      <div class="w-96">
-        <div class="bg-gray-800 p-4 rounded-lg">
-          ${taxableAmount > 0 ? `
-          <div class="flex justify-between mb-2">
-            <span>Taxable Services:</span>
-            <span>$${taxableAmount.toFixed(2)}</span>
-          </div>
-          ` : ''}
-          ${nonTaxableAmount > 0 ? `
-          <div class="flex justify-between mb-2">
-            <span>Materials (incl. taxes):</span>
-            <span>$${nonTaxableAmount.toFixed(2)}</span>
-          </div>
-          ` : ''}
-          <div class="flex justify-between mb-2 border-t border-gray-600 pt-2">
-            <span>Subtotal:</span>
-            <span>$${subtotalBeforeTax.toFixed(2)}</span>
-          </div>
-          ${taxRate > 0 && taxableAmount > 0 ? `
-          <div class="flex justify-between mb-2">
-            <span>Tax (${(taxRate * 100).toFixed(1)}% on services only):</span>
-            <span>$${taxAmount.toFixed(2)}</span>
-          </div>
-          ` : ''}
-          <div class="border-t border-gray-600 pt-2 mt-2">
-            <div class="flex justify-between bg-green-600 text-white px-4 py-3 rounded font-bold text-xl">
-              <span>Grand Total:</span>
-              <span>$${grandTotal.toFixed(2)}</span>
-            </div>
-          </div>
+    <!-- Summary Section - Purple -->
+    <div class="mb-8">
+      <div style="background-color: #8B5FBF;" class="text-white px-4 py-3 rounded-t-lg">
+        <h2 class="text-lg font-bold">Summary</h2>
+      </div>
+      <div style="background-color: #2D3748; border: 2px solid #8B5FBF; border-top: none;" class="rounded-b-lg p-4">
+        ${taxableAmount > 0 ? `
+        <div class="flex justify-between mb-2 pb-2 text-white" style="border-bottom: 1px solid #8B5FBF;">
+          <span>Taxable Services:</span>
+          <span>$${taxableAmount.toFixed(2)}</span>
+        </div>
+        ` : ''}
+        ${nonTaxableAmount > 0 ? `
+        <div class="flex justify-between mb-2 pb-2 text-white" style="border-bottom: 1px solid #8B5FBF;">
+          <span>Materials (incl. taxes):</span>
+          <span>$${nonTaxableAmount.toFixed(2)}</span>
+        </div>
+        ` : ''}
+        <div class="flex justify-between mb-2 pb-2 text-white" style="border-bottom: 1px solid #8B5FBF;">
+          <span>Subtotal:</span>
+          <span>$${subtotalBeforeTax.toFixed(2)}</span>
+        </div>
+        ${taxRate > 0 && taxableAmount > 0 ? `
+        <div class="flex justify-between mb-2 pb-2 text-white" style="border-bottom: 1px solid #8B5FBF;">
+          <span>Tax (${(taxRate * 100).toFixed(1)}% on services only):</span>
+          <span>$${taxAmount.toFixed(2)}</span>
+        </div>
+        ` : ''}
+        <div class="flex justify-between text-xl font-bold text-green-400 mt-2 pt-2" style="border-top: 2px solid #8B5FBF;">
+          <span>Grand Total:</span>
+          <span>$${grandTotal.toFixed(2)}</span>
         </div>
       </div>
     </div>
