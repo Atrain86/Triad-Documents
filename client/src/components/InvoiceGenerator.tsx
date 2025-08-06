@@ -1762,7 +1762,7 @@ ${emailMessage}`;
                 <div className="p-4 rounded-lg" style={{ backgroundColor: '#E53E3E' }}>
                   <h3 className="text-lg font-semibold text-white">Services & Labor</h3>
                 </div>
-                <div className="rounded-lg border-2" style={{ borderColor: '#4A5568', backgroundColor: '#2D3748' }}>
+                <div className="rounded-lg border-2" style={{ borderColor: '#E53E3E', backgroundColor: '#2D3748' }}>
                   <table className="w-full">
                     <thead>
                       <tr style={{ backgroundColor: '#4A5568' }}>
@@ -1803,7 +1803,7 @@ ${emailMessage}`;
                 <div className="p-4 rounded-lg" style={{ backgroundColor: '#ECC94B' }}>
                   <h3 className="text-lg font-semibold text-white">Paint & Materials (incl. taxes)</h3>
                 </div>
-                <div className="rounded-lg border-2" style={{ borderColor: '#4A5568', backgroundColor: '#2D3748' }}>
+                <div className="rounded-lg border-2" style={{ borderColor: '#ECC94B', backgroundColor: '#2D3748' }}>
                   <table className="w-full">
                     <thead>
                       <tr style={{ backgroundColor: '#4A5568' }}>
@@ -1850,7 +1850,7 @@ ${emailMessage}`;
               <div className="p-4 rounded-lg" style={{ backgroundColor: '#3182CE' }}>
                 <h3 className="text-lg font-semibold text-white">Additional Services</h3>
               </div>
-              <div className="rounded-lg border-2" style={{ borderColor: '#4A5568', backgroundColor: '#2D3748' }}>
+              <div className="rounded-lg border-2" style={{ borderColor: '#3182CE', backgroundColor: '#2D3748' }}>
                 <div className="p-6 space-y-3">
                   <div className="flex justify-between text-white">
                     <span>Labor Subtotal:</span>
@@ -1886,7 +1886,7 @@ ${emailMessage}`;
                 <div className="p-4 rounded-lg" style={{ backgroundColor: '#8B5FBF' }}>
                   <h3 className="text-lg font-semibold text-white">Notes & Payment Instructions</h3>
                 </div>
-                <div className="rounded-lg border-2 p-6" style={{ borderColor: '#4A5568', backgroundColor: '#2D3748' }}>
+                <div className="rounded-lg border-2 p-6" style={{ borderColor: '#8B5FBF', backgroundColor: '#2D3748' }}>
                   <p className="whitespace-pre-line text-white">{invoiceData.notes}</p>
                 </div>
               </div>

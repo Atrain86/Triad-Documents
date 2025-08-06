@@ -121,14 +121,11 @@ export default function StreamlinedHomepage({
     const taxSetupCompleted = localStorage.getItem('taxSetupCompleted');
     const hasShownSetup = sessionStorage.getItem('hasShownTaxSetup');
     
-    // TEMPORARY: Force show modal to test styling (remove this line after testing)
-    setShowTaxSetup(true);
-    
     // Only show if never completed AND not shown in this session
-    // if (!taxSetupCompleted && !hasShownSetup) {
-    //   setShowTaxSetup(true);
-    //   sessionStorage.setItem('hasShownTaxSetup', 'true');
-    // }
+    if (!taxSetupCompleted && !hasShownSetup) {
+      setShowTaxSetup(true);
+      sessionStorage.setItem('hasShownTaxSetup', 'true');
+    }
   }, []);
 
   // Listen for logo visibility changes
