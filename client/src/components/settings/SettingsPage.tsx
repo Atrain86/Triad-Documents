@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Settings, DollarSign, Globe, Mail, ChevronRight, Info, Menu, X, Camera, FileText, Upload, Trash2, Plus, Minus, Building2, Home, ArrowUp, ArrowDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -241,8 +241,9 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
   const [logoScale, setLogoScale] = useState(() => {
     const saved = localStorage.getItem('logoScale');
     let parsed = saved ? parseInt(saved) : 100;
-    // Clear any problematic cached values 
-    if (parsed === 240 || parsed === 335 || parsed === 340 || parsed === 350 || parsed === 365 || parsed > 500) {
+    // Clear any problematic cached values - especially around 415% limit
+    if (parsed === 240 || parsed === 335 || parsed === 340 || parsed === 350 || parsed === 365 || parsed === 415 || parsed > 500) {
+      console.log('Clearing problematic cached logo scale:', parsed, 'resetting to 100%');
       parsed = 100;
       localStorage.setItem('logoScale', '100');
     }
@@ -257,11 +258,17 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
   });
 
   // Logo scaling helper functions
-  const updateLogoScale = (newScale: number) => {
+  const updateLogoScale = useCallback((newScale: number) => {
     console.log('updateLogoScale called with:', newScale);
     // Clamp scale between 25% and 500%
     const clampedScale = Math.max(25, Math.min(500, newScale));
     console.log('Clamped to:', clampedScale, 'from range 25-500');
+    
+    // Only update if the value actually changed
+    if (clampedScale === logoScale) {
+      console.log('No change needed, current scale is already', clampedScale);
+      return;
+    }
     
     // Force update state and localStorage
     setLogoScale(clampedScale);
@@ -271,7 +278,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
     
     // Dispatch custom event to notify other components
     window.dispatchEvent(new CustomEvent('logoScaleChanged', { detail: clampedScale }));
-  };
+  }, [logoScale]);
 
   // Logo vertical position helper functions
   const updateLogoVerticalPosition = (newPosition: number) => {
@@ -292,17 +299,19 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
     updateLogoVerticalPosition(logoVerticalPosition + 2);
   };
 
-  const increaseLogoScale = () => {
-    console.log('BEFORE increaseLogoScale:', logoScale, 'disabled?', logoScale >= 500);
-    const newScale = logoScale + 5;
-    console.log('Calling updateLogoScale with:', newScale);
+  const increaseLogoScale = useCallback(() => {
+    if (logoScale >= 500) return; // Prevent going over 500%
+    const newScale = Math.min(500, logoScale + 5); // Ensure we don't exceed 500%
+    console.log('Increasing logo scale from', logoScale, 'to', newScale);
     updateLogoScale(newScale);
-    console.log('AFTER increaseLogoScale, state should be:', newScale);
-  };
+  }, [logoScale, updateLogoScale]);
 
-  const decreaseLogoScale = () => {
-    updateLogoScale(logoScale - 5);
-  };
+  const decreaseLogoScale = useCallback(() => {
+    if (logoScale <= 25) return; // Prevent going under 25%
+    const newScale = Math.max(25, logoScale - 5); // Ensure we don't go below 25%
+    console.log('Decreasing logo scale from', logoScale, 'to', newScale);
+    updateLogoScale(newScale);
+  }, [logoScale, updateLogoScale]);
 
   // Logo visibility toggle function
   const toggleLogoVisibility = (context: 'homepage' | 'estimates' | 'emails') => {
@@ -767,41 +776,27 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                     <button
                                       onClick={decreaseLogoScale}
                                       disabled={logoScale <= 25}
-                                      className="w-12 h-12 rounded-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors shadow-lg"
+                                      className="w-12 h-12 rounded-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors shadow-lg active:bg-blue-700"
                                       title="Decrease size (5%)"
+                                      type="button"
                                     >
                                       <Minus className="h-6 w-6" />
                                     </button>
-                                    <span className="text-lg text-gray-300 min-w-[60px] text-center font-medium px-4 py-2 bg-gray-800 rounded-lg">
-                                      {logoScale}%
-                                    </span>
+                                    <div className="text-lg text-gray-300 min-w-[80px] text-center font-medium px-4 py-2 bg-gray-800 rounded-lg border">
+                                      {logoScale}% / 500%
+                                    </div>
                                     <button
                                       onClick={increaseLogoScale}
                                       disabled={logoScale >= 500}
-                                      className="w-12 h-12 rounded-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors shadow-lg"
+                                      className="w-12 h-12 rounded-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors shadow-lg active:bg-blue-700"
                                       title="Increase size (5%)"
+                                      type="button"
                                     >
                                       <Plus className="h-6 w-6" />
                                     </button>
                                   </div>
                                   
-                                  {/* Temporary Force Reset Button */}
-                                  <div className="absolute top-2 left-2">
-                                    <button
-                                      onClick={() => {
-                                        localStorage.removeItem('logoScale');
-                                        localStorage.removeItem('logoVerticalPosition');
-                                        setLogoScale(100);
-                                        setLogoVerticalPosition(0);
-                                        console.log('FORCE RESET: Cache cleared, state reset to defaults');
-                                        location.reload();
-                                      }}
-                                      className="text-xs bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded shadow-md"
-                                      title="Force clear all cached values and reset"
-                                    >
-                                      Force Reset
-                                    </button>
-                                  </div>
+
 
                                 </div>
 

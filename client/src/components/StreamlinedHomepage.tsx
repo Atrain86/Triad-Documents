@@ -67,8 +67,9 @@ export default function StreamlinedHomepage({
   const [logoScale, setLogoScale] = useState(() => {
     const saved = localStorage.getItem('logoScale');
     let parsed = saved ? parseInt(saved) : 100;
-    // Clear problematic cached values
-    if (parsed === 240 || parsed === 335 || parsed === 340 || parsed === 350 || parsed === 365 || parsed > 500) {
+    // Clear problematic cached values - especially around 415% limit
+    if (parsed === 240 || parsed === 335 || parsed === 340 || parsed === 350 || parsed === 365 || parsed === 415 || parsed > 500) {
+      console.log('Clearing problematic cached logo scale:', parsed, 'resetting to 100%');
       parsed = 100;
       localStorage.setItem('logoScale', '100');
     }
