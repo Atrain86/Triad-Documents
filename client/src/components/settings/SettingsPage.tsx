@@ -257,28 +257,25 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
     return saved ? parseInt(saved) : 0;
   });
 
-  // Logo scaling helper functions
-  const updateLogoScale = useCallback((newScale: number) => {
+  // Logo scaling helper functions - Force 500% maximum
+  const updateLogoScale = (newScale: number) => {
     console.log('updateLogoScale called with:', newScale);
-    // Clamp scale between 25% and 500%
-    const clampedScale = Math.max(25, Math.min(500, newScale));
-    console.log('Clamped to:', clampedScale, 'from range 25-500');
+    // Force scale between 25% and 500% - NO RESTRICTIONS
+    let clampedScale = newScale;
+    if (newScale < 25) clampedScale = 25;
+    if (newScale > 500) clampedScale = 500;
     
-    // Only update if the value actually changed
-    if (clampedScale === logoScale) {
-      console.log('No change needed, current scale is already', clampedScale);
-      return;
-    }
+    console.log('Scaling to:', clampedScale, '(forced 500% max override)');
     
     // Force update state and localStorage
     setLogoScale(clampedScale);
-    localStorage.removeItem('logoScale'); // Clear first to avoid any caching issues
+    localStorage.removeItem('logoScale');
     localStorage.setItem('logoScale', clampedScale.toString());
-    console.log('Set localStorage to:', clampedScale.toString());
+    console.log('localStorage force set to:', clampedScale);
     
     // Dispatch custom event to notify other components
     window.dispatchEvent(new CustomEvent('logoScaleChanged', { detail: clampedScale }));
-  }, [logoScale]);
+  };
 
   // Logo vertical position helper functions
   const updateLogoVerticalPosition = (newPosition: number) => {
@@ -299,19 +296,25 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
     updateLogoVerticalPosition(logoVerticalPosition + 2);
   };
 
-  const increaseLogoScale = useCallback(() => {
-    if (logoScale >= 500) return; // Prevent going over 500%
-    const newScale = Math.min(500, logoScale + 5); // Ensure we don't exceed 500%
+  const increaseLogoScale = () => {
+    if (logoScale >= 500) {
+      console.log('Already at maximum 500%');
+      return;
+    }
+    const newScale = Math.min(500, logoScale + 5);
     console.log('Increasing logo scale from', logoScale, 'to', newScale);
     updateLogoScale(newScale);
-  }, [logoScale, updateLogoScale]);
+  };
 
-  const decreaseLogoScale = useCallback(() => {
-    if (logoScale <= 25) return; // Prevent going under 25%
-    const newScale = Math.max(25, logoScale - 5); // Ensure we don't go below 25%
+  const decreaseLogoScale = () => {
+    if (logoScale <= 25) {
+      console.log('Already at minimum 25%');
+      return;
+    }
+    const newScale = Math.max(25, logoScale - 5);
     console.log('Decreasing logo scale from', logoScale, 'to', newScale);
     updateLogoScale(newScale);
-  }, [logoScale, updateLogoScale]);
+  };
 
   // Logo visibility toggle function
   const toggleLogoVisibility = (context: 'homepage' | 'estimates' | 'emails') => {
@@ -732,9 +735,23 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                 <h4 className="text-white font-medium mb-3">Current Homepage Logo</h4>
                                 
                                 {/* Large Preview Container - Enlarged for 500% scaling */}
-                                <div className="logo-preview-container bg-[#1a1a1a] border-2 border-[#444] rounded-lg p-8 w-full min-h-[400px] mb-4 relative overflow-visible">
+                                <div 
+                                  className="logo-preview-container bg-[#1a1a1a] border-2 border-[#444] rounded-lg p-8 w-full min-h-[400px] mb-4 relative"
+                                  style={{
+                                    overflow: 'visible',
+                                    maxWidth: 'none',
+                                    maxHeight: 'none'
+                                  }}
+                                >
                                   {/* Logo Display Area - Upper Half */}
-                                  <div className="flex items-center justify-center h-64 relative overflow-visible mb-8">
+                                  <div 
+                                    className="flex items-center justify-center h-64 relative mb-8"
+                                    style={{
+                                      overflow: 'visible',
+                                      maxWidth: 'none',
+                                      maxHeight: 'none'
+                                    }}
+                                  >
                                     <img 
                                       src={currentLogo.url} 
                                       alt="Business Logo" 
@@ -742,11 +759,12 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                       style={{ 
                                         transform: `scale(${logoScale / 100}) translateY(${logoVerticalPosition}px)`,
                                         transformOrigin: 'center center',
-                                        maxWidth: 'none',
-                                        maxHeight: 'none',
+                                        maxWidth: 'none !important',
+                                        maxHeight: 'none !important',
                                         width: '60px',
                                         height: 'auto',
-                                        zIndex: 1
+                                        zIndex: 1,
+                                        overflow: 'visible !important'
                                       }}
                                     />
                                   </div>
@@ -782,8 +800,8 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                     >
                                       <Minus className="h-6 w-6" />
                                     </button>
-                                    <div className="text-lg text-gray-300 min-w-[80px] text-center font-medium px-4 py-2 bg-gray-800 rounded-lg border">
-                                      {logoScale}% / 500%
+                                    <div className="text-lg text-gray-300 min-w-[60px] text-center font-medium px-4 py-2 bg-gray-800 rounded-lg border">
+                                      {logoScale}%
                                     </div>
                                     <button
                                       onClick={increaseLogoScale}
