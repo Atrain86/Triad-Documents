@@ -522,7 +522,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       <div style="background-color: #E53E3E;" class="text-white p-4 rounded-t-lg">
         <h3 class="text-lg font-semibold text-white">Services & Labor</h3>
       </div>
-      <div style="background-color: #2D3748; border: 2px solid #E53E3E; border-top: none;" class="rounded-b-lg p-4">
+      <div style="background-color: #2D3748; border: 2px solid #E53E3E; border-top: none;" class="rounded-b-lg">
         <table class="w-full">
           <thead>
             <tr style="background-color: #4A5568;">
@@ -551,7 +551,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       <div style="background-color: #ECC94B;" class="text-white p-4 rounded-t-lg">
         <h3 class="text-lg font-semibold text-white">Paint & Materials (incl. taxes)</h3>
       </div>
-      <div style="background-color: #2D3748; border: 2px solid #ECC94B; border-top: none;" class="rounded-b-lg p-4">
+      <div style="background-color: #2D3748; border: 2px solid #ECC94B; border-top: none;" class="rounded-b-lg">
         <table class="w-full">
           <thead>
             <tr style="background-color: #4A5568;">
@@ -567,7 +567,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             </tr>
           </tbody>
         </table>
-        <div class="text-xs text-gray-400 mt-2">
+        <div class="text-xs text-gray-400 p-3 pt-2">
           <p>* Materials already include taxes paid at purchase - no additional tax applied</p>
         </div>
       </div>
@@ -580,7 +580,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       <div style="background-color: #3182CE;" class="text-white p-4 rounded-t-lg">
         <h3 class="text-lg font-semibold text-white">Additional Services</h3>
       </div>
-      <div style="background-color: #2D3748; border: 2px solid #3182CE; border-top: none;" class="rounded-b-lg p-4">
+      <div style="background-color: #2D3748; border: 2px solid #3182CE; border-top: none;" class="rounded-b-lg">
         <table class="w-full">
           <thead>
             <tr style="background-color: #4A5568;">
@@ -608,8 +608,8 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       <div style="background-color: #38A169;" class="text-white p-4 rounded-t-lg">
         <h3 class="text-lg font-semibold text-white">Travel Costs</h3>
       </div>
-      <div style="background-color: #2D3748; border: 2px solid #38A169; border-top: none;" class="rounded-b-lg p-4">
-        <div class="text-white">
+      <div style="background-color: #2D3748; border: 2px solid #38A169; border-top: none;" class="rounded-b-lg">
+        <div class="p-3 text-white">
           <p>${travelCosts.distance}km × ${travelCosts.trips} trips × $${travelCosts.ratePerKm}/km = $${travelSubtotal.toFixed(2)}</p>
         </div>
       </div>
@@ -621,7 +621,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       <div style="background-color: #8B5FBF;" class="text-white p-4 rounded-t-lg">
         <h3 class="text-lg font-semibold text-white">Summary</h3>
       </div>
-      <div style="background-color: #2D3748; border: 2px solid #8B5FBF; border-top: none;" class="rounded-b-lg p-4">
+      <div style="background-color: #2D3748; border: 2px solid #8B5FBF; border-top: none;" class="rounded-b-lg">
         ${taxableAmount > 0 ? `
         <div class="flex justify-between p-3 mb-2 text-white" style="border-bottom: 1px solid #8B5FBF;">
           <span>Taxable Services:</span>
