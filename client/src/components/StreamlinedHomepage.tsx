@@ -559,7 +559,7 @@ function NewClientForm({ onSubmit, onCancel, isLoading }: { onSubmit: (data: any
     address: '',
     projectType: 'interior',
     roomCount: 0,
-    hourlyRate: 60
+    hourlyRate: ''
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -572,6 +572,7 @@ function NewClientForm({ onSubmit, onCancel, isLoading }: { onSubmit: (data: any
     onSubmit({
       ...formData,
       clientName: formData.clientName.trim(),
+      hourlyRate: parseInt(formData.hourlyRate) || 0,
       status: 'initial-contact',
       difficulty: 'medium'  // Always include difficulty with default value
     });
@@ -634,7 +635,7 @@ function NewClientForm({ onSubmit, onCancel, isLoading }: { onSubmit: (data: any
           min="0"
           step="1"
           value={formData.hourlyRate}
-          onChange={(e) => setFormData(prev => ({ ...prev, hourlyRate: parseInt(e.target.value) || 0 }))}
+          onChange={(e) => setFormData(prev => ({ ...prev, hourlyRate: e.target.value }))}
           placeholder="Enter hourly rate"
         />
       </div>
