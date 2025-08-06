@@ -707,43 +707,22 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                 
                                 {/* Large Preview Container */}
                                 <div className="logo-preview-container bg-[#1a1a1a] border-2 border-[#444] rounded-lg p-6 flex flex-col items-center justify-center w-full min-h-[200px] mb-4">
-                                  <div className="flex items-center justify-center flex-1 min-h-[120px]">
+                                  <div className="flex items-center justify-center flex-1 min-h-[120px] relative">
                                     <img 
                                       src={currentLogo.url} 
                                       alt="Business Logo" 
-                                      className="max-w-full max-h-[120px] object-contain"
+                                      className="object-contain"
                                       style={{ 
-                                        transform: `scale(${logoScale / 100}) translateY(${logoVerticalPosition}px)` 
+                                        transform: `scale(${logoScale / 100}) translateY(${logoVerticalPosition}px)`,
+                                        maxWidth: 'none',
+                                        maxHeight: 'none',
+                                        width: '120px',
+                                        height: 'auto'
                                       }}
                                     />
-                                  </div>
-                                  {/* Logo Controls */}
-                                  <div className="flex flex-col items-center gap-3 mt-4">
-                                    {/* Size Controls */}
-                                    <div className="flex items-center gap-2">
-                                      <button
-                                        onClick={decreaseLogoScale}
-                                        disabled={logoScale <= 25}
-                                        className="w-8 h-8 rounded-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
-                                        title="Decrease size (5%)"
-                                      >
-                                        <Minus className="h-4 w-4" />
-                                      </button>
-                                      <span className="text-sm text-gray-300 min-w-[50px] text-center font-medium">
-                                        {logoScale}%
-                                      </span>
-                                      <button
-                                        onClick={increaseLogoScale}
-                                        disabled={logoScale >= 400}
-                                        className="w-8 h-8 rounded-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
-                                        title="Increase size (5%)"
-                                      >
-                                        <Plus className="h-4 w-4" />
-                                      </button>
-                                    </div>
                                     
-                                    {/* Vertical Position Controls */}
-                                    <div className="flex items-center gap-2">
+                                    {/* Vertical Position Controls - Right Side */}
+                                    <div className="absolute right-0 top-1/2 transform -translate-y-1/2 flex flex-col gap-2">
                                       <button
                                         onClick={moveLogoUp}
                                         disabled={logoVerticalPosition <= -50}
@@ -752,9 +731,6 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                       >
                                         <ArrowUp className="h-4 w-4" />
                                       </button>
-                                      <span className="text-sm text-gray-300 min-w-[50px] text-center font-medium">
-                                        {logoVerticalPosition}px
-                                      </span>
                                       <button
                                         onClick={moveLogoDown}
                                         disabled={logoVerticalPosition >= 50}
@@ -766,13 +742,36 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                     </div>
                                   </div>
                                   
+                                  {/* Size Controls - Bottom Center */}
+                                  <div className="flex items-center gap-2 mt-4">
+                                    <button
+                                      onClick={decreaseLogoScale}
+                                      disabled={logoScale <= 25}
+                                      className="w-8 h-8 rounded-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
+                                      title="Decrease size (5%)"
+                                    >
+                                      <Minus className="h-4 w-4" />
+                                    </button>
+                                    <span className="text-sm text-gray-300 min-w-[50px] text-center font-medium">
+                                      {logoScale}%
+                                    </span>
+                                    <button
+                                      onClick={increaseLogoScale}
+                                      disabled={logoScale >= 400}
+                                      className="w-8 h-8 rounded-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
+                                      title="Increase size (5%)"
+                                    >
+                                      <Plus className="h-4 w-4" />
+                                    </button>
+                                  </div>
+                                  
                                   {/* Control Labels */}
                                   <div className="text-center text-xs text-gray-400 mt-2">
                                     <div className="mb-1">
                                       <span className="text-blue-400">Blue:</span> Size (25% - 400%)
                                     </div>
                                     <div>
-                                      <span className="text-green-400">Green:</span> Height (-50px to +50px)
+                                      <span className="text-green-400">Green:</span> Height ({logoVerticalPosition}px)
                                     </div>
                                   </div>
                                 </div>
