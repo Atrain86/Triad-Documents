@@ -66,7 +66,13 @@ export default function StreamlinedHomepage({
   // Logo scaling and positioning state
   const [logoScale, setLogoScale] = useState(() => {
     const saved = localStorage.getItem('logoScale');
-    return saved ? parseInt(saved) : 100;
+    let parsed = saved ? parseInt(saved) : 100;
+    // Clear problematic cached values
+    if (parsed === 240 || parsed === 335) {
+      parsed = 100;
+      localStorage.setItem('logoScale', '100');
+    }
+    return parsed;
   });
   
   const [logoVerticalPosition, setLogoVerticalPosition] = useState(() => {
@@ -74,11 +80,12 @@ export default function StreamlinedHomepage({
     return saved ? parseInt(saved) : 0;
   });
 
-  // Listen for logo changes
+  // Listen for logo changes with forced refresh
   useEffect(() => {
     const handleStorageChange = () => {
       const saved = localStorage.getItem('logoScale');
-      setLogoScale(saved ? parseInt(saved) : 100);
+      const parsed = saved ? parseInt(saved) : 100;
+      setLogoScale(parsed);
       
       const savedPosition = localStorage.getItem('logoVerticalPosition');
       setLogoVerticalPosition(savedPosition ? parseInt(savedPosition) : 0);
@@ -91,6 +98,9 @@ export default function StreamlinedHomepage({
     const handleLogoVerticalPositionChange = (event: CustomEvent) => {
       setLogoVerticalPosition(event.detail);
     };
+
+    // Force refresh on mount
+    handleStorageChange();
 
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('logoScaleChanged', handleLogoScaleChange as EventListener);

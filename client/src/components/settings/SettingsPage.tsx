@@ -239,10 +239,10 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
   
   // Logo scaling state (stored as percentage, default 100%)
   const [logoScale, setLogoScale] = useState(() => {
-    // Clear any cached values above 300% to reset the issue
     const saved = localStorage.getItem('logoScale');
     let parsed = saved ? parseInt(saved) : 100;
-    if (parsed > 300 || parsed === 240) {
+    // Clear any problematic cached values 
+    if (parsed === 240 || parsed === 335) {
       parsed = 100;
       localStorage.setItem('logoScale', '100');
     }
@@ -259,11 +259,13 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
   const updateLogoScale = (newScale: number) => {
     // Clamp scale between 25% and 400%
     const clampedScale = Math.max(25, Math.min(400, newScale));
+    console.log('updateLogoScale: input =', newScale, 'clamped =', clampedScale, 'current state =', logoScale);
     
     // Force update state and localStorage
     setLogoScale(clampedScale);
     localStorage.removeItem('logoScale'); // Clear first to avoid any caching issues
     localStorage.setItem('logoScale', clampedScale.toString());
+    console.log('localStorage updated to:', clampedScale.toString());
     
     // Dispatch custom event to notify other components
     window.dispatchEvent(new CustomEvent('logoScaleChanged', { detail: clampedScale }));
@@ -289,7 +291,9 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
   };
 
   const increaseLogoScale = () => {
-    updateLogoScale(logoScale + 5);
+    const newScale = logoScale + 5;
+    console.log('Attempting to scale from', logoScale, 'to', newScale, 'disabled check:', logoScale >= 400);
+    updateLogoScale(newScale);
   };
 
   const decreaseLogoScale = () => {
@@ -774,6 +778,23 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                       title="Increase size (5%)"
                                     >
                                       <Plus className="h-6 w-6" />
+                                    </button>
+                                  </div>
+                                  
+                                  {/* Debug Controls - Temporary */}
+                                  <div className="absolute top-2 left-2 flex gap-2">
+                                    <button
+                                      onClick={() => {
+                                        localStorage.removeItem('logoScale');
+                                        localStorage.removeItem('logoVerticalPosition');
+                                        setLogoScale(100);
+                                        setLogoVerticalPosition(0);
+                                        console.log('Cache cleared, reset to defaults');
+                                      }}
+                                      className="text-xs bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded"
+                                      title="Clear cache and reset"
+                                    >
+                                      Reset
                                     </button>
                                   </div>
                                 </div>
