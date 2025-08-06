@@ -398,70 +398,80 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   const generateProfessionalHTML = () => {
     const logoUrl = currentLogo?.url || '/paint-brain-logo.png';
     
-    // Generate services & labor section
-    const servicesHTML = workStages.filter((stage: any) => (parseFloat(stage.hours) || 0) > 0).map((stage: any) => {
+    // Generate services & labor section with alternating row colors
+    const servicesHTML = workStages.filter((stage: any) => (parseFloat(stage.hours) || 0) > 0).map((stage: any, index: number) => {
       const hours = parseFloat(stage.hours) || 0;
       const rate = parseFloat(stage.rate) || 0;
       const total = hours * rate;
+      const rowClass = index % 2 === 0 ? '' : 'bg-gray-700';
       return `
-        <tr style="border-bottom: 1px solid #E53E3E;">
-          <td class="py-2 px-4 text-white">${stage.name}</td>
-          <td class="py-2 px-4 text-center text-white">${hours}h</td>
-          <td class="py-2 px-4 text-center text-white">$${rate}/hr</td>
-          <td class="py-2 px-4 text-right font-semibold text-white">$${total.toFixed(2)}</td>
+        <tr class="${rowClass}" style="border-bottom: 1px solid #E53E3E;">
+          <td class="p-3 text-white">${stage.name}</td>
+          <td class="p-3 text-center text-white">${hours}h</td>
+          <td class="p-3 text-center text-white">$${rate}/hr</td>
+          <td class="p-3 text-right font-semibold text-white">$${total.toFixed(2)}</td>
         </tr>
       `;
     }).join('');
 
-    // Generate additional labor section
-    const additionalLaborHTML = additionalLabor.filter((labor: any) => (parseFloat(labor.hours) || 0) > 0).map((labor: any) => {
+    // Generate additional labor section with alternating row colors (continuing index from services)
+    const serviceCount = workStages.filter((stage: any) => (parseFloat(stage.hours) || 0) > 0).length;
+    const additionalLaborHTML = additionalLabor.filter((labor: any) => (parseFloat(labor.hours) || 0) > 0).map((labor: any, index: number) => {
       const hours = parseFloat(labor.hours) || 0;
       const rate = parseFloat(labor.rate) || 0;
       const total = hours * rate;
+      const rowClass = (serviceCount + index) % 2 === 0 ? '' : 'bg-gray-700';
       return `
-        <tr style="border-bottom: 1px solid #E53E3E;">
-          <td class="py-2 px-4 text-white">${labor.name || 'Additional Worker'}</td>
-          <td class="py-2 px-4 text-center text-white">${hours}h</td>
-          <td class="py-2 px-4 text-center text-white">$${rate}/hr</td>
-          <td class="py-2 px-4 text-right font-semibold text-white">$${total.toFixed(2)}</td>
+        <tr class="${rowClass}" style="border-bottom: 1px solid #E53E3E;">
+          <td class="p-3 text-white">${labor.name || 'Additional Worker'}</td>
+          <td class="p-3 text-center text-white">${hours}h</td>
+          <td class="p-3 text-center text-white">$${rate}/hr</td>
+          <td class="p-3 text-right font-semibold text-white">$${total.toFixed(2)}</td>
         </tr>
       `;
     }).join('');
 
-    // Generate additional services section
-    const additionalServicesHTML = additionalServices.filter((service: any) => (parseFloat(service.hours) || 0) > 0).map((service: any) => {
+    // Generate additional services section with alternating row colors
+    const additionalServicesHTML = additionalServices.filter((service: any) => (parseFloat(service.hours) || 0) > 0).map((service: any, index: number) => {
       const hours = parseFloat(service.hours) || 0;
       const rate = parseFloat(service.rate) || 0;
       const total = hours * rate;
+      const rowClass = index % 2 === 0 ? '' : 'bg-gray-700';
       return `
-        <tr style="border-bottom: 1px solid #3182CE;">
-          <td class="py-2 px-4 text-white">${service.name}</td>
-          <td class="py-2 px-4 text-center text-white">${hours}h</td>
-          <td class="py-2 px-4 text-center text-white">$${rate}/hr</td>
-          <td class="py-2 px-4 text-right font-semibold text-white">$${total.toFixed(2)}</td>
+        <tr class="${rowClass}" style="border-bottom: 1px solid #3182CE;">
+          <td class="p-3 text-white">${service.name}</td>
+          <td class="p-3 text-center text-white">${hours}h</td>
+          <td class="p-3 text-center text-white">$${rate}/hr</td>
+          <td class="p-3 text-right font-semibold text-white">$${total.toFixed(2)}</td>
         </tr>
       `;
     }).join('');
 
-    // Generate materials section
+    // Generate materials section with alternating row colors
     const materialsHTML = [];
+    let materialIndex = 0;
+    
     if (paintSubtotal > 0) {
+      const rowClass = materialIndex % 2 === 0 ? '' : 'bg-gray-700';
       materialsHTML.push(`
-        <tr style="border-bottom: 1px solid #ECC94B;">
-          <td class="py-2 px-4 text-white">Paint (${paintCosts.gallons} gal × ${paintCosts.coats} coats)</td>
-          <td class="py-2 px-4 text-right font-semibold text-white">$${paintSubtotal.toFixed(2)}</td>
+        <tr class="${rowClass}" style="border-bottom: 1px solid #ECC94B;">
+          <td class="p-3 text-white">Paint (${paintCosts.gallons} gal × ${paintCosts.coats} coats)</td>
+          <td class="p-3 text-right font-semibold text-white">$${paintSubtotal.toFixed(2)}</td>
         </tr>
       `);
+      materialIndex++;
     }
     
     customSupplies.filter((supply: any) => (parseFloat(supply.quantity) || 0) > 0).forEach((supply: any) => {
       const total = (parseFloat(supply.quantity) || 0) * (parseFloat(supply.pricePerUnit) || 0);
+      const rowClass = materialIndex % 2 === 0 ? '' : 'bg-gray-700';
       materialsHTML.push(`
-        <tr style="border-bottom: 1px solid #ECC94B;">
-          <td class="py-2 px-4 text-white">${supply.name} (${supply.quantity} × $${supply.pricePerUnit})</td>
-          <td class="py-2 px-4 text-right font-semibold text-white">$${total.toFixed(2)}</td>
+        <tr class="${rowClass}" style="border-bottom: 1px solid #ECC94B;">
+          <td class="p-3 text-white">${supply.name} (${supply.quantity} × $${supply.pricePerUnit})</td>
+          <td class="p-3 text-right font-semibold text-white">$${total.toFixed(2)}</td>
         </tr>
       `);
+      materialIndex++;
     });
 
     return `
@@ -515,19 +525,19 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       <div style="background-color: #2D3748; border: 2px solid #E53E3E; border-top: none;" class="rounded-b-lg p-4">
         <table class="w-full">
           <thead>
-            <tr style="border-bottom: 2px solid #E53E3E;">
-              <th class="py-2 px-4 text-left text-white">Service</th>
-              <th class="py-2 px-4 text-center text-white">Hours</th>
-              <th class="py-2 px-4 text-center text-white">Rate</th>
-              <th class="py-2 px-4 text-right text-white">Total</th>
+            <tr style="background-color: #4A5568;">
+              <th class="p-3 text-left text-white font-semibold">Service</th>
+              <th class="p-3 text-center text-white font-semibold">Hours</th>
+              <th class="p-3 text-center text-white font-semibold">Rate</th>
+              <th class="p-3 text-right text-white font-semibold">Total</th>
             </tr>
           </thead>
           <tbody>
             ${servicesHTML}
             ${additionalLaborHTML}
             <tr style="border-top: 2px solid #E53E3E;">
-              <td colspan="3" class="py-2 px-4 font-semibold text-white">Labor Subtotal</td>
-              <td class="py-2 px-4 text-right font-bold text-green-400">$${laborSubtotal.toFixed(2)}</td>
+              <td colspan="3" class="p-3 font-semibold text-white">Labor Subtotal</td>
+              <td class="p-3 text-right font-bold text-green-400">$${laborSubtotal.toFixed(2)}</td>
             </tr>
           </tbody>
         </table>
@@ -544,16 +554,16 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       <div style="background-color: #2D3748; border: 2px solid #ECC94B; border-top: none;" class="rounded-b-lg p-4">
         <table class="w-full">
           <thead>
-            <tr style="border-bottom: 2px solid #ECC94B;">
-              <th class="py-2 px-4 text-left text-white">Item</th>
-              <th class="py-2 px-4 text-right text-white">Amount</th>
+            <tr style="background-color: #4A5568;">
+              <th class="p-3 text-left text-white font-semibold">Item</th>
+              <th class="p-3 text-right text-white font-semibold">Amount</th>
             </tr>
           </thead>
           <tbody>
             ${materialsHTML.join('')}
             <tr style="border-top: 2px solid #ECC94B;">
-              <td class="py-2 px-4 font-semibold text-white">Materials Subtotal (incl. taxes)</td>
-              <td class="py-2 px-4 text-right font-bold text-green-400">$${materialsSubtotal.toFixed(2)}</td>
+              <td class="p-3 font-semibold text-white">Materials Subtotal (incl. taxes)</td>
+              <td class="p-3 text-right font-bold text-green-400">$${materialsSubtotal.toFixed(2)}</td>
             </tr>
           </tbody>
         </table>
@@ -573,18 +583,18 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       <div style="background-color: #2D3748; border: 2px solid #3182CE; border-top: none;" class="rounded-b-lg p-4">
         <table class="w-full">
           <thead>
-            <tr style="border-bottom: 2px solid #3182CE;">
-              <th class="py-2 px-4 text-left text-white">Service</th>
-              <th class="py-2 px-4 text-center text-white">Hours</th>
-              <th class="py-2 px-4 text-center text-white">Rate</th>
-              <th class="py-2 px-4 text-right text-white">Total</th>
+            <tr style="background-color: #4A5568;">
+              <th class="p-3 text-left text-white font-semibold">Service</th>
+              <th class="p-3 text-center text-white font-semibold">Hours</th>
+              <th class="p-3 text-center text-white font-semibold">Rate</th>
+              <th class="p-3 text-right text-white font-semibold">Total</th>
             </tr>
           </thead>
           <tbody>
             ${additionalServicesHTML}
             <tr style="border-top: 2px solid #3182CE;">
-              <td colspan="3" class="py-2 px-4 font-semibold text-white">Additional Services Subtotal</td>
-              <td class="py-2 px-4 text-right font-bold text-green-400">$${additionalServicesSubtotal.toFixed(2)}</td>
+              <td colspan="3" class="p-3 font-semibold text-white">Additional Services Subtotal</td>
+              <td class="p-3 text-right font-bold text-green-400">$${additionalServicesSubtotal.toFixed(2)}</td>
             </tr>
           </tbody>
         </table>
@@ -1470,17 +1480,20 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
               </div>
               <div className="rounded-b-lg border-2 border-t-0 p-4" style={{ borderColor: '#E53E3E', backgroundColor: '#2D3748' }}>
                 {workStages.filter((stage: any) => parseFloat(stage.hours) > 0).map((stage: any, index: number) => (
-                  <div key={index} className="flex justify-between mb-2 pb-2 text-white" style={{ borderBottom: '1px solid #E53E3E' }}>
+                  <div key={index} className={`flex justify-between mb-2 pb-2 text-white p-3 ${index % 2 === 0 ? '' : 'bg-gray-700'}`} style={{ borderBottom: '1px solid #E53E3E' }}>
                     <span>{stage.name} ({stage.hours} hrs @ ${stage.rate}/hr)</span>
                     <span>${((parseFloat(stage.hours) || 0) * (parseFloat(stage.rate.toString()) || 0)).toFixed(2)}</span>
                   </div>
                 ))}
-                {additionalLabor.filter((member: any) => member.name && parseFloat(member.hours) > 0).map((member: any, index: number) => (
-                  <div key={`labor-${index}`} className="flex justify-between mb-2 pb-2 text-white" style={{ borderBottom: '1px solid #E53E3E' }}>
-                    <span>{member.name} ({member.hours} hrs @ ${member.rate}/hr)</span>
-                    <span>${((parseFloat(member.hours) || 0) * (parseFloat(member.rate) || 0)).toFixed(2)}</span>
-                  </div>
-                ))}
+{additionalLabor.filter((member: any) => member.name && parseFloat(member.hours) > 0).map((member: any, index: number) => {
+                  const combinedIndex = workStages.filter((stage: any) => parseFloat(stage.hours) > 0).length + index;
+                  return (
+                    <div key={`labor-${index}`} className={`flex justify-between mb-2 pb-2 text-white p-3 ${combinedIndex % 2 === 0 ? '' : 'bg-gray-700'}`} style={{ borderBottom: '1px solid #E53E3E' }}>
+                      <span>{member.name} ({member.hours} hrs @ ${member.rate}/hr)</span>
+                      <span>${((parseFloat(member.hours) || 0) * (parseFloat(member.rate) || 0)).toFixed(2)}</span>
+                    </div>
+                  );
+                })}
                 <div className="text-right font-semibold text-[#6A9955] mt-2 pt-2" style={{ borderTop: '2px solid #E53E3E' }}>
                   Labor Subtotal: ${laborSubtotal.toFixed(2)}
                 </div>
@@ -1495,18 +1508,32 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                 <h3 className="text-lg font-semibold text-white">Paint & Materials</h3>
               </div>
               <div className="rounded-b-lg border-2 border-t-0 p-4" style={{ borderColor: '#ECC94B', backgroundColor: '#2D3748' }}>
-                {paintSubtotal > 0 && (
-                  <div className="flex justify-between mb-2 pb-2 text-white" style={{ borderBottom: '1px solid #ECC94B' }}>
-                    <span>Paint ({paintCosts.gallons} gallons @ ${paintCosts.pricePerGallon}/gal, {paintCosts.coats} coats)</span>
-                    <span>${paintSubtotal.toFixed(2)}</span>
-                  </div>
-                )}
-                {customSupplies.filter((supply: any) => parseFloat(supply.quantity) > 0 && parseFloat(supply.pricePerUnit) > 0).map((supply: any, index: number) => (
-                  <div key={index} className="flex justify-between mb-2 pb-2 text-white" style={{ borderBottom: index < customSupplies.filter((supply: any) => parseFloat(supply.quantity) > 0 && parseFloat(supply.pricePerUnit) > 0).length - 1 ? '1px solid #ECC94B' : '1px solid #ECC94B' }}>
-                    <span>{supply.name} ({supply.quantity} units @ ${supply.pricePerUnit}/unit)</span>
-                    <span>${((parseFloat(supply.quantity) || 0) * (parseFloat(supply.pricePerUnit) || 0)).toFixed(2)}</span>
-                  </div>
-                ))}
+{(() => {
+                  let materialIndex = 0;
+                  const materialRows = [];
+                  
+                  if (paintSubtotal > 0) {
+                    materialRows.push(
+                      <div key="paint" className={`flex justify-between mb-2 pb-2 text-white p-3 ${materialIndex % 2 === 0 ? '' : 'bg-gray-700'}`} style={{ borderBottom: '1px solid #ECC94B' }}>
+                        <span>Paint ({paintCosts.gallons} gallons @ ${paintCosts.pricePerGallon}/gal, {paintCosts.coats} coats)</span>
+                        <span>${paintSubtotal.toFixed(2)}</span>
+                      </div>
+                    );
+                    materialIndex++;
+                  }
+                  
+                  customSupplies.filter((supply: any) => parseFloat(supply.quantity) > 0 && parseFloat(supply.pricePerUnit) > 0).forEach((supply: any, index: number) => {
+                    materialRows.push(
+                      <div key={`supply-${index}`} className={`flex justify-between mb-2 pb-2 text-white p-3 ${materialIndex % 2 === 0 ? '' : 'bg-gray-700'}`} style={{ borderBottom: '1px solid #ECC94B' }}>
+                        <span>{supply.name} ({supply.quantity} units @ ${supply.pricePerUnit}/unit)</span>
+                        <span>${((parseFloat(supply.quantity) || 0) * (parseFloat(supply.pricePerUnit) || 0)).toFixed(2)}</span>
+                      </div>
+                    );
+                    materialIndex++;
+                  });
+                  
+                  return materialRows;
+                })()}
                 <div className="text-right font-semibold text-[#6A9955] mt-2 pt-2" style={{ borderTop: '2px solid #ECC94B' }}>
                   Materials Subtotal: ${paintAndMaterialsSubtotal.toFixed(2)}
                 </div>
@@ -1538,7 +1565,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
               </div>
               <div className="rounded-b-lg border-2 border-t-0 p-4" style={{ borderColor: '#3182CE', backgroundColor: '#2D3748' }}>
                 {additionalServices.filter((service: any) => parseFloat(service.hours) > 0).map((service: any, index: number) => (
-                  <div key={index} className="flex justify-between mb-2 pb-2 text-white" style={{ borderBottom: '1px solid #3182CE' }}>
+                  <div key={index} className={`flex justify-between mb-2 pb-2 text-white p-3 ${index % 2 === 0 ? '' : 'bg-gray-700'}`} style={{ borderBottom: '1px solid #3182CE' }}>
                     <span>{service.name} ({service.hours} hrs @ ${service.rate}/hr)</span>
                     <span>${((parseFloat(service.hours) || 0) * (parseFloat(service.rate.toString()) || 0)).toFixed(2)}</span>
                   </div>
