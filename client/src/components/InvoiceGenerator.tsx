@@ -412,7 +412,7 @@ cortespainter@gmail.com`;
         windowHeight: elementHeight,
         removeContainer: false,
         onclone: (clonedDoc) => {
-          console.log('Cloning document for PDF generation');
+          console.log('Cloning document for PDF generation (downloadPDF)');
           const clonedElement = clonedDoc.querySelector('[data-invoice-ref]') as HTMLElement;
           if (clonedElement) {
             clonedElement.style.position = 'static';
@@ -424,13 +424,18 @@ cortespainter@gmail.com`;
             
             // Set logo to proper size for PDF (same as EstimateGenerator)
             const logoElements = clonedElement.querySelectorAll('img[alt*="A-Frame Painting Logo"], img[alt*="Logo"]');
-            logoElements.forEach((logo: any) => {
+            console.log('Found logo elements for PDF download:', logoElements.length);
+            logoElements.forEach((logo: any, index: number) => {
               if (logo) {
+                console.log(`Setting download logo ${index} size to 32px`);
+                console.log('Before styling:', logo.style.height, logo.className);
                 logo.style.height = '32px !important';
                 logo.style.maxHeight = '32px !important';
                 logo.style.width = 'auto !important';
                 logo.style.display = 'block !important';
                 logo.style.objectFit = 'contain !important';
+                logo.style.transform = 'none !important';
+                console.log('After styling:', logo.style.height);
               }
             });
           }
@@ -690,7 +695,7 @@ cortespainter@gmail.com`;
         windowHeight: elementHeight,
         removeContainer: false,
         onclone: (clonedDoc) => {
-          console.log('Cloning document for canvas capture');
+          console.log('Cloning document for canvas capture (emailPDF)');
           const clonedElement = clonedDoc.querySelector('[data-invoice-ref]') as HTMLElement;
           if (clonedElement) {
             clonedElement.style.position = 'static';
@@ -702,13 +707,18 @@ cortespainter@gmail.com`;
             
             // Set logo to proper size for PDF (same as EstimateGenerator)
             const logoElements = clonedElement.querySelectorAll('img[alt*="A-Frame Painting Logo"], img[alt*="Logo"]');
-            logoElements.forEach((logo: any) => {
+            console.log('Found logo elements for PDF email:', logoElements.length);
+            logoElements.forEach((logo: any, index: number) => {
               if (logo) {
+                console.log(`Setting email logo ${index} size to 32px`);
+                console.log('Before styling:', logo.style.height, logo.className);
                 logo.style.height = '32px !important';
                 logo.style.maxHeight = '32px !important';
                 logo.style.width = 'auto !important';
                 logo.style.display = 'block !important';
                 logo.style.objectFit = 'contain !important';
+                logo.style.transform = 'none !important';
+                console.log('After styling:', logo.style.height);
               }
             });
           }
@@ -1709,6 +1719,7 @@ ${emailMessage}`;
                     src={`${currentLogo?.url || '/paint-brain-logo.png'}?v=${Date.now()}`} 
                     alt="A-Frame Painting Logo" 
                     className="h-8 w-auto object-contain"
+                    style={{ height: '32px', width: 'auto', objectFit: 'contain', maxHeight: '32px', maxWidth: '200px' }}
                   />
                 </div>
               )}
