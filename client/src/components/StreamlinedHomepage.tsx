@@ -11,7 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import ClientPhone from './ClientPhone';
 import DarkModeCalendar from './DarkModeCalendar';
 import TaxSetupModal from './settings/TaxSetupModal';
-import { HomepageHints, HelpIcon } from './HintSystem';
+
 
 // Paint Brain Color Palette
 const paintBrainColors = {
@@ -558,8 +558,7 @@ export default function StreamlinedHomepage({
         />
       </div>
 
-      {/* Homepage Hint System */}
-      <HomepageHints />
+
     </div>
   );
 }
