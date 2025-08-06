@@ -1477,7 +1477,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           {/* Paint & Materials Section */}
           {paintAndMaterialsSubtotal > 0 && (
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-[#D4A574] mb-4 border-b border-[#D4A574] pb-2">
+              <h3 className="text-lg font-semibold text-[#ECC94B] mb-4 border-b border-[#ECC94B] pb-2">
                 Paint & Materials
               </h3>
               {paintSubtotal > 0 && (
@@ -1501,7 +1501,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           {/* Additional Labor Section */}
           {additionalLaborSubtotal > 0 && (
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-[#4ECDC4] mb-4 border-b border-[#4ECDC4] pb-2">
+              <h3 className="text-lg font-semibold text-[#38A169] mb-4 border-b border-[#38A169] pb-2">
                 Additional Labor
               </h3>
               {additionalLabor.filter((member: any) => member.name && parseFloat(member.hours) > 0).map((member: any, index: number) => (
@@ -1510,7 +1510,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                   <span>${((parseFloat(member.hours) || 0) * (parseFloat(member.rate) || 0)).toFixed(2)}</span>
                 </div>
               ))}
-              <div className="text-right font-semibold text-[#4ECDC4] mt-2">
+              <div className="text-right font-semibold text-[#38A169] mt-2">
                 Additional Labor Total: ${additionalLaborSubtotal.toFixed(2)}
               </div>
             </div>
@@ -1519,7 +1519,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           {/* Additional Services Section */}
           {additionalServicesSubtotal > 0 && (
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-[#DCDCAA] mb-4 border-b border-[#DCDCAA] pb-2">
+              <h3 className="text-lg font-semibold text-[#3182CE] mb-4 border-b border-[#3182CE] pb-2">
                 Additional Services
               </h3>
               {additionalServices.filter((service: any) => parseFloat(service.hours) > 0).map((service: any, index: number) => (
@@ -1528,7 +1528,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                   <span>${((parseFloat(service.hours) || 0) * (parseFloat(service.rate.toString()) || 0)).toFixed(2)}</span>
                 </div>
               ))}
-              <div className="text-right font-semibold text-[#6A9955] mt-2">
+              <div className="text-right font-semibold text-[#3182CE] mt-2">
                 Additional Services: ${additionalServicesSubtotal.toFixed(2)}
               </div>
             </div>
