@@ -212,6 +212,9 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
     };
   });
 
+  // Active logo tab state
+  const [activeLogoTab, setActiveLogoTab] = useState('app');
+
   // Define sortable sections
   const [settingsSections, setSettingsSections] = useState([
     { id: 'gmail', name: 'Gmail Integration', icon: Mail, color: 'red' },
@@ -695,13 +698,20 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                     {expandedSection === 'logo' && (
                       <div className="mt-4 p-6 rounded-lg border border-blue-400/30 bg-gray-900/10">
                         <div className="space-y-6">
-                          <h3 className="text-lg font-medium text-blue-400 mb-4">Business Logo Library</h3>
+                          <h3 className="text-lg font-medium text-blue-400 mb-4">Logo Management - Set Different Logos for Each Area</h3>
+                          
+                          <div className="p-3 bg-blue-500/10 border border-blue-400/30 rounded-lg mb-6">
+                            <p className="text-sm text-blue-200">
+                              <span className="font-medium">Flexible Branding:</span> Choose separate logos for your homepage/app, estimates, and invoices. 
+                              Each area can use a different logo for maximum branding flexibility.
+                            </p>
+                          </div>
                           
                           {/* Current Logo Display */}
                           {currentLogo && (
                             <div className="space-y-4">
                               <div className="p-4 rounded-lg bg-gray-800/50 border">
-                                <h4 className="text-white font-medium mb-3">Current Logo</h4>
+                                <h4 className="text-white font-medium mb-3">Current Homepage Logo</h4>
                                 
                                 {/* Large Preview Container */}
                                 <div className="logo-preview-container bg-[#1a1a1a] border-2 border-[#444] rounded-lg p-6 flex flex-col items-center justify-center w-full min-h-[200px] mb-4">
@@ -904,13 +914,24 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
 
                           {/* Estimate & Invoice Logo Selection */}
                           <div className="space-y-4 pt-4 border-t border-gray-700">
-                            <h4 className="text-white font-medium">Document Logos</h4>
+                            <h4 className="text-white font-medium">Document Logos - Separate from Homepage</h4>
+                            <p className="text-sm text-gray-400">
+                              Set different logos for estimates and invoices. If no logo is selected, the homepage logo will be used.
+                            </p>
                             
                             {/* Estimate Logo Selection */}
                             <div className="space-y-3">
                               <div className="flex items-center gap-3">
                                 <FileText className="h-5 w-5 text-purple-400" />
                                 <span className="text-white font-medium">Estimates</span>
+                                {estimateLogo ? (
+                                  <div className="flex items-center gap-2 px-2 py-1 bg-purple-400/10 rounded text-xs">
+                                    <img src={estimateLogo.url} alt="Current" className="h-4 w-auto object-contain" />
+                                    <span className="text-purple-300">Custom Logo Set</span>
+                                  </div>
+                                ) : (
+                                  <span className="text-xs text-gray-500 px-2 py-1 bg-gray-700 rounded">Uses Homepage Logo</span>
+                                )}
                               </div>
                               <div className="grid grid-cols-3 gap-2 pl-8">
                                 {logoLibrary.map((logo: any) => (
@@ -940,6 +961,14 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                               <div className="flex items-center gap-3">
                                 <Mail className="h-5 w-5 text-green-400" />
                                 <span className="text-white font-medium">Invoices</span>
+                                {invoiceLogo ? (
+                                  <div className="flex items-center gap-2 px-2 py-1 bg-green-400/10 rounded text-xs">
+                                    <img src={invoiceLogo.url} alt="Current" className="h-4 w-auto object-contain" />
+                                    <span className="text-green-300">Custom Logo Set</span>
+                                  </div>
+                                ) : (
+                                  <span className="text-xs text-gray-500 px-2 py-1 bg-gray-700 rounded">Uses Homepage Logo</span>
+                                )}
                               </div>
                               <div className="grid grid-cols-3 gap-2 pl-8">
                                 {logoLibrary.map((logo: any) => (
@@ -965,9 +994,10 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                             </div>
                           </div>
 
-                          <div className="mt-4 p-3 bg-gray-800 rounded-lg">
-                            <p className="text-sm text-gray-300">
-                              <span className="font-medium">How it works:</span> Select your homepage logo from the library above, then choose specific logos for estimates and invoices below.
+                          <div className="mt-4 p-3 bg-green-500/10 border border-green-400/30 rounded-lg">
+                            <p className="text-sm text-green-200">
+                              <span className="font-medium">🎯 Pro Tip:</span> Use a horizontal logo for homepage/app and vertical logos for documents, 
+                              or create different versions of your logo for different contexts (dark/light backgrounds, formal/casual style).
                             </p>
                           </div>
                         </div>
