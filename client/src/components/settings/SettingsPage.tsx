@@ -240,7 +240,9 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
   // Logo scaling state (stored as percentage, default 100%)
   const [logoScale, setLogoScale] = useState(() => {
     const saved = localStorage.getItem('logoScale');
-    return saved ? parseInt(saved) : 100;
+    const parsed = saved ? parseInt(saved) : 100;
+    console.log('Initial logoScale from localStorage:', saved, 'parsed to:', parsed);
+    return parsed;
   });
 
   // Logo vertical position state (stored as pixels, default 0)
@@ -253,8 +255,10 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
   const updateLogoScale = (newScale: number) => {
     // Clamp scale between 25% and 400%
     const clampedScale = Math.max(25, Math.min(400, newScale));
+    console.log('updateLogoScale - input:', newScale, 'clamped:', clampedScale, 'current state:', logoScale);
     setLogoScale(clampedScale);
     localStorage.setItem('logoScale', clampedScale.toString());
+    console.log('localStorage set to:', clampedScale.toString());
     
     // Dispatch custom event to notify other components
     window.dispatchEvent(new CustomEvent('logoScaleChanged', { detail: clampedScale }));
@@ -280,7 +284,10 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
   };
 
   const increaseLogoScale = () => {
-    updateLogoScale(logoScale + 5);
+    console.log('Current logoScale before increase:', logoScale);
+    const newScale = logoScale + 5;
+    console.log('Attempting to set logoScale to:', newScale);
+    updateLogoScale(newScale);
   };
 
   const decreaseLogoScale = () => {
@@ -706,44 +713,47 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                 <h4 className="text-white font-medium mb-3">Current Homepage Logo</h4>
                                 
                                 {/* Large Preview Container */}
-                                <div className="logo-preview-container bg-[#1a1a1a] border-2 border-[#444] rounded-lg p-6 flex flex-col items-center justify-center w-full min-h-[200px] mb-4">
-                                  <div className="flex items-center justify-center flex-1 min-h-[120px] relative">
+                                <div className="logo-preview-container bg-[#1a1a1a] border-2 border-[#444] rounded-lg p-6 w-full min-h-[200px] mb-4 relative overflow-visible">
+                                  {/* Logo Display Area */}
+                                  <div className="flex items-center justify-center h-32 relative overflow-visible">
                                     <img 
                                       src={currentLogo.url} 
                                       alt="Business Logo" 
                                       className="object-contain"
                                       style={{ 
                                         transform: `scale(${logoScale / 100}) translateY(${logoVerticalPosition}px)`,
+                                        transformOrigin: 'center center',
                                         maxWidth: 'none',
                                         maxHeight: 'none',
-                                        width: '120px',
-                                        height: 'auto'
+                                        width: '60px',
+                                        height: 'auto',
+                                        zIndex: 1
                                       }}
                                     />
-                                    
-                                    {/* Vertical Position Controls - Right Side */}
-                                    <div className="absolute right-0 top-1/2 transform -translate-y-1/2 flex flex-col gap-2">
-                                      <button
-                                        onClick={moveLogoUp}
-                                        disabled={logoVerticalPosition <= -50}
-                                        className="w-8 h-8 rounded-full bg-green-500 hover:bg-green-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
-                                        title="Move up (2px)"
-                                      >
-                                        <ArrowUp className="h-4 w-4" />
-                                      </button>
-                                      <button
-                                        onClick={moveLogoDown}
-                                        disabled={logoVerticalPosition >= 50}
-                                        className="w-8 h-8 rounded-full bg-green-500 hover:bg-green-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
-                                        title="Move down (2px)"
-                                      >
-                                        <ArrowDown className="h-4 w-4" />
-                                      </button>
-                                    </div>
                                   </div>
                                   
-                                  {/* Size Controls - Bottom Center */}
-                                  <div className="flex items-center gap-2 mt-4">
+                                  {/* Vertical Position Controls - Far Right */}
+                                  <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex flex-col gap-2">
+                                    <button
+                                      onClick={moveLogoUp}
+                                      disabled={logoVerticalPosition <= -50}
+                                      className="w-8 h-8 rounded-full bg-green-500 hover:bg-green-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
+                                      title="Move up (2px)"
+                                    >
+                                      <ArrowUp className="h-4 w-4" />
+                                    </button>
+                                    <button
+                                      onClick={moveLogoDown}
+                                      disabled={logoVerticalPosition >= 50}
+                                      className="w-8 h-8 rounded-full bg-green-500 hover:bg-green-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
+                                      title="Move down (2px)"
+                                    >
+                                      <ArrowDown className="h-4 w-4" />
+                                    </button>
+                                  </div>
+                                  
+                                  {/* Size Controls - Bottom */}
+                                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-2">
                                     <button
                                       onClick={decreaseLogoScale}
                                       disabled={logoScale <= 25}
@@ -756,23 +766,16 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                       {logoScale}%
                                     </span>
                                     <button
-                                      onClick={increaseLogoScale}
+                                      onClick={() => {
+                                        console.log('Plus button clicked, current scale:', logoScale, 'disabled check:', logoScale >= 400);
+                                        increaseLogoScale();
+                                      }}
                                       disabled={logoScale >= 400}
                                       className="w-8 h-8 rounded-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
                                       title="Increase size (5%)"
                                     >
                                       <Plus className="h-4 w-4" />
                                     </button>
-                                  </div>
-                                  
-                                  {/* Control Labels */}
-                                  <div className="text-center text-xs text-gray-400 mt-2">
-                                    <div className="mb-1">
-                                      <span className="text-blue-400">Blue:</span> Size (25% - 400%)
-                                    </div>
-                                    <div>
-                                      <span className="text-green-400">Green:</span> Height ({logoVerticalPosition}px)
-                                    </div>
                                   </div>
                                 </div>
 
