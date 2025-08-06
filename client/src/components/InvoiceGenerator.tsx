@@ -687,6 +687,20 @@ cortespainter@gmail.com`;
             clonedElement.style.transform = 'none';
             clonedElement.style.width = '794px';
             clonedElement.style.display = 'block';
+            
+            // Force logo to be extremely small in the cloned document
+            const logoElements = clonedElement.querySelectorAll('img[alt*="A-Frame Painting Logo"], img[alt*="Logo"]');
+            logoElements.forEach((logo: any) => {
+              if (logo) {
+                logo.style.height = '4px !important';
+                logo.style.maxHeight = '4px !important';
+                logo.style.width = 'auto !important';
+                logo.style.maxWidth = '40px !important';
+                logo.style.transform = 'scale(0.2) !important';
+                logo.style.display = 'block !important';
+                logo.style.objectFit = 'contain !important';
+              }
+            });
           }
         }
       });
