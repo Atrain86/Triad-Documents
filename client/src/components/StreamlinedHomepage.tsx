@@ -68,7 +68,7 @@ export default function StreamlinedHomepage({
     const saved = localStorage.getItem('logoScale');
     let parsed = saved ? parseInt(saved) : 100;
     // Clear problematic cached values
-    if (parsed === 240 || parsed === 335) {
+    if (parsed === 240 || parsed === 335 || parsed === 340) {
       parsed = 100;
       localStorage.setItem('logoScale', '100');
     }

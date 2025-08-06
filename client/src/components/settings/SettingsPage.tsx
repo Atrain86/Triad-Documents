@@ -242,7 +242,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
     const saved = localStorage.getItem('logoScale');
     let parsed = saved ? parseInt(saved) : 100;
     // Clear any problematic cached values 
-    if (parsed === 240 || parsed === 335) {
+    if (parsed === 240 || parsed === 335 || parsed === 340) {
       parsed = 100;
       localStorage.setItem('logoScale', '100');
     }
@@ -257,15 +257,13 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
 
   // Logo scaling helper functions
   const updateLogoScale = (newScale: number) => {
-    // Clamp scale between 25% and 400%
-    const clampedScale = Math.max(25, Math.min(400, newScale));
-    console.log('updateLogoScale: input =', newScale, 'clamped =', clampedScale, 'current state =', logoScale);
+    // Clamp scale between 25% and 500%
+    const clampedScale = Math.max(25, Math.min(500, newScale));
     
     // Force update state and localStorage
     setLogoScale(clampedScale);
     localStorage.removeItem('logoScale'); // Clear first to avoid any caching issues
     localStorage.setItem('logoScale', clampedScale.toString());
-    console.log('localStorage updated to:', clampedScale.toString());
     
     // Dispatch custom event to notify other components
     window.dispatchEvent(new CustomEvent('logoScaleChanged', { detail: clampedScale }));
@@ -291,9 +289,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
   };
 
   const increaseLogoScale = () => {
-    const newScale = logoScale + 5;
-    console.log('Attempting to scale from', logoScale, 'to', newScale, 'disabled check:', logoScale >= 400);
-    updateLogoScale(newScale);
+    updateLogoScale(logoScale + 5);
   };
 
   const decreaseLogoScale = () => {
@@ -718,10 +714,10 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                               <div className="p-4 rounded-lg bg-gray-800/50 border">
                                 <h4 className="text-white font-medium mb-3">Current Homepage Logo</h4>
                                 
-                                {/* Large Preview Container */}
-                                <div className="logo-preview-container bg-[#1a1a1a] border-2 border-[#444] rounded-lg p-8 w-full min-h-[320px] mb-4 relative overflow-visible">
+                                {/* Large Preview Container - Enlarged for 500% scaling */}
+                                <div className="logo-preview-container bg-[#1a1a1a] border-2 border-[#444] rounded-lg p-8 w-full min-h-[400px] mb-4 relative overflow-visible">
                                   {/* Logo Display Area - Upper Half */}
-                                  <div className="flex items-center justify-center h-48 relative overflow-visible mb-8">
+                                  <div className="flex items-center justify-center h-64 relative overflow-visible mb-8">
                                     <img 
                                       src={currentLogo.url} 
                                       alt="Business Logo" 
@@ -739,7 +735,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                   </div>
                                   
                                   {/* Vertical Position Controls - Far Right, Centered on Logo Area */}
-                                  <div className="absolute right-8 top-24 flex flex-col gap-3">
+                                  <div className="absolute right-8 top-32 flex flex-col gap-3">
                                     <button
                                       onClick={moveLogoUp}
                                       disabled={logoVerticalPosition <= -50}
@@ -773,7 +769,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                     </span>
                                     <button
                                       onClick={increaseLogoScale}
-                                      disabled={logoScale >= 400}
+                                      disabled={logoScale >= 500}
                                       className="w-12 h-12 rounded-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors shadow-lg"
                                       title="Increase size (5%)"
                                     >
@@ -781,22 +777,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                     </button>
                                   </div>
                                   
-                                  {/* Debug Controls - Temporary */}
-                                  <div className="absolute top-2 left-2 flex gap-2">
-                                    <button
-                                      onClick={() => {
-                                        localStorage.removeItem('logoScale');
-                                        localStorage.removeItem('logoVerticalPosition');
-                                        setLogoScale(100);
-                                        setLogoVerticalPosition(0);
-                                        console.log('Cache cleared, reset to defaults');
-                                      }}
-                                      className="text-xs bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded"
-                                      title="Clear cache and reset"
-                                    >
-                                      Reset
-                                    </button>
-                                  </div>
+
                                 </div>
 
                                 {/* Logo Information Below Preview */}
