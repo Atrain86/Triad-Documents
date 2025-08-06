@@ -68,10 +68,11 @@ export default function StreamlinedHomepage({
     const saved = localStorage.getItem('logoScale');
     let parsed = saved ? parseInt(saved) : 100;
     // Clear problematic cached values
-    if (parsed === 240 || parsed === 335 || parsed === 340) {
+    if (parsed === 240 || parsed === 335 || parsed === 340 || parsed === 350 || parsed === 365 || parsed > 500) {
       parsed = 100;
       localStorage.setItem('logoScale', '100');
     }
+    console.log('Homepage logoScale initialized to:', parsed);
     return parsed;
   });
   
