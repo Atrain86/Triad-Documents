@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Settings, DollarSign, Globe, Mail, ChevronRight, Info, Menu, X, Camera, FileText, Upload, Trash2, Plus, Minus, Building2, Home } from 'lucide-react';
+import { ArrowLeft, Settings, DollarSign, Globe, Mail, ChevronRight, Info, Menu, X, Camera, FileText, Upload, Trash2, Plus, Minus, Building2, Home, ArrowUp, ArrowDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ReactSortable } from 'react-sortablejs';
@@ -243,15 +243,40 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
     return saved ? parseInt(saved) : 100;
   });
 
+  // Logo vertical position state (stored as pixels, default 0)
+  const [logoVerticalPosition, setLogoVerticalPosition] = useState(() => {
+    const saved = localStorage.getItem('logoVerticalPosition');
+    return saved ? parseInt(saved) : 0;
+  });
+
   // Logo scaling helper functions
   const updateLogoScale = (newScale: number) => {
-    // Clamp scale between 25% and 300%
-    const clampedScale = Math.max(25, Math.min(300, newScale));
+    // Clamp scale between 25% and 400%
+    const clampedScale = Math.max(25, Math.min(400, newScale));
     setLogoScale(clampedScale);
     localStorage.setItem('logoScale', clampedScale.toString());
     
     // Dispatch custom event to notify other components
     window.dispatchEvent(new CustomEvent('logoScaleChanged', { detail: clampedScale }));
+  };
+
+  // Logo vertical position helper functions
+  const updateLogoVerticalPosition = (newPosition: number) => {
+    // Clamp position between -50px and +50px
+    const clampedPosition = Math.max(-50, Math.min(50, newPosition));
+    setLogoVerticalPosition(clampedPosition);
+    localStorage.setItem('logoVerticalPosition', clampedPosition.toString());
+    
+    // Dispatch custom event to notify other components
+    window.dispatchEvent(new CustomEvent('logoVerticalPositionChanged', { detail: clampedPosition }));
+  };
+
+  const moveLogoUp = () => {
+    updateLogoVerticalPosition(logoVerticalPosition - 2);
+  };
+
+  const moveLogoDown = () => {
+    updateLogoVerticalPosition(logoVerticalPosition + 2);
   };
 
   const increaseLogoScale = () => {
@@ -687,30 +712,68 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                       src={currentLogo.url} 
                                       alt="Business Logo" 
                                       className="max-w-full max-h-[120px] object-contain"
-                                      style={{ transform: `scale(${logoScale / 100})` }}
+                                      style={{ 
+                                        transform: `scale(${logoScale / 100}) translateY(${logoVerticalPosition}px)` 
+                                      }}
                                     />
                                   </div>
-                                  {/* Logo Scale Controls */}
-                                  <div className="flex items-center gap-2 mt-4">
-                                    <button
-                                      onClick={decreaseLogoScale}
-                                      disabled={logoScale <= 25}
-                                      className="w-8 h-8 rounded-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
-                                      title="Decrease size (5%)"
-                                    >
-                                      <Minus className="h-4 w-4" />
-                                    </button>
-                                    <span className="text-sm text-gray-300 min-w-[50px] text-center font-medium">
-                                      {logoScale}%
-                                    </span>
-                                    <button
-                                      onClick={increaseLogoScale}
-                                      disabled={logoScale >= 300}
-                                      className="w-8 h-8 rounded-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
-                                      title="Increase size (5%)"
-                                    >
-                                      <Plus className="h-4 w-4" />
-                                    </button>
+                                  {/* Logo Controls */}
+                                  <div className="flex flex-col items-center gap-3 mt-4">
+                                    {/* Size Controls */}
+                                    <div className="flex items-center gap-2">
+                                      <button
+                                        onClick={decreaseLogoScale}
+                                        disabled={logoScale <= 25}
+                                        className="w-8 h-8 rounded-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
+                                        title="Decrease size (5%)"
+                                      >
+                                        <Minus className="h-4 w-4" />
+                                      </button>
+                                      <span className="text-sm text-gray-300 min-w-[50px] text-center font-medium">
+                                        {logoScale}%
+                                      </span>
+                                      <button
+                                        onClick={increaseLogoScale}
+                                        disabled={logoScale >= 400}
+                                        className="w-8 h-8 rounded-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
+                                        title="Increase size (5%)"
+                                      >
+                                        <Plus className="h-4 w-4" />
+                                      </button>
+                                    </div>
+                                    
+                                    {/* Vertical Position Controls */}
+                                    <div className="flex items-center gap-2">
+                                      <button
+                                        onClick={moveLogoUp}
+                                        disabled={logoVerticalPosition <= -50}
+                                        className="w-8 h-8 rounded-full bg-green-500 hover:bg-green-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
+                                        title="Move up (2px)"
+                                      >
+                                        <ArrowUp className="h-4 w-4" />
+                                      </button>
+                                      <span className="text-sm text-gray-300 min-w-[50px] text-center font-medium">
+                                        {logoVerticalPosition}px
+                                      </span>
+                                      <button
+                                        onClick={moveLogoDown}
+                                        disabled={logoVerticalPosition >= 50}
+                                        className="w-8 h-8 rounded-full bg-green-500 hover:bg-green-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
+                                        title="Move down (2px)"
+                                      >
+                                        <ArrowDown className="h-4 w-4" />
+                                      </button>
+                                    </div>
+                                  </div>
+                                  
+                                  {/* Control Labels */}
+                                  <div className="text-center text-xs text-gray-400 mt-2">
+                                    <div className="mb-1">
+                                      <span className="text-blue-400">Blue:</span> Size (25% - 400%)
+                                    </div>
+                                    <div>
+                                      <span className="text-green-400">Green:</span> Height (-50px to +50px)
+                                    </div>
                                   </div>
                                 </div>
 

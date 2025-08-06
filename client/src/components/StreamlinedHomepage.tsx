@@ -63,29 +63,43 @@ export default function StreamlinedHomepage({
   const { toast } = useToast();
   const { logout } = useAuth();
 
-  // Logo scaling state
+  // Logo scaling and positioning state
   const [logoScale, setLogoScale] = useState(() => {
     const saved = localStorage.getItem('logoScale');
     return saved ? parseInt(saved) : 100;
   });
+  
+  const [logoVerticalPosition, setLogoVerticalPosition] = useState(() => {
+    const saved = localStorage.getItem('logoVerticalPosition');
+    return saved ? parseInt(saved) : 0;
+  });
 
-  // Listen for logo scale changes
+  // Listen for logo changes
   useEffect(() => {
     const handleStorageChange = () => {
       const saved = localStorage.getItem('logoScale');
       setLogoScale(saved ? parseInt(saved) : 100);
+      
+      const savedPosition = localStorage.getItem('logoVerticalPosition');
+      setLogoVerticalPosition(savedPosition ? parseInt(savedPosition) : 0);
     };
 
     const handleLogoScaleChange = (event: CustomEvent) => {
       setLogoScale(event.detail);
     };
+    
+    const handleLogoVerticalPositionChange = (event: CustomEvent) => {
+      setLogoVerticalPosition(event.detail);
+    };
 
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('logoScaleChanged', handleLogoScaleChange as EventListener);
+    window.addEventListener('logoVerticalPositionChanged', handleLogoVerticalPositionChange as EventListener);
     
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('logoScaleChanged', handleLogoScaleChange as EventListener);
+      window.removeEventListener('logoVerticalPositionChanged', handleLogoVerticalPositionChange as EventListener);
     };
   }, []);
 
@@ -348,7 +362,9 @@ export default function StreamlinedHomepage({
               src={currentLogo?.url || "/aframe-logo.png"} 
               alt="Business Logo" 
               className="h-14 w-auto object-contain"
-              style={{ transform: `scale(${logoScale / 100})` }}
+              style={{ 
+                transform: `scale(${logoScale / 100}) translateY(${logoVerticalPosition}px)` 
+              }}
             />
           </div>
         )}
