@@ -1696,7 +1696,7 @@ ${emailMessage}`;
               {logoVisibility.emails && (
                 <div className="flex justify-center mb-4">
                   <img 
-                    src={`${invoiceData.businessLogo}?v=${Date.now()}`} 
+                    src={`${currentLogo?.url || '/paint-brain-logo.png'}?v=${Date.now()}`} 
                     alt="A-Frame Painting Logo" 
                     className="h-8 w-auto object-contain"
                   />
