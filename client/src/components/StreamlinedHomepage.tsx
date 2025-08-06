@@ -368,7 +368,7 @@ export default function StreamlinedHomepage({
             >
               New Client
             </Button>
-            <HelpIcon hintId="homepage-new-client" position="bottom" />
+
           </div>
           
           <Button
@@ -403,7 +403,7 @@ export default function StreamlinedHomepage({
               <span className="text-sm font-medium" style={{ color: '#7B4FF2' }}>
                 {projects.filter((p: any) => p.status === 'archived').length} Archive
               </span>
-              <HelpIcon hintId="homepage-archive-toggle" position="right" />
+
             </div>
           </div>
         )}
@@ -420,7 +420,7 @@ export default function StreamlinedHomepage({
               style={{ borderColor: paintBrainColors.orange }}
             />
             <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-              <HelpIcon hintId="homepage-search" position="left" />
+
             </div>
           </div>
         </div>
