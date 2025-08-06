@@ -25,20 +25,20 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   const printRef = useRef<HTMLDivElement>(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Get estimate-specific logo
-  const { data: estimateLogo } = useQuery({
-    queryKey: [`/api/users/1/logos/estimates`],
+  // Get documents logo (unified for estimates and invoices)
+  const { data: documentsLogo } = useQuery({
+    queryKey: [`/api/users/1/logos/documents`],
     select: (data: any) => data?.logo || null
   });
 
-  // Fallback to regular logo if no estimate-specific logo is set
+  // Fallback to regular logo if no documents-specific logo is set
   const { data: fallbackLogo } = useQuery({
     queryKey: [`/api/users/1/logo`],
     select: (data: any) => data?.logo || null,
-    enabled: !estimateLogo
+    enabled: !documentsLogo
   });
 
-  const currentLogo = estimateLogo || fallbackLogo;
+  const currentLogo = documentsLogo || fallbackLogo;
 
   // Logo visibility settings
   const [logoVisibility, setLogoVisibility] = useState(() => {

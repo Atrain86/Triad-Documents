@@ -162,13 +162,9 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
     }
   });
 
-  // Fetch estimate and invoice logos
-  const { data: estimateLogoData } = useQuery({
-    queryKey: [`/api/users/1/logos/estimates`]
-  });
-
-  const { data: invoiceLogoData } = useQuery({
-    queryKey: [`/api/users/1/logos/emails`]
+  // Fetch documents logo (unified for estimates and invoices)
+  const { data: documentsLogoData } = useQuery({
+    queryKey: [`/api/users/1/logos/documents`]
   });
 
   const queryClient = useQueryClient();
@@ -238,9 +234,8 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
   const [logoMessage, setLogoMessage] = useState('');
   const [backgroundProcessing, setBackgroundProcessing] = useState(false);
   
-  // Estimate and invoice logo states
-  const [estimateLogo, setEstimateLogo] = useState<{ url: string; originalName: string } | null>(null);
-  const [invoiceLogo, setInvoiceLogo] = useState<{ url: string; originalName: string } | null>(null);
+  // Documents logo state (unified for estimates and invoices)
+  const [documentsLogo, setDocumentsLogo] = useState<{ url: string; originalName: string } | null>(null);
   
   // Logo scaling state (stored as percentage, default 100%)
   const [logoScale, setLogoScale] = useState(() => {
@@ -294,22 +289,14 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
     }
   }, [logoData]);
 
-  // Update estimate and invoice logo states when data changes
+  // Update documents logo state when data changes
   useEffect(() => {
-    if (estimateLogoData && typeof estimateLogoData === 'object' && 'logo' in estimateLogoData && estimateLogoData.logo) {
-      setEstimateLogo(estimateLogoData.logo as { url: string; originalName: string });
+    if (documentsLogoData && typeof documentsLogoData === 'object' && 'logo' in documentsLogoData && documentsLogoData.logo) {
+      setDocumentsLogo(documentsLogoData.logo as { url: string; originalName: string });
     } else {
-      setEstimateLogo(null);
+      setDocumentsLogo(null);
     }
-  }, [estimateLogoData]);
-
-  useEffect(() => {
-    if (invoiceLogoData && typeof invoiceLogoData === 'object' && 'logo' in invoiceLogoData && invoiceLogoData.logo) {
-      setInvoiceLogo(invoiceLogoData.logo as { url: string; originalName: string });
-    } else {
-      setInvoiceLogo(null);
-    }
-  }, [invoiceLogoData]);
+  }, [documentsLogoData]);
 
   // Save invoice numbering settings to localStorage
   const saveInvoiceSettings = (mode: 'automatic' | 'manual', nextNumber: number) => {
@@ -410,39 +397,23 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
     }
   });
 
-  // Mutations for estimate and invoice logo selection
-  const estimateLogoSelectMutation = useMutation({
+  // Unified documents logo selection mutation (applies to both estimates and invoices)
+  const documentsLogoSelectMutation = useMutation({
     mutationFn: async (logoId: number) => {
-      return apiRequest('/api/users/1/logos/estimates/select', {
+      return apiRequest('/api/users/1/logos/documents/select', {
         method: 'POST',
         body: { logoId }
       });
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/users/1/logos/documents`] });
       queryClient.invalidateQueries({ queryKey: [`/api/users/1/logos/estimates`] });
-      setLogoMessage('Estimate logo updated successfully');
+      queryClient.invalidateQueries({ queryKey: [`/api/users/1/logos/invoices`] });
+      setLogoMessage('Documents logo updated successfully (applies to both estimates and invoices)');
       setTimeout(() => setLogoMessage(''), 3000);
     },
     onError: (error: Error) => {
-      setLogoMessage(`Failed to update estimate logo: ${error.message}`);
-      setTimeout(() => setLogoMessage(''), 5000);
-    }
-  });
-
-  const invoiceLogoSelectMutation = useMutation({
-    mutationFn: async (logoId: number) => {
-      return apiRequest('/api/users/1/logos/emails/select', {
-        method: 'POST',
-        body: { logoId }
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/users/1/logos/emails`] });
-      setLogoMessage('Invoice logo updated successfully');
-      setTimeout(() => setLogoMessage(''), 3000);
-    },
-    onError: (error: Error) => {
-      setLogoMessage(`Failed to update invoice logo: ${error.message}`);
+      setLogoMessage(`Failed to update documents logo: ${error.message}`);
       setTimeout(() => setLogoMessage(''), 5000);
     }
   });
@@ -489,13 +460,9 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
     }
   };
 
-  // Handle estimate and invoice logo selection
-  const handleEstimateLogoSelect = (logoId: number) => {
-    estimateLogoSelectMutation.mutate(logoId);
-  };
-
-  const handleInvoiceLogoSelect = (logoId: number) => {
-    invoiceLogoSelectMutation.mutate(logoId);
+  // Handle documents logo selection (applies to both estimates and invoices)
+  const handleDocumentsLogoSelect = (logoId: number) => {
+    documentsLogoSelectMutation.mutate(logoId);
   };
 
   // Re-check tax configuration when component mounts or localStorage changes
@@ -916,18 +883,18 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                           <div className="space-y-4 pt-4 border-t border-gray-700">
                             <h4 className="text-white font-medium">Document Logos - Separate from Homepage</h4>
                             <p className="text-sm text-gray-400">
-                              Set different logos for estimates and invoices. If no logo is selected, the homepage logo will be used.
+                              Set a logo for your documents (estimates and invoices). If no logo is selected, the homepage logo will be used.
                             </p>
                             
-                            {/* Estimate Logo Selection */}
+                            {/* Documents Logo Selection (Estimates & Invoices) */}
                             <div className="space-y-3">
                               <div className="flex items-center gap-3">
-                                <FileText className="h-5 w-5 text-purple-400" />
-                                <span className="text-white font-medium">Estimates</span>
-                                {estimateLogo ? (
-                                  <div className="flex items-center gap-2 px-2 py-1 bg-purple-400/10 rounded text-xs">
-                                    <img src={estimateLogo.url} alt="Current" className="h-4 w-auto object-contain" />
-                                    <span className="text-purple-300">Custom Logo Set</span>
+                                <FileText className="h-5 w-5 text-blue-400" />
+                                <span className="text-white font-medium">Documents (Estimates & Invoices)</span>
+                                {documentsLogo ? (
+                                  <div className="flex items-center gap-2 px-2 py-1 bg-blue-400/10 rounded text-xs">
+                                    <img src={documentsLogo.url} alt="Current" className="h-4 w-auto object-contain" />
+                                    <span className="text-blue-300">Custom Logo Set</span>
                                   </div>
                                 ) : (
                                   <span className="text-xs text-gray-500 px-2 py-1 bg-gray-700 rounded">Uses Homepage Logo</span>
@@ -937,49 +904,12 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                 {logoLibrary.map((logo: any) => (
                                   <button
                                     key={logo.id}
-                                    onClick={() => handleEstimateLogoSelect(logo.id)}
-                                    disabled={estimateLogoSelectMutation.isPending}
+                                    onClick={() => handleDocumentsLogoSelect(logo.id)}
+                                    disabled={documentsLogoSelectMutation.isPending}
                                     className={`p-2 rounded border transition-colors ${
-                                      estimateLogo?.url === logo.filename
-                                        ? 'border-purple-400 bg-purple-400/10'
-                                        : 'border-gray-600 hover:border-purple-400 bg-gray-800/50'
-                                    }`}
-                                  >
-                                    <img 
-                                      src={logo.filename} 
-                                      alt={logo.name} 
-                                      className="w-full h-8 object-contain"
-                                    />
-                                    <span className="text-xs text-gray-300 block mt-1 truncate">{logo.originalName}</span>
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-
-                            {/* Invoice Logo Selection */}
-                            <div className="space-y-3">
-                              <div className="flex items-center gap-3">
-                                <Mail className="h-5 w-5 text-green-400" />
-                                <span className="text-white font-medium">Invoices</span>
-                                {invoiceLogo ? (
-                                  <div className="flex items-center gap-2 px-2 py-1 bg-green-400/10 rounded text-xs">
-                                    <img src={invoiceLogo.url} alt="Current" className="h-4 w-auto object-contain" />
-                                    <span className="text-green-300">Custom Logo Set</span>
-                                  </div>
-                                ) : (
-                                  <span className="text-xs text-gray-500 px-2 py-1 bg-gray-700 rounded">Uses Homepage Logo</span>
-                                )}
-                              </div>
-                              <div className="grid grid-cols-3 gap-2 pl-8">
-                                {logoLibrary.map((logo: any) => (
-                                  <button
-                                    key={logo.id}
-                                    onClick={() => handleInvoiceLogoSelect(logo.id)}
-                                    disabled={invoiceLogoSelectMutation.isPending}
-                                    className={`p-2 rounded border transition-colors ${
-                                      invoiceLogo?.url === logo.filename
-                                        ? 'border-green-400 bg-green-400/10'
-                                        : 'border-gray-600 hover:border-green-400 bg-gray-800/50'
+                                      documentsLogo?.url === logo.filename
+                                        ? 'border-blue-400 bg-blue-400/10'
+                                        : 'border-gray-600 hover:border-blue-400 bg-gray-800/50'
                                     }`}
                                   >
                                     <img 
@@ -994,9 +924,9 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                             </div>
                           </div>
 
-                          <div className="mt-4 p-3 bg-green-500/10 border border-green-400/30 rounded-lg">
-                            <p className="text-sm text-green-200">
-                              <span className="font-medium">🎯 Pro Tip:</span> Use a horizontal logo for homepage/app and vertical logos for documents, 
+                          <div className="mt-4 p-3 bg-blue-500/10 border border-blue-400/30 rounded-lg">
+                            <p className="text-sm text-blue-200">
+                              <span className="font-medium">Pro Tip:</span> Use a horizontal logo for homepage and a vertical logo for documents, 
                               or create different versions of your logo for different contexts (dark/light backgrounds, formal/casual style).
                             </p>
                           </div>

@@ -31,20 +31,20 @@ export default function InvoiceGenerator({
   const { toast } = useToast();
   const { user } = useAuth();
 
-  // Get invoice/email-specific logo
-  const { data: invoiceLogo } = useQuery({
-    queryKey: [`/api/users/1/logos/emails`],
+  // Get documents logo (unified for estimates and invoices)
+  const { data: documentsLogo } = useQuery({
+    queryKey: [`/api/users/1/logos/documents`],
     select: (data: any) => data?.logo || null
   });
 
-  // Fallback to regular logo if no invoice-specific logo is set
+  // Fallback to regular logo if no documents-specific logo is set
   const { data: fallbackLogo } = useQuery({
     queryKey: [`/api/users/1/logo`],
     select: (data: any) => data?.logo || null,
-    enabled: !invoiceLogo
+    enabled: !documentsLogo
   });
 
-  const currentLogo = invoiceLogo || fallbackLogo;
+  const currentLogo = documentsLogo || fallbackLogo;
 
   // Logo visibility settings
   const [logoVisibility, setLogoVisibility] = useState(() => {

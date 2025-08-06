@@ -1581,9 +1581,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/users/:userId/logos/:logoType', async (req, res) => {
     try {
       const userId = parseInt(req.params.userId);
-      const logoType = req.params.logoType; // 'homepage', 'invoice', 'estimate', 'business'
+      const logoType = req.params.logoType; // 'homepage', 'documents', 'estimates', 'invoices'
       
-      const logo = await storage.getUserLogoByType(userId, logoType);
+      // For documents, check estimates first, then invoices as fallback
+      let logo;
+      if (logoType === 'documents') {
+        logo = await storage.getUserLogoByType(userId, 'estimates') || 
+               await storage.getUserLogoByType(userId, 'invoices') ||
+               await storage.getUserLogoByType(userId, 'documents');
+      } else {
+        logo = await storage.getUserLogoByType(userId, logoType);
+      }
       
       if (!logo) {
         return res.json({ logo: null });
@@ -1624,31 +1632,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: 'Logo not found in library' });
       }
 
-      // Check if user already has a logo for this context
-      const existingLogo = await storage.getUserLogoByType(userId, logoType);
-      
-      if (existingLogo) {
-        // Update existing entry
-        await storage.updateUserLogo(existingLogo.id, {
-          logoUrl: selectedLogo.filename,
-          logoOriginalName: selectedLogo.originalName,
-          isActive: 'true'
-        });
-      } else {
-        // Create new entry
-        await storage.createUserLogo({
-          userId,
-          logoType,
-          logoUrl: selectedLogo.filename,
-          logoOriginalName: selectedLogo.originalName,
-          isActive: 'true'
-        });
+      // If setting documents logo, also set it for estimates and invoices
+      const logoTypesToUpdate = logoType === 'documents' ? ['documents', 'estimates', 'invoices'] : [logoType];
+
+      for (const type of logoTypesToUpdate) {
+        // Check if user already has a logo for this context
+        const existingLogo = await storage.getUserLogoByType(userId, type);
+        
+        if (existingLogo) {
+          // Update existing entry
+          await storage.updateUserLogo(existingLogo.id, {
+            logoUrl: selectedLogo.filename,
+            logoOriginalName: selectedLogo.originalName,
+            isActive: 'true'
+          });
+        } else {
+          // Create new entry
+          await storage.createUserLogo({
+            userId,
+            logoType: type,
+            logoUrl: selectedLogo.filename,
+            logoOriginalName: selectedLogo.originalName,
+            isActive: 'true'
+          });
+        }
       }
 
       res.json({ 
         success: true, 
         logoUrl: selectedLogo.filename,
-        logoType
+        logoType,
+        appliedTo: logoTypesToUpdate
       });
     } catch (error) {
       console.error('Error setting contextual logo:', error);
