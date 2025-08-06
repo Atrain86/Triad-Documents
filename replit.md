@@ -10,6 +10,13 @@ Theme preference: Dark mode by default
 Logo: Custom A-frame house structure with paint brush accent
 Logo sizing: Homepage logo should use h-14 size with -mt-2 and mb-8 spacing. All logos in library should maintain this same size standard to avoid visual conflicts when switching between logos.
 
+## Archived Design Elements
+- **Rainbow Gradient Line**: Horizontal rainbow-colored gradient that stretched across the screen under the logo on the homepage. 
+  - **CSS Code**: `<div className="h-1 w-full mb-8" style={{ background: "linear-gradient(to right, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3, #54a0ff)" }} />`
+  - **Colors**: Red, teal, blue, mint green, yellow, pink, light blue
+  - **Location**: StreamlinedHomepage.tsx, positioned between logo area and New Client/Schedule buttons
+  - **Status**: Temporarily removed (Jan 2025) but preserved for potential future restoration
+
 ## System Architecture
 
 ### Frontend Architecture

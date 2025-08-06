@@ -382,10 +382,7 @@ export default function StreamlinedHomepage({
           </div>
         )}
 
-        <div 
-          className="h-1 w-full mb-8"
-          style={{ background: "linear-gradient(to right, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3, #54a0ff)" }}
-        />
+
 
         {/* Centered New Client and Schedule buttons */}
         <div className="flex justify-center gap-4 mb-6">
