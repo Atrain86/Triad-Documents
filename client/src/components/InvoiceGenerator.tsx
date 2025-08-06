@@ -1759,10 +1759,10 @@ ${emailMessage}`;
             {/* Services & Labor Section - Table format matching estimate */}
             {dailyHours.length > 0 && (
               <div className="mb-6">
-                <div className="p-4 rounded-lg" style={{ backgroundColor: '#E53E3E' }}>
+                <div className="p-4 rounded-t-lg" style={{ backgroundColor: '#E53E3E' }}>
                   <h3 className="text-lg font-semibold text-white">Services & Labor</h3>
                 </div>
-                <div className="rounded-lg border-2" style={{ borderColor: '#E53E3E', backgroundColor: '#2D3748' }}>
+                <div className="rounded-b-lg border-2 border-t-0" style={{ borderColor: '#E53E3E', backgroundColor: '#2D3748' }}>
                   <table className="w-full">
                     <thead>
                       <tr style={{ backgroundColor: '#4A5568' }}>
@@ -1774,7 +1774,7 @@ ${emailMessage}`;
                     </thead>
                     <tbody>
                       {dailyHours.map((hourEntry, index) => (
-                        <tr key={index} className={index % 2 === 0 ? '' : 'bg-gray-700'}>
+                        <tr key={index} className={index % 2 === 0 ? '' : 'bg-gray-700'} style={{ borderBottom: '1px solid #E53E3E' }}>
                           <td className="p-3 text-white">
                             {hourEntry.description || 'Painting'}
                           </td>
@@ -1785,7 +1785,7 @@ ${emailMessage}`;
                           </td>
                         </tr>
                       ))}
-                      <tr>
+                      <tr style={{ borderBottom: '1px solid #E53E3E' }}>
                         <td className="p-3 text-left font-semibold text-white" colSpan={3}>Labor Subtotal</td>
                         <td className="p-3 text-right font-semibold text-[#6A9955]">
                           ${dailyHours.reduce((sum, hourEntry) => sum + (hourEntry.hours * (project.hourlyRate || 60)), 0).toFixed(2)}
@@ -1800,10 +1800,10 @@ ${emailMessage}`;
             {/* Materials & Supplies Section - Table format matching estimate */}
             {(receipts.filter(receipt => invoiceData.selectedReceipts.has(receipt.id)).length > 0 || invoiceData.suppliesCost > 0) && (
               <div className="mb-6">
-                <div className="p-4 rounded-lg" style={{ backgroundColor: '#ECC94B' }}>
+                <div className="p-4 rounded-t-lg" style={{ backgroundColor: '#ECC94B' }}>
                   <h3 className="text-lg font-semibold text-white">Paint & Materials (incl. taxes)</h3>
                 </div>
-                <div className="rounded-lg border-2" style={{ borderColor: '#ECC94B', backgroundColor: '#2D3748' }}>
+                <div className="rounded-b-lg border-2 border-t-0" style={{ borderColor: '#ECC94B', backgroundColor: '#2D3748' }}>
                   <table className="w-full">
                     <thead>
                       <tr style={{ backgroundColor: '#4A5568' }}>
@@ -1813,7 +1813,7 @@ ${emailMessage}`;
                     </thead>
                     <tbody>
                       {receipts.filter(receipt => invoiceData.selectedReceipts.has(receipt.id)).map((receipt, index) => (
-                        <tr key={index} className={index % 2 === 0 ? '' : 'bg-gray-700'}>
+                        <tr key={index} className={index % 2 === 0 ? '' : 'bg-gray-700'} style={{ borderBottom: '1px solid #ECC94B' }}>
                           <td className="p-3 text-white">
                             {receipt.vendor || 'Materials'}: {receipt.description || receipt.items}
                           </td>
@@ -1823,14 +1823,14 @@ ${emailMessage}`;
                         </tr>
                       ))}
                       {invoiceData.suppliesCost > 0 && (
-                        <tr className={receipts.filter(receipt => invoiceData.selectedReceipts.has(receipt.id)).length % 2 === 0 ? '' : 'bg-gray-700'}>
+                        <tr className={receipts.filter(receipt => invoiceData.selectedReceipts.has(receipt.id)).length % 2 === 0 ? '' : 'bg-gray-700'} style={{ borderBottom: '1px solid #ECC94B' }}>
                           <td className="p-3 text-white">Additional Supplies</td>
                           <td className="p-3 text-right font-semibold text-white">
                             ${invoiceData.suppliesCost.toFixed(2)}
                           </td>
                         </tr>
                       )}
-                      <tr>
+                      <tr style={{ borderBottom: '1px solid #ECC94B' }}>
                         <td className="p-3 text-left font-semibold text-white">Materials Subtotal (incl. taxes)</td>
                         <td className="p-3 text-right font-semibold text-[#6A9955]">
                           ${(calculateMaterialCost() + invoiceData.suppliesCost).toFixed(2)}
@@ -1847,32 +1847,30 @@ ${emailMessage}`;
 
             {/* Summary Section - Table format matching estimate */}
             <div className="mb-6">
-              <div className="p-4 rounded-lg" style={{ backgroundColor: '#3182CE' }}>
+              <div className="p-4 rounded-t-lg" style={{ backgroundColor: '#3182CE' }}>
                 <h3 className="text-lg font-semibold text-white">Additional Services</h3>
               </div>
-              <div className="rounded-lg border-2" style={{ borderColor: '#3182CE', backgroundColor: '#2D3748' }}>
+              <div className="rounded-b-lg border-2 border-t-0" style={{ borderColor: '#3182CE', backgroundColor: '#2D3748' }}>
                 <div className="p-6 space-y-3">
-                  <div className="flex justify-between text-white">
+                  <div className="flex justify-between text-white pb-2" style={{ borderBottom: '1px solid #3182CE' }}>
                     <span>Labor Subtotal:</span>
                     <span>${dailyHours.reduce((sum, hourEntry) => sum + (hourEntry.hours * (project.hourlyRate || 60)), 0).toFixed(2)}</span>
                   </div>
                   {(calculateMaterialCost() + invoiceData.suppliesCost) > 0 && (
-                    <div className="flex justify-between text-white">
+                    <div className="flex justify-between text-white pb-2" style={{ borderBottom: '1px solid #3182CE' }}>
                       <span>Materials & Supplies:</span>
                       <span>${(calculateMaterialCost() + invoiceData.suppliesCost).toFixed(2)}</span>
                     </div>
                   )}
-                  <hr className="border-gray-600" />
-                  <div className="flex justify-between text-white">
+                  <div className="flex justify-between text-white pb-2" style={{ borderBottom: '2px solid #3182CE' }}>
                     <span>Subtotal:</span>
                     <span>${calculateSubtotal().toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between text-white">
+                  <div className="flex justify-between text-white pb-2" style={{ borderBottom: '1px solid #3182CE' }}>
                     <span>GST (5%):</span>
                     <span>${calculateGST().toFixed(2)}</span>
                   </div>
-                  <hr className="border-gray-600" />
-                  <div className="flex justify-between text-xl font-bold text-[#6A9955]">
+                  <div className="flex justify-between text-xl font-bold text-[#6A9955] pt-2" style={{ borderTop: '2px solid #3182CE' }}>
                     <span>Total Amount:</span>
                     <span>${calculateTotal().toFixed(2)}</span>
                   </div>
@@ -1883,10 +1881,10 @@ ${emailMessage}`;
             {/* Notes Section (if any) */}
             {invoiceData.notes && (
               <div className="mb-6">
-                <div className="p-4 rounded-lg" style={{ backgroundColor: '#8B5FBF' }}>
+                <div className="p-4 rounded-t-lg" style={{ backgroundColor: '#8B5FBF' }}>
                   <h3 className="text-lg font-semibold text-white">Notes & Payment Instructions</h3>
                 </div>
-                <div className="rounded-lg border-2 p-6" style={{ borderColor: '#8B5FBF', backgroundColor: '#2D3748' }}>
+                <div className="rounded-b-lg border-2 border-t-0 p-6" style={{ borderColor: '#8B5FBF', backgroundColor: '#2D3748' }}>
                   <p className="whitespace-pre-line text-white">{invoiceData.notes}</p>
                 </div>
               </div>
