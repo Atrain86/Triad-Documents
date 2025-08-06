@@ -862,19 +862,11 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                               </div>
                             )}
 
-                            {/* Estimate Logo Selection Progress */}
-                            {estimateLogoSelectMutation.isPending && (
-                              <div className="flex items-center gap-3 p-3 bg-purple-500/10 border border-purple-400/30 rounded-lg">
-                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-400"></div>
-                                <span className="text-purple-400 text-sm">Selecting estimate logo...</span>
-                              </div>
-                            )}
-
-                            {/* Invoice Logo Selection Progress */}
-                            {invoiceLogoSelectMutation.isPending && (
-                              <div className="flex items-center gap-3 p-3 bg-green-500/10 border border-green-400/30 rounded-lg">
-                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-400"></div>
-                                <span className="text-green-400 text-sm">Selecting invoice logo...</span>
+                            {/* Documents Logo Selection Progress */}
+                            {documentsLogoSelectMutation.isPending && (
+                              <div className="flex items-center gap-3 p-3 bg-blue-500/10 border border-blue-400/30 rounded-lg">
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-400"></div>
+                                <span className="text-blue-400 text-sm">Selecting documents logo...</span>
                               </div>
                             )}
                           </div>
