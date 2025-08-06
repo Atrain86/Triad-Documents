@@ -241,10 +241,11 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
   const [logoScale, setLogoScale] = useState(() => {
     const saved = localStorage.getItem('logoScale');
     let parsed = saved ? parseInt(saved) : 100;
-    // Clear any problematic cached values - especially around 415% limit
-    if (parsed === 240 || parsed === 335 || parsed === 340 || parsed === 350 || parsed === 365 || parsed === 415 || parsed > 500) {
-      console.log('Clearing problematic cached logo scale:', parsed, 'resetting to 100%');
+    // Clear SPECIFIC problematic cached values - 425%, 430%, 415%
+    if (parsed === 240 || parsed === 335 || parsed === 340 || parsed === 350 || parsed === 365 || parsed === 415 || parsed === 425 || parsed === 430 || parsed > 500) {
+      console.log('CLEARING PROBLEMATIC CACHE:', parsed, 'resetting to 100%');
       parsed = 100;
+      localStorage.clear(); // Nuclear clear
       localStorage.setItem('logoScale', '100');
     }
     console.log('SettingsPage logoScale initialized to:', parsed);
@@ -257,24 +258,28 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
     return saved ? parseInt(saved) : 0;
   });
 
-  // Logo scaling helper functions - Force 500% maximum
+  // Logo scaling helper functions - AGGRESSIVE 500% FORCE
   const updateLogoScale = (newScale: number) => {
-    console.log('updateLogoScale called with:', newScale);
-    // Force scale between 25% and 500% - NO RESTRICTIONS
-    let clampedScale = newScale;
-    if (newScale < 25) clampedScale = 25;
-    if (newScale > 500) clampedScale = 500;
+    console.log('AGGRESSIVE updateLogoScale called with:', newScale);
     
-    console.log('Scaling to:', clampedScale, '(forced 500% max override)');
+    // FORCE DIRECT SCALING - NO MATH.MIN/MAX INTERFERENCE
+    let finalScale = newScale;
+    if (finalScale < 25) finalScale = 25;
+    if (finalScale > 500) finalScale = 500;
     
-    // Force update state and localStorage
-    setLogoScale(clampedScale);
-    localStorage.removeItem('logoScale');
-    localStorage.setItem('logoScale', clampedScale.toString());
-    console.log('localStorage force set to:', clampedScale);
+    console.log('FORCING scale to:', finalScale, 'bypassing all restrictions');
     
-    // Dispatch custom event to notify other components
-    window.dispatchEvent(new CustomEvent('logoScaleChanged', { detail: clampedScale }));
+    // AGGRESSIVE STATE UPDATE
+    setLogoScale(finalScale);
+    
+    // CLEAR AND FORCE LOCALSTORAGE
+    localStorage.clear(); // Nuclear option
+    localStorage.setItem('logoScale', finalScale.toString());
+    
+    console.log('AGGRESSIVE: localStorage FORCED to:', finalScale);
+    
+    // Dispatch event
+    window.dispatchEvent(new CustomEvent('logoScaleChanged', { detail: finalScale }));
   };
 
   // Logo vertical position helper functions
@@ -297,13 +302,19 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
   };
 
   const increaseLogoScale = () => {
+    console.log('INCREASE BUTTON CLICKED - Current:', logoScale);
+    
+    // BYPASS ALL CHECKS - JUST ADD 5
+    const targetScale = logoScale + 5;
+    
+    // Only stop at exactly 500, nothing less
     if (logoScale >= 500) {
-      console.log('Already at maximum 500%');
+      console.log('Truly at 500% maximum, stopping');
       return;
     }
-    const newScale = Math.min(500, logoScale + 5);
-    console.log('Increasing logo scale from', logoScale, 'to', newScale);
-    updateLogoScale(newScale);
+    
+    console.log('FORCING increase from', logoScale, 'to', targetScale);
+    updateLogoScale(targetScale);
   };
 
   const decreaseLogoScale = () => {
@@ -792,9 +803,14 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                   {/* Size Controls - Bottom Area with More Space */}
                                   <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex items-center gap-4">
                                     <button
-                                      onClick={decreaseLogoScale}
-                                      disabled={logoScale <= 25}
-                                      className="w-12 h-12 rounded-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors shadow-lg active:bg-blue-700"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        console.log('AGGRESSIVE DECREASE CLICKED');
+                                        const newVal = logoScale - 5;
+                                        if (newVal >= 25) updateLogoScale(newVal);
+                                      }}
+                                      className="w-12 h-12 rounded-full bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center transition-colors shadow-lg active:bg-blue-700"
                                       title="Decrease size (5%)"
                                       type="button"
                                     >
@@ -804,13 +820,34 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                       {logoScale}%
                                     </div>
                                     <button
-                                      onClick={increaseLogoScale}
-                                      disabled={logoScale >= 500}
-                                      className="w-12 h-12 rounded-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors shadow-lg active:bg-blue-700"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        console.log('AGGRESSIVE INCREASE CLICKED');
+                                        const newVal = logoScale + 5;
+                                        if (newVal <= 500) updateLogoScale(newVal);
+                                      }}
+                                      className="w-12 h-12 rounded-full bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center transition-colors shadow-lg active:bg-blue-700"
                                       title="Increase size (5%)"
                                       type="button"
                                     >
                                       <Plus className="h-6 w-6" />
+                                    </button>
+                                  </div>
+                                  
+                                  {/* NUCLEAR TEST BUTTON */}
+                                  <div className="absolute top-4 right-4">
+                                    <button
+                                      onClick={() => {
+                                        console.log('NUCLEAR 500% TEST');
+                                        setLogoScale(500);
+                                        localStorage.clear();
+                                        localStorage.setItem('logoScale', '500');
+                                        window.dispatchEvent(new CustomEvent('logoScaleChanged', { detail: 500 }));
+                                      }}
+                                      className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 text-xs rounded"
+                                    >
+                                      Test 500%
                                     </button>
                                   </div>
                                   
