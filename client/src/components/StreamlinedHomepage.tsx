@@ -116,11 +116,15 @@ export default function StreamlinedHomepage({
     };
   }, []);
 
-  // Check for first login and show tax setup modal
+  // Check for first login and show tax setup modal only once
   useEffect(() => {
     const taxSetupCompleted = localStorage.getItem('taxSetupCompleted');
-    if (!taxSetupCompleted) {
+    const hasShownSetup = sessionStorage.getItem('hasShownTaxSetup');
+    
+    // Only show if never completed AND not shown in this session
+    if (!taxSetupCompleted && !hasShownSetup) {
       setShowTaxSetup(true);
+      sessionStorage.setItem('hasShownTaxSetup', 'true');
     }
   }, []);
 

@@ -147,14 +147,15 @@ cortespainter@gmail.com`;
 
   // Increment and save next invoice number, update display
   const incrementInvoiceNumber = () => {
-    console.log('incrementInvoiceNumber function called');
-    const currentNumber = getNextInvoiceNumber();
-    console.log('Current number from localStorage:', currentNumber);
-    const nextNumber = currentNumber + 1;
-    console.log('Setting next number to:', nextNumber);
+    console.log('CRITICAL: incrementInvoiceNumber function called');
+    const currentDisplayedNumber = invoiceData.invoiceNumber; // Use displayed number
+    console.log('Current displayed invoice number:', currentDisplayedNumber);
+    const nextNumber = currentDisplayedNumber + 1;
+    console.log('Setting next invoice number to:', nextNumber);
+    
+    // Update localStorage and state immediately
     localStorage.setItem('nextInvoiceNumber', nextNumber.toString());
-    console.log('localStorage updated. Stored value:', localStorage.getItem('nextInvoiceNumber'));
-    console.log('Invoice number incremented from', currentNumber, 'to', nextNumber);
+    console.log('CRITICAL: localStorage updated to:', localStorage.getItem('nextInvoiceNumber'));
     
     // Update the displayed invoice number for next time
     setInvoiceData(prev => ({
@@ -162,7 +163,8 @@ cortespainter@gmail.com`;
       invoiceNumber: nextNumber
     }));
     
-    return currentNumber;
+    console.log('CRITICAL: Invoice number incremented from', currentDisplayedNumber, 'to', nextNumber);
+    return currentDisplayedNumber; // Return the number that was just used
   };
 
 
@@ -1390,7 +1392,7 @@ ${emailMessage}`;
                   {/* Material Markup Control */}
                   <div className="space-y-3">
                     <div className="flex items-center justify-between p-3 rounded-lg border" style={{ borderColor: '#ECC94B' }}>
-                      <span className="text-sm font-medium" style={{ color: darkTheme.textPrimary }}>
+                      <span className="text-sm font-medium" style={{ color: darkTheme.text }}>
                         Supplies
                       </span>
                       <div className="flex items-center space-x-3">

@@ -26,8 +26,9 @@ const TaxSetupModal: React.FC<TaxSetupModalProps> = ({ isOpen, onClose }) => {
   };
 
   const handleMaybeLater = () => {
-    // Mark as dismissed for this session
-    localStorage.setItem('taxSetupCompleted', 'true');
+    // Mark as dismissed (don't show again until localStorage is cleared)
+    localStorage.setItem('taxSetupCompleted', 'dismissed');
+    sessionStorage.setItem('hasShownTaxSetup', 'true');
     onClose();
   };
 
@@ -56,7 +57,12 @@ const TaxSetupModal: React.FC<TaxSetupModalProps> = ({ isOpen, onClose }) => {
             <Button
               variant="outline"
               onClick={handleMaybeLater}
-              className="text-gray-600 hover:text-gray-800"
+              className="text-white hover:text-white border-purple-500 hover:bg-purple-600"
+              style={{ 
+                borderColor: paintBrainColors.purple,
+                color: 'white',
+                backgroundColor: 'transparent'
+              }}
             >
               Maybe Later
             </Button>
