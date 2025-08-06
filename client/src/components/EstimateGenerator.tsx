@@ -66,8 +66,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   // Initialize form data when dialog opens (run only once per open)
   useEffect(() => {
     if (isOpen && !isInitialized) {
-      // Clear localStorage to ensure fresh start
-      localStorage.removeItem('estimateFormData');
+      // Keep localStorage for persistence - don't clear it
       setIsInitialized(true);
     } else if (!isOpen) {
       setIsInitialized(false);
