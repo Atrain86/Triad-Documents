@@ -488,27 +488,27 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       }
     </style>
   </head>
-  <body class="bg-black text-white font-sans p-8">
+  <body class="bg-black text-white font-sans p-4">
     <!-- Logo and Title -->
-    <div class="flex flex-col items-center mb-8">
-      <div class="h-16 mb-4 flex items-center justify-center">
-        <img src="${logoUrl}" alt="Logo" class="h-16 object-contain" />
+    <div class="flex flex-col items-center mb-6">
+      <div class="h-14 mb-3 flex items-center justify-center">
+        <img src="${logoUrl}" alt="Logo" class="h-14 object-contain" />
       </div>
-      <h1 class="text-orange-500 text-3xl font-bold">ESTIMATE</h1>
+      <h1 class="text-orange-500 text-2xl font-bold">ESTIMATE</h1>
     </div>
 
     <!-- Client & Company Info -->
-    <div class="flex justify-between text-sm mb-10">
-      <div>
-        <p class="text-gray-300 font-semibold mb-2">Estimate For:</p>
+    <div class="flex justify-between text-sm mb-6">
+      <div class="w-1/2">
+        <p class="text-gray-300 font-semibold mb-1">Estimate For:</p>
         <p class="font-semibold">${project.clientName}</p>
         <p>${project.address}</p>
         <p>${project.clientCity || ''}, ${project.clientPostal || ''}</p>
         ${project.clientPhone ? `<p>${project.clientPhone}</p>` : ''}
         ${project.clientEmail ? `<p>${project.clientEmail}</p>` : ''}
       </div>
-      <div class="text-right">
-        <p class="text-gray-300 font-semibold mb-2">From:</p>
+      <div class="w-1/2 text-right">
+        <p class="text-gray-300 font-semibold mb-1">From:</p>
         <p class="font-semibold">A-Frame Painting</p>
         <p>884 Hayes Rd</p>
         <p>Manson's Landing, BC</p>
@@ -518,9 +518,9 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
     ${servicesHTML || additionalLaborHTML ? `
     <!-- Services & Labor -->
-    <div class="mb-8">
-      <div style="background-color: #E53E3E;" class="text-white px-4 py-3 rounded-t-lg">
-        <h2 class="text-lg font-bold">Services & Labor</h2>
+    <div class="mb-6">
+      <div style="background-color: #E53E3E;" class="text-white p-4 rounded-t-lg">
+        <h3 class="text-lg font-semibold text-white">Services & Labor</h3>
       </div>
       <div style="background-color: #2D3748; border: 2px solid #E53E3E; border-top: none;" class="rounded-b-lg p-4">
         <table class="w-full">
@@ -547,9 +547,9 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
     ${materialsHTML.length > 0 ? `
     <!-- Paint & Materials -->
-    <div class="mb-8">
-      <div style="background-color: #ECC94B;" class="text-white px-4 py-3 rounded-t-lg">
-        <h2 class="text-lg font-bold">Paint & Materials (incl. taxes)</h2>
+    <div class="mb-6">
+      <div style="background-color: #ECC94B;" class="text-white p-4 rounded-t-lg">
+        <h3 class="text-lg font-semibold text-white">Paint & Materials (incl. taxes)</h3>
       </div>
       <div style="background-color: #2D3748; border: 2px solid #ECC94B; border-top: none;" class="rounded-b-lg p-4">
         <table class="w-full">
@@ -576,9 +576,9 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
     ${additionalServicesHTML ? `
     <!-- Additional Services -->
-    <div class="mb-8">
-      <div style="background-color: #3182CE;" class="text-white px-4 py-3 rounded-t-lg">
-        <h2 class="text-lg font-bold">Additional Services</h2>
+    <div class="mb-6">
+      <div style="background-color: #3182CE;" class="text-white p-4 rounded-t-lg">
+        <h3 class="text-lg font-semibold text-white">Additional Services</h3>
       </div>
       <div style="background-color: #2D3748; border: 2px solid #3182CE; border-top: none;" class="rounded-b-lg p-4">
         <table class="w-full">
@@ -604,9 +604,9 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
     ${travelSubtotal > 0 ? `
     <!-- Travel Costs -->
-    <div class="mb-8">
-      <div style="background-color: #38A169;" class="text-white px-4 py-3 rounded-t-lg">
-        <h2 class="text-lg font-bold">Travel Costs</h2>
+    <div class="mb-6">
+      <div style="background-color: #38A169;" class="text-white p-4 rounded-t-lg">
+        <h3 class="text-lg font-semibold text-white">Travel Costs</h3>
       </div>
       <div style="background-color: #2D3748; border: 2px solid #38A169; border-top: none;" class="rounded-b-lg p-4">
         <div class="text-white">
@@ -617,34 +617,34 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     ` : ''}
 
     <!-- Summary Section - Purple -->
-    <div class="mb-8">
-      <div style="background-color: #8B5FBF;" class="text-white px-4 py-3 rounded-t-lg">
-        <h2 class="text-lg font-bold">Summary</h2>
+    <div class="mb-6">
+      <div style="background-color: #8B5FBF;" class="text-white p-4 rounded-t-lg">
+        <h3 class="text-lg font-semibold text-white">Summary</h3>
       </div>
       <div style="background-color: #2D3748; border: 2px solid #8B5FBF; border-top: none;" class="rounded-b-lg p-4">
         ${taxableAmount > 0 ? `
-        <div class="flex justify-between mb-2 pb-2 text-white" style="border-bottom: 1px solid #8B5FBF;">
+        <div class="flex justify-between p-3 mb-2 text-white" style="border-bottom: 1px solid #8B5FBF;">
           <span>Taxable Services:</span>
           <span>$${taxableAmount.toFixed(2)}</span>
         </div>
         ` : ''}
         ${nonTaxableAmount > 0 ? `
-        <div class="flex justify-between mb-2 pb-2 text-white" style="border-bottom: 1px solid #8B5FBF;">
+        <div class="flex justify-between p-3 mb-2 text-white" style="border-bottom: 1px solid #8B5FBF;">
           <span>Materials (incl. taxes):</span>
           <span>$${nonTaxableAmount.toFixed(2)}</span>
         </div>
         ` : ''}
-        <div class="flex justify-between mb-2 pb-2 text-white" style="border-bottom: 1px solid #8B5FBF;">
+        <div class="flex justify-between p-3 mb-2 text-white" style="border-bottom: 1px solid #8B5FBF;">
           <span>Subtotal:</span>
           <span>$${subtotalBeforeTax.toFixed(2)}</span>
         </div>
         ${taxRate > 0 && taxableAmount > 0 ? `
-        <div class="flex justify-between mb-2 pb-2 text-white" style="border-bottom: 1px solid #8B5FBF;">
+        <div class="flex justify-between p-3 mb-2 text-white" style="border-bottom: 1px solid #8B5FBF;">
           <span>Tax (${(taxRate * 100).toFixed(1)}% on services only):</span>
           <span>$${taxAmount.toFixed(2)}</span>
         </div>
         ` : ''}
-        <div class="flex justify-between text-xl font-bold text-green-400 mt-2 pt-2" style="border-top: 2px solid #8B5FBF;">
+        <div class="flex justify-between p-3 text-xl font-bold text-green-400" style="border-top: 2px solid #8B5FBF;">
           <span>Grand Total:</span>
           <span>$${grandTotal.toFixed(2)}</span>
         </div>
