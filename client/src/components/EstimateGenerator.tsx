@@ -404,11 +404,11 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       const rate = parseFloat(stage.rate) || 0;
       const total = hours * rate;
       return `
-        <tr>
-          <td class="py-2 px-4 border-b border-gray-700">${stage.name}</td>
-          <td class="py-2 px-4 border-b border-gray-700 text-center">${hours}h</td>
-          <td class="py-2 px-4 border-b border-gray-700 text-center">$${rate}/hr</td>
-          <td class="py-2 px-4 border-b border-gray-700 text-right font-semibold">$${total.toFixed(2)}</td>
+        <tr style="border-bottom: 1px solid #E53E3E;">
+          <td class="py-2 px-4 text-white">${stage.name}</td>
+          <td class="py-2 px-4 text-center text-white">${hours}h</td>
+          <td class="py-2 px-4 text-center text-white">$${rate}/hr</td>
+          <td class="py-2 px-4 text-right font-semibold text-white">$${total.toFixed(2)}</td>
         </tr>
       `;
     }).join('');
@@ -419,11 +419,11 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       const rate = parseFloat(labor.rate) || 0;
       const total = hours * rate;
       return `
-        <tr>
-          <td class="py-2 px-4 border-b border-gray-700">${labor.name || 'Additional Worker'}</td>
-          <td class="py-2 px-4 border-b border-gray-700 text-center">${hours}h</td>
-          <td class="py-2 px-4 border-b border-gray-700 text-center">$${rate}/hr</td>
-          <td class="py-2 px-4 border-b border-gray-700 text-right font-semibold">$${total.toFixed(2)}</td>
+        <tr style="border-bottom: 1px solid #E53E3E;">
+          <td class="py-2 px-4 text-white">${labor.name || 'Additional Worker'}</td>
+          <td class="py-2 px-4 text-center text-white">${hours}h</td>
+          <td class="py-2 px-4 text-center text-white">$${rate}/hr</td>
+          <td class="py-2 px-4 text-right font-semibold text-white">$${total.toFixed(2)}</td>
         </tr>
       `;
     }).join('');
@@ -434,11 +434,11 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       const rate = parseFloat(service.rate) || 0;
       const total = hours * rate;
       return `
-        <tr>
-          <td class="py-2 px-4 border-b border-gray-700">${service.name}</td>
-          <td class="py-2 px-4 border-b border-gray-700 text-center">${hours}h</td>
-          <td class="py-2 px-4 border-b border-gray-700 text-center">$${rate}/hr</td>
-          <td class="py-2 px-4 border-b border-gray-700 text-right font-semibold">$${total.toFixed(2)}</td>
+        <tr style="border-bottom: 1px solid #3182CE;">
+          <td class="py-2 px-4 text-white">${service.name}</td>
+          <td class="py-2 px-4 text-center text-white">${hours}h</td>
+          <td class="py-2 px-4 text-center text-white">$${rate}/hr</td>
+          <td class="py-2 px-4 text-right font-semibold text-white">$${total.toFixed(2)}</td>
         </tr>
       `;
     }).join('');
@@ -447,9 +447,9 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     const materialsHTML = [];
     if (paintSubtotal > 0) {
       materialsHTML.push(`
-        <tr>
-          <td class="py-2 px-4 border-b border-gray-700">Paint (${paintCosts.gallons} gal × ${paintCosts.coats} coats)</td>
-          <td class="py-2 px-4 border-b border-gray-700 text-right font-semibold">$${paintSubtotal.toFixed(2)}</td>
+        <tr style="border-bottom: 1px solid #ECC94B;">
+          <td class="py-2 px-4 text-white">Paint (${paintCosts.gallons} gal × ${paintCosts.coats} coats)</td>
+          <td class="py-2 px-4 text-right font-semibold text-white">$${paintSubtotal.toFixed(2)}</td>
         </tr>
       `);
     }
@@ -457,9 +457,9 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     customSupplies.filter((supply: any) => (parseFloat(supply.quantity) || 0) > 0).forEach((supply: any) => {
       const total = (parseFloat(supply.quantity) || 0) * (parseFloat(supply.pricePerUnit) || 0);
       materialsHTML.push(`
-        <tr>
-          <td class="py-2 px-4 border-b border-gray-700">${supply.name} (${supply.quantity} × $${supply.pricePerUnit})</td>
-          <td class="py-2 px-4 border-b border-gray-700 text-right font-semibold">$${total.toFixed(2)}</td>
+        <tr style="border-bottom: 1px solid #ECC94B;">
+          <td class="py-2 px-4 text-white">${supply.name} (${supply.quantity} × $${supply.pricePerUnit})</td>
+          <td class="py-2 px-4 text-right font-semibold text-white">$${total.toFixed(2)}</td>
         </tr>
       `);
     });
@@ -506,7 +506,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       </div>
     </div>
 
-    ${servicesHTML ? `
+    ${servicesHTML || additionalLaborHTML ? `
     <!-- Services & Labor -->
     <div class="mb-8">
       <div style="background-color: #E53E3E;" class="text-white px-4 py-3 rounded-t-lg">
@@ -524,37 +524,10 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           </thead>
           <tbody>
             ${servicesHTML}
-            <tr style="border-top: 2px solid #E53E3E;">
-              <td colspan="3" class="py-2 px-4 font-semibold text-white">Services Subtotal</td>
-              <td class="py-2 px-4 text-right font-bold text-green-400">$${workStages.filter((stage: any) => (parseFloat(stage.hours) || 0) > 0).reduce((total: number, stage: any) => total + ((parseFloat(stage.hours) || 0) * (parseFloat(stage.rate) || 0)), 0).toFixed(2)}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-    ` : ''}
-
-    ${additionalLaborHTML ? `
-    <!-- Additional Labor -->
-    <div class="mb-8">
-      <div style="background-color: #38A169;" class="text-white px-4 py-3 rounded-t-lg">
-        <h2 class="text-lg font-bold">Additional Labor</h2>
-      </div>
-      <div style="background-color: #2D3748; border: 2px solid #38A169; border-top: none;" class="rounded-b-lg p-4">
-        <table class="w-full">
-          <thead>
-            <tr style="border-bottom: 2px solid #38A169;">
-              <th class="py-2 px-4 text-left text-white">Worker</th>
-              <th class="py-2 px-4 text-center text-white">Hours</th>
-              <th class="py-2 px-4 text-center text-white">Rate</th>
-              <th class="py-2 px-4 text-right text-white">Total</th>
-            </tr>
-          </thead>
-          <tbody>
             ${additionalLaborHTML}
-            <tr style="border-top: 2px solid #38A169;">
-              <td colspan="3" class="py-2 px-4 font-semibold text-white">Additional Labor Subtotal</td>
-              <td class="py-2 px-4 text-right font-bold text-green-400">$${additionalLabor.filter((labor: any) => (parseFloat(labor.hours) || 0) > 0).reduce((total: number, labor: any) => total + ((parseFloat(labor.hours) || 0) * (parseFloat(labor.rate) || 0)), 0).toFixed(2)}</td>
+            <tr style="border-top: 2px solid #E53E3E;">
+              <td colspan="3" class="py-2 px-4 font-semibold text-white">Labor Subtotal</td>
+              <td class="py-2 px-4 text-right font-bold text-green-400">$${laborSubtotal.toFixed(2)}</td>
             </tr>
           </tbody>
         </table>
@@ -622,11 +595,13 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     ${travelSubtotal > 0 ? `
     <!-- Travel Costs -->
     <div class="mb-8">
-      <div class="bg-red-500 text-white px-4 py-2 mb-4">
+      <div style="background-color: #38A169;" class="text-white px-4 py-3 rounded-t-lg">
         <h2 class="text-lg font-bold">Travel Costs</h2>
       </div>
-      <div class="bg-gray-800 p-4 rounded-lg">
-        <p>${travelCosts.distance}km × ${travelCosts.trips} trips × $${travelCosts.ratePerKm}/km = $${travelSubtotal.toFixed(2)}</p>
+      <div style="background-color: #2D3748; border: 2px solid #38A169; border-top: none;" class="rounded-b-lg p-4">
+        <div class="text-white">
+          <p>${travelCosts.distance}km × ${travelCosts.trips} trips × $${travelCosts.ratePerKm}/km = $${travelSubtotal.toFixed(2)}</p>
+        </div>
       </div>
     </div>
     ` : ''}
@@ -1495,9 +1470,15 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
               </div>
               <div className="rounded-b-lg border-2 border-t-0 p-4" style={{ borderColor: '#E53E3E', backgroundColor: '#2D3748' }}>
                 {workStages.filter((stage: any) => parseFloat(stage.hours) > 0).map((stage: any, index: number) => (
-                  <div key={index} className="flex justify-between mb-2 pb-2 text-white" style={{ borderBottom: index < workStages.filter((stage: any) => parseFloat(stage.hours) > 0).length - 1 ? '1px solid #E53E3E' : 'none' }}>
+                  <div key={index} className="flex justify-between mb-2 pb-2 text-white" style={{ borderBottom: '1px solid #E53E3E' }}>
                     <span>{stage.name} ({stage.hours} hrs @ ${stage.rate}/hr)</span>
                     <span>${((parseFloat(stage.hours) || 0) * (parseFloat(stage.rate.toString()) || 0)).toFixed(2)}</span>
+                  </div>
+                ))}
+                {additionalLabor.filter((member: any) => member.name && parseFloat(member.hours) > 0).map((member: any, index: number) => (
+                  <div key={`labor-${index}`} className="flex justify-between mb-2 pb-2 text-white" style={{ borderBottom: '1px solid #E53E3E' }}>
+                    <span>{member.name} ({member.hours} hrs @ ${member.rate}/hr)</span>
+                    <span>${((parseFloat(member.hours) || 0) * (parseFloat(member.rate) || 0)).toFixed(2)}</span>
                   </div>
                 ))}
                 <div className="text-right font-semibold text-[#6A9955] mt-2 pt-2" style={{ borderTop: '2px solid #E53E3E' }}>
@@ -1533,21 +1514,17 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             </div>
           )}
 
-          {/* Additional Labor Section */}
-          {additionalLaborSubtotal > 0 && (
+
+
+          {/* Travel Costs Section */}
+          {travelSubtotal > 0 && (
             <div className="mb-6">
               <div className="p-4 rounded-t-lg" style={{ backgroundColor: '#38A169' }}>
-                <h3 className="text-lg font-semibold text-white">Additional Labor</h3>
+                <h3 className="text-lg font-semibold text-white">Travel Costs</h3>
               </div>
               <div className="rounded-b-lg border-2 border-t-0 p-4" style={{ borderColor: '#38A169', backgroundColor: '#2D3748' }}>
-                {additionalLabor.filter((member: any) => member.name && parseFloat(member.hours) > 0).map((member: any, index: number) => (
-                  <div key={index} className="flex justify-between mb-2 pb-2 text-white" style={{ borderBottom: index < additionalLabor.filter((member: any) => member.name && parseFloat(member.hours) > 0).length - 1 ? '1px solid #38A169' : '1px solid #38A169' }}>
-                    <span>{member.name} ({member.hours} hrs @ ${member.rate}/hr)</span>
-                    <span>${((parseFloat(member.hours) || 0) * (parseFloat(member.rate) || 0)).toFixed(2)}</span>
-                  </div>
-                ))}
-                <div className="text-right font-semibold text-[#38A169] mt-2 pt-2" style={{ borderTop: '2px solid #38A169' }}>
-                  Additional Labor Total: ${additionalLaborSubtotal.toFixed(2)}
+                <div className="text-white">
+                  <p>{travelCosts.distance}km × {travelCosts.trips} trips × ${travelCosts.ratePerKm}/km = ${travelSubtotal.toFixed(2)}</p>
                 </div>
               </div>
             </div>
@@ -1561,7 +1538,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
               </div>
               <div className="rounded-b-lg border-2 border-t-0 p-4" style={{ borderColor: '#3182CE', backgroundColor: '#2D3748' }}>
                 {additionalServices.filter((service: any) => parseFloat(service.hours) > 0).map((service: any, index: number) => (
-                  <div key={index} className="flex justify-between mb-2 pb-2 text-white" style={{ borderBottom: index < additionalServices.filter((service: any) => parseFloat(service.hours) > 0).length - 1 ? '1px solid #3182CE' : '1px solid #3182CE' }}>
+                  <div key={index} className="flex justify-between mb-2 pb-2 text-white" style={{ borderBottom: '1px solid #3182CE' }}>
                     <span>{service.name} ({service.hours} hrs @ ${service.rate}/hr)</span>
                     <span>${((parseFloat(service.hours) || 0) * (parseFloat(service.rate.toString()) || 0)).toFixed(2)}</span>
                   </div>
