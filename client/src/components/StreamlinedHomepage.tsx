@@ -632,9 +632,10 @@ function NewClientForm({ onSubmit, onCancel, isLoading }: { onSubmit: (data: any
           id="hourlyRate"
           type="number"
           min="0"
-          step="5"
+          step="1"
           value={formData.hourlyRate}
-          onChange={(e) => setFormData(prev => ({ ...prev, hourlyRate: parseInt(e.target.value) || 60 }))}
+          onChange={(e) => setFormData(prev => ({ ...prev, hourlyRate: parseInt(e.target.value) || 0 }))}
+          placeholder="Enter hourly rate"
         />
       </div>
 
@@ -999,8 +1000,8 @@ function EditClientForm({ project, onSubmit, onCancel, isLoading }: { project: a
     clientEmail: project.clientEmail || '',
     clientPhone: project.clientPhone || '',
     projectType: project.projectType || 'interior',
-    roomCount: project.roomCount || 1,
-    hourlyRate: project.hourlyRate || 60
+    roomCount: project.roomCount ?? 0,
+    hourlyRate: project.hourlyRate ?? 0
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -1102,9 +1103,10 @@ function EditClientForm({ project, onSubmit, onCancel, isLoading }: { project: a
           <Input
             id="editRoomCount"
             type="number"
-            min="1"
+            min="0"
             value={formData.roomCount}
-            onChange={(e) => setFormData(prev => ({ ...prev, roomCount: parseInt(e.target.value) || 1 }))}
+            onChange={(e) => setFormData(prev => ({ ...prev, roomCount: parseInt(e.target.value) || 0 }))}
+            placeholder="Enter room count"
           />
         </div>
         <div>
@@ -1113,9 +1115,10 @@ function EditClientForm({ project, onSubmit, onCancel, isLoading }: { project: a
             id="editHourlyRate"
             type="number"
             min="0"
-            step="5"
+            step="1"
             value={formData.hourlyRate}
-            onChange={(e) => setFormData(prev => ({ ...prev, hourlyRate: parseInt(e.target.value) || 60 }))}
+            onChange={(e) => setFormData(prev => ({ ...prev, hourlyRate: parseInt(e.target.value) || 0 }))}
+            placeholder="Enter hourly rate"
           />
         </div>
       </div>
