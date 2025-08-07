@@ -1935,7 +1935,8 @@ ${emailMessage}`;
           </div>
             
           {/* Custom Email Message - Just above send button */}
-          <div className="px-6 py-4 border-t border-gray-700 bg-gray-900 flex-shrink-0">
+          <div className="px-6 py-4 border-t border-gray-700 bg-red-900 flex-shrink-0">
+            <div className="text-white text-lg font-bold mb-2">CUSTOM EMAIL MESSAGE TEST</div>
             <label className="block text-sm font-medium mb-2 text-gray-300">
               Custom Email Message:
             </label>
