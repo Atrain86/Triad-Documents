@@ -1735,17 +1735,101 @@ ${emailMessage}`;
               </div>
             )}
 
-            {/* Additional Services */}
+            {/* Services & Labor (combined with Additional Workers) */}
             <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: paintBrainColors.blue, backgroundColor: darkTheme.cardBg }}>
+              {/* Additional Workers Section - Inside Blue Container */}
+              <div>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.blue }}>
+                    <Users className="mr-2 h-5 w-5" />
+                    Additional Workers
+                  </h2>
+                  <Button
+                    onClick={addAdditionalWorker}
+                    size="sm"
+                    className="text-blue-400 border-blue-400 bg-transparent hover:bg-blue-400 hover:text-white"
+                    variant="outline"
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    Add Worker
+                  </Button>
+                </div>
+                <div className="space-y-3">
+                  {additionalWorkers.map((worker, index) => (
+                    <div key={index} className="grid gap-3 items-end" style={{gridTemplateColumns: '2fr 80px 80px 1fr'}}>
+                      <div>
+                        <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Employee Name</label>
+                        <Input
+                          value={worker.name}
+                          onChange={(e) => updateAdditionalWorker(index, 'name', e.target.value)}
+                          placeholder="Employee name"
+                          className="bg-gray-800 border-blue-400 text-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Hours</label>
+                        <Input
+                          type="number"
+                          value={worker.hours}
+                          onChange={(e) => updateAdditionalWorker(index, 'hours', e.target.value)}
+                          placeholder="0"
+                          min="0"
+                          step="0.25"
+                          className="bg-gray-800 border-blue-400 text-white w-20"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Rate/hr</label>
+                        <Input
+                          type="number"
+                          value={worker.rate}
+                          onChange={(e) => updateAdditionalWorker(index, 'rate', e.target.value)}
+                          placeholder="60"
+                          min="0"
+                          step="0.01"
+                          className="bg-gray-800 border-blue-400 text-white w-20"
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium" style={{ color: darkTheme.text }}>
+                          ${((parseFloat(worker.hours) || 0) * (parseFloat(worker.rate.toString()) || 0)).toFixed(2)}
+                        </span>
+                        {additionalWorkers.length > 1 && (
+                          <Button
+                            onClick={() => removeAdditionalWorker(index)}
+                            size="sm"
+                            variant="ghost"
+                            className="text-red-400 hover:text-red-300 hover:bg-red-900/20 p-1"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  {additionalWorkersSubtotal > 0 && (
+                    <div className="pt-2 border-t border-blue-400/30">
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium" style={{ color: darkTheme.text }}>Additional Workers Subtotal:</span>
+                        <span className="font-semibold text-blue-400">${additionalWorkersSubtotal.toFixed(2)}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Additional Services - Purple Container */}
+            <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: paintBrainColors.purple, backgroundColor: darkTheme.cardBg }}>
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.blue }}>
+                <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.purple }}>
                   <Wrench className="mr-2 h-5 w-5" />
                   Additional Services
                 </h2>
                 <Button
                   onClick={addAdditionalService}
                   size="sm"
-                  className="text-blue-400 border-blue-400 bg-transparent hover:bg-blue-400 hover:text-white"
+                  className="text-purple-400 border-purple-400 bg-transparent hover:bg-purple-400 hover:text-white"
                   variant="outline"
                 >
                   <Plus className="h-4 w-4 mr-1" />
@@ -1754,14 +1838,14 @@ ${emailMessage}`;
               </div>
               <div className="space-y-3">
                 {additionalServices.map((service, index) => (
-                  <div key={index} className="grid grid-cols-4 gap-3 items-end">
+                  <div key={index} className="grid gap-3 items-end" style={{gridTemplateColumns: '2fr 80px 80px 1fr'}}>
                     <div>
-                      <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Service Name</label>
+                      <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Service</label>
                       <Input
                         value={service.name}
                         onChange={(e) => updateAdditionalService(index, 'name', e.target.value)}
                         placeholder="Service name"
-                        className="bg-gray-800 border-blue-400 text-white"
+                        className="bg-gray-800 border-purple-400 text-white"
                       />
                     </div>
                     <div>
@@ -1773,7 +1857,7 @@ ${emailMessage}`;
                         placeholder="0"
                         min="0"
                         step="0.25"
-                        className="bg-gray-800 border-blue-400 text-white"
+                        className="bg-gray-800 border-purple-400 text-white w-20"
                       />
                     </div>
                     <div>
@@ -1785,10 +1869,10 @@ ${emailMessage}`;
                         placeholder="60"
                         min="0"
                         step="0.01"
-                        className="bg-gray-800 border-blue-400 text-white"
+                        className="bg-gray-800 border-purple-400 text-white w-20"
                       />
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center justify-between">
                       <span className="text-sm font-medium" style={{ color: darkTheme.text }}>
                         ${((parseFloat(service.hours) || 0) * (parseFloat(service.rate.toString()) || 0)).toFixed(2)}
                       </span>
@@ -1806,91 +1890,10 @@ ${emailMessage}`;
                   </div>
                 ))}
                 {additionalServicesSubtotal > 0 && (
-                  <div className="pt-2 border-t border-blue-400/30">
-                    <div className="flex justify-between items-center">
-                      <span className="font-medium" style={{ color: darkTheme.text }}>Additional Services Subtotal:</span>
-                      <span className="font-semibold text-blue-400">${additionalServicesSubtotal.toFixed(2)}</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Additional Workers */}
-            <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: paintBrainColors.purple, backgroundColor: darkTheme.cardBg }}>
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.purple }}>
-                  <Users className="mr-2 h-5 w-5" />
-                  Additional Workers
-                </h2>
-                <Button
-                  onClick={addAdditionalWorker}
-                  size="sm"
-                  className="text-purple-400 border-purple-400 bg-transparent hover:bg-purple-400 hover:text-white"
-                  variant="outline"
-                >
-                  <Plus className="h-4 w-4 mr-1" />
-                  Add Worker
-                </Button>
-              </div>
-              <div className="space-y-3">
-                {additionalWorkers.map((worker, index) => (
-                  <div key={index} className="grid grid-cols-4 gap-3 items-end">
-                    <div>
-                      <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Worker Name</label>
-                      <Input
-                        value={worker.name}
-                        onChange={(e) => updateAdditionalWorker(index, 'name', e.target.value)}
-                        placeholder="Worker name"
-                        className="bg-gray-800 border-purple-400 text-white"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Hours</label>
-                      <Input
-                        type="number"
-                        value={worker.hours}
-                        onChange={(e) => updateAdditionalWorker(index, 'hours', e.target.value)}
-                        placeholder="0"
-                        min="0"
-                        step="0.25"
-                        className="bg-gray-800 border-purple-400 text-white"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Rate/hr</label>
-                      <Input
-                        type="number"
-                        value={worker.rate}
-                        onChange={(e) => updateAdditionalWorker(index, 'rate', e.target.value)}
-                        placeholder="60"
-                        min="0"
-                        step="0.01"
-                        className="bg-gray-800 border-purple-400 text-white"
-                      />
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm font-medium" style={{ color: darkTheme.text }}>
-                        ${((parseFloat(worker.hours) || 0) * (parseFloat(worker.rate.toString()) || 0)).toFixed(2)}
-                      </span>
-                      {additionalWorkers.length > 1 && (
-                        <Button
-                          onClick={() => removeAdditionalWorker(index)}
-                          size="sm"
-                          variant="ghost"
-                          className="text-red-400 hover:text-red-300 hover:bg-red-900/20 p-1"
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-                {additionalWorkersSubtotal > 0 && (
                   <div className="pt-2 border-t border-purple-400/30">
                     <div className="flex justify-between items-center">
-                      <span className="font-medium" style={{ color: darkTheme.text }}>Additional Workers Subtotal:</span>
-                      <span className="font-semibold text-purple-400">${additionalWorkersSubtotal.toFixed(2)}</span>
+                      <span className="font-medium" style={{ color: darkTheme.text }}>Additional Services Subtotal:</span>
+                      <span className="font-semibold text-purple-400">${additionalServicesSubtotal.toFixed(2)}</span>
                     </div>
                   </div>
                 )}
@@ -2187,13 +2190,58 @@ ${emailMessage}`;
               </div>
             )}
 
-            {/* Additional Services Section */}
-            {additionalServices.filter((service: any) => (parseFloat(service.hours) || 0) > 0).length > 0 && (
+            {/* Additional Workers Section - Blue (combined with Services & Labor) */}
+            {additionalWorkers.filter((worker: any) => (parseFloat(worker.hours) || 0) > 0).length > 0 && (
               <div className="mb-6">
                 <div className="p-4 rounded-t-lg" style={{ backgroundColor: '#3182CE' }}>
-                  <h3 className="text-lg font-semibold text-white">Additional Services</h3>
+                  <h3 className="text-lg font-semibold text-white">Additional Workers</h3>
                 </div>
                 <div className="rounded-b-lg border-2 border-t-0" style={{ borderColor: '#3182CE', backgroundColor: '#2D3748' }}>
+                  <table className="w-full">
+                    <thead>
+                      <tr style={{ backgroundColor: '#4A5568' }}>
+                        <th className="p-3 text-left text-white font-semibold">Employee Name</th>
+                        <th className="p-3 text-center text-white font-semibold">Hours</th>
+                        <th className="p-3 text-center text-white font-semibold">Rate</th>
+                        <th className="p-3 text-right text-white font-semibold">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {additionalWorkers.filter((worker: any) => (parseFloat(worker.hours) || 0) > 0).map((worker: any, index: number) => {
+                        const hours = parseFloat(worker.hours) || 0;
+                        const rate = parseFloat(worker.rate) || 0;
+                        const total = hours * rate;
+                        const rowClass = index % 2 === 0 ? '' : 'bg-gray-700';
+                        return (
+                          <tr key={index} className={rowClass} style={{ borderBottom: '1px solid #3182CE' }}>
+                            <td className="p-3 text-white">{worker.name || 'Additional Worker'}</td>
+                            <td className="p-3 text-center text-white">{hours}h</td>
+                            <td className="p-3 text-center text-white">${rate}/hr</td>
+                            <td className="p-3 text-right font-semibold text-white">${total.toFixed(2)}</td>
+                          </tr>
+                        );
+                      })}
+                      <tr style={{ borderBottom: '1px solid #3182CE' }}>
+                        <td className="p-3 text-left font-semibold text-white">Additional Workers Subtotal</td>
+                        <td className="p-3"></td>
+                        <td className="p-3"></td>
+                        <td className="p-3 text-right font-semibold text-[#6A9955]">
+                          ${additionalWorkersSubtotal.toFixed(2)}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* Additional Services Section - Purple */}
+            {additionalServices.filter((service: any) => (parseFloat(service.hours) || 0) > 0).length > 0 && (
+              <div className="mb-6">
+                <div className="p-4 rounded-t-lg" style={{ backgroundColor: '#8B5FBF' }}>
+                  <h3 className="text-lg font-semibold text-white">Additional Services</h3>
+                </div>
+                <div className="rounded-b-lg border-2 border-t-0" style={{ borderColor: '#8B5FBF', backgroundColor: '#2D3748' }}>
                   <table className="w-full">
                     <thead>
                       <tr style={{ backgroundColor: '#4A5568' }}>
@@ -2210,7 +2258,7 @@ ${emailMessage}`;
                         const total = hours * rate;
                         const rowClass = index % 2 === 0 ? '' : 'bg-gray-700';
                         return (
-                          <tr key={index} className={rowClass} style={{ borderBottom: '1px solid #3182CE' }}>
+                          <tr key={index} className={rowClass} style={{ borderBottom: '1px solid #8B5FBF' }}>
                             <td className="p-3 text-white">{service.name}</td>
                             <td className="p-3 text-center text-white">{hours}h</td>
                             <td className="p-3 text-center text-white">${rate}/hr</td>
@@ -2218,57 +2266,12 @@ ${emailMessage}`;
                           </tr>
                         );
                       })}
-                      <tr style={{ borderBottom: '1px solid #3182CE' }}>
+                      <tr style={{ borderBottom: '1px solid #8B5FBF' }}>
                         <td className="p-3 text-left font-semibold text-white">Additional Services Subtotal</td>
                         <td className="p-3"></td>
                         <td className="p-3"></td>
                         <td className="p-3 text-right font-semibold text-[#6A9955]">
                           ${additionalServicesSubtotal.toFixed(2)}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-
-            {/* Additional Workers Section */}
-            {additionalWorkers.filter((worker: any) => (parseFloat(worker.hours) || 0) > 0).length > 0 && (
-              <div className="mb-6">
-                <div className="p-4 rounded-t-lg" style={{ backgroundColor: '#8B5FBF' }}>
-                  <h3 className="text-lg font-semibold text-white">Additional Workers</h3>
-                </div>
-                <div className="rounded-b-lg border-2 border-t-0" style={{ borderColor: '#8B5FBF', backgroundColor: '#2D3748' }}>
-                  <table className="w-full">
-                    <thead>
-                      <tr style={{ backgroundColor: '#4A5568' }}>
-                        <th className="p-3 text-left text-white font-semibold">Worker</th>
-                        <th className="p-3 text-center text-white font-semibold">Hours</th>
-                        <th className="p-3 text-center text-white font-semibold">Rate</th>
-                        <th className="p-3 text-right text-white font-semibold">Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {additionalWorkers.filter((worker: any) => (parseFloat(worker.hours) || 0) > 0).map((worker: any, index: number) => {
-                        const hours = parseFloat(worker.hours) || 0;
-                        const rate = parseFloat(worker.rate) || 0;
-                        const total = hours * rate;
-                        const rowClass = index % 2 === 0 ? '' : 'bg-gray-700';
-                        return (
-                          <tr key={index} className={rowClass} style={{ borderBottom: '1px solid #8B5FBF' }}>
-                            <td className="p-3 text-white">{worker.name || 'Additional Worker'}</td>
-                            <td className="p-3 text-center text-white">{hours}h</td>
-                            <td className="p-3 text-center text-white">${rate}/hr</td>
-                            <td className="p-3 text-right font-semibold text-white">${total.toFixed(2)}</td>
-                          </tr>
-                        );
-                      })}
-                      <tr style={{ borderBottom: '1px solid #8B5FBF' }}>
-                        <td className="p-3 text-left font-semibold text-white">Additional Workers Subtotal</td>
-                        <td className="p-3"></td>
-                        <td className="p-3"></td>
-                        <td className="p-3 text-right font-semibold text-[#6A9955]">
-                          ${additionalWorkersSubtotal.toFixed(2)}
                         </td>
                       </tr>
                     </tbody>
