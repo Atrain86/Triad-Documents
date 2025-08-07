@@ -1808,7 +1808,7 @@ ${emailMessage}`;
                     </div>
                     <div className="space-y-3">
                       {additionalWorkers.map((worker, index) => (
-                        <div key={index} className="grid gap-3 items-end" style={{gridTemplateColumns: '3fr 60px 50px 120px'}}>
+                        <div key={index} className="grid gap-3 items-end" style={{gridTemplateColumns: 'minmax(300px, 1fr) 60px 50px 120px'}}>
                           <div>
                             <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Employee Name</label>
                             <Input
@@ -1897,7 +1897,7 @@ ${emailMessage}`;
                     </div>
                     <div className="space-y-3">
                       {additionalServices.map((service, index) => (
-                        <div key={index} className="grid gap-3 items-end" style={{gridTemplateColumns: '3fr 60px 50px 120px'}}>
+                        <div key={index} className="grid gap-3 items-end" style={{gridTemplateColumns: 'minmax(300px, 1fr) 60px 50px 120px'}}>
                           <div>
                             <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Service Description</label>
                             <Input
