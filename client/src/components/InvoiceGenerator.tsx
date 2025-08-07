@@ -1610,12 +1610,12 @@ ${emailMessage}`;
             </div>
 
             {/* Notes */}
-            <div className="p-4 rounded-lg border space-y-2" style={{ borderColor: '#EA580C', backgroundColor: darkTheme.cardBg }}>
-              <label className="block text-sm font-medium" style={{ color: '#EA580C' }}>Notes & Payment Instructions</label>
+            <div className="p-4 rounded-lg border space-y-2" style={{ borderColor: '#3182CE', backgroundColor: darkTheme.cardBg }}>
+              <label className="block text-sm font-medium" style={{ color: '#3182CE' }}>Notes & Payment Instructions</label>
               <Textarea
                 value={invoiceData.notes}
                 onChange={(e) => setInvoiceData({...invoiceData, notes: e.target.value})}
-                className="bg-gray-800 border-[#EA580C] text-white"
+                className="bg-gray-800 border-[#3182CE] text-white"
                 rows={3}
                 placeholder="Payment instructions, additional notes, etc."
               />
