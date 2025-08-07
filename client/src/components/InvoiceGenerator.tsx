@@ -1935,7 +1935,7 @@ ${emailMessage}`;
 
             </div>
             
-            {/* Email Message - Just before send button */}
+            {/* Custom Email Message - Just before send button */}
             <div className="pt-4 border-t border-gray-700">
               <label className="block text-sm font-medium mb-2 text-gray-300">
                 Custom Email Message:
