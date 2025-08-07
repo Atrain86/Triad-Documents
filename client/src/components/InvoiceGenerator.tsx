@@ -1803,7 +1803,7 @@ ${emailMessage}`;
         </div>
 
         {/* Invoice Preview (for PDF generation) - v2025.1 */}
-        <div ref={invoiceRef} data-invoice-ref className="fixed -top-[9999px] -left-[9999px] w-[794px] opacity-0 pointer-events-none print:static print:opacity-100 print:pointer-events-auto print:block print:max-w-none" style={{ backgroundColor: '#ffffff', color: '#000000', minHeight: 'auto', paddingBottom: '40px' }}>
+        <div ref={invoiceRef} data-invoice-ref className="fixed -top-[9999px] -left-[9999px] w-[794px] opacity-0 pointer-events-none print:static print:opacity-100 print:pointer-events-auto print:block print:max-w-none" style={{ backgroundColor: '#000000', color: '#ffffff', minHeight: 'auto', paddingBottom: '40px' }}>
           <div className="p-8">
             {/* Header Section */}
             <div className="mb-8">
@@ -1974,15 +1974,15 @@ ${emailMessage}`;
                       <span>${(calculateMaterialCost() + invoiceData.suppliesCost).toFixed(2)}</span>
                     </div>
                   )}
-                  <div className="flex justify-between text-white py-2 border-b-4" style={{ borderBottomColor: '#38A169' }}>
+                  <div className="flex justify-between text-white py-2">
                     <span>Subtotal:</span>
                     <span>${calculateSubtotal().toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between text-white py-2 border-b-2" style={{ borderBottomColor: '#38A169' }}>
+                  <div className="flex justify-between text-white py-2">
                     <span>GST (5%):</span>
                     <span>${calculateGST().toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between text-xl font-bold text-[#6A9955] py-2 border-t-4" style={{ borderTopColor: '#38A169' }}>
+                  <div className="flex justify-between text-xl font-bold text-[#6A9955] py-3 mt-2">
                     <span>Total Amount:</span>
                     <span>${calculateTotal().toFixed(2)}</span>
                   </div>
