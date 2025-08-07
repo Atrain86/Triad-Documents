@@ -63,6 +63,7 @@ export default function InvoiceGenerator({
   const [emailMessage, setEmailMessage] = useState('');
   const [actionMode, setActionMode] = useState<'download' | 'email'>('email');
   const [emailSaveStatus, setEmailSaveStatus] = useState<'saved' | 'saving' | 'idle'>('idle');
+  const [emailInitialized, setEmailInitialized] = useState(false);
   
   // Material markup state for invoice
   const [materialMarkupEnabled, setMaterialMarkupEnabled] = useState(false);
@@ -117,22 +118,30 @@ cortespainter@gmail.com`;
       
       setEmailMessage(defaultMessage);
     }
+    
+    // Mark as initialized to prevent auto-save during initial load
+    setTimeout(() => setEmailInitialized(true), 100);
   }, [project.clientName]);
 
   // Auto-save email message changes with debouncing
   React.useEffect(() => {
-    if (emailMessage && emailSaveStatus !== 'saving') {
+    if (emailMessage && emailInitialized) {
       setEmailSaveStatus('saving');
       const timeoutId = setTimeout(() => {
-        saveEmailMessage(emailMessage);
-        setEmailSaveStatus('saved');
-        // Reset to idle after showing saved status briefly
-        setTimeout(() => setEmailSaveStatus('idle'), 2000);
+        try {
+          saveEmailMessage(emailMessage);
+          setEmailSaveStatus('saved');
+          // Reset to idle after showing saved status briefly
+          setTimeout(() => setEmailSaveStatus('idle'), 2000);
+        } catch (error) {
+          console.error('Save failed:', error);
+          setEmailSaveStatus('idle');
+        }
       }, 1000); // Save after 1 second of no changes
       
       return () => clearTimeout(timeoutId);
     }
-  }, [emailMessage]);
+  }, [emailMessage, emailInitialized]);
 
   // Reset email message to default
   const resetEmailToDefault = () => {
@@ -178,6 +187,7 @@ cortespainter@gmail.com`;
   // Prevent text auto-selection when dialog opens and refresh invoice number
   React.useEffect(() => {
     if (isOpen) {
+      setEmailInitialized(false); // Reset on each open
       // If localStorage is empty, set a default starting value
       if (!localStorage.getItem('nextInvoiceNumber')) {
         localStorage.setItem('nextInvoiceNumber', '346');
