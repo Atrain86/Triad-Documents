@@ -1492,7 +1492,7 @@ ${emailMessage}`;
 
           <div className="p-6 space-y-6" style={{ backgroundColor: darkTheme.background }}>
               {/* Business & Invoice Info */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6">
               <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: paintBrainColors.red, backgroundColor: darkTheme.cardBg }}>
                 <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.red }}>
                   <User className="mr-2 h-5 w-5" />
