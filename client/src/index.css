@@ -184,6 +184,30 @@
   max-width: 90rem !important;
 }
 
+/* Force all Radix dialog content to be wide */
+[data-radix-dialog-content].wide-dialog {
+  left: 1vw !important;
+  transform: translateY(-50%) !important;
+  width: 98vw !important;
+  max-width: 90rem !important;
+}
+
+/* Additional targeting for any stubborn dialog styles */
+.wide-dialog[data-state="open"] {
+  left: 1vw !important;
+  transform: translateY(-50%) !important;
+  width: 98vw !important;
+  max-width: 90rem !important;
+}
+
+/* Override any fixed positioning constraints */
+div[role="dialog"].wide-dialog {
+  left: 1vw !important;
+  transform: translateY(-50%) !important;
+  width: 98vw !important;
+  max-width: 90rem !important;
+}
+
 /* Prevent text selection globally on map container */
 .map-no-select,
 .map-no-select *,

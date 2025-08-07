@@ -1467,7 +1467,7 @@ ${emailMessage}`;
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="wide-dialog max-h-[90vh] overflow-y-auto overflow-x-hidden p-0 [&>button]:hidden" style={{ backgroundColor: darkTheme.background }}>
+      <DialogContent className="wide-dialog max-h-[90vh] overflow-y-auto overflow-x-hidden p-0 [&>button]:hidden" style={{ backgroundColor: darkTheme.background, left: '1vw', transform: 'translateY(-50%)', width: '98vw', maxWidth: '90rem' }}>
         <DialogHeader className="sr-only">
           <DialogTitle>Invoice</DialogTitle>
           <DialogDescription>Create and send professional painting service invoices</DialogDescription>
