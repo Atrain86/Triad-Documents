@@ -864,13 +864,40 @@ cortespainter@gmail.com`;
     </Dialog>
 
     {/* Email Composition Dialog */}
-    {console.log('showEmailDialog state:', showEmailDialog)}
     {showEmailDialog && (
       <Dialog open={showEmailDialog} onOpenChange={setShowEmailDialog}>
         <DialogContent className="max-w-2xl bg-gray-900 text-white border-gray-700 z-[9999]">
           <DialogHeader>
             <DialogTitle className="text-white text-lg font-semibold">Send Invoice Email</DialogTitle>
           </DialogHeader>
+
+          {/* CUSTOM EMAIL MESSAGE - RED BOX TEST */}
+          <div style={{
+            backgroundColor: 'red',
+            color: 'white',
+            padding: '20px',
+            margin: '10px',
+            fontSize: '24px',
+            fontWeight: 'bold',
+            border: '10px solid yellow',
+            textAlign: 'center'
+          }}>
+            ENHANCED VERSION - CUSTOM EMAIL MESSAGE TEST
+            <br />
+            <input 
+              type="text"
+              value={emailMessage}
+              onChange={(e) => setEmailMessage(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '10px',
+                fontSize: '18px',
+                marginTop: '10px',
+                border: '5px solid blue'
+              }}
+              placeholder="Custom message here..."
+            />
+          </div>
         
         <div className="space-y-4">
           {/* Email Details */}

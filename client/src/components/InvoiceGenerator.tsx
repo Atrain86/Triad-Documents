@@ -1887,7 +1887,6 @@ ${emailMessage}`;
           <DialogHeader className="flex-shrink-0">
             <DialogTitle className="text-white text-lg font-semibold">Send Invoice Email</DialogTitle>
           </DialogHeader>
-          {console.log('EMAIL DIALOG IS RENDERING - Custom section should appear below')}
 
           {/* EXTREME TEST - RENDER SIMPLE HTML */}
           <div style={{
