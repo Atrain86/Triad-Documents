@@ -86,6 +86,7 @@ export default function InvoiceGenerator({
   const loadSavedEmailMessage = (): string => {
     try {
       const saved = localStorage.getItem('customEmailTemplate');
+      console.log('Loading saved template from localStorage:', saved ? saved.substring(0, 50) + '... (length: ' + saved.length + ')' : 'No saved template');
       return saved || '';
     } catch (error) {
       console.error('Failed to load email template:', error);
@@ -98,13 +99,13 @@ export default function InvoiceGenerator({
     const firstName = (invoiceData.clientName || project.clientName).split(' ')[0];
     const savedTemplate = loadSavedEmailMessage();
     
+    let finalMessage = '';
     if (savedTemplate) {
       // Use saved template, but update client name dynamically
-      const updatedTemplate = savedTemplate.replace(/Hi \w+,/, `Hi ${firstName},`);
-      setEmailMessage(updatedTemplate);
+      finalMessage = savedTemplate.replace(/Hi \w+,/, `Hi ${firstName},`);
     } else {
       // Create default message
-      const defaultMessage = `Hi ${firstName},
+      finalMessage = `Hi ${firstName},
 
 Please find attached your invoice for painting services.
 
@@ -116,17 +117,20 @@ Thank you for your business!
 Best regards,
 A-Frame Painting
 cortespainter@gmail.com`;
-      
-      setEmailMessage(defaultMessage);
     }
     
-    // Mark as initialized to prevent auto-save during initial load
-    setTimeout(() => setEmailInitialized(true), 100);
+    setEmailMessage(finalMessage);
+    // Mark as initialized after message is set
+    setTimeout(() => setEmailInitialized(true), 200);
   }, [project.clientName]);
 
   // Auto-save email message changes with debouncing
   React.useEffect(() => {
-    console.log('Auto-save effect triggered:', { emailMessage: emailMessage?.substring(0, 30), emailInitialized });
+    console.log('Auto-save effect triggered:', { 
+      emailMessage: emailMessage?.substring(0, 30), 
+      emailInitialized,
+      messageLength: emailMessage?.length 
+    });
     if (emailMessage && emailInitialized) {
       console.log('Setting save status to saving...');
       setEmailSaveStatus('saving');
@@ -148,6 +152,9 @@ cortespainter@gmail.com`;
       }, 1000); // Save after 1 second of no changes
       
       return () => clearTimeout(timeoutId);
+    } else {
+      // Set to idle if not initialized yet
+      setEmailSaveStatus('idle');
     }
   }, [emailMessage, emailInitialized]);
 
