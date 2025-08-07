@@ -157,7 +157,7 @@ cortespainter@gmail.com`;
           setTimeout(() => {
             console.log('Setting save status back to idle');
             setEmailSaveStatus('idle');
-          }, 2000);
+          }, 3000);
         } catch (error) {
           console.error('Save failed:', error);
           setEmailSaveStatus('idle');
@@ -165,9 +165,6 @@ cortespainter@gmail.com`;
       }, 1000); // Save after 1 second of no changes
       
       return () => clearTimeout(timeoutId);
-    } else {
-      // Set to idle if conditions not met
-      setEmailSaveStatus('idle');
     }
   }, [emailMessage, emailInitialized, isOpen, userHasEdited]);
 
@@ -1729,19 +1726,12 @@ ${emailMessage}`;
                 <div className="flex items-center space-x-3">
                   {emailSaveStatus === 'saving' && (
                     <span className="text-xs text-yellow-400 flex items-center">
-                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-yellow-400 mr-1"></div>
-                      Saving...
+                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-yellow-400"></div>
                     </span>
                   )}
                   {emailSaveStatus === 'saved' && (
                     <span className="text-xs text-green-400 flex items-center">
                       ✓ Saved
-                    </span>
-                  )}
-                  {emailSaveStatus === 'idle' && (
-                    <span className="text-xs text-gray-500 flex items-center">
-                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-gray-400 mr-1"></div>
-                      Auto-save enabled
                     </span>
                   )}
                   <Button
