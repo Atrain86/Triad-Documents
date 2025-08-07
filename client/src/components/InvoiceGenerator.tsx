@@ -1803,7 +1803,7 @@ ${emailMessage}`;
         </div>
 
         {/* Invoice Preview (for PDF generation) - v2025.1 */}
-        <div ref={invoiceRef} data-invoice-ref className="fixed -top-[9999px] -left-[9999px] w-[794px] opacity-0 pointer-events-none print:static print:opacity-100 print:pointer-events-auto print:block print:max-w-none" style={{ backgroundColor: '#000000', color: '#fff', minHeight: 'auto', paddingBottom: '40px' }}>
+        <div ref={invoiceRef} data-invoice-ref className="fixed -top-[9999px] -left-[9999px] w-[794px] opacity-0 pointer-events-none print:static print:opacity-100 print:pointer-events-auto print:block print:max-w-none" style={{ backgroundColor: '#ffffff', color: '#000000', minHeight: 'auto', paddingBottom: '40px' }}>
           <div className="p-8">
             {/* Header Section */}
             <div className="mb-8">
