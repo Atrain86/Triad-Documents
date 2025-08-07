@@ -64,6 +64,7 @@ export default function InvoiceGenerator({
   const [actionMode, setActionMode] = useState<'download' | 'email'>('email');
   const [emailSaveStatus, setEmailSaveStatus] = useState<'saved' | 'saving' | 'idle'>('idle');
   const [emailInitialized, setEmailInitialized] = useState(false);
+  const [userHasEdited, setUserHasEdited] = useState(false);
   
   // Material markup state for invoice
   const [materialMarkupEnabled, setMaterialMarkupEnabled] = useState(false);
@@ -120,18 +121,30 @@ cortespainter@gmail.com`;
     }
     
     setEmailMessage(finalMessage);
-    // Mark as initialized after message is set
-    setTimeout(() => setEmailInitialized(true), 200);
+    setUserHasEdited(false); // Reset user edit flag
+    // Mark as initialized after message is set - longer delay to prevent auto-save on load
+    setTimeout(() => {
+      console.log('Marking email as initialized - auto-save now enabled');
+      setEmailInitialized(true);
+    }, 500);
   }, [project.clientName]);
 
-  // Auto-save email message changes with debouncing
+  // Auto-save email message changes with debouncing - only after user edits
   React.useEffect(() => {
     console.log('Auto-save effect triggered:', { 
       emailMessage: emailMessage?.substring(0, 30), 
       emailInitialized,
-      messageLength: emailMessage?.length 
+      messageLength: emailMessage?.length,
+      isOpen,
+      userHasEdited
     });
-    if (emailMessage && emailInitialized) {
+    
+    // Only auto-save if:
+    // 1. Dialog is open
+    // 2. Email message exists
+    // 3. System is initialized
+    // 4. User has actually made an edit (not just initial load)
+    if (isOpen && emailMessage && emailInitialized && userHasEdited) {
       console.log('Setting save status to saving...');
       setEmailSaveStatus('saving');
       const timeoutId = setTimeout(() => {
@@ -153,10 +166,10 @@ cortespainter@gmail.com`;
       
       return () => clearTimeout(timeoutId);
     } else {
-      // Set to idle if not initialized yet
+      // Set to idle if conditions not met
       setEmailSaveStatus('idle');
     }
-  }, [emailMessage, emailInitialized]);
+  }, [emailMessage, emailInitialized, isOpen, userHasEdited]);
 
   // Reset email message to default
   const resetEmailToDefault = () => {
@@ -202,7 +215,6 @@ cortespainter@gmail.com`;
   // Prevent text auto-selection when dialog opens and refresh invoice number
   React.useEffect(() => {
     if (isOpen) {
-      setEmailInitialized(false); // Reset on each open
       // If localStorage is empty, set a default starting value
       if (!localStorage.getItem('nextInvoiceNumber')) {
         localStorage.setItem('nextInvoiceNumber', '346');
@@ -1748,7 +1760,10 @@ ${emailMessage}`;
                 </label>
                 <Textarea
                   value={emailMessage}
-                  onChange={(e) => setEmailMessage(e.target.value)}
+                  onChange={(e) => {
+                    setEmailMessage(e.target.value);
+                    setUserHasEdited(true); // Mark that user has made an edit
+                  }}
                   className="bg-gray-800 border-[#ECC94B] text-white min-h-20"
                   placeholder="Enter your custom message..."
                 />
