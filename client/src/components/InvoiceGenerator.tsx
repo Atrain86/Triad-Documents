@@ -1637,7 +1637,7 @@ ${emailMessage}`;
                 />
               </div>
               {showClientInfo && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-4">
                 <Input
                   value={invoiceData.clientName}
                   onChange={(e) => setInvoiceData({...invoiceData, clientName: e.target.value})}
@@ -1699,14 +1699,14 @@ ${emailMessage}`;
                 <div className="space-y-3 mb-4">
                   {receipts.map((receipt) => (
                     <div key={receipt.id} className="border rounded-lg p-2" style={{ borderColor: '#8B5FBF' }}>
-                      <div className="flex justify-between items-center text-sm mb-1">
-                        <span className="font-medium" style={{ color: darkTheme.text }}>{receipt.vendor}</span>
-                        <span className="font-semibold" style={{ color: darkTheme.text }}>${receipt.amount}</span>
+                      <div className="flex justify-between items-start text-sm mb-1">
+                        <span className="font-medium flex-1 pr-2 break-words" style={{ color: darkTheme.text }}>{receipt.vendor}</span>
+                        <span className="font-semibold flex-shrink-0" style={{ color: darkTheme.text }}>${receipt.amount}</span>
                       </div>
                       {receipt.items && receipt.items.length > 0 && (
                         <div className="text-xs space-y-1">
                           {receipt.items.map((item, index) => (
-                            <div key={index} className="pl-2" style={{ color: darkTheme.textSecondary }}>
+                            <div key={index} className="pl-2 break-words" style={{ color: darkTheme.textSecondary }}>
                               • {item}
                             </div>
                           ))}
