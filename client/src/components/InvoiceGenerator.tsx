@@ -1887,16 +1887,33 @@ ${emailMessage}`;
           <DialogHeader className="flex-shrink-0">
             <DialogTitle className="text-white text-lg font-semibold">Send Invoice Email</DialogTitle>
           </DialogHeader>
+          {console.log('EMAIL DIALOG IS RENDERING - Custom section should appear below')}
 
-          {/* CUSTOM EMAIL MESSAGE AT TOP - SHOULD BE IMPOSSIBLE TO MISS */}
-          <div className="bg-yellow-400 p-6 m-4 rounded-lg border-8 border-red-500">
-            <h2 className="text-black text-2xl font-black mb-4">🔥 CUSTOM EMAIL MESSAGE - TOP OF DIALOG 🔥</h2>
-            <textarea
+          {/* EXTREME TEST - RENDER SIMPLE HTML */}
+          <div style={{
+            backgroundColor: 'red',
+            color: 'white',
+            padding: '20px',
+            margin: '10px',
+            fontSize: '24px',
+            fontWeight: 'bold',
+            border: '10px solid yellow',
+            textAlign: 'center'
+          }}>
+            CUSTOM EMAIL MESSAGE TEST - THIS SHOULD BE VISIBLE
+            <br />
+            <input 
+              type="text"
               value={emailMessage}
               onChange={(e) => setEmailMessage(e.target.value)}
-              className="w-full p-3 text-black text-xl border-4 border-blue-500"
-              rows={4}
-              placeholder="Type your custom email message here..."
+              style={{
+                width: '100%',
+                padding: '10px',
+                fontSize: '18px',
+                marginTop: '10px',
+                border: '5px solid blue'
+              }}
+              placeholder="Custom message here..."
             />
           </div>
         
