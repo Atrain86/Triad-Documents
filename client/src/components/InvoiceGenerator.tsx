@@ -1720,7 +1720,8 @@ ${emailMessage}`;
                     </span>
                   )}
                   {emailSaveStatus === 'idle' && (
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-500 flex items-center">
+                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-gray-400 mr-1"></div>
                       Auto-save enabled
                     </span>
                   )}
