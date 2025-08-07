@@ -1932,28 +1932,27 @@ ${emailMessage}`;
                 Attach receipt photos to email (as additional attachments)
               </label>
             </div>
-
-            </div>
+          </div>
             
-            {/* Custom Email Message - Just above send button */}
-            <div className="px-6 py-4 border-t border-gray-700 bg-gray-900 flex-shrink-0">
-              <label className="block text-sm font-medium mb-2 text-gray-300">
-                Custom Email Message:
-              </label>
-              <Textarea
-                value={emailMessage}
-                onChange={(e) => setEmailMessage(e.target.value)}
-                rows={4}
-                className="w-full text-sm bg-gray-800 border-[#3182CE] text-white resize-none"
-                placeholder="Add a personal message to your client..."
-              />
-              <div className="text-xs text-gray-400 mt-1">
-                This message will be included in the email body to your client.
-              </div>
+          {/* Custom Email Message - Just above send button */}
+          <div className="px-6 py-4 border-t border-gray-700 bg-gray-900 flex-shrink-0">
+            <label className="block text-sm font-medium mb-2 text-gray-300">
+              Custom Email Message:
+            </label>
+            <Textarea
+              value={emailMessage}
+              onChange={(e) => setEmailMessage(e.target.value)}
+              rows={4}
+              className="w-full text-sm bg-gray-800 border-[#3182CE] text-white resize-none"
+              placeholder="Add a personal message to your client..."
+            />
+            <div className="text-xs text-gray-400 mt-1">
+              This message will be included in the email body to your client.
             </div>
+          </div>
             
-            {/* Action Buttons - Sticky at bottom */}
-            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-700 flex-shrink-0 bg-gray-900">
+          {/* Action Buttons - Sticky at bottom */}
+          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-700 flex-shrink-0 bg-gray-900">
               <Button
                 onClick={() => setShowEmailDialog(false)}
                 variant="outline"
