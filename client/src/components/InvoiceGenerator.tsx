@@ -76,6 +76,7 @@ export default function InvoiceGenerator({
   const saveEmailMessage = (message: string) => {
     try {
       localStorage.setItem('customEmailTemplate', message);
+      console.log('Email template saved to localStorage:', message.substring(0, 50) + '...');
     } catch (error) {
       console.error('Failed to save email template:', error);
     }
@@ -125,14 +126,21 @@ cortespainter@gmail.com`;
 
   // Auto-save email message changes with debouncing
   React.useEffect(() => {
+    console.log('Auto-save effect triggered:', { emailMessage: emailMessage?.substring(0, 30), emailInitialized });
     if (emailMessage && emailInitialized) {
+      console.log('Setting save status to saving...');
       setEmailSaveStatus('saving');
       const timeoutId = setTimeout(() => {
         try {
+          console.log('Attempting to save email message...');
           saveEmailMessage(emailMessage);
           setEmailSaveStatus('saved');
+          console.log('Email save status set to saved');
           // Reset to idle after showing saved status briefly
-          setTimeout(() => setEmailSaveStatus('idle'), 2000);
+          setTimeout(() => {
+            console.log('Setting save status back to idle');
+            setEmailSaveStatus('idle');
+          }, 2000);
         } catch (error) {
           console.error('Save failed:', error);
           setEmailSaveStatus('idle');
