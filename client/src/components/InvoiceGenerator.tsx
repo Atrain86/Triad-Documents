@@ -1950,20 +1950,20 @@ ${emailMessage}`;
               </label>
             </div>
 
-            {/* Email Message */}
-            <div>
-              <label className="block text-sm font-medium mb-1 text-gray-300">
-                Message:
+            </div>
+            
+            {/* Email Message - Just before send button */}
+            <div className="pt-4 border-t border-gray-700">
+              <label className="block text-sm font-medium mb-2 text-gray-300">
+                Custom Email Message:
               </label>
               <Textarea
                 value={emailMessage}
                 onChange={(e) => setEmailMessage(e.target.value)}
-                rows={12}
+                rows={4}
                 className="w-full font-mono text-sm bg-gray-800 border-[#3182CE] text-white"
-                placeholder="Customize your email message..."
+                placeholder="Add a personal message to your client..."
               />
-            </div>
-
             </div>
             
             {/* Action Buttons - Sticky at bottom */}
