@@ -836,7 +836,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-[95vw] max-w-5xl max-h-[90vh] h-[90vh] overflow-y-auto bg-black text-white [&>button]:hidden">
+      <DialogContent className="w-[98vw] max-w-6xl max-h-[90vh] h-[90vh] overflow-y-auto bg-black text-white [&>button]:hidden">
         <DialogHeader className="pb-1">
           <DialogTitle className="sr-only">Generate Estimate</DialogTitle>
         </DialogHeader>
