@@ -62,6 +62,7 @@ export default function InvoiceGenerator({
 
   const [emailMessage, setEmailMessage] = useState('');
   const [actionMode, setActionMode] = useState<'download' | 'email'>('email');
+  const [emailSaveStatus, setEmailSaveStatus] = useState<'saved' | 'saving' | 'idle'>('idle');
   
   // Material markup state for invoice
   const [materialMarkupEnabled, setMaterialMarkupEnabled] = useState(false);
@@ -70,8 +71,71 @@ export default function InvoiceGenerator({
   // Ref for the first input to prevent auto-selection
   const firstInputRef = React.useRef<HTMLInputElement>(null);
   
-  // Initialize email message
+  // Save custom email message to localStorage
+  const saveEmailMessage = (message: string) => {
+    try {
+      localStorage.setItem('customEmailTemplate', message);
+    } catch (error) {
+      console.error('Failed to save email template:', error);
+    }
+  };
+
+  // Load saved email message from localStorage
+  const loadSavedEmailMessage = (): string => {
+    try {
+      const saved = localStorage.getItem('customEmailTemplate');
+      return saved || '';
+    } catch (error) {
+      console.error('Failed to load email template:', error);
+      return '';
+    }
+  };
+  
+  // Initialize email message with saved template or default
   React.useEffect(() => {
+    const firstName = (invoiceData.clientName || project.clientName).split(' ')[0];
+    const savedTemplate = loadSavedEmailMessage();
+    
+    if (savedTemplate) {
+      // Use saved template, but update client name dynamically
+      const updatedTemplate = savedTemplate.replace(/Hi \w+,/, `Hi ${firstName},`);
+      setEmailMessage(updatedTemplate);
+    } else {
+      // Create default message
+      const defaultMessage = `Hi ${firstName},
+
+Please find attached your invoice for painting services.
+
+Payment Instructions:
+Please send e-transfer to cortespainter@gmail.com
+
+Thank you for your business!
+
+Best regards,
+A-Frame Painting
+cortespainter@gmail.com`;
+      
+      setEmailMessage(defaultMessage);
+    }
+  }, [project.clientName]);
+
+  // Auto-save email message changes with debouncing
+  React.useEffect(() => {
+    if (emailMessage && emailSaveStatus !== 'saving') {
+      setEmailSaveStatus('saving');
+      const timeoutId = setTimeout(() => {
+        saveEmailMessage(emailMessage);
+        setEmailSaveStatus('saved');
+        // Reset to idle after showing saved status briefly
+        setTimeout(() => setEmailSaveStatus('idle'), 2000);
+      }, 1000); // Save after 1 second of no changes
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [emailMessage]);
+
+  // Reset email message to default
+  const resetEmailToDefault = () => {
     const firstName = (invoiceData.clientName || project.clientName).split(' ')[0];
     const defaultMessage = `Hi ${firstName},
 
@@ -87,7 +151,16 @@ A-Frame Painting
 cortespainter@gmail.com`;
     
     setEmailMessage(defaultMessage);
-  }, [project.clientName]);
+    localStorage.removeItem('customEmailTemplate');
+    setEmailSaveStatus('saved');
+    setTimeout(() => setEmailSaveStatus('idle'), 2000);
+    
+    toast({
+      title: "Email Template Reset",
+      description: "Email message restored to default template",
+      duration: 3000,
+    });
+  };
 
   // Listen for logo visibility changes
   React.useEffect(() => {
@@ -1611,13 +1684,36 @@ ${emailMessage}`;
 
             {/* Email Message Section - Restored Yellow Container */}
             <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: '#ECC94B', backgroundColor: darkTheme.cardBg }}>
-              <h2 className="text-xl font-semibold flex items-center" style={{ color: '#ECC94B' }}>
-                <Send className="mr-2 h-5 w-5" />
-                Email Message
-              </h2>
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold flex items-center" style={{ color: '#ECC94B' }}>
+                  <Send className="mr-2 h-5 w-5" />
+                  Email Message
+                </h2>
+                <div className="flex items-center space-x-3">
+                  {emailSaveStatus === 'saving' && (
+                    <span className="text-xs text-gray-400 flex items-center">
+                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-yellow-400 mr-1"></div>
+                      Saving...
+                    </span>
+                  )}
+                  {emailSaveStatus === 'saved' && (
+                    <span className="text-xs text-green-400 flex items-center">
+                      ✓ Saved
+                    </span>
+                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={resetEmailToDefault}
+                    className="text-xs text-yellow-400 border-yellow-400 hover:bg-yellow-400 hover:text-black"
+                  >
+                    Reset to Default
+                  </Button>
+                </div>
+              </div>
               <div>
                 <label className="block text-sm font-medium mb-2" style={{ color: darkTheme.textSecondary }}>
-                  Custom message for email body
+                  Custom message for email body (auto-saved)
                 </label>
                 <Textarea
                   value={emailMessage}
