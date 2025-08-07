@@ -1808,7 +1808,7 @@ ${emailMessage}`;
                     </div>
                     <div className="space-y-3">
                       {additionalWorkers.map((worker, index) => (
-                        <div key={index} className="grid gap-3 items-end" style={{gridTemplateColumns: 'minmax(300px, 1fr) 60px 50px 120px'}}>
+                        <div key={index} className="grid gap-2 items-end" style={{gridTemplateColumns: 'minmax(180px, 2fr) 60px 50px 100px'}}>
                           <div>
                             <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Employee Name</label>
                             <Input
@@ -1850,7 +1850,7 @@ ${emailMessage}`;
                               />
                             </div>
                           </div>
-                          <div className="flex items-center justify-between flex-shrink-0" style={{ minWidth: '120px' }}>
+                          <div className="flex items-center justify-between flex-shrink-0" style={{ minWidth: '100px' }}>
                             <span className="text-sm font-medium" style={{ color: darkTheme.text }}>
                               ${((parseFloat(worker.hours) || 0) * (parseFloat(worker.rate.toString()) || 0)).toFixed(2)}
                             </span>
@@ -1897,7 +1897,7 @@ ${emailMessage}`;
                     </div>
                     <div className="space-y-3">
                       {additionalServices.map((service, index) => (
-                        <div key={index} className="grid gap-3 items-end" style={{gridTemplateColumns: 'minmax(300px, 1fr) 60px 50px 120px'}}>
+                        <div key={index} className="grid gap-2 items-end" style={{gridTemplateColumns: 'minmax(180px, 2fr) 60px 50px 100px'}}>
                           <div>
                             <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Service Description</label>
                             <Input
@@ -1939,7 +1939,7 @@ ${emailMessage}`;
                               />
                             </div>
                           </div>
-                          <div className="flex items-center justify-between flex-shrink-0" style={{ minWidth: '120px' }}>
+                          <div className="flex items-center justify-between flex-shrink-0" style={{ minWidth: '100px' }}>
                             <span className="text-sm font-medium" style={{ color: darkTheme.text }}>
                               ${((parseFloat(service.hours) || 0) * (parseFloat(service.rate.toString()) || 0)).toFixed(2)}
                             </span>
