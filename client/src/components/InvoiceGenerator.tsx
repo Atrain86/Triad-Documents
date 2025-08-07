@@ -1957,32 +1957,32 @@ ${emailMessage}`;
               </div>
             </div>
 
-            {/* Summary Section - GREEN SECTION */}
-            <div className="mb-6">
-              <div className="p-4 rounded-t-lg" style={{ backgroundColor: '#38A169' }}>
-                <h3 className="text-lg font-semibold text-white">Summary</h3>
-              </div>
-              <div className="rounded-b-lg border-2 border-t-0" style={{ borderColor: '#38A169', backgroundColor: '#2D3748' }}>
-                <div className="p-6 space-y-3">
-                  <div className="flex justify-between text-white py-2 border-b-2" style={{ borderBottomColor: '#38A169' }}>
-                    <span>Labor Subtotal:</span>
-                    <span>${dailyHours.reduce((sum, hourEntry) => sum + (hourEntry.hours * (project.hourlyRate || 60)), 0).toFixed(2)}</span>
-                  </div>
-                  {(calculateMaterialCost() + invoiceData.suppliesCost) > 0 && (
-                    <div className="flex justify-between text-white py-2 border-b-2" style={{ borderBottomColor: '#38A169' }}>
-                      <span>Materials & Supplies:</span>
-                      <span>${(calculateMaterialCost() + invoiceData.suppliesCost).toFixed(2)}</span>
-                    </div>
-                  )}
+            {/* Summary Section - Simplified for PDF */}
+            <div className="mb-8 page-break-inside-avoid">
+              <h3 className="text-2xl font-bold text-[#38A169] mb-4 border-b-2 pb-2" style={{ borderBottomColor: '#38A169' }}>Summary</h3>
+              
+              <div className="space-y-2 mb-6">
+                <div className="flex justify-between text-white py-2">
+                  <span>Labor Subtotal:</span>
+                  <span>${dailyHours.reduce((sum, hourEntry) => sum + (hourEntry.hours * (project.hourlyRate || 60)), 0).toFixed(2)}</span>
+                </div>
+                {(calculateMaterialCost() + invoiceData.suppliesCost) > 0 && (
                   <div className="flex justify-between text-white py-2">
-                    <span>Subtotal:</span>
-                    <span>${calculateSubtotal().toFixed(2)}</span>
+                    <span>Materials & Supplies:</span>
+                    <span>${(calculateMaterialCost() + invoiceData.suppliesCost).toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between text-white py-2">
-                    <span>GST (5%):</span>
-                    <span>${calculateGST().toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between text-xl font-bold text-[#6A9955] py-3 mt-2">
+                )}
+                <div className="flex justify-between text-white py-2">
+                  <span>Subtotal:</span>
+                  <span>${calculateSubtotal().toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-white py-2">
+                  <span>GST (5%):</span>
+                  <span>${calculateGST().toFixed(2)}</span>
+                </div>
+                
+                <div className="border-t-2 pt-4 mt-4" style={{ borderTopColor: '#38A169' }}>
+                  <div className="flex justify-between text-2xl font-bold text-[#6A9955]">
                     <span>Total Amount:</span>
                     <span>${calculateTotal().toFixed(2)}</span>
                   </div>
