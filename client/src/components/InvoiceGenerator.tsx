@@ -1697,7 +1697,7 @@ ${emailMessage}`;
                   <span className="font-semibold" style={{ color: darkTheme.text }}>${calculateGST().toFixed(2)}</span>
                 </div>
 
-                <div className="flex justify-between py-2 text-lg font-bold px-4 rounded" style={{ backgroundColor: `${paintBrainColors.primary}20`, color: darkTheme.text }}>
+                <div className="flex justify-between py-3 text-lg font-bold" style={{ color: darkTheme.text }}>
                   <span>Total:</span>
                   <span>${calculateTotal().toFixed(2)}</span>
                 </div>
