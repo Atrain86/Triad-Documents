@@ -1791,19 +1791,19 @@ ${emailMessage}`;
 
                   {/* Additional Workers Section */}
                   <div className="border rounded-lg p-4 space-y-4" style={{ borderColor: paintBrainColors.blue, backgroundColor: `${paintBrainColors.blue}10` }}>
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between mb-2">
                       <h3 className="text-lg font-semibold flex items-center" style={{ color: paintBrainColors.blue }}>
                         <Users className="mr-2 h-4 w-4" />
                         Additional Workers
                       </h3>
                       <Button
                         onClick={addAdditionalWorker}
-                        size="sm"
-                        className="text-blue-400 border-blue-400 bg-transparent hover:bg-blue-400 hover:text-white"
+                        size="xs"
+                        className="text-blue-400 border-blue-400 bg-transparent hover:bg-blue-400 hover:text-white px-2 py-1 text-xs"
                         variant="outline"
                       >
-                        <Plus className="h-4 w-4 mr-1" />
-                        Add Worker
+                        <Plus className="h-3 w-3 mr-1" />
+                        Worker
                       </Button>
                     </div>
                     <div className="space-y-3">
@@ -1880,19 +1880,19 @@ ${emailMessage}`;
 
                   {/* Additional Services Section */}
                   <div className="border rounded-lg p-4 space-y-4" style={{ borderColor: paintBrainColors.blue, backgroundColor: `${paintBrainColors.blue}10` }}>
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between mb-2">
                       <h3 className="text-lg font-semibold flex items-center" style={{ color: paintBrainColors.blue }}>
                         <Wrench className="mr-2 h-4 w-4" />
                         Additional Services
                       </h3>
                       <Button
                         onClick={addAdditionalService}
-                        size="sm"
-                        className="text-blue-400 border-blue-400 bg-transparent hover:bg-blue-400 hover:text-white"
+                        size="xs"
+                        className="text-blue-400 border-blue-400 bg-transparent hover:bg-blue-400 hover:text-white px-2 py-1 text-xs"
                         variant="outline"
                       >
-                        <Plus className="h-4 w-4 mr-1" />
-                        Add Service
+                        <Plus className="h-3 w-3 mr-1" />
+                        Service
                       </Button>
                     </div>
                     <div className="space-y-3">
