@@ -1934,24 +1934,25 @@ ${emailMessage}`;
             </div>
           </div>
             
-          {/* Custom Email Message - Just above send button */}
-          <div className="px-6 py-4 border-t border-gray-700 bg-red-900 flex-shrink-0">
-            <div className="text-white text-lg font-bold mb-2">CUSTOM EMAIL MESSAGE TEST</div>
-            <label className="block text-sm font-medium mb-2 text-gray-300">
-              Custom Email Message:
-            </label>
-            <Textarea
-              value={emailMessage}
-              onChange={(e) => setEmailMessage(e.target.value)}
-              rows={4}
-              className="w-full text-sm bg-gray-800 border-[#3182CE] text-white resize-none"
-              placeholder="Add a personal message to your client..."
-            />
-            <div className="text-xs text-gray-400 mt-1">
-              This message will be included in the email body to your client.
+          {/* Custom Email Message Section */}
+          <div className="space-y-4 px-6 py-4 border-t border-gray-700 bg-gray-900 flex-shrink-0">
+            <div className="p-4 rounded-t-lg" style={{ backgroundColor: '#FEC101' }}>
+              <h3 className="text-lg font-semibold text-black">Custom Email Message</h3>
+            </div>
+            <div className="rounded-b-lg border-2 border-t-0 p-4 space-y-3" style={{ borderColor: '#FEC101', backgroundColor: '#2D3748' }}>
+              <div className="text-gray-300 text-sm mb-3">
+                Add a personal message to include with your invoice:
+              </div>
+              <Textarea
+                value={emailMessage}
+                onChange={(e) => setEmailMessage(e.target.value)}
+                rows={3}
+                className="w-full text-sm bg-gray-800 border border-gray-600 text-white resize-none"
+                placeholder="Please find attached your invoice for painting services..."
+              />
             </div>
           </div>
-            
+
           {/* Action Buttons - Sticky at bottom */}
           <div className="flex justify-end space-x-3 pt-4 border-t border-gray-700 flex-shrink-0 bg-gray-900">
               <Button
