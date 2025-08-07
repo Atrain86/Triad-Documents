@@ -1467,12 +1467,12 @@ ${emailMessage}`;
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-full max-w-4xl max-h-[90vh] overflow-y-auto p-0 [&>button]:hidden" style={{ backgroundColor: darkTheme.background }}>
+      <DialogContent className="w-full max-w-4xl max-h-[90vh] overflow-y-auto overflow-x-hidden p-0 [&>button]:hidden" style={{ backgroundColor: darkTheme.background }}>
         <DialogHeader className="sr-only">
           <DialogTitle>Invoice</DialogTitle>
           <DialogDescription>Create and send professional painting service invoices</DialogDescription>
         </DialogHeader>
-        <div className="flex flex-col">
+        <div className="flex flex-col w-full overflow-x-hidden">
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b" style={{ backgroundColor: darkTheme.headerBg, borderColor: darkTheme.border }}>
             <div></div> {/* Spacer for centering */}
@@ -1490,7 +1490,7 @@ ${emailMessage}`;
             </Button>
           </div>
 
-          <div className="p-6 space-y-6" style={{ backgroundColor: darkTheme.background }}>
+          <div className="p-6 space-y-6 w-full overflow-x-hidden" style={{ backgroundColor: darkTheme.background }}>
               {/* Business & Invoice Info */}
             <div className="grid grid-cols-1 gap-6">
               <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: paintBrainColors.red, backgroundColor: darkTheme.cardBg }}>
