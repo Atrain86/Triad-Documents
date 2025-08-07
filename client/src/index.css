@@ -176,6 +176,14 @@
   overflow: hidden !important;
 }
 
+/* Wide dialog for invoice and estimate generators */
+.wide-dialog {
+  left: 1vw !important;
+  transform: translateY(-50%) !important;
+  width: 98vw !important;
+  max-width: 90rem !important;
+}
+
 /* Prevent text selection globally on map container */
 .map-no-select,
 .map-no-select *,
