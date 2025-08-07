@@ -1490,7 +1490,24 @@ ${emailMessage}`;
               </div>
             </div>
 
-
+            {/* Email Message Section - Restored Yellow Container */}
+            <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: '#ECC94B', backgroundColor: darkTheme.cardBg }}>
+              <h2 className="text-xl font-semibold flex items-center" style={{ color: '#ECC94B' }}>
+                <Send className="mr-2 h-5 w-5" />
+                Email Message
+              </h2>
+              <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: darkTheme.textSecondary }}>
+                  Custom message for email body
+                </label>
+                <Textarea
+                  value={emailMessage}
+                  onChange={(e) => setEmailMessage(e.target.value)}
+                  className="bg-gray-800 border-[#ECC94B] text-white min-h-20"
+                  placeholder="Enter your custom message..."
+                />
+              </div>
+            </div>
 
             {/* Services & Labor - Daily Hours Layout */}
             <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: '#3182CE', backgroundColor: darkTheme.cardBg }}>
@@ -1888,33 +1905,7 @@ ${emailMessage}`;
             <DialogTitle className="text-white text-lg font-semibold">Send Invoice Email</DialogTitle>
           </DialogHeader>
 
-          {/* EXTREME TEST - RENDER SIMPLE HTML */}
-          <div style={{
-            backgroundColor: 'red',
-            color: 'white',
-            padding: '20px',
-            margin: '10px',
-            fontSize: '24px',
-            fontWeight: 'bold',
-            border: '10px solid yellow',
-            textAlign: 'center'
-          }}>
-            CUSTOM EMAIL MESSAGE TEST - THIS SHOULD BE VISIBLE
-            <br />
-            <input 
-              type="text"
-              value={emailMessage}
-              onChange={(e) => setEmailMessage(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '10px',
-                fontSize: '18px',
-                marginTop: '10px',
-                border: '5px solid blue'
-              }}
-              placeholder="Custom message here..."
-            />
-          </div>
+
         
           <div className="space-y-4 flex-1 overflow-y-auto pr-2">
             {/* Email Details */}
