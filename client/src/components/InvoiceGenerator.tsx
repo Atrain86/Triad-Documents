@@ -1887,6 +1887,18 @@ ${emailMessage}`;
           <DialogHeader className="flex-shrink-0">
             <DialogTitle className="text-white text-lg font-semibold">Send Invoice Email</DialogTitle>
           </DialogHeader>
+
+          {/* CUSTOM EMAIL MESSAGE AT TOP - SHOULD BE IMPOSSIBLE TO MISS */}
+          <div className="bg-yellow-400 p-6 m-4 rounded-lg border-8 border-red-500">
+            <h2 className="text-black text-2xl font-black mb-4">🔥 CUSTOM EMAIL MESSAGE - TOP OF DIALOG 🔥</h2>
+            <textarea
+              value={emailMessage}
+              onChange={(e) => setEmailMessage(e.target.value)}
+              className="w-full p-3 text-black text-xl border-4 border-blue-500"
+              rows={4}
+              placeholder="Type your custom email message here..."
+            />
+          </div>
         
           <div className="space-y-4 flex-1 overflow-y-auto pr-2">
             {/* Email Details */}
