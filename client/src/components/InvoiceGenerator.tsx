@@ -1790,7 +1790,7 @@ ${emailMessage}`;
                   </div>
 
                   {/* Additional Workers Section */}
-                  <div>
+                  <div className="border rounded-lg p-4 space-y-4" style={{ borderColor: paintBrainColors.blue, backgroundColor: `${paintBrainColors.blue}10` }}>
                     <div className="flex items-center justify-between">
                       <h3 className="text-lg font-semibold flex items-center" style={{ color: paintBrainColors.blue }}>
                         <Users className="mr-2 h-4 w-4" />
@@ -1808,13 +1808,13 @@ ${emailMessage}`;
                     </div>
                     <div className="space-y-3">
                       {additionalWorkers.map((worker, index) => (
-                        <div key={index} className="grid gap-3 items-end" style={{gridTemplateColumns: '2fr 60px 50px 120px'}}>
+                        <div key={index} className="grid gap-3 items-end" style={{gridTemplateColumns: '3fr 60px 50px 120px'}}>
                           <div>
                             <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Employee Name</label>
                             <Input
                               value={worker.name}
                               onChange={(e) => updateAdditionalWorker(index, 'name', e.target.value)}
-                              placeholder="Employee name"
+                              placeholder="Enter full employee name"
                               className="bg-gray-800 border-blue-400 text-white w-full"
                             />
                           </div>
@@ -1879,7 +1879,7 @@ ${emailMessage}`;
                   </div>
 
                   {/* Additional Services Section */}
-                  <div>
+                  <div className="border rounded-lg p-4 space-y-4" style={{ borderColor: paintBrainColors.blue, backgroundColor: `${paintBrainColors.blue}10` }}>
                     <div className="flex items-center justify-between">
                       <h3 className="text-lg font-semibold flex items-center" style={{ color: paintBrainColors.blue }}>
                         <Wrench className="mr-2 h-4 w-4" />
@@ -1897,13 +1897,13 @@ ${emailMessage}`;
                     </div>
                     <div className="space-y-3">
                       {additionalServices.map((service, index) => (
-                        <div key={index} className="grid gap-3 items-end" style={{gridTemplateColumns: '2fr 60px 50px 120px'}}>
+                        <div key={index} className="grid gap-3 items-end" style={{gridTemplateColumns: '3fr 60px 50px 120px'}}>
                           <div>
-                            <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Service</label>
+                            <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Service Description</label>
                             <Input
                               value={service.name}
                               onChange={(e) => updateAdditionalService(index, 'name', e.target.value)}
-                              placeholder="Service name"
+                              placeholder="Enter detailed service description"
                               className="bg-gray-800 border-blue-400 text-white w-full"
                             />
                           </div>
