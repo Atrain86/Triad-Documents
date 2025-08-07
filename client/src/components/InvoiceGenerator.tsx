@@ -1734,7 +1734,7 @@ ${emailMessage}`;
               </div>
               <div className="text-right">
                 <p><strong>Invoice #:</strong> {invoiceData.invoiceNumber}</p>
-                <p><strong>Date:</strong> {invoiceData.date}</p>
+                <p><strong>Date:</strong> {invoiceData.date.replace('2025-', '').replace(/-/g, '/')}</p>
               </div>
             </div>
 
@@ -1767,8 +1767,6 @@ ${emailMessage}`;
                     <thead>
                       <tr style={{ backgroundColor: '#4A5568' }}>
                         <th className="p-3 text-left text-white font-semibold">Service</th>
-                        <th className="p-3 text-center text-white font-semibold">Hours</th>
-                        <th className="p-3 text-center text-white font-semibold">Rate</th>
                         <th className="p-3 text-right text-white font-semibold">Total</th>
                       </tr>
                     </thead>
@@ -1776,17 +1774,15 @@ ${emailMessage}`;
                       {dailyHours.map((hourEntry, index) => (
                         <tr key={index} className={index % 2 === 0 ? '' : 'bg-gray-700'} style={{ borderBottom: '1px solid #E53E3E' }}>
                           <td className="p-3 text-white">
-                            {hourEntry.description || 'Painting'}
+                            {hourEntry.description || 'Painting'}: {hourEntry.hours}h × ${project.hourlyRate || 60}/hr
                           </td>
-                          <td className="p-3 text-center text-white">{hourEntry.hours}h</td>
-                          <td className="p-3 text-center text-white">${project.hourlyRate || 60}/hr</td>
                           <td className="p-3 text-right font-semibold text-white">
                             ${(hourEntry.hours * (project.hourlyRate || 60)).toFixed(2)}
                           </td>
                         </tr>
                       ))}
                       <tr style={{ borderBottom: '1px solid #E53E3E' }}>
-                        <td className="p-3 text-left font-semibold text-white" colSpan={3}>Labor Subtotal</td>
+                        <td className="p-3 text-left font-semibold text-white">Labor Subtotal</td>
                         <td className="p-3 text-right font-semibold text-[#6A9955]">
                           ${dailyHours.reduce((sum, hourEntry) => sum + (hourEntry.hours * (project.hourlyRate || 60)), 0).toFixed(2)}
                         </td>
@@ -1943,20 +1939,6 @@ ${emailMessage}`;
               </div>
             </div>
 
-            {/* Email Message */}
-            <div>
-              <label className="block text-sm font-medium mb-1 text-gray-300">
-                Message:
-              </label>
-              <Textarea
-                value={emailMessage}
-                onChange={(e) => setEmailMessage(e.target.value)}
-                rows={12}
-                className="w-full font-mono text-sm bg-gray-800 border-[#3182CE] text-white"
-                placeholder="Customize your email message..."
-              />
-            </div>
-
             {/* Receipt Attachment Option */}
             <div className="flex items-center space-x-2">
               <input
@@ -1974,6 +1956,20 @@ ${emailMessage}`;
               <label htmlFor="attachReceipts" className="text-gray-300">
                 Attach receipt photos to email (as additional attachments)
               </label>
+            </div>
+
+            {/* Email Message */}
+            <div>
+              <label className="block text-sm font-medium mb-1 text-gray-300">
+                Message:
+              </label>
+              <Textarea
+                value={emailMessage}
+                onChange={(e) => setEmailMessage(e.target.value)}
+                rows={12}
+                className="w-full font-mono text-sm bg-gray-800 border-[#3182CE] text-white"
+                placeholder="Customize your email message..."
+              />
             </div>
 
             </div>
