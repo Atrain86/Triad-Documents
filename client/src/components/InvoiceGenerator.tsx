@@ -1497,7 +1497,7 @@ ${emailMessage}`;
               <h2 className="text-xl font-semibold" style={{ color: '#3182CE' }}>Services & Labor</h2>
               
               <div className="overflow-x-auto">
-                <table className="w-full border-collapse" style={{ borderColor: darkTheme.border }}>
+                <table className="w-full border-collapse rounded-lg overflow-hidden" style={{ borderColor: darkTheme.border }}>
                   <thead>
                     <tr style={{ backgroundColor: darkTheme.inputBg }}>
                       <th className="border p-3 text-left" style={{ borderColor: '#3182CE', color: '#3182CE' }}>Service</th>
