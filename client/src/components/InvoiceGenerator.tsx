@@ -1933,7 +1933,6 @@ ${emailMessage}`;
               </label>
             </div>
 
-            </div>
             
             {/* Custom Email Message - Just before send button */}
             <div className="pt-4 border-t border-gray-700">
@@ -1947,6 +1946,8 @@ ${emailMessage}`;
                 className="w-full font-mono text-sm bg-gray-800 border-[#3182CE] text-white"
                 placeholder="Add a personal message to your client..."
               />
+            </div>
+            
             </div>
             
             {/* Action Buttons - Sticky at bottom */}
