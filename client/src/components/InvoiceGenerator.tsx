@@ -1490,24 +1490,7 @@ ${emailMessage}`;
               </div>
             </div>
 
-            {/* Email Message */}
-            <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: '#3182CE', backgroundColor: darkTheme.cardBg }}>
-              <h2 className="text-xl font-semibold flex items-center" style={{ color: '#3182CE' }}>
-                <Send className="mr-2 h-5 w-5" />
-                Email Message
-              </h2>
-              <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: darkTheme.textSecondary }}>
-                  Custom message for email body
-                </label>
-                <Textarea
-                  value={invoiceData.emailMessage}
-                  onChange={(e) => setInvoiceData({...invoiceData, emailMessage: e.target.value})}
-                  className="bg-gray-800 border-[#3182CE] text-white min-h-20"
-                  placeholder="Enter your custom message..."
-                />
-              </div>
-            </div>
+
 
             {/* Services & Labor - Daily Hours Layout */}
             <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: '#3182CE', backgroundColor: darkTheme.cardBg }}>
