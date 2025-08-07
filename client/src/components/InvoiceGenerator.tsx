@@ -1808,8 +1808,8 @@ ${emailMessage}`;
                     </div>
                     <div className="space-y-3">
                       {additionalWorkers.map((worker, index) => (
-                        <div key={index} className="grid gap-2 items-end" style={{gridTemplateColumns: 'minmax(180px, 2fr) 60px 50px 100px'}}>
-                          <div>
+                        <div key={index} className="flex flex-wrap gap-2 items-end">
+                          <div className="flex-1 min-w-0">
                             <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Employee Name</label>
                             <Input
                               value={worker.name}
@@ -1820,37 +1820,31 @@ ${emailMessage}`;
                           </div>
                           <div className="flex-shrink-0">
                             <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Hours</label>
-                            <div style={{ width: '60px', minWidth: '60px' }}>
-                              <Input
-                                type="number"
-                                value={worker.hours}
-                                onChange={(e) => updateAdditionalWorker(index, 'hours', e.target.value)}
-                                placeholder="0"
-                                min="0"
-                                max="999"
-                                step="0.25"
-                                className="bg-gray-800 border-blue-400 text-white text-center"
-                                style={{ width: '60px', minWidth: '60px', maxWidth: '60px' }}
-                              />
-                            </div>
+                            <Input
+                              type="number"
+                              value={worker.hours}
+                              onChange={(e) => updateAdditionalWorker(index, 'hours', e.target.value)}
+                              placeholder="0"
+                              min="0"
+                              max="999"
+                              step="0.25"
+                              className="bg-gray-800 border-blue-400 text-white text-center w-16"
+                            />
                           </div>
                           <div className="flex-shrink-0">
                             <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Rate</label>
-                            <div style={{ width: '50px', minWidth: '50px' }}>
-                              <Input
-                                type="number"
-                                value={worker.rate}
-                                onChange={(e) => updateAdditionalWorker(index, 'rate', e.target.value)}
-                                placeholder="60"
-                                min="0"
-                                max="99"
-                                step="1"
-                                className="bg-gray-800 border-blue-400 text-white text-center"
-                                style={{ width: '50px', minWidth: '50px', maxWidth: '50px' }}
-                              />
-                            </div>
+                            <Input
+                              type="number"
+                              value={worker.rate}
+                              onChange={(e) => updateAdditionalWorker(index, 'rate', e.target.value)}
+                              placeholder="60"
+                              min="0"
+                              max="99"
+                              step="1"
+                              className="bg-gray-800 border-blue-400 text-white text-center w-14"
+                            />
                           </div>
-                          <div className="flex items-center justify-between flex-shrink-0" style={{ minWidth: '100px' }}>
+                          <div className="flex items-center gap-2 flex-shrink-0">
                             <span className="text-sm font-medium" style={{ color: darkTheme.text }}>
                               ${((parseFloat(worker.hours) || 0) * (parseFloat(worker.rate.toString()) || 0)).toFixed(2)}
                             </span>
@@ -1859,7 +1853,7 @@ ${emailMessage}`;
                                 onClick={() => removeAdditionalWorker(index)}
                                 size="sm"
                                 variant="ghost"
-                                className="text-red-400 hover:text-red-300 hover:bg-red-900/20 p-1 ml-2"
+                                className="text-red-400 hover:text-red-300 hover:bg-red-900/20 p-1"
                               >
                                 <X className="h-4 w-4" />
                               </Button>
@@ -1897,8 +1891,8 @@ ${emailMessage}`;
                     </div>
                     <div className="space-y-3">
                       {additionalServices.map((service, index) => (
-                        <div key={index} className="grid gap-2 items-end" style={{gridTemplateColumns: 'minmax(180px, 2fr) 60px 50px 100px'}}>
-                          <div>
+                        <div key={index} className="flex flex-wrap gap-2 items-end">
+                          <div className="flex-1 min-w-0">
                             <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Service Description</label>
                             <Input
                               value={service.name}
@@ -1909,37 +1903,31 @@ ${emailMessage}`;
                           </div>
                           <div className="flex-shrink-0">
                             <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Hours</label>
-                            <div style={{ width: '60px', minWidth: '60px' }}>
-                              <Input
-                                type="number"
-                                value={service.hours}
-                                onChange={(e) => updateAdditionalService(index, 'hours', e.target.value)}
-                                placeholder="0"
-                                min="0"
-                                max="999"
-                                step="0.25"
-                                className="bg-gray-800 border-blue-400 text-white text-center"
-                                style={{ width: '60px', minWidth: '60px', maxWidth: '60px' }}
-                              />
-                            </div>
+                            <Input
+                              type="number"
+                              value={service.hours}
+                              onChange={(e) => updateAdditionalService(index, 'hours', e.target.value)}
+                              placeholder="0"
+                              min="0"
+                              max="999"
+                              step="0.25"
+                              className="bg-gray-800 border-blue-400 text-white text-center w-16"
+                            />
                           </div>
                           <div className="flex-shrink-0">
                             <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Rate</label>
-                            <div style={{ width: '50px', minWidth: '50px' }}>
-                              <Input
-                                type="number"
-                                value={service.rate}
-                                onChange={(e) => updateAdditionalService(index, 'rate', e.target.value)}
-                                placeholder="60"
-                                min="0"
-                                max="99"
-                                step="1"
-                                className="bg-gray-800 border-blue-400 text-white text-center"
-                                style={{ width: '50px', minWidth: '50px', maxWidth: '50px' }}
-                              />
-                            </div>
+                            <Input
+                              type="number"
+                              value={service.rate}
+                              onChange={(e) => updateAdditionalService(index, 'rate', e.target.value)}
+                              placeholder="60"
+                              min="0"
+                              max="99"
+                              step="1"
+                              className="bg-gray-800 border-blue-400 text-white text-center w-14"
+                            />
                           </div>
-                          <div className="flex items-center justify-between flex-shrink-0" style={{ minWidth: '100px' }}>
+                          <div className="flex items-center gap-2 flex-shrink-0">
                             <span className="text-sm font-medium" style={{ color: darkTheme.text }}>
                               ${((parseFloat(service.hours) || 0) * (parseFloat(service.rate.toString()) || 0)).toFixed(2)}
                             </span>
