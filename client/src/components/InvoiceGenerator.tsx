@@ -1932,24 +1932,24 @@ ${emailMessage}`;
                 Attach receipt photos to email (as additional attachments)
               </label>
             </div>
-          </div>
-            
-          {/* Custom Email Message Section */}
-          <div className="space-y-4 px-6 py-4 border-t border-gray-700 bg-gray-900 flex-shrink-0">
-            <div className="p-4 rounded-t-lg" style={{ backgroundColor: '#FEC101' }}>
-              <h3 className="text-lg font-semibold text-black">Custom Email Message</h3>
-            </div>
-            <div className="rounded-b-lg border-2 border-t-0 p-4 space-y-3" style={{ borderColor: '#FEC101', backgroundColor: '#2D3748' }}>
-              <div className="text-gray-300 text-sm mb-3">
-                Add a personal message to include with your invoice:
+
+            {/* Custom Email Message Section */}
+            <div className="space-y-2">
+              <div className="p-4 rounded-t-lg" style={{ backgroundColor: '#FEC101' }}>
+                <h3 className="text-lg font-semibold text-black">Custom Email Message</h3>
               </div>
-              <Textarea
-                value={emailMessage}
-                onChange={(e) => setEmailMessage(e.target.value)}
-                rows={3}
-                className="w-full text-sm bg-gray-800 border border-gray-600 text-white resize-none"
-                placeholder="Please find attached your invoice for painting services..."
-              />
+              <div className="rounded-b-lg border-2 border-t-0 p-4" style={{ borderColor: '#FEC101', backgroundColor: '#2D3748' }}>
+                <div className="text-gray-300 text-sm mb-3">
+                  Add a personal message to include with your invoice:
+                </div>
+                <Textarea
+                  value={emailMessage}
+                  onChange={(e) => setEmailMessage(e.target.value)}
+                  rows={3}
+                  className="w-full text-sm bg-gray-800 border border-gray-600 text-white resize-none"
+                  placeholder="Please find attached your invoice for painting services..."
+                />
+              </div>
             </div>
           </div>
 
