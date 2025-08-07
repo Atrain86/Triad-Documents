@@ -1644,6 +1644,7 @@ ${emailMessage}`;
                 onClick={() => {
                   if (actionMode === 'email') {
                     console.log('Send Invoice button clicked - opening email dialog');
+                    console.log('emailMessage state at dialog open:', emailMessage);
                     setShowEmailDialog(true);
                   } else {
                     generatePDF();
@@ -1933,16 +1934,21 @@ ${emailMessage}`;
               </label>
             </div>
 
-            {/* TEST: Simple Custom Email Message */}
-            <div className="bg-yellow-500 p-4 my-4 rounded">
-              <h3 className="text-black font-bold mb-2">CUSTOM EMAIL MESSAGE TEST</h3>
+            {/* Custom Email Message - Adding logging */}
+            <div className="bg-red-500 p-4 my-4 rounded border-4 border-white">
+              <h3 className="text-white font-bold mb-2 text-xl">✓ CUSTOM EMAIL MESSAGE IS HERE ✓</h3>
+              <div className="text-white mb-2">Email message state: "{emailMessage}"</div>
               <textarea
                 value={emailMessage}
-                onChange={(e) => setEmailMessage(e.target.value)}
-                className="w-full p-2 text-black"
+                onChange={(e) => {
+                  console.log('Custom email message changed:', e.target.value);
+                  setEmailMessage(e.target.value);
+                }}
+                className="w-full p-2 text-black text-lg"
                 rows={3}
                 placeholder="Type your custom message here..."
               />
+              <div className="text-white mt-2 text-sm">This should be visible in the email dialog!</div>
             </div>
           </div>
 
