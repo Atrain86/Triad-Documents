@@ -1474,7 +1474,7 @@ ${emailMessage}`;
         </DialogHeader>
         <div className="flex flex-col w-full overflow-x-hidden">
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b" style={{ backgroundColor: darkTheme.headerBg, borderColor: darkTheme.border }}>
+          <div className="flex items-center justify-between px-8 py-6 border-b" style={{ backgroundColor: darkTheme.headerBg, borderColor: darkTheme.border }}>
             <div></div> {/* Spacer for centering */}
             <div className="text-center">
 
@@ -1490,10 +1490,10 @@ ${emailMessage}`;
             </Button>
           </div>
 
-          <div className="p-6 space-y-6 w-full overflow-x-hidden" style={{ backgroundColor: darkTheme.background }}>
+          <div className="px-8 py-6 space-y-6 w-full overflow-x-hidden" style={{ backgroundColor: darkTheme.background }}>
               {/* Business & Invoice Info */}
             <div className="grid grid-cols-1 gap-6">
-              <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: paintBrainColors.red, backgroundColor: darkTheme.cardBg }}>
+              <div className="p-3 rounded-lg border space-y-4" style={{ borderColor: paintBrainColors.red, backgroundColor: darkTheme.cardBg }}>
                 <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.red }}>
                   <User className="mr-2 h-5 w-5" />
                   Business Information
@@ -1542,7 +1542,7 @@ ${emailMessage}`;
                 </div>
               </div>
 
-              <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: paintBrainColors.yellow, backgroundColor: darkTheme.cardBg }}>
+              <div className="p-3 rounded-lg border space-y-4" style={{ borderColor: paintBrainColors.yellow, backgroundColor: darkTheme.cardBg }}>
                 <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.yellow }}>
                   <Calendar className="mr-2 h-5 w-5" />
                   Invoice Details
@@ -1681,7 +1681,7 @@ ${emailMessage}`;
 
             {/* Materials */}
             {receipts.length > 0 && (
-              <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: paintBrainColors.purple, backgroundColor: darkTheme.cardBg }}>
+              <div className="p-3 rounded-lg border space-y-4" style={{ borderColor: paintBrainColors.purple, backgroundColor: darkTheme.cardBg }}>
                 <div className="flex items-center justify-between cursor-pointer" onClick={() => setShowMaterials(!showMaterials)}>
                   <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.purple }}>
                     <Wrench className="mr-2 h-5 w-5" />
@@ -1745,7 +1745,7 @@ ${emailMessage}`;
             )}
 
             {/* Services & Labor - Combined Container (Blue) */}
-            <div className="p-4 rounded-lg border space-y-6" style={{ borderColor: paintBrainColors.blue, backgroundColor: darkTheme.cardBg }}>
+            <div className="p-3 rounded-lg border space-y-6" style={{ borderColor: paintBrainColors.blue, backgroundColor: darkTheme.cardBg }}>
               <div className="flex items-center justify-between cursor-pointer" onClick={() => setShowServicesLabor(!showServicesLabor)}>
                 <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.blue }}>
                   <Users className="mr-2 h-5 w-5" />
@@ -1790,7 +1790,7 @@ ${emailMessage}`;
                   </div>
 
                   {/* Additional Workers Section */}
-                  <div className="border rounded-lg p-4 space-y-4" style={{ borderColor: paintBrainColors.blue, backgroundColor: `${paintBrainColors.blue}10` }}>
+                  <div className="border rounded-lg p-2 space-y-4" style={{ borderColor: paintBrainColors.blue, backgroundColor: `${paintBrainColors.blue}10` }}>
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="text-lg font-semibold flex items-center" style={{ color: paintBrainColors.blue }}>
                         <Users className="mr-2 h-4 w-4" />
@@ -1873,7 +1873,7 @@ ${emailMessage}`;
                   </div>
 
                   {/* Additional Services Section */}
-                  <div className="border rounded-lg p-4 space-y-4" style={{ borderColor: paintBrainColors.blue, backgroundColor: `${paintBrainColors.blue}10` }}>
+                  <div className="border rounded-lg p-2 space-y-4" style={{ borderColor: paintBrainColors.blue, backgroundColor: `${paintBrainColors.blue}10` }}>
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="text-lg font-semibold flex items-center" style={{ color: paintBrainColors.blue }}>
                         <Wrench className="mr-2 h-4 w-4" />
@@ -1959,7 +1959,7 @@ ${emailMessage}`;
             </div>
 
             {/* Totals */}
-            <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: paintBrainColors.purple, backgroundColor: darkTheme.cardBg }}>
+            <div className="p-3 rounded-lg border space-y-4" style={{ borderColor: paintBrainColors.purple, backgroundColor: darkTheme.cardBg }}>
               <div className="flex items-center justify-between cursor-pointer" onClick={() => setShowTotals(!showTotals)}>
                 <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.purple }}>
                   <Calendar className="mr-2 h-5 w-5" />
