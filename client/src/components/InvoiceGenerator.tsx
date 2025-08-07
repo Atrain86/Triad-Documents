@@ -1709,7 +1709,7 @@ ${emailMessage}`;
           </div>
         </div>
 
-        {/* Invoice Preview (for PDF generation) */}
+        {/* Invoice Preview (for PDF generation) - v2025.1 */}
         <div ref={invoiceRef} data-invoice-ref className="fixed -top-[9999px] -left-[9999px] w-[794px] opacity-0 pointer-events-none print:static print:opacity-100 print:pointer-events-auto print:block print:max-w-none" style={{ backgroundColor: '#000000', color: '#fff', minHeight: 'auto', paddingBottom: '40px' }}>
           <div className="p-8">
             {/* Header Section */}
@@ -1756,7 +1756,7 @@ ${emailMessage}`;
               </div>
             </div>
 
-            {/* Services & Labor Section - Table format matching estimate */}
+            {/* Services & Labor Section - 2-Column Layout (Updated Jan 2025) */}
             {dailyHours.length > 0 && (
               <div className="mb-6">
                 <div className="p-4 rounded-t-lg" style={{ backgroundColor: '#E53E3E' }}>
