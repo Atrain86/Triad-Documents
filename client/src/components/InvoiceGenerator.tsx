@@ -1517,9 +1517,7 @@ ${emailMessage}`;
                 <table className="w-full border-collapse" style={{ borderColor: darkTheme.border }}>
                   <thead>
                     <tr style={{ backgroundColor: darkTheme.inputBg }}>
-                      <th className="border p-3 text-left" style={{ borderColor: '#3182CE', color: '#3182CE' }}>Date</th>
-                      <th className="border p-3 text-left" style={{ borderColor: '#3182CE', color: '#3182CE' }}>Description</th>
-                      <th className="border p-3 text-center" style={{ borderColor: '#3182CE', color: '#3182CE' }}>Hours</th>
+                      <th className="border p-3 text-left" style={{ borderColor: '#3182CE', color: '#3182CE' }}>Service</th>
                       <th className="border p-3 text-right" style={{ borderColor: '#3182CE', color: '#3182CE' }}>Total</th>
                     </tr>
                   </thead>
@@ -1527,24 +1525,7 @@ ${emailMessage}`;
                     {dailyHours.map((hourEntry, index) => (
                       <tr key={index}>
                         <td className="border p-3" style={{ borderColor: '#3182CE', color: darkTheme.text }}>
-                          {(() => {
-                            // Parse date string directly to avoid timezone conversion
-                            const dateStr = hourEntry.date.toString();
-                            const datePart = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr.split(' ')[0];
-                            const [year, month, day] = datePart.split('-').map(Number);
-                            const localDate = new Date(year, month - 1, day);
-                            return localDate.toLocaleDateString('en-US', { 
-                              year: 'numeric', 
-                              month: 'short', 
-                              day: 'numeric' 
-                            });
-                          })()}
-                        </td>
-                        <td className="border p-3" style={{ borderColor: '#3182CE', color: darkTheme.text }}>
-                          {hourEntry.description || 'Painting'}
-                        </td>
-                        <td className="border p-3 text-center" style={{ borderColor: '#3182CE', color: darkTheme.text }}>
-                          {hourEntry.hours}
+                          {hourEntry.description || 'Painting'}: {hourEntry.hours}h × ${project.hourlyRate || 60}/hr
                         </td>
                         <td className="border p-3 text-right font-semibold" style={{ borderColor: '#3182CE', color: darkTheme.text }}>
                           ${(hourEntry.hours * (project.hourlyRate || 60)).toFixed(2)}
