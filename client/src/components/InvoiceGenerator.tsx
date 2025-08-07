@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import { Calendar, Download, Send, Plus, Trash2, User, MapPin, Phone, Mail, X, Wrench, Users } from 'lucide-react';
+import { Calendar, Download, Send, Plus, Trash2, User, MapPin, Phone, Mail, X, Wrench, Users, ChevronDown } from 'lucide-react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -69,6 +69,12 @@ export default function InvoiceGenerator({
   // Material markup state for invoice
   const [materialMarkupEnabled, setMaterialMarkupEnabled] = useState(false);
   const [materialMarkupPercentage, setMaterialMarkupPercentage] = useState('');
+  
+  // Dropdown states for containers
+  const [showClientInfo, setShowClientInfo] = useState(true);
+  const [showServicesLabor, setShowServicesLabor] = useState(true);
+  const [showMaterials, setShowMaterials] = useState(true);
+  const [showTotals, setShowTotals] = useState(true);
   
   // Ref for the first input to prevent auto-selection
   const firstInputRef = React.useRef<HTMLInputElement>(null);
@@ -1620,11 +1626,18 @@ ${emailMessage}`;
 
             {/* Client Information */}
             <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: paintBrainColors.green, backgroundColor: darkTheme.cardBg }}>
-              <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.green }}>
-                <MapPin className="mr-2 h-5 w-5" />
-                Client Information
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-center justify-between cursor-pointer" onClick={() => setShowClientInfo(!showClientInfo)}>
+                <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.green }}>
+                  <MapPin className="mr-2 h-5 w-5" />
+                  Client Information
+                </h2>
+                <ChevronDown 
+                  className={`h-5 w-5 transition-transform duration-200 ${showClientInfo ? 'transform rotate-180' : ''}`}
+                  style={{ color: paintBrainColors.green }}
+                />
+              </div>
+              {showClientInfo && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
                   value={invoiceData.clientName}
                   onChange={(e) => setInvoiceData({...invoiceData, clientName: e.target.value})}
@@ -1659,34 +1672,28 @@ ${emailMessage}`;
                   />
                 </div>
               </div>
+              )}
             </div>
 
 
 
-            {/* Services & Labor - Daily Hours Layout */}
-            <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: '#3182CE', backgroundColor: darkTheme.cardBg }}>
-              <h2 className="text-xl font-semibold" style={{ color: '#3182CE' }}>Services & Labor</h2>
-              
-              <div className="space-y-3">
-                {dailyHours.map((hourEntry, index) => (
-                  <div key={index} className="border rounded-lg p-3" style={{ borderColor: '#3182CE' }}>
-                    <div className="flex justify-between items-center">
-                      <span style={{ color: darkTheme.text }}>
-                        {hourEntry.description || 'Painting'}: {hourEntry.hours}h × ${project.hourlyRate || 60}/hr
-                      </span>
-                      <span className="font-semibold" style={{ color: darkTheme.text }}>
-                        ${(hourEntry.hours * (project.hourlyRate || 60)).toFixed(2)}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
 
-            {/* Receipt Attachment Option */}
+
+            {/* Materials */}
             {receipts.length > 0 && (
-              <div className="p-4 rounded-lg border" style={{ borderColor: '#8B5FBF', backgroundColor: darkTheme.cardBg }}>
-                <h3 className="text-xl font-semibold mb-3" style={{ color: '#8B5FBF' }}>Receipts & Materials</h3>
+              <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: paintBrainColors.purple, backgroundColor: darkTheme.cardBg }}>
+                <div className="flex items-center justify-between cursor-pointer" onClick={() => setShowMaterials(!showMaterials)}>
+                  <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.purple }}>
+                    <Wrench className="mr-2 h-5 w-5" />
+                    Materials & Receipts
+                  </h2>
+                  <ChevronDown 
+                    className={`h-5 w-5 transition-transform duration-200 ${showMaterials ? 'transform rotate-180' : ''}`}
+                    style={{ color: paintBrainColors.purple }}
+                  />
+                </div>
+                {showMaterials && (
+                  <div>
                 
                 {/* Display receipt items with OCR data */}
                 <div className="space-y-3 mb-4">
@@ -1732,193 +1739,222 @@ ${emailMessage}`;
                     Include receipts as email attachments (not embedded in PDF)
                   </span>
                 </label>
+                </div>
+                )}
               </div>
             )}
 
-            {/* Services & Labor (combined with Additional Workers) */}
+            {/* Services & Labor - Combined Container (Blue) */}
             <div className="p-4 rounded-lg border space-y-6" style={{ borderColor: paintBrainColors.blue, backgroundColor: darkTheme.cardBg }}>
-              {/* Additional Workers Section - Inside Blue Container */}
-              <div>
-                <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.blue }}>
-                    <Users className="mr-2 h-5 w-5" />
-                    Additional Workers
-                  </h2>
-                  <Button
-                    onClick={addAdditionalWorker}
-                    size="sm"
-                    className="text-blue-400 border-blue-400 bg-transparent hover:bg-blue-400 hover:text-white"
-                    variant="outline"
-                  >
-                    <Plus className="h-4 w-4 mr-1" />
-                    Add Worker
-                  </Button>
-                </div>
-                <div className="space-y-3">
-                  {additionalWorkers.map((worker, index) => (
-                    <div key={index} className="grid gap-3 items-end" style={{gridTemplateColumns: '1fr 60px 50px 120px'}}>
-                      <div>
-                        <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Employee Name</label>
-                        <Input
-                          value={worker.name}
-                          onChange={(e) => updateAdditionalWorker(index, 'name', e.target.value)}
-                          placeholder="Employee name"
-                          className="bg-gray-800 border-blue-400 text-white w-full"
-                        />
-                      </div>
-                      <div className="flex-shrink-0">
-                        <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Hours</label>
-                        <div style={{ width: '60px', minWidth: '60px' }}>
-                          <Input
-                            type="number"
-                            value={worker.hours}
-                            onChange={(e) => updateAdditionalWorker(index, 'hours', e.target.value)}
-                            placeholder="0"
-                            min="0"
-                            max="999"
-                            step="0.25"
-                            className="bg-gray-800 border-blue-400 text-white text-center"
-                            style={{ width: '60px', minWidth: '60px', maxWidth: '60px' }}
-                          />
-                        </div>
-                      </div>
-                      <div className="flex-shrink-0">
-                        <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Rate</label>
-                        <div style={{ width: '50px', minWidth: '50px' }}>
-                          <Input
-                            type="number"
-                            value={worker.rate}
-                            onChange={(e) => updateAdditionalWorker(index, 'rate', e.target.value)}
-                            placeholder="60"
-                            min="0"
-                            max="99"
-                            step="1"
-                            className="bg-gray-800 border-blue-400 text-white text-center"
-                            style={{ width: '50px', minWidth: '50px', maxWidth: '50px' }}
-                          />
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between flex-shrink-0" style={{ minWidth: '120px' }}>
-                        <span className="text-sm font-medium" style={{ color: darkTheme.text }}>
-                          ${((parseFloat(worker.hours) || 0) * (parseFloat(worker.rate.toString()) || 0)).toFixed(2)}
-                        </span>
-                        {additionalWorkers.length > 1 && (
-                          <Button
-                            onClick={() => removeAdditionalWorker(index)}
-                            size="sm"
-                            variant="ghost"
-                            className="text-red-400 hover:text-red-300 hover:bg-red-900/20 p-1 ml-2"
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                  {additionalWorkersSubtotal > 0 && (
-                    <div className="pt-2 border-t border-blue-400/30">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium" style={{ color: darkTheme.text }}>Additional Workers Subtotal:</span>
-                        <span className="font-semibold text-blue-400">${additionalWorkersSubtotal.toFixed(2)}</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Additional Services - Purple Container */}
-            <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: paintBrainColors.purple, backgroundColor: darkTheme.cardBg }}>
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.purple }}>
-                  <Wrench className="mr-2 h-5 w-5" />
-                  Additional Services
+              <div className="flex items-center justify-between cursor-pointer" onClick={() => setShowServicesLabor(!showServicesLabor)}>
+                <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.blue }}>
+                  <Users className="mr-2 h-5 w-5" />
+                  Services & Labor
                 </h2>
-                <Button
-                  onClick={addAdditionalService}
-                  size="sm"
-                  className="text-purple-400 border-purple-400 bg-transparent hover:bg-purple-400 hover:text-white"
-                  variant="outline"
-                >
-                  <Plus className="h-4 w-4 mr-1" />
-                  Add Service
-                </Button>
+                <ChevronDown 
+                  className={`h-5 w-5 transition-transform duration-200 ${showServicesLabor ? 'transform rotate-180' : ''}`}
+                  style={{ color: paintBrainColors.blue }}
+                />
               </div>
-              <div className="space-y-3">
-                {additionalServices.map((service, index) => (
-                  <div key={index} className="grid gap-3 items-end" style={{gridTemplateColumns: '1fr 60px 50px 120px'}}>
-                    <div>
-                      <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Service</label>
-                      <Input
-                        value={service.name}
-                        onChange={(e) => updateAdditionalService(index, 'name', e.target.value)}
-                        placeholder="Service name"
-                        className="bg-gray-800 border-purple-400 text-white w-full"
-                      />
+              
+              {showServicesLabor && (
+                <>
+                  {/* Additional Workers Section */}
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold flex items-center" style={{ color: paintBrainColors.blue }}>
+                        <Users className="mr-2 h-4 w-4" />
+                        Additional Workers
+                      </h3>
+                      <Button
+                        onClick={addAdditionalWorker}
+                        size="sm"
+                        className="text-blue-400 border-blue-400 bg-transparent hover:bg-blue-400 hover:text-white"
+                        variant="outline"
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        Add Worker
+                      </Button>
                     </div>
-                    <div className="flex-shrink-0">
-                      <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Hours</label>
-                      <div style={{ width: '60px', minWidth: '60px' }}>
-                        <Input
-                          type="number"
-                          value={service.hours}
-                          onChange={(e) => updateAdditionalService(index, 'hours', e.target.value)}
-                          placeholder="0"
-                          min="0"
-                          max="999"
-                          step="0.25"
-                          className="bg-gray-800 border-purple-400 text-white text-center"
-                          style={{ width: '60px', minWidth: '60px', maxWidth: '60px' }}
-                        />
-                      </div>
-                    </div>
-                    <div className="flex-shrink-0">
-                      <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Rate</label>
-                      <div style={{ width: '50px', minWidth: '50px' }}>
-                        <Input
-                          type="number"
-                          value={service.rate}
-                          onChange={(e) => updateAdditionalService(index, 'rate', e.target.value)}
-                          placeholder="60"
-                          min="0"
-                          max="99"
-                          step="1"
-                          className="bg-gray-800 border-purple-400 text-white text-center"
-                          style={{ width: '50px', minWidth: '50px', maxWidth: '50px' }}
-                        />
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between flex-shrink-0" style={{ minWidth: '120px' }}>
-                      <span className="text-sm font-medium" style={{ color: darkTheme.text }}>
-                        ${((parseFloat(service.hours) || 0) * (parseFloat(service.rate.toString()) || 0)).toFixed(2)}
-                      </span>
-                      {index >= 3 && (
-                        <Button
-                          onClick={() => removeAdditionalService(index)}
-                          size="sm"
-                          variant="ghost"
-                          className="text-red-400 hover:text-red-300 hover:bg-red-900/20 p-1 ml-2"
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
+                    <div className="space-y-3">
+                      {additionalWorkers.map((worker, index) => (
+                        <div key={index} className="grid gap-3 items-end" style={{gridTemplateColumns: '2fr 60px 50px 120px'}}>
+                          <div>
+                            <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Employee Name</label>
+                            <Input
+                              value={worker.name}
+                              onChange={(e) => updateAdditionalWorker(index, 'name', e.target.value)}
+                              placeholder="Employee name"
+                              className="bg-gray-800 border-blue-400 text-white w-full"
+                            />
+                          </div>
+                          <div className="flex-shrink-0">
+                            <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Hours</label>
+                            <div style={{ width: '60px', minWidth: '60px' }}>
+                              <Input
+                                type="number"
+                                value={worker.hours}
+                                onChange={(e) => updateAdditionalWorker(index, 'hours', e.target.value)}
+                                placeholder="0"
+                                min="0"
+                                max="999"
+                                step="0.25"
+                                className="bg-gray-800 border-blue-400 text-white text-center"
+                                style={{ width: '60px', minWidth: '60px', maxWidth: '60px' }}
+                              />
+                            </div>
+                          </div>
+                          <div className="flex-shrink-0">
+                            <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Rate</label>
+                            <div style={{ width: '50px', minWidth: '50px' }}>
+                              <Input
+                                type="number"
+                                value={worker.rate}
+                                onChange={(e) => updateAdditionalWorker(index, 'rate', e.target.value)}
+                                placeholder="60"
+                                min="0"
+                                max="99"
+                                step="1"
+                                className="bg-gray-800 border-blue-400 text-white text-center"
+                                style={{ width: '50px', minWidth: '50px', maxWidth: '50px' }}
+                              />
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between flex-shrink-0" style={{ minWidth: '120px' }}>
+                            <span className="text-sm font-medium" style={{ color: darkTheme.text }}>
+                              ${((parseFloat(worker.hours) || 0) * (parseFloat(worker.rate.toString()) || 0)).toFixed(2)}
+                            </span>
+                            {additionalWorkers.length > 1 && (
+                              <Button
+                                onClick={() => removeAdditionalWorker(index)}
+                                size="sm"
+                                variant="ghost"
+                                className="text-red-400 hover:text-red-300 hover:bg-red-900/20 p-1 ml-2"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                      {additionalWorkersSubtotal > 0 && (
+                        <div className="pt-2 border-t border-blue-400/30">
+                          <div className="flex justify-between items-center">
+                            <span className="font-medium" style={{ color: darkTheme.text }}>Additional Workers Subtotal:</span>
+                            <span className="font-semibold text-blue-400">${additionalWorkersSubtotal.toFixed(2)}</span>
+                          </div>
+                        </div>
                       )}
                     </div>
                   </div>
-                ))}
-                {additionalServicesSubtotal > 0 && (
-                  <div className="pt-2 border-t border-purple-400/30">
-                    <div className="flex justify-between items-center">
-                      <span className="font-medium" style={{ color: darkTheme.text }}>Additional Services Subtotal:</span>
-                      <span className="font-semibold text-purple-400">${additionalServicesSubtotal.toFixed(2)}</span>
+
+                  {/* Additional Services Section */}
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold flex items-center" style={{ color: paintBrainColors.blue }}>
+                        <Wrench className="mr-2 h-4 w-4" />
+                        Additional Services
+                      </h3>
+                      <Button
+                        onClick={addAdditionalService}
+                        size="sm"
+                        className="text-blue-400 border-blue-400 bg-transparent hover:bg-blue-400 hover:text-white"
+                        variant="outline"
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        Add Service
+                      </Button>
+                    </div>
+                    <div className="space-y-3">
+                      {additionalServices.map((service, index) => (
+                        <div key={index} className="grid gap-3 items-end" style={{gridTemplateColumns: '2fr 60px 50px 120px'}}>
+                          <div>
+                            <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Service</label>
+                            <Input
+                              value={service.name}
+                              onChange={(e) => updateAdditionalService(index, 'name', e.target.value)}
+                              placeholder="Service name"
+                              className="bg-gray-800 border-blue-400 text-white w-full"
+                            />
+                          </div>
+                          <div className="flex-shrink-0">
+                            <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Hours</label>
+                            <div style={{ width: '60px', minWidth: '60px' }}>
+                              <Input
+                                type="number"
+                                value={service.hours}
+                                onChange={(e) => updateAdditionalService(index, 'hours', e.target.value)}
+                                placeholder="0"
+                                min="0"
+                                max="999"
+                                step="0.25"
+                                className="bg-gray-800 border-blue-400 text-white text-center"
+                                style={{ width: '60px', minWidth: '60px', maxWidth: '60px' }}
+                              />
+                            </div>
+                          </div>
+                          <div className="flex-shrink-0">
+                            <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Rate</label>
+                            <div style={{ width: '50px', minWidth: '50px' }}>
+                              <Input
+                                type="number"
+                                value={service.rate}
+                                onChange={(e) => updateAdditionalService(index, 'rate', e.target.value)}
+                                placeholder="60"
+                                min="0"
+                                max="99"
+                                step="1"
+                                className="bg-gray-800 border-blue-400 text-white text-center"
+                                style={{ width: '50px', minWidth: '50px', maxWidth: '50px' }}
+                              />
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between flex-shrink-0" style={{ minWidth: '120px' }}>
+                            <span className="text-sm font-medium" style={{ color: darkTheme.text }}>
+                              ${((parseFloat(service.hours) || 0) * (parseFloat(service.rate.toString()) || 0)).toFixed(2)}
+                            </span>
+                            {index >= 3 && (
+                              <Button
+                                onClick={() => removeAdditionalService(index)}
+                                size="sm"
+                                variant="ghost"
+                                className="text-red-400 hover:text-red-300 hover:bg-red-900/20 p-1 ml-2"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                      {additionalServicesSubtotal > 0 && (
+                        <div className="pt-2 border-t border-blue-400/30">
+                          <div className="flex justify-between items-center">
+                            <span className="font-medium" style={{ color: darkTheme.text }}>Additional Services Subtotal:</span>
+                            <span className="font-semibold text-blue-400">${additionalServicesSubtotal.toFixed(2)}</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
-                )}
-              </div>
+                </>
+              )}
             </div>
 
             {/* Totals */}
-            <div className="flex justify-end">
-              <div className="w-64 space-y-2">
+            <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: paintBrainColors.purple, backgroundColor: darkTheme.cardBg }}>
+              <div className="flex items-center justify-between cursor-pointer" onClick={() => setShowTotals(!showTotals)}>
+                <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.purple }}>
+                  <Calendar className="mr-2 h-5 w-5" />
+                  Invoice Totals
+                </h2>
+                <ChevronDown 
+                  className={`h-5 w-5 transition-transform duration-200 ${showTotals ? 'transform rotate-180' : ''}`}
+                  style={{ color: paintBrainColors.purple }}
+                />
+              </div>
+              {showTotals && (
+                <div className="flex justify-end">
+                  <div className="w-64 space-y-2">
                 <div className="flex justify-between py-2 border-b" style={{ borderColor: darkTheme.border }}>
                   <span className="font-medium" style={{ color: darkTheme.text }}>Labor:</span>
                   <span className="font-semibold" style={{ color: darkTheme.text }}>${dailyHours.reduce((sum, hourEntry) => sum + (hourEntry.hours * (project.hourlyRate || 60)), 0).toFixed(2)}</span>
@@ -1963,6 +1999,8 @@ ${emailMessage}`;
                   <span>${calculateTotal().toFixed(2)}</span>
                 </div>
               </div>
+                </div>
+              )}
             </div>
 
 
