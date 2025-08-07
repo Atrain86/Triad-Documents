@@ -1496,27 +1496,19 @@ ${emailMessage}`;
             <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: '#3182CE', backgroundColor: darkTheme.cardBg }}>
               <h2 className="text-xl font-semibold" style={{ color: '#3182CE' }}>Services & Labor</h2>
               
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse" style={{ borderColor: darkTheme.border }}>
-                  <thead>
-                    <tr style={{ backgroundColor: darkTheme.inputBg }}>
-                      <th className="border p-3 text-left" style={{ borderColor: '#3182CE', color: '#3182CE' }}>Service</th>
-                      <th className="border p-3 text-right" style={{ borderColor: '#3182CE', color: '#3182CE' }}>Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {dailyHours.map((hourEntry, index) => (
-                      <tr key={index}>
-                        <td className="border rounded-lg p-3" style={{ borderColor: '#3182CE', color: darkTheme.text }}>
-                          {hourEntry.description || 'Painting'}: {hourEntry.hours}h × ${project.hourlyRate || 60}/hr
-                        </td>
-                        <td className="border rounded-lg p-3 text-right font-semibold" style={{ borderColor: '#3182CE', color: darkTheme.text }}>
-                          ${(hourEntry.hours * (project.hourlyRate || 60)).toFixed(2)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="space-y-3">
+                {dailyHours.map((hourEntry, index) => (
+                  <div key={index} className="border rounded-lg p-3" style={{ borderColor: '#3182CE' }}>
+                    <div className="flex justify-between items-center">
+                      <span style={{ color: darkTheme.text }}>
+                        {hourEntry.description || 'Painting'}: {hourEntry.hours}h × ${project.hourlyRate || 60}/hr
+                      </span>
+                      <span className="font-semibold" style={{ color: darkTheme.text }}>
+                        ${(hourEntry.hours * (project.hourlyRate || 60)).toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
