@@ -59,7 +59,7 @@ export default function InvoiceGenerator({
   const [isSending, setIsSending] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
-  const [showEmailDialog, setShowEmailDialog] = useState(false);
+
   const [emailMessage, setEmailMessage] = useState('');
   const [actionMode, setActionMode] = useState<'download' | 'email'>('email');
   
@@ -1655,9 +1655,7 @@ ${emailMessage}`;
                 className="flex items-center gap-3 cursor-pointer"
                 onClick={() => {
                   if (actionMode === 'email') {
-                    console.log('Send Invoice button clicked - opening email dialog');
-                    console.log('emailMessage state at dialog open:', emailMessage);
-                    setShowEmailDialog(true);
+                    sendInvoice();
                   } else {
                     generatePDF();
                   }
@@ -1892,111 +1890,7 @@ ${emailMessage}`;
       </DialogContent>
     </Dialog>
 
-    {/* Email Composition Dialog */}
-    {showEmailDialog && (
-      <Dialog open={showEmailDialog} onOpenChange={setShowEmailDialog}>
-        <DialogContent className="max-w-2xl max-h-[85vh] bg-gray-900 text-white border-gray-700 z-[9999] overflow-hidden flex flex-col">
-          <DialogHeader className="flex-shrink-0">
-            <DialogTitle className="text-white text-lg font-semibold">Send Invoice Email</DialogTitle>
-          </DialogHeader>
 
-
-        
-          <div className="space-y-4 flex-1 overflow-y-auto pr-2">
-            {/* Email Details */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1 text-gray-300">
-                  To:
-                </label>
-                <Input
-                  type="email"
-                  value={invoiceData.clientEmail}
-                  onChange={(e) => setInvoiceData({ ...invoiceData, clientEmail: e.target.value })}
-                  className="bg-gray-800 border-[#3182CE] text-white"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-gray-300">
-                  Subject:
-                </label>
-                <Input
-                  type="text"
-                  value={`Invoice #${invoiceData.invoiceNumber} - A-Frame Painting`}
-                  readOnly
-                  className="bg-gray-800 border-[#3182CE] text-white"
-                />
-              </div>
-            </div>
-
-            {/* Receipt Attachment Option */}
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="attachReceipts"
-                checked={receipts.length > 0 && receipts.every(r => invoiceData.selectedReceipts.has(r.id))}
-                onChange={(e) => {
-                  const newSelection = new Set<number>();
-                  if (e.target.checked) {
-                    receipts.forEach(receipt => newSelection.add(receipt.id));
-                  }
-                  setInvoiceData({...invoiceData, selectedReceipts: newSelection});
-                }}
-              />
-              <label htmlFor="attachReceipts" className="text-gray-300">
-                Attach receipt photos to email (as additional attachments)
-              </label>
-            </div>
-
-            {/* Custom Email Message - Adding logging */}
-            <div className="bg-red-500 p-4 my-4 rounded border-4 border-white">
-              <h3 className="text-white font-bold mb-2 text-xl">✓ CUSTOM EMAIL MESSAGE IS HERE ✓</h3>
-              <div className="text-white mb-2">Email message state: "{emailMessage}"</div>
-              <textarea
-                value={emailMessage}
-                onChange={(e) => {
-                  console.log('Custom email message changed:', e.target.value);
-                  setEmailMessage(e.target.value);
-                }}
-                className="w-full p-2 text-black text-lg"
-                rows={3}
-                placeholder="Type your custom message here..."
-              />
-              <div className="text-white mt-2 text-sm">This should be visible in the email dialog!</div>
-            </div>
-          </div>
-
-          {/* Action Buttons - Sticky at bottom */}
-          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-700 flex-shrink-0 bg-gray-900">
-              <Button
-                onClick={() => setShowEmailDialog(false)}
-                variant="outline"
-                className="border-gray-600 text-gray-300 hover:bg-gray-800"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={sendInvoice}
-                disabled={sendGmailMutation.isPending || !invoiceData.clientEmail}
-                className="text-white"
-                style={{ backgroundColor: paintBrainColors.green }}
-              >
-                {sendGmailMutation.isPending ? (
-                  <>
-                    <div className="mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Sending...
-                  </>
-                ) : (
-                  <>
-                    <Send className="mr-2 h-4 w-4" />
-                    Send Invoice
-                  </>
-                )}
-              </Button>
-            </div>
-        </DialogContent>
-      </Dialog>
-    )}
 
     {/* Success Dialog */}
     <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
