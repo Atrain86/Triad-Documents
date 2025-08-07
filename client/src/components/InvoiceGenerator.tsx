@@ -1490,24 +1490,7 @@ ${emailMessage}`;
               </div>
             </div>
 
-            {/* Email Message Section - Restored Yellow Container */}
-            <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: '#ECC94B', backgroundColor: darkTheme.cardBg }}>
-              <h2 className="text-xl font-semibold flex items-center" style={{ color: '#ECC94B' }}>
-                <Send className="mr-2 h-5 w-5" />
-                Email Message
-              </h2>
-              <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: darkTheme.textSecondary }}>
-                  Custom message for email body
-                </label>
-                <Textarea
-                  value={emailMessage}
-                  onChange={(e) => setEmailMessage(e.target.value)}
-                  className="bg-gray-800 border-[#ECC94B] text-white min-h-20"
-                  placeholder="Enter your custom message..."
-                />
-              </div>
-            </div>
+
 
             {/* Services & Labor - Daily Hours Layout */}
             <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: '#3182CE', backgroundColor: darkTheme.cardBg }}>
@@ -1637,6 +1620,26 @@ ${emailMessage}`;
                 placeholder="Payment instructions, additional notes, etc."
               />
             </div>
+
+            {/* Email Message Section - Restored Yellow Container */}
+            <div className="p-4 rounded-lg border space-y-4" style={{ borderColor: '#ECC94B', backgroundColor: darkTheme.cardBg }}>
+              <h2 className="text-xl font-semibold flex items-center" style={{ color: '#ECC94B' }}>
+                <Send className="mr-2 h-5 w-5" />
+                Email Message
+              </h2>
+              <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: darkTheme.textSecondary }}>
+                  Custom message for email body
+                </label>
+                <Textarea
+                  value={emailMessage}
+                  onChange={(e) => setEmailMessage(e.target.value)}
+                  className="bg-gray-800 border-[#ECC94B] text-white min-h-20"
+                  placeholder="Enter your custom message..."
+                />
+              </div>
+            </div>
+
             {/* Action Toggle with Dynamic Label - Matching EstimateGenerator */}
             <div className="flex flex-col items-center gap-4 mb-6 p-6 bg-black rounded-lg border border-gray-600" style={{ 
               borderColor: actionMode === 'email' ? '#EA580C' : '#8B5FBF' 
