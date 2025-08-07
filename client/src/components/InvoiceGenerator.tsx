@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import { Calendar, Download, Send, Plus, Trash2, User, MapPin, Phone, Mail, X, Wrench, Users, ChevronDown } from 'lucide-react';
+import { Calendar, Download, Send, Plus, Trash2, User, MapPin, Phone, Mail, X, Wrench, Users, ChevronDown, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -1759,6 +1759,36 @@ ${emailMessage}`;
               
               {showServicesLabor && (
                 <>
+                  {/* Time Logged Hours Section - Primary Labor */}
+                  <div>
+                    <h3 className="text-lg font-semibold flex items-center mb-3" style={{ color: paintBrainColors.blue }}>
+                      <Clock className="mr-2 h-4 w-4" />
+                      Time Logged Hours
+                    </h3>
+                    <div className="space-y-3">
+                      {dailyHours.map((hourEntry, index) => (
+                        <div key={index} className="border rounded-lg p-3" style={{ borderColor: paintBrainColors.blue }}>
+                          <div className="flex justify-between items-center">
+                            <span style={{ color: darkTheme.text }}>
+                              {hourEntry.description || 'Painting'}: {hourEntry.hours}h × ${project.hourlyRate || 60}/hr
+                            </span>
+                            <span className="font-semibold" style={{ color: darkTheme.text }}>
+                              ${(hourEntry.hours * (project.hourlyRate || 60)).toFixed(2)}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    {dailyHours.length > 0 && (
+                      <div className="pt-3 border-t border-blue-400/30">
+                        <div className="flex justify-between items-center">
+                          <span className="font-medium" style={{ color: darkTheme.text }}>Primary Labor Subtotal:</span>
+                          <span className="font-semibold text-blue-400">${dailyHours.reduce((sum, hourEntry) => sum + (hourEntry.hours * (project.hourlyRate || 60)), 0).toFixed(2)}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
                   {/* Additional Workers Section */}
                   <div>
                     <div className="flex items-center justify-between">
