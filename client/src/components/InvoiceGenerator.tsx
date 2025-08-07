@@ -1507,10 +1507,10 @@ ${emailMessage}`;
                   <tbody>
                     {dailyHours.map((hourEntry, index) => (
                       <tr key={index}>
-                        <td className="border p-3" style={{ borderColor: '#3182CE', color: darkTheme.text }}>
+                        <td className="border rounded-lg p-3" style={{ borderColor: '#3182CE', color: darkTheme.text }}>
                           {hourEntry.description || 'Painting'}: {hourEntry.hours}h × ${project.hourlyRate || 60}/hr
                         </td>
-                        <td className="border p-3 text-right font-semibold" style={{ borderColor: '#3182CE', color: darkTheme.text }}>
+                        <td className="border rounded-lg p-3 text-right font-semibold" style={{ borderColor: '#3182CE', color: darkTheme.text }}>
                           ${(hourEntry.hours * (project.hourlyRate || 60)).toFixed(2)}
                         </td>
                       </tr>
