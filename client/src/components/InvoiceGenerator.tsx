@@ -496,8 +496,8 @@ cortespainter@gmail.com`;
 
   const calculateTotal = () => {
     const subtotal = calculateSubtotal();
-    // Only add GST if taxes are not included in materials
-    return subtotal + (taxesIncluded ? 0 : calculateGST());
+    // Always add GST - materials already have taxes built in, GST applies to labor/services
+    return subtotal + calculateGST();
   };
 
   const generatePDF = async () => {
@@ -2038,7 +2038,7 @@ ${emailMessage}`;
                 {receipts.filter(receipt => invoiceData.selectedReceipts.has(receipt.id)).length > 0 && (
                   <div className="flex justify-between py-2 border-b" style={{ borderColor: darkTheme.border }}>
                     <span className="font-medium" style={{ color: darkTheme.text }}>
-                      Materials {materialMarkupEnabled && materialMarkupPercentage ? `(+${materialMarkupPercentage}% markup)` : ''} {taxesIncluded ? '(incl. taxes)' : '(excl. taxes)'}:
+                      Materials {materialMarkupEnabled && materialMarkupPercentage ? `(+${materialMarkupPercentage}% markup)` : ''}{taxesIncluded ? ' (incl. taxes)' : ''}:
                     </span>
                     <span className="font-semibold" style={{ color: darkTheme.text }}>${calculateMaterialCost().toFixed(2)}</span>
                   </div>
@@ -2047,12 +2047,10 @@ ${emailMessage}`;
                   <span className="font-medium" style={{ color: darkTheme.text }}>Subtotal:</span>
                   <span className="font-semibold" style={{ color: darkTheme.text }}>${calculateSubtotal().toFixed(2)}</span>
                 </div>
-                {!taxesIncluded && (
-                  <div className="flex justify-between py-2 border-b" style={{ borderColor: darkTheme.border }}>
-                    <span className="font-medium" style={{ color: darkTheme.text }}>GST (5%):</span>
-                    <span className="font-semibold" style={{ color: darkTheme.text }}>${calculateGST().toFixed(2)}</span>
-                  </div>
-                )}
+                <div className="flex justify-between py-2 border-b" style={{ borderColor: darkTheme.border }}>
+                  <span className="font-medium" style={{ color: darkTheme.text }}>GST (5%):</span>
+                  <span className="font-semibold" style={{ color: darkTheme.text }}>${calculateGST().toFixed(2)}</span>
+                </div>
 
                 <div className="flex justify-between py-3 text-lg font-bold">
                   <span style={{ color: paintBrainColors.blue }}>Total:</span>
@@ -2260,7 +2258,7 @@ ${emailMessage}`;
             {(receipts.filter(receipt => invoiceData.selectedReceipts.has(receipt.id)).length > 0 || invoiceData.suppliesCost > 0) && (
               <div className="mb-6">
                 <div className="p-4 rounded-t-lg" style={{ backgroundColor: '#ECC94B' }}>
-                  <h3 className="text-lg font-semibold text-white">Paint & Materials {taxesIncluded ? '(incl. taxes)' : '(excl. taxes)'}</h3>
+                  <h3 className="text-lg font-semibold text-white">Paint & Materials{taxesIncluded ? ' (incl. taxes)' : ''}</h3>
                 </div>
                 <div className="rounded-b-lg border-2 border-t-0" style={{ borderColor: '#ECC94B', backgroundColor: '#2D3748' }}>
                   <table className="w-full">
@@ -2290,7 +2288,7 @@ ${emailMessage}`;
                         </tr>
                       )}
                       <tr style={{ borderBottom: '1px solid #ECC94B' }}>
-                        <td className="p-3 text-left font-semibold text-white">Materials Subtotal {taxesIncluded ? '(incl. taxes)' : '(excl. taxes)'}</td>
+                        <td className="p-3 text-left font-semibold text-white">Materials Subtotal{taxesIncluded ? ' (incl. taxes)' : ''}</td>
                         <td className="p-3 text-right font-semibold text-[#6A9955]">
                           ${(calculateMaterialCost() + invoiceData.suppliesCost).toFixed(2)}
                         </td>
@@ -2301,7 +2299,7 @@ ${emailMessage}`;
                 <div className="text-xs text-gray-400 mt-2 px-3">
                   {taxesIncluded ? 
                     '* Materials already include taxes paid at purchase - no additional tax applied' :
-                    '* Materials shown before taxes - applicable taxes will be added separately'
+                    ''
                   }
                 </div>
               </div>
