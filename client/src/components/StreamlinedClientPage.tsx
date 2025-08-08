@@ -1571,6 +1571,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                 selectedDate={selectedDate}
                                 onDateSelect={(date) => {
                                   setSelectedDate(date);
+                                  setShowDatePicker(false); // Close the calendar popup after date selection
                                   if (date) {
                                     setTimeout(() => {
                                       const hoursInput = document.querySelector('input[placeholder="0"]') as HTMLInputElement;
@@ -1659,7 +1660,16 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                       <div className="text-sm text-gray-300">Edit Date:</div>
                                       <PaintBrainCalendar
                                         selectedDate={editDate}
-                                        onDateSelect={setEditDate}
+                                        onDateSelect={(date) => {
+                                          setEditDate(date);
+                                          // Close the edit form after date selection to provide feedback
+                                          if (date) {
+                                            setTimeout(() => {
+                                              const editHoursInput = document.querySelector('input[placeholder="Enter new hours"]') as HTMLInputElement;
+                                              if (editHoursInput) editHoursInput.focus();
+                                            }, 100);
+                                          }
+                                        }}
                                         maxDate={new Date().toISOString().split('T')[0]}
                                       />
                                     </div>
