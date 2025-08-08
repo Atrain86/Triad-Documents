@@ -2245,7 +2245,9 @@ ${emailMessage}`;
                         </tr>
                       )}
                       <tr style={{ borderBottom: '1px solid #ECC94B' }}>
-                        <td className="p-3 text-left font-semibold text-white">Materials Subtotal (incl. taxes)</td>
+                        <td className="p-3 text-left font-semibold text-white">
+                          Materials Subtotal (incl. taxes) {materialMarkupEnabled && materialMarkupPercentage ? `- ${materialMarkupPercentage}% markup applied` : '- no markup applied'}
+                        </td>
                         <td className="p-3 text-right font-semibold text-[#6A9955]">
                           ${(calculateMaterialCost() + invoiceData.suppliesCost).toFixed(2)}
                         </td>
@@ -2372,7 +2374,7 @@ ${emailMessage}`;
                 )}
                 {(calculateMaterialCost() + invoiceData.suppliesCost) > 0 && (
                   <div className="flex justify-between text-white py-2">
-                    <span>Materials & Supplies:</span>
+                    <span>Materials & Supplies: {materialMarkupEnabled && materialMarkupPercentage ? `(${materialMarkupPercentage}% markup applied)` : '(no markup applied)'}</span>
                     <span>${(calculateMaterialCost() + invoiceData.suppliesCost).toFixed(2)}</span>
                   </div>
                 )}
