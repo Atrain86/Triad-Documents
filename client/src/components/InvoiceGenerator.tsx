@@ -1998,9 +1998,9 @@ ${emailMessage}`;
                   <span className="font-semibold" style={{ color: darkTheme.text }}>${calculateGST().toFixed(2)}</span>
                 </div>
 
-                <div className="flex justify-between py-3 text-lg font-bold" style={{ color: darkTheme.text }}>
-                  <span>Total:</span>
-                  <span>${calculateTotal().toFixed(2)}</span>
+                <div className="flex justify-between py-3 text-lg font-bold">
+                  <span className="text-purple-400">Total:</span>
+                  <span className="text-green-400">${calculateTotal().toFixed(2)}</span>
                 </div>
               </div>
                 </div>
