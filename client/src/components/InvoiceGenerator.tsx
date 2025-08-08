@@ -1760,15 +1760,15 @@ ${emailMessage}`;
                         Taxes
                       </span>
                       <div className="flex items-center space-x-3">
-                        <span className="text-xs" style={{ color: darkTheme.textSecondary }}>
-                          Not Included
+                        <span className="text-xs" style={{ color: taxesIncluded ? '#6A9955' : darkTheme.textSecondary }}>
+                          Included
                         </span>
                         <div className="relative inline-block w-12 h-6">
                           <input
                             type="checkbox"
                             id="taxes-toggle"
-                            checked={taxesIncluded}
-                            onChange={(e) => setTaxesIncluded(e.target.checked)}
+                            checked={!taxesIncluded}
+                            onChange={(e) => setTaxesIncluded(!e.target.checked)}
                             className="sr-only"
                           />
                           <label 
@@ -1777,13 +1777,13 @@ ${emailMessage}`;
                           >
                             <span 
                               className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
-                                taxesIncluded ? 'translate-x-6' : 'translate-x-0'
+                                !taxesIncluded ? 'translate-x-6' : 'translate-x-0'
                               }`}
                             />
                           </label>
                         </div>
-                        <span className="text-xs" style={{ color: taxesIncluded ? '#6A9955' : darkTheme.textSecondary }}>
-                          Included
+                        <span className="text-xs" style={{ color: !taxesIncluded ? '#E53E3E' : darkTheme.textSecondary }}>
+                          Not Included
                         </span>
                       </div>
                     </div>
