@@ -1782,8 +1782,8 @@ ${emailMessage}`;
                     {dailyHours.length > 0 && (
                       <div className="pt-3 border-t border-blue-400/30">
                         <div className="flex justify-between items-center">
-                          <span className="font-medium" style={{ color: darkTheme.text }}>Primary Labor Subtotal:</span>
-                          <span className="font-semibold text-blue-400">${dailyHours.reduce((sum, hourEntry) => sum + (hourEntry.hours * (project.hourlyRate || 60)), 0).toFixed(2)}</span>
+                          <span className="font-bold text-purple-400">Labor Subtotal:</span>
+                          <span className="font-bold text-green-400">${dailyHours.reduce((sum, hourEntry) => sum + (hourEntry.hours * (project.hourlyRate || 60)), 0).toFixed(2)}</span>
                         </div>
                       </div>
                     )}
@@ -1858,7 +1858,7 @@ ${emailMessage}`;
                       ))}
                       <div className="pt-3 border-t border-blue-400/30">
                         <div className="flex justify-between items-center">
-                          <span className="font-bold" style={{ color: darkTheme.text }}>Additional Workers Subtotal:</span>
+                          <span className="font-bold text-purple-400">Additional Workers Subtotal:</span>
                           <span className="font-bold text-green-400">${additionalWorkersSubtotal.toFixed(2)}</span>
                         </div>
                       </div>
@@ -1934,7 +1934,7 @@ ${emailMessage}`;
                       ))}
                       <div className="pt-3 border-t border-blue-400/30">
                         <div className="flex justify-between items-center">
-                          <span className="font-bold" style={{ color: darkTheme.text }}>Additional Services Subtotal:</span>
+                          <span className="font-bold text-purple-400">Additional Services Subtotal:</span>
                           <span className="font-bold text-green-400">${additionalServicesSubtotal.toFixed(2)}</span>
                         </div>
                       </div>
