@@ -547,14 +547,16 @@ cortespainter@gmail.com`;
       invoiceRef.current.style.overflow = 'visible';
       invoiceRef.current.style.transform = 'none';
       
-      // Force all child elements to expand and remove height constraints
+      // Remove ALL height constraints to prevent compression
       const allElements = invoiceRef.current.querySelectorAll('*');
       allElements.forEach((el: any) => {
         if (el.style) {
-          el.style.maxHeight = 'none';
-          el.style.height = 'auto';
-          el.style.overflow = 'visible';
-          el.style.whiteSpace = 'normal';
+          el.style.maxHeight = 'none !important';
+          el.style.minHeight = 'auto !important';
+          el.style.height = 'auto !important';
+          el.style.overflow = 'visible !important';
+          el.style.whiteSpace = 'normal !important';
+          el.style.lineHeight = 'normal !important';
         }
       });
 
@@ -579,21 +581,21 @@ cortespainter@gmail.com`;
         clientHeight: invoiceRef.current.clientHeight
       });
 
-      // Use actual element height for better spacing
+      // Let element determine its natural height without forcing constraints
       const actualHeight = invoiceRef.current.scrollHeight;
-      const elementHeight = Math.max(actualHeight, 2000);
+      console.log('Natural element height:', actualHeight);
 
-      // Capture the invoice preview with proper height
+      // Capture the invoice preview with natural dimensions
       const canvas = await html2canvas(invoiceRef.current, {
         scale: 1.5,
         backgroundColor: '#000000',
         useCORS: true,
         allowTaint: true,
-        logging: true,
+        logging: false,
         width: 794,
-        height: elementHeight,
+        height: actualHeight,
         windowWidth: 794,
-        windowHeight: elementHeight,
+        windowHeight: actualHeight,
         removeContainer: false,
         onclone: (clonedDoc) => {
           console.log('Cloning document for PDF generation (downloadPDF)');
@@ -659,54 +661,50 @@ cortespainter@gmail.com`;
       if (imgHeight <= pageHeight) {
         pdf.addImage(imageData, 'JPEG', 0, 0, imgWidth, imgHeight);
       } else {
-        // Multi-page handling with better spacing preservation
-        let position = 0;
+        // Improved multi-page handling with preserved spacing
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const maxPageHeightInPixels = (pageHeight / imgHeight) * canvas.height;
+        
+        let currentY = 0;
         let pageNumber = 0;
         
-        // Calculate scaling with better ratio preservation
-        const pixelsPerMm = canvas.height / imgHeight;
-        const pageHeightInPixels = Math.floor(pageHeight * pixelsPerMm);
-        
-        while (position < imgHeight) {
+        while (currentY < canvas.height) {
           if (pageNumber > 0) {
             pdf.addPage();
           }
           
-          const remainingHeight = imgHeight - position;
-          const currentPageHeight = Math.min(pageHeight, remainingHeight);
+          // Calculate how much content fits on this page
+          const remainingHeight = canvas.height - currentY;
+          const pageContentHeight = Math.min(maxPageHeightInPixels, remainingHeight);
           
-          console.log(`Adding invoice page ${pageNumber + 1}, position: ${position}mm, remaining: ${remainingHeight}mm`);
+          // Calculate the actual height in PDF units
+          const pdfPageContentHeight = (pageContentHeight / canvas.height) * imgHeight;
           
-          // Create a separate canvas for this page with proper dimensions
+          console.log(`Page ${pageNumber + 1}: Y=${currentY}, ContentHeight=${pageContentHeight}, PDFHeight=${pdfPageContentHeight}`);
+          
+          // Create canvas for this page section without compression
           const pageCanvas = document.createElement('canvas');
-          const pageCtx = pageCanvas.getContext('2d');
           pageCanvas.width = canvas.width;
-          pageCanvas.height = pageHeightInPixels;
+          pageCanvas.height = Math.ceil(pageContentHeight);
           
+          const pageCtx = pageCanvas.getContext('2d');
           if (pageCtx) {
-            // Fill with black background
+            // Fill background
             pageCtx.fillStyle = '#000000';
             pageCtx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
             
-            // Calculate source coordinates with better precision
-            const sourceY = Math.floor(position * pixelsPerMm);
-            const sourceHeight = Math.min(pageHeightInPixels, canvas.height - sourceY);
-            
-            // Draw with preserved aspect ratio
+            // Copy content without scaling distortion
             pageCtx.drawImage(
               canvas,
-              0, sourceY, canvas.width, sourceHeight,
-              0, 0, pageCanvas.width, sourceHeight
+              0, currentY, canvas.width, pageContentHeight,
+              0, 0, pageCanvas.width, pageContentHeight
             );
             
-            const pageImageData = pageCanvas.toDataURL('image/jpeg', 0.8);
-            
-            // Add image with proper scaling to prevent squishing
-            const scaledHeight = (sourceHeight / pixelsPerMm);
-            pdf.addImage(pageImageData, 'JPEG', 0, 0, pdfWidth, scaledHeight);
+            const pageImageData = pageCanvas.toDataURL('image/png', 1.0);
+            pdf.addImage(pageImageData, 'PNG', 0, 0, pdfWidth, pdfPageContentHeight);
           }
           
-          position += pageHeight;
+          currentY += pageContentHeight;
           pageNumber++;
         }
         
