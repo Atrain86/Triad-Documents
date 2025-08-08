@@ -400,6 +400,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
 
   // Hours tracking state
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showCalendarPopup, setShowCalendarPopup] = useState(false);
   const [selectedDate, setSelectedDate] = useState('');
   const [hoursInput, setHoursInput] = useState('');
   const [descriptionInput, setDescriptionInput] = useState('');
@@ -669,6 +670,34 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
       });
     }
   }, [project]);
+
+  // Close calendar popup when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showCalendarPopup) {
+        const target = event.target as HTMLElement;
+        const calendarElement = target.closest('.calendar-popup-container');
+        if (!calendarElement) {
+          setShowCalendarPopup(false);
+        }
+      }
+    };
+
+    if (showCalendarPopup) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showCalendarPopup]);
+
+  // Close calendar popup when date picker is closed
+  React.useEffect(() => {
+    if (!showDatePicker) {
+      setShowCalendarPopup(false);
+    }
+  }, [showDatePicker]);
 
   const handleEditInputChange = (field: string, value: any) => {
     setEditForm(prev => ({
@@ -1567,21 +1596,37 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                   Today: {formatDateForInput(new Date())}
                                 </span>
                               </label>
-                              <PaintBrainCalendar
-                                selectedDate={selectedDate}
-                                onDateSelect={(date) => {
-                                  setSelectedDate(date);
-                                  setShowDatePicker(false); // Close the calendar popup after date selection
-                                  if (date) {
-                                    setTimeout(() => {
-                                      const hoursInput = document.querySelector('input[placeholder="0"]') as HTMLInputElement;
-                                      if (hoursInput) hoursInput.focus();
-                                    }, 100);
-                                  }
-                                }}
-                                maxDate={formatDateForInput(new Date())}
-                                className="w-full"
-                              />
+                              <div className="relative calendar-popup-container">
+                                <input
+                                  type="text"
+                                  readOnly
+                                  value={selectedDate ? new Date(selectedDate).toLocaleDateString() : ''}
+                                  onClick={() => setShowCalendarPopup(true)}
+                                  placeholder="Click to select date"
+                                  className="w-full px-3 py-2 text-sm border border-gray-600 rounded-lg bg-gray-800 text-gray-200 focus:border-green-500 focus:ring-1 focus:ring-green-500 cursor-pointer"
+                                />
+                                <Calendar className="absolute right-3 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" />
+                                {showCalendarPopup && (
+                                  <div 
+                                    className="absolute top-full left-0 mt-1 z-50 bg-gray-800 border border-gray-600 rounded-lg shadow-lg p-2"
+                                    onMouseDown={(e) => e.stopPropagation()} // Prevent calendar from closing when clicking inside
+                                  >
+                                    <PaintBrainCalendar
+                                      selectedDate={selectedDate}
+                                      onDateSelect={(date) => {
+                                        setSelectedDate(date);
+                                        setShowCalendarPopup(false);
+                                        setTimeout(() => {
+                                          const hoursInput = document.querySelector('input[placeholder=""]') as HTMLInputElement;
+                                          if (hoursInput) hoursInput.focus();
+                                        }, 100);
+                                      }}
+                                      maxDate={formatDateForInput(new Date())}
+                                      className="w-full"
+                                    />
+                                  </div>
+                                )}
+                              </div>
                             </div>
                             
                             <div>
