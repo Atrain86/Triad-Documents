@@ -1701,7 +1701,7 @@ ${emailMessage}`;
                     {dailyHours.length > 0 && (
                       <div className="pt-3 border-t border-blue-400/30">
                         <div className="flex justify-between items-center">
-                          <span className="font-bold text-purple-400">Labor Subtotal:</span>
+                          <span className="font-bold text-green-400">Labor Subtotal:</span>
                           <span className="font-bold text-green-400">${dailyHours.reduce((sum, hourEntry) => sum + (hourEntry.hours * (project.hourlyRate || 60)), 0).toFixed(2)}</span>
                         </div>
                       </div>
@@ -2482,17 +2482,7 @@ ${emailMessage}`;
               </div>
             </div>
 
-            {/* Notes Section (if any) */}
-            {invoiceData.notes && (
-              <div className="mb-6">
-                <div className="p-4 rounded-t-lg" style={{ backgroundColor: '#8B5FBF' }}>
-                  <h3 className="text-lg font-semibold text-white">Notes & Payment Instructions</h3>
-                </div>
-                <div className="rounded-b-lg border-2 border-t-0 p-6" style={{ borderColor: '#8B5FBF', backgroundColor: '#2D3748' }}>
-                  <p className="whitespace-pre-line text-white">{invoiceData.notes}</p>
-                </div>
-              </div>
-            )}
+
 
 
           </div>
