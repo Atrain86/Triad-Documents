@@ -1744,7 +1744,7 @@ ${emailMessage}`;
                 <div className="pt-3 border-t" style={{ borderColor: paintBrainColors.purple + '30' }}>
                   <div className="flex justify-between items-center">
                     <span className="font-bold text-purple-400">Receipts Subtotal:</span>
-                    <span className="font-bold text-green-400">${receipts.reduce((sum, receipt) => sum + receipt.amount, 0).toFixed(2)}</span>
+                    <span className="font-bold text-green-400">${receipts.reduce((sum, receipt) => sum + (parseFloat(receipt.amount) || 0), 0).toFixed(2)}</span>
                   </div>
                 </div>
                 </div>
