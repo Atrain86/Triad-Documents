@@ -2039,7 +2039,7 @@ ${emailMessage}`;
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2" style={{ color: darkTheme.textSecondary }}>
-                  Custom message for email body (auto-saved)
+                  Custom message for email body
                 </label>
                 <Textarea
                   value={emailMessage}
