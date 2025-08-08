@@ -495,7 +495,9 @@ cortespainter@gmail.com`;
   };
 
   const calculateTotal = () => {
-    return calculateSubtotal() + calculateGST();
+    const subtotal = calculateSubtotal();
+    // Only add GST if taxes are not included in materials
+    return subtotal + (taxesIncluded ? 0 : calculateGST());
   };
 
   const generatePDF = async () => {
@@ -2036,7 +2038,7 @@ ${emailMessage}`;
                 {receipts.filter(receipt => invoiceData.selectedReceipts.has(receipt.id)).length > 0 && (
                   <div className="flex justify-between py-2 border-b" style={{ borderColor: darkTheme.border }}>
                     <span className="font-medium" style={{ color: darkTheme.text }}>
-                      Materials {materialMarkupEnabled && materialMarkupPercentage ? `(+${materialMarkupPercentage}% markup)` : '(incl. taxes)'}:
+                      Materials {materialMarkupEnabled && materialMarkupPercentage ? `(+${materialMarkupPercentage}% markup)` : ''} {taxesIncluded ? '(incl. taxes)' : '(excl. taxes)'}:
                     </span>
                     <span className="font-semibold" style={{ color: darkTheme.text }}>${calculateMaterialCost().toFixed(2)}</span>
                   </div>
@@ -2045,10 +2047,12 @@ ${emailMessage}`;
                   <span className="font-medium" style={{ color: darkTheme.text }}>Subtotal:</span>
                   <span className="font-semibold" style={{ color: darkTheme.text }}>${calculateSubtotal().toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between py-2 border-b" style={{ borderColor: darkTheme.border }}>
-                  <span className="font-medium" style={{ color: darkTheme.text }}>GST (5%):</span>
-                  <span className="font-semibold" style={{ color: darkTheme.text }}>${calculateGST().toFixed(2)}</span>
-                </div>
+                {!taxesIncluded && (
+                  <div className="flex justify-between py-2 border-b" style={{ borderColor: darkTheme.border }}>
+                    <span className="font-medium" style={{ color: darkTheme.text }}>GST (5%):</span>
+                    <span className="font-semibold" style={{ color: darkTheme.text }}>${calculateGST().toFixed(2)}</span>
+                  </div>
+                )}
 
                 <div className="flex justify-between py-3 text-lg font-bold">
                   <span style={{ color: paintBrainColors.blue }}>Total:</span>
