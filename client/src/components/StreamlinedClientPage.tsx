@@ -1784,10 +1784,21 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                           {(() => {
                                             try {
                                               const date = new Date(hours.date);
-                                              return date.toLocaleDateString('en-US', { 
-                                                month: 'long', 
-                                                day: 'numeric' 
-                                              });
+                                              const monthName = date.toLocaleDateString('en-US', { month: 'long' });
+                                              const day = date.getDate();
+                                              
+                                              // Abbreviate long month names (keep March, April, May, June, July full)
+                                              const monthAbbreviation = {
+                                                'January': 'Jan',
+                                                'February': 'Feb',
+                                                'August': 'Aug',
+                                                'September': 'Sep',
+                                                'October': 'Oct',
+                                                'November': 'Nov',
+                                                'December': 'Dec'
+                                              }[monthName] || monthName;
+                                              
+                                              return `${monthAbbreviation} ${day}`;
                                             } catch {
                                               return 'Invalid Date';
                                             }
@@ -1846,7 +1857,7 @@ export default function StreamlinedClientPage({ projectId, onBack }: Streamlined
                                   {(() => {
                                     const totalHours = dailyHours.reduce((sum, h) => sum + (typeof h.hours === 'number' ? h.hours : parseFloat(h.hours) || 0), 0);
                                     const totalCost = dailyHours.reduce((sum, h) => sum + ((typeof h.hours === 'number' ? h.hours : parseFloat(h.hours) || 0) * (h.hourlyRate || project?.hourlyRate || 60)), 0);
-                                    return `${totalHours % 1 === 0 ? totalHours : totalHours.toFixed(1)} hrs • $${totalCost.toLocaleString()}`;
+                                    return `Total Hours: ${totalHours % 1 === 0 ? totalHours : totalHours.toFixed(1)} hrs • $${totalCost.toLocaleString()}`;
                                   })()}
                                 </span>
                               </div>
