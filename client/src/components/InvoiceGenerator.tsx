@@ -541,8 +541,8 @@ cortespainter@gmail.com`;
       invoiceRef.current.style.pointerEvents = 'auto';
       invoiceRef.current.style.zIndex = '9999';
       invoiceRef.current.style.width = '794px';
-      invoiceRef.current.style.height = '2000px'; // Force large height like email version
-      invoiceRef.current.style.minHeight = '2000px';
+      invoiceRef.current.style.height = 'auto'; // Let content determine height
+      invoiceRef.current.style.minHeight = '1500px';
       invoiceRef.current.style.maxHeight = 'none';
       invoiceRef.current.style.overflow = 'visible';
       invoiceRef.current.style.transform = 'none';
@@ -579,10 +579,11 @@ cortespainter@gmail.com`;
         clientHeight: invoiceRef.current.clientHeight
       });
 
-      // Use optimized canvas height for 2-page PDF
-      const elementHeight = 2000;
+      // Use actual element height for better spacing
+      const actualHeight = invoiceRef.current.scrollHeight;
+      const elementHeight = Math.max(actualHeight, 2000);
 
-      // Capture the invoice preview with forced height like email version
+      // Capture the invoice preview with proper height
       const canvas = await html2canvas(invoiceRef.current, {
         scale: 1.5,
         backgroundColor: '#000000',
@@ -658,13 +659,13 @@ cortespainter@gmail.com`;
       if (imgHeight <= pageHeight) {
         pdf.addImage(imageData, 'JPEG', 0, 0, imgWidth, imgHeight);
       } else {
-        // Multi-page handling: create separate canvases for each page
+        // Multi-page handling with better spacing preservation
         let position = 0;
         let pageNumber = 0;
         
-        // Calculate how many pixels per mm for proper scaling
+        // Calculate scaling with better ratio preservation
         const pixelsPerMm = canvas.height / imgHeight;
-        const pageHeightInPixels = pageHeight * pixelsPerMm;
+        const pageHeightInPixels = Math.floor(pageHeight * pixelsPerMm);
         
         while (position < imgHeight) {
           if (pageNumber > 0) {
@@ -676,29 +677,33 @@ cortespainter@gmail.com`;
           
           console.log(`Adding invoice page ${pageNumber + 1}, position: ${position}mm, remaining: ${remainingHeight}mm`);
           
-          // Create a separate canvas for this page
+          // Create a separate canvas for this page with proper dimensions
           const pageCanvas = document.createElement('canvas');
           const pageCtx = pageCanvas.getContext('2d');
           pageCanvas.width = canvas.width;
-          pageCanvas.height = Math.floor(pageHeightInPixels);
+          pageCanvas.height = pageHeightInPixels;
           
           if (pageCtx) {
-            // Fill with black background to eliminate white space
+            // Fill with black background
             pageCtx.fillStyle = '#000000';
             pageCtx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
             
-            // Copy the portion of the original canvas for this page
+            // Calculate source coordinates with better precision
             const sourceY = Math.floor(position * pixelsPerMm);
             const sourceHeight = Math.min(pageHeightInPixels, canvas.height - sourceY);
             
+            // Draw with preserved aspect ratio
             pageCtx.drawImage(
               canvas,
               0, sourceY, canvas.width, sourceHeight,
               0, 0, pageCanvas.width, sourceHeight
             );
             
-            const pageImageData = pageCanvas.toDataURL('image/jpeg', 0.7);
-            pdf.addImage(pageImageData, 'JPEG', 0, 0, pdfWidth, currentPageHeight);
+            const pageImageData = pageCanvas.toDataURL('image/jpeg', 0.8);
+            
+            // Add image with proper scaling to prevent squishing
+            const scaledHeight = (sourceHeight / pixelsPerMm);
+            pdf.addImage(pageImageData, 'JPEG', 0, 0, pdfWidth, scaledHeight);
           }
           
           position += pageHeight;
