@@ -624,12 +624,14 @@ cortespainter@gmail.com`;
               if (logo) {
                 console.log(`Setting download logo ${index} size to 64px`);
                 console.log('Before styling:', logo.style.height, logo.className);
-                logo.style.height = '64px !important';
-                logo.style.maxHeight = '64px !important';
-                logo.style.width = 'auto !important';
-                logo.style.display = 'block !important';
-                logo.style.objectFit = 'contain !important';
-                logo.style.transform = 'none !important';
+                // Remove existing classes that might conflict
+                logo.className = '';
+                logo.style.setProperty('height', '64px', 'important');
+                logo.style.setProperty('max-height', '64px', 'important');
+                logo.style.setProperty('width', 'auto', 'important');
+                logo.style.setProperty('display', 'block', 'important');
+                logo.style.setProperty('object-fit', 'contain', 'important');
+                logo.style.setProperty('transform', 'none', 'important');
                 console.log('After styling:', logo.style.height);
               }
             });
@@ -907,12 +909,14 @@ cortespainter@gmail.com`;
               if (logo) {
                 console.log(`Setting email logo ${index} size to 64px`);
                 console.log('Before styling:', logo.style.height, logo.className);
-                logo.style.height = '64px !important';
-                logo.style.maxHeight = '64px !important';
-                logo.style.width = 'auto !important';
-                logo.style.display = 'block !important';
-                logo.style.objectFit = 'contain !important';
-                logo.style.transform = 'none !important';
+                // Remove existing classes that might conflict
+                logo.className = '';
+                logo.style.setProperty('height', '64px', 'important');
+                logo.style.setProperty('max-height', '64px', 'important');
+                logo.style.setProperty('width', 'auto', 'important');
+                logo.style.setProperty('display', 'block', 'important');
+                logo.style.setProperty('object-fit', 'contain', 'important');
+                logo.style.setProperty('transform', 'none', 'important');
                 console.log('After styling:', logo.style.height);
               }
             });
@@ -2050,7 +2054,7 @@ ${emailMessage}`;
                 {receipts.filter(receipt => invoiceData.selectedReceipts.has(receipt.id)).length > 0 && (
                   <div className="flex justify-between py-2 border-b" style={{ borderColor: darkTheme.border }}>
                     <span className="font-medium" style={{ color: darkTheme.text }}>
-                      Materials {materialMarkupEnabled && materialMarkupPercentage ? `(+${materialMarkupPercentage}% markup)` : ''}{taxesIncluded ? ' (incl. taxes)' : ''}:
+                      Materials {materialMarkupEnabled && materialMarkupPercentage ? `(+${materialMarkupPercentage}% markup)` : ''}{taxesIncluded ? ' (taxes included)' : ''}:
                     </span>
                     <span className="font-semibold" style={{ color: darkTheme.text }}>${calculateMaterialCost().toFixed(2)}</span>
                   </div>
@@ -2430,7 +2434,7 @@ ${emailMessage}`;
                 )}
                 {(calculateMaterialCost() + invoiceData.suppliesCost) > 0 && (
                   <div className="flex justify-between text-white py-2">
-                    <span>Materials & Supplies:</span>
+                    <span>Materials & Supplies{taxesIncluded ? ' (taxes included)' : ''}:</span>
                     <span>${(calculateMaterialCost() + invoiceData.suppliesCost).toFixed(2)}</span>
                   </div>
                 )}
