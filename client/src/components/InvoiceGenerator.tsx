@@ -1844,31 +1844,24 @@ ${emailMessage}`;
                               className="bg-gray-800 border-blue-400 text-white text-center w-14"
                             />
                           </div>
-                          <div className="flex items-center gap-2 flex-shrink-0">
-                            <span className="text-sm font-medium" style={{ color: darkTheme.text }}>
-                              ${((parseFloat(worker.hours) || 0) * (parseFloat(worker.rate.toString()) || 0)).toFixed(2)}
-                            </span>
-                            {additionalWorkers.length > 1 && (
-                              <Button
-                                onClick={() => removeAdditionalWorker(index)}
-                                size="sm"
-                                variant="ghost"
-                                className="text-red-400 hover:text-red-300 hover:bg-red-900/20 p-1"
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            )}
-                          </div>
+                          {additionalWorkers.length > 1 && (
+                            <Button
+                              onClick={() => removeAdditionalWorker(index)}
+                              size="sm"
+                              variant="ghost"
+                              className="text-red-400 hover:text-red-300 hover:bg-red-900/20 p-1 ml-2"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          )}
                         </div>
                       ))}
-                      {additionalWorkersSubtotal > 0 && (
-                        <div className="pt-2 border-t border-blue-400/30">
-                          <div className="flex justify-between items-center">
-                            <span className="font-medium" style={{ color: darkTheme.text }}>Additional Workers Subtotal:</span>
-                            <span className="font-semibold text-blue-400">${additionalWorkersSubtotal.toFixed(2)}</span>
-                          </div>
+                      <div className="pt-3 border-t border-blue-400/30">
+                        <div className="flex justify-between items-center">
+                          <span className="font-bold" style={{ color: darkTheme.text }}>Additional Workers Subtotal:</span>
+                          <span className="font-bold text-green-400">${additionalWorkersSubtotal.toFixed(2)}</span>
                         </div>
-                      )}
+                      </div>
                     </div>
                   </div>
 
@@ -1927,31 +1920,24 @@ ${emailMessage}`;
                               className="bg-gray-800 border-blue-400 text-white text-center w-14"
                             />
                           </div>
-                          <div className="flex items-center gap-2 flex-shrink-0">
-                            <span className="text-sm font-medium" style={{ color: darkTheme.text }}>
-                              ${((parseFloat(service.hours) || 0) * (parseFloat(service.rate.toString()) || 0)).toFixed(2)}
-                            </span>
-                            {index >= 3 && (
-                              <Button
-                                onClick={() => removeAdditionalService(index)}
-                                size="sm"
-                                variant="ghost"
-                                className="text-red-400 hover:text-red-300 hover:bg-red-900/20 p-1 ml-2"
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            )}
-                          </div>
+                          {index >= 3 && (
+                            <Button
+                              onClick={() => removeAdditionalService(index)}
+                              size="sm"
+                              variant="ghost"
+                              className="text-red-400 hover:text-red-300 hover:bg-red-900/20 p-1 ml-2"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          )}
                         </div>
                       ))}
-                      {additionalServicesSubtotal > 0 && (
-                        <div className="pt-2 border-t border-blue-400/30">
-                          <div className="flex justify-between items-center">
-                            <span className="font-medium" style={{ color: darkTheme.text }}>Additional Services Subtotal:</span>
-                            <span className="font-semibold text-blue-400">${additionalServicesSubtotal.toFixed(2)}</span>
-                          </div>
+                      <div className="pt-3 border-t border-blue-400/30">
+                        <div className="flex justify-between items-center">
+                          <span className="font-bold" style={{ color: darkTheme.text }}>Additional Services Subtotal:</span>
+                          <span className="font-bold text-green-400">${additionalServicesSubtotal.toFixed(2)}</span>
                         </div>
-                      )}
+                      </div>
                     </div>
                   </div>
                 </>
