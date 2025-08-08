@@ -69,6 +69,7 @@ export default function InvoiceGenerator({
   // Material markup state for invoice
   const [materialMarkupEnabled, setMaterialMarkupEnabled] = useState(false);
   const [materialMarkupPercentage, setMaterialMarkupPercentage] = useState('');
+  const [taxesIncluded, setTaxesIncluded] = useState(true);
   
   // Dropdown states for containers
   const [showClientInfo, setShowClientInfo] = useState(true);
@@ -1569,60 +1570,7 @@ ${emailMessage}`;
                       className="bg-gray-800 border-[#ECC94B] text-white"
                     />
                   </div>
-                  {/* Material Markup Control */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 rounded-lg border" style={{ borderColor: '#ECC94B' }}>
-                      <span className="text-sm font-medium" style={{ color: darkTheme.text }}>
-                        Supplies
-                      </span>
-                      <div className="flex items-center space-x-3">
-                        <span className="text-xs" style={{ color: darkTheme.textSecondary }}>
-                          No Markup
-                        </span>
-                        <div className="relative inline-block w-12 h-6">
-                          <input
-                            type="checkbox"
-                            id="invoice-material-markup-toggle"
-                            checked={materialMarkupEnabled}
-                            onChange={(e) => setMaterialMarkupEnabled(e.target.checked)}
-                            className="sr-only"
-                          />
-                          <label 
-                            htmlFor="invoice-material-markup-toggle" 
-                            className="block w-12 h-6 rounded-full cursor-pointer transition-colors bg-gray-600"
-                          >
-                            <span 
-                              className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
-                                materialMarkupEnabled ? 'translate-x-6' : 'translate-x-0'
-                              }`}
-                            />
-                          </label>
-                        </div>
-                        <span className="text-xs" style={{ color: materialMarkupEnabled ? '#E53E3E' : darkTheme.textSecondary }}>
-                          Markup
-                        </span>
-                      </div>
-                    </div>
-                    
-                    {materialMarkupEnabled && (
-                      <div>
-                        <label className="block text-sm font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Markup Percentage</label>
-                        <div className="relative">
-                          <Input
-                            type="number"
-                            value={materialMarkupPercentage}
-                            onChange={(e) => setMaterialMarkupPercentage(e.target.value)}
-                            placeholder="Enter markup %"
-                            className="bg-gray-800 border-[#ECC94B] text-white pr-8"
-                            min="0"
-                            max="100"
-                            step="0.1"
-                          />
-                          <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">%</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+
                 </div>
               </div>
             </div>
@@ -1745,9 +1693,100 @@ ${emailMessage}`;
                 
                 {/* Receipts Subtotal */}
                 <div className="pt-3 border-t" style={{ borderColor: paintBrainColors.purple + '30' }}>
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center mb-4">
                     <span className="font-bold text-purple-400">Receipts Subtotal:</span>
                     <span className="font-bold text-green-400">${receipts.reduce((sum, receipt) => sum + (parseFloat(receipt.amount) || 0), 0).toFixed(2)}</span>
+                  </div>
+                  
+                  {/* Materials Controls - Markup and Tax */}
+                  <div className="space-y-3">
+                    {/* Supplies Markup Control */}
+                    <div className="flex items-center justify-between p-3 rounded-lg border" style={{ borderColor: paintBrainColors.purple, backgroundColor: `${paintBrainColors.purple}05` }}>
+                      <span className="text-sm font-medium" style={{ color: darkTheme.text }}>
+                        Supplies
+                      </span>
+                      <div className="flex items-center space-x-3">
+                        <span className="text-xs" style={{ color: darkTheme.textSecondary }}>
+                          No Markup
+                        </span>
+                        <div className="relative inline-block w-12 h-6">
+                          <input
+                            type="checkbox"
+                            id="materials-markup-toggle"
+                            checked={materialMarkupEnabled}
+                            onChange={(e) => setMaterialMarkupEnabled(e.target.checked)}
+                            className="sr-only"
+                          />
+                          <label 
+                            htmlFor="materials-markup-toggle" 
+                            className="block w-12 h-6 rounded-full cursor-pointer transition-colors bg-gray-600"
+                          >
+                            <span 
+                              className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
+                                materialMarkupEnabled ? 'translate-x-6' : 'translate-x-0'
+                              }`}
+                            />
+                          </label>
+                        </div>
+                        <span className="text-xs" style={{ color: materialMarkupEnabled ? '#E53E3E' : darkTheme.textSecondary }}>
+                          Markup
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {/* Markup Percentage Input */}
+                    {materialMarkupEnabled && (
+                      <div className="px-3">
+                        <label className="block text-sm font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Markup Percentage (Internal Only)</label>
+                        <div className="relative">
+                          <Input
+                            type="number"
+                            value={materialMarkupPercentage}
+                            onChange={(e) => setMaterialMarkupPercentage(e.target.value)}
+                            placeholder="Enter markup %"
+                            className="bg-gray-800 border-purple-400 text-white pr-8"
+                            min="0"
+                            max="100"
+                            step="0.1"
+                          />
+                          <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">%</span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Tax Control */}
+                    <div className="flex items-center justify-between p-3 rounded-lg border" style={{ borderColor: paintBrainColors.purple, backgroundColor: `${paintBrainColors.purple}05` }}>
+                      <span className="text-sm font-medium" style={{ color: darkTheme.text }}>
+                        Taxes
+                      </span>
+                      <div className="flex items-center space-x-3">
+                        <span className="text-xs" style={{ color: darkTheme.textSecondary }}>
+                          Not Included
+                        </span>
+                        <div className="relative inline-block w-12 h-6">
+                          <input
+                            type="checkbox"
+                            id="taxes-toggle"
+                            checked={taxesIncluded}
+                            onChange={(e) => setTaxesIncluded(e.target.checked)}
+                            className="sr-only"
+                          />
+                          <label 
+                            htmlFor="taxes-toggle" 
+                            className="block w-12 h-6 rounded-full cursor-pointer transition-colors bg-gray-600"
+                          >
+                            <span 
+                              className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
+                                taxesIncluded ? 'translate-x-6' : 'translate-x-0'
+                              }`}
+                            />
+                          </label>
+                        </div>
+                        <span className="text-xs" style={{ color: taxesIncluded ? '#6A9955' : darkTheme.textSecondary }}>
+                          Included
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 </div>
@@ -2215,7 +2254,7 @@ ${emailMessage}`;
             {(receipts.filter(receipt => invoiceData.selectedReceipts.has(receipt.id)).length > 0 || invoiceData.suppliesCost > 0) && (
               <div className="mb-6">
                 <div className="p-4 rounded-t-lg" style={{ backgroundColor: '#ECC94B' }}>
-                  <h3 className="text-lg font-semibold text-white">Paint & Materials (incl. taxes)</h3>
+                  <h3 className="text-lg font-semibold text-white">Paint & Materials {taxesIncluded ? '(incl. taxes)' : '(excl. taxes)'}</h3>
                 </div>
                 <div className="rounded-b-lg border-2 border-t-0" style={{ borderColor: '#ECC94B', backgroundColor: '#2D3748' }}>
                   <table className="w-full">
@@ -2245,9 +2284,7 @@ ${emailMessage}`;
                         </tr>
                       )}
                       <tr style={{ borderBottom: '1px solid #ECC94B' }}>
-                        <td className="p-3 text-left font-semibold text-white">
-                          Materials Subtotal (incl. taxes) {materialMarkupEnabled && materialMarkupPercentage ? `- ${materialMarkupPercentage}% markup applied` : '- no markup applied'}
-                        </td>
+                        <td className="p-3 text-left font-semibold text-white">Materials Subtotal {taxesIncluded ? '(incl. taxes)' : '(excl. taxes)'}</td>
                         <td className="p-3 text-right font-semibold text-[#6A9955]">
                           ${(calculateMaterialCost() + invoiceData.suppliesCost).toFixed(2)}
                         </td>
@@ -2256,7 +2293,10 @@ ${emailMessage}`;
                   </table>
                 </div>
                 <div className="text-xs text-gray-400 mt-2 px-3">
-                  * Materials already include taxes paid at purchase - no additional tax applied
+                  {taxesIncluded ? 
+                    '* Materials already include taxes paid at purchase - no additional tax applied' :
+                    '* Materials shown before taxes - applicable taxes will be added separately'
+                  }
                 </div>
               </div>
             )}
@@ -2374,7 +2414,7 @@ ${emailMessage}`;
                 )}
                 {(calculateMaterialCost() + invoiceData.suppliesCost) > 0 && (
                   <div className="flex justify-between text-white py-2">
-                    <span>Materials & Supplies: {materialMarkupEnabled && materialMarkupPercentage ? `(${materialMarkupPercentage}% markup applied)` : '(no markup applied)'}</span>
+                    <span>Materials & Supplies:</span>
                     <span>${(calculateMaterialCost() + invoiceData.suppliesCost).toFixed(2)}</span>
                   </div>
                 )}
