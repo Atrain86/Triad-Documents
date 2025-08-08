@@ -622,10 +622,10 @@ cortespainter@gmail.com`;
             console.log('Found logo elements for PDF download:', logoElements.length);
             logoElements.forEach((logo: any, index: number) => {
               if (logo) {
-                console.log(`Setting download logo ${index} size to 32px`);
+                console.log(`Setting download logo ${index} size to 64px`);
                 console.log('Before styling:', logo.style.height, logo.className);
-                logo.style.height = '32px !important';
-                logo.style.maxHeight = '32px !important';
+                logo.style.height = '64px !important';
+                logo.style.maxHeight = '64px !important';
                 logo.style.width = 'auto !important';
                 logo.style.display = 'block !important';
                 logo.style.objectFit = 'contain !important';
@@ -905,10 +905,10 @@ cortespainter@gmail.com`;
             console.log('Found logo elements for PDF email:', logoElements.length);
             logoElements.forEach((logo: any, index: number) => {
               if (logo) {
-                console.log(`Setting email logo ${index} size to 32px`);
+                console.log(`Setting email logo ${index} size to 64px`);
                 console.log('Before styling:', logo.style.height, logo.className);
-                logo.style.height = '32px !important';
-                logo.style.maxHeight = '32px !important';
+                logo.style.height = '64px !important';
+                logo.style.maxHeight = '64px !important';
                 logo.style.width = 'auto !important';
                 logo.style.display = 'block !important';
                 logo.style.objectFit = 'contain !important';
@@ -2270,7 +2270,7 @@ ${emailMessage}`;
             {(receipts.filter(receipt => invoiceData.selectedReceipts.has(receipt.id)).length > 0 || invoiceData.suppliesCost > 0) && (
               <div className="mb-6">
                 <div className="p-4 rounded-t-lg" style={{ backgroundColor: '#ECC94B' }}>
-                  <h3 className="text-lg font-semibold text-white">Paint & Materials{taxesIncluded ? ' (incl. taxes)' : ''}</h3>
+                  <h3 className="text-lg font-semibold text-white">Paint & Materials{taxesIncluded ? ' (taxes included)' : ''}</h3>
                 </div>
                 <div className="rounded-b-lg border-2 border-t-0" style={{ borderColor: '#ECC94B', backgroundColor: '#2D3748' }}>
                   <table className="w-full">
@@ -2300,7 +2300,7 @@ ${emailMessage}`;
                         </tr>
                       )}
                       <tr style={{ borderBottom: '1px solid #ECC94B' }}>
-                        <td className="p-3 text-left font-semibold text-white">Materials Subtotal{taxesIncluded ? ' (incl. taxes)' : ''}</td>
+                        <td className="p-3 text-left font-semibold text-white">Materials Subtotal{taxesIncluded ? ' (taxes included)' : ''}</td>
                         <td className="p-3 text-right font-semibold text-[#6A9955]">
                           ${(calculateMaterialCost() + invoiceData.suppliesCost).toFixed(2)}
                         </td>
@@ -2310,7 +2310,7 @@ ${emailMessage}`;
                 </div>
                 <div className="text-xs text-gray-400 mt-2 px-3">
                   {taxesIncluded ? 
-                    '* Materials already include taxes paid at purchase - no additional tax applied' :
+                    '* Materials already include taxes paid at purchase - no additional tax applied to materials' :
                     ''
                   }
                 </div>
