@@ -2232,8 +2232,10 @@ ${emailMessage}`;
                   <table className="w-full">
                     <thead>
                       <tr style={{ backgroundColor: '#4A5568' }}>
+                        <th className="p-3 text-left text-white font-semibold">Date</th>
                         <th className="p-3 text-left text-white font-semibold">Service</th>
-                        <th className="p-3 text-right text-white font-semibold">Total</th>
+                        <th className="p-3 text-center text-white font-semibold">Hours</th>
+                        <th className="p-3 text-right text-white font-semibold">Price</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -2241,7 +2243,7 @@ ${emailMessage}`;
                         <tr key={index} className={index % 2 === 0 ? '' : 'bg-gray-700'} style={{ borderBottom: '1px solid #E53E3E' }}>
                           <td className="p-3 text-white">
                             {(() => {
-                              // Format date for PDF (without year)
+                              // Format date for PDF (without year and without parentheses)
                               const dateStr = hourEntry.date.toString();
                               const datePart = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr.split(' ')[0];
                               const [year, month, day] = datePart.split('-').map(Number);
@@ -2250,8 +2252,14 @@ ${emailMessage}`;
                                 month: 'short', 
                                 day: 'numeric' 
                               });
-                              return `${hourEntry.description || 'Painting'} (${formattedDate}): ${hourEntry.hours}h × $${project.hourlyRate || 60}/hr`;
+                              return formattedDate;
                             })()}
+                          </td>
+                          <td className="p-3 text-white">
+                            {hourEntry.description || 'Painting'}
+                          </td>
+                          <td className="p-3 text-center text-white">
+                            {hourEntry.hours}h
                           </td>
                           <td className="p-3 text-right font-semibold text-white">
                             ${(hourEntry.hours * (project.hourlyRate || 60)).toFixed(2)}
@@ -2259,7 +2267,7 @@ ${emailMessage}`;
                         </tr>
                       ))}
                       <tr style={{ borderBottom: '1px solid #E53E3E' }}>
-                        <td className="p-3 text-left font-semibold text-white">Labor Subtotal</td>
+                        <td colSpan={3} className="p-3 text-left font-semibold text-white">Labor Subtotal</td>
                         <td className="p-3 text-right font-semibold text-[#6A9955]">
                           ${dailyHours.reduce((sum, hourEntry) => sum + (hourEntry.hours * (project.hourlyRate || 60)), 0).toFixed(2)}
                         </td>
