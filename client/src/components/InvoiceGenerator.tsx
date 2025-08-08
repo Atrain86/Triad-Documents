@@ -1630,169 +1630,7 @@ ${emailMessage}`;
 
 
 
-            {/* Materials */}
-            {receipts.length > 0 && (
-              <div className="p-3 rounded-lg border space-y-4" style={{ borderColor: paintBrainColors.purple, backgroundColor: darkTheme.cardBg }}>
-                <div className="flex items-center justify-between cursor-pointer" onClick={() => setShowMaterials(!showMaterials)}>
-                  <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.purple }}>
-                    <Wrench className="mr-2 h-5 w-5" />
-                    Materials & Receipts
-                  </h2>
-                  <ChevronDown 
-                    className={`h-5 w-5 transition-transform duration-200 ${showMaterials ? 'transform rotate-180' : ''}`}
-                    style={{ color: paintBrainColors.purple }}
-                  />
-                </div>
-                {showMaterials && (
-                  <div>
-                
-                {/* Display receipt items with OCR data */}
-                <div className="space-y-3 mb-4">
-                  {receipts.map((receipt) => (
-                    <div key={receipt.id} className="border rounded-lg p-2" style={{ borderColor: '#8B5FBF' }}>
-                      <div className="flex justify-between items-start text-sm mb-1">
-                        <span className="font-medium flex-1 pr-2 break-words" style={{ color: darkTheme.text }}>{receipt.vendor}</span>
-                        <span className="font-semibold flex-shrink-0" style={{ color: darkTheme.text }}>${receipt.amount}</span>
-                      </div>
-                      {receipt.items && receipt.items.length > 0 && (
-                        <div className="text-xs space-y-1">
-                          {receipt.items.map((item, index) => (
-                            <div key={index} className="pl-2 break-words" style={{ color: darkTheme.textSecondary }}>
-                              • {item}
-                            </div>
-                          ))}
-                          {receipt.ocrMethod && (
-                            <div className="text-xs mt-1 opacity-60" style={{ color: darkTheme.textSecondary }}>
-                              Processed with {receipt.ocrMethod} ({Math.round((receipt.confidence || 0) * 100)}% confidence)
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-                
-                {/* Single checkbox for all receipts */}
-                <label className="flex items-center space-x-2 text-sm border-t pt-3" style={{ borderColor: darkTheme.border }}>
-                  <input
-                    type="checkbox"
-                    checked={receipts.length > 0 && receipts.every(r => invoiceData.selectedReceipts.has(r.id))}
-                    onChange={(e) => {
-                      const newSelection = new Set<number>();
-                      if (e.target.checked) {
-                        receipts.forEach(receipt => newSelection.add(receipt.id));
-                      }
-                      setInvoiceData({...invoiceData, selectedReceipts: newSelection});
-                    }}
-                    className="rounded"
-                  />
-                  <span style={{ color: darkTheme.text }}>
-                    Include receipts as email attachments (not embedded in PDF)
-                  </span>
-                </label>
-                
-                {/* Receipts Subtotal */}
-                <div className="pt-3 border-t" style={{ borderColor: paintBrainColors.purple + '30' }}>
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="font-bold text-purple-400">Receipts Subtotal:</span>
-                    <span className="font-bold text-green-400">${receipts.reduce((sum, receipt) => sum + (parseFloat(receipt.amount) || 0), 0).toFixed(2)}</span>
-                  </div>
-                  
-                  {/* Materials Controls - Markup and Tax */}
-                  <div className="space-y-3">
-                    {/* Supplies Markup Control */}
-                    <div className="flex items-center justify-between p-3 rounded-lg border" style={{ borderColor: paintBrainColors.purple, backgroundColor: `${paintBrainColors.purple}05` }}>
-                      <span className="text-sm font-medium" style={{ color: darkTheme.text }}>
-                        Supplies
-                      </span>
-                      <div className="flex items-center space-x-3">
-                        <span className="text-xs" style={{ color: darkTheme.textSecondary }}>
-                          No Markup
-                        </span>
-                        <div className="relative inline-block w-12 h-6">
-                          <input
-                            type="checkbox"
-                            id="materials-markup-toggle"
-                            checked={materialMarkupEnabled}
-                            onChange={(e) => setMaterialMarkupEnabled(e.target.checked)}
-                            className="sr-only"
-                          />
-                          <label 
-                            htmlFor="materials-markup-toggle" 
-                            className="block w-12 h-6 rounded-full cursor-pointer transition-colors bg-gray-600"
-                          >
-                            <span 
-                              className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
-                                materialMarkupEnabled ? 'translate-x-6' : 'translate-x-0'
-                              }`}
-                            />
-                          </label>
-                        </div>
-                        <span className="text-xs" style={{ color: materialMarkupEnabled ? '#E53E3E' : darkTheme.textSecondary }}>
-                          Markup
-                        </span>
-                      </div>
-                    </div>
-                    
-                    {/* Markup Percentage Input */}
-                    {materialMarkupEnabled && (
-                      <div className="px-3">
-                        <label className="block text-sm font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Markup Percentage (Internal Only)</label>
-                        <div className="relative">
-                          <Input
-                            type="number"
-                            value={materialMarkupPercentage}
-                            onChange={(e) => setMaterialMarkupPercentage(e.target.value)}
-                            placeholder="Enter markup %"
-                            className="bg-gray-800 border-purple-400 text-white pr-8"
-                            min="0"
-                            max="100"
-                            step="0.1"
-                          />
-                          <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">%</span>
-                        </div>
-                      </div>
-                    )}
 
-                    {/* Tax Control */}
-                    <div className="flex items-center justify-between p-3 rounded-lg border" style={{ borderColor: paintBrainColors.purple, backgroundColor: `${paintBrainColors.purple}05` }}>
-                      <span className="text-sm font-medium" style={{ color: darkTheme.text }}>
-                        Taxes
-                      </span>
-                      <div className="flex items-center space-x-3">
-                        <span className="text-xs" style={{ color: taxesIncluded ? '#6A9955' : darkTheme.textSecondary }}>
-                          Included
-                        </span>
-                        <div className="relative inline-block w-12 h-6">
-                          <input
-                            type="checkbox"
-                            id="taxes-toggle"
-                            checked={!taxesIncluded}
-                            onChange={(e) => setTaxesIncluded(!e.target.checked)}
-                            className="sr-only"
-                          />
-                          <label 
-                            htmlFor="taxes-toggle" 
-                            className="block w-12 h-6 rounded-full cursor-pointer transition-colors bg-gray-600"
-                          >
-                            <span 
-                              className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
-                                !taxesIncluded ? 'translate-x-6' : 'translate-x-0'
-                              }`}
-                            />
-                          </label>
-                        </div>
-                        <span className="text-xs" style={{ color: !taxesIncluded ? '#E53E3E' : darkTheme.textSecondary }}>
-                          Not Included
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                </div>
-                )}
-              </div>
-            )}
 
             {/* Services & Labor - Combined Container (Blue) */}
             <div className="p-3 rounded-lg border space-y-6" style={{ borderColor: paintBrainColors.blue, backgroundColor: darkTheme.cardBg }}>
@@ -1993,6 +1831,170 @@ ${emailMessage}`;
                 </>
               )}
             </div>
+
+            {/* Materials & Receipts */}
+            {receipts.length > 0 && (
+              <div className="p-3 rounded-lg border space-y-4" style={{ borderColor: paintBrainColors.purple, backgroundColor: darkTheme.cardBg }}>
+                <div className="flex items-center justify-between cursor-pointer" onClick={() => setShowMaterials(!showMaterials)}>
+                  <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.purple }}>
+                    <Wrench className="mr-2 h-5 w-5" />
+                    Materials & Receipts
+                  </h2>
+                  <ChevronDown 
+                    className={`h-5 w-5 transition-transform duration-200 ${showMaterials ? 'transform rotate-180' : ''}`}
+                    style={{ color: paintBrainColors.purple }}
+                  />
+                </div>
+                {showMaterials && (
+                  <div>
+                
+                {/* Display receipt items with OCR data */}
+                <div className="space-y-3 mb-4">
+                  {receipts.map((receipt) => (
+                    <div key={receipt.id} className="border rounded-lg p-2" style={{ borderColor: '#8B5FBF' }}>
+                      <div className="flex justify-between items-start text-sm mb-1">
+                        <span className="font-medium flex-1 pr-2 break-words" style={{ color: darkTheme.text }}>{receipt.vendor}</span>
+                        <span className="font-semibold flex-shrink-0" style={{ color: darkTheme.text }}>${receipt.amount}</span>
+                      </div>
+                      {receipt.items && receipt.items.length > 0 && (
+                        <div className="text-xs space-y-1">
+                          {receipt.items.map((item, index) => (
+                            <div key={index} className="pl-2 break-words" style={{ color: darkTheme.textSecondary }}>
+                              • {item}
+                            </div>
+                          ))}
+                          {receipt.ocrMethod && (
+                            <div className="text-xs mt-1 opacity-60" style={{ color: darkTheme.textSecondary }}>
+                              Processed with {receipt.ocrMethod} ({Math.round((receipt.confidence || 0) * 100)}% confidence)
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                
+                {/* Single checkbox for all receipts */}
+                <label className="flex items-center space-x-2 text-sm border-t pt-3" style={{ borderColor: darkTheme.border }}>
+                  <input
+                    type="checkbox"
+                    checked={receipts.length > 0 && receipts.every(r => invoiceData.selectedReceipts.has(r.id))}
+                    onChange={(e) => {
+                      const newSelection = new Set<number>();
+                      if (e.target.checked) {
+                        receipts.forEach(receipt => newSelection.add(receipt.id));
+                      }
+                      setInvoiceData({...invoiceData, selectedReceipts: newSelection});
+                    }}
+                    className="rounded"
+                  />
+                  <span style={{ color: darkTheme.text }}>
+                    Include receipts as email attachments (not embedded in PDF)
+                  </span>
+                </label>
+                
+                {/* Receipts Subtotal */}
+                <div className="pt-3 border-t" style={{ borderColor: paintBrainColors.purple + '30' }}>
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="font-bold text-purple-400">Receipts Subtotal:</span>
+                    <span className="font-bold text-green-400">${receipts.reduce((sum, receipt) => sum + (parseFloat(receipt.amount) || 0), 0).toFixed(2)}</span>
+                  </div>
+                  
+                  {/* Materials Controls - Markup and Tax */}
+                  <div className="space-y-3">
+                    {/* Supplies Markup Control */}
+                    <div className="flex items-center justify-between p-3 rounded-lg border" style={{ borderColor: paintBrainColors.purple, backgroundColor: `${paintBrainColors.purple}05` }}>
+                      <span className="text-sm font-medium" style={{ color: darkTheme.text }}>
+                        Supplies
+                      </span>
+                      <div className="flex items-center space-x-3">
+                        <span className="text-xs" style={{ color: !materialMarkupEnabled ? '#6A9955' : darkTheme.textSecondary }}>
+                          No Markup
+                        </span>
+                        <div className="relative inline-block w-12 h-6">
+                          <input
+                            type="checkbox"
+                            id="materials-markup-toggle"
+                            checked={materialMarkupEnabled}
+                            onChange={(e) => setMaterialMarkupEnabled(e.target.checked)}
+                            className="sr-only"
+                          />
+                          <label 
+                            htmlFor="materials-markup-toggle" 
+                            className="block w-12 h-6 rounded-full cursor-pointer transition-colors bg-gray-600"
+                          >
+                            <span 
+                              className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
+                                materialMarkupEnabled ? 'translate-x-6' : 'translate-x-0'
+                              }`}
+                            />
+                          </label>
+                        </div>
+                        <span className="text-xs" style={{ color: materialMarkupEnabled ? '#E53E3E' : darkTheme.textSecondary }}>
+                          Markup
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {/* Markup Percentage Input */}
+                    {materialMarkupEnabled && (
+                      <div className="px-3">
+                        <label className="block text-sm font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Markup Percentage (Internal Only)</label>
+                        <div className="relative">
+                          <Input
+                            type="number"
+                            value={materialMarkupPercentage}
+                            onChange={(e) => setMaterialMarkupPercentage(e.target.value)}
+                            placeholder="Enter markup %"
+                            className="bg-gray-800 border-purple-400 text-white pr-8"
+                            min="0"
+                            max="100"
+                            step="0.1"
+                          />
+                          <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">%</span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Tax Control */}
+                    <div className="flex items-center justify-between p-3 rounded-lg border" style={{ borderColor: paintBrainColors.purple, backgroundColor: `${paintBrainColors.purple}05` }}>
+                      <span className="text-sm font-medium" style={{ color: darkTheme.text }}>
+                        Taxes
+                      </span>
+                      <div className="flex items-center space-x-3">
+                        <span className="text-xs" style={{ color: taxesIncluded ? '#6A9955' : darkTheme.textSecondary }}>
+                          Included
+                        </span>
+                        <div className="relative inline-block w-12 h-6">
+                          <input
+                            type="checkbox"
+                            id="taxes-toggle"
+                            checked={!taxesIncluded}
+                            onChange={(e) => setTaxesIncluded(!e.target.checked)}
+                            className="sr-only"
+                          />
+                          <label 
+                            htmlFor="taxes-toggle" 
+                            className="block w-12 h-6 rounded-full cursor-pointer transition-colors bg-gray-600"
+                          >
+                            <span 
+                              className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
+                                !taxesIncluded ? 'translate-x-6' : 'translate-x-0'
+                              }`}
+                            />
+                          </label>
+                        </div>
+                        <span className="text-xs" style={{ color: !taxesIncluded ? '#E53E3E' : darkTheme.textSecondary }}>
+                          Not Included
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                </div>
+                )}
+              </div>
+            )}
 
             {/* Totals */}
             <div className="p-3 rounded-lg border space-y-4" style={{ borderColor: paintBrainColors.purple, backgroundColor: darkTheme.cardBg }}>
