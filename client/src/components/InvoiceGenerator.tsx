@@ -31,6 +31,12 @@ export default function InvoiceGenerator({
   const { toast } = useToast();
   const { user } = useAuth();
 
+  // Prevent wheel events on number inputs to avoid accidental value changes during scrolling
+  const preventWheelChange = (e: React.WheelEvent<HTMLInputElement>) => {
+    e.currentTarget.blur();
+    e.preventDefault();
+  };
+
   // Get documents logo (unified for estimates and invoices)
   const { data: documentsLogo } = useQuery({
     queryKey: [`/api/users/1/logos/documents`],
@@ -1560,6 +1566,7 @@ ${emailMessage}`;
                       type="number"
                       value={invoiceData.invoiceNumber}
                       onChange={(e) => setInvoiceData({...invoiceData, invoiceNumber: parseInt(e.target.value)})}
+                      onWheel={preventWheelChange}
                       className="bg-gray-800 border-[#ECC94B] text-white"
                     />
                   </div>
@@ -1714,6 +1721,7 @@ ${emailMessage}`;
                               type="number"
                               value={worker.hours}
                               onChange={(e) => updateAdditionalWorker(index, 'hours', e.target.value)}
+                              onWheel={preventWheelChange}
                               placeholder="0"
                               min="0"
                               max="999"
@@ -1727,6 +1735,7 @@ ${emailMessage}`;
                               type="number"
                               value={worker.rate}
                               onChange={(e) => updateAdditionalWorker(index, 'rate', e.target.value)}
+                              onWheel={preventWheelChange}
                               placeholder="60"
                               min="0"
                               max="99"
@@ -1790,6 +1799,7 @@ ${emailMessage}`;
                               type="number"
                               value={service.hours}
                               onChange={(e) => updateAdditionalService(index, 'hours', e.target.value)}
+                              onWheel={preventWheelChange}
                               placeholder="0"
                               min="0"
                               max="999"
@@ -1803,6 +1813,7 @@ ${emailMessage}`;
                               type="number"
                               value={service.rate}
                               onChange={(e) => updateAdditionalService(index, 'rate', e.target.value)}
+                              onWheel={preventWheelChange}
                               placeholder="60"
                               min="0"
                               max="99"
@@ -1947,6 +1958,7 @@ ${emailMessage}`;
                             type="number"
                             value={materialMarkupPercentage}
                             onChange={(e) => setMaterialMarkupPercentage(e.target.value)}
+                            onWheel={preventWheelChange}
                             placeholder="Enter markup %"
                             className="bg-gray-800 border-purple-400 text-white pr-8"
                             min="0"
