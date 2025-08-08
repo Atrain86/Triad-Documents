@@ -1669,11 +1669,29 @@ ${emailMessage}`;
                     <div className="space-y-3">
                       {dailyHours.map((hourEntry, index) => (
                         <div key={index} className="border rounded-lg p-3" style={{ borderColor: paintBrainColors.blue }}>
-                          <div className="flex justify-between items-center">
-                            <span style={{ color: darkTheme.text }}>
-                              {hourEntry.description || 'Painting'}: {hourEntry.hours}h × ${project.hourlyRate || 60}/hr
-                            </span>
-                            <span className="font-semibold" style={{ color: darkTheme.text }}>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-4 flex-1">
+                              <span className="text-sm" style={{ color: darkTheme.text, minWidth: '60px' }}>
+                                {(() => {
+                                  // Format date for interface (without year)
+                                  const dateStr = hourEntry.date.toString();
+                                  const datePart = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr.split(' ')[0];
+                                  const [year, month, day] = datePart.split('-').map(Number);
+                                  const localDate = new Date(year, month - 1, day);
+                                  return localDate.toLocaleDateString('en-US', { 
+                                    month: 'short', 
+                                    day: 'numeric' 
+                                  });
+                                })()}
+                              </span>
+                              <span className="flex-1" style={{ color: darkTheme.text }}>
+                                {hourEntry.description || 'Painting'}
+                              </span>
+                              <span className="text-sm" style={{ color: darkTheme.text, minWidth: '40px' }}>
+                                {hourEntry.hours}h
+                              </span>
+                            </div>
+                            <span className="font-semibold ml-4" style={{ color: darkTheme.text }}>
                               ${(hourEntry.hours * (project.hourlyRate || 60)).toFixed(2)}
                             </span>
                           </div>
