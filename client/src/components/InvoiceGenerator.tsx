@@ -1779,7 +1779,7 @@ ${emailMessage}`;
                       ))}
                       <div className="pt-3 border-t border-blue-400/30">
                         <div className="flex justify-between items-center">
-                          <span className="font-bold text-purple-400">Additional Workers Subtotal:</span>
+                          <span className="font-bold text-green-400">Additional Workers Subtotal:</span>
                           <span className="font-bold text-green-400">${additionalWorkersSubtotal.toFixed(2)}</span>
                         </div>
                       </div>
@@ -1857,7 +1857,7 @@ ${emailMessage}`;
                       ))}
                       <div className="pt-3 border-t border-blue-400/30">
                         <div className="flex justify-between items-center">
-                          <span className="font-bold text-purple-400">Additional Services Subtotal:</span>
+                          <span className="font-bold text-green-400">Additional Services Subtotal:</span>
                           <span className="font-bold text-green-400">${additionalServicesSubtotal.toFixed(2)}</span>
                         </div>
                       </div>
@@ -2048,42 +2048,42 @@ ${emailMessage}`;
                 <div className="flex justify-end">
                   <div className="w-64 space-y-2">
                 <div className="flex justify-between py-2 border-b" style={{ borderColor: darkTheme.border }}>
-                  <span className="font-medium" style={{ color: darkTheme.text }}>Labor:</span>
-                  <span className="font-semibold" style={{ color: darkTheme.text }}>${dailyHours.reduce((sum, hourEntry) => sum + (hourEntry.hours * (project.hourlyRate || 60)), 0).toFixed(2)}</span>
+                  <span className="font-medium text-green-400">Labor:</span>
+                  <span className="font-semibold text-green-400">${dailyHours.reduce((sum, hourEntry) => sum + (hourEntry.hours * (project.hourlyRate || 60)), 0).toFixed(2)}</span>
                 </div>
                 {additionalServicesSubtotal > 0 && (
                   <div className="flex justify-between py-2 border-b" style={{ borderColor: darkTheme.border }}>
-                    <span className="font-medium" style={{ color: darkTheme.text }}>Additional Services:</span>
-                    <span className="font-semibold" style={{ color: darkTheme.text }}>${additionalServicesSubtotal.toFixed(2)}</span>
+                    <span className="font-medium text-green-400">Additional Services:</span>
+                    <span className="font-semibold text-green-400">${additionalServicesSubtotal.toFixed(2)}</span>
                   </div>
                 )}
                 {additionalWorkersSubtotal > 0 && (
                   <div className="flex justify-between py-2 border-b" style={{ borderColor: darkTheme.border }}>
-                    <span className="font-medium" style={{ color: darkTheme.text }}>Additional Workers:</span>
-                    <span className="font-semibold" style={{ color: darkTheme.text }}>${additionalWorkersSubtotal.toFixed(2)}</span>
+                    <span className="font-medium text-green-400">Additional Workers:</span>
+                    <span className="font-semibold text-green-400">${additionalWorkersSubtotal.toFixed(2)}</span>
                   </div>
                 )}
                 {invoiceData.suppliesCost > 0 && (
                   <div className="flex justify-between py-2 border-b" style={{ borderColor: darkTheme.border }}>
-                    <span className="font-medium" style={{ color: darkTheme.text }}>Additional Supplies:</span>
-                    <span className="font-semibold" style={{ color: darkTheme.text }}>${invoiceData.suppliesCost.toFixed(2)}</span>
+                    <span className="font-medium text-green-400">Additional Supplies:</span>
+                    <span className="font-semibold text-green-400">${invoiceData.suppliesCost.toFixed(2)}</span>
                   </div>
                 )}
                 {receipts.filter(receipt => invoiceData.selectedReceipts.has(receipt.id)).length > 0 && (
                   <div className="flex justify-between py-2 border-b" style={{ borderColor: darkTheme.border }}>
-                    <span className="font-medium" style={{ color: darkTheme.text }}>
+                    <span className="font-medium text-green-400">
                       Materials {materialMarkupEnabled && materialMarkupPercentage ? `(+${materialMarkupPercentage}% markup)` : ''}{taxesIncluded ? ' (taxes included)' : ''}:
                     </span>
-                    <span className="font-semibold" style={{ color: darkTheme.text }}>${calculateMaterialCost().toFixed(2)}</span>
+                    <span className="font-semibold text-green-400">${calculateMaterialCost().toFixed(2)}</span>
                   </div>
                 )}
                 <div className="flex justify-between py-2 border-b" style={{ borderColor: darkTheme.border }}>
-                  <span className="font-medium" style={{ color: darkTheme.text }}>Subtotal:</span>
-                  <span className="font-semibold" style={{ color: darkTheme.text }}>${calculateSubtotal().toFixed(2)}</span>
+                  <span className="font-medium text-green-400">Subtotal:</span>
+                  <span className="font-semibold text-green-400">${calculateSubtotal().toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between py-2 border-b" style={{ borderColor: darkTheme.border }}>
-                  <span className="font-medium" style={{ color: darkTheme.text }}>GST (5%):</span>
-                  <span className="font-semibold" style={{ color: darkTheme.text }}>${calculateGST().toFixed(2)}</span>
+                  <span className="font-medium text-green-400">GST (5%):</span>
+                  <span className="font-semibold text-green-400">${calculateGST().toFixed(2)}</span>
                 </div>
 
                 <div className="flex justify-between py-3 text-lg font-bold">
