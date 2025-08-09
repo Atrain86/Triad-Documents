@@ -1928,7 +1928,7 @@ ${emailMessage}`;
                               value={service.rate}
                               onChange={(e) => updateAdditionalService(index, 'rate', e.target.value)}
                               onWheel={preventWheelChange}
-                              placeholder="60"
+                              placeholder={servicesMode === 'default' ? "0" : "60"}
                               min="0"
                               max="99"
                               step="1"
