@@ -335,11 +335,20 @@ cortespainter@gmail.com`;
   });
 
   // Additional services state
-  const [additionalServices, setAdditionalServices] = React.useState([
+  // Additional services toggle state
+  const [servicesMode, setServicesMode] = React.useState<'default' | 'custom'>('default');
+  
+  // Preset services for custom mode
+  const presetServices = [
     { name: 'Power Washing', hours: '', rate: 60 },
     { name: 'Drywall Repair', hours: '', rate: 60 },
     { name: 'Wood Reconditioning', hours: '', rate: 60 }
-  ]);
+  ];
+
+  const [additionalServices, setAdditionalServices] = React.useState(() => {
+    // Start with default mode - empty services
+    return [{ name: '', hours: '', rate: 60 }];
+  });
 
   // Additional workers state
   const [additionalWorkers, setAdditionalWorkers] = React.useState([
@@ -360,10 +369,24 @@ cortespainter@gmail.com`;
   }, []);
 
   const removeAdditionalService = React.useCallback((index: number) => {
-    if (index >= 3) {
+    if (servicesMode === 'default' || index >= 3) {
       setAdditionalServices(prev => prev.filter((_, i) => i !== index));
     }
-  }, []);
+  }, [servicesMode]);
+
+  // Handle services mode toggle
+  const handleServicesModeToggle = React.useCallback(() => {
+    const newMode = servicesMode === 'default' ? 'custom' : 'default';
+    setServicesMode(newMode);
+    
+    if (newMode === 'custom') {
+      // Switch to preset services
+      setAdditionalServices([...presetServices]);
+    } else {
+      // Switch to empty default services
+      setAdditionalServices([{ name: '', hours: '', rate: 60 }]);
+    }
+  }, [servicesMode, presetServices]);
 
   // Helper functions for additional workers
   const updateAdditionalWorker = React.useCallback((index: number, field: string, value: string) => {
@@ -1793,21 +1816,44 @@ ${emailMessage}`;
                         <Wrench className="mr-2 h-4 w-4" />
                         Additional Services
                       </h3>
-                      <Button
-                        onClick={addAdditionalService}
-                        size="xs"
-                        className="text-blue-400 border-blue-400 bg-transparent hover:bg-blue-400 hover:text-white px-2 py-1 text-xs"
-                        variant="outline"
-                      >
-                        <Plus className="h-3 w-3 mr-1" />
-                        Service
-                      </Button>
+                      <div className="flex items-center gap-3">
+                        {/* Toggle Switch */}
+                        <div className="flex items-center gap-2">
+                          <span className={`text-xs font-medium ${servicesMode === 'default' ? 'text-blue-400' : 'text-gray-500'}`}>
+                            Default
+                          </span>
+                          <button
+                            onClick={handleServicesModeToggle}
+                            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                              servicesMode === 'custom' ? 'bg-blue-600' : 'bg-gray-600'
+                            }`}
+                          >
+                            <span
+                              className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+                                servicesMode === 'custom' ? 'translate-x-5' : 'translate-x-1'
+                              }`}
+                            />
+                          </button>
+                          <span className={`text-xs font-medium ${servicesMode === 'custom' ? 'text-blue-400' : 'text-gray-500'}`}>
+                            Custom
+                          </span>
+                        </div>
+                        <Button
+                          onClick={addAdditionalService}
+                          size="xs"
+                          className="text-blue-400 border-blue-400 bg-transparent hover:bg-blue-400 hover:text-white px-2 py-1 text-xs"
+                          variant="outline"
+                        >
+                          <Plus className="h-3 w-3 mr-1" />
+                          Service
+                        </Button>
+                      </div>
                     </div>
                     <div className="space-y-3">
                       {additionalServices.map((service, index) => (
                         <div key={index} className="flex flex-wrap gap-2 items-end">
                           <div className="flex-1 min-w-0">
-                            <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Service Description</label>
+                            <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Service</label>
                             <Input
                               value={service.name}
                               onChange={(e) => updateAdditionalService(index, 'name', e.target.value)}
@@ -1843,7 +1889,7 @@ ${emailMessage}`;
                               className="bg-gray-800 border-blue-400 text-white text-center w-14"
                             />
                           </div>
-                          {index >= 3 && (
+                          {(servicesMode === 'default' || index >= 3) && (
                             <Button
                               onClick={() => removeAdditionalService(index)}
                               size="sm"
