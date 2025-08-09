@@ -286,6 +286,34 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     }
   }, []);
 
+  // Services & Labor helper functions
+  const addWorkStage = useCallback(() => {
+    const defaultRate = servicesMode === 'default' ? 0 : 60;
+    setWorkStages(prev => [...prev, { name: '', hours: '', rate: defaultRate }]);
+  }, [servicesMode]);
+
+  const removeWorkStage = useCallback((index: number) => {
+    if (servicesMode === 'default' || index >= 3) {
+      setWorkStages(prev => prev.filter((_, i) => i !== index));
+    }
+  }, [servicesMode]);
+
+  // Handle services mode toggle
+  const handleServicesModeToggle = useCallback(() => {
+    const newMode = servicesMode === 'default' ? 'custom' : 'default';
+    setServicesMode(newMode);
+    
+    if (newMode === 'custom') {
+      // Switch to preset services
+      setWorkStages([...presetServices]);
+    } else {
+      // Switch to default mode - update existing services to have rate 0
+      setWorkStages(prev => 
+        prev.map(service => ({ ...service, rate: 0 }))
+      );
+    }
+  }, [servicesMode, presetServices]);
+
   // Calculate totals
   const laborSubtotal = workStages.reduce((sum: number, stage: any) => {
     const hours = parseFloat(stage.hours) || 0;
@@ -414,7 +442,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       const total = hours * rate;
       const rowClass = index % 2 === 0 ? '' : 'bg-gray-700';
       return `
-        <tr class="${rowClass}" style="border-bottom: 1px solid #E53E3E;">
+        <tr class="${rowClass}" style="border-bottom: 1px solid #3B82F6;">
           <td class="p-3 text-white">${stage.name}</td>
           <td class="p-3 text-center text-white">${hours}h</td>
           <td class="p-3 text-center text-white">$${rate}/hr</td>
@@ -431,7 +459,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       const total = hours * rate;
       const rowClass = (serviceCount + index) % 2 === 0 ? '' : 'bg-gray-700';
       return `
-        <tr class="${rowClass}" style="border-bottom: 1px solid #E53E3E;">
+        <tr class="${rowClass}" style="border-bottom: 1px solid #3B82F6;">
           <td class="p-3 text-white">${labor.name || 'Additional Worker'}</td>
           <td class="p-3 text-center text-white">${hours}h</td>
           <td class="p-3 text-center text-white">$${rate}/hr</td>
@@ -537,10 +565,10 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     ${servicesHTML || additionalLaborHTML ? `
     <!-- Services & Labor -->
     <div class="mb-6">
-      <div style="background-color: #E53E3E;" class="text-white p-4 rounded-t-lg">
+      <div style="background-color: #3B82F6;" class="text-white p-4 rounded-t-lg">
         <h3 class="text-lg font-semibold text-white">Services & Labor</h3>
       </div>
-      <div style="background-color: #2D3748; border: 2px solid #E53E3E; border-top: none;" class="rounded-b-lg">
+      <div style="background-color: #2D3748; border: 2px solid #3B82F6; border-top: none;" class="rounded-b-lg">
         <table class="w-full">
           <thead>
             <tr style="background-color: #4A5568;">
@@ -553,7 +581,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           <tbody>
             ${servicesHTML}
             ${additionalLaborHTML}
-            <tr style="border-top: 2px solid #E53E3E;">
+            <tr style="border-top: 2px solid #3B82F6;">
               <td colspan="3" class="p-3 font-semibold text-white">Labor Subtotal</td>
               <td class="p-3 text-right font-bold text-green-400">$${laborSubtotal.toFixed(2)}</td>
             </tr>
@@ -989,29 +1017,60 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           </Card>
 
           {/* Services & Labor */}
-          <Card className="bg-gray-900 border-[#ECC94B] transform-gpu will-change-contents">
+          <Card className="bg-gray-900 border-blue-500 transform-gpu will-change-contents">
             <CardHeader 
               className="cursor-pointer hover:bg-gray-800 transition-colors"
               onClick={() => toggleSection('servicesLabor')}
             >
-              <CardTitle className="text-[#ECC94B] flex items-center justify-between">
+              <CardTitle className="text-blue-400 flex items-center justify-between">
                 Services & Labor
                 {expandedSections.servicesLabor ? (
-                  <ChevronDown className="w-5 h-5 text-[#ECC94B]" />
+                  <ChevronDown className="w-5 h-5 text-blue-400" />
                 ) : (
-                  <ChevronLeft className="w-5 h-5 text-[#ECC94B]" />
+                  <ChevronLeft className="w-5 h-5 text-blue-400" />
                 )}
               </CardTitle>
             </CardHeader>
             {expandedSections.servicesLabor && (
               <CardContent className="space-y-4">
+                {/* Toggle Section */}
+                <div className="flex items-center justify-between p-3 bg-gray-800 rounded-lg border border-blue-500">
+                  <div className="flex items-center space-x-3">
+                    <span className="text-sm font-medium text-white">Default</span>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={servicesMode === 'custom'}
+                        onChange={handleServicesModeToggle}
+                        className="sr-only peer"
+                      />
+                      <div className="relative w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                    </label>
+                    <span className="text-sm font-medium text-white">Custom</span>
+                  </div>
+                  <span className="text-xs text-gray-400">
+                    {servicesMode === 'default' ? 'Custom rates' : 'Preset services ($60/hr)'}
+                  </span>
+                </div>
+
+                {/* Services List */}
                 {workStages.map((stage: any, index: number) => (
-                  <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-800 rounded-lg">
-                    <div>
-                      <label className="block text-sm font-medium mb-2">{stage.name}</label>
+                  <div key={index} className="flex items-end space-x-2 p-3 bg-gray-800 rounded-lg border border-blue-500">
+                    <div className="flex-1">
+                      <label className="block text-sm font-medium mb-2 text-white">
+                        {servicesMode === 'custom' && index < 3 ? stage.name : 'Name'}
+                      </label>
+                      <Input
+                        type="text"
+                        value={stage.name}
+                        onChange={(e) => updateWorkStage(index, 'name', e.target.value)}
+                        placeholder={servicesMode === 'custom' && index < 3 ? stage.name : 'Service name'}
+                        className="bg-gray-700 border-blue-500 text-white"
+                        disabled={servicesMode === 'custom' && index < 3}
+                      />
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-2">Hours</label>
+                    <div className="w-24">
+                      <label className="block text-sm font-medium mb-2 text-white">Hours</label>
                       <Input
                         type="number"
                         inputMode="decimal"
@@ -1020,28 +1079,48 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                         value={stage.hours}
                         onChange={(e) => updateWorkStage(index, 'hours', e.target.value)}
                         placeholder="0"
-                        className="bg-gray-700 border-[#ECC94B] text-white transform-gpu will-change-contents"
-                        style={{ minHeight: '40px' }}
+                        className="bg-gray-700 border-blue-500 text-white"
                         onWheel={(e) => e.currentTarget.blur()}
                       />
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-2">Rate/Hour</label>
+                    <div className="w-24">
+                      <label className="block text-sm font-medium mb-2 text-white">Rate</label>
                       <Input
                         type="number"
                         min="0"
                         value={stage.rate}
                         onChange={(e) => updateWorkStage(index, 'rate', e.target.value)}
-                        className="bg-gray-700 border-[#ECC94B] text-white"
+                        placeholder="0"
+                        className="bg-gray-700 border-blue-500 text-white"
                         onWheel={(e) => e.currentTarget.blur()}
                       />
                     </div>
-                    <div className="md:col-span-3 text-right text-[#6A9955] font-semibold">
-                      Total: ${((parseFloat(stage.hours) || 0) * (parseFloat(stage.rate.toString()) || 0)).toFixed(2)}
-                    </div>
+                    {(servicesMode === 'default' || index >= 3) && (
+                      <Button
+                        type="button"
+                        onClick={() => removeWorkStage(index)}
+                        className="bg-red-600 hover:bg-red-700 text-white p-2 h-10"
+                        disabled={workStages.length <= 1}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
                   </div>
                 ))}
-                <div className="text-right text-lg font-semibold text-[#6A9955]">
+
+                {/* Add Service Button */}
+                <div className="flex justify-center">
+                  <Button
+                    type="button"
+                    onClick={addWorkStage}
+                    className="bg-blue-600 hover:bg-blue-700 text-white border border-blue-500 flex items-center space-x-2"
+                    style={{ width: "38px", height: "38px", borderRadius: "50%" }}
+                  >
+                    <Plus className="w-5 h-5" />
+                  </Button>
+                </div>
+
+                <div className="text-right text-lg font-semibold text-green-400">
                   Labor Subtotal: ${laborSubtotal.toFixed(2)}
                 </div>
               </CardContent>
