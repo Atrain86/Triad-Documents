@@ -1764,11 +1764,11 @@ ${emailMessage}`;
                         Additional Workers
                         <Button
                           onClick={addAdditionalWorker}
-                          size="xs"
-                          className="text-blue-400 bg-transparent hover:bg-blue-400/20 p-1 ml-2"
+                          className="text-blue-400 bg-transparent hover:bg-blue-400/20 ml-2 p-2"
                           variant="ghost"
+                          style={{ minWidth: '48px', minHeight: '48px' }}
                         >
-                          <Plus className="h-24 w-24 font-bold" strokeWidth={3} />
+                          <Plus style={{ width: '48px', height: '48px' }} strokeWidth={4} />
                         </Button>
                       </h3>
                       <div className="flex items-center gap-3">
@@ -1864,11 +1864,11 @@ ${emailMessage}`;
                         Additional Services
                         <Button
                           onClick={addAdditionalService}
-                          size="xs"
-                          className="text-blue-400 bg-transparent hover:bg-blue-400/20 p-1 ml-2"
+                          className="text-blue-400 bg-transparent hover:bg-blue-400/20 ml-2 p-2"
                           variant="ghost"
+                          style={{ minWidth: '48px', minHeight: '48px' }}
                         >
-                          <Plus className="h-24 w-24 font-bold" strokeWidth={3} />
+                          <Plus style={{ width: '48px', height: '48px' }} strokeWidth={4} />
                         </Button>
                       </h3>
                       <div className="flex items-center gap-3">
