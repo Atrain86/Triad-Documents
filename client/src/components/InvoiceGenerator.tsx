@@ -2288,7 +2288,7 @@ ${emailMessage}`;
         </div>
 
         {/* Invoice Preview (for PDF generation) - v2025.1 */}
-        <div ref={invoiceRef} data-invoice-ref className="fixed -top-[9999px] -left-[9999px] w-[794px] opacity-0 pointer-events-none print:static print:opacity-100 print:pointer-events-auto print:block print:max-w-none" style={{ backgroundColor: '#000000', color: '#ffffff', minHeight: 'auto', paddingBottom: '40px' }}>
+        <div ref={invoiceRef} data-invoice-ref key={`invoice-${Date.now()}`} className="fixed -top-[9999px] -left-[9999px] w-[794px] opacity-0 pointer-events-none print:static print:opacity-100 print:pointer-events-auto print:block print:max-w-none" style={{ backgroundColor: '#000000', color: '#ffffff', minHeight: 'auto', paddingBottom: '40px' }}>
           <div className="p-8">
             {/* Header Section */}
             <div className="mb-8">
@@ -2312,12 +2312,7 @@ ${emailMessage}`;
               </div>
               <div className="text-right">
                 <p><strong>Invoice #:</strong> {invoiceData.invoiceNumber}</p>
-                <p><strong>Date:</strong> {(() => {
-                  console.log('Invoice date value:', invoiceData.date);
-                  const formattedDate = invoiceData.date.replace(/-/g, '/');
-                  console.log('Formatted date:', formattedDate);
-                  return formattedDate;
-                })()}</p>
+                <p><strong>Date:</strong> {invoiceData.date.replace(/-/g, '/')}</p>
               </div>
             </div>
 
