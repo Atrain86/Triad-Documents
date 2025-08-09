@@ -872,71 +872,63 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
           <div className="space-y-6 p-6">
             {/* Estimate Details Section */}
-            <div className="border-2 border-[#569CD6] rounded-lg p-6 bg-gray-800/50">
-              <div 
-                className="flex items-center justify-between cursor-pointer mb-4"
-                onClick={() => toggleSection('estimateDetails')}
-              >
-                <h3 className="text-[#569CD6] text-lg font-semibold flex items-center">
-                  <Calendar className="w-5 h-5 mr-2" />
-                  Estimate Information
-                </h3>
-                <ChevronDown className={`w-5 h-5 text-[#569CD6] transition-transform ${expandedSections.estimateDetails ? 'rotate-180' : ''}`} />
-              </div>
-              {expandedSections.estimateDetails && (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-2 text-gray-300">Project Title/Description</label>
-                      <Textarea
-                        value={projectTitle}
-                        onChange={(e) => setProjectTitle(e.target.value)}
-                        placeholder="Brief description of the painting project..."
-                        className="bg-gray-800 border-[#569CD6] text-white min-h-[80px] focus:border-[#569CD6] focus:ring-[#569CD6]"
+            <div className="border-2 border-[#E53E3E] rounded-lg p-4 bg-gray-800/50">
+              <h3 className="text-[#E53E3E] text-lg font-semibold mb-4 flex items-center">
+                <Calendar className="w-5 h-5 mr-2" />
+                Estimate Information
+              </h3>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-gray-300">Project Title</label>
+                    <Input
+                      value={projectTitle}
+                      onChange={(e) => setProjectTitle(e.target.value)}
+                      placeholder=""
+                      className="bg-gray-800 border-[#E53E3E] text-white focus:border-[#E53E3E] focus:ring-[#E53E3E]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-gray-300">Estimate Date</label>
+                    <div className="relative">
+                      <Input
+                        type="date"
+                        value={estimateDate}
+                        onChange={(e) => setEstimateDate(e.target.value)}
+                        className="bg-gray-800 border-[#E53E3E] text-white focus:border-[#E53E3E] focus:ring-[#E53E3E]"
                       />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-2 text-gray-300">Estimate Date</label>
-                      <div className="relative">
-                        <Input
-                          type="date"
-                          value={estimateDate}
-                          onChange={(e) => setEstimateDate(e.target.value)}
-                          className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6]"
-                        />
-                        <Button
-                          type="button"
-                          onClick={() => setShowCalendar(true)}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 p-0 bg-[#569CD6] hover:bg-[#569CD6]/80"
-                        >
-                          <Calendar className="w-3 h-3" />
-                        </Button>
-                      </div>
+                      <Button
+                        type="button"
+                        onClick={() => setShowCalendar(true)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 p-0 bg-[#E53E3E] hover:bg-[#E53E3E]/80"
+                      >
+                        <Calendar className="w-3 h-3" />
+                      </Button>
                     </div>
                   </div>
                 </div>
-              )}
+              </div>
             </div>
 
             {/* Services & Labor Section */}
-            <div className="border-2 border-[#E53E3E] rounded-lg p-6 bg-gray-800/50">
+            <div className="border-2 border-[#569CD6] rounded-lg p-4 bg-gray-800/50">
               <div 
-                className="flex items-center justify-between cursor-pointer mb-4"
+                className="flex items-center justify-between cursor-pointer mb-3"
                 onClick={() => toggleSection('servicesLabor')}
               >
-                <h3 className="text-[#E53E3E] text-lg font-semibold">Services & Labor</h3>
-                <ChevronDown className={`w-5 h-5 text-[#E53E3E] transition-transform ${expandedSections.servicesLabor ? 'rotate-180' : ''}`} />
+                <h3 className="text-[#569CD6] text-lg font-semibold">Services & Labor</h3>
+                <ChevronDown className={`w-5 h-5 text-[#569CD6] transition-transform ${expandedSections.servicesLabor ? 'rotate-180' : ''}`} />
               </div>
               {expandedSections.servicesLabor && (
                 <div className="space-y-4">
                   {workStages.map((stage, index) => (
-                    <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-900/50 rounded-lg border border-[#E53E3E]/30">
+                    <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-900/50 rounded-lg border border-[#569CD6]/30">
                       <div>
                         <label className="block text-sm font-medium mb-2 text-gray-300">Service</label>
                         <Input
                           value={stage.name}
                           onChange={(e) => updateWorkStage(index, 'name', e.target.value)}
-                          className="bg-gray-800 border-[#E53E3E] text-white focus:border-[#E53E3E] focus:ring-[#E53E3E]"
+                          className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6]"
                         />
                       </div>
                       <div>
@@ -946,7 +938,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                           step="0.5"
                           value={stage.hours}
                           onChange={(e) => updateWorkStage(index, 'hours', e.target.value)}
-                          className="bg-gray-800 border-[#E53E3E] text-white focus:border-[#E53E3E] focus:ring-[#E53E3E]"
+                          className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6]"
                         />
                       </div>
                       <div>
@@ -955,19 +947,19 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                           type="number"
                           value={stage.rate}
                           onChange={(e) => updateWorkStage(index, 'rate', e.target.value)}
-                          className="bg-gray-800 border-[#E53E3E] text-white focus:border-[#E53E3E] focus:ring-[#E53E3E]"
+                          className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6]"
                         />
                       </div>
                       <div>
                         <label className="block text-sm font-medium mb-2 text-gray-300">Total</label>
-                        <div className="text-[#E53E3E] font-semibold text-lg bg-gray-800 border border-[#E53E3E]/30 rounded px-3 py-2">
+                        <div className="text-[#569CD6] font-semibold text-lg bg-gray-800 border border-[#569CD6]/30 rounded px-3 py-2">
                           ${((parseFloat(stage.hours) || 0) * (parseFloat(stage.rate.toString()) || 0)).toFixed(2)}
                         </div>
                       </div>
                     </div>
                   ))}
                   <div className="text-right">
-                    <div className="text-lg font-semibold text-[#E53E3E] bg-gray-900/50 border border-[#E53E3E] rounded px-4 py-2 inline-block">
+                    <div className="text-lg font-semibold text-[#569CD6] bg-gray-900/50 border border-[#569CD6] rounded px-4 py-2 inline-block">
                       Services Total: ${laborSubtotal.toFixed(2)}
                     </div>
                   </div>
@@ -976,25 +968,25 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             </div>
 
             {/* Additional Labor Section */}
-            <div className="border-2 border-[#E53E3E] rounded-lg p-6 bg-gray-800/50">
+            <div className="border-2 border-[#569CD6] rounded-lg p-4 bg-gray-800/50">
               <div 
-                className="flex items-center justify-between cursor-pointer mb-4"
+                className="flex items-center justify-between cursor-pointer mb-3"
                 onClick={() => toggleSection('additionalLabor')}
               >
-                <h3 className="text-[#E53E3E] text-lg font-semibold">Additional Labor/Crew</h3>
-                <ChevronDown className={`w-5 h-5 text-[#E53E3E] transition-transform ${expandedSections.additionalLabor ? 'rotate-180' : ''}`} />
+                <h3 className="text-[#569CD6] text-lg font-semibold">Additional Labor/Crew</h3>
+                <ChevronDown className={`w-5 h-5 text-[#569CD6] transition-transform ${expandedSections.additionalLabor ? 'rotate-180' : ''}`} />
               </div>
               {expandedSections.additionalLabor && (
                 <div className="space-y-4">
                   {additionalLabor.map((labor, index) => (
-                    <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-900/50 rounded-lg border border-[#E53E3E]/30">
+                    <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-900/50 rounded-lg border border-[#569CD6]/30">
                       <div>
                         <label className="block text-sm font-medium mb-2 text-gray-300">Worker Name</label>
                         <Input
                           value={labor.name}
                           onChange={(e) => updateAdditionalLabor(index, 'name', e.target.value)}
                           placeholder="e.g., Assistant, Helper"
-                          className="bg-gray-800 border-[#E53E3E] text-white focus:border-[#E53E3E] focus:ring-[#E53E3E]"
+                          className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6]"
                         />
                       </div>
                       <div>
@@ -1004,7 +996,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                           step="0.5"
                           value={labor.hours}
                           onChange={(e) => updateAdditionalLabor(index, 'hours', e.target.value)}
-                          className="bg-gray-800 border-[#E53E3E] text-white focus:border-[#E53E3E] focus:ring-[#E53E3E]"
+                          className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6]"
                         />
                       </div>
                       <div>
@@ -1013,13 +1005,13 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                           type="number"
                           value={labor.rate}
                           onChange={(e) => updateAdditionalLabor(index, 'rate', e.target.value)}
-                          className="bg-gray-800 border-[#E53E3E] text-white focus:border-[#E53E3E] focus:ring-[#E53E3E]"
+                          className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6]"
                         />
                       </div>
                       <div className="flex items-end space-x-2">
                         <div className="flex-1">
                           <label className="block text-sm font-medium mb-2 text-gray-300">Total</label>
-                          <div className="text-[#E53E3E] font-semibold text-lg bg-gray-800 border border-[#E53E3E]/30 rounded px-3 py-2">
+                          <div className="text-[#569CD6] font-semibold text-lg bg-gray-800 border border-[#569CD6]/30 rounded px-3 py-2">
                             ${((parseFloat(labor.hours) || 0) * (parseFloat(labor.rate.toString()) || 0)).toFixed(2)}
                           </div>
                         </div>
@@ -1038,12 +1030,12 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                   <div className="flex justify-between items-center">
                     <Button
                       onClick={addLabor}
-                      className="bg-[#E53E3E] hover:bg-[#E53E3E]/80 border-[#E53E3E]"
+                      className="bg-[#569CD6] hover:bg-[#569CD6]/80 border-[#569CD6]"
                     >
                       <Plus className="w-4 h-4 mr-2" />
                       Add Worker
                     </Button>
-                    <div className="text-lg font-semibold text-[#E53E3E] bg-gray-900/50 border border-[#E53E3E] rounded px-4 py-2">
+                    <div className="text-lg font-semibold text-[#569CD6] bg-gray-900/50 border border-[#569CD6] rounded px-4 py-2">
                       Additional Labor Total: ${additionalLaborSubtotal.toFixed(2)}
                     </div>
                   </div>
@@ -1052,9 +1044,9 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             </div>
 
             {/* Paint & Materials Section */}
-            <div className="border-2 border-[#D4AC0D] rounded-lg p-6 bg-gray-800/50">
+            <div className="border-2 border-[#D4AC0D] rounded-lg p-4 bg-gray-800/50">
               <div 
-                className="flex items-center justify-between cursor-pointer mb-4"
+                className="flex items-center justify-between cursor-pointer mb-3"
                 onClick={() => toggleSection('paintMaterials')}
               >
                 <h3 className="text-[#D4AC0D] text-lg font-semibold">Paint & Materials</h3>
@@ -1217,9 +1209,9 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             </div>
 
             {/* Additional Services Section */}
-            <div className="border-2 border-[#D4AC0D] rounded-lg p-6 bg-gray-800/50">
+            <div className="border-2 border-[#D4AC0D] rounded-lg p-4 bg-gray-800/50">
               <div 
-                className="flex items-center justify-between cursor-pointer mb-4"
+                className="flex items-center justify-between cursor-pointer mb-3"
                 onClick={() => toggleSection('additionalServices')}
               >
                 <h3 className="text-[#D4AC0D] text-lg font-semibold">Additional Services</h3>
@@ -1293,9 +1285,9 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             </div>
 
             {/* Travel Costs Section */}
-            <div className="border-2 border-[#6A9955] rounded-lg p-6 bg-gray-800/50">
+            <div className="border-2 border-[#6A9955] rounded-lg p-4 bg-gray-800/50">
               <div 
-                className="flex items-center justify-between cursor-pointer mb-4"
+                className="flex items-center justify-between cursor-pointer mb-3"
                 onClick={() => toggleSection('travel')}
               >
                 <h3 className="text-[#6A9955] text-lg font-semibold">Travel Costs</h3>
@@ -1345,17 +1337,17 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             </div>
 
             {/* Summary */}
-            <div className="border-2 border-[#8B5FBF] rounded-lg p-6 bg-gray-800/50">
-              <h3 className="text-[#8B5FBF] text-lg font-semibold mb-4">Estimate Summary</h3>
+            <div className="border-2 border-[#8B5FBF] rounded-lg p-4 bg-gray-800/50">
+              <h3 className="text-[#8B5FBF] text-lg font-semibold mb-3">Estimate Summary</h3>
               <div className="space-y-3">
                 {laborSubtotal > 0 && (
-                  <div className="flex justify-between text-[#E53E3E] bg-gray-900/50 border border-[#E53E3E]/30 rounded px-3 py-2">
+                  <div className="flex justify-between text-[#569CD6] bg-gray-900/50 border border-[#569CD6]/30 rounded px-3 py-2">
                     <span>Services & Labor:</span>
                     <span>${laborSubtotal.toFixed(2)}</span>
                   </div>
                 )}
                 {additionalLaborSubtotal > 0 && (
-                  <div className="flex justify-between text-[#E53E3E] bg-gray-900/50 border border-[#E53E3E]/30 rounded px-3 py-2">
+                  <div className="flex justify-between text-[#569CD6] bg-gray-900/50 border border-[#569CD6]/30 rounded px-3 py-2">
                     <span>Additional Labor:</span>
                     <span>${additionalLaborSubtotal.toFixed(2)}</span>
                   </div>
