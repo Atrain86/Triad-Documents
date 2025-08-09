@@ -780,8 +780,8 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                     />
                                   </div>
                                   
-                                  {/* Up Arrow - Positioned Higher and Aligned Over Plus Button */}
-                                  <div className="absolute right-4 top-12 flex justify-center">
+                                  {/* Up Arrow - Positioned at Top Edge and Aligned Over Plus Button */}
+                                  <div className="absolute right-4 top-4 flex justify-center">
                                     <button
                                       onClick={moveLogoUp}
                                       disabled={logoVerticalPosition <= -50}
@@ -793,7 +793,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                   </div>
                                   
                                   {/* Down Arrow - Above Plus Button, Aligned */}
-                                  <div className="absolute bottom-20 right-4 flex justify-center">
+                                  <div className="absolute bottom-16 right-4 flex justify-center">
                                     <button
                                       onClick={moveLogoDown}
                                       disabled={logoVerticalPosition >= 50}
@@ -804,8 +804,8 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                     </button>
                                   </div>
                                   
-                                  {/* Size Controls - Spread Further Apart */}
-                                  <div className="absolute bottom-8 left-4 right-4 flex items-center justify-between">
+                                  {/* Size Controls - Moved to Bottom of Frame */}
+                                  <div className="absolute bottom-2 left-4 right-4 flex items-center justify-between">
                                     {/* Minus Button - Left Side */}
                                     <button
                                       onClick={(e) => {
@@ -822,8 +822,8 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                       <Minus className="h-6 w-6" />
                                     </button>
                                     
-                                    {/* Percentage Display - Center */}
-                                    <div className="text-lg text-gray-300 min-w-[60px] text-center font-medium px-4 py-2 bg-gray-800 rounded-lg border">
+                                    {/* Percentage Display - No Container, Just Text */}
+                                    <div className="text-lg text-gray-300 min-w-[60px] text-center font-medium">
                                       {logoScale}%
                                     </div>
                                     
