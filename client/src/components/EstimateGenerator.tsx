@@ -494,7 +494,17 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
       <div class="h-14 mb-3 flex items-center justify-center">
         <img src="${logoUrl}" alt="Logo" class="h-14 object-contain" />
       </div>
-      <h1 class="text-orange-500 text-2xl font-bold">ESTIMATE</h1>
+    </div>
+
+    <!-- Estimate Title and Info -->
+    <div class="flex justify-between items-start mb-8">
+      <div>
+        <h1 class="text-3xl font-bold text-[#8B5FBF]">ESTIMATE</h1>
+      </div>
+      <div class="text-right">
+        <p><strong>Estimate #:</strong> EST-${Date.now()}</p>
+        <p><strong>Date:</strong> ${estimateDate.replace(/-/g, '/')}</p>
+      </div>
     </div>
 
     <!-- Client & Company Info -->
@@ -1448,7 +1458,17 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                 className="mx-auto mb-4 h-8"
               />
             )}
-            <h1 className="text-3xl font-bold text-[#8B5FBF]">ESTIMATE</h1>
+          </div>
+
+          {/* Estimate Title and Info */}
+          <div className="flex justify-between items-start mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-[#8B5FBF]">ESTIMATE</h1>
+            </div>
+            <div className="text-right">
+              <p><strong>Estimate #:</strong> EST-{Date.now()}</p>
+              <p><strong>Date:</strong> {estimateDate.replace(/-/g, '/')}</p>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-8 mb-8">
@@ -1469,7 +1489,6 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-[#8B5FBF] mb-2">Project Details:</h3>
             <p><strong>Project:</strong> {projectTitle || `${project.projectType} Project`}</p>
-            <p><strong>Date:</strong> {new Date(estimateDate).toLocaleDateString()}</p>
           </div>
 
           {/* Services & Labor Section */}
