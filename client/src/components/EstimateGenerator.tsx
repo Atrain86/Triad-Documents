@@ -126,10 +126,18 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     { name: 'Painting', hours: '', rate: 60 }
   ];
 
-  // Work stages state with localStorage persistence
+  // Combine all services into one array for the Services & Labor section
+  const getAllServices = useCallback(() => {
+    const services = savedData.workStages || [{ name: '', hours: '', rate: 0 }];
+    const additionalWorkers = savedData.additionalLabor || [];
+    const additionalServices = savedData.additionalServices || [];
+    
+    return [...services, ...additionalWorkers, ...additionalServices];
+  }, [savedData]);
+
+  // Work stages state - now includes all services, workers, and additional services
   const [workStages, setWorkStages] = useState(() => {
-    // Start with default mode - empty services with rate 0
-    return savedData.workStages || [{ name: '', hours: '', rate: 0 }];
+    return getAllServices();
   });
 
   // Paint costs state
@@ -314,7 +322,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     }
   }, [servicesMode, presetServices]);
 
-  // Calculate totals
+  // Calculate totals - now includes all services
   const laborSubtotal = workStages.reduce((sum: number, stage: any) => {
     const hours = parseFloat(stage.hours) || 0;
     const rate = parseFloat(stage.rate.toString()) || 0;
@@ -1033,8 +1041,11 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             </CardHeader>
             {expandedSections.servicesLabor && (
               <CardContent className="space-y-4">
-                {/* Toggle Section */}
+                {/* Header with Service Description and Toggle */}
                 <div className="flex items-center justify-between p-3 bg-gray-800 rounded-lg border border-blue-500">
+                  <div className="flex items-center space-x-3">
+                    <span className="text-sm font-medium text-blue-400">Service Description</span>
+                  </div>
                   <div className="flex items-center space-x-3">
                     <span className="text-sm font-medium text-white">Default</span>
                     <label className="relative inline-flex items-center cursor-pointer">
@@ -1048,9 +1059,6 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     </label>
                     <span className="text-sm font-medium text-white">Custom</span>
                   </div>
-                  <span className="text-xs text-gray-400">
-                    {servicesMode === 'default' ? 'Custom rates' : 'Preset services ($60/hr)'}
-                  </span>
                 </div>
 
                 {/* Services List */}
@@ -1058,13 +1066,13 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                   <div key={index} className="flex items-end space-x-2 p-3 bg-gray-800 rounded-lg border border-blue-500">
                     <div className="flex-1">
                       <label className="block text-sm font-medium mb-2 text-white">
-                        {servicesMode === 'custom' && index < 3 ? stage.name : 'Name'}
+                        Service
                       </label>
                       <Input
                         type="text"
                         value={stage.name}
                         onChange={(e) => updateWorkStage(index, 'name', e.target.value)}
-                        placeholder={servicesMode === 'custom' && index < 3 ? stage.name : 'Service name'}
+                        placeholder={servicesMode === 'custom' && index < 3 ? stage.name : 'Service description'}
                         className="bg-gray-700 border-blue-500 text-white"
                         disabled={servicesMode === 'custom' && index < 3}
                       />
@@ -1269,8 +1277,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             )}
           </Card>
 
-          {/* Additional Labor (Crew Members) */}
-          <Card className="bg-gray-900 border-[#3182CE] transform-gpu will-change-contents">
+
             <CardHeader 
               className="cursor-pointer hover:bg-gray-800 transition-colors"
               onClick={() => toggleSection('additionalLabor')}
