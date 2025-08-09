@@ -880,17 +880,17 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="w-[98vw] sm:w-[95vw] max-w-sm sm:max-w-4xl max-h-[95vh] overflow-y-auto bg-gray-900 border-gray-700 text-white">
-          <DialogHeader>
-            <DialogTitle className="text-xl sm:text-2xl font-bold text-center text-[#8B5FBF]">
+        <DialogContent className="w-full h-full sm:w-[95vw] sm:max-w-4xl sm:max-h-[95vh] sm:h-auto overflow-y-auto bg-gray-900 border-gray-700 text-white p-0 m-0">
+          <DialogHeader className="p-2 sm:p-6">
+            <DialogTitle className="text-lg sm:text-2xl font-bold text-center text-[#8B5FBF]">
               Generate Estimate
             </DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 md:p-6">
+          <div className="space-y-3 sm:space-y-6 p-1 sm:p-4 md:p-6">
             {/* Estimate Details Section */}
-            <div className="border-2 border-[#E53E3E] rounded-lg p-2 sm:p-4 bg-gray-800/50">
-              <h3 className="text-[#E53E3E] text-base sm:text-lg font-semibold mb-3 sm:mb-4 flex items-center">
+            <div className="border border-[#E53E3E] rounded p-1 sm:p-4 bg-gray-800/50">
+              <h3 className="text-[#E53E3E] text-sm sm:text-lg font-semibold mb-2 sm:mb-4 flex items-center">
                 <Calendar className="w-5 h-5 mr-2" />
                 Estimate Information
               </h3>
@@ -928,16 +928,16 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             </div>
 
             {/* Services & Labor Section */}
-            <div className="border-2 border-[#569CD6] rounded-lg bg-gray-800/50">
+            <div className="border border-[#569CD6] rounded bg-gray-800/50">
               <div 
-                className="flex items-center justify-between cursor-pointer p-3"
+                className="flex items-center justify-between cursor-pointer p-2 sm:p-3"
                 onClick={() => toggleSection('servicesLabor')}
               >
                 <h3 className="text-[#569CD6] text-base sm:text-lg font-semibold">Services & Labor</h3>
                 <ChevronDown className={`w-5 h-5 text-[#569CD6] transition-transform ${expandedSections.servicesLabor ? 'rotate-180' : ''}`} />
               </div>
               {expandedSections.servicesLabor && (
-                <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 border-t border-[#569CD6]/30">
+                <div className="space-y-3 sm:space-y-6 p-1 sm:p-4 border-t border-[#569CD6]/30">
                   {/* Primary Services */}
                   <div className="border rounded-lg p-1 sm:p-2 space-y-3 sm:space-y-4" style={{ borderColor: '#569CD6', backgroundColor: '#569CD610' }}>
                     <div className="flex items-center justify-between mb-2">
