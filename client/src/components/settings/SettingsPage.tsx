@@ -1011,7 +1011,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                           <div className="space-y-4 pt-4 border-t border-gray-700">
                             <h4 className="text-white font-medium">Document Logos - Separate from Homepage</h4>
                             <p className="text-sm text-gray-400">
-                              Set a logo for your documents (estimates and invoices). If no logo is selected, the homepage logo will be used.
+                              Set a logo for your documents, estimates and invoices. If no logo is selected, the homepage logo will be used.
                             </p>
                             
                             {/* Documents Logo Selection (Estimates & Invoices) */}
@@ -1052,12 +1052,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                             </div>
                           </div>
 
-                          <div className="mt-4 p-3 bg-blue-500/10 border border-blue-400/30 rounded-lg">
-                            <p className="text-sm text-blue-200">
-                              <span className="font-medium">Pro Tip:</span> Use a horizontal logo for homepage and a vertical logo for documents, 
-                              or create different versions of your logo for different contexts (dark/light backgrounds, formal/casual style).
-                            </p>
-                          </div>
+
                         </div>
                       </div>
                     )}
