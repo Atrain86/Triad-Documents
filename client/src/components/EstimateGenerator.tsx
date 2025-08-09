@@ -966,23 +966,23 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                   {/* Additional Labor/Crew */}
                   <div className="p-4 bg-gray-900/50 rounded-lg border border-[#569CD6]/30">
                     <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-3">
                         <Users className="w-5 h-5 text-[#569CD6]" />
-                        <h4 className="text-[#569CD6] font-semibold text-base">Additional Workers</h4>
+                        <h4 className="text-[#569CD6] font-semibold text-lg">Additional Workers</h4>
                         <Button
                           onClick={addLabor}
-                          size="sm"
-                          className="bg-[#569CD6] hover:bg-[#569CD6]/80 border-[#569CD6] h-6 w-6 p-0"
+                          size="lg"
+                          className="bg-[#569CD6] hover:bg-[#569CD6]/80 border-[#569CD6] h-8 w-8 p-0 rounded-sm"
                         >
-                          <Plus className="w-3 h-3" />
+                          <Plus className="w-5 h-5" />
                         </Button>
                       </div>
-                      <div className="flex items-center space-x-2 text-sm text-gray-400">
-                        <span>Default</span>
-                        <div className="w-8 h-4 bg-gray-600 rounded-full relative">
-                          <div className="w-3 h-3 bg-white rounded-full absolute top-0.5 left-0.5"></div>
+                      <div className="flex items-center space-x-2 text-sm">
+                        <span className="text-gray-400">Default</span>
+                        <div className="w-10 h-5 bg-gray-600 rounded-full relative cursor-pointer">
+                          <div className="w-4 h-4 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform duration-200"></div>
                         </div>
-                        <span>Custom</span>
+                        <span className="text-gray-400">Custom</span>
                       </div>
                     </div>
                     
@@ -1048,23 +1048,23 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                   {/* Additional Services */}
                   <div className="p-4 bg-gray-900/50 rounded-lg border border-[#569CD6]/30">
                     <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-3">
                         <Settings className="w-5 h-5 text-[#569CD6]" />
-                        <h4 className="text-[#569CD6] font-semibold text-base">Additional Services</h4>
+                        <h4 className="text-[#569CD6] font-semibold text-lg">Additional Services</h4>
                         <Button
                           onClick={addAdditionalService}
-                          size="sm"
-                          className="bg-[#569CD6] hover:bg-[#569CD6]/80 border-[#569CD6] h-6 w-6 p-0"
+                          size="lg"
+                          className="bg-[#569CD6] hover:bg-[#569CD6]/80 border-[#569CD6] h-8 w-8 p-0 rounded-sm"
                         >
-                          <Plus className="w-3 h-3" />
+                          <Plus className="w-5 h-5" />
                         </Button>
                       </div>
-                      <div className="flex items-center space-x-2 text-sm text-gray-400">
-                        <span>Default</span>
-                        <div className="w-8 h-4 bg-gray-600 rounded-full relative">
-                          <div className="w-3 h-3 bg-white rounded-full absolute top-0.5 left-0.5"></div>
+                      <div className="flex items-center space-x-2 text-sm">
+                        <span className="text-gray-400">Default</span>
+                        <div className="w-10 h-5 bg-gray-600 rounded-full relative cursor-pointer">
+                          <div className="w-4 h-4 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform duration-200"></div>
                         </div>
-                        <span>Custom</span>
+                        <span className="text-gray-400">Custom</span>
                       </div>
                     </div>
                     
