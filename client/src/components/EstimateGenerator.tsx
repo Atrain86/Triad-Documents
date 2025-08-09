@@ -1168,16 +1168,18 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     ))}
                     
                     <div className="mt-4 pt-4 border-t border-[#569CD6]/30">
-                      <div className="text-lg font-semibold text-green-400">
-                        Additional Services Subtotal: ${additionalServicesSubtotal.toFixed(2)}
+                      <div className="flex justify-between items-center text-lg font-semibold text-green-400">
+                        <span>Additional Services Subtotal</span>
+                        <span>${additionalServicesSubtotal.toFixed(2)}</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Total */}
                   <div className="text-right">
-                    <div className="text-lg font-semibold text-[#569CD6] bg-gray-900/50 border border-[#569CD6] rounded px-4 py-2 inline-block">
-                      Services & Labor Total: ${(laborSubtotal + additionalLaborSubtotal + additionalServicesSubtotal).toFixed(2)}
+                    <div className="text-lg font-semibold text-[#569CD6] bg-gray-900/50 border border-[#569CD6] rounded px-4 py-2 inline-block flex justify-between items-center min-w-[300px]">
+                      <span>Services & Labor Total</span>
+                      <span>${(laborSubtotal + additionalLaborSubtotal + additionalServicesSubtotal).toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
@@ -1411,37 +1413,37 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
               <div className="space-y-3">
                 {laborSubtotal > 0 && (
                   <div className="flex justify-between text-[#569CD6] bg-gray-900/50 border border-[#569CD6]/30 rounded px-3 py-2">
-                    <span>Services & Labor:</span>
+                    <span>Services & Labor</span>
                     <span>${laborSubtotal.toFixed(2)}</span>
                   </div>
                 )}
                 {additionalLaborSubtotal > 0 && (
                   <div className="flex justify-between text-[#569CD6] bg-gray-900/50 border border-[#569CD6]/30 rounded px-3 py-2">
-                    <span>Additional Labor:</span>
+                    <span>Additional Labor</span>
                     <span>${additionalLaborSubtotal.toFixed(2)}</span>
                   </div>
                 )}
                 {additionalServicesSubtotal > 0 && (
                   <div className="flex justify-between text-[#D4AC0D] bg-gray-900/50 border border-[#D4AC0D]/30 rounded px-3 py-2">
-                    <span>Additional Services:</span>
+                    <span>Additional Services</span>
                     <span>${additionalServicesSubtotal.toFixed(2)}</span>
                   </div>
                 )}
                 {paintAndMaterialsSubtotal > 0 && (
                   <div className="flex justify-between text-[#D4AC0D] bg-gray-900/50 border border-[#D4AC0D]/30 rounded px-3 py-2">
-                    <span>Paint & Materials:</span>
+                    <span>Paint & Materials</span>
                     <span>${paintAndMaterialsSubtotal.toFixed(2)}</span>
                   </div>
                 )}
                 {travelSubtotal > 0 && (
                   <div className="flex justify-between text-[#6A9955] bg-gray-900/50 border border-[#6A9955]/30 rounded px-3 py-2">
-                    <span>Travel Costs:</span>
+                    <span>Travel Costs</span>
                     <span>${travelSubtotal.toFixed(2)}</span>
                   </div>
                 )}
                 <hr className="border-[#8B5FBF]" />
                 <div className="flex justify-between bg-gray-900/50 border border-gray-600 rounded px-3 py-2">
-                  <span>Subtotal:</span>
+                  <span>Subtotal</span>
                   <span>${subtotalBeforeTax.toFixed(2)}</span>
                 </div>
                 {taxAmount > 0 && (
