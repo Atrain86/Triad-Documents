@@ -502,7 +502,6 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
         <h1 class="text-3xl font-bold text-[#8B5FBF]">ESTIMATE</h1>
       </div>
       <div class="text-right">
-        <p><strong>Estimate #:</strong> EST-${Date.now()}</p>
         <p><strong>Date:</strong> ${estimateDate.replace(/-/g, '/')}</p>
       </div>
     </div>
@@ -1466,7 +1465,6 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
               <h1 className="text-3xl font-bold text-[#8B5FBF]">ESTIMATE</h1>
             </div>
             <div className="text-right">
-              <p><strong>Estimate #:</strong> EST-{Date.now()}</p>
               <p><strong>Date:</strong> {estimateDate.replace(/-/g, '/')}</p>
             </div>
           </div>
