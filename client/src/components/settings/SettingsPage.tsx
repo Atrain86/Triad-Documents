@@ -781,7 +781,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                   </div>
                                   
                                   {/* Up Arrow - Positioned Higher and Aligned Over Plus Button */}
-                                  <div className="absolute right-4 top-16 flex justify-center">
+                                  <div className="absolute right-4 top-12 flex justify-center">
                                     <button
                                       onClick={moveLogoUp}
                                       disabled={logoVerticalPosition <= -50}
