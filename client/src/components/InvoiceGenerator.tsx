@@ -1788,11 +1788,10 @@ ${emailMessage}`;
                         <Button
                           onClick={addAdditionalWorker}
                           size="xs"
-                          className="text-blue-400 border-blue-400 bg-transparent hover:bg-blue-400 hover:text-white px-2 py-1 text-xs"
-                          variant="outline"
+                          className="text-blue-400 bg-transparent hover:bg-blue-400/20 p-1"
+                          variant="ghost"
                         >
-                          <Plus className="h-3 w-3 mr-1" />
-                          Worker
+                          <Plus className="h-6 w-6 font-bold" strokeWidth={3} />
                         </Button>
                       </div>
                     </div>
@@ -1889,11 +1888,10 @@ ${emailMessage}`;
                         <Button
                           onClick={addAdditionalService}
                           size="xs"
-                          className="text-blue-400 border-blue-400 bg-transparent hover:bg-blue-400 hover:text-white px-2 py-1 text-xs"
-                          variant="outline"
+                          className="text-blue-400 bg-transparent hover:bg-blue-400/20 p-1"
+                          variant="ghost"
                         >
-                          <Plus className="h-3 w-3 mr-1" />
-                          Service
+                          <Plus className="h-6 w-6 font-bold" strokeWidth={3} />
                         </Button>
                       </div>
                     </div>
