@@ -1768,7 +1768,7 @@ ${emailMessage}`;
                           className="text-blue-400 bg-transparent hover:bg-blue-400/20 p-1 ml-2"
                           variant="ghost"
                         >
-                          <Plus className="h-12 w-12 font-bold" strokeWidth={3} />
+                          <Plus className="h-24 w-24 font-bold" strokeWidth={3} />
                         </Button>
                       </h3>
                       <div className="flex items-center gap-3">
@@ -1868,7 +1868,7 @@ ${emailMessage}`;
                           className="text-blue-400 bg-transparent hover:bg-blue-400/20 p-1 ml-2"
                           variant="ghost"
                         >
-                          <Plus className="h-12 w-12 font-bold" strokeWidth={3} />
+                          <Plus className="h-24 w-24 font-bold" strokeWidth={3} />
                         </Button>
                       </h3>
                       <div className="flex items-center gap-3">
