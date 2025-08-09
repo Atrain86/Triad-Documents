@@ -2312,7 +2312,12 @@ ${emailMessage}`;
               </div>
               <div className="text-right">
                 <p><strong>Invoice #:</strong> {invoiceData.invoiceNumber}</p>
-                <p><strong>Date:</strong> {invoiceData.date.replace(/-/g, '/')}</p>
+                <p><strong>Date:</strong> {(() => {
+                  console.log('Invoice date value:', invoiceData.date);
+                  const formattedDate = invoiceData.date.replace(/-/g, '/');
+                  console.log('Formatted date:', formattedDate);
+                  return formattedDate;
+                })()}</p>
               </div>
             </div>
 
