@@ -1072,8 +1072,9 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     ))}
                     
                     <div className="mt-4 pt-4 border-t border-[#569CD6]/30">
-                      <div className="text-lg font-semibold text-green-400">
-                        Additional Workers Subtotal: ${additionalLaborSubtotal.toFixed(2)}
+                      <div className="flex justify-between items-center text-lg font-semibold text-green-400">
+                        <span>Additional Workers Subtotal</span>
+                        <span>${additionalLaborSubtotal.toFixed(2)}</span>
                       </div>
                     </div>
                   </div>
