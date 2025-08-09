@@ -1766,9 +1766,9 @@ ${emailMessage}`;
                           onClick={addAdditionalWorker}
                           className="text-blue-400 bg-transparent hover:bg-blue-400/20 ml-2 p-2"
                           variant="ghost"
-                          style={{ minWidth: '48px', minHeight: '48px' }}
+                          style={{ minWidth: '38px', minHeight: '38px' }}
                         >
-                          <Plus style={{ width: '48px', height: '48px' }} strokeWidth={4} />
+                          <Plus style={{ width: '38px', height: '38px' }} strokeWidth={2} />
                         </Button>
                       </h3>
                       <div className="flex items-center gap-3">
@@ -1799,11 +1799,11 @@ ${emailMessage}`;
                       {additionalWorkers.map((worker, index) => (
                         <div key={index} className="flex flex-wrap gap-2 items-end">
                           <div className="flex-1 min-w-0">
-                            <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Employee Name</label>
+                            <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Name</label>
                             <Input
                               value={worker.name}
                               onChange={(e) => updateAdditionalWorker(index, 'name', e.target.value)}
-                              placeholder="Enter full employee name"
+                              placeholder="Employee name"
                               className="bg-gray-800 border-blue-400 text-white w-full"
                             />
                           </div>
@@ -1866,9 +1866,9 @@ ${emailMessage}`;
                           onClick={addAdditionalService}
                           className="text-blue-400 bg-transparent hover:bg-blue-400/20 ml-2 p-2"
                           variant="ghost"
-                          style={{ minWidth: '48px', minHeight: '48px' }}
+                          style={{ minWidth: '38px', minHeight: '38px' }}
                         >
-                          <Plus style={{ width: '48px', height: '48px' }} strokeWidth={4} />
+                          <Plus style={{ width: '38px', height: '38px' }} strokeWidth={2} />
                         </Button>
                       </h3>
                       <div className="flex items-center gap-3">
@@ -1903,7 +1903,7 @@ ${emailMessage}`;
                             <Input
                               value={service.name}
                               onChange={(e) => updateAdditionalService(index, 'name', e.target.value)}
-                              placeholder="Enter detailed service description"
+                              placeholder="Service description"
                               className="bg-gray-800 border-blue-400 text-white w-full"
                             />
                           </div>
