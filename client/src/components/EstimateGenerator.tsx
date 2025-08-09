@@ -986,62 +986,54 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                       </div>
                     </div>
                     
+                    {/* Headers */}
+                    <div className="grid grid-cols-12 gap-4 mb-4 text-gray-300 text-sm font-medium">
+                      <div className="col-span-6">Name</div>
+                      <div className="col-span-2">Hours</div>
+                      <div className="col-span-2">Rate</div>
+                      <div className="col-span-2"></div>
+                    </div>
+                    
                     {additionalLabor.map((labor, index) => (
-                      <div key={index} className="space-y-4 mb-6 p-4 bg-gray-800/50 rounded-lg border border-[#569CD6]/20">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-400">Worker {index + 1}</span>
+                      <div key={index} className="grid grid-cols-12 gap-4 mb-4">
+                        <div className="col-span-6">
+                          <Input
+                            value={labor.name}
+                            onChange={(e) => updateAdditionalLabor(index, 'name', e.target.value)}
+                            placeholder="Employee name"
+                            className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6]"
+                          />
+                        </div>
+                        <div className="col-span-2">
+                          <Input
+                            type="number"
+                            step="0.5"
+                            value={labor.hours}
+                            onChange={(e) => updateAdditionalLabor(index, 'hours', e.target.value)}
+                            placeholder="0"
+                            className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6]"
+                          />
+                        </div>
+                        <div className="col-span-2">
+                          <Input
+                            type="number"
+                            value={labor.rate}
+                            onChange={(e) => updateAdditionalLabor(index, 'rate', e.target.value)}
+                            placeholder="0"
+                            className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6]"
+                          />
+                        </div>
+                        <div className="col-span-2 flex justify-end">
                           {additionalLabor.length > 1 && (
                             <Button
                               onClick={() => removeLabor(index)}
                               variant="ghost"
                               size="sm"
-                              className="text-red-400 hover:text-red-300 h-6 w-6 p-0"
+                              className="text-red-400 hover:text-red-300 h-10 w-10 p-0"
                             >
                               <X className="w-4 h-4" />
                             </Button>
                           )}
-                        </div>
-                        
-                        <div className="space-y-4">
-                          <div>
-                            <label className="block text-sm font-medium mb-2 text-gray-300">Name</label>
-                            <Input
-                              value={labor.name}
-                              onChange={(e) => updateAdditionalLabor(index, 'name', e.target.value)}
-                              placeholder="Employee name"
-                              className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6]"
-                            />
-                          </div>
-                          
-                          <div>
-                            <label className="block text-sm font-medium mb-2 text-gray-300">Hours</label>
-                            <Input
-                              type="number"
-                              step="0.5"
-                              value={labor.hours}
-                              onChange={(e) => updateAdditionalLabor(index, 'hours', e.target.value)}
-                              placeholder="0"
-                              className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6]"
-                            />
-                          </div>
-                          
-                          <div>
-                            <label className="block text-sm font-medium mb-2 text-gray-300">Rate</label>
-                            <Input
-                              type="number"
-                              value={labor.rate}
-                              onChange={(e) => updateAdditionalLabor(index, 'rate', e.target.value)}
-                              placeholder="0"
-                              className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6]"
-                            />
-                          </div>
-                          
-                          <div>
-                            <label className="block text-sm font-medium mb-2 text-gray-300">Total</label>
-                            <div className="bg-gray-800 border border-[#569CD6]/30 rounded px-3 py-2 text-[#569CD6] font-semibold">
-                              ${((parseFloat(labor.hours) || 0) * (parseFloat(labor.rate.toString()) || 0)).toFixed(2)}
-                            </div>
-                          </div>
                         </div>
                       </div>
                     ))}
@@ -1076,59 +1068,51 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                       </div>
                     </div>
                     
+                    {/* Headers */}
+                    <div className="grid grid-cols-12 gap-4 mb-4 text-gray-300 text-sm font-medium">
+                      <div className="col-span-6">Service</div>
+                      <div className="col-span-2">Hours</div>
+                      <div className="col-span-2">Rate/Hour</div>
+                      <div className="col-span-2"></div>
+                    </div>
+                    
                     {additionalServices.map((service, index) => (
-                      <div key={index} className="space-y-4 mb-6 p-4 bg-gray-800/50 rounded-lg border border-[#569CD6]/20">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-400">Service {index + 1}</span>
+                      <div key={index} className="grid grid-cols-12 gap-4 mb-4">
+                        <div className="col-span-6">
+                          <Input
+                            value={service.name}
+                            onChange={(e) => updateAdditionalService(index, 'name', e.target.value)}
+                            className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6]"
+                          />
+                        </div>
+                        <div className="col-span-2">
+                          <Input
+                            type="number"
+                            step="0.5"
+                            value={service.hours}
+                            onChange={(e) => updateAdditionalService(index, 'hours', e.target.value)}
+                            className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6]"
+                          />
+                        </div>
+                        <div className="col-span-2">
+                          <Input
+                            type="number"
+                            value={service.rate}
+                            onChange={(e) => updateAdditionalService(index, 'rate', e.target.value)}
+                            className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6]"
+                          />
+                        </div>
+                        <div className="col-span-2 flex justify-end">
                           {additionalServices.length > 1 && (
                             <Button
                               onClick={() => removeAdditionalService(index)}
                               variant="ghost"
                               size="sm"
-                              className="text-red-400 hover:text-red-300 h-6 w-6 p-0"
+                              className="text-red-400 hover:text-red-300 h-10 w-10 p-0"
                             >
                               <X className="w-4 h-4" />
                             </Button>
                           )}
-                        </div>
-                        
-                        <div className="space-y-4">
-                          <div>
-                            <label className="block text-sm font-medium mb-2 text-gray-300">Service</label>
-                            <Input
-                              value={service.name}
-                              onChange={(e) => updateAdditionalService(index, 'name', e.target.value)}
-                              className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6]"
-                            />
-                          </div>
-                          
-                          <div>
-                            <label className="block text-sm font-medium mb-2 text-gray-300">Hours</label>
-                            <Input
-                              type="number"
-                              step="0.5"
-                              value={service.hours}
-                              onChange={(e) => updateAdditionalService(index, 'hours', e.target.value)}
-                              className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6]"
-                            />
-                          </div>
-                          
-                          <div>
-                            <label className="block text-sm font-medium mb-2 text-gray-300">Rate/Hour</label>
-                            <Input
-                              type="number"
-                              value={service.rate}
-                              onChange={(e) => updateAdditionalService(index, 'rate', e.target.value)}
-                              className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6]"
-                            />
-                          </div>
-                          
-                          <div>
-                            <label className="block text-sm font-medium mb-2 text-gray-300">Total</label>
-                            <div className="bg-gray-800 border border-[#569CD6]/30 rounded px-3 py-2 text-[#569CD6] font-semibold">
-                              ${((parseFloat(service.hours) || 0) * (parseFloat(service.rate.toString()) || 0)).toFixed(2)}
-                            </div>
-                          </div>
                         </div>
                       </div>
                     ))}
