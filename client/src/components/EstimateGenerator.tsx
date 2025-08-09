@@ -880,22 +880,22 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="w-[95vw] max-w-4xl max-h-[95vh] overflow-y-auto bg-gray-900 border-gray-700 text-white">
+        <DialogContent className="w-[98vw] sm:w-[95vw] max-w-sm sm:max-w-4xl max-h-[95vh] overflow-y-auto bg-gray-900 border-gray-700 text-white">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-center text-[#8B5FBF]">
+            <DialogTitle className="text-xl sm:text-2xl font-bold text-center text-[#8B5FBF]">
               Generate Estimate
             </DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-6 p-4 sm:p-6">
+          <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 md:p-6">
             {/* Estimate Details Section */}
-            <div className="border-2 border-[#E53E3E] rounded-lg p-4 bg-gray-800/50">
-              <h3 className="text-[#E53E3E] text-lg font-semibold mb-4 flex items-center">
+            <div className="border-2 border-[#E53E3E] rounded-lg p-2 sm:p-4 bg-gray-800/50">
+              <h3 className="text-[#E53E3E] text-base sm:text-lg font-semibold mb-3 sm:mb-4 flex items-center">
                 <Calendar className="w-5 h-5 mr-2" />
                 Estimate Information
               </h3>
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-3 sm:space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <label className="block text-sm font-medium mb-2 text-gray-300">Project Title</label>
                     <Input
@@ -933,13 +933,13 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                 className="flex items-center justify-between cursor-pointer p-3"
                 onClick={() => toggleSection('servicesLabor')}
               >
-                <h3 className="text-[#569CD6] text-lg font-semibold">Services & Labor</h3>
+                <h3 className="text-[#569CD6] text-base sm:text-lg font-semibold">Services & Labor</h3>
                 <ChevronDown className={`w-5 h-5 text-[#569CD6] transition-transform ${expandedSections.servicesLabor ? 'rotate-180' : ''}`} />
               </div>
               {expandedSections.servicesLabor && (
-                <div className="space-y-6 p-4 border-t border-[#569CD6]/30">
+                <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 border-t border-[#569CD6]/30">
                   {/* Primary Services */}
-                  <div className="border rounded-lg p-2 space-y-4" style={{ borderColor: '#569CD6', backgroundColor: '#569CD610' }}>
+                  <div className="border rounded-lg p-1 sm:p-2 space-y-3 sm:space-y-4" style={{ borderColor: '#569CD6', backgroundColor: '#569CD610' }}>
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="text-lg font-semibold flex items-center" style={{ color: '#569CD6' }}>
                         <Wrench className="mr-2 h-4 w-4" />
@@ -1013,7 +1013,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                   </div>
 
                   {/* Additional Labor/Crew */}
-                  <div className="border rounded-lg p-2 space-y-4" style={{ borderColor: '#569CD6', backgroundColor: '#569CD610' }}>
+                  <div className="border rounded-lg p-1 sm:p-2 space-y-3 sm:space-y-4" style={{ borderColor: '#569CD6', backgroundColor: '#569CD610' }}>
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="text-lg font-semibold flex items-center" style={{ color: '#569CD6' }}>
                         <Users className="mr-2 h-4 w-4" />
@@ -1115,7 +1115,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                   </div>
 
                   {/* Additional Services */}
-                  <div className="border rounded-lg p-2 space-y-4" style={{ borderColor: '#569CD6', backgroundColor: '#569CD610' }}>
+                  <div className="border rounded-lg p-1 sm:p-2 space-y-3 sm:space-y-4" style={{ borderColor: '#569CD6', backgroundColor: '#569CD610' }}>
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="text-lg font-semibold flex items-center" style={{ color: '#569CD6' }}>
                         <Settings className="mr-2 h-4 w-4" />
