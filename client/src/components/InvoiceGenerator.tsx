@@ -393,8 +393,10 @@ cortespainter@gmail.com`;
       // Switch to preset services
       setAdditionalServices([...presetServices]);
     } else {
-      // Switch to empty default services with rate cleared to 0
-      setAdditionalServices([{ name: '', hours: '', rate: 0 }]);
+      // Switch to default mode - update existing services to have rate 0
+      setAdditionalServices(prev => 
+        prev.map(service => ({ ...service, rate: 0 }))
+      );
     }
   }, [servicesMode, presetServices]);
 
