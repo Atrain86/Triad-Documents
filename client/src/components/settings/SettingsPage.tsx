@@ -792,7 +792,19 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                     </button>
                                   </div>
                                   
-                                  {/* Size Controls - Spread Across Container Width */}
+                                  {/* Down Arrow - Above Plus Button */}
+                                  <div className="absolute bottom-20 right-8">
+                                    <button
+                                      onClick={moveLogoDown}
+                                      disabled={logoVerticalPosition >= 50}
+                                      className="text-green-500 hover:text-green-400 disabled:text-gray-600 disabled:cursor-not-allowed transition-colors p-2"
+                                      title="Move down (2px)"
+                                    >
+                                      <ArrowDown className="h-6 w-6" />
+                                    </button>
+                                  </div>
+                                  
+                                  {/* Size Controls - Horizontally Aligned */}
                                   <div className="absolute bottom-8 left-8 right-8 flex items-center justify-between">
                                     {/* Minus Button - Left Side */}
                                     <button
@@ -815,33 +827,21 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                       {logoScale}%
                                     </div>
                                     
-                                    {/* Plus Button and Down Arrow - Right Side Stack */}
-                                    <div className="flex flex-col items-center">
-                                      <button
-                                        onClick={(e) => {
-                                          e.preventDefault();
-                                          e.stopPropagation();
-                                          console.log('AGGRESSIVE INCREASE CLICKED');
-                                          const newVal = logoScale + 5;
-                                          if (newVal <= 500) updateLogoScale(newVal);
-                                        }}
-                                        className="text-blue-500 hover:text-blue-400 transition-colors p-2"
-                                        title="Increase size (5%)"
-                                        type="button"
-                                      >
-                                        <Plus className="h-6 w-6" />
-                                      </button>
-                                      
-                                      {/* Down Arrow - Directly Under Plus */}
-                                      <button
-                                        onClick={moveLogoDown}
-                                        disabled={logoVerticalPosition >= 50}
-                                        className="text-green-500 hover:text-green-400 disabled:text-gray-600 disabled:cursor-not-allowed transition-colors p-2"
-                                        title="Move down (2px)"
-                                      >
-                                        <ArrowDown className="h-6 w-6" />
-                                      </button>
-                                    </div>
+                                    {/* Plus Button - Right Side */}
+                                    <button
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        console.log('AGGRESSIVE INCREASE CLICKED');
+                                        const newVal = logoScale + 5;
+                                        if (newVal <= 500) updateLogoScale(newVal);
+                                      }}
+                                      className="text-blue-500 hover:text-blue-400 transition-colors p-2"
+                                      title="Increase size (5%)"
+                                      type="button"
+                                    >
+                                      <Plus className="h-6 w-6" />
+                                    </button>
                                   </div>
                                   
 
