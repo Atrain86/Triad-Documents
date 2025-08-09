@@ -780,28 +780,21 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                     />
                                   </div>
                                   
-                                  {/* Vertical Position Controls - Far Right, Centered on Logo Area */}
-                                  <div className="absolute right-8 top-32 flex flex-col gap-3">
+                                  {/* Up Arrow - Positioned Higher for More Logo Space */}
+                                  <div className="absolute right-12 top-16">
                                     <button
                                       onClick={moveLogoUp}
                                       disabled={logoVerticalPosition <= -50}
-                                      className="w-10 h-10 rounded-full bg-green-500 hover:bg-green-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors shadow-lg"
+                                      className="text-green-500 hover:text-green-400 disabled:text-gray-600 disabled:cursor-not-allowed transition-colors p-2"
                                       title="Move up (2px)"
                                     >
-                                      <ArrowUp className="h-5 w-5" />
-                                    </button>
-                                    <button
-                                      onClick={moveLogoDown}
-                                      disabled={logoVerticalPosition >= 50}
-                                      className="w-10 h-10 rounded-full bg-green-500 hover:bg-green-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors shadow-lg"
-                                      title="Move down (2px)"
-                                    >
-                                      <ArrowDown className="h-5 w-5" />
+                                      <ArrowUp className="h-6 w-6" />
                                     </button>
                                   </div>
                                   
-                                  {/* Size Controls - Bottom Area with More Space */}
-                                  <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex items-center gap-4">
+                                  {/* Size Controls - Spread Across Container Width */}
+                                  <div className="absolute bottom-8 left-8 right-8 flex items-center justify-between">
+                                    {/* Minus Button - Left Side */}
                                     <button
                                       onClick={(e) => {
                                         e.preventDefault();
@@ -810,29 +803,45 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                         const newVal = logoScale - 5;
                                         if (newVal >= 25) updateLogoScale(newVal);
                                       }}
-                                      className="w-12 h-12 rounded-full bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center transition-colors shadow-lg active:bg-blue-700"
+                                      className="text-blue-500 hover:text-blue-400 transition-colors p-2"
                                       title="Decrease size (5%)"
                                       type="button"
                                     >
                                       <Minus className="h-6 w-6" />
                                     </button>
+                                    
+                                    {/* Percentage Display - Center */}
                                     <div className="text-lg text-gray-300 min-w-[60px] text-center font-medium px-4 py-2 bg-gray-800 rounded-lg border">
                                       {logoScale}%
                                     </div>
-                                    <button
-                                      onClick={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        console.log('AGGRESSIVE INCREASE CLICKED');
-                                        const newVal = logoScale + 5;
-                                        if (newVal <= 500) updateLogoScale(newVal);
-                                      }}
-                                      className="w-12 h-12 rounded-full bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center transition-colors shadow-lg active:bg-blue-700"
-                                      title="Increase size (5%)"
-                                      type="button"
-                                    >
-                                      <Plus className="h-6 w-6" />
-                                    </button>
+                                    
+                                    {/* Plus Button and Down Arrow - Right Side Stack */}
+                                    <div className="flex flex-col items-center">
+                                      <button
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          e.stopPropagation();
+                                          console.log('AGGRESSIVE INCREASE CLICKED');
+                                          const newVal = logoScale + 5;
+                                          if (newVal <= 500) updateLogoScale(newVal);
+                                        }}
+                                        className="text-blue-500 hover:text-blue-400 transition-colors p-2"
+                                        title="Increase size (5%)"
+                                        type="button"
+                                      >
+                                        <Plus className="h-6 w-6" />
+                                      </button>
+                                      
+                                      {/* Down Arrow - Directly Under Plus */}
+                                      <button
+                                        onClick={moveLogoDown}
+                                        disabled={logoVerticalPosition >= 50}
+                                        className="text-green-500 hover:text-green-400 disabled:text-gray-600 disabled:cursor-not-allowed transition-colors p-2"
+                                        title="Move down (2px)"
+                                      >
+                                        <ArrowDown className="h-6 w-6" />
+                                      </button>
+                                    </div>
                                   </div>
                                   
 
