@@ -1189,23 +1189,28 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             >
               <CardTitle className="text-[#3182CE] flex items-center justify-between">
                 Additional Labor
-                {expandedSections.additionalLabor ? (
-                  <ChevronDown className="w-5 h-5 text-[#3182CE]" />
-                ) : (
-                  <ChevronLeft className="w-5 h-5 text-[#3182CE]" />
-                )}
+                <div className="flex items-center">
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      addLabor();
+                    }}
+                    size="sm"
+                    className="bg-transparent hover:bg-[#3182CE]/20 text-[#3182CE] p-1 mr-2"
+                    variant="ghost"
+                  >
+                    <Plus className="w-8 h-8 font-bold" strokeWidth={3} />
+                  </Button>
+                  {expandedSections.additionalLabor ? (
+                    <ChevronDown className="w-5 h-5 text-[#3182CE]" />
+                  ) : (
+                    <ChevronLeft className="w-5 h-5 text-[#3182CE]" />
+                  )}
+                </div>
               </CardTitle>
             </CardHeader>
             {expandedSections.additionalLabor && (
               <CardContent className="space-y-4">
-              <Button
-                onClick={addLabor}
-                size="sm"
-                className="bg-[#3182CE] hover:bg-[#2C6CB8] text-white"
-              >
-                <Plus className="w-4 h-4 mr-1" />
-                Add Crew
-              </Button>
               {additionalLabor.map((member: any, index: number) => (
                 <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-800 rounded-lg border border-[#3182CE]">
                   <div>
@@ -1275,23 +1280,28 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             >
               <CardTitle className="text-[#8B5FBF] flex items-center justify-between">
                 Additional Services
-                {expandedSections.additionalServices ? (
-                  <ChevronDown className="w-5 h-5 text-[#8B5FBF]" />
-                ) : (
-                  <ChevronLeft className="w-5 h-5 text-[#8B5FBF]" />
-                )}
+                <div className="flex items-center">
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      addAdditionalService();
+                    }}
+                    size="sm"
+                    className="bg-transparent hover:bg-[#8B5FBF]/20 text-[#8B5FBF] p-1 mr-2"
+                    variant="ghost"
+                  >
+                    <Plus className="w-8 h-8 font-bold" strokeWidth={3} />
+                  </Button>
+                  {expandedSections.additionalServices ? (
+                    <ChevronDown className="w-5 h-5 text-[#8B5FBF]" />
+                  ) : (
+                    <ChevronLeft className="w-5 h-5 text-[#8B5FBF]" />
+                  )}
+                </div>
               </CardTitle>
             </CardHeader>
             {expandedSections.additionalServices && (
               <CardContent className="space-y-4">
-              <Button
-                onClick={addAdditionalService}
-                size="sm"
-                className="bg-[#8B5FBF] hover:bg-[#7A54A8] text-white px-3 py-1"
-              >
-                <Plus className="w-5 h-5 mr-1" />
-                Services
-              </Button>
               {additionalServices.map((service: any, index: number) => (
                 <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-800 rounded-lg border border-[#8B5FBF]">
                   <div>
