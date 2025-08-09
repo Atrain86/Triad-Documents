@@ -2312,7 +2312,7 @@ ${emailMessage}`;
               </div>
               <div className="text-right">
                 <p><strong>Invoice #:</strong> {invoiceData.invoiceNumber}</p>
-                <p><strong>Date:</strong> {invoiceData.date.replace('2025-', '').replace(/-/g, '/')}</p>
+                <p><strong>Date:</strong> {invoiceData.date.replace(/-/g, '/')}</p>
               </div>
             </div>
 
