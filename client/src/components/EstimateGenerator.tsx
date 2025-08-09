@@ -146,9 +146,13 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     return defaults;
   });
 
+  // Toggle states for workers and services mode
+  const [workersMode, setWorkersMode] = useState<'default' | 'custom'>('default');
+  const [servicesMode, setServicesMode] = useState<'default' | 'custom'>('default');
+
   // Additional labor (crew members) - This was missing!
   const [additionalLabor, setAdditionalLabor] = useState(savedData.additionalLabor || [
-    { name: '', hours: '', rate: '' }
+    { name: '', hours: '', rate: 0 }
   ]);
 
   // Custom supplies state
@@ -244,8 +248,9 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   }, []);
 
   const addLabor = useCallback(() => {
-    setAdditionalLabor((prev: any) => [...prev, { name: '', hours: '', rate: '' }]);
-  }, []);
+    const defaultRate = workersMode === 'default' ? 0 : 60;
+    setAdditionalLabor((prev: any) => [...prev, { name: '', hours: '', rate: defaultRate }]);
+  }, [workersMode]);
 
   const updateCustomSupply = useCallback((index: number, field: string, value: string) => {
     setCustomSupplies((prev: any) => {
@@ -264,11 +269,23 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   }, []);
 
   const removeLabor = useCallback((index: number) => {
-    setAdditionalLabor((prev: any) => prev.length > 1 ? prev.filter((_: any, i: number) => i !== index) : prev);
-  }, []);
+    if (workersMode === 'default' || index >= 1) {
+      setAdditionalLabor((prev: any) => prev.filter((_: any, i: number) => i !== index));
+    }
+  }, [workersMode]);
 
   const addAdditionalService = useCallback(() => {
-    setAdditionalServices(prev => [...prev, { name: '', hours: '', rate: 60 }]);
+    const defaultRate = servicesMode === 'default' ? 0 : 60;
+    setAdditionalServices(prev => [...prev, { name: '', hours: '', rate: defaultRate }]);
+  }, [servicesMode]);
+
+  // Toggle handlers
+  const handleWorkersModeToggle = useCallback(() => {
+    setWorkersMode(prev => prev === 'default' ? 'custom' : 'default');
+  }, []);
+
+  const handleServicesModeToggle = useCallback(() => {
+    setServicesMode(prev => prev === 'default' ? 'custom' : 'default');
   }, []);
 
   const removeAdditionalService = useCallback((index: number) => {
@@ -964,25 +981,41 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                   </div>
 
                   {/* Additional Labor/Crew */}
-                  <div className="p-4 bg-gray-900/50 rounded-lg border border-[#569CD6]/30">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center space-x-3">
-                        <Users className="w-5 h-5 text-[#569CD6]" />
-                        <h4 className="text-[#569CD6] font-semibold text-lg">Additional Workers</h4>
+                  <div className="border rounded-lg p-2 space-y-4" style={{ borderColor: '#569CD6', backgroundColor: '#569CD610' }}>
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-lg font-semibold flex items-center" style={{ color: '#569CD6' }}>
+                        <Users className="mr-2 h-4 w-4" />
+                        Additional Workers
                         <Button
                           onClick={addLabor}
-                          size="lg"
-                          className="bg-[#569CD6] hover:bg-[#569CD6]/80 border-[#569CD6] h-8 w-8 p-0 rounded-sm"
+                          className="text-blue-400 bg-transparent hover:bg-blue-400/20 ml-2 p-2"
+                          variant="ghost"
+                          style={{ minWidth: '38px', minHeight: '38px' }}
                         >
-                          <Plus className="w-5 h-5" />
+                          <Plus style={{ width: '38px', height: '38px' }} strokeWidth={2} />
                         </Button>
-                      </div>
-                      <div className="flex items-center space-x-2 text-sm">
-                        <span className="text-gray-400">Default</span>
-                        <div className="w-10 h-5 bg-gray-600 rounded-full relative cursor-pointer">
-                          <div className="w-4 h-4 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform duration-200"></div>
+                      </h3>
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
+                          <span className={`text-xs font-medium ${workersMode === 'default' ? 'text-blue-400' : 'text-gray-500'}`}>
+                            Default
+                          </span>
+                          <button
+                            onClick={handleWorkersModeToggle}
+                            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 ${
+                              workersMode === 'custom' ? 'bg-yellow-600' : 'bg-gray-600'
+                            }`}
+                          >
+                            <span
+                              className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+                                workersMode === 'custom' ? 'translate-x-5' : 'translate-x-1'
+                              }`}
+                            />
+                          </button>
+                          <span className={`text-xs font-medium ${workersMode === 'custom' ? 'text-yellow-400' : 'text-gray-500'}`}>
+                            Custom
+                          </span>
                         </div>
-                        <span className="text-gray-400">Custom</span>
                       </div>
                     </div>
                     
@@ -1046,25 +1079,41 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                   </div>
 
                   {/* Additional Services */}
-                  <div className="p-4 bg-gray-900/50 rounded-lg border border-[#569CD6]/30">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center space-x-3">
-                        <Settings className="w-5 h-5 text-[#569CD6]" />
-                        <h4 className="text-[#569CD6] font-semibold text-lg">Additional Services</h4>
+                  <div className="border rounded-lg p-2 space-y-4" style={{ borderColor: '#569CD6', backgroundColor: '#569CD610' }}>
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-lg font-semibold flex items-center" style={{ color: '#569CD6' }}>
+                        <Settings className="mr-2 h-4 w-4" />
+                        Additional Services
                         <Button
                           onClick={addAdditionalService}
-                          size="lg"
-                          className="bg-[#569CD6] hover:bg-[#569CD6]/80 border-[#569CD6] h-8 w-8 p-0 rounded-sm"
+                          className="text-blue-400 bg-transparent hover:bg-blue-400/20 ml-2 p-2"
+                          variant="ghost"
+                          style={{ minWidth: '38px', minHeight: '38px' }}
                         >
-                          <Plus className="w-5 h-5" />
+                          <Plus style={{ width: '38px', height: '38px' }} strokeWidth={2} />
                         </Button>
-                      </div>
-                      <div className="flex items-center space-x-2 text-sm">
-                        <span className="text-gray-400">Default</span>
-                        <div className="w-10 h-5 bg-gray-600 rounded-full relative cursor-pointer">
-                          <div className="w-4 h-4 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform duration-200"></div>
+                      </h3>
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
+                          <span className={`text-xs font-medium ${servicesMode === 'default' ? 'text-blue-400' : 'text-gray-500'}`}>
+                            Default
+                          </span>
+                          <button
+                            onClick={handleServicesModeToggle}
+                            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 ${
+                              servicesMode === 'custom' ? 'bg-yellow-600' : 'bg-gray-600'
+                            }`}
+                          >
+                            <span
+                              className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+                                servicesMode === 'custom' ? 'translate-x-5' : 'translate-x-1'
+                              }`}
+                            />
+                          </button>
+                          <span className={`text-xs font-medium ${servicesMode === 'custom' ? 'text-yellow-400' : 'text-gray-500'}`}>
+                            Custom
+                          </span>
                         </div>
-                        <span className="text-gray-400">Custom</span>
                       </div>
                     </div>
                     
