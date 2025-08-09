@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
-import { Download, Mail, Plus, Trash2, ChevronDown, ChevronUp, User, MapPin, Phone, Calendar } from 'lucide-react';
+import { Download, Mail, Plus, Trash2, ChevronDown, ChevronUp, User, MapPin, Phone, Calendar, Clock } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { apiRequest } from '@/lib/queryClient';
