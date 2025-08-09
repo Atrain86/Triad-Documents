@@ -350,10 +350,21 @@ cortespainter@gmail.com`;
     return [{ name: '', hours: '', rate: 60 }];
   });
 
+  // Additional workers toggle state
+  const [workersMode, setWorkersMode] = React.useState<'default' | 'custom'>('default');
+  
+  // Preset workers for custom mode
+  const presetWorkers = [
+    { name: 'Apprentice', hours: '', rate: 45 },
+    { name: 'Helper', hours: '', rate: 25 },
+    { name: 'Subcontractor', hours: '', rate: 50 }
+  ];
+
   // Additional workers state
-  const [additionalWorkers, setAdditionalWorkers] = React.useState([
-    { name: '', hours: '', rate: '' }
-  ]);
+  const [additionalWorkers, setAdditionalWorkers] = React.useState(() => {
+    // Start with default mode - empty workers
+    return [{ name: '', hours: '', rate: 0 }];
+  });
 
   // Helper functions for additional services
   const updateAdditionalService = React.useCallback((index: number, field: string, value: string) => {
@@ -365,8 +376,9 @@ cortespainter@gmail.com`;
   }, []);
 
   const addAdditionalService = React.useCallback(() => {
-    setAdditionalServices(prev => [...prev, { name: '', hours: '', rate: 60 }]);
-  }, []);
+    const defaultRate = servicesMode === 'default' ? 0 : 60;
+    setAdditionalServices(prev => [...prev, { name: '', hours: '', rate: defaultRate }]);
+  }, [servicesMode]);
 
   const removeAdditionalService = React.useCallback((index: number) => {
     if (servicesMode === 'default' || index >= 3) {
@@ -383,8 +395,8 @@ cortespainter@gmail.com`;
       // Switch to preset services
       setAdditionalServices([...presetServices]);
     } else {
-      // Switch to empty default services
-      setAdditionalServices([{ name: '', hours: '', rate: 60 }]);
+      // Switch to empty default services with rate cleared to 0
+      setAdditionalServices([{ name: '', hours: '', rate: 0 }]);
     }
   }, [servicesMode, presetServices]);
 
@@ -398,14 +410,29 @@ cortespainter@gmail.com`;
   }, []);
 
   const addAdditionalWorker = React.useCallback(() => {
-    setAdditionalWorkers(prev => [...prev, { name: '', hours: '', rate: '' }]);
-  }, []);
+    const defaultRate = workersMode === 'default' ? 0 : 60;
+    setAdditionalWorkers(prev => [...prev, { name: '', hours: '', rate: defaultRate }]);
+  }, [workersMode]);
 
   const removeAdditionalWorker = React.useCallback((index: number) => {
-    if (additionalWorkers.length > 1) {
+    if (workersMode === 'default' || index >= 3) {
       setAdditionalWorkers(prev => prev.filter((_, i) => i !== index));
     }
-  }, [additionalWorkers.length]);
+  }, [workersMode]);
+
+  // Handle workers mode toggle
+  const handleWorkersModeToggle = React.useCallback(() => {
+    const newMode = workersMode === 'default' ? 'custom' : 'default';
+    setWorkersMode(newMode);
+    
+    if (newMode === 'custom') {
+      // Switch to preset workers
+      setAdditionalWorkers([...presetWorkers]);
+    } else {
+      // Switch to empty default workers with rate cleared to 0
+      setAdditionalWorkers([{ name: '', hours: '', rate: 0 }]);
+    }
+  }, [workersMode, presetWorkers]);
 
   // Calculate additional services subtotal
   const additionalServicesSubtotal = React.useMemo(() => {
@@ -1738,15 +1765,38 @@ ${emailMessage}`;
                         <Users className="mr-2 h-4 w-4" />
                         Additional Workers
                       </h3>
-                      <Button
-                        onClick={addAdditionalWorker}
-                        size="xs"
-                        className="text-blue-400 border-blue-400 bg-transparent hover:bg-blue-400 hover:text-white px-2 py-1 text-xs"
-                        variant="outline"
-                      >
-                        <Plus className="h-3 w-3 mr-1" />
-                        Worker
-                      </Button>
+                      <div className="flex items-center gap-3">
+                        {/* Toggle Switch */}
+                        <div className="flex items-center gap-2">
+                          <span className={`text-xs font-medium ${workersMode === 'default' ? 'text-blue-400' : 'text-gray-500'}`}>
+                            Default
+                          </span>
+                          <button
+                            onClick={handleWorkersModeToggle}
+                            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 ${
+                              workersMode === 'custom' ? 'bg-yellow-600' : 'bg-gray-600'
+                            }`}
+                          >
+                            <span
+                              className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+                                workersMode === 'custom' ? 'translate-x-5' : 'translate-x-1'
+                              }`}
+                            />
+                          </button>
+                          <span className={`text-xs font-medium ${workersMode === 'custom' ? 'text-yellow-400' : 'text-gray-500'}`}>
+                            Custom
+                          </span>
+                        </div>
+                        <Button
+                          onClick={addAdditionalWorker}
+                          size="xs"
+                          className="text-blue-400 border-blue-400 bg-transparent hover:bg-blue-400 hover:text-white px-2 py-1 text-xs"
+                          variant="outline"
+                        >
+                          <Plus className="h-3 w-3 mr-1" />
+                          Worker
+                        </Button>
+                      </div>
                     </div>
                     <div className="space-y-3">
                       {additionalWorkers.map((worker, index) => (
@@ -1788,7 +1838,7 @@ ${emailMessage}`;
                               className="bg-gray-800 border-blue-400 text-white text-center w-14"
                             />
                           </div>
-                          {additionalWorkers.length > 1 && (
+                          {(workersMode === 'default' || index >= 3) && (
                             <Button
                               onClick={() => removeAdditionalWorker(index)}
                               size="sm"
@@ -1824,8 +1874,8 @@ ${emailMessage}`;
                           </span>
                           <button
                             onClick={handleServicesModeToggle}
-                            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                              servicesMode === 'custom' ? 'bg-blue-600' : 'bg-gray-600'
+                            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 ${
+                              servicesMode === 'custom' ? 'bg-yellow-600' : 'bg-gray-600'
                             }`}
                           >
                             <span
@@ -1834,7 +1884,7 @@ ${emailMessage}`;
                               }`}
                             />
                           </button>
-                          <span className={`text-xs font-medium ${servicesMode === 'custom' ? 'text-blue-400' : 'text-gray-500'}`}>
+                          <span className={`text-xs font-medium ${servicesMode === 'custom' ? 'text-yellow-400' : 'text-gray-500'}`}>
                             Custom
                           </span>
                         </div>
