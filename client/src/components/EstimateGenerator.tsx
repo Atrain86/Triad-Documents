@@ -911,16 +911,16 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             </div>
 
             {/* Services & Labor Section */}
-            <div className="border-2 border-[#569CD6] rounded-lg p-4 bg-gray-800/50">
+            <div className="border-2 border-[#569CD6] rounded-lg bg-gray-800/50">
               <div 
-                className="flex items-center justify-between cursor-pointer mb-3"
+                className="flex items-center justify-between cursor-pointer p-3"
                 onClick={() => toggleSection('servicesLabor')}
               >
                 <h3 className="text-[#569CD6] text-lg font-semibold">Services & Labor</h3>
                 <ChevronDown className={`w-5 h-5 text-[#569CD6] transition-transform ${expandedSections.servicesLabor ? 'rotate-180' : ''}`} />
               </div>
               {expandedSections.servicesLabor && (
-                <div className="space-y-4">
+                <div className="space-y-4 p-4 border-t border-[#569CD6]/30">
                   {workStages.map((stage, index) => (
                     <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-900/50 rounded-lg border border-[#569CD6]/30">
                       <div>
@@ -968,16 +968,16 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             </div>
 
             {/* Additional Labor Section */}
-            <div className="border-2 border-[#569CD6] rounded-lg p-4 bg-gray-800/50">
+            <div className="border-2 border-[#569CD6] rounded-lg bg-gray-800/50">
               <div 
-                className="flex items-center justify-between cursor-pointer mb-3"
+                className="flex items-center justify-between cursor-pointer p-3"
                 onClick={() => toggleSection('additionalLabor')}
               >
                 <h3 className="text-[#569CD6] text-lg font-semibold">Additional Labor/Crew</h3>
                 <ChevronDown className={`w-5 h-5 text-[#569CD6] transition-transform ${expandedSections.additionalLabor ? 'rotate-180' : ''}`} />
               </div>
               {expandedSections.additionalLabor && (
-                <div className="space-y-4">
+                <div className="space-y-4 p-4 border-t border-[#569CD6]/30">
                   {additionalLabor.map((labor, index) => (
                     <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-900/50 rounded-lg border border-[#569CD6]/30">
                       <div>
@@ -1044,16 +1044,16 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             </div>
 
             {/* Paint & Materials Section */}
-            <div className="border-2 border-[#D4AC0D] rounded-lg p-4 bg-gray-800/50">
+            <div className="border-2 border-[#D4AC0D] rounded-lg bg-gray-800/50">
               <div 
-                className="flex items-center justify-between cursor-pointer mb-3"
+                className="flex items-center justify-between cursor-pointer p-3"
                 onClick={() => toggleSection('paintMaterials')}
               >
                 <h3 className="text-[#D4AC0D] text-lg font-semibold">Paint & Materials</h3>
                 <ChevronDown className={`w-5 h-5 text-[#D4AC0D] transition-transform ${expandedSections.paintMaterials ? 'rotate-180' : ''}`} />
               </div>
               {expandedSections.paintMaterials && (
-                <div className="space-y-4">
+                <div className="space-y-4 p-4 border-t border-[#D4AC0D]/30">
                   {/* Paint Costs */}
                   <div className="p-4 bg-gray-900/50 rounded-lg border border-[#D4AC0D]/30">
                     <h4 className="text-[#D4AC0D] font-semibold mb-3">Paint</h4>
@@ -1209,16 +1209,16 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             </div>
 
             {/* Additional Services Section */}
-            <div className="border-2 border-[#D4AC0D] rounded-lg p-4 bg-gray-800/50">
+            <div className="border-2 border-[#D4AC0D] rounded-lg bg-gray-800/50">
               <div 
-                className="flex items-center justify-between cursor-pointer mb-3"
+                className="flex items-center justify-between cursor-pointer p-3"
                 onClick={() => toggleSection('additionalServices')}
               >
                 <h3 className="text-[#D4AC0D] text-lg font-semibold">Additional Services</h3>
                 <ChevronDown className={`w-5 h-5 text-[#D4AC0D] transition-transform ${expandedSections.additionalServices ? 'rotate-180' : ''}`} />
               </div>
               {expandedSections.additionalServices && (
-                <div className="space-y-4">
+                <div className="space-y-4 p-4 border-t border-[#D4AC0D]/30">
                   {additionalServices.map((service, index) => (
                     <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-900/50 rounded-lg border border-[#D4AC0D]/30">
                       <div>
@@ -1285,16 +1285,16 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             </div>
 
             {/* Travel Costs Section */}
-            <div className="border-2 border-[#6A9955] rounded-lg p-4 bg-gray-800/50">
+            <div className="border-2 border-[#6A9955] rounded-lg bg-gray-800/50">
               <div 
-                className="flex items-center justify-between cursor-pointer mb-3"
+                className="flex items-center justify-between cursor-pointer p-3"
                 onClick={() => toggleSection('travel')}
               >
                 <h3 className="text-[#6A9955] text-lg font-semibold">Travel Costs</h3>
                 <ChevronDown className={`w-5 h-5 text-[#6A9955] transition-transform ${expandedSections.travel ? 'rotate-180' : ''}`} />
               </div>
               {expandedSections.travel && (
-                <div className="space-y-4">
+                <div className="space-y-4 p-4 border-t border-[#6A9955]/30">
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-900/50 rounded-lg border border-[#6A9955]/30">
                     <div>
                       <label className="block text-sm font-medium mb-2 text-gray-300">Distance (km)</label>
