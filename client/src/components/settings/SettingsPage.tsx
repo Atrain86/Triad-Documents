@@ -747,7 +747,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                 
                                 {/* Large Preview Container - Enlarged for 500% scaling */}
                                 <div 
-                                  className="logo-preview-container bg-[#1a1a1a] border-2 border-[#444] rounded-lg p-8 w-full min-h-[400px] mb-4 relative"
+                                  className="logo-preview-container bg-black border-2 border-[#444] rounded-lg p-8 w-full min-h-[400px] mb-4 relative"
                                   style={{
                                     overflow: 'visible',
                                     maxWidth: 'none',
