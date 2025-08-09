@@ -346,8 +346,8 @@ cortespainter@gmail.com`;
   ];
 
   const [additionalServices, setAdditionalServices] = React.useState(() => {
-    // Start with default mode - empty services
-    return [{ name: '', hours: '', rate: 60 }];
+    // Start with default mode - empty services with rate 0
+    return [{ name: '', hours: '', rate: 0 }];
   });
 
   // Additional workers toggle state
