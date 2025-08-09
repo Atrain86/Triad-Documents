@@ -1762,6 +1762,14 @@ ${emailMessage}`;
                       <h3 className="text-lg font-semibold flex items-center" style={{ color: paintBrainColors.blue }}>
                         <Users className="mr-2 h-4 w-4" />
                         Additional Workers
+                        <Button
+                          onClick={addAdditionalWorker}
+                          size="xs"
+                          className="text-blue-400 bg-transparent hover:bg-blue-400/20 p-1 ml-2"
+                          variant="ghost"
+                        >
+                          <Plus className="h-12 w-12 font-bold" strokeWidth={3} />
+                        </Button>
                       </h3>
                       <div className="flex items-center gap-3">
                         {/* Toggle Switch */}
@@ -1781,18 +1789,10 @@ ${emailMessage}`;
                               }`}
                             />
                           </button>
-                          <span className={`text-xs font-medium ${workersMode === 'custom' ? 'text-yellow-400' : 'text-gray-500'}`}>
+                          <span className={`text-xs font-medium ${servicesMode === 'custom' ? 'text-yellow-400' : 'text-gray-500'}`}>
                             Custom
                           </span>
                         </div>
-                        <Button
-                          onClick={addAdditionalWorker}
-                          size="xs"
-                          className="text-blue-400 bg-transparent hover:bg-blue-400/20 p-1"
-                          variant="ghost"
-                        >
-                          <Plus className="h-6 w-6 font-bold" strokeWidth={3} />
-                        </Button>
                       </div>
                     </div>
                     <div className="space-y-3">
@@ -1862,6 +1862,14 @@ ${emailMessage}`;
                       <h3 className="text-lg font-semibold flex items-center" style={{ color: paintBrainColors.blue }}>
                         <Wrench className="mr-2 h-4 w-4" />
                         Additional Services
+                        <Button
+                          onClick={addAdditionalService}
+                          size="xs"
+                          className="text-blue-400 bg-transparent hover:bg-blue-400/20 p-1 ml-2"
+                          variant="ghost"
+                        >
+                          <Plus className="h-12 w-12 font-bold" strokeWidth={3} />
+                        </Button>
                       </h3>
                       <div className="flex items-center gap-3">
                         {/* Toggle Switch */}
@@ -1885,14 +1893,6 @@ ${emailMessage}`;
                             Custom
                           </span>
                         </div>
-                        <Button
-                          onClick={addAdditionalService}
-                          size="xs"
-                          className="text-blue-400 bg-transparent hover:bg-blue-400/20 p-1"
-                          variant="ghost"
-                        >
-                          <Plus className="h-6 w-6 font-bold" strokeWidth={3} />
-                        </Button>
                       </div>
                     </div>
                     <div className="space-y-3">
