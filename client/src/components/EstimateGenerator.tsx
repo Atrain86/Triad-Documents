@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
-import { Download, Mail, Plus, Trash2, Calendar, ChevronDown, ChevronLeft, Users, Settings, X } from 'lucide-react';
+import { Download, Mail, Plus, Trash2, Calendar, ChevronDown, ChevronLeft, Users, Settings, X, Wrench } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { apiRequest } from '@/lib/queryClient';
