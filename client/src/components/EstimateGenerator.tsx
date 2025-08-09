@@ -872,157 +872,154 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
           <div className="space-y-6 p-6">
             {/* Estimate Details Section */}
-            <Card className="bg-gray-800 border-gray-700">
-              <CardHeader 
-                className="cursor-pointer hover:bg-gray-750 transition-colors"
+            <div className="border-2 border-[#569CD6] rounded-lg p-6 bg-gray-800/50">
+              <div 
+                className="flex items-center justify-between cursor-pointer mb-4"
                 onClick={() => toggleSection('estimateDetails')}
               >
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-[#569CD6] text-lg">Estimate Information</CardTitle>
-                  <ChevronDown className={`w-5 h-5 transition-transform ${expandedSections.estimateDetails ? 'rotate-180' : ''}`} />
-                </div>
-              </CardHeader>
+                <h3 className="text-[#569CD6] text-lg font-semibold flex items-center">
+                  <Calendar className="w-5 h-5 mr-2" />
+                  Estimate Information
+                </h3>
+                <ChevronDown className={`w-5 h-5 text-[#569CD6] transition-transform ${expandedSections.estimateDetails ? 'rotate-180' : ''}`} />
+              </div>
               {expandedSections.estimateDetails && (
-                <CardContent className="space-y-4">
+                <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium mb-2">Project Title/Description</label>
+                      <label className="block text-sm font-medium mb-2 text-gray-300">Project Title/Description</label>
                       <Textarea
                         value={projectTitle}
                         onChange={(e) => setProjectTitle(e.target.value)}
                         placeholder="Brief description of the painting project..."
-                        className="bg-gray-700 border-gray-600 text-white min-h-[80px]"
+                        className="bg-gray-800 border-[#569CD6] text-white min-h-[80px] focus:border-[#569CD6] focus:ring-[#569CD6]"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-2">Estimate Date</label>
+                      <label className="block text-sm font-medium mb-2 text-gray-300">Estimate Date</label>
                       <div className="relative">
                         <Input
                           type="date"
                           value={estimateDate}
                           onChange={(e) => setEstimateDate(e.target.value)}
-                          className="bg-gray-700 border-gray-600 text-white"
+                          className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6]"
                         />
                         <Button
                           type="button"
                           onClick={() => setShowCalendar(true)}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 p-0 bg-[#8B5FBF] hover:bg-[#8B5FBF]/80"
+                          className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 p-0 bg-[#569CD6] hover:bg-[#569CD6]/80"
                         >
                           <Calendar className="w-3 h-3" />
                         </Button>
                       </div>
                     </div>
                   </div>
-                </CardContent>
+                </div>
               )}
-            </Card>
+            </div>
 
             {/* Services & Labor Section */}
-            <Card className="bg-gray-800 border-gray-700">
-              <CardHeader 
-                className="cursor-pointer hover:bg-gray-750 transition-colors"
+            <div className="border-2 border-[#E53E3E] rounded-lg p-6 bg-gray-800/50">
+              <div 
+                className="flex items-center justify-between cursor-pointer mb-4"
                 onClick={() => toggleSection('servicesLabor')}
               >
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-[#E53E3E] text-lg">Services & Labor</CardTitle>
-                  <ChevronDown className={`w-5 h-5 transition-transform ${expandedSections.servicesLabor ? 'rotate-180' : ''}`} />
-                </div>
-              </CardHeader>
+                <h3 className="text-[#E53E3E] text-lg font-semibold">Services & Labor</h3>
+                <ChevronDown className={`w-5 h-5 text-[#E53E3E] transition-transform ${expandedSections.servicesLabor ? 'rotate-180' : ''}`} />
+              </div>
               {expandedSections.servicesLabor && (
-                <CardContent className="space-y-4">
+                <div className="space-y-4">
                   {workStages.map((stage, index) => (
-                    <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-750 rounded-lg">
+                    <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-900/50 rounded-lg border border-[#E53E3E]/30">
                       <div>
-                        <label className="block text-sm font-medium mb-2">Service</label>
+                        <label className="block text-sm font-medium mb-2 text-gray-300">Service</label>
                         <Input
                           value={stage.name}
                           onChange={(e) => updateWorkStage(index, 'name', e.target.value)}
-                          className="bg-gray-700 border-gray-600 text-white"
+                          className="bg-gray-800 border-[#E53E3E] text-white focus:border-[#E53E3E] focus:ring-[#E53E3E]"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium mb-2">Hours</label>
+                        <label className="block text-sm font-medium mb-2 text-gray-300">Hours</label>
                         <Input
                           type="number"
                           step="0.5"
                           value={stage.hours}
                           onChange={(e) => updateWorkStage(index, 'hours', e.target.value)}
-                          className="bg-gray-700 border-gray-600 text-white"
+                          className="bg-gray-800 border-[#E53E3E] text-white focus:border-[#E53E3E] focus:ring-[#E53E3E]"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium mb-2">Rate/Hour</label>
+                        <label className="block text-sm font-medium mb-2 text-gray-300">Rate/Hour</label>
                         <Input
                           type="number"
                           value={stage.rate}
                           onChange={(e) => updateWorkStage(index, 'rate', e.target.value)}
-                          className="bg-gray-700 border-gray-600 text-white"
+                          className="bg-gray-800 border-[#E53E3E] text-white focus:border-[#E53E3E] focus:ring-[#E53E3E]"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium mb-2">Total</label>
-                        <div className="text-[#6A9955] font-semibold text-lg">
+                        <label className="block text-sm font-medium mb-2 text-gray-300">Total</label>
+                        <div className="text-[#E53E3E] font-semibold text-lg bg-gray-800 border border-[#E53E3E]/30 rounded px-3 py-2">
                           ${((parseFloat(stage.hours) || 0) * (parseFloat(stage.rate.toString()) || 0)).toFixed(2)}
                         </div>
                       </div>
                     </div>
                   ))}
                   <div className="text-right">
-                    <div className="text-lg font-semibold text-[#E53E3E]">
+                    <div className="text-lg font-semibold text-[#E53E3E] bg-gray-900/50 border border-[#E53E3E] rounded px-4 py-2 inline-block">
                       Services Total: ${laborSubtotal.toFixed(2)}
                     </div>
                   </div>
-                </CardContent>
+                </div>
               )}
-            </Card>
+            </div>
 
             {/* Additional Labor Section */}
-            <Card className="bg-gray-800 border-gray-700">
-              <CardHeader 
-                className="cursor-pointer hover:bg-gray-750 transition-colors"
+            <div className="border-2 border-[#E53E3E] rounded-lg p-6 bg-gray-800/50">
+              <div 
+                className="flex items-center justify-between cursor-pointer mb-4"
                 onClick={() => toggleSection('additionalLabor')}
               >
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-[#E53E3E] text-lg">Additional Labor/Crew</CardTitle>
-                  <ChevronDown className={`w-5 h-5 transition-transform ${expandedSections.additionalLabor ? 'rotate-180' : ''}`} />
-                </div>
-              </CardHeader>
+                <h3 className="text-[#E53E3E] text-lg font-semibold">Additional Labor/Crew</h3>
+                <ChevronDown className={`w-5 h-5 text-[#E53E3E] transition-transform ${expandedSections.additionalLabor ? 'rotate-180' : ''}`} />
+              </div>
               {expandedSections.additionalLabor && (
-                <CardContent className="space-y-4">
+                <div className="space-y-4">
                   {additionalLabor.map((labor, index) => (
-                    <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-750 rounded-lg">
+                    <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-900/50 rounded-lg border border-[#E53E3E]/30">
                       <div>
-                        <label className="block text-sm font-medium mb-2">Worker Name</label>
+                        <label className="block text-sm font-medium mb-2 text-gray-300">Worker Name</label>
                         <Input
                           value={labor.name}
                           onChange={(e) => updateAdditionalLabor(index, 'name', e.target.value)}
                           placeholder="e.g., Assistant, Helper"
-                          className="bg-gray-700 border-gray-600 text-white"
+                          className="bg-gray-800 border-[#E53E3E] text-white focus:border-[#E53E3E] focus:ring-[#E53E3E]"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium mb-2">Hours</label>
+                        <label className="block text-sm font-medium mb-2 text-gray-300">Hours</label>
                         <Input
                           type="number"
                           step="0.5"
                           value={labor.hours}
                           onChange={(e) => updateAdditionalLabor(index, 'hours', e.target.value)}
-                          className="bg-gray-700 border-gray-600 text-white"
+                          className="bg-gray-800 border-[#E53E3E] text-white focus:border-[#E53E3E] focus:ring-[#E53E3E]"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium mb-2">Rate/Hour</label>
+                        <label className="block text-sm font-medium mb-2 text-gray-300">Rate/Hour</label>
                         <Input
                           type="number"
                           value={labor.rate}
                           onChange={(e) => updateAdditionalLabor(index, 'rate', e.target.value)}
-                          className="bg-gray-700 border-gray-600 text-white"
+                          className="bg-gray-800 border-[#E53E3E] text-white focus:border-[#E53E3E] focus:ring-[#E53E3E]"
                         />
                       </div>
                       <div className="flex items-end space-x-2">
-                        <div>
-                          <label className="block text-sm font-medium mb-2">Total</label>
-                          <div className="text-[#6A9955] font-semibold text-lg">
+                        <div className="flex-1">
+                          <label className="block text-sm font-medium mb-2 text-gray-300">Total</label>
+                          <div className="text-[#E53E3E] font-semibold text-lg bg-gray-800 border border-[#E53E3E]/30 rounded px-3 py-2">
                             ${((parseFloat(labor.hours) || 0) * (parseFloat(labor.rate.toString()) || 0)).toFixed(2)}
                           </div>
                         </div>
@@ -1031,6 +1028,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                           variant="destructive"
                           size="sm"
                           disabled={additionalLabor.length === 1}
+                          className="bg-red-600 hover:bg-red-700 border-red-600"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -1040,63 +1038,61 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                   <div className="flex justify-between items-center">
                     <Button
                       onClick={addLabor}
-                      className="bg-[#E53E3E] hover:bg-[#E53E3E]/80"
+                      className="bg-[#E53E3E] hover:bg-[#E53E3E]/80 border-[#E53E3E]"
                     >
                       <Plus className="w-4 h-4 mr-2" />
                       Add Worker
                     </Button>
-                    <div className="text-lg font-semibold text-[#E53E3E]">
+                    <div className="text-lg font-semibold text-[#E53E3E] bg-gray-900/50 border border-[#E53E3E] rounded px-4 py-2">
                       Additional Labor Total: ${additionalLaborSubtotal.toFixed(2)}
                     </div>
                   </div>
-                </CardContent>
+                </div>
               )}
-            </Card>
+            </div>
 
             {/* Paint & Materials Section */}
-            <Card className="bg-gray-800 border-gray-700">
-              <CardHeader 
-                className="cursor-pointer hover:bg-gray-750 transition-colors"
+            <div className="border-2 border-[#D4AC0D] rounded-lg p-6 bg-gray-800/50">
+              <div 
+                className="flex items-center justify-between cursor-pointer mb-4"
                 onClick={() => toggleSection('paintMaterials')}
               >
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-[#D4AC0D] text-lg">Paint & Materials</CardTitle>
-                  <ChevronDown className={`w-5 h-5 transition-transform ${expandedSections.paintMaterials ? 'rotate-180' : ''}`} />
-                </div>
-              </CardHeader>
+                <h3 className="text-[#D4AC0D] text-lg font-semibold">Paint & Materials</h3>
+                <ChevronDown className={`w-5 h-5 text-[#D4AC0D] transition-transform ${expandedSections.paintMaterials ? 'rotate-180' : ''}`} />
+              </div>
               {expandedSections.paintMaterials && (
-                <CardContent className="space-y-4">
+                <div className="space-y-4">
                   {/* Paint Costs */}
-                  <div className="p-4 bg-gray-750 rounded-lg">
+                  <div className="p-4 bg-gray-900/50 rounded-lg border border-[#D4AC0D]/30">
                     <h4 className="text-[#D4AC0D] font-semibold mb-3">Paint</h4>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                       <div>
-                        <label className="block text-sm font-medium mb-2">Price per Gallon</label>
+                        <label className="block text-sm font-medium mb-2 text-gray-300">Price per Gallon</label>
                         <Input
                           type="number"
                           step="0.01"
                           value={paintCosts.pricePerGallon}
                           onChange={(e) => updatePaintCosts('pricePerGallon', e.target.value)}
-                          className="bg-gray-700 border-gray-600 text-white"
+                          className="bg-gray-800 border-[#D4AC0D] text-white focus:border-[#D4AC0D] focus:ring-[#D4AC0D]"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium mb-2">Gallons Needed</label>
+                        <label className="block text-sm font-medium mb-2 text-gray-300">Gallons Needed</label>
                         <Input
                           type="number"
                           step="0.5"
                           value={paintCosts.gallons}
                           onChange={(e) => updatePaintCosts('gallons', e.target.value)}
-                          className="bg-gray-700 border-gray-600 text-white"
+                          className="bg-gray-800 border-[#D4AC0D] text-white focus:border-[#D4AC0D] focus:ring-[#D4AC0D]"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium mb-2">Number of Coats</label>
+                        <label className="block text-sm font-medium mb-2 text-gray-300">Number of Coats</label>
                         <Select value={paintCosts.coats} onValueChange={(value) => updatePaintCosts('coats', value)}>
-                          <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                          <SelectTrigger className="bg-gray-800 border-[#D4AC0D] text-white focus:border-[#D4AC0D] focus:ring-[#D4AC0D]">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent className="bg-gray-700 border-gray-600">
+                          <SelectContent className="bg-gray-800 border-[#D4AC0D]">
                             <SelectItem value="1">1 Coat</SelectItem>
                             <SelectItem value="2">2 Coats</SelectItem>
                             <SelectItem value="3">3 Coats</SelectItem>
@@ -1104,8 +1100,8 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                         </Select>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium mb-2">Paint Total</label>
-                        <div className="text-[#6A9955] font-semibold text-lg">
+                        <label className="block text-sm font-medium mb-2 text-gray-300">Paint Total</label>
+                        <div className="text-[#D4AC0D] font-semibold text-lg bg-gray-800 border border-[#D4AC0D]/30 rounded px-3 py-2">
                           ${paintSubtotal.toFixed(2)}
                         </div>
                       </div>
@@ -1113,42 +1109,42 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                   </div>
 
                   {/* Custom Supplies */}
-                  <div className="p-4 bg-gray-750 rounded-lg">
+                  <div className="p-4 bg-gray-900/50 rounded-lg border border-[#D4AC0D]/30">
                     <h4 className="text-[#D4AC0D] font-semibold mb-3">Additional Supplies</h4>
                     {customSupplies.map((supply, index) => (
                       <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                         <div>
-                          <label className="block text-sm font-medium mb-2">Item Name</label>
+                          <label className="block text-sm font-medium mb-2 text-gray-300">Item Name</label>
                           <Input
                             value={supply.name}
                             onChange={(e) => updateCustomSupply(index, 'name', e.target.value)}
                             placeholder="e.g., Brushes, Rollers"
-                            className="bg-gray-700 border-gray-600 text-white"
+                            className="bg-gray-800 border-[#D4AC0D] text-white focus:border-[#D4AC0D] focus:ring-[#D4AC0D]"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium mb-2">Quantity</label>
+                          <label className="block text-sm font-medium mb-2 text-gray-300">Quantity</label>
                           <Input
                             type="number"
                             value={supply.quantity}
                             onChange={(e) => updateCustomSupply(index, 'quantity', e.target.value)}
-                            className="bg-gray-700 border-gray-600 text-white"
+                            className="bg-gray-800 border-[#D4AC0D] text-white focus:border-[#D4AC0D] focus:ring-[#D4AC0D]"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium mb-2">Price per Unit</label>
+                          <label className="block text-sm font-medium mb-2 text-gray-300">Price per Unit</label>
                           <Input
                             type="number"
                             step="0.01"
                             value={supply.pricePerUnit}
                             onChange={(e) => updateCustomSupply(index, 'pricePerUnit', e.target.value)}
-                            className="bg-gray-700 border-gray-600 text-white"
+                            className="bg-gray-800 border-[#D4AC0D] text-white focus:border-[#D4AC0D] focus:ring-[#D4AC0D]"
                           />
                         </div>
                         <div className="flex items-end space-x-2">
-                          <div>
-                            <label className="block text-sm font-medium mb-2">Total</label>
-                            <div className="text-[#6A9955] font-semibold text-lg">
+                          <div className="flex-1">
+                            <label className="block text-sm font-medium mb-2 text-gray-300">Total</label>
+                            <div className="text-[#D4AC0D] font-semibold text-lg bg-gray-800 border border-[#D4AC0D]/30 rounded px-3 py-2">
                               ${((parseFloat(supply.quantity) || 0) * (parseFloat(supply.pricePerUnit) || 0)).toFixed(2)}
                             </div>
                           </div>
@@ -1157,6 +1153,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                             variant="destructive"
                             size="sm"
                             disabled={customSupplies.length === 1}
+                            className="bg-red-600 hover:bg-red-700 border-red-600"
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
@@ -1165,7 +1162,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     ))}
                     <Button
                       onClick={addCustomSupply}
-                      className="bg-[#D4AC0D] hover:bg-[#D4AC0D]/80"
+                      className="bg-[#D4AC0D] hover:bg-[#D4AC0D]/80 border-[#D4AC0D] text-black"
                     >
                       <Plus className="w-4 h-4 mr-2" />
                       Add Supply
@@ -1173,33 +1170,33 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                   </div>
 
                   {/* Material Markup */}
-                  <div className="p-4 bg-gray-750 rounded-lg">
+                  <div className="p-4 bg-gray-900/50 rounded-lg border border-[#D4AC0D]/30">
                     <div className="flex items-center space-x-4 mb-3">
                       <input
                         type="checkbox"
                         id="materialMarkup"
                         checked={materialMarkupEnabled}
                         onChange={(e) => setMaterialMarkupEnabled(e.target.checked)}
-                        className="w-4 h-4"
+                        className="w-4 h-4 accent-[#D4AC0D]"
                       />
-                      <label htmlFor="materialMarkup" className="text-sm font-medium">Add Material Markup</label>
+                      <label htmlFor="materialMarkup" className="text-sm font-medium text-gray-300">Add Material Markup</label>
                     </div>
                     {materialMarkupEnabled && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm font-medium mb-2">Markup Percentage</label>
+                          <label className="block text-sm font-medium mb-2 text-gray-300">Markup Percentage</label>
                           <Input
                             type="number"
                             step="1"
                             value={materialMarkupPercentage}
                             onChange={(e) => setMaterialMarkupPercentage(e.target.value)}
                             placeholder="e.g., 15"
-                            className="bg-gray-700 border-gray-600 text-white"
+                            className="bg-gray-800 border-[#D4AC0D] text-white focus:border-[#D4AC0D] focus:ring-[#D4AC0D]"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium mb-2">Markup Amount</label>
-                          <div className="text-[#6A9955] font-semibold text-lg">
+                          <label className="block text-sm font-medium mb-2 text-gray-300">Markup Amount</label>
+                          <div className="text-[#D4AC0D] font-semibold text-lg bg-gray-800 border border-[#D4AC0D]/30 rounded px-3 py-2">
                             ${materialMarkupEnabled && materialMarkupPercentage ? 
                               (paintAndMaterialsSubtotal - (paintSubtotal + customSuppliesSubtotal)).toFixed(2) : 
                               '0.00'
@@ -1211,60 +1208,58 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                   </div>
 
                   <div className="text-right">
-                    <div className="text-lg font-semibold text-[#D4AC0D]">
+                    <div className="text-lg font-semibold text-[#D4AC0D] bg-gray-900/50 border border-[#D4AC0D] rounded px-4 py-2 inline-block">
                       Materials Total: ${paintAndMaterialsSubtotal.toFixed(2)}
                     </div>
                   </div>
-                </CardContent>
+                </div>
               )}
-            </Card>
+            </div>
 
             {/* Additional Services Section */}
-            <Card className="bg-gray-800 border-gray-700">
-              <CardHeader 
-                className="cursor-pointer hover:bg-gray-750 transition-colors"
+            <div className="border-2 border-[#D4AC0D] rounded-lg p-6 bg-gray-800/50">
+              <div 
+                className="flex items-center justify-between cursor-pointer mb-4"
                 onClick={() => toggleSection('additionalServices')}
               >
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-[#E53E3E] text-lg">Additional Services</CardTitle>
-                  <ChevronDown className={`w-5 h-5 transition-transform ${expandedSections.additionalServices ? 'rotate-180' : ''}`} />
-                </div>
-              </CardHeader>
+                <h3 className="text-[#D4AC0D] text-lg font-semibold">Additional Services</h3>
+                <ChevronDown className={`w-5 h-5 text-[#D4AC0D] transition-transform ${expandedSections.additionalServices ? 'rotate-180' : ''}`} />
+              </div>
               {expandedSections.additionalServices && (
-                <CardContent className="space-y-4">
+                <div className="space-y-4">
                   {additionalServices.map((service, index) => (
-                    <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-750 rounded-lg">
+                    <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-900/50 rounded-lg border border-[#D4AC0D]/30">
                       <div>
-                        <label className="block text-sm font-medium mb-2">Service</label>
+                        <label className="block text-sm font-medium mb-2 text-gray-300">Service</label>
                         <Input
                           value={service.name}
                           onChange={(e) => updateAdditionalService(index, 'name', e.target.value)}
-                          className="bg-gray-700 border-gray-600 text-white"
+                          className="bg-gray-800 border-[#D4AC0D] text-white focus:border-[#D4AC0D] focus:ring-[#D4AC0D]"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium mb-2">Hours</label>
+                        <label className="block text-sm font-medium mb-2 text-gray-300">Hours</label>
                         <Input
                           type="number"
                           step="0.5"
                           value={service.hours}
                           onChange={(e) => updateAdditionalService(index, 'hours', e.target.value)}
-                          className="bg-gray-700 border-gray-600 text-white"
+                          className="bg-gray-800 border-[#D4AC0D] text-white focus:border-[#D4AC0D] focus:ring-[#D4AC0D]"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium mb-2">Rate/Hour</label>
+                        <label className="block text-sm font-medium mb-2 text-gray-300">Rate/Hour</label>
                         <Input
                           type="number"
                           value={service.rate}
                           onChange={(e) => updateAdditionalService(index, 'rate', e.target.value)}
-                          className="bg-gray-700 border-gray-600 text-white"
+                          className="bg-gray-800 border-[#D4AC0D] text-white focus:border-[#D4AC0D] focus:ring-[#D4AC0D]"
                         />
                       </div>
                       <div className="flex items-end space-x-2">
-                        <div>
-                          <label className="block text-sm font-medium mb-2">Total</label>
-                          <div className="text-[#6A9955] font-semibold text-lg">
+                        <div className="flex-1">
+                          <label className="block text-sm font-medium mb-2 text-gray-300">Total</label>
+                          <div className="text-[#D4AC0D] font-semibold text-lg bg-gray-800 border border-[#D4AC0D]/30 rounded px-3 py-2">
                             ${((parseFloat(service.hours) || 0) * (parseFloat(service.rate.toString()) || 0)).toFixed(2)}
                           </div>
                         </div>
@@ -1273,6 +1268,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                             onClick={() => removeAdditionalService(index)}
                             variant="destructive"
                             size="sm"
+                            className="bg-red-600 hover:bg-red-700 border-red-600"
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
@@ -1283,127 +1279,123 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                   <div className="flex justify-between items-center">
                     <Button
                       onClick={addAdditionalService}
-                      className="bg-[#E53E3E] hover:bg-[#E53E3E]/80"
+                      className="bg-[#D4AC0D] hover:bg-[#D4AC0D]/80 border-[#D4AC0D] text-black"
                     >
                       <Plus className="w-4 h-4 mr-2" />
                       Add Service
                     </Button>
-                    <div className="text-lg font-semibold text-[#E53E3E]">
+                    <div className="text-lg font-semibold text-[#D4AC0D] bg-gray-900/50 border border-[#D4AC0D] rounded px-4 py-2">
                       Additional Services Total: ${additionalServicesSubtotal.toFixed(2)}
                     </div>
                   </div>
-                </CardContent>
+                </div>
               )}
-            </Card>
+            </div>
 
             {/* Travel Costs Section */}
-            <Card className="bg-gray-800 border-gray-700">
-              <CardHeader 
-                className="cursor-pointer hover:bg-gray-750 transition-colors"
+            <div className="border-2 border-[#6A9955] rounded-lg p-6 bg-gray-800/50">
+              <div 
+                className="flex items-center justify-between cursor-pointer mb-4"
                 onClick={() => toggleSection('travel')}
               >
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-[#6A9955] text-lg">Travel Costs</CardTitle>
-                  <ChevronDown className={`w-5 h-5 transition-transform ${expandedSections.travel ? 'rotate-180' : ''}`} />
-                </div>
-              </CardHeader>
+                <h3 className="text-[#6A9955] text-lg font-semibold">Travel Costs</h3>
+                <ChevronDown className={`w-5 h-5 text-[#6A9955] transition-transform ${expandedSections.travel ? 'rotate-180' : ''}`} />
+              </div>
               {expandedSections.travel && (
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-750 rounded-lg">
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-900/50 rounded-lg border border-[#6A9955]/30">
                     <div>
-                      <label className="block text-sm font-medium mb-2">Distance (km)</label>
+                      <label className="block text-sm font-medium mb-2 text-gray-300">Distance (km)</label>
                       <Input
                         type="number"
                         step="0.1"
                         value={travelCosts.distance}
                         onChange={(e) => updateTravelCosts('distance', e.target.value)}
-                        className="bg-gray-700 border-gray-600 text-white"
+                        className="bg-gray-800 border-[#6A9955] text-white focus:border-[#6A9955] focus:ring-[#6A9955]"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-2">Number of Trips</label>
+                      <label className="block text-sm font-medium mb-2 text-gray-300">Number of Trips</label>
                       <Input
                         type="number"
                         value={travelCosts.trips}
                         onChange={(e) => updateTravelCosts('trips', e.target.value)}
-                        className="bg-gray-700 border-gray-600 text-white"
+                        className="bg-gray-800 border-[#6A9955] text-white focus:border-[#6A9955] focus:ring-[#6A9955]"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-2">Rate per km</label>
+                      <label className="block text-sm font-medium mb-2 text-gray-300">Rate per km</label>
                       <Input
                         type="number"
                         step="0.01"
                         value={travelCosts.ratePerKm}
                         onChange={(e) => updateTravelCosts('ratePerKm', e.target.value)}
-                        className="bg-gray-700 border-gray-600 text-white"
+                        className="bg-gray-800 border-[#6A9955] text-white focus:border-[#6A9955] focus:ring-[#6A9955]"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-2">Travel Total</label>
-                      <div className="text-[#6A9955] font-semibold text-lg">
+                      <label className="block text-sm font-medium mb-2 text-gray-300">Travel Total</label>
+                      <div className="text-[#6A9955] font-semibold text-lg bg-gray-800 border border-[#6A9955]/30 rounded px-3 py-2">
                         ${travelSubtotal.toFixed(2)}
                       </div>
                     </div>
                   </div>
-                </CardContent>
+                </div>
               )}
-            </Card>
+            </div>
 
             {/* Summary */}
-            <Card className="bg-gray-800 border-gray-700">
-              <CardHeader>
-                <CardTitle className="text-[#8B5FBF] text-lg">Estimate Summary</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
+            <div className="border-2 border-[#8B5FBF] rounded-lg p-6 bg-gray-800/50">
+              <h3 className="text-[#8B5FBF] text-lg font-semibold mb-4">Estimate Summary</h3>
+              <div className="space-y-3">
                 {laborSubtotal > 0 && (
-                  <div className="flex justify-between text-[#E53E3E]">
+                  <div className="flex justify-between text-[#E53E3E] bg-gray-900/50 border border-[#E53E3E]/30 rounded px-3 py-2">
                     <span>Services & Labor:</span>
                     <span>${laborSubtotal.toFixed(2)}</span>
                   </div>
                 )}
                 {additionalLaborSubtotal > 0 && (
-                  <div className="flex justify-between text-[#E53E3E]">
+                  <div className="flex justify-between text-[#E53E3E] bg-gray-900/50 border border-[#E53E3E]/30 rounded px-3 py-2">
                     <span>Additional Labor:</span>
                     <span>${additionalLaborSubtotal.toFixed(2)}</span>
                   </div>
                 )}
                 {additionalServicesSubtotal > 0 && (
-                  <div className="flex justify-between text-[#E53E3E]">
+                  <div className="flex justify-between text-[#D4AC0D] bg-gray-900/50 border border-[#D4AC0D]/30 rounded px-3 py-2">
                     <span>Additional Services:</span>
                     <span>${additionalServicesSubtotal.toFixed(2)}</span>
                   </div>
                 )}
                 {paintAndMaterialsSubtotal > 0 && (
-                  <div className="flex justify-between text-[#D4AC0D]">
+                  <div className="flex justify-between text-[#D4AC0D] bg-gray-900/50 border border-[#D4AC0D]/30 rounded px-3 py-2">
                     <span>Paint & Materials:</span>
                     <span>${paintAndMaterialsSubtotal.toFixed(2)}</span>
                   </div>
                 )}
                 {travelSubtotal > 0 && (
-                  <div className="flex justify-between text-[#6A9955]">
+                  <div className="flex justify-between text-[#6A9955] bg-gray-900/50 border border-[#6A9955]/30 rounded px-3 py-2">
                     <span>Travel Costs:</span>
                     <span>${travelSubtotal.toFixed(2)}</span>
                   </div>
                 )}
-                <hr className="border-gray-600" />
-                <div className="flex justify-between">
+                <hr className="border-[#8B5FBF]" />
+                <div className="flex justify-between bg-gray-900/50 border border-gray-600 rounded px-3 py-2">
                   <span>Subtotal:</span>
                   <span>${subtotalBeforeTax.toFixed(2)}</span>
                 </div>
                 {taxAmount > 0 && (
-                  <div className="flex justify-between">
+                  <div className="flex justify-between bg-gray-900/50 border border-gray-600 rounded px-3 py-2">
                     <span>Tax ({(taxRate * 100).toFixed(1)}%):</span>
                     <span>${taxAmount.toFixed(2)}</span>
                   </div>
                 )}
-                <hr className="border-gray-600" />
-                <div className="flex justify-between text-2xl font-bold text-[#8B5FBF]">
+                <hr className="border-[#8B5FBF]" />
+                <div className="flex justify-between text-2xl font-bold text-[#8B5FBF] bg-gray-900/50 border-2 border-[#8B5FBF] rounded px-4 py-3">
                   <span>TOTAL ESTIMATE:</span>
                   <span>${grandTotal.toFixed(2)}</span>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Action Buttons */}
             <div className="flex justify-between items-center pt-4">
