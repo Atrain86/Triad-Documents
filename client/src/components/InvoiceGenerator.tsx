@@ -353,11 +353,9 @@ cortespainter@gmail.com`;
   // Additional workers toggle state
   const [workersMode, setWorkersMode] = React.useState<'default' | 'custom'>('default');
   
-  // Preset workers for custom mode
+  // Preset workers for custom mode - single empty worker
   const presetWorkers = [
-    { name: 'Apprentice', hours: '', rate: 45 },
-    { name: 'Helper', hours: '', rate: 25 },
-    { name: 'Subcontractor', hours: '', rate: 50 }
+    { name: '', hours: '', rate: 0 }
   ];
 
   // Additional workers state
@@ -415,7 +413,7 @@ cortespainter@gmail.com`;
   }, [workersMode]);
 
   const removeAdditionalWorker = React.useCallback((index: number) => {
-    if (workersMode === 'default' || index >= 3) {
+    if (workersMode === 'default' || index >= 1) {
       setAdditionalWorkers(prev => prev.filter((_, i) => i !== index));
     }
   }, [workersMode]);
@@ -1838,7 +1836,7 @@ ${emailMessage}`;
                               className="bg-gray-800 border-blue-400 text-white text-center w-14"
                             />
                           </div>
-                          {(workersMode === 'default' || index >= 3) && (
+                          {(workersMode === 'default' || index >= 1) && (
                             <Button
                               onClick={() => removeAdditionalWorker(index)}
                               size="sm"
