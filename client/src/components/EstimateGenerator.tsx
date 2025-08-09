@@ -220,7 +220,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
   // Stabilized event handlers using useCallback to prevent re-renders
   const updateWorkStage = useCallback((index: number, field: string, value: string) => {
-    setWorkStages(prev => {
+    setWorkStages((prev: any) => {
       const updated = [...prev];
       updated[index] = { ...updated[index], [field]: value };
       return updated;
@@ -228,7 +228,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   }, []);
 
   const updateAdditionalService = useCallback((index: number, field: string, value: string) => {
-    setAdditionalServices(prev => {
+    setAdditionalServices((prev: any) => {
       const updated = [...prev];
       updated[index] = { ...updated[index], [field]: value };
       return updated;
@@ -236,7 +236,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   }, []);
 
   const updateAdditionalLabor = useCallback((index: number, field: string, value: string) => {
-    setAdditionalLabor(prev => {
+    setAdditionalLabor((prev: any) => {
       const updated = [...prev];
       updated[index] = { ...updated[index], [field]: value };
       return updated;
@@ -244,11 +244,11 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   }, []);
 
   const addLabor = useCallback(() => {
-    setAdditionalLabor(prev => [...prev, { name: '', hours: '', rate: '' }]);
+    setAdditionalLabor((prev: any) => [...prev, { name: '', hours: '', rate: '' }]);
   }, []);
 
   const updateCustomSupply = useCallback((index: number, field: string, value: string) => {
-    setCustomSupplies(prev => {
+    setCustomSupplies((prev: any) => {
       const updated = [...prev];
       updated[index] = { ...updated[index], [field]: value };
       return updated;
@@ -256,15 +256,15 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   }, []);
 
   const addCustomSupply = useCallback(() => {
-    setCustomSupplies(prev => [...prev, { name: '', quantity: '', pricePerUnit: '' }]);
+    setCustomSupplies((prev: any) => [...prev, { name: '', quantity: '', pricePerUnit: '' }]);
   }, []);
 
   const removeCustomSupply = useCallback((index: number) => {
-    setCustomSupplies(prev => prev.length > 1 ? prev.filter((_, i) => i !== index) : prev);
+    setCustomSupplies((prev: any) => prev.length > 1 ? prev.filter((_: any, i: number) => i !== index) : prev);
   }, []);
 
   const removeLabor = useCallback((index: number) => {
-    setAdditionalLabor(prev => prev.length > 1 ? prev.filter((_, i) => i !== index) : prev);
+    setAdditionalLabor((prev: any) => prev.length > 1 ? prev.filter((_: any, i: number) => i !== index) : prev);
   }, []);
 
   const addAdditionalService = useCallback(() => {
@@ -658,7 +658,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
               <h3>Client Information</h3>
               <p><strong>${project.clientName}</strong></p>
               <p>${project.address}</p>
-              <p>${project.clientCity ? project.clientCity + ', ' : ''}${project.clientProvince || ''}</p>
+              <p>${project.clientCity ? project.clientCity + ', ' : ''}${project.clientPostal || ''}</p>
               ${project.clientEmail ? `<p>Email: ${project.clientEmail}</p>` : ''}
               ${project.clientPhone ? `<p>Phone: ${project.clientPhone}</p>` : ''}
             </div>
@@ -842,24 +842,21 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   };
 
   const updatePaintCosts = (field: string, value: string) => {
-    setPaintCosts(prev => ({
+    setPaintCosts((prev: any) => ({
       ...prev,
       [field]: value
     }));
   };
 
   const updateTravelCosts = (field: string, value: string) => {
-    setTravelCosts(prev => ({
+    setTravelCosts((prev: any) => ({
       ...prev,
       [field]: value
     }));
   };
 
-  const handleDateSelect = (date: Date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    setEstimateDate(`${year}-${month}-${day}`);
+  const handleDateSelect = (date: string) => {
+    setEstimateDate(date);
     setShowCalendar(false);
   };
 
@@ -1457,7 +1454,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             </DialogHeader>
             <PaintBrainCalendar 
               onDateSelect={handleDateSelect}
-              selectedDate={new Date(estimateDate)}
+              selectedDate={estimateDate}
             />
           </DialogContent>
         </Dialog>
