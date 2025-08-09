@@ -780,8 +780,8 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                     />
                                   </div>
                                   
-                                  {/* Up Arrow - Positioned Higher for More Logo Space */}
-                                  <div className="absolute right-12 top-16">
+                                  {/* Up Arrow - Positioned Higher and Aligned Over Plus Button */}
+                                  <div className="absolute right-4 top-16 flex justify-center">
                                     <button
                                       onClick={moveLogoUp}
                                       disabled={logoVerticalPosition <= -50}
@@ -792,8 +792,8 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                     </button>
                                   </div>
                                   
-                                  {/* Down Arrow - Above Plus Button */}
-                                  <div className="absolute bottom-20 right-8">
+                                  {/* Down Arrow - Above Plus Button, Aligned */}
+                                  <div className="absolute bottom-20 right-4 flex justify-center">
                                     <button
                                       onClick={moveLogoDown}
                                       disabled={logoVerticalPosition >= 50}
@@ -804,8 +804,8 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack }) => {
                                     </button>
                                   </div>
                                   
-                                  {/* Size Controls - Horizontally Aligned */}
-                                  <div className="absolute bottom-8 left-8 right-8 flex items-center justify-between">
+                                  {/* Size Controls - Spread Further Apart */}
+                                  <div className="absolute bottom-8 left-4 right-4 flex items-center justify-between">
                                     {/* Minus Button - Left Side */}
                                     <button
                                       onClick={(e) => {
