@@ -116,12 +116,21 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     }));
   };
 
-  // Work stages state with localStorage persistence
-  const [workStages, setWorkStages] = useState(savedData.workStages || [
+  // Services & Labor toggle state
+  const [servicesMode, setServicesMode] = useState<'default' | 'custom'>('default');
+  
+  // Preset services for custom mode
+  const presetServices = [
     { name: 'Prep', hours: '', rate: 60 },
     { name: 'Priming', hours: '', rate: 60 },
-    { name: 'Painting', hours: '', rate: 60 },
-  ]);
+    { name: 'Painting', hours: '', rate: 60 }
+  ];
+
+  // Work stages state with localStorage persistence
+  const [workStages, setWorkStages] = useState(() => {
+    // Start with default mode - empty services with rate 0
+    return savedData.workStages || [{ name: '', hours: '', rate: 0 }];
+  });
 
   // Paint costs state
   const [paintCosts, setPaintCosts] = useState(savedData.paintCosts || {
