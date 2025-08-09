@@ -939,45 +939,73 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
               {expandedSections.servicesLabor && (
                 <div className="space-y-6 p-4 border-t border-[#569CD6]/30">
                   {/* Primary Services */}
-                  <div className="space-y-4">
-                    <h4 className="text-[#569CD6] font-semibold text-base">Primary Services</h4>
+                  <div className="border rounded-lg p-2 space-y-4" style={{ borderColor: '#569CD6', backgroundColor: '#569CD610' }}>
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-lg font-semibold flex items-center" style={{ color: '#569CD6' }}>
+                        <Wrench className="mr-2 h-4 w-4" />
+                        Primary Services
+                        <Button
+                          onClick={() => setWorkStages(prev => [...prev, { name: '', hours: '', rate: 60 }])}
+                          className="text-blue-400 bg-transparent hover:bg-blue-400/20 ml-2 p-2"
+                          variant="ghost"
+                          style={{ minWidth: '38px', minHeight: '38px' }}
+                        >
+                          <Plus style={{ width: '38px', height: '38px' }} strokeWidth={2} />
+                        </Button>
+                      </h3>
+                    </div>
+                    
+                    {/* Headers */}
+                    <div className="grid grid-cols-12 gap-4 mb-4 text-gray-300 text-sm font-medium">
+                      <div className="col-span-6">Service</div>
+                      <div className="col-span-2">Hours</div>
+                      <div className="col-span-2">Rate</div>
+                      <div className="col-span-2">Total</div>
+                    </div>
+                    
                     {workStages.map((stage, index) => (
-                      <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-900/50 rounded-lg border border-[#569CD6]/30">
-                        <div>
-                          <label className="block text-sm font-medium mb-2 text-gray-300">Service</label>
+                      <div key={index} className="grid grid-cols-12 gap-4 mb-4">
+                        <div className="col-span-6">
                           <Input
                             value={stage.name}
                             onChange={(e) => updateWorkStage(index, 'name', e.target.value)}
+                            placeholder="Service name"
                             className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6]"
                           />
                         </div>
-                        <div>
-                          <label className="block text-sm font-medium mb-2 text-gray-300">Hours</label>
+                        <div className="col-span-2">
                           <Input
                             type="number"
                             step="0.5"
                             value={stage.hours}
                             onChange={(e) => updateWorkStage(index, 'hours', e.target.value)}
+                            placeholder="0"
                             className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6]"
                           />
                         </div>
-                        <div>
-                          <label className="block text-sm font-medium mb-2 text-gray-300">Rate/Hour</label>
+                        <div className="col-span-2">
                           <Input
                             type="number"
                             value={stage.rate}
                             onChange={(e) => updateWorkStage(index, 'rate', e.target.value)}
+                            placeholder="0"
                             className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6]"
                           />
                         </div>
-                        <div>
-                          <label className="block text-sm font-medium mb-2 text-gray-300">Total</label>
-                          <div className="text-[#569CD6] font-semibold text-lg bg-gray-800 border border-[#569CD6]/30 rounded px-3 py-2">
+                        <div className="col-span-2 flex items-center justify-center">
+                          <div className="text-[#569CD6] font-semibold text-lg bg-gray-800 border border-[#569CD6]/30 rounded px-3 py-2 text-center w-full">
                             ${((parseFloat(stage.hours) || 0) * (parseFloat(stage.rate.toString()) || 0)).toFixed(2)}
                           </div>
                         </div>
                       </div>
                     ))}
+                    
+                    <div className="mt-4 pt-4 border-t border-[#569CD6]/30">
+                      <div className="flex justify-between items-center text-lg font-semibold text-green-400">
+                        <span>Primary Services Subtotal</span>
+                        <span>${laborSubtotal.toFixed(2)}</span>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Additional Labor/Crew */}
