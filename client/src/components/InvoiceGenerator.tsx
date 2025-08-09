@@ -2355,14 +2355,15 @@ ${emailMessage}`;
                         <tr key={index} className={index % 2 === 0 ? '' : 'bg-gray-700'} style={{ borderBottom: '1px solid #E53E3E' }}>
                           <td className="p-3 text-white">
                             {(() => {
-                              // Format date for PDF (without year and without parentheses)
+                              // Format date for PDF (with year included)
                               const dateStr = hourEntry.date.toString();
                               const datePart = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr.split(' ')[0];
                               const [year, month, day] = datePart.split('-').map(Number);
                               const localDate = new Date(year, month - 1, day);
                               const formattedDate = localDate.toLocaleDateString('en-US', { 
                                 month: 'short', 
-                                day: 'numeric' 
+                                day: 'numeric',
+                                year: 'numeric'
                               });
                               return formattedDate;
                             })()}
