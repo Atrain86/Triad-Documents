@@ -1557,10 +1557,39 @@ ${emailMessage}`;
           </div>
 
           <div className="px-8 py-6 space-y-6 w-full overflow-x-hidden" style={{ backgroundColor: darkTheme.background }}>
-              {/* Business & Invoice Info */}
+              {/* Invoice Details & Business Info */}
             <div className="grid grid-cols-1 gap-6">
               <div className="p-3 rounded-lg border space-y-4" style={{ borderColor: paintBrainColors.red, backgroundColor: darkTheme.cardBg }}>
                 <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.red }}>
+                  <Calendar className="mr-2 h-5 w-5" />
+                  Invoice Details
+                </h2>
+                <div className="space-y-2">
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Invoice Number</label>
+                    <Input
+                      type="number"
+                      value={invoiceData.invoiceNumber}
+                      onChange={(e) => setInvoiceData({...invoiceData, invoiceNumber: parseInt(e.target.value)})}
+                      onWheel={preventWheelChange}
+                      className="bg-gray-800 border-[#E03E3E] text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Date</label>
+                    <Input
+                      type="date"
+                      value={invoiceData.date}
+                      onChange={(e) => setInvoiceData({...invoiceData, date: e.target.value})}
+                      className="bg-gray-800 border-[#E03E3E] text-white"
+                    />
+                  </div>
+
+                </div>
+              </div>
+
+              <div className="p-3 rounded-lg border space-y-4" style={{ borderColor: paintBrainColors.yellow, backgroundColor: darkTheme.cardBg }}>
+                <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.yellow }}>
                   <User className="mr-2 h-5 w-5" />
                   Business Information
                 </h2>
@@ -1569,7 +1598,7 @@ ${emailMessage}`;
                     ref={firstInputRef}
                     value={invoiceData.businessName}
                     onChange={(e) => setInvoiceData({...invoiceData, businessName: e.target.value})}
-                    className="bg-gray-800 border-[#E03E3E] text-white"
+                    className="bg-gray-800 border-[#ECC94B] text-white"
                     placeholder="Business Name"
                     autoFocus={false}
                     style={{ userSelect: 'text' }} // Allow selection after user interaction
@@ -1596,44 +1625,15 @@ ${emailMessage}`;
                   <Input
                     value={invoiceData.businessAddress}
                     onChange={(e) => setInvoiceData({...invoiceData, businessAddress: e.target.value})}
-                    className="bg-gray-800 border-[#E03E3E] text-white"  
+                    className="bg-gray-800 border-[#ECC94B] text-white"  
                     placeholder="Address"
                   />
                   <Input
                     value={invoiceData.businessEmail}
                     onChange={(e) => setInvoiceData({...invoiceData, businessEmail: e.target.value})}
-                    className="bg-gray-800 border-[#E03E3E] text-white"
+                    className="bg-gray-800 border-[#ECC94B] text-white"
                     placeholder="Email"
                   />
-                </div>
-              </div>
-
-              <div className="p-3 rounded-lg border space-y-4" style={{ borderColor: paintBrainColors.yellow, backgroundColor: darkTheme.cardBg }}>
-                <h2 className="text-xl font-semibold flex items-center" style={{ color: paintBrainColors.yellow }}>
-                  <Calendar className="mr-2 h-5 w-5" />
-                  Invoice Details
-                </h2>
-                <div className="space-y-2">
-                  <div>
-                    <label className="block text-sm font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Invoice Number</label>
-                    <Input
-                      type="number"
-                      value={invoiceData.invoiceNumber}
-                      onChange={(e) => setInvoiceData({...invoiceData, invoiceNumber: parseInt(e.target.value)})}
-                      onWheel={preventWheelChange}
-                      className="bg-gray-800 border-[#ECC94B] text-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Date</label>
-                    <Input
-                      type="date"
-                      value={invoiceData.date}
-                      onChange={(e) => setInvoiceData({...invoiceData, date: e.target.value})}
-                      className="bg-gray-800 border-[#ECC94B] text-white"
-                    />
-                  </div>
-
                 </div>
               </div>
             </div>
