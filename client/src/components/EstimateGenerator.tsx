@@ -1282,8 +1282,8 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
 
                   {/* Total */}
                   <div className="text-right">
-                    <div className="text-lg font-semibold text-[#569CD6] bg-gray-900/50 border border-[#569CD6] rounded px-4 py-2 flex justify-between items-center w-full sm:inline-block sm:min-w-[300px]">
-                      <span>Services & Labor Total</span>
+                    <div className="text-lg font-semibold text-green-400 bg-gray-900/50 border border-green-400 rounded px-4 py-2 flex justify-between items-center w-full sm:inline-block sm:min-w-[300px]">
+                      <span>Services & Crew Total</span>
                       <span>${(laborSubtotal + additionalLaborSubtotal).toFixed(2)}</span>
                     </div>
                   </div>
