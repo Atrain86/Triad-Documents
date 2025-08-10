@@ -146,9 +146,15 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     return defaults;
   });
 
-  // Toggle states for workers and services mode
-  const [workersMode, setWorkersMode] = useState<'default' | 'custom'>('default');
-  const [servicesMode, setServicesMode] = useState<'default' | 'custom'>('default');
+  // Toggle states for workers and services mode with localStorage persistence
+  const [workersMode, setWorkersMode] = useState<'default' | 'custom'>(() => {
+    const saved = localStorage.getItem('estimateWorkersMode');
+    return (saved as 'default' | 'custom') || 'default';
+  });
+  const [servicesMode, setServicesMode] = useState<'default' | 'custom'>(() => {
+    const saved = localStorage.getItem('estimateServicesMode');
+    return (saved as 'default' | 'custom') || 'default';
+  });
 
   // Additional labor (crew members) - This was missing!
   const [additionalLabor, setAdditionalLabor] = useState(savedData.additionalLabor || [
@@ -279,13 +285,21 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     setAdditionalServices(prev => [...prev, { name: '', hours: '', rate: defaultRate }]);
   }, [servicesMode]);
 
-  // Toggle handlers
+  // Toggle handlers with localStorage persistence
   const handleWorkersModeToggle = useCallback(() => {
-    setWorkersMode(prev => prev === 'default' ? 'custom' : 'default');
+    setWorkersMode(prev => {
+      const newMode = prev === 'default' ? 'custom' : 'default';
+      localStorage.setItem('estimateWorkersMode', newMode);
+      return newMode;
+    });
   }, []);
 
   const handleServicesModeToggle = useCallback(() => {
-    setServicesMode(prev => prev === 'default' ? 'custom' : 'default');
+    setServicesMode(prev => {
+      const newMode = prev === 'default' ? 'custom' : 'default';
+      localStorage.setItem('estimateServicesMode', newMode);
+      return newMode;
+    });
   }, []);
 
   const removeAdditionalService = useCallback((index: number) => {
@@ -957,16 +971,38 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="text-lg font-semibold flex items-center" style={{ color: '#569CD6' }}>
                         <Wrench className="mr-2 h-4 w-4" />
-                        Primary Services
+                        Services
+                      </h3>
+                      <div className="flex items-center gap-4">
                         <Button
-                          onClick={() => setWorkStages((prev) => [...prev, { name: '', hours: '', rate: 60 }])}
-                          className="text-blue-400 bg-transparent hover:bg-blue-400/20 ml-2 p-2"
+                          onClick={() => setWorkStages((prev: any) => [...prev, { name: '', hours: '', rate: 60 }])}
+                          className="text-blue-400 bg-transparent hover:bg-blue-400/20 p-2"
                           variant="ghost"
                           style={{ minWidth: '38px', minHeight: '38px' }}
                         >
                           <Plus style={{ width: '38px', height: '38px' }} strokeWidth={2} />
                         </Button>
-                      </h3>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-xs font-medium ${servicesMode === 'default' ? 'text-blue-400' : 'text-gray-500'}`}>
+                            Default
+                          </span>
+                          <button
+                            onClick={handleServicesModeToggle}
+                            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 ${
+                              servicesMode === 'custom' ? 'bg-yellow-600' : 'bg-gray-600'
+                            }`}
+                          >
+                            <span
+                              className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+                                servicesMode === 'custom' ? 'translate-x-5' : 'translate-x-1'
+                              }`}
+                            />
+                          </button>
+                          <span className={`text-xs font-medium ${servicesMode === 'custom' ? 'text-yellow-400' : 'text-gray-500'}`}>
+                            Custom
+                          </span>
+                        </div>
+                      </div>
                       <div className="flex items-center gap-3">
                         <div className="flex items-center gap-2">
                           <span className={`text-xs font-medium ${servicesMode === 'default' ? 'text-blue-400' : 'text-gray-500'}`}>
@@ -1046,7 +1082,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                       
                       <div className="pt-3 border-t border-[#569CD6]/30">
                         <div className="flex justify-between items-center">
-                          <span className="font-bold text-green-400">Primary Services Subtotal:</span>
+                          <span className="font-bold text-green-400">Services Subtotal:</span>
                           <span className="font-bold text-green-400">${laborSubtotal.toFixed(2)}</span>
                         </div>
                       </div>
@@ -1058,16 +1094,38 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="text-lg font-semibold flex items-center" style={{ color: '#569CD6' }}>
                         <Users className="mr-2 h-4 w-4" />
-                        Additional Workers
+                        Crew
+                      </h3>
+                      <div className="flex items-center gap-4">
                         <Button
                           onClick={addLabor}
-                          className="text-blue-400 bg-transparent hover:bg-blue-400/20 ml-2 p-2"
+                          className="text-blue-400 bg-transparent hover:bg-blue-400/20 p-2"
                           variant="ghost"
                           style={{ minWidth: '38px', minHeight: '38px' }}
                         >
                           <Plus style={{ width: '38px', height: '38px' }} strokeWidth={2} />
                         </Button>
-                      </h3>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-xs font-medium ${workersMode === 'default' ? 'text-blue-400' : 'text-gray-500'}`}>
+                            Default
+                          </span>
+                          <button
+                            onClick={handleWorkersModeToggle}
+                            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 ${
+                              workersMode === 'custom' ? 'bg-yellow-600' : 'bg-gray-600'
+                            }`}
+                          >
+                            <span
+                              className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+                                workersMode === 'custom' ? 'translate-x-5' : 'translate-x-1'
+                              }`}
+                            />
+                          </button>
+                          <span className={`text-xs font-medium ${workersMode === 'custom' ? 'text-yellow-400' : 'text-gray-500'}`}>
+                            Custom
+                          </span>
+                        </div>
+                      </div>
                       <div className="flex items-center gap-3">
                         <div className="flex items-center gap-2">
                           <span className={`text-xs font-medium ${workersMode === 'default' ? 'text-blue-400' : 'text-gray-500'}`}>
@@ -1145,117 +1203,20 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                       
                       <div className="pt-3 border-t border-[#569CD6]/30">
                         <div className="flex justify-between items-center">
-                          <span className="font-bold text-green-400">Additional Workers Subtotal:</span>
+                          <span className="font-bold text-green-400">Crew Subtotal:</span>
                           <span className="font-bold text-green-400">${additionalLaborSubtotal.toFixed(2)}</span>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Additional Services */}
-                  <div className="border rounded-lg p-2 space-y-4" style={{ borderColor: '#569CD6', backgroundColor: '#569CD610' }}>
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-lg font-semibold flex items-center" style={{ color: '#569CD6' }}>
-                        <Settings className="mr-2 h-4 w-4" />
-                        Additional Services
-                        <Button
-                          onClick={addAdditionalService}
-                          className="text-blue-400 bg-transparent hover:bg-blue-400/20 ml-2 p-2"
-                          variant="ghost"
-                          style={{ minWidth: '38px', minHeight: '38px' }}
-                        >
-                          <Plus style={{ width: '38px', height: '38px' }} strokeWidth={2} />
-                        </Button>
-                      </h3>
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-2">
-                          <span className={`text-xs font-medium ${servicesMode === 'default' ? 'text-blue-400' : 'text-gray-500'}`}>
-                            Default
-                          </span>
-                          <button
-                            onClick={handleServicesModeToggle}
-                            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 ${
-                              servicesMode === 'custom' ? 'bg-yellow-600' : 'bg-gray-600'
-                            }`}
-                          >
-                            <span
-                              className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
-                                servicesMode === 'custom' ? 'translate-x-5' : 'translate-x-1'
-                              }`}
-                            />
-                          </button>
-                          <span className={`text-xs font-medium ${servicesMode === 'custom' ? 'text-yellow-400' : 'text-gray-500'}`}>
-                            Custom
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-3">
-                      {additionalServices.map((service, index) => (
-                        <div key={index} className="flex flex-wrap gap-2 items-end">
-                          <div className="flex-1 min-w-0">
-                            <label className="block text-xs font-medium mb-1 text-gray-300">Service</label>
-                            <Input
-                              value={service.name}
-                              onChange={(e) => updateAdditionalService(index, 'name', e.target.value)}
-                              placeholder="Service name"
-                              className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6] w-full"
-                            />
-                          </div>
-                          <div className="flex-shrink-0">
-                            <label className="block text-xs font-medium mb-1 text-gray-300">Hours</label>
-                            <Input
-                              type="number"
-                              step="0.25"
-                              value={service.hours}
-                              onChange={(e) => updateAdditionalService(index, 'hours', e.target.value)}
-                              placeholder="0"
-                              min="0"
-                              max="999"
-                              className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6] text-center w-16"
-                            />
-                          </div>
-                          <div className="flex-shrink-0">
-                            <label className="block text-xs font-medium mb-1 text-gray-300">Rate</label>
-                            <Input
-                              type="number"
-                              value={service.rate}
-                              onChange={(e) => updateAdditionalService(index, 'rate', e.target.value)}
-                              placeholder="60"
-                              min="0"
-                              max="999"
-                              step="1"
-                              className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6] text-center w-14"
-                            />
-                          </div>
-                          {additionalServices.length > 1 && (
-                            <Button
-                              onClick={() => removeAdditionalService(index)}
-                              size="sm"
-                              variant="ghost"
-                              className="text-red-400 hover:text-red-300 hover:bg-red-900/20 p-1 ml-2"
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                      ))}
-                      
-                      <div className="pt-3 border-t border-[#569CD6]/30">
-                        <div className="flex justify-between items-center">
-                          <span className="font-bold text-green-400">Additional Services Subtotal:</span>
-                          <span className="font-bold text-green-400">${additionalServicesSubtotal.toFixed(2)}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+
 
                   {/* Total */}
                   <div className="text-right">
                     <div className="text-lg font-semibold text-[#569CD6] bg-gray-900/50 border border-[#569CD6] rounded px-4 py-2 flex justify-between items-center w-full sm:inline-block sm:min-w-[300px]">
                       <span>Services & Labor Total</span>
-                      <span>${(laborSubtotal + additionalLaborSubtotal + additionalServicesSubtotal).toFixed(2)}</span>
+                      <span>${(laborSubtotal + additionalLaborSubtotal).toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
