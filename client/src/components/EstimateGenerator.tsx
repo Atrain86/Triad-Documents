@@ -880,14 +880,28 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="w-[100vw] h-[100vh] sm:max-w-4xl sm:max-h-[95vh] sm:w-auto sm:h-auto overflow-y-auto bg-gray-900 border-gray-700 text-white sm:rounded-lg rounded-none">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-center text-[#8B5FBF]">
-              Generate Estimate
-            </DialogTitle>
+        <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto p-0 [&>button]:hidden bg-gray-900 border-gray-700 text-white">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Generate Estimate</DialogTitle>
           </DialogHeader>
+          <div className="flex flex-col w-full overflow-x-hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between px-8 py-6 border-b border-gray-700 bg-gray-800">
+              <div></div> {/* Spacer for centering */}
+              <div className="text-center">
+                <h1 className="text-2xl font-bold text-[#8B5FBF]">Generate Estimate</h1>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={onClose}
+                className="text-gray-400 hover:text-white hover:bg-gray-700"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
 
-          <div className="space-y-4 p-2 sm:p-6">
+            <div className="px-8 py-6 space-y-6 w-full overflow-x-hidden bg-gray-900">
             {/* Estimate Details Section */}
             <div className="border-2 border-[#E53E3E] rounded-lg p-2 sm:p-4 bg-gray-800/50">
               <h3 className="text-[#E53E3E] text-lg font-semibold mb-4 flex items-center">
