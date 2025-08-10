@@ -880,22 +880,22 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="mobile-fullscreen sm:max-w-4xl sm:max-h-[95vh] sm:w-auto sm:h-auto overflow-y-auto bg-gray-900 border-gray-700 text-white">
+        <DialogContent className="max-w-[95vw] w-full sm:max-w-4xl max-h-[95vh] overflow-y-auto bg-gray-900 border-gray-700 text-white">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold text-center text-[#8B5FBF]">
               Generate Estimate
             </DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-6 p-3 sm:p-6">
+          <div className="space-y-4 p-2 sm:p-6">
             {/* Estimate Details Section */}
-            <div className="border-2 border-[#E53E3E] rounded-lg p-4 bg-gray-800/50">
+            <div className="border-2 border-[#E53E3E] rounded-lg p-2 sm:p-4 bg-gray-800/50">
               <h3 className="text-[#E53E3E] text-lg font-semibold mb-4 flex items-center">
                 <Calendar className="w-5 h-5 mr-2" />
                 Estimate Information
               </h3>
               <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4">
                   <div>
                     <label className="block text-sm font-medium mb-2 text-gray-300">Project Title</label>
                     <Input
@@ -928,7 +928,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
             </div>
 
             {/* Services & Labor Section */}
-            <div className="border-2 border-[#569CD6] rounded-lg bg-gray-800/50">
+            <div className="border-2 border-[#569CD6] rounded-lg bg-gray-800/50 min-w-0">
               <div 
                 className="flex items-center justify-between cursor-pointer p-3"
                 onClick={() => toggleSection('servicesLabor')}
@@ -937,7 +937,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                 <ChevronDown className={`w-5 h-5 text-[#569CD6] transition-transform ${expandedSections.servicesLabor ? 'rotate-180' : ''}`} />
               </div>
               {expandedSections.servicesLabor && (
-                <div className="space-y-6 p-4 border-t border-[#569CD6]/30">
+                <div className="space-y-4 p-2 sm:p-4 border-t border-[#569CD6]/30 min-w-0">
                   {/* Primary Services */}
                   <div className="border rounded-lg p-2 space-y-4" style={{ borderColor: '#569CD6', backgroundColor: '#569CD610' }}>
                     <div className="flex items-center justify-between mb-2">
@@ -964,14 +964,14 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     </div>
                     
                     {workStages.map((stage, index) => (
-                      <div key={index} className="space-y-3 sm:space-y-0 sm:grid sm:grid-cols-12 gap-2 sm:gap-4 mb-4">
+                      <div key={index} className="space-y-2 sm:space-y-0 sm:grid sm:grid-cols-12 gap-2 mb-4">
                         <div className="sm:col-span-6">
-                          <label className="block sm:hidden text-sm font-medium mb-1 text-gray-300">Service</label>
+                          <label className="block sm:hidden text-xs font-medium mb-1 text-gray-300">Service</label>
                           <Input
                             value={stage.name}
                             onChange={(e) => updateWorkStage(index, 'name', e.target.value)}
                             placeholder="Service name"
-                            className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6] w-full"
+                            className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6] w-full text-sm"
                           />
                         </div>
                         <div className="sm:col-span-2">
