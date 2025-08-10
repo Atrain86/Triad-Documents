@@ -880,8 +880,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="w-[98vw] sm:max-w-4xl max-h-[95vh] overflow-y-auto bg-gray-900 border-gray-700 text-white">
-          {/* Mobile-responsive dialog container */}
+        <DialogContent className="mobile-fullscreen sm:max-w-4xl sm:max-h-[95vh] sm:w-auto sm:h-auto overflow-y-auto bg-gray-900 border-gray-700 text-white">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold text-center text-[#8B5FBF]">
               Generate Estimate
