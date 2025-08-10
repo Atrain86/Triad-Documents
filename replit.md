@@ -83,3 +83,4 @@ Logo sizing: Homepage logo should use h-14 size with -mt-2 and mb-8 spacing. All
 - **Vite**: Frontend build tool.
 - **ESBuild**: For bundling backend code.
 - **PostCSS**: CSS processing.
+- **Git**: Version control with feature branch workflow (current: feature/invoice-layout-updates).
