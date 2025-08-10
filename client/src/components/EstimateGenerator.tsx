@@ -1003,28 +1003,6 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                           </span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-2">
-                          <span className={`text-xs font-medium ${servicesMode === 'default' ? 'text-blue-400' : 'text-gray-500'}`}>
-                            Default
-                          </span>
-                          <button
-                            onClick={handleServicesModeToggle}
-                            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 ${
-                              servicesMode === 'custom' ? 'bg-yellow-600' : 'bg-gray-600'
-                            }`}
-                          >
-                            <span
-                              className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
-                                servicesMode === 'custom' ? 'translate-x-5' : 'translate-x-1'
-                              }`}
-                            />
-                          </button>
-                          <span className={`text-xs font-medium ${servicesMode === 'custom' ? 'text-yellow-400' : 'text-gray-500'}`}>
-                            Custom
-                          </span>
-                        </div>
-                      </div>
                     </div>
                     
                     <div className="space-y-3">
@@ -1105,28 +1083,6 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                         >
                           <Plus style={{ width: '38px', height: '38px' }} strokeWidth={2} />
                         </Button>
-                        <div className="flex items-center gap-2">
-                          <span className={`text-xs font-medium ${workersMode === 'default' ? 'text-blue-400' : 'text-gray-500'}`}>
-                            Default
-                          </span>
-                          <button
-                            onClick={handleWorkersModeToggle}
-                            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 ${
-                              workersMode === 'custom' ? 'bg-yellow-600' : 'bg-gray-600'
-                            }`}
-                          >
-                            <span
-                              className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
-                                workersMode === 'custom' ? 'translate-x-5' : 'translate-x-1'
-                              }`}
-                            />
-                          </button>
-                          <span className={`text-xs font-medium ${workersMode === 'custom' ? 'text-yellow-400' : 'text-gray-500'}`}>
-                            Custom
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
                         <div className="flex items-center gap-2">
                           <span className={`text-xs font-medium ${workersMode === 'default' ? 'text-blue-400' : 'text-gray-500'}`}>
                             Default
