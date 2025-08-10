@@ -343,10 +343,8 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   }, []);
 
   const removeLabor = useCallback((index: number) => {
-    if (workersMode === 'default' || index >= 1) {
-      setAdditionalLabor((prev) => prev.filter((_, i) => i !== index));
-    }
-  }, [workersMode]);
+    setAdditionalLabor((prev) => prev.length > 1 ? prev.filter((_, i) => i !== index) : prev);
+  }, []);
 
   const addAdditionalService = useCallback(() => {
     const defaultRate = servicesMode === 'default' ? 0 : 60;
@@ -1262,16 +1260,15 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                               className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6] text-center w-14"
                             />
                           </div>
-                          {(workersMode === 'default' || index >= 1) && (
-                            <Button
-                              onClick={() => removeLabor(index)}
-                              size="sm"
-                              variant="ghost"
-                              className="text-red-400 hover:text-red-300 hover:bg-red-900/20 p-1 ml-2"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          )}
+                          <Button
+                            onClick={() => removeLabor(index)}
+                            size="sm"
+                            variant="ghost"
+                            disabled={additionalLabor.length === 1}
+                            className="text-red-400 hover:text-red-300 hover:bg-red-900/20 p-1 ml-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
                       ))}
                       
