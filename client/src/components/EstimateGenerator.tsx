@@ -1082,8 +1082,8 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
               </div>
               {expandedSections.servicesLabor && (
                 <div className="space-y-4 p-2 sm:p-4 border-t border-[#569CD6]/30 min-w-0">
-                  {/* Primary Services */}
-                  <div className="border rounded-lg p-2 space-y-4" style={{ borderColor: '#569CD6', backgroundColor: '#569CD610' }}>
+                    {/* Primary Services */}
+                    <div className="border rounded-lg p-2 space-y-4" style={{ borderColor: '#569CD6', backgroundColor: '#569CD610' }}>
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
                         <h3 className="text-lg font-semibold flex items-center" style={{ color: '#569CD6' }}>
@@ -1278,11 +1278,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                       </div>
                     </div>
                   </div>
-                </div>
-              )}
-            </div>
 
-            {/* Total */}
                   <div className="text-right">
                     <div className="text-lg font-semibold text-green-400 bg-gray-900/50 border border-green-400 rounded px-4 py-2 flex justify-between items-center w-full sm:inline-block sm:min-w-[300px]">
                       <span>Services & Crew Total</span>
@@ -1290,10 +1286,9 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                     </div>
                   </div>
                 </div>
+                </>
               )}
             </div>
-
-
 
             {/* Paint & Materials Section */}
             <div className="border-2 border-[#D4AC0D] rounded-lg bg-gray-800/50">
