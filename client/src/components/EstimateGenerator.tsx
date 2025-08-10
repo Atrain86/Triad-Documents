@@ -429,7 +429,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   // Calculate totals
   const laborSubtotal = workStages.reduce((sum: number, stage: any) => {
     const hours = parseFloat(stage.hours) || 0;
-    const rate = parseFloat(stage.rate.toString()) || 0;
+    const rate = servicesMode === 'default' ? 0 : (parseFloat(stage.rate.toString()) || 0);
     return sum + (hours * rate);
   }, 0);
 
@@ -444,10 +444,10 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   const additionalLaborSubtotal = useMemo(() => {
     return additionalLabor.reduce((sum: number, member: any) => {
       const hours = parseFloat(member.hours) || 0;
-      const rate = parseFloat(member.rate.toString()) || 0;
+      const rate = workersMode === 'default' ? 0 : (parseFloat(member.rate.toString()) || 0);
       return sum + (hours * rate);
     }, 0);
-  }, [additionalLabor]);
+  }, [additionalLabor, workersMode]);
 
   const paintSubtotal = useMemo(() => {
     return (parseFloat(paintCosts.pricePerGallon) || 0) * 
@@ -1152,18 +1152,13 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                             <label className="block text-xs font-medium mb-1 text-gray-300">Rate</label>
                             <Input
                               type="number"
-                              value={servicesMode === 'default' ? '0' : stage.rate}
+                              value={stage.rate}
                               onChange={(e) => updateWorkStage(index, 'rate', e.target.value)}
-                              placeholder={servicesMode === 'default' ? '0' : '60'}
-                              disabled={servicesMode === 'default'}
+                              placeholder="60"
                               min="0"
                               max="999"
                               step="1"
-                              className={`border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6] text-center w-14 ${
-                                servicesMode === 'default' 
-                                  ? 'bg-gray-700 text-gray-400 cursor-not-allowed' 
-                                  : 'bg-gray-800'
-                              }`}
+                              className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6] text-center w-14"
                             />
                           </div>
                           {workStages.length > 1 && (
@@ -1258,18 +1253,13 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                             <label className="block text-xs font-medium mb-1 text-gray-300">Rate</label>
                             <Input
                               type="number"
-                              value={workersMode === 'default' ? '0' : labor.rate}
+                              value={labor.rate}
                               onChange={(e) => updateAdditionalLabor(index, 'rate', e.target.value)}
-                              placeholder={workersMode === 'default' ? '0' : '60'}
-                              disabled={workersMode === 'default'}
+                              placeholder="60"
                               min="0"
                               max="999"
                               step="1"
-                              className={`border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6] text-center w-14 ${
-                                workersMode === 'default' 
-                                  ? 'bg-gray-700 text-gray-400 cursor-not-allowed' 
-                                  : 'bg-gray-800'
-                              }`}
+                              className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6] text-center w-14"
                             />
                           </div>
                           {(workersMode === 'default' || index >= 1) && (
