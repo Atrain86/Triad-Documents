@@ -116,12 +116,25 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     }));
   };
 
-  // Work stages state with localStorage persistence
-  const [workStages, setWorkStages] = useState(savedData.workStages || [
-    { name: 'Prep', hours: '', rate: 60 },
-    { name: 'Priming', hours: '', rate: 60 },
-    { name: 'Painting', hours: '', rate: 60 },
-  ]);
+  // Work stages state - dynamically set based on current mode
+  const [workStages, setWorkStages] = useState(() => {
+    const mode = localStorage.getItem('estimateServicesMode') || 'default';
+    if (mode === 'default') {
+      const saved = localStorage.getItem('estimateDefaultServices');
+      return saved ? JSON.parse(saved) : [
+        { name: 'Prep', hours: '', rate: 60 },
+        { name: 'Priming', hours: '', rate: 60 },
+        { name: 'Painting', hours: '', rate: 60 },
+      ];
+    } else {
+      const saved = localStorage.getItem('estimateCustomServices');
+      return saved ? JSON.parse(saved) : [
+        { name: 'Prep', hours: '', rate: 60 },
+        { name: 'Priming', hours: '', rate: 60 },
+        { name: 'Painting', hours: '', rate: 60 },
+      ];
+    }
+  });
 
   // Paint costs state
   const [paintCosts, setPaintCosts] = useState(savedData.paintCosts || {
@@ -156,10 +169,44 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     return (saved as 'default' | 'custom') || 'default';
   });
 
-  // Additional labor (crew members) - This was missing!
-  const [additionalLabor, setAdditionalLabor] = useState(savedData.additionalLabor || [
-    { name: '', hours: '', rate: 0 }
-  ]);
+  // Separate state for default and custom configurations
+  const [defaultServices, setDefaultServices] = useState(() => {
+    const saved = localStorage.getItem('estimateDefaultServices');
+    return saved ? JSON.parse(saved) : [
+      { name: 'Prep', hours: '', rate: 60 },
+      { name: 'Priming', hours: '', rate: 60 },
+      { name: 'Painting', hours: '', rate: 60 },
+    ];
+  });
+  const [customServices, setCustomServices] = useState(() => {
+    const saved = localStorage.getItem('estimateCustomServices');
+    return saved ? JSON.parse(saved) : [
+      { name: 'Prep', hours: '', rate: 60 },
+      { name: 'Priming', hours: '', rate: 60 },
+      { name: 'Painting', hours: '', rate: 60 },
+    ];
+  });
+
+  const [defaultWorkers, setDefaultWorkers] = useState(() => {
+    const saved = localStorage.getItem('estimateDefaultWorkers');
+    return saved ? JSON.parse(saved) : [{ name: '', hours: '', rate: 0 }];
+  });
+  const [customWorkers, setCustomWorkers] = useState(() => {
+    const saved = localStorage.getItem('estimateCustomWorkers');
+    return saved ? JSON.parse(saved) : [{ name: '', hours: '', rate: 60 }];
+  });
+
+  // Additional labor (crew members) - dynamically set based on current mode
+  const [additionalLabor, setAdditionalLabor] = useState(() => {
+    const mode = localStorage.getItem('estimateWorkersMode') || 'default';
+    if (mode === 'default') {
+      const saved = localStorage.getItem('estimateDefaultWorkers');
+      return saved ? JSON.parse(saved) : [{ name: '', hours: '', rate: 0 }];
+    } else {
+      const saved = localStorage.getItem('estimateCustomWorkers');
+      return saved ? JSON.parse(saved) : [{ name: '', hours: '', rate: 60 }];
+    }
+  });
 
   // Custom supplies state
   const [customSupplies, setCustomSupplies] = useState(savedData.customSupplies || [
@@ -258,6 +305,27 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     setAdditionalLabor((prev) => [...prev, { name: '', hours: '', rate: defaultRate }]);
   }, [workersMode]);
 
+  // Auto-save effects to continuously save changes
+  useEffect(() => {
+    if (servicesMode === 'default') {
+      localStorage.setItem('estimateDefaultServices', JSON.stringify(workStages));
+      setDefaultServices(workStages);
+    } else {
+      localStorage.setItem('estimateCustomServices', JSON.stringify(workStages));
+      setCustomServices(workStages);
+    }
+  }, [workStages, servicesMode]);
+
+  useEffect(() => {
+    if (workersMode === 'default') {
+      localStorage.setItem('estimateDefaultWorkers', JSON.stringify(additionalLabor));
+      setDefaultWorkers(additionalLabor);
+    } else {
+      localStorage.setItem('estimateCustomWorkers', JSON.stringify(additionalLabor));
+      setCustomWorkers(additionalLabor);
+    }
+  }, [additionalLabor, workersMode]);
+
   const updateCustomSupply = useCallback((index: number, field: string, value: string) => {
     setCustomSupplies((prev) => {
       const updated = [...prev];
@@ -285,22 +353,72 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
     setAdditionalServices(prev => [...prev, { name: '', hours: '', rate: defaultRate }]);
   }, [servicesMode]);
 
-  // Toggle handlers with localStorage persistence
+  // Toggle handlers with localStorage persistence and state switching
   const handleWorkersModeToggle = useCallback(() => {
     setWorkersMode(prev => {
       const newMode = prev === 'default' ? 'custom' : 'default';
+      
+      // Save current workers state to the current mode
+      if (prev === 'default') {
+        localStorage.setItem('estimateDefaultWorkers', JSON.stringify(additionalLabor));
+        setDefaultWorkers(additionalLabor);
+      } else {
+        localStorage.setItem('estimateCustomWorkers', JSON.stringify(additionalLabor));
+        setCustomWorkers(additionalLabor);
+      }
+      
+      // Load workers state for the new mode
+      if (newMode === 'default') {
+        const savedDefault = localStorage.getItem('estimateDefaultWorkers');
+        const defaultData = savedDefault ? JSON.parse(savedDefault) : [{ name: '', hours: '', rate: 0 }];
+        setAdditionalLabor(defaultData);
+      } else {
+        const savedCustom = localStorage.getItem('estimateCustomWorkers');
+        const customData = savedCustom ? JSON.parse(savedCustom) : [{ name: '', hours: '', rate: 60 }];
+        setAdditionalLabor(customData);
+      }
+      
       localStorage.setItem('estimateWorkersMode', newMode);
       return newMode;
     });
-  }, []);
+  }, [additionalLabor]);
 
   const handleServicesModeToggle = useCallback(() => {
     setServicesMode(prev => {
       const newMode = prev === 'default' ? 'custom' : 'default';
+      
+      // Save current services state to the current mode
+      if (prev === 'default') {
+        localStorage.setItem('estimateDefaultServices', JSON.stringify(workStages));
+        setDefaultServices(workStages);
+      } else {
+        localStorage.setItem('estimateCustomServices', JSON.stringify(workStages));
+        setCustomServices(workStages);
+      }
+      
+      // Load services state for the new mode
+      if (newMode === 'default') {
+        const savedDefault = localStorage.getItem('estimateDefaultServices');
+        const defaultData = savedDefault ? JSON.parse(savedDefault) : [
+          { name: 'Prep', hours: '', rate: 60 },
+          { name: 'Priming', hours: '', rate: 60 },
+          { name: 'Painting', hours: '', rate: 60 },
+        ];
+        setWorkStages(defaultData);
+      } else {
+        const savedCustom = localStorage.getItem('estimateCustomServices');
+        const customData = savedCustom ? JSON.parse(savedCustom) : [
+          { name: 'Prep', hours: '', rate: 60 },
+          { name: 'Priming', hours: '', rate: 60 },
+          { name: 'Painting', hours: '', rate: 60 },
+        ];
+        setWorkStages(customData);
+      }
+      
       localStorage.setItem('estimateServicesMode', newMode);
       return newMode;
     });
-  }, []);
+  }, [workStages]);
 
   const removeAdditionalService = useCallback((index: number) => {
     if (index >= 3) {
@@ -1034,13 +1152,18 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                             <label className="block text-xs font-medium mb-1 text-gray-300">Rate</label>
                             <Input
                               type="number"
-                              value={stage.rate}
+                              value={servicesMode === 'default' ? '0' : stage.rate}
                               onChange={(e) => updateWorkStage(index, 'rate', e.target.value)}
-                              placeholder="60"
+                              placeholder={servicesMode === 'default' ? '0' : '60'}
+                              disabled={servicesMode === 'default'}
                               min="0"
                               max="999"
                               step="1"
-                              className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6] text-center w-14"
+                              className={`border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6] text-center w-14 ${
+                                servicesMode === 'default' 
+                                  ? 'bg-gray-700 text-gray-400 cursor-not-allowed' 
+                                  : 'bg-gray-800'
+                              }`}
                             />
                           </div>
                           {workStages.length > 1 && (
@@ -1135,13 +1258,18 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                             <label className="block text-xs font-medium mb-1 text-gray-300">Rate</label>
                             <Input
                               type="number"
-                              value={labor.rate}
+                              value={workersMode === 'default' ? '0' : labor.rate}
                               onChange={(e) => updateAdditionalLabor(index, 'rate', e.target.value)}
-                              placeholder="60"
+                              placeholder={workersMode === 'default' ? '0' : '60'}
+                              disabled={workersMode === 'default'}
                               min="0"
                               max="999"
                               step="1"
-                              className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6] text-center w-14"
+                              className={`border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6] text-center w-14 ${
+                                workersMode === 'default' 
+                                  ? 'bg-gray-700 text-gray-400 cursor-not-allowed' 
+                                  : 'bg-gray-800'
+                              }`}
                             />
                           </div>
                           {(workersMode === 'default' || index >= 1) && (
