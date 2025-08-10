@@ -1082,28 +1082,29 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
               </div>
               {expandedSections.servicesLabor && (
                 <div className="space-y-4 p-2 sm:p-4 border-t border-[#569CD6]/30 min-w-0">
+                  <div className="space-y-4">
                     {/* Primary Services */}
                     <div className="border rounded-lg p-2 space-y-4" style={{ borderColor: '#569CD6', backgroundColor: '#569CD610' }}>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-lg font-semibold flex items-center" style={{ color: '#569CD6' }}>
-                          <Wrench className="mr-2 h-4 w-4" />
-                          Services
-                        </h3>
-                        <Button
-                          onClick={() => setWorkStages((prev: any) => [...prev, { name: '', hours: '', rate: 0 }])}
-                          className="text-blue-400 bg-transparent hover:bg-blue-400/20 p-2"
-                          variant="ghost"
-                          style={{ minWidth: '38px', minHeight: '38px' }}
-                        >
-                          <Plus style={{ width: '38px', height: '38px' }} strokeWidth={2} />
-                        </Button>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className={`text-xs font-medium ${servicesMode === 'default' ? 'text-blue-400' : 'text-gray-500'}`}>
-                          Default
-                        </span>
-                        <button
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-lg font-semibold flex items-center" style={{ color: '#569CD6' }}>
+                            <Wrench className="mr-2 h-4 w-4" />
+                            Services
+                          </h3>
+                          <Button
+                            onClick={() => setWorkStages((prev: any) => [...prev, { name: '', hours: '', rate: 0 }])}
+                            className="text-blue-400 bg-transparent hover:bg-blue-400/20 p-2"
+                            variant="ghost"
+                            style={{ minWidth: '38px', minHeight: '38px' }}
+                          >
+                            <Plus style={{ width: '38px', height: '38px' }} strokeWidth={2} />
+                          </Button>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-xs font-medium ${servicesMode === 'default' ? 'text-blue-400' : 'text-gray-500'}`}>
+                            Default
+                          </span>
+                          <button
                             onClick={handleServicesModeToggle}
                             className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 ${
                               servicesMode === 'custom' ? 'bg-yellow-600' : 'bg-gray-600'
@@ -1115,10 +1116,10 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                               }`}
                             />
                           </button>
-                        <span className={`text-xs font-medium ${servicesMode === 'custom' ? 'text-yellow-400' : 'text-gray-500'}`}>
-                          Custom
-                        </span>
-                      </div>
+                          <span className={`text-xs font-medium ${servicesMode === 'custom' ? 'text-yellow-400' : 'text-gray-500'}`}>
+                            Custom
+                          </span>
+                        </div>
                     </div>
                     
                     <div className="space-y-3">
@@ -1277,16 +1278,15 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="text-right">
-                    <div className="text-lg font-semibold text-green-400 bg-gray-900/50 border border-green-400 rounded px-4 py-2 flex justify-between items-center w-full sm:inline-block sm:min-w-[300px]">
-                      <span>Services & Crew Total</span>
-                      <span>${(laborSubtotal + additionalLaborSubtotal).toFixed(2)}</span>
+                    <div className="text-right">
+                      <div className="text-lg font-semibold text-green-400 bg-gray-900/50 border border-green-400 rounded px-4 py-2 flex justify-between items-center w-full sm:inline-block sm:min-w-[300px]">
+                        <span>Services & Crew Total</span>
+                        <span>${(laborSubtotal + additionalLaborSubtotal).toFixed(2)}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-                </>
               )}
             </div>
 
