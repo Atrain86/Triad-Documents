@@ -343,7 +343,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
   }, []);
 
   const removeLabor = useCallback((index: number) => {
-    setAdditionalLabor((prev) => prev.length > 1 ? prev.filter((_, i) => i !== index) : prev);
+    setAdditionalLabor((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
   const addAdditionalService = useCallback(() => {
@@ -1262,8 +1262,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                             onClick={() => removeLabor(index)}
                             size="sm"
                             variant="ghost"
-                            disabled={additionalLabor.length === 1}
-                            className="text-red-400 hover:text-red-300 hover:bg-red-900/20 p-1 ml-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="text-red-400 hover:text-red-300 hover:bg-red-900/20 p-1 ml-2"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
