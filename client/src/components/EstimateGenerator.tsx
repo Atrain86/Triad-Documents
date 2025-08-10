@@ -1170,7 +1170,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                               variant="ghost"
                               className="text-red-400 hover:text-red-300 hover:bg-red-900/20 p-1 ml-2"
                             >
-                              <X className="h-4 w-4" />
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           )}
                         </div>
@@ -1269,7 +1269,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                               variant="ghost"
                               className="text-red-400 hover:text-red-300 hover:bg-red-900/20 p-1 ml-2"
                             >
-                              <X className="h-4 w-4" />
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           )}
                         </div>
