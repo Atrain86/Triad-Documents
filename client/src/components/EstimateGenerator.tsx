@@ -1558,7 +1558,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                   </div>
                 )}
                 <hr className="border-[#8B5FBF]" />
-                <div className="flex justify-between text-2xl font-bold text-[#8B5FBF] bg-gray-900/50 border-2 border-[#8B5FBF] rounded px-4 py-3">
+                <div className="flex justify-between text-lg font-semibold text-green-400 bg-gray-900/50 border border-green-400 rounded px-4 py-2">
                   <span>TOTAL ESTIMATE:</span>
                   <span>${grandTotal.toFixed(2)}</span>
                 </div>
