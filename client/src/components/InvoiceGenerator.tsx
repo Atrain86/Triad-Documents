@@ -1758,106 +1758,6 @@ ${emailMessage}`;
                     )}
                   </div>
 
-                  {/* Additional Workers Section */}
-                  <div className="border rounded-lg p-2 space-y-4" style={{ borderColor: paintBrainColors.blue, backgroundColor: `${paintBrainColors.blue}10` }}>
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-lg font-semibold flex items-center" style={{ color: paintBrainColors.blue }}>
-                        <Users className="mr-2 h-4 w-4" />
-                        Additional Workers
-                        <Button
-                          onClick={addAdditionalWorker}
-                          className="text-blue-400 bg-transparent hover:bg-blue-400/20 ml-2 p-2"
-                          variant="ghost"
-                          style={{ minWidth: '38px', minHeight: '38px' }}
-                        >
-                          <Plus style={{ width: '38px', height: '38px' }} strokeWidth={2} />
-                        </Button>
-                      </h3>
-                      <div className="flex items-center gap-3">
-                        {/* Toggle Switch */}
-                        <div className="flex items-center gap-2">
-                          <span className={`text-xs font-medium ${workersMode === 'default' ? 'text-blue-400' : 'text-gray-500'}`}>
-                            Default
-                          </span>
-                          <button
-                            onClick={handleWorkersModeToggle}
-                            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 ${
-                              workersMode === 'custom' ? 'bg-yellow-600' : 'bg-gray-600'
-                            }`}
-                          >
-                            <span
-                              className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
-                                workersMode === 'custom' ? 'translate-x-5' : 'translate-x-1'
-                              }`}
-                            />
-                          </button>
-                          <span className={`text-xs font-medium ${servicesMode === 'custom' ? 'text-yellow-400' : 'text-gray-500'}`}>
-                            Custom
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="space-y-3">
-                      {additionalWorkers.map((worker, index) => (
-                        <div key={index} className="flex flex-wrap gap-2 items-end">
-                          <div className="flex-1 min-w-0">
-                            <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Name</label>
-                            <Input
-                              value={worker.name}
-                              onChange={(e) => updateAdditionalWorker(index, 'name', e.target.value)}
-                              placeholder="Employee name"
-                              className="bg-gray-800 border-blue-400 text-white w-full"
-                            />
-                          </div>
-                          <div className="flex-shrink-0">
-                            <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Hours</label>
-                            <Input
-                              type="number"
-                              value={worker.hours}
-                              onChange={(e) => updateAdditionalWorker(index, 'hours', e.target.value)}
-                              onWheel={preventWheelChange}
-                              placeholder="0"
-                              min="0"
-                              max="999"
-                              step="0.25"
-                              className="bg-gray-800 border-blue-400 text-white text-center w-16"
-                            />
-                          </div>
-                          <div className="flex-shrink-0">
-                            <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Rate</label>
-                            <Input
-                              type="number"
-                              value={worker.rate}
-                              onChange={(e) => updateAdditionalWorker(index, 'rate', e.target.value)}
-                              onWheel={preventWheelChange}
-                              placeholder="60"
-                              min="0"
-                              max="99"
-                              step="1"
-                              className="bg-gray-800 border-blue-400 text-white text-center w-14"
-                            />
-                          </div>
-                          {(workersMode === 'default' || index >= 1) && (
-                            <Button
-                              onClick={() => removeAdditionalWorker(index)}
-                              size="sm"
-                              variant="ghost"
-                              className="text-red-400 hover:text-red-300 hover:bg-red-900/20 p-1 ml-2"
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                      ))}
-                      <div className="pt-3 border-t border-blue-400/30">
-                        <div className="flex justify-between items-center">
-                          <span className="font-bold text-green-400">Additional Workers Subtotal:</span>
-                          <span className="font-bold text-green-400">${additionalWorkersSubtotal.toFixed(2)}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
                   {/* Additional Services Section */}
                   <div className="border rounded-lg p-2 space-y-4" style={{ borderColor: paintBrainColors.blue, backgroundColor: `${paintBrainColors.blue}10` }}>
                     <div className="flex items-center justify-between mb-2">
@@ -1954,6 +1854,106 @@ ${emailMessage}`;
                         <div className="flex justify-between items-center">
                           <span className="font-bold text-green-400">Additional Services Subtotal:</span>
                           <span className="font-bold text-green-400">${additionalServicesSubtotal.toFixed(2)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Additional Workers Section */}
+                  <div className="border rounded-lg p-2 space-y-4" style={{ borderColor: paintBrainColors.blue, backgroundColor: `${paintBrainColors.blue}10` }}>
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-lg font-semibold flex items-center" style={{ color: paintBrainColors.blue }}>
+                        <Users className="mr-2 h-4 w-4" />
+                        Additional Workers
+                        <Button
+                          onClick={addAdditionalWorker}
+                          className="text-blue-400 bg-transparent hover:bg-blue-400/20 ml-2 p-2"
+                          variant="ghost"
+                          style={{ minWidth: '38px', minHeight: '38px' }}
+                        >
+                          <Plus style={{ width: '38px', height: '38px' }} strokeWidth={2} />
+                        </Button>
+                      </h3>
+                      <div className="flex items-center gap-3">
+                        {/* Toggle Switch */}
+                        <div className="flex items-center gap-2">
+                          <span className={`text-xs font-medium ${workersMode === 'default' ? 'text-blue-400' : 'text-gray-500'}`}>
+                            Default
+                          </span>
+                          <button
+                            onClick={handleWorkersModeToggle}
+                            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 ${
+                              workersMode === 'custom' ? 'bg-yellow-600' : 'bg-gray-600'
+                            }`}
+                          >
+                            <span
+                              className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+                                workersMode === 'custom' ? 'translate-x-5' : 'translate-x-1'
+                              }`}
+                            />
+                          </button>
+                          <span className={`text-xs font-medium ${servicesMode === 'custom' ? 'text-yellow-400' : 'text-gray-500'}`}>
+                            Custom
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      {additionalWorkers.map((worker, index) => (
+                        <div key={index} className="flex flex-wrap gap-2 items-end">
+                          <div className="flex-1 min-w-0">
+                            <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Name</label>
+                            <Input
+                              value={worker.name}
+                              onChange={(e) => updateAdditionalWorker(index, 'name', e.target.value)}
+                              placeholder="Employee name"
+                              className="bg-gray-800 border-blue-400 text-white w-full"
+                            />
+                          </div>
+                          <div className="flex-shrink-0">
+                            <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Hours</label>
+                            <Input
+                              type="number"
+                              value={worker.hours}
+                              onChange={(e) => updateAdditionalWorker(index, 'hours', e.target.value)}
+                              onWheel={preventWheelChange}
+                              placeholder="0"
+                              min="0"
+                              max="999"
+                              step="0.25"
+                              className="bg-gray-800 border-blue-400 text-white text-center w-16"
+                            />
+                          </div>
+                          <div className="flex-shrink-0">
+                            <label className="block text-xs font-medium mb-1" style={{ color: darkTheme.textSecondary }}>Rate</label>
+                            <Input
+                              type="number"
+                              value={worker.rate}
+                              onChange={(e) => updateAdditionalWorker(index, 'rate', e.target.value)}
+                              onWheel={preventWheelChange}
+                              placeholder="60"
+                              min="0"
+                              max="99"
+                              step="1"
+                              className="bg-gray-800 border-blue-400 text-white text-center w-14"
+                            />
+                          </div>
+                          {(workersMode === 'default' || index >= 1) && (
+                            <Button
+                              onClick={() => removeAdditionalWorker(index)}
+                              size="sm"
+                              variant="ghost"
+                              className="text-red-400 hover:text-red-300 hover:bg-red-900/20 p-1 ml-2"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      ))}
+                      <div className="pt-3 border-t border-blue-400/30">
+                        <div className="flex justify-between items-center">
+                          <span className="font-bold text-green-400">Additional Workers Subtotal:</span>
+                          <span className="font-bold text-green-400">${additionalWorkersSubtotal.toFixed(2)}</span>
                         </div>
                       </div>
                     </div>
