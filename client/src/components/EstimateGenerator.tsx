@@ -1134,7 +1134,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                             />
                           </div>
                           <div className="flex-shrink-0">
-                            <label className="block text-xs font-medium mb-1 text-gray-300">Hours</label>
+                            <label className="block text-xs font-medium mb-1 text-gray-300 text-center">Hours</label>
                             <Input
                               type="number"
                               step="0.25"
@@ -1143,11 +1143,11 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                               placeholder="0"
                               min="0"
                               max="999"
-                              className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6] text-center w-16"
+                              className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6] text-center w-16 placeholder:text-gray-500"
                             />
                           </div>
                           <div className="flex-shrink-0">
-                            <label className="block text-xs font-medium mb-1 text-gray-300">Rate</label>
+                            <label className="block text-xs font-medium mb-1 text-gray-300 text-center">Rate</label>
                             <Input
                               type="number"
                               value={stage.rate}
@@ -1156,7 +1156,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                               min="0"
                               max="999"
                               step="1"
-                              className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6] text-center w-14"
+                              className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6] text-center w-14 placeholder:text-gray-500"
                             />
                           </div>
                           <Button
@@ -1233,7 +1233,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                             />
                           </div>
                           <div className="flex-shrink-0">
-                            <label className="block text-xs font-medium mb-1 text-gray-300">Hours</label>
+                            <label className="block text-xs font-medium mb-1 text-gray-300 text-center">Hours</label>
                             <Input
                               type="number"
                               step="0.25"
@@ -1242,11 +1242,11 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                               placeholder="0"
                               min="0"
                               max="999"
-                              className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6] text-center w-16"
+                              className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6] text-center w-16 placeholder:text-gray-500"
                             />
                           </div>
                           <div className="flex-shrink-0">
-                            <label className="block text-xs font-medium mb-1 text-gray-300">Rate</label>
+                            <label className="block text-xs font-medium mb-1 text-gray-300 text-center">Rate</label>
                             <Input
                               type="number"
                               value={labor.rate}
@@ -1255,7 +1255,7 @@ export default function EstimateGenerator({ project, isOpen, onClose }: Estimate
                               min="0"
                               max="999"
                               step="1"
-                              className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6] text-center w-14"
+                              className="bg-gray-800 border-[#569CD6] text-white focus:border-[#569CD6] focus:ring-[#569CD6] text-center w-14 placeholder:text-gray-500"
                             />
                           </div>
                           <Button
