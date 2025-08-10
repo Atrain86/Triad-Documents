@@ -1,11 +1,11 @@
-# Painting Project Management Application
+# Paint Brain - Painting Project Management Application
 
 ## Overview
 This is a full-stack web application for managing painting projects, offering tools for estimation, photo organization, receipt tracking, and time logging. Its purpose is to streamline operations for painting businesses, providing a comprehensive solution for project oversight from initial contact to invoicing. The application aims to enhance efficiency, improve client communication, and provide detailed financial tracking for painting professionals.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
-Brand name: A-Frame Painting
+Brand name: Paint Brain (previously A-Frame Painting)
 Theme preference: Dark mode by default
 Logo: Custom A-frame house structure with paint brush accent
 Logo sizing: Homepage logo should use h-14 size with -mt-2 and mb-8 spacing. All logos in library should maintain this same size standard to avoid visual conflicts when switching between logos.
