@@ -1,134 +1,156 @@
-import React, { useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2 } from 'lucide-react';
+import React, { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { LoaderCircle } from "lucide-react";
 
-const LoginForm: React.FC = () => {
-  const { login, register } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  
-  // Login form state
-  const [loginEmail, setLoginEmail] = useState('cortespainter@gmail.com');
-  const [loginPassword, setLoginPassword] = useState('brain');
-  
-  // Register form state
-  const [registerEmail, setRegisterEmail] = useState('');
-  const [registerPassword, setRegisterPassword] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+export default function LoginForm() {
+  const { login, register, loading, error } = useAuth();
+  const [activeTab, setActiveTab] = useState("login");
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      await login(loginEmail, loginPassword);
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Login failed');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      await register(registerEmail, registerPassword, firstName, lastName);
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Registration failed');
-    } finally {
-      setIsLoading(false);
+    if (activeTab === "register") {
+      await register(formData.name, formData.email, formData.password);
+    } else {
+      await login(formData.email, formData.password);
     }
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-12">
-        {/* Paint Brain Logo */}
-        <div className="text-center mb-4">
-          <div className="w-64 h-64 mx-auto flex items-center justify-center" style={{ backgroundColor: '#000000', boxShadow: 'inset 0 0 100px #000000, inset 0 0 200px #000000' }}>
-            <img 
-              src="/paint-brain-logo.png" 
-              alt="Paint Brain Logo" 
-              className="h-60 w-60 object-contain"
-            />
-          </div>
-          <div className="text-white text-lg font-medium -mt-12 leading-relaxed" style={{ fontFamily: 'TikTok Sans, sans-serif' }}>
-            <p className="text-center">Smart project management for painters</p>
-          </div>
-        </div>
+    <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
+      <Card className="w-[350px] shadow-xl bg-card/80 backdrop-blur border border-border">
+        <CardHeader>
+          <CardTitle className="text-center text-xl text-primary">
+            Paint Brain
+          </CardTitle>
+          <CardDescription className="text-center">
+            Manage your painting business efficiently
+          </CardDescription>
+        </CardHeader>
 
-        <Card className="border-0 shadow-xl">
-          <CardContent className="space-y-4 pt-6">
-            <div className="space-y-2">
-              <Input
-                id="email"
-                type="email"
-                placeholder="Email"
-                value={loginEmail}
-                onChange={(e) => setLoginEmail(e.target.value)}
-                required
-                disabled={isLoading}
-                className="placeholder:opacity-75 border-2 border-orange-500 focus:border-orange-400"
-                style={{ borderColor: '#D4A574' }}
-              />
-            </div>
-            <div className="space-y-2">
-              <Input
-                id="password"
-                type="password"
-                placeholder="Password"
-                value={loginPassword}
-                onChange={(e) => setLoginPassword(e.target.value)}
-                required
-                disabled={isLoading}
-                className="placeholder:opacity-75 border-2 border-orange-500 focus:border-orange-400"
-                style={{ borderColor: '#D4A574' }}
-              />
-            </div>
-            
-            {/* Side by side buttons */}
-            <div className="grid grid-cols-2 gap-3 pt-2">
-              <Button 
-                onClick={handleLogin}
-                className="bg-orange-600 hover:bg-orange-700"
-                disabled={isLoading}
-              >
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Sign In
-              </Button>
-              <Button 
-                onClick={handleRegister}
-                className="text-white hover:opacity-90"
-                disabled={isLoading}
-                style={{ backgroundColor: '#7B4FF2', borderColor: '#7B4FF2' }}
-              >
-                Register
-              </Button>
-            </div>
-          </CardContent>
-          
-          {error && (
-            <div className="p-4">
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            </div>
-          )}
-        </Card>
-      </div>
+        <CardContent>
+          <Tabs defaultValue="login" onValueChange={setActiveTab}>
+            <TabsList className="grid grid-cols-2 mb-4">
+              <TabsTrigger value="login">Login</TabsTrigger>
+              <TabsTrigger value="register">Register</TabsTrigger>
+            </TabsList>
+
+            {/* LOGIN TAB */}
+            <TabsContent value="login">
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) =>
+                      setFormData({ ...formData, password: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+                {error && (
+                  <p className="text-red-500 text-sm text-center">{error}</p>
+                )}
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full mt-2 flex items-center justify-center gap-2"
+                >
+                  {loading && <LoaderCircle className="animate-spin h-4 w-4" />}
+                  Login
+                </Button>
+              </form>
+            </TabsContent>
+
+            {/* REGISTER TAB */}
+            <TabsContent value="register">
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <Label htmlFor="name">Name</Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) =>
+                      setFormData({ ...formData, password: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+                {error && (
+                  <p className="text-red-500 text-sm text-center">{error}</p>
+                )}
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full mt-2 flex items-center justify-center gap-2"
+                >
+                  {loading && <LoaderCircle className="animate-spin h-4 w-4" />}
+                  Register
+                </Button>
+              </form>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+
+        <CardFooter className="flex justify-center text-sm text-muted-foreground">
+          © 2025 Paint Brain
+        </CardFooter>
+      </Card>
     </div>
   );
-};
-
-export default LoginForm;
+}

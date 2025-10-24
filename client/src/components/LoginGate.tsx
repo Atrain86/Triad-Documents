@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { ReactNode } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,12 +6,13 @@ import { Lock } from "lucide-react";
 
 interface LoginGateProps {
   onAuthenticated: () => void;
+  children: ReactNode;
 }
 
-export default function LoginGate({ onAuthenticated }: LoginGateProps) {
-  const [passcode, setPasscode] = useState('demo2025');
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+export default function LoginGate({ onAuthenticated, children }: LoginGateProps) {
+  const [passcode, setPasscode] = React.useState('demo2025');
+  const [error, setError] = React.useState('');
+  const [isLoading, setIsLoading] = React.useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +41,7 @@ export default function LoginGate({ onAuthenticated }: LoginGateProps) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800 p-4 border-4 border-red-500">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="mx-auto w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mb-4">
@@ -70,7 +71,7 @@ export default function LoginGate({ onAuthenticated }: LoginGateProps) {
             )}
             <Button 
               type="submit" 
-              className="w-full"
+              className="w-full bg-green-500 hover:bg-green-600"
               disabled={!passcode || isLoading}
             >
               {isLoading ? 'Verifying...' : 'Access App'}
@@ -78,6 +79,7 @@ export default function LoginGate({ onAuthenticated }: LoginGateProps) {
           </form>
         </CardContent>
       </Card>
+      {sessionStorage.getItem('authenticated') === 'true' && children}
     </div>
   );
 }

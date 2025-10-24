@@ -37,7 +37,6 @@ const TaxConfiguration: React.FC<TaxConfigurationProps> = ({
 }) => {
   const { toast } = useToast();
   
-  // Load saved tax configuration from localStorage
   const loadSavedTaxConfig = (): TaxConfig => {
     try {
       const saved = localStorage.getItem('taxConfiguration');
@@ -65,15 +64,12 @@ const TaxConfiguration: React.FC<TaxConfigurationProps> = ({
 
   const [taxConfig, setTaxConfig] = useState<TaxConfig>(loadSavedTaxConfig());
 
-  // Save to localStorage whenever config changes
   useEffect(() => {
     localStorage.setItem('taxConfiguration', JSON.stringify(taxConfig));
   }, [taxConfig]);
 
   const handleCountryChange = (country: string) => {
     let newConfig = { ...taxConfig, country };
-    
-    // Reset all tax rates when country changes
     newConfig = {
       ...newConfig,
       gst: 0,
@@ -84,7 +80,6 @@ const TaxConfiguration: React.FC<TaxConfigurationProps> = ({
       otherTax: 0
     };
 
-    // Set default rates based on country
     switch (country) {
       case 'CA':
         newConfig.gst = 5;
@@ -96,7 +91,6 @@ const TaxConfiguration: React.FC<TaxConfigurationProps> = ({
         newConfig.vat = 20;
         break;
       default:
-        // International - leave at 0
         break;
     }
 
@@ -104,9 +98,7 @@ const TaxConfiguration: React.FC<TaxConfigurationProps> = ({
   };
 
   const handleSave = () => {
-    if (onSave) {
-      onSave(taxConfig);
-    }
+    if (onSave) onSave(taxConfig);
     toast({
       title: "Tax Configuration Saved",
       description: "Your tax settings have been updated successfully.",
@@ -254,20 +246,15 @@ const TaxConfiguration: React.FC<TaxConfigurationProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Tax Configuration Header */}
       <div className="text-center space-y-2">
         <h2 className="text-2xl font-bold text-yellow-400">Tax Configuration</h2>
         <p className="text-[#DCDCAA] text-sm">
           Configure tax rates for invoices and estimates across different regions.
-          Settings are saved automatically and applied to all future documents.
         </p>
       </div>
 
-      {/* Tax Settings Container */}
       <div className="relative p-6 rounded-xl border-2 border-yellow-400/50 bg-black backdrop-blur-sm">
-        
         <div className="space-y-6">
-          {/* Country Selection */}
           <div>
             <Label htmlFor="country" className="text-lg font-semibold text-yellow-300">Country/Region</Label>
             <Select value={taxConfig.country} onValueChange={handleCountryChange}>
@@ -283,13 +270,11 @@ const TaxConfiguration: React.FC<TaxConfigurationProps> = ({
             </Select>
           </div>
 
-          {/* Tax Input Fields */}
           <div className="space-y-4">
             <h3 className="text-xl font-bold text-yellow-300">Tax Rates Configuration</h3>
             {renderTaxInputs()}
           </div>
 
-          {/* Tax Summary */}
           <div className="pt-4 border-t border-yellow-400/30">
             <div className="bg-black border border-yellow-400/30 p-4 rounded-lg">
               <h4 className="text-lg font-semibold text-yellow-300 mb-2">Tax Summary</h4>
@@ -302,9 +287,6 @@ const TaxConfiguration: React.FC<TaxConfigurationProps> = ({
                   taxConfig.vat + 
                   taxConfig.otherTax
                 ).toFixed(2)}%
-              </p>
-              <p className="text-sm text-[#DCDCAA]">
-                This tax configuration will be automatically applied to all future invoices and estimates.
               </p>
             </div>
           </div>

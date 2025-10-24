@@ -1,0 +1,12 @@
+import * as React from "react";
+import * as NavigationMenuPrimitive from "@radix-ui/react-navigation-menu";
+declare const NavigationMenu: React.ForwardRefExoticComponent<Omit<NavigationMenuPrimitive.NavigationMenuProps & import("react").RefAttributes<HTMLElement>, "ref"> & React.RefAttributes<never>>;
+declare const NavigationMenuList: React.ForwardRefExoticComponent<Omit<NavigationMenuPrimitive.NavigationMenuListProps & import("react").RefAttributes<HTMLUListElement>, "ref"> & React.RefAttributes<never>>;
+declare const NavigationMenuItem: import("react").ForwardRefExoticComponent<NavigationMenuPrimitive.NavigationMenuItemProps & import("react").RefAttributes<HTMLLIElement>>;
+declare const navigationMenuTriggerStyle: (props?: import("class-variance-authority/types").ClassProp) => string;
+declare const NavigationMenuTrigger: React.ForwardRefExoticComponent<Omit<NavigationMenuPrimitive.NavigationMenuTriggerProps & import("react").RefAttributes<HTMLButtonElement>, "ref"> & React.RefAttributes<never>>;
+declare const NavigationMenuContent: React.ForwardRefExoticComponent<Omit<NavigationMenuPrimitive.NavigationMenuContentProps & import("react").RefAttributes<HTMLDivElement>, "ref"> & React.RefAttributes<never>>;
+declare const NavigationMenuLink: import("react").ForwardRefExoticComponent<NavigationMenuPrimitive.NavigationMenuLinkProps & import("react").RefAttributes<HTMLAnchorElement>>;
+declare const NavigationMenuViewport: React.ForwardRefExoticComponent<Omit<NavigationMenuPrimitive.NavigationMenuViewportProps & import("react").RefAttributes<HTMLDivElement>, "ref"> & React.RefAttributes<never>>;
+declare const NavigationMenuIndicator: React.ForwardRefExoticComponent<Omit<NavigationMenuPrimitive.NavigationMenuIndicatorProps & import("react").RefAttributes<HTMLDivElement>, "ref"> & React.RefAttributes<never>>;
+export { navigationMenuTriggerStyle, NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuContent, NavigationMenuTrigger, NavigationMenuLink, NavigationMenuIndicator, NavigationMenuViewport, };

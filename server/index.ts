@@ -1,94 +1,47 @@
-import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
+import "dotenv/config";
+import express, { Request, Response } from "express";
+import cors from "cors";
+import { drizzle } from "drizzle-orm/node-postgres";
+import pkg from "pg";
+import router from "./routes.js";
 
+const { Pool } = pkg;
 const app = express();
-app.use(express.json({ limit: '200mb' }));
-app.use(express.urlencoded({ extended: false, limit: '200mb' }));
 
-app.use((req, res, next) => {
-  const start = Date.now();
-  const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
+// ✅ Middleware
+app.use(
+  cors({
+    origin: [/http:\/\/localhost:\d+$/], // Allow any localhost port
+    credentials: true,
+  })
+);
+app.use(express.json());
 
-  const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
-  };
+// ✅ Environment variables
+const port = process.env.PORT || 5001;
+const databaseUrl = process.env.DATABASE_URL;
 
-  res.on("finish", () => {
-    const duration = Date.now() - start;
-    if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
-      }
+if (!databaseUrl) {
+  throw new Error("DATABASE_URL must be set in .env");
+}
 
-      if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "…";
-      }
+// ✅ Database connection
+console.log("🟢 Connecting to Render Postgres...");
+const pool = new Pool({
+  connectionString: databaseUrl,
+  ssl: { rejectUnauthorized: false },
+});
+export const db = drizzle(pool);
 
-      log(logLine);
-    }
-  });
+// ✅ Route mounting (correct base path)
+app.use("/api", router);
 
-  next();
+// ✅ Health check route
+app.get("/api/health", (_req: Request, res: Response) => {
+  res.status(200).json({ status: "ok", message: "Paint Brain backend is running!" });
 });
 
-(async () => {
-  try {
-    const server = await registerRoutes(app);
-
-    app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
-      const status = err.status || err.statusCode || 500;
-      const message = err.message || "Internal Server Error";
-
-      // Enhanced error logging for email route issues
-      console.error('=== SERVER ERROR ===');
-      console.error('URL:', req.url);
-      console.error('Method:', req.method);
-      console.error('Error type:', err.type);
-      console.error('Error message:', err.message);
-      console.error('Full error:', err);
-      
-      // Special handling for body parser errors
-      if (err.type === 'entity.parse.failed') {
-        console.error('Body parser failed - request too large or malformed');
-        return res.status(413).json({ 
-          error: 'Request too large or malformed data',
-          details: 'PDF data may be corrupted or too large'
-        });
-      }
-      
-      res.status(status).json({ message });
-    });
-
-    // Serve static files from public directory
-    app.use(express.static("public"));
-    
-    // importantly only setup vite in development and after
-    // setting up all the other routes so the catch-all route
-    // doesn't interfere with the other routes
-    if (app.get("env") === "development") {
-      await setupVite(app, server);
-    } else {
-      serveStatic(app);
-    }
-
-    // ALWAYS serve the app on port 5000
-    // this serves both the API and the client.
-    // It is the only port that is not firewalled.
-    const port = 5000;
-    
-    server.listen({
-      port,
-      host: "0.0.0.0",
-    }, () => {
-      log(`serving on port ${port}`);
-    });
-  } catch (error) {
-    console.error('Failed to start server:', error);
-    process.exit(1);
-  }
-})();
+// ✅ Start server
+app.listen(port, () => {
+  console.log(`✅ Paint Brain server running on http://localhost:${port}`);
+});

@@ -49,4 +49,4 @@ simple-db.json
 storage.json
 
 # Large asset folders
-attached_assets/
+attached_assets//triad_private/
