@@ -4,6 +4,7 @@ import cors from "cors";
 import { drizzle } from "drizzle-orm/node-postgres";
 import pkg from "pg";
 import router from "./routes.js";
+import googleDriveRoutes from "./routes/googleDriveRoutes.js";
 
 const { Pool } = pkg;
 const app = express();
@@ -35,10 +36,15 @@ export const db = drizzle(pool);
 
 // ✅ Route mounting (correct base path)
 app.use("/api", router);
+app.use("/api", googleDriveRoutes);
 
 // ✅ Health check route
 app.get("/api/health", (_req: Request, res: Response) => {
   res.status(200).json({ status: "ok", message: "Paint Brain backend is running!" });
+});
+
+app.get("/api/ping", (_req: Request, res: Response) => {
+  res.status(200).json({ message: "Server is alive", timestamp: new Date().toISOString() });
 });
 
 // ✅ Start server

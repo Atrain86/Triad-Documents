@@ -79,6 +79,7 @@
     "react-sortablejs": "^6.1.4",
     "recharts": "^3.3.0",
     "sharp": "^0.34.4",
+    "sortablejs": "^1.15.6",
     "tailwind-merge": "^3.3.1",
     "tsx": "^4.7.2",
     "vaul": "^1.1.2",
@@ -101,11 +102,11 @@
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "@types/sharp": "^0.31.1",
+    "autoprefixer": "^10.4.16",
     "drizzle-kit": "^0.31.5",
     "kill-port": "^2.0.1",
-    "tailwindcss": "^3.4.1",
     "postcss": "^8.4.31",
-    "autoprefixer": "^10.4.16",
+    "tailwindcss": "^3.4.1",
     "typescript": "^5.3.3",
     "vite": "^7.1.11"
   }

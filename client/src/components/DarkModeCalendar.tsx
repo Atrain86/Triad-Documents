@@ -156,7 +156,7 @@ const DarkModeCalendar: React.FC<DarkModeCalendarProps> = ({
               let spanWidth = 1;
               if (isStart) {
                 // Count days from start to end of event
-                let checkDate = new Date(currentDayDate);
+                const checkDate = new Date(currentDayDate);
                 while (checkDate <= eventEnd && checkDate.getDate() <= daysInMonth) {
                   spanWidth++;
                   checkDate.setDate(checkDate.getDate() + 1);

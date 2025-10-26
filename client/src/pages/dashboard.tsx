@@ -1,197 +1,238 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Link } from "wouter";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { PaintRollerIcon, Plus, Briefcase, DollarSign, Clock, Home } from "lucide-react";
-import type { Project } from "@shared/schema";
-import ProjectForm from "@/components/project-form";
-import AFrameLogo from "@/components/a-frame-logo";
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
-export default function Dashboard() {
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+// Define brand color constants for consistency
+const BRAND_COLORS = {
+  red: '#E03E3E',
+  orange: '#EF6C30',
+  yellow: '#F7C11F',
+  blue: '#0099CC',
+  purple: '#6B4C9A',
+  background: '#000000',
+  foreground: '#FFFFFF'
+};
 
-  const { data: projects = [], isLoading } = useQuery<Project[]>({
-    queryKey: ['/api/projects'],
-  });
-
-  // Calculate stats
-  const activeProjects = projects.filter(p => p.status === 'in-progress' || p.status === 'estimating').length;
-  const totalRevenue = projects.reduce((sum, p) => sum + (p.estimate || 0), 0);
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'in-progress':
-        return 'bg-blue-100 text-blue-800';
-      case 'completed':
-        return 'bg-green-100 text-green-800';
-      case 'estimating':
-        return 'bg-yellow-100 text-yellow-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'in-progress':
-        return 'In Progress';
-      case 'completed':
-        return 'Completed';
-      case 'estimating':
-        return 'Estimating';
-      default:
-        return status;
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-black">
-        <header className="bg-white dark:bg-black shadow-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
-              <div className="flex items-center">
-                <AFrameLogo className="w-8 h-8 mr-3" />
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">A-Frame Painting</h1>
-              </div>
-            </div>
-          </div>
-        </header>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-gray-500 dark:text-gray-400">Loading...</div>
-        </div>
-      </div>
-    );
+// Temporary mock data - replace with actual data fetching
+const mockClients = [
+  {
+    id: 1,
+    name: 'Alan Kohl',
+    streetAddress: '884 Hayes Rd',
+    cityProvince: 'Mansons Landing, BC',
+    postalCode: 'V0P1K0',
+    type: 'Exterior',
+    status: 'In Progress',
+    rooms: 0,
+    lastUpdated: '2025-10-25',
+    progressColor: '#0099CC',
+    tags: ['Active', 'Urgent']
+  },
+  {
+    id: 2,
+    name: 'Klahoose First Nation #1',
+    streetAddress: '1743A Torx Rd',
+    cityProvince: 'Squirrel Cove, BC',
+    postalCode: 'V0P1T0',
+    type: 'Interior',
+    status: 'In Progress',
+    rooms: 5,
+    lastUpdated: '2025-10-24',
+    progressColor: '#6B4C9A',
+    tags: ['Pending']
+  },
+  {
+    id: 3,
+    name: 'GaiaTree Construction',
+    streetAddress: '1662 Bobcat',
+    cityProvince: 'Location Unknown',
+    postalCode: '',
+    type: 'Interior',
+    status: 'Initial Contact',
+    rooms: 0,
+    lastUpdated: '2025-10-20',
+    progressColor: '#EF6C30',
+    tags: ['New']
+  },
+  {
+    id: 4,
+    name: 'Thomas Behm',
+    streetAddress: '404 Whaletown Rd',
+    cityProvince: 'Whaletown, BC',
+    postalCode: '',
+    type: 'Interior',
+    status: 'Initial Contact',
+    rooms: 0,
+    lastUpdated: '2025-10-22',
+    progressColor: '#E03E3E',
+    tags: ['Urgent']
+  },
+  {
+    id: 5,
+    name: 'Cortes Housing Society',
+    streetAddress: '965 Beasley P.O. Box 517',
+    cityProvince: 'Manson\'s Landing, BC',
+    postalCode: '',
+    type: 'Interior',
+    status: 'Initial Contact',
+    rooms: 0,
+    lastUpdated: '2025-10-21',
+    progressColor: '#F7C11F',
+    tags: ['Potential']
+  },
+  {
+    id: 6,
+    name: 'FRED WARD',
+    streetAddress: '1823 Cedar Lane',
+    cityProvince: 'Whaletown, BC',
+    postalCode: 'V0P1K0',
+    type: 'Interior',
+    status: 'Initial Contact',
+    rooms: 4,
+    lastUpdated: '2025-10-23',
+    progressColor: '#0099CC',
+    tags: ['Follow-up']
   }
+];
+
+const Dashboard: React.FC = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState(true);
+
+  const filteredClients = mockClients.filter(client => 
+    client.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+const statusColorMap: Record<string, string> = {
+  'In Progress': `bg-[${BRAND_COLORS.blue}]`,
+  'Initial Contact': `bg-[${BRAND_COLORS.orange}]`,
+  'Awaiting Confirmation': `bg-[${BRAND_COLORS.yellow}]`
+};
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-black">
-      {/* Header */}
-      <header className="bg-white dark:bg-black shadow-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <AFrameLogo className="w-8 h-8 mr-3" />
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white">A-Frame Painting</h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button className="bg-primary text-white hover:bg-blue-700">
-                    <Plus className="w-4 h-4 mr-2" />
-                    New Project
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl">
-                  <DialogHeader>
-                    <DialogTitle>Create New Project</DialogTitle>
-                  </DialogHeader>
-                  <ProjectForm onSuccess={() => setIsCreateDialogOpen(false)} />
-                </DialogContent>
-              </Dialog>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Project Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                  <Briefcase className="text-primary text-xl" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Active Projects</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{activeProjects}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="p-3 bg-green-100 dark:bg-green-900 rounded-lg">
-                  <DollarSign className="text-secondary text-xl" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Revenue</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                    ${totalRevenue.toLocaleString()}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="p-3 bg-yellow-100 dark:bg-yellow-900 rounded-lg">
-                  <Clock className="text-yellow-600 dark:text-yellow-400 text-xl" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Projects</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{projects.length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+    <div className="min-h-screen bg-black p-4 text-white font-sans antialiased">
+      <div className="max-w-2xl mx-auto">
+        {/* Logo */}
+        <div className="flex justify-center mb-8 -mt-2">
+          <img 
+            src="/paint-brain-logo.png" 
+            alt="Paint Brain Logo" 
+            className="h-48 w-auto transform hover:scale-105 transition-transform duration-300"
+          />
         </div>
 
-        {/* Projects List */}
-        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Projects</h2>
-          </div>
-          <div className="divide-y divide-gray-200 dark:divide-gray-700">
-            {projects.length === 0 ? (
-              <div className="px-6 py-12 text-center">
-                <Home className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No projects yet</h3>
-                <p className="text-gray-500 dark:text-gray-400">Get started by creating your first project.</p>
+        {/* Action Buttons */}
+        <div className="flex justify-center space-x-4 mb-6">
+          <button 
+            className="bg-[#E03E3E] text-white px-6 py-3 rounded-xl hover:bg-[#E03E3E]/90 transition-colors duration-300 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#F7C11F]"
+          >
+            New Client
+          </button>
+          <button 
+            className="bg-[#6B4C9A] text-white px-6 py-3 rounded-xl hover:bg-[#6B4C9A]/90 transition-colors duration-300 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#F7C11F]"
+          >
+            Schedule
+          </button>
+        </div>
+
+        {/* Active/Archive Toggle */}
+        <div className="flex justify-center items-center space-x-4 mb-6">
+          <span className="text-[#0099CC] font-semibold">9 Active</span>
+          <label className="inline-flex relative items-center cursor-pointer">
+            <input 
+              type="checkbox" 
+              checked={!activeTab}
+              onChange={() => setActiveTab(!activeTab)}
+              className="sr-only peer"
+            />
+            <div className="w-12 h-6 bg-gray-700 rounded-full peer peer-checked:bg-[#6B4C9A] transition-colors duration-300 
+              after:content-[''] after:absolute after:top-[2px] after:left-[2px] 
+              after:bg-white after:border-gray-300 after:border after:rounded-full 
+              after:h-5 after:w-5 after:transition-all 
+              peer-checked:after:translate-x-full"></div>
+            <span className="ml-3 text-[#6B4C9A] font-semibold">4 Archive</span>
+          </label>
+        </div>
+
+        {/* Search Bar */}
+        <div className="mb-6">
+          <input 
+            type="text" 
+            placeholder="Search clients" 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-4 py-3 bg-black border border-[#EF6C30] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[#F7C11F] focus:ring-2 focus:ring-[#F7C11F]/30 transition-all duration-300"
+          />
+        </div>
+
+        {/* Client List */}
+        <div className="space-y-4">
+          {filteredClients.map(client => (
+            <div 
+              key={client.id} 
+              className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-5 shadow-sm hover:shadow-lg hover:scale-[1.02] transition-all duration-300 group cursor-pointer relative"
+            >
+              {/* Progress Indicator */}
+              <div 
+                className="absolute top-2 right-2 h-2 w-2 rounded-full"
+                style={{ backgroundColor: client.progressColor }}
+                title={`Project Status: ${client.status}`}
+              ></div>
+
+              {/* Removed project tags as per feedback */}
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-[#6B4C9A] font-bold text-xl mb-1">{client.name}</h3>
+<div className="flex space-x-3">
+  <button className="text-[#E03E3E] hover:opacity-80 transition-opacity duration-300">
+    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 20h9"></path>
+      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+    </svg>
+  </button>
+  <button className="text-[#6B4C9A] hover:opacity-80 transition-opacity duration-300">
+    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+      <polyline points="22,6 12,13 2,6"></polyline>
+    </svg>
+  </button>
+  <button className="text-[#0099CC] hover:opacity-80 transition-opacity duration-300">
+    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+      <line x1="3" y1="9" x2="21" y2="9"></line>
+      <line x1="9" y1="21" x2="9" y2="9"></line>
+    </svg>
+  </button>
+  <button className="text-[#E03E3E] hover:opacity-80 transition-opacity duration-300">
+    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="3 6 5 6 21 6"></polyline>
+      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+      <line x1="10" y1="11" x2="10" y2="17"></line>
+      <line x1="14" y1="11" x2="14" y2="17"></line>
+    </svg>
+  </button>
+</div>
               </div>
-            ) : (
-              projects.map((project) => (
-                <Link key={project.id} to={`/project/${project.id}`}>
-                  <div className="px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mr-4">
-                          <Home className="text-primary" />
-                        </div>
-                        <div>
-                          <h3 className="text-sm font-medium text-gray-900 dark:text-white">{project.clientName}</h3>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">{project.address}</p>
-                          <div className="flex items-center mt-1">
-                            <Badge className={getStatusColor(project.status)}>
-                              {getStatusLabel(project.status)}
-                            </Badge>
-                            <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
-                              {project.roomCount} rooms
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-medium text-gray-900 dark:text-white">
-                          {project.estimate ? `$${project.estimate.toLocaleString()}` : 'No estimate'}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              ))
-            )}
-          </div>
-        </Card>
+              <div className="text-green-500 text-sm space-y-1 mb-2">
+  <p>{client.streetAddress}</p>
+  <p>{client.cityProvince}</p>
+  <p>{client.postalCode}</p>
+</div>
+<div className="border-b border-[#F7C11F] w-full my-2"></div>
+              <div className="flex justify-between items-center text-sm mt-4">
+                <div className="flex flex-col">
+                  <span className="text-[#EF6C30] font-medium">{client.type}</span>
+                  <span className="text-white/60 text-xs">{client.lastUpdated}</span>
+                </div>
+                <div className="flex items-center text-green-500 group-hover:text-[#F7C11F] transition-colors">
+                  <span className="h-3 w-3 rounded-full bg-green-500 mr-2"></span>
+                  In Progress
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
-}
+};
+
+export default Dashboard;

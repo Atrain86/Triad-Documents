@@ -1,0 +1,3 @@
+#!/bin/bash
+# After each commit, refresh Word copies
+./update_word_docs.sh

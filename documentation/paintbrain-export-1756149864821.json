@@ -1,0 +1,1129 @@
+{
+  "exportInfo": {
+    "appName": "Paint Brain",
+    "description": "Painting Business Management System - Complete Data Export",
+    "exportDate": "2025-08-25T19:24:24.821Z",
+    "timestamp": 1756149864821,
+    "version": "1.0.0"
+  },
+  "data": {
+    "users": [],
+    "projects": [],
+    "photos": [
+      {
+        "id": 1,
+        "filename": "1750891656204-204990950.jpeg",
+        "path": "uploads/1750891656204-204990950.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 2,
+        "filename": "1750975887911-227059509",
+        "path": "uploads/1750975887911-227059509",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 3,
+        "filename": "1750982403669-371466904.jpeg",
+        "path": "uploads/1750982403669-371466904.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 4,
+        "filename": "1750982418042-61318930.jpeg",
+        "path": "uploads/1750982418042-61318930.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 5,
+        "filename": "1750983183845-103138968.jpeg",
+        "path": "uploads/1750983183845-103138968.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 6,
+        "filename": "1750983216462-923583591.png",
+        "path": "uploads/1750983216462-923583591.png",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 7,
+        "filename": "1750984047924-692612310.jpeg",
+        "path": "uploads/1750984047924-692612310.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 8,
+        "filename": "1750984062995-565806653.jpeg",
+        "path": "uploads/1750984062995-565806653.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 9,
+        "filename": "1750988366639-533584456.png",
+        "path": "uploads/1750988366639-533584456.png",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 10,
+        "filename": "1750990070841-139228744.jpeg",
+        "path": "uploads/1750990070841-139228744.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 11,
+        "filename": "1750990105194-713209687.jpeg",
+        "path": "uploads/1750990105194-713209687.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 12,
+        "filename": "1750990119244-604152925.jpeg",
+        "path": "uploads/1750990119244-604152925.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 13,
+        "filename": "1750990687129-431434522.jpeg",
+        "path": "uploads/1750990687129-431434522.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 14,
+        "filename": "1750990736066-767941905.jpg",
+        "path": "uploads/1750990736066-767941905.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 15,
+        "filename": "1750993144242-960770712.jpeg",
+        "path": "uploads/1750993144242-960770712.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 16,
+        "filename": "1750994517320-275043254.pdf",
+        "path": "uploads/1750994517320-275043254.pdf",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 17,
+        "filename": "1750994523581-419088269.pdf",
+        "path": "uploads/1750994523581-419088269.pdf",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 18,
+        "filename": "1750994782109-55728877.pdf",
+        "path": "uploads/1750994782109-55728877.pdf",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 19,
+        "filename": "1750994877906-666902760.pdf",
+        "path": "uploads/1750994877906-666902760.pdf",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 20,
+        "filename": "1750994917106-156783761.pdf",
+        "path": "uploads/1750994917106-156783761.pdf",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 21,
+        "filename": "1750994939347-315476635.pdf",
+        "path": "uploads/1750994939347-315476635.pdf",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 22,
+        "filename": "1750995776344-981119878.pdf",
+        "path": "uploads/1750995776344-981119878.pdf",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 23,
+        "filename": "1750995825805-904005802.pdf",
+        "path": "uploads/1750995825805-904005802.pdf",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 24,
+        "filename": "1750996003016-300566086.pdf",
+        "path": "uploads/1750996003016-300566086.pdf",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 25,
+        "filename": "1750996122669-445454663.pdf",
+        "path": "uploads/1750996122669-445454663.pdf",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 26,
+        "filename": "1750996135354-628868786.jpeg",
+        "path": "uploads/1750996135354-628868786.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 27,
+        "filename": "1750996163374-899891101.pdf",
+        "path": "uploads/1750996163374-899891101.pdf",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 28,
+        "filename": "1750996579989-706971741.pdf",
+        "path": "uploads/1750996579989-706971741.pdf",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 29,
+        "filename": "1750999144911-994919934.pdf",
+        "path": "uploads/1750999144911-994919934.pdf",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 30,
+        "filename": "1750999410356-838713931.pdf",
+        "path": "uploads/1750999410356-838713931.pdf",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 31,
+        "filename": "1751013628350-851747559.png",
+        "path": "uploads/1751013628350-851747559.png",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 32,
+        "filename": "1751014343962-858120919.pdf",
+        "path": "uploads/1751014343962-858120919.pdf",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 33,
+        "filename": "1751016307355-526482705.jpeg",
+        "path": "uploads/1751016307355-526482705.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 34,
+        "filename": "1751018228576-564790399.jpeg",
+        "path": "uploads/1751018228576-564790399.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 35,
+        "filename": "1751018229455-487851818.jpeg",
+        "path": "uploads/1751018229455-487851818.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 36,
+        "filename": "1751047623849-834744361.jpeg",
+        "path": "uploads/1751047623849-834744361.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 37,
+        "filename": "1751047626296-323512656.jpeg",
+        "path": "uploads/1751047626296-323512656.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 38,
+        "filename": "1751047628430-661142188.jpeg",
+        "path": "uploads/1751047628430-661142188.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 39,
+        "filename": "1751164097349-466875766.jpg",
+        "path": "uploads/1751164097349-466875766.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 40,
+        "filename": "1751206622538-638635416.pdf",
+        "path": "uploads/1751206622538-638635416.pdf",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 41,
+        "filename": "1751206623157-655843537.txt",
+        "path": "uploads/1751206623157-655843537.txt",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 42,
+        "filename": "1751206646659-391648576.txt",
+        "path": "uploads/1751206646659-391648576.txt",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 43,
+        "filename": "1751243389486-714757313.jpeg",
+        "path": "uploads/1751243389486-714757313.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 44,
+        "filename": "1751243390032-436963528.jpeg",
+        "path": "uploads/1751243390032-436963528.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 45,
+        "filename": "1751243390228-830443269.jpeg",
+        "path": "uploads/1751243390228-830443269.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 46,
+        "filename": "1751243390360-499803873.jpeg",
+        "path": "uploads/1751243390360-499803873.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 47,
+        "filename": "1751243390486-726580866.jpeg",
+        "path": "uploads/1751243390486-726580866.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 48,
+        "filename": "1751243390619-462701881.jpeg",
+        "path": "uploads/1751243390619-462701881.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 49,
+        "filename": "1751243390879-297193945.jpeg",
+        "path": "uploads/1751243390879-297193945.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 50,
+        "filename": "1751298711507-466741473.jpeg",
+        "path": "uploads/1751298711507-466741473.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 51,
+        "filename": "1751298712863-706960374.jpeg",
+        "path": "uploads/1751298712863-706960374.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 52,
+        "filename": "1751298716135-676265190.jpeg",
+        "path": "uploads/1751298716135-676265190.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 53,
+        "filename": "1751298732498-48682435.jpeg",
+        "path": "uploads/1751298732498-48682435.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 54,
+        "filename": "1751298733836-863677711.jpeg",
+        "path": "uploads/1751298733836-863677711.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 55,
+        "filename": "1751298733994-919532675.jpeg",
+        "path": "uploads/1751298733994-919532675.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 56,
+        "filename": "1751298734860-411716863.jpeg",
+        "path": "uploads/1751298734860-411716863.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 57,
+        "filename": "1751298950643-430819145.jpeg",
+        "path": "uploads/1751298950643-430819145.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 58,
+        "filename": "1751319611287-65698383.jpg",
+        "path": "uploads/1751319611287-65698383.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 59,
+        "filename": "1751319653535-802675242.jpg",
+        "path": "uploads/1751319653535-802675242.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 60,
+        "filename": "1751391933022-76364173.jpeg",
+        "path": "uploads/1751391933022-76364173.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 61,
+        "filename": "1751392127406-961154912.jpeg",
+        "path": "uploads/1751392127406-961154912.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 62,
+        "filename": "1751392141336-432559078.jpg",
+        "path": "uploads/1751392141336-432559078.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 63,
+        "filename": "1751394121635-146602783.jpg",
+        "path": "uploads/1751394121635-146602783.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 64,
+        "filename": "1751397572065-542794286.jpg",
+        "path": "uploads/1751397572065-542794286.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 65,
+        "filename": "1751492153202-278239303.jpg",
+        "path": "uploads/1751492153202-278239303.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 66,
+        "filename": "1751495225753-864999466.jpeg",
+        "path": "uploads/1751495225753-864999466.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 67,
+        "filename": "1751495272229-964652391.jpeg",
+        "path": "uploads/1751495272229-964652391.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 68,
+        "filename": "1751495623759-797466608.png",
+        "path": "uploads/1751495623759-797466608.png",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 69,
+        "filename": "1751496615209-596338736.png",
+        "path": "uploads/1751496615209-596338736.png",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 70,
+        "filename": "1751496652537-717909271.png",
+        "path": "uploads/1751496652537-717909271.png",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 71,
+        "filename": "1751497101795-531175963.jpeg",
+        "path": "uploads/1751497101795-531175963.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 72,
+        "filename": "1751497127990-86793160.png",
+        "path": "uploads/1751497127990-86793160.png",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 73,
+        "filename": "1751497139915-520305815.jpeg",
+        "path": "uploads/1751497139915-520305815.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 74,
+        "filename": "1751497172531-672715827.jpeg",
+        "path": "uploads/1751497172531-672715827.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 75,
+        "filename": "1751497549119-103350855.jpeg",
+        "path": "uploads/1751497549119-103350855.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 76,
+        "filename": "1751497663332-299511765.jpeg",
+        "path": "uploads/1751497663332-299511765.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 77,
+        "filename": "1751868432657-723266390.jpeg",
+        "path": "uploads/1751868432657-723266390.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 78,
+        "filename": "1751868436009-648308071.png",
+        "path": "uploads/1751868436009-648308071.png",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 79,
+        "filename": "1751868524852-691770038.jpeg",
+        "path": "uploads/1751868524852-691770038.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 80,
+        "filename": "1752076390306-647574945.jpeg",
+        "path": "uploads/1752076390306-647574945.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 81,
+        "filename": "1752160390486-327765611.jpeg",
+        "path": "uploads/1752160390486-327765611.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 82,
+        "filename": "1752160681331-593405371.jpeg",
+        "path": "uploads/1752160681331-593405371.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 83,
+        "filename": "1752161006672-961276441.jpeg",
+        "path": "uploads/1752161006672-961276441.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 84,
+        "filename": "1752247264020-548771270.jpeg",
+        "path": "uploads/1752247264020-548771270.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 85,
+        "filename": "1752329383938-952605673.jpg",
+        "path": "uploads/1752329383938-952605673.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 86,
+        "filename": "1752334381462-486365452.jpg",
+        "path": "uploads/1752334381462-486365452.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 87,
+        "filename": "1752334479215-654934163.png",
+        "path": "uploads/1752334479215-654934163.png",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 88,
+        "filename": "1752335722960-384858997.jpeg",
+        "path": "uploads/1752335722960-384858997.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 89,
+        "filename": "1752336299999-886528038.jpeg",
+        "path": "uploads/1752336299999-886528038.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 90,
+        "filename": "1752336573497-68613878.jpeg",
+        "path": "uploads/1752336573497-68613878.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 91,
+        "filename": "1752337112343-221518409.jpg",
+        "path": "uploads/1752337112343-221518409.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 92,
+        "filename": "1752337264296-293544315.jpg",
+        "path": "uploads/1752337264296-293544315.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 93,
+        "filename": "1752337406253-877805504.jpg",
+        "path": "uploads/1752337406253-877805504.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 94,
+        "filename": "1752337427504-769759166.jpg",
+        "path": "uploads/1752337427504-769759166.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 95,
+        "filename": "1752337673791-747626469.jpg",
+        "path": "uploads/1752337673791-747626469.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 96,
+        "filename": "1752338360081-960353279.jpg",
+        "path": "uploads/1752338360081-960353279.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 97,
+        "filename": "1752342794367-880202320.jpg",
+        "path": "uploads/1752342794367-880202320.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 98,
+        "filename": "1752674728824-772910417.jpeg",
+        "path": "uploads/1752674728824-772910417.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 99,
+        "filename": "1752674793654-358519646.jpeg",
+        "path": "uploads/1752674793654-358519646.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 100,
+        "filename": "1752674839712-792213241.jpeg",
+        "path": "uploads/1752674839712-792213241.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 101,
+        "filename": "1752675000971-308094064.jpeg",
+        "path": "uploads/1752675000971-308094064.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 102,
+        "filename": "1752675038936-130227219.png",
+        "path": "uploads/1752675038936-130227219.png",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 103,
+        "filename": "1752675185784-581849179.jpeg",
+        "path": "uploads/1752675185784-581849179.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 104,
+        "filename": "1752676617957-222831916.jpg",
+        "path": "uploads/1752676617957-222831916.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 105,
+        "filename": "1752738708993-750979869.jpg",
+        "path": "uploads/1752738708993-750979869.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 106,
+        "filename": "1753109039990-909650337.jpeg",
+        "path": "uploads/1753109039990-909650337.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 107,
+        "filename": "1753487313645-511349126.jpeg",
+        "path": "uploads/1753487313645-511349126.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 108,
+        "filename": "1753510312131-571766615.png",
+        "path": "uploads/1753510312131-571766615.png",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 109,
+        "filename": "1753510608658-226443192.jpeg",
+        "path": "uploads/1753510608658-226443192.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 110,
+        "filename": "1753597034535-112530788.jpg",
+        "path": "uploads/1753597034535-112530788.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 111,
+        "filename": "1753597035028-723368071.jpg",
+        "path": "uploads/1753597035028-723368071.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 112,
+        "filename": "1753597035382-209439107.jpg",
+        "path": "uploads/1753597035382-209439107.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 113,
+        "filename": "1753597035494-872320214.jpg",
+        "path": "uploads/1753597035494-872320214.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 114,
+        "filename": "1753597035621-964798225.jpg",
+        "path": "uploads/1753597035621-964798225.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 115,
+        "filename": "1753597036079-415056022.jpg",
+        "path": "uploads/1753597036079-415056022.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 116,
+        "filename": "1753624278103-817539739.jpg",
+        "path": "uploads/1753624278103-817539739.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 117,
+        "filename": "1753624278391-695281143.jpg",
+        "path": "uploads/1753624278391-695281143.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 118,
+        "filename": "1753624278533-595841404.jpg",
+        "path": "uploads/1753624278533-595841404.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 119,
+        "filename": "1753624279072-660147489.jpg",
+        "path": "uploads/1753624279072-660147489.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 120,
+        "filename": "1753624279531-299712120.jpg",
+        "path": "uploads/1753624279531-299712120.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 121,
+        "filename": "1753624279791-473856761.jpg",
+        "path": "uploads/1753624279791-473856761.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 122,
+        "filename": "1753624280216-808224557.jpg",
+        "path": "uploads/1753624280216-808224557.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 123,
+        "filename": "1753624280675-561290767.jpg",
+        "path": "uploads/1753624280675-561290767.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 124,
+        "filename": "1753624280879-788434569.jpg",
+        "path": "uploads/1753624280879-788434569.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 125,
+        "filename": "1753629384006-945253370.pdf",
+        "path": "uploads/1753629384006-945253370.pdf",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 126,
+        "filename": "1753629762898-730109787.jpg",
+        "path": "uploads/1753629762898-730109787.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 127,
+        "filename": "1753639944784-140911926.jpg",
+        "path": "uploads/1753639944784-140911926.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 128,
+        "filename": "1753643166256-915772952.jpg",
+        "path": "uploads/1753643166256-915772952.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 129,
+        "filename": "1753643196374-631044675.jpg",
+        "path": "uploads/1753643196374-631044675.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 130,
+        "filename": "1753643354974-474887633.jpg",
+        "path": "uploads/1753643354974-474887633.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 131,
+        "filename": "1753663335797-645450021.jpg",
+        "path": "uploads/1753663335797-645450021.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 132,
+        "filename": "1753666802209-215047312.jpg",
+        "path": "uploads/1753666802209-215047312.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 133,
+        "filename": "1753666953933-234308604.jpg",
+        "path": "uploads/1753666953933-234308604.jpg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 134,
+        "filename": "1753802988504-115965989.png",
+        "path": "uploads/1753802988504-115965989.png",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 135,
+        "filename": "1753803242837-603736545.png",
+        "path": "uploads/1753803242837-603736545.png",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 136,
+        "filename": "1753992528896-813222520.jpeg",
+        "path": "uploads/1753992528896-813222520.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 137,
+        "filename": "1753992534328-790938213.jpeg",
+        "path": "uploads/1753992534328-790938213.jpeg",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 138,
+        "filename": "2859dccf1adb0bd193d89891b7952beb",
+        "path": "uploads/2859dccf1adb0bd193d89891b7952beb",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 139,
+        "filename": "30ab7b53b4205426fa30aa6aa3f82b48",
+        "path": "uploads/30ab7b53b4205426fa30aa6aa3f82b48",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 140,
+        "filename": "3309b54632822e3f4fc33f13d22fcb95",
+        "path": "uploads/3309b54632822e3f4fc33f13d22fcb95",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 141,
+        "filename": "3fe969853ca7eaefe63c8ad0166ca8ec",
+        "path": "uploads/3fe969853ca7eaefe63c8ad0166ca8ec",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 142,
+        "filename": "4c633a329df1036c287f89f0af6b6b36",
+        "path": "uploads/4c633a329df1036c287f89f0af6b6b36",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 143,
+        "filename": "6822130c947ce4760c00f8a80c114c56",
+        "path": "uploads/6822130c947ce4760c00f8a80c114c56",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 144,
+        "filename": "734d3c708b6a06ff5a8ced86779eb674",
+        "path": "uploads/734d3c708b6a06ff5a8ced86779eb674",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 145,
+        "filename": "7ba963cb850b7b643c55ff74da3afe0c",
+        "path": "uploads/7ba963cb850b7b643c55ff74da3afe0c",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 146,
+        "filename": "7d1c331e3a3912599a47337e09ca231c",
+        "path": "uploads/7d1c331e3a3912599a47337e09ca231c",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 147,
+        "filename": "905d4938df6477f8ee6c5e558f3fb8f7",
+        "path": "uploads/905d4938df6477f8ee6c5e558f3fb8f7",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 148,
+        "filename": "b1c07416b5a1bfd6cb2f76c3646c73e8",
+        "path": "uploads/b1c07416b5a1bfd6cb2f76c3646c73e8",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 149,
+        "filename": "b23a154d5a8f3494dbc169641a731d34",
+        "path": "uploads/b23a154d5a8f3494dbc169641a731d34",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 150,
+        "filename": "b6834c83b57cbfe9040457772e6c8ab4",
+        "path": "uploads/b6834c83b57cbfe9040457772e6c8ab4",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 151,
+        "filename": "c6cfa0ae66a273cd0282305882539b10",
+        "path": "uploads/c6cfa0ae66a273cd0282305882539b10",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 152,
+        "filename": "cd962f9af60fbaf9433c5c8c563d7411",
+        "path": "uploads/cd962f9af60fbaf9433c5c8c563d7411",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 153,
+        "filename": "e589da3c2f226f21090aa86c285c1e42",
+        "path": "uploads/e589da3c2f226f21090aa86c285c1e42",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 154,
+        "filename": "f87d2cdfca533e02c4871c24bdec99c2",
+        "path": "uploads/f87d2cdfca533e02c4871c24bdec99c2",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 155,
+        "filename": "ffe7d535b45f09793b1fb8a21089061d",
+        "path": "uploads/ffe7d535b45f09793b1fb8a21089061d",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 156,
+        "filename": "photo-upload-code.txt",
+        "path": "uploads/photo-upload-code.txt",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      },
+      {
+        "id": 157,
+        "filename": "simple-photo-export.js",
+        "path": "uploads/simple-photo-export.js",
+        "foundAt": "2025-08-25T19:24:24.827Z",
+        "note": "File found in uploads directory - metadata not available"
+      }
+    ],
+    "metadata": {
+      "totalRecords": 157,
+      "dataSource": "unknown",
+      "foundFiles": [
+        "export-data.mjs",
+        "export-database.js",
+        "index.js.backup",
+        "package-lock.json",
+        "package.json",
+        "paint-brain.backup.html",
+        "simple-export.js",
+        "tsconfig.json",
+        "tsconfig.node.json"
+      ]
+    }
+  }
+}
