@@ -1,10 +1,48 @@
 services:
   - type: web
-    name: idea-hub
+    name: paintbrain7
     env: node
     buildCommand: npm run build
     startCommand: node dist/server/index.js
     rootDir: .
+    plan: starter
     envVars:
       - key: NODE_VERSION
         value: 22.16.0
+      - key: PORT
+        value: 5001
+      - key: NODE_ENV
+        value: production
+      - fromGroup: triad-shared-secrets
+    autoDeploy: false
+    domains:
+      - paintbrain.app
+
+  - type: web
+    name: idea-hub
+    env: node
+    buildCommand: npm run build
+    startCommand: node dist/server.js
+    rootDir: ../IDEA-HUB
+    plan: starter
+    envVars:
+      - key: NODE_VERSION
+        value: 22.16.0
+      - key: PORT
+        value: 3000
+      - key: NODE_ENV
+        value: production
+      - fromGroup: triad-shared-secrets
+    autoDeploy: false
+    domains:
+      - ideas.paintbrain.app
+
+envVarGroups:
+  - name: triad-shared-secrets
+    envVars:
+      - key: GOOGLE_SERVICE_ACCOUNT
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false

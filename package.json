@@ -6,8 +6,8 @@
   "scripts": {
     "client:dev": "vite",
     "dev": "npx kill-port 5001 && NODE_ENV=development tsx server/index.ts",
-    "build": "tsc -p server",
-    "start": "node server/index.js",
+    "build": "tsc",
+    "start": "node dist/server/index.js",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
@@ -65,6 +65,7 @@
     "lucide-react": "^0.546.0",
     "memoizee": "^0.4.17",
     "multer": "^2.0.2",
+    "node-fetch": "^3.3.2",
     "nodemailer": "^7.0.9",
     "openai": "^6.6.0",
     "passport": "^0.7.0",

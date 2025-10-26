@@ -5,6 +5,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import pkg from "pg";
 import router from "./routes.js";
 import googleDriveRoutes from "./routes/googleDriveRoutes.js";
+import { createIdeaHubProxy } from "./ideaHubProxy.js";
 
 const { Pool } = pkg;
 const app = express();
@@ -17,6 +18,14 @@ app.use(
   })
 );
 app.use(express.json());
+
+// ✅ Configure IDEA-HUB proxy
+const ideaHubUrl = process.env.IDEA_HUB_URL || 'http://localhost:3000';
+app.use(createIdeaHubProxy({
+  targetUrl: ideaHubUrl,
+  pathPrefix: '/api/ideas'
+}));
+console.log(`🔄 IDEA-HUB proxy configured to ${ideaHubUrl}`);
 
 // ✅ Environment variables
 const port = process.env.PORT || 5001;
@@ -35,7 +44,10 @@ const pool = new Pool({
 export const db = drizzle(pool);
 
 // ✅ Route mounting (correct base path)
+// ✅ PaintBrain routes
 app.use("/api", router);
+
+// ✅ Use shared Google API functionality instead of direct implementation
 app.use("/api", googleDriveRoutes);
 
 // ✅ Health check route
