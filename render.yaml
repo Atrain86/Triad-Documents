@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: idea-hub
+    env: node
+    buildCommand: echo "Skipping build step"
+    startCommand: npx tsx server/index.ts
+    rootDir: .
+    envVars:
+      - key: NODE_VERSION
+        value: 22.16.0
