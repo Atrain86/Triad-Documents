@@ -6,7 +6,7 @@
   "scripts": {
     "client:dev": "vite",
     "dev": "npx kill-port 5001 && NODE_ENV=development tsx server/index.ts",
-    "build": "tsc",
+    "build": "tsc -p server",
     "start": "node server/index.js",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
