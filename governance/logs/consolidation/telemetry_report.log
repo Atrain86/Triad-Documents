@@ -1,0 +1,78 @@
+{
+  "timestamp": "2025-10-27T13:31:02.503Z",
+  "integrity_checks": {
+    "workflow_checks": {
+      "orphaned_workflows": [
+        {
+          "name": "step 0",
+          "completed_at": "2025-10-27T12:48:08.684Z"
+        },
+        {
+          "name": "step 1",
+          "completed_at": "2025-10-27T12:48:08.685Z"
+        },
+        {
+          "name": "step 2",
+          "completed_at": "2025-10-27T12:48:08.685Z"
+        }
+      ],
+      "incomplete_workflows": [
+        {
+          "name": "Test_Workflow",
+          "started_at": "2025-10-27T12:48:07.674Z"
+        }
+      ],
+      "status": "FAIL"
+    },
+    "governance_checks": {
+      "incomplete_phases": [
+        "Phase-III-H"
+      ],
+      "missing_addenda": [
+        "logs/phase_iii_g5_summary.md",
+        "logs/system_state.md"
+      ],
+      "status": "FAIL"
+    }
+  },
+  "exceptions": [
+    {
+      "type": "orphaned_workflow",
+      "workflow": "step 0",
+      "details": "Workflow completed without a start event: 2025-10-27T12:48:08.684Z"
+    },
+    {
+      "type": "orphaned_workflow",
+      "workflow": "step 1",
+      "details": "Workflow completed without a start event: 2025-10-27T12:48:08.685Z"
+    },
+    {
+      "type": "orphaned_workflow",
+      "workflow": "step 2",
+      "details": "Workflow completed without a start event: 2025-10-27T12:48:08.685Z"
+    },
+    {
+      "type": "stalled_workflow",
+      "workflow": "Test_Workflow",
+      "started_at": "2025-10-27T12:48:07.674Z",
+      "runtime_minutes": 43,
+      "details": "Workflow has been running for 43 minutes without completing"
+    },
+    {
+      "type": "missing_addendum",
+      "log": "logs/phase_iii_g5_summary.md",
+      "details": "Log file does not have a corresponding addendum"
+    },
+    {
+      "type": "missing_addendum",
+      "log": "logs/system_state.md",
+      "details": "Log file does not have a corresponding addendum"
+    },
+    {
+      "type": "incomplete_phase",
+      "phase": "Phase-III-H",
+      "details": "Phase has 1 logs but no addenda"
+    }
+  ],
+  "integrity_status": "FAIL"
+}

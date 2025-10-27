@@ -1,0 +1,79 @@
+{
+  "generated": "2025-10-27T13:31:02.415Z",
+  "totalAssets": 5,
+  "phases": [
+    "Phase-III-D",
+    "Phase-III-G",
+    "Unknown"
+  ],
+  "index": {
+    "Phase-III-D": {
+      "templates": [],
+      "logs": [],
+      "addenda": [],
+      "unknown": [
+        {
+          "path": "/Users/atrain/Documents/AI_LOCAL/Triad-Documents/governance/TRIAD_CONTEXT_POLICY.md",
+          "relativePath": "TRIAD_CONTEXT_POLICY.md",
+          "phase": "Phase-III-D",
+          "type": "Unknown",
+          "created": "2025-10-27T04:58:31.205Z",
+          "modified": "2025-10-27T05:34:04.343Z",
+          "size": 838
+        }
+      ]
+    },
+    "Phase-III-G": {
+      "templates": [],
+      "logs": [
+        {
+          "path": "/Users/atrain/Documents/AI_LOCAL/Triad-Documents/governance/logs/phase_iii_g5_summary.md",
+          "relativePath": "logs/phase_iii_g5_summary.md",
+          "phase": "Phase-III-G",
+          "type": "Log",
+          "created": "2025-10-27T13:10:28.608Z",
+          "modified": "2025-10-27T13:10:28.610Z",
+          "size": 888
+        }
+      ],
+      "addenda": [
+        {
+          "path": "/Users/atrain/Documents/AI_LOCAL/Triad-Documents/governance/addenda/phase_iii_g5_completion.md",
+          "relativePath": "addenda/phase_iii_g5_completion.md",
+          "phase": "Phase-III-G",
+          "type": "Addendum",
+          "created": "2025-10-27T13:15:22.377Z",
+          "modified": "2025-10-27T13:15:22.384Z",
+          "size": 517
+        }
+      ],
+      "unknown": []
+    },
+    "Unknown": {
+      "templates": [
+        {
+          "path": "/Users/atrain/Documents/AI_LOCAL/Triad-Documents/governance/templates/alignment_checkpoint_template.md",
+          "relativePath": "templates/alignment_checkpoint_template.md",
+          "phase": "Unknown",
+          "type": "Template",
+          "created": "2025-10-27T13:08:56.937Z",
+          "modified": "2025-10-27T13:08:56.939Z",
+          "size": 2487
+        }
+      ],
+      "logs": [
+        {
+          "path": "/Users/atrain/Documents/AI_LOCAL/Triad-Documents/governance/logs/system_state.md",
+          "relativePath": "logs/system_state.md",
+          "phase": "Unknown",
+          "type": "Log",
+          "created": "2025-10-27T13:29:35.478Z",
+          "modified": "2025-10-27T13:29:35.481Z",
+          "size": 306
+        }
+      ],
+      "addenda": [],
+      "unknown": []
+    }
+  }
+}

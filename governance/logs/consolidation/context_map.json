@@ -1,0 +1,123 @@
+{
+  "generated": "2025-10-27T13:31:02.445Z",
+  "relationships": {
+    "phase_relationships": {
+      "Phase-III-D": {
+        "leads_to": [
+          "Phase-III-G"
+        ],
+        "dependencies": []
+      },
+      "Phase-III-G": {
+        "leads_to": [
+          "Unknown"
+        ],
+        "dependencies": [
+          "Phase-III-D"
+        ]
+      },
+      "Unknown": {
+        "leads_to": [],
+        "dependencies": [
+          "Phase-III-G"
+        ]
+      }
+    },
+    "template_log_relationships": {},
+    "log_addenda_relationships": {}
+  },
+  "workflows": {
+    "active": [],
+    "completed": [
+      {
+        "name": "step 0",
+        "started_at": "2025-10-27T12:28:08.684Z",
+        "completed_at": "2025-10-27T12:48:08.684Z"
+      },
+      {
+        "name": "step 1",
+        "started_at": "2025-10-27T12:38:08.684Z",
+        "completed_at": "2025-10-27T12:48:08.685Z"
+      },
+      {
+        "name": "step 2",
+        "started_at": "2025-10-27T12:38:08.685Z",
+        "completed_at": "2025-10-27T12:48:08.685Z"
+      },
+      {
+        "name": "Test_Workflow",
+        "started_at": "2025-10-27T12:38:08.684Z",
+        "completed_at": "2025-10-27T13:33:18.110Z"
+      }
+    ],
+    "orphaned": []
+  },
+  "checkpoints": {
+    "Phase-III-D": {
+      "concept_alignment": true,
+      "architecture_alignment": true,
+      "pre_toggle_alignment": true,
+      "implementation_complete": true
+    },
+    "Phase-III-G": {
+      "concept_alignment": true,
+      "architecture_alignment": true,
+      "pre_toggle_alignment": true,
+      "implementation_complete": true
+    },
+    "Unknown": {
+      "concept_alignment": false,
+      "architecture_alignment": false,
+      "pre_toggle_alignment": false,
+      "implementation_complete": false
+    },
+    "Phase-III-H": {
+      "concept_alignment": true,
+      "architecture_alignment": true,
+      "pre_toggle_alignment": true,
+      "implementation_complete": true
+    },
+    "Phase-I": {
+      "concept_alignment": true,
+      "architecture_alignment": true,
+      "pre_toggle_alignment": true,
+      "implementation_complete": true
+    },
+    "Phase-II": {
+      "concept_alignment": true,
+      "architecture_alignment": true,
+      "pre_toggle_alignment": true,
+      "implementation_complete": true
+    },
+    "Phase-III-B": {
+      "concept_alignment": true,
+      "architecture_alignment": true,
+      "pre_toggle_alignment": true,
+      "implementation_complete": true
+    },
+    "Phase-III-C": {
+      "concept_alignment": true,
+      "architecture_alignment": true,
+      "pre_toggle_alignment": true,
+      "implementation_complete": true
+    },
+    "Phase-III-E": {
+      "concept_alignment": true,
+      "architecture_alignment": true,
+      "pre_toggle_alignment": true,
+      "implementation_complete": true
+    },
+    "Phase-III-F": {
+      "concept_alignment": true,
+      "architecture_alignment": true,
+      "pre_toggle_alignment": true,
+      "implementation_complete": true
+    },
+    "Phase-III-G.5": {
+      "concept_alignment": true,
+      "architecture_alignment": true,
+      "pre_toggle_alignment": true,
+      "implementation_complete": true
+    }
+  }
+}
