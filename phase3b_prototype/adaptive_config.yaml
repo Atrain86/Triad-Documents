@@ -1,7 +1,7 @@
 version: 0.1
 last_updated: 2025-10-26T00:00:00.000Z
 thresholds:
-  zScoreWarning: 3.2499999999999956
+  zScoreWarning: 7.149999999999982
   zScoreCritical: 3
 learning:
   adjustment_rate: 0.05
