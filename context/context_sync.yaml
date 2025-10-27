@@ -1,0 +1,8 @@
+# Context Synchronization Configuration
+version: 0.1
+interval_minutes: 5
+retention_hours: 24
+replication_targets:
+  - Triad-Docs
+  - IDEA-HUB
+  - PaintBrain7

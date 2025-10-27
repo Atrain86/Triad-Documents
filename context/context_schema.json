@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Triad Context Schema",
+  "description": "Unified data structure for service state synchronization.",
+  "type": "object",
+  "properties": {
+    "lastUpdate": { "type": "string", "format": "date-time" },
+    "services": { "type": "object" },
+    "governance": { "type": "object" }
+  },
+  "required": ["lastUpdate", "services", "governance"]
+}
