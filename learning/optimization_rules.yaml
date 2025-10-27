@@ -1,0 +1,4 @@
+# Optimization Rules – Phase III-G
+duration_threshold: 5
+auto_apply: false
+governance_review: true
