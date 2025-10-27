@@ -9,6 +9,16 @@ import {
 
 const router = express.Router();
 
+// Triad API Governance Integration - Health Check Endpoint
+router.get("/api/ping", (req, res) => {
+  res.json({
+    message: "Server is alive",
+    service: "PaintBrain7",
+    timestamp: new Date().toISOString(),
+    version: "1.0.0"
+  });
+});
+
 router.post("/api/auth/register", register);
 router.post("/api/auth/login", login);
 router.post("/api/auth/logout", logout);
