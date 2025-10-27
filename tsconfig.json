@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "ESNext",
-    "moduleResolution": "node",
     "outDir": "./dist",
     "rootDir": "./",
+    "module": "ESNext",
+    "target": "es2020",
     "esModuleInterop": true,
+    "moduleResolution": "node",
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
@@ -13,7 +13,6 @@
     "declaration": true,
     "noImplicitAny": false,
     "strictNullChecks": false,
-    "composite": true,
     "forceConsistentCasingInFileNames": true
   },
   "include": [

@@ -1,1 +1,22 @@
-{"name":"triad-documents","version":"1.0.0","description":"Shared services and utilities for the Triad Development Environment","type":"module","main":"dist/index.js","scripts":{"build":"tsc","start":"node dist/index.js","dev":"tsx watch index.ts"},"dependencies":{"express":"^5.1.0","googleapis":"^164.1.0"},"devDependencies":{"@types/express":"^5.0.4","@types/node":"^24.9.1","tsx":"^4.7.2","typescript":"^5.9.3"}}
+{
+  "name": "triad-documents",
+  "version": "1.0.0",
+  "description": "Shared services and utilities for the Triad Development Environment",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch index.ts"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "googleapis": "^164.1.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.4",
+    "@types/node": "^24.9.1",
+    "tsx": "^4.7.2",
+    "typescript": "^5.9.3"
+  }
+}

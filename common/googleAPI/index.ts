@@ -216,6 +216,7 @@ export function createGoogleAPIService(): GoogleAPIService {
 
   // Try to locate service account key file in standard location
   try {
+    // ESM-compatible way to get current file path and directory
     const __filename = fileURLToPath(import.meta.url);
     const __dirname = path.dirname(__filename);
     const standardKeyPath = path.join(__dirname, '../../../google-service-account.json');
@@ -226,7 +227,7 @@ export function createGoogleAPIService(): GoogleAPIService {
       });
     }
   } catch (error) {
-    console.warn('Could not check for standard service account key location');
+    console.warn('Could not check for standard service account key location:', error);
   }
 
   throw new Error(
