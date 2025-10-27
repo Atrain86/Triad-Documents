@@ -10,9 +10,14 @@ const PORT = process.env.PORT || 5002;
 // Add JSON parsing middleware
 app.use(express.json());
 
-// Add ping endpoint for health checks
+// Triad API Governance Integration - Health Check Endpoint
 app.get('/api/ping', (req, res) => {
-  res.json({ message: 'Server is alive' });
+  res.json({
+    message: 'Server is alive',
+    service: 'Triad-Documents',
+    timestamp: new Date().toISOString(),
+    version: '1.0.0'
+  });
 });
 
 // Start server
