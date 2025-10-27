@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Triad Workflow Schema",
+  "description": "Defines structure for Triad multi-step workflows",
+  "type": "object",
+  "properties": {
+    "name": { "type": "string" },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "task": { "type": "string" },
+          "owner": { "type": "string" },
+          "dependencies": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": ["task", "owner"]
+      }
+    }
+  },
+  "required": ["name", "steps"]
+}

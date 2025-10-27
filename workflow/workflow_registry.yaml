@@ -1,0 +1,7 @@
+# Workflow Registry – Phase III-F
+templates:
+  - name: "Telemetry_Check_and_Report"
+    steps:
+      - { task: "collectTelemetry", owner: "Cline" }
+      - { task: "analyzeTelemetry", owner: "GPT5", dependencies: ["collectTelemetry"] }
+      - { task: "recordFindings", owner: "TriadDocs", dependencies: ["analyzeTelemetry"] }
