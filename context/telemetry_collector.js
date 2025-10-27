@@ -2,6 +2,7 @@
 import fs from "fs";
 import path from "path";
 import Ajv from "ajv";
+import addFormats from "ajv-formats";
 import yaml from "js-yaml";
 import cron from "node-cron";
 import { updateContext, contextBus, getContext } from "./triad_context_hub.js";
@@ -11,6 +12,7 @@ const schema = JSON.parse(
   fs.readFileSync(path.resolve("context/context_schema.json"), "utf8")
 );
 const ajv = new Ajv();
+addFormats(ajv); // Add support for date-time format
 const validate = ajv.compile(schema);
 
 // Service name for this instance
