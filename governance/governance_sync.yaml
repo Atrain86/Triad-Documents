@@ -1,0 +1,8 @@
+# Governance Synchronization Configuration
+version: 0.1
+commit_interval_minutes: 60
+retention_days: 7
+targets:
+  - Triad-Docs
+  - IDEA-HUB
+  - PaintBrain7

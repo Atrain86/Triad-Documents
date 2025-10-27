@@ -1,0 +1,11 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Triad Governance Policy Schema",
+  "description": "Ensures governance updates have valid structure",
+  "type": "object",
+  "properties": {
+    "content": { "type": "string" },
+    "updated": { "type": "string", "format": "date-time" }
+  },
+  "required": ["content", "updated"]
+}
