@@ -1,0 +1,12 @@
+version: 0.1
+last_updated: 2025-10-26T00:00:00.000Z
+thresholds:
+  zScoreWarning: 2.05
+  zScoreCritical: 3
+learning:
+  adjustment_rate: 0.05
+  min_threshold: 1.5
+  max_threshold: 4
+retention:
+  telemetry_days: 14
+  feedback_days: 30
