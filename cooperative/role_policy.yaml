@@ -1,0 +1,8 @@
+# Role Policy – Phase III-E
+decision_hierarchy:
+  - strategist
+  - executor
+  - governor
+approval_rules:
+  strategist: ["executor","governor"]
+  executor: ["strategist"]

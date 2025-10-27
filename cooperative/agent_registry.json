@@ -1,0 +1,5 @@
+{
+  "GPT5": { "role": "strategist", "permissions": ["analyze","approve","advise"] },
+  "Cline": { "role": "executor", "permissions": ["act","report","recover"] },
+  "TriadDocs": { "role": "governor", "permissions": ["audit","record"] }
+}
