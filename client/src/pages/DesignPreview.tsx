@@ -1,5 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
+import ClientDetail from './ClientDetail';  // Import ClientDetail component
 
 // Lazy load design components
 const LoginDesign = lazy(() => import('../../design/components/LoginPage.jsx'));
@@ -30,6 +31,12 @@ const DesignPreviewLayout: React.FC = () => {
           >
             Dashboard
           </Link>
+          <Link
+            to="/design-preview/client-detail"
+            className="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600"
+          >
+            Client Detail
+          </Link>
         </div>
       </nav>
 
@@ -51,6 +58,12 @@ const DesignPreviewLayout: React.FC = () => {
             <div className="bg-white shadow-md rounded-lg p-6">
               <h2 className="text-xl font-semibold mb-4">Dashboard Preview</h2>
               <DashboardDesign />
+            </div>
+          } />
+          <Route path="client-detail" element={
+            <div className="bg-white shadow-md rounded-lg p-6">
+              <h2 className="text-xl font-semibold mb-4">Client Detail Preview</h2>
+              <ClientDetail />
             </div>
           } />
         </Routes>
