@@ -21,11 +21,14 @@
     },
     "declaration": true,
     "noImplicitAny": false,
-    "strictNullChecks": false,
-    "composite": true
+    "strictNullChecks": false
   },
   "include": ["client/src", "server", "shared"],
   "references": [
     { "path": "../Triad-Documents" }
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**"
   ]
 }

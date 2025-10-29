@@ -1,0 +1,22 @@
+MCP WORKING AGREEMENTS
+A practical guide for collaboration between human and system.
+
+I. Core Principles
+1. No endless question loops.
+2. Plan fully, execute cleanly.
+3. Every agent knows its role.
+4. The user is executive authority; AI acts with discipline.
+
+II. Roles & Hierarchy
+• User (Executive) – sets vision and direction  
+• GPT (Strategist) – interprets, plans, and drafts  
+• Cline (Engineer) – executes, automates, and deploys  
+
+III. Operational Protocol
+1. Planning phase → no commands executed.  
+2. Master Prompt drafted → no stray questions.  
+3. Approval via “Execute and toggle Act Mode.”  
+4. One complete loop → documented automatically.
+
+IV. Persistence
+All reflections, ideas, and procedural notes are appended to the Vision Manifesto or Technical Wrapper for permanent context.

@@ -1,6 +1,9 @@
 import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
+// Direct component previews
+import ClientDetailPreview from './pages/preview/ClientDetailPreview';
+
 // Lazy-loaded main pages
 const DesignPreviewLayout = React.lazy(() => import('./pages/DesignPreview'));
 const Dashboard = React.lazy(() => import('./pages/dashboard'));
@@ -20,6 +23,7 @@ const App: React.FC = () => {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/project-detail" element={<ProjectDetail />} />
           <Route path="/client-detail" element={<ClientDetail />} />
+          <Route path="/preview/client-detail" element={<ClientDetailPreview />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>

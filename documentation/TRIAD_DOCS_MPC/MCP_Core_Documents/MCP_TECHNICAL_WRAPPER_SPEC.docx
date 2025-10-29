@@ -1,0 +1,23 @@
+MCP TECHNICAL WRAPPER SPEC
+A unified context framework for persistent, role-aware intelligence.
+
+I. System Overview
+The MCP wrapper connects all Triad nodes:
+• PaintBrain7 — Frontend UI and data collector  
+• IDEA-HUB — Backend orchestration and document export  
+• Triad-Documents — Shared Google API integration  
+• MPC Server — Context persistence and memory coordination  
+
+II. Core Components
+• Context Memory Layer – Stores and recalls prior state  
+• Role Manager – Assigns tone and function per agent  
+• Prompt Router – Directs queries to the correct node  
+• Persistence Bridge – Syncs with Google Docs and local Markdown  
+
+III. Human ↔ LLM Mirroring
+Each Markdown file = LLM-readable local record.  
+Each Google Doc = human-readable live document.  
+Sync loop via Triad-Documents API using Google service account.  
+
+IV. Expansion
+Planned modules: Contextual Memory (MPC), Vision & Voice Agents, Distributed Task Manager.
