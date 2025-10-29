@@ -1,0 +1,1 @@
+GPT successfully read the handshake file. Communication verified between GPT and Cline via GitHub.
