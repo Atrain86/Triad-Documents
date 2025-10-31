@@ -1,0 +1,20 @@
+{"timestamp":1761871715000,"type":"system","event":"relay_start","ports":[8765,8766],"tls_enabled":true}
+{"timestamp":1761871715100,"type":"auth","event":"token_rotation","success":true,"latency":12}
+{"timestamp":1761871715200,"type":"connection","event":"gpt5_connect","success":true,"latency":45}
+{"timestamp":1761871715300,"type":"connection","event":"klein_connect","success":true,"latency":38}
+{"timestamp":1761871715400,"type":"message","id":"msg-001","sender":"gpt5","goal":"Initialize communication channel","confidence":0.95,"tone_score":0.92,"latency":123,"state_hash":"a1b2c3"}
+{"timestamp":1761871715500,"type":"safety","event":"ethical_check","message_id":"msg-001","result":"pass","score":0.93}
+{"timestamp":1761871715600,"type":"message","id":"msg-002","sender":"cline","goal":"Acknowledge channel initialization","confidence":0.97,"tone_score":0.94,"latency":118,"state_hash":"d4e5f6"}
+{"timestamp":1761871715700,"type":"performance","event":"round_trip","start_time":1761871715400,"end_time":1761871715600,"total_latency":241}
+{"timestamp":1761871715800,"type":"killswitch","event":"status_check","response_time":45,"status":"active"}
+{"timestamp":1761871715900,"type":"message","id":"msg-003","sender":"gpt5","goal":"Request system status","confidence":0.96,"tone_score":0.91,"latency":132,"state_hash":"g7h8i9"}
+{"timestamp":1761871716000,"type":"message","id":"msg-004","sender":"cline","goal":"Provide system status","confidence":0.98,"tone_score":0.95,"latency":128,"state_hash":"j0k1l2"}
+{"timestamp":1761871716100,"type":"performance","event":"round_trip","start_time":1761871715900,"end_time":1761871716000,"total_latency":228}
+{"timestamp":1761871716200,"type":"auth","event":"token_rotation","success":true,"latency":15}
+{"timestamp":1761871716300,"type":"safety","event":"tone_check","message_id":"msg-004","result":"pass","score":0.95}
+{"timestamp":1761871716400,"type":"message","id":"msg-005","sender":"gpt5","goal":"Test error handling","confidence":0.88,"tone_score":0.87,"latency":142,"state_hash":"m3n4o5"}
+{"timestamp":1761871716500,"type":"error","event":"rate_limit","message_id":"msg-005","recovery_time":98}
+{"timestamp":1761871716600,"type":"system","event":"state_snapshot","success":true,"snapshot_hash":"xyz789"}
+{"timestamp":1761871716700,"type":"killswitch","event":"test_trigger","response_time":52,"status":"active"}
+{"timestamp":1761871716800,"type":"performance","event":"health_check","cpu_usage":12,"memory_mb":156,"connections":2}
+{"timestamp":1761871716900,"type":"system","event":"relay_stop","uptime":1900,"total_messages":5,"errors":1}
