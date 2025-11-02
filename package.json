@@ -46,16 +46,17 @@
     "@vitejs/plugin-react": "^5.0.4",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^2.4.3",
+    "chalk": "^5.6.2",
     "class-variance-authority": "^0.7.1",
     "cmdk": "^1.1.1",
     "connect-pg-simple": "^10.0.0",
     "cors": "^2.8.5",
     "dayjs": "^1.11.18",
-    "dotenv": "^16.3.1",
+    "dotenv": "^16.6.1",
     "drizzle-orm": "^0.39.3",
     "drizzle-zod": "^0.8.3",
     "embla-carousel-react": "^8.6.0",
-    "express": "^4.18.2",
+    "express": "^4.21.2",
     "express-session": "^1.18.2",
     "googleapis": "^164.1.0",
     "html2canvas": "^1.4.1",
@@ -83,8 +84,10 @@
     "sortablejs": "^1.15.6",
     "tailwind-merge": "^3.3.1",
     "tsx": "^4.7.2",
+    "uuid": "^13.0.0",
     "vaul": "^1.1.2",
     "wouter": "^3.7.1",
+    "ws": "^8.18.3",
     "zod": "^4.1.12"
   },
   "devDependencies": {
@@ -110,5 +113,17 @@
     "tailwindcss": "^3.4.1",
     "typescript": "^5.3.3",
     "vite": "^7.1.11"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Atrain86/Triad-Documents.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Atrain86/Triad-Documents/issues"
+  },
+  "homepage": "https://github.com/Atrain86/Triad-Documents#readme",
+  "description": ""
 }

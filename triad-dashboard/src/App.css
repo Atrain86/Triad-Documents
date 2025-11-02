@@ -1,0 +1,257 @@
+:root {
+  --pb-red: #E0533D;
+  --pb-yellow: #E5B93C;
+  --pb-blue: #3B7DD8;
+  --pb-green: #8ED187;
+  --pb-purple: #8E63C6;
+  --pb-dark: #101010;
+  --pb-cream: #E8DCC5;
+  --pb-orange: #FF8C42;
+}
+
+.App {
+  text-align: center;
+  min-height: 100vh;
+  background-color: var(--pb-dark);
+  color: var(--pb-cream);
+}
+
+.App-header {
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 1rem;
+  border-bottom: 2px solid var(--pb-purple);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.connection-status {
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.tab-navigation {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.tab-button {
+  background: none;
+  border: 2px solid var(--pb-purple);
+  color: var(--pb-cream);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.tab-button:hover {
+  background-color: rgba(142, 99, 198, 0.2);
+}
+
+.tab-button.active {
+  background-color: var(--pb-purple);
+}
+
+.tab-icon {
+  font-size: 1.2rem;
+}
+
+.App-main {
+  padding: 2rem;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin: 0 auto;
+  max-width: 1400px;
+}
+
+.dashboard-section {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  padding: 1.5rem;
+  border: 1px solid var(--pb-purple);
+}
+
+.llm-section {
+  grid-column: span 2;
+}
+
+.monitor-section {
+  grid-column: span 2;
+}
+
+.pipeline-section {
+  grid-column: span 2;
+}
+
+/* Status Indicators */
+.status-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+.status-indicator.active {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; box-shadow: 0 0 0 0 currentColor; }
+  50% { opacity: 0.8; box-shadow: 0 0 0 10px transparent; }
+  100% { opacity: 1; box-shadow: 0 0 0 0 transparent; }
+}
+
+/* Cost Tracker */
+.cost-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.cost-card {
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  padding: 1rem;
+}
+
+.cost-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.cost-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.token-bar {
+  height: 4px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+.token-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+/* Pipeline */
+.pipeline-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.pipeline-status {
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  border: 2px solid currentColor;
+}
+
+.control-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.control-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.control-btn.start { background-color: var(--pb-green); }
+.control-btn.stop { background-color: var(--pb-red); }
+.control-btn.system { background-color: var(--pb-blue); }
+
+.control-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Messages */
+.message-list {
+  max-height: 500px;
+  overflow-y: auto;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  padding: 1rem;
+}
+
+.message {
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.message.incoming {
+  border-left: 3px solid var(--pb-blue);
+}
+
+.message.outgoing {
+  border-left: 3px solid var(--pb-green);
+}
+
+.timestamp {
+  color: rgba(232, 220, 197, 0.6);
+  font-size: 0.8rem;
+  margin-right: 0.5rem;
+}
+
+.type {
+  color: var(--pb-purple);
+  font-weight: bold;
+  margin-right: 0.5rem;
+}
+
+/* Chat Interface */
+.chat-view {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* System Report */
+.report-preview {
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  padding: 1rem;
+  margin-top: 1rem;
+  text-align: left;
+  white-space: pre-wrap;
+  font-family: monospace;
+}
+
+.sync-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: 1rem;
+}
+
+.sync-icon {
+  font-size: 1.2rem;
+}
